@@ -74,7 +74,12 @@ const navItems: NavItem[] = [
         href: "/portal/candidates",
         label: "Candidates",
         icon: "fa-users",
-        roles: ["recruiter", "platform_admin"],
+        roles: [
+            "recruiter",
+            "hiring_manager",
+            "company_admin",
+            "platform_admin",
+        ],
         section: "management",
         mobileDock: true,
     },
@@ -226,18 +231,76 @@ export function Sidebar() {
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get("/chat/conversations", {
-            params: { filter: "inbox", limit: 100 },
-        });
-        const rows = (response?.data || []) as Array<{ unread_count?: number }>;
-        const total = rows.reduce(
-            (sum, row) => sum + (row.unread_count || 0),
-            0,
-        );
-        setBadges((prev) => ({
-            ...prev,
-            "/portal/messages": total,
-        }));
+
+        try {
+            // Fetch unread messages from inbox
+            const inboxResponse: any = await client.get("/chat/conversations", {
+                params: { filter: "inbox", limit: 100 },
+            });
+
+            const inboxRows = (inboxResponse?.data || []) as Array<{
+                unread_count?: number;
+                participant?: { unread_count?: number };
+            }>;
+
+            const unreadCount = inboxRows.reduce((sum, row) => {
+                // Handle both old and new API response formats
+                const count =
+                    row.participant?.unread_count || row.unread_count || 0;
+                return sum + count;
+            }, 0);
+
+            // Try to fetch pending requests - but don't fail if this fails
+            let requestCount = 0;
+            try {
+                const requestsResponse: any = await client.get(
+                    "/chat/conversations",
+                    {
+                        params: { filter: "requests", limit: 100 },
+                    },
+                );
+
+                const requestRows = (requestsResponse?.data || []) as Array<{
+                    participant?: { request_state?: string };
+                    request_state?: string; // fallback for old format
+                }>;
+
+                requestCount = requestRows.filter((row) => {
+                    const state =
+                        row.participant?.request_state || row.request_state;
+                    return state === "pending";
+                }).length;
+            } catch (requestError) {
+                console.warn(
+                    "Failed to fetch request count, continuing with unread messages only:",
+                    requestError,
+                );
+            }
+
+            // Total badge count is unread messages + pending requests
+            const totalBadgeCount = unreadCount + requestCount;
+
+            setBadges((prev) => ({
+                ...prev,
+                "/portal/messages": totalBadgeCount,
+            }));
+
+            // Debug logging in development
+            if (process.env.NODE_ENV === "development") {
+                console.log("Message badge counts:", {
+                    unreadCount,
+                    requestCount,
+                    totalBadgeCount,
+                });
+            }
+        } catch (error) {
+            console.error("Failed to fetch message counts:", error);
+            // Fallback to 0 to prevent UI from breaking
+            setBadges((prev) => ({
+                ...prev,
+                "/portal/messages": 0,
+            }));
+        }
     }, [getToken]);
 
     useEffect(() => {

@@ -71,6 +71,7 @@ export default function ThreadPanel({
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
+    const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
     const messagesRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
     const initialScrollDoneRef = useRef(false);
@@ -131,7 +132,6 @@ export default function ThreadPanel({
             }
         }
     };
-
 
     const markRead = async (lastReadMessageId: string) => {
         const token = await getToken();
@@ -645,32 +645,80 @@ export default function ThreadPanel({
                 </div>
             </div>
 
-            <div className="border-t border-base-300 bg-base-100/80 backdrop-blur-sm p-4">
+            <div className="border-t border-base-300 bg-base-100 p-4 mt-auto">
                 <div className="flex gap-2 items-start">
-                    <MarkdownEditor
-                        className="flex-1"
-                        value={draft}
-                        onChange={setDraft}
-                        height={140}
-                        preview="edit"
-                        disabled={disabled}
-                        placeholder={
-                            requestPending
-                                ? "Accept this request to reply."
-                                : requestDeclined
-                                  ? "Conversation declined."
-                                  : data.participant.archived_at
-                                    ? "Unarchive to reply."
-                                    : "Type your message..."
-                        }
-                    />
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleSend}
-                        disabled={disabled || sending}
-                    >
-                        Send
-                    </button>
+                    <div className="flex-1 space-y-2 relative">
+                        {useMarkdownEditor ? (
+                            <MarkdownEditor
+                                className="flex-1"
+                                value={draft}
+                                onChange={setDraft}
+                                height={140}
+                                preview="edit"
+                                disabled={disabled}
+                                placeholder={
+                                    requestPending
+                                        ? "Accept this request to reply."
+                                        : requestDeclined
+                                          ? "Conversation declined."
+                                          : data.participant.archived_at
+                                            ? "Unarchive to reply."
+                                            : data.messages.length === 1 &&
+                                                data.participant
+                                                    .request_state ===
+                                                    "accepted"
+                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
+                                              : "Type your message..."
+                                }
+                            />
+                        ) : (
+                            <textarea
+                                className="textarea textarea-bordered w-full"
+                                value={draft}
+                                onChange={(e) => setDraft(e.target.value)}
+                                rows={5}
+                                disabled={disabled}
+                                placeholder={
+                                    requestPending
+                                        ? "Accept this request to reply."
+                                        : requestDeclined
+                                          ? "Conversation declined."
+                                          : data.participant.archived_at
+                                            ? "Unarchive to reply."
+                                            : data.messages.length === 1 &&
+                                                data.participant
+                                                    .request_state ===
+                                                    "accepted"
+                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
+                                              : "Type your message..."
+                                }
+                            />
+                        )}
+                        <button
+                            className="btn btn-primary btn-circle btn-soft absolute bottom-4 right-2"
+                            onClick={handleSend}
+                            disabled={disabled || sending}
+                            title={"Send message"}
+                        >
+                            <i className="fa-duotone fa-paper-plane" />
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                    <label className="label cursor-pointer gap-2">
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-sm"
+                            checked={useMarkdownEditor}
+                            onChange={(e) =>
+                                setUseMarkdownEditor(e.target.checked)
+                            }
+                            disabled={disabled}
+                        />
+                        <span className="label-text text-sm">
+                            Markdown editor
+                        </span>
+                    </label>
                 </div>
             </div>
         </div>

@@ -269,8 +269,24 @@ export default function ThreadPanel({
             setDraft("");
             await fetchResync();
         } catch (err: any) {
-            setError(err?.message || "Failed to send message");
-            toast.error(err?.message || "Failed to send message");
+            const errorMessage = err?.message || "Failed to send message";
+
+            // Handle conversation request pending - this is expected behavior, not an error
+            if (
+                errorMessage.includes("Request pending") ||
+                errorMessage.includes("cannot send additional messages")
+            ) {
+                toast.info(
+                    "Your message is waiting for them to accept your conversation request.",
+                    4000,
+                );
+                // Don't set this as an error since it's expected behavior
+                return;
+            }
+
+            // Handle other actual errors
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setSending(false);
         }
@@ -474,7 +490,10 @@ export default function ThreadPanel({
         ? "Request pending"
         : requestDeclined
           ? "Declined"
-          : "Chat thread";
+          : data.messages.length === 1 &&
+              data.participant.request_state === "accepted"
+            ? "Waiting for them to accept your conversation request"
+            : "Chat thread";
 
     return (
         <div className="flex h-full flex-col">
@@ -697,7 +716,12 @@ export default function ThreadPanel({
                                           ? "Conversation declined."
                                           : data.participant.archived_at
                                             ? "Unarchive to reply."
-                                            : "Type your message..."
+                                            : data.messages.length === 1 &&
+                                                data.participant
+                                                    .request_state ===
+                                                    "accepted"
+                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
+                                              : "Type your message..."
                                 }
                             />
                         ) : (
@@ -714,7 +738,12 @@ export default function ThreadPanel({
                                           ? "Conversation declined."
                                           : data.participant.archived_at
                                             ? "Unarchive to reply."
-                                            : "Type your message..."
+                                            : data.messages.length === 1 &&
+                                                data.participant
+                                                    .request_state ===
+                                                    "accepted"
+                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
+                                              : "Type your message..."
                                 }
                             />
                         )}

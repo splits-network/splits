@@ -9,10 +9,12 @@ type MessagesPageProps = {
     searchParams?: Promise<MessagesSearchParams>;
 };
 
-export default async function MessagesPage({ searchParams }: MessagesPageProps) {
+export default async function MessagesPage({
+    searchParams,
+}: MessagesPageProps) {
     const resolvedParams = await searchParams;
     return (
-        <div className="container mx-auto px-4 py-8 space-y-6">
+        <div className="container mx-auto space-y-6">
             <div>
                 <h1 className="text-3xl font-bold">Messages</h1>
                 <p className="text-base-content/70">

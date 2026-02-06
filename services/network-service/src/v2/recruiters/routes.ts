@@ -44,11 +44,15 @@ export function registerRecruiterRoutes(
                 }
             }
 
+            // Extract filters from both direct query params and nested filters object
+            const status = query.status || parsedFilters.status;
+            const specialization = query.specialization || parsedFilters.specialization;
+
             const filters = {
                 ...pagination,
                 search: query.search,
-                status: query.status,
-                specialization: query.specialization,
+                status,
+                specialization,
                 sort_by: query.sort_by,
                 sort_order: query.sort_order,
                 filters: parsedFilters, // Include the filters object for repository
