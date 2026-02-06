@@ -74,7 +74,12 @@ const navItems: NavItem[] = [
         href: "/portal/candidates",
         label: "Candidates",
         icon: "fa-users",
-        roles: ["recruiter", "platform_admin"],
+        roles: [
+            "recruiter",
+            "hiring_manager",
+            "company_admin",
+            "platform_admin",
+        ],
         section: "management",
         mobileDock: true,
     },
@@ -244,25 +249,16 @@ export function Sidebar() {
                     row.participant?.unread_count || row.unread_count || 0;
                 return sum + count;
             }, 0);
-            console.log(
-                "📊 Unread count:",
-                unreadCount,
-                "from",
-                inboxRows.length,
-                "conversations",
-            );
 
             // Try to fetch pending requests - but don't fail if this fails
             let requestCount = 0;
             try {
-                console.log("📤 Fetching request conversations...");
                 const requestsResponse: any = await client.get(
                     "/chat/conversations",
                     {
                         params: { filter: "requests", limit: 100 },
                     },
                 );
-                console.log("📥 Requests response:", requestsResponse);
 
                 const requestRows = (requestsResponse?.data || []) as Array<{
                     participant?: { request_state?: string };
@@ -274,13 +270,6 @@ export function Sidebar() {
                         row.participant?.request_state || row.request_state;
                     return state === "pending";
                 }).length;
-                console.log(
-                    "📊 Request count:",
-                    requestCount,
-                    "from",
-                    requestRows.length,
-                    "conversations",
-                );
             } catch (requestError) {
                 console.warn(
                     "Failed to fetch request count, continuing with unread messages only:",
@@ -290,13 +279,11 @@ export function Sidebar() {
 
             // Total badge count is unread messages + pending requests
             const totalBadgeCount = unreadCount + requestCount;
-            console.log("🏷️ Total badge count:", totalBadgeCount);
 
             setBadges((prev) => ({
                 ...prev,
                 "/portal/messages": totalBadgeCount,
             }));
-            console.log("✅ Badge set for /portal/messages:", totalBadgeCount);
 
             // Debug logging in development
             if (process.env.NODE_ENV === "development") {
