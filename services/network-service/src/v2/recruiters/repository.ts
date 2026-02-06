@@ -248,7 +248,7 @@ export class RecruiterRepository {
                     // JOIN with identity.users table via user_id foreign key
                     // Using Supabase's select syntax for cross-schema joins
                     // Format: user:users!user_id(fields) where users is in identity schema
-                    selectParts.push('users!user_id(id, name, email, created_at)');
+                    selectParts.push('users!user_id(id, name, email, created_at, profile_image_url)');
                     break;
                 // Future includes can be added here
                 // case 'stats':

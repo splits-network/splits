@@ -50,9 +50,12 @@ export function InvitationDetailPanel({
                 <div className="bg-base-200 p-6 rounded-full mb-4">
                     <i className="fa-duotone fa-regular fa-building text-4xl"></i>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Select an Invitation</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                    Select an Invitation
+                </h3>
                 <p className="max-w-xs">
-                    Select an invitation from the list to view details and respond.
+                    Select an invitation from the list to view details and
+                    respond.
                 </p>
             </div>
         );
@@ -107,17 +110,22 @@ export function InvitationDetailPanel({
                 >
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </button>
-                <h3 className="text-lg font-semibold flex-1">Invitation Details</h3>
+                <h3 className="text-lg font-semibold flex-1">
+                    Invitation Details
+                </h3>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-start gap-4">
-                        <div className="avatar placeholder">
+                        <div className="avaatar avatar-placeholder">
                             {company?.logo_url ? (
                                 <div className="w-16 h-16 rounded-xl">
-                                    <img src={company.logo_url} alt={company.name} />
+                                    <img
+                                        src={company.logo_url}
+                                        alt={company.name}
+                                    />
                                 </div>
                             ) : (
                                 <div className="bg-secondary text-secondary-content rounded-xl w-16 h-16">
@@ -132,12 +140,16 @@ export function InvitationDetailPanel({
                                 <h3 className="text-2xl font-bold truncate">
                                     {company?.name || "Unknown Company"}
                                 </h3>
-                                <div className={`badge ${statusColor} badge-lg ml-2`}>
+                                <div
+                                    className={`badge ${statusColor} badge-lg ml-2`}
+                                >
                                     {statusLabel}
                                 </div>
                             </div>
                             {company?.industry && (
-                                <p className="text-base-content/70 mt-1">{company.industry}</p>
+                                <p className="text-base-content/70 mt-1">
+                                    {company.industry}
+                                </p>
                             )}
                             {company?.headquarters_location && (
                                 <p className="text-sm text-base-content/50 mt-1">
@@ -161,14 +173,18 @@ export function InvitationDetailPanel({
                                     <div className="text-sm font-medium text-base-content/70">
                                         Received
                                     </div>
-                                    <div>{formatDate(invitation.created_at)}</div>
+                                    <div>
+                                        {formatDate(invitation.created_at)}
+                                    </div>
                                 </div>
 
                                 <div>
                                     <div className="text-sm font-medium text-base-content/70">
                                         Status
                                     </div>
-                                    <div className={`badge ${statusColor}`}>{statusLabel}</div>
+                                    <div className={`badge ${statusColor}`}>
+                                        {statusLabel}
+                                    </div>
                                 </div>
 
                                 {invitation.relationship_start_date && (
@@ -176,7 +192,11 @@ export function InvitationDetailPanel({
                                         <div className="text-sm font-medium text-base-content/70">
                                             Started
                                         </div>
-                                        <div>{formatDate(invitation.relationship_start_date)}</div>
+                                        <div>
+                                            {formatDate(
+                                                invitation.relationship_start_date,
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
@@ -185,7 +205,11 @@ export function InvitationDetailPanel({
                                         <div className="text-sm font-medium text-base-content/70">
                                             Ended
                                         </div>
-                                        <div>{formatDate(invitation.relationship_end_date)}</div>
+                                        <div>
+                                            {formatDate(
+                                                invitation.relationship_end_date,
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -213,8 +237,8 @@ export function InvitationDetailPanel({
                                 <div className="alert alert-info mt-3">
                                     <i className="fa-duotone fa-regular fa-info-circle"></i>
                                     <span>
-                                        You will be able to create and edit job postings for this
-                                        company.
+                                        You will be able to create and edit job
+                                        postings for this company.
                                     </span>
                                 </div>
                             )}
@@ -229,7 +253,9 @@ export function InvitationDetailPanel({
                                     <i className="fa-duotone fa-regular fa-times-circle mr-2"></i>
                                     Termination Reason
                                 </h4>
-                                <p className="text-error/80">{invitation.termination_reason}</p>
+                                <p className="text-error/80">
+                                    {invitation.termination_reason}
+                                </p>
                             </div>
                         </div>
                     )}

@@ -147,11 +147,11 @@ export interface MarketplaceRecruiterDTO {
     name: string;
     email?: string; // Only if show_contact_info is true
     phone?: string; // Only if show_contact_info is true
-    marketplace_tagline?: string;
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_years_experience?: number;
+    tagline?: string;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     bio?: string;
     // Success metrics (only if show_success_metrics is true)

@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
+import UserAvatar from "@/components/common/UserAvatar";
 
 // Extended type to include joined user data from Supabase
 interface RecruiterWithUser extends MarketplaceRecruiterDTO {
@@ -8,6 +9,7 @@ interface RecruiterWithUser extends MarketplaceRecruiterDTO {
         id: string;
         name: string;
         email: string;
+        profile_image_url?: string;
     };
 }
 
@@ -29,18 +31,8 @@ export function RecruiterListItem({
         recruiter.users?.email ||
         "Unknown Recruiter";
 
-    // Get initials for avatar (defensive)
-    const getInitials = (name: string | undefined | null) => {
-        if (!name) return "??";
-        const parts = name.trim().split(" ");
-        if (parts.length >= 2 && parts[0] && parts[1]) {
-            return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-        }
-        return name.slice(0, 2).toUpperCase();
-    };
-
     // Format specialties for display
-    const specialties = recruiter.marketplace_specialties || [];
+    const specialties = recruiter.specialties || [];
     const primarySpecialty = specialties[0] || null;
 
     return (
@@ -54,13 +46,14 @@ export function RecruiterListItem({
         >
             <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="avatar avatar-placeholder shrink-0">
-                    <div className="bg-primary text-primary-content rounded-full w-10 h-10">
-                        <span className="text-sm">
-                            {getInitials(displayName)}
-                        </span>
-                    </div>
-                </div>
+                <UserAvatar
+                    user={{
+                        name: displayName,
+                        profile_image_url: recruiter.users?.profile_image_url,
+                    }}
+                    size="sm"
+                    className="shrink-0"
+                />
 
                 {/* Content */}
                 <div className="min-w-0 flex-1">
@@ -72,9 +65,7 @@ export function RecruiterListItem({
 
                     {/* Tagline or Location */}
                     <div className="text-xs text-base-content/60 truncate mb-1.5">
-                        {recruiter.marketplace_tagline ||
-                            recruiter.marketplace_location ||
-                            "Recruiter"}
+                        {recruiter.tagline || recruiter.location || "Recruiter"}
                     </div>
 
                     {/* Badges */}
@@ -106,9 +97,9 @@ export function RecruiterListItem({
 
                 {/* Quick Actions - Visible on Hover/Selected */}
                 <div className="shrink-0 flex flex-col items-end gap-1">
-                    {recruiter.marketplace_years_experience && (
+                    {recruiter.years_experience && (
                         <span className="text-[10px] text-base-content/40">
-                            {recruiter.marketplace_years_experience}+ yrs
+                            {recruiter.years_experience}+ yrs
                         </span>
                     )}
 

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
-import { useUserProfile } from '@/contexts';
-import { ButtonLoading } from '@splits-network/shared-ui';
-import RoleWizardModal from './role-wizard-modal';
-import SubmitCandidateWizard from './submit-candidate-wizard';
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useUserProfile } from "@/contexts";
+import { ButtonLoading } from "@splits-network/shared-ui";
+import RoleWizardModal from "./role-wizard-modal";
+import SubmitCandidateWizard from "./submit-candidate-wizard";
 
 // ===== TYPES =====
 
@@ -21,25 +21,26 @@ export interface Job {
         identity_organization_id?: string | null;
         [key: string]: any;
     };
-    status: 'active' | 'paused' | 'filled' | 'closed' | string | null;
+    status: "active" | "paused" | "filled" | "closed" | string | null;
     [key: string]: any;
 }
 
 export interface RoleActionsToolbarProps {
     job: Job;
-    variant: 'icon-only' | 'descriptive';
-    layout?: 'horizontal' | 'vertical';
-    size?: 'xs' | 'sm' | 'md';
+    variant: "icon-only" | "descriptive";
+    layout?: "horizontal" | "vertical";
+    size?: "xs" | "sm" | "md";
     showActions?: {
         viewDetails?: boolean;
-        viewPipeline?: boolean;         // NEW: Show pipeline button
+        viewPipeline?: boolean; // NEW: Show pipeline button
         submitCandidate?: boolean;
         edit?: boolean;
         statusActions?: boolean;
+        share?: boolean; // NEW: Share job button
     };
     onRefresh?: () => void;
     onViewDetails?: (jobId: string) => void;
-    onViewPipeline?: (jobId: string) => void;   // NEW: Pipeline callback
+    onViewPipeline?: (jobId: string) => void; // NEW: Pipeline callback
     className?: string;
 }
 
@@ -48,13 +49,13 @@ export interface RoleActionsToolbarProps {
 export default function RoleActionsToolbar({
     job,
     variant,
-    layout = 'horizontal',
-    size = 'sm',
+    layout = "horizontal",
+    size = "sm",
     showActions = {},
     onRefresh,
     onViewDetails,
     onViewPipeline,
-    className = '',
+    className = "",
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
@@ -65,6 +66,7 @@ export default function RoleActionsToolbar({
     const [showSubmitModal, setShowSubmitModal] = useState(false);
 
     // Loading states
+    const [isSharing, setIsSharing] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
 
@@ -73,7 +75,7 @@ export default function RoleActionsToolbar({
     const canManageRole = useMemo(() => {
         if (isAdmin) return true;
 
-        const isCompanyAdmin = profile?.roles?.includes('company_admin');
+        const isCompanyAdmin = profile?.roles?.includes("company_admin");
         if (!isCompanyAdmin) return false;
 
         // TODO: Enhance with strict org matching
@@ -88,7 +90,9 @@ export default function RoleActionsToolbar({
 
     // ===== STATUS CHANGE HANDLER =====
 
-    const handleStatusChange = async (newStatus: 'active' | 'paused' | 'filled' | 'closed') => {
+    const handleStatusChange = async (
+        newStatus: "active" | "paused" | "filled" | "closed",
+    ) => {
         const confirmMessage = `Are you sure you want to change the status to ${newStatus}?`;
         if (!confirm(confirmMessage)) {
             return;
@@ -100,7 +104,7 @@ export default function RoleActionsToolbar({
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token');
+                throw new Error("No auth token");
             }
 
             const client = createAuthenticatedClient(token);
@@ -112,11 +116,56 @@ export default function RoleActionsToolbar({
                 onRefresh();
             }
         } catch (error: any) {
-            console.error('Failed to update status:', error);
+            console.error("Failed to update status:", error);
             toast.error(`Failed to update status: ${error.message}`);
         } finally {
             setUpdatingStatus(false);
             setStatusAction(null);
+        }
+    };
+
+    // ===== SHARE HANDLER =====
+
+    const handleShare = async () => {
+        if (!job) return;
+
+        setIsSharing(true);
+
+        const candidateAppUrl =
+            process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
+            "https://staging.applicant.network";
+        const shareUrl = `${candidateAppUrl}/public/jobs/${job.id}`;
+        const shareData = {
+            title: `${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`,
+            text: `Check out this job opportunity: ${job.title || "Job Opportunity"}${job.company?.name ? ` at ${job.company.name}` : ""}`,
+            url: shareUrl,
+        };
+
+        try {
+            // Check if native Web Share API is available
+            if (
+                navigator.share &&
+                navigator.canShare &&
+                navigator.canShare(shareData)
+            ) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback: Copy to clipboard
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success("Job link copied to clipboard!");
+            }
+        } catch (error: any) {
+            if (error.name !== "AbortError") {
+                // Fallback on any error except user cancellation
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    toast.success("Job link copied to clipboard!");
+                } catch (clipboardError) {
+                    toast.error("Failed to share job link");
+                }
+            }
+        } finally {
+            setIsSharing(false);
         }
     };
 
@@ -154,10 +203,12 @@ export default function RoleActionsToolbar({
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
-        viewPipeline: showActions.viewPipeline === true,  // Only show if explicitly enabled
-        submitCandidate: showActions.submitCandidate !== false && canSubmitCandidate,
+        viewPipeline: showActions.viewPipeline === true, // Only show if explicitly enabled
+        submitCandidate:
+            showActions.submitCandidate !== false && canSubmitCandidate,
         edit: showActions.edit !== false && canManageRole,
         statusActions: showActions.statusActions !== false && canManageRole,
+        share: showActions.share !== false, // Default enabled
     };
 
     // ===== RENDER HELPERS =====
@@ -167,24 +218,24 @@ export default function RoleActionsToolbar({
     };
 
     const getLayoutClass = () => {
-        return layout === 'horizontal' ? 'gap-1' : 'flex-col gap-2';
+        return layout === "horizontal" ? "gap-1" : "flex-col gap-2";
     };
 
     // Quick status action for icon-only variant
     const renderQuickStatusButton = () => {
-        if (variant !== 'icon-only' || !actions.statusActions) return null;
+        if (variant !== "icon-only" || !actions.statusActions) return null;
 
         const isLoading = updatingStatus && statusAction;
 
-        if (job.status === 'active') {
+        if (job.status === "active") {
             return (
                 <button
-                    onClick={() => handleStatusChange('paused')}
+                    onClick={() => handleStatusChange("paused")}
                     className={`btn ${getSizeClass()} btn-square btn-warning`}
                     title="Pause Role"
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'paused' ? (
+                    {isLoading && statusAction === "paused" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-pause" />
@@ -193,15 +244,15 @@ export default function RoleActionsToolbar({
             );
         }
 
-        if (job.status === 'paused') {
+        if (job.status === "paused") {
             return (
                 <button
-                    onClick={() => handleStatusChange('active')}
+                    onClick={() => handleStatusChange("active")}
                     className={`btn ${getSizeClass()} btn-square btn-success`}
                     title="Activate Role"
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'active' ? (
+                    {isLoading && statusAction === "active" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-play" />
@@ -215,84 +266,84 @@ export default function RoleActionsToolbar({
 
     // Status buttons for descriptive variant
     const renderStatusButtons = () => {
-        if (variant !== 'descriptive' || !actions.statusActions) return null;
+        if (variant !== "descriptive" || !actions.statusActions) return null;
 
         const buttons = [];
         const isLoading = updatingStatus && statusAction;
 
         // Activate button (if not active)
-        if (job.status !== 'active') {
+        if (job.status !== "active") {
             buttons.push(
                 <button
                     key="activate"
-                    onClick={() => handleStatusChange('active')}
+                    onClick={() => handleStatusChange("active")}
                     className={`btn ${getSizeClass()} btn-success gap-2`}
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'active' ? (
+                    {isLoading && statusAction === "active" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-play"></i>
                     )}
                     Activate
-                </button>
+                </button>,
             );
         }
 
         // Pause button (if active)
-        if (job.status === 'active') {
+        if (job.status === "active") {
             buttons.push(
                 <button
                     key="pause"
-                    onClick={() => handleStatusChange('paused')}
+                    onClick={() => handleStatusChange("paused")}
                     className={`btn ${getSizeClass()} btn-warning gap-2`}
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'paused' ? (
+                    {isLoading && statusAction === "paused" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-pause"></i>
                     )}
                     Pause
-                </button>
+                </button>,
             );
         }
 
         // Mark as Filled button (if not filled)
-        if (job.status !== 'filled') {
+        if (job.status !== "filled") {
             buttons.push(
                 <button
                     key="filled"
-                    onClick={() => handleStatusChange('filled')}
+                    onClick={() => handleStatusChange("filled")}
                     className={`btn ${getSizeClass()} btn-info gap-2`}
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'filled' ? (
+                    {isLoading && statusAction === "filled" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-check"></i>
                     )}
                     Mark Filled
-                </button>
+                </button>,
             );
         }
 
         // Close button (if not closed)
-        if (job.status !== 'closed') {
+        if (job.status !== "closed") {
             buttons.push(
                 <button
                     key="closed"
-                    onClick={() => handleStatusChange('closed')}
+                    onClick={() => handleStatusChange("closed")}
                     className={`btn ${getSizeClass()} btn-error gap-2`}
                     disabled={updatingStatus}
                 >
-                    {isLoading && statusAction === 'closed' ? (
+                    {isLoading && statusAction === "closed" ? (
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <i className="fa-duotone fa-regular fa-xmark"></i>
                     )}
                     Close
-                </button>
+                </button>,
             );
         }
 
@@ -301,7 +352,7 @@ export default function RoleActionsToolbar({
 
     // ===== RENDER VARIANTS =====
 
-    if (variant === 'icon-only') {
+    if (variant === "icon-only") {
         return (
             <>
                 <div className={`flex ${getLayoutClass()} ${className}`}>
@@ -350,6 +401,22 @@ export default function RoleActionsToolbar({
                         </button>
                     )}
 
+                    {/* Share Job */}
+                    {actions.share && (
+                        <button
+                            onClick={handleShare}
+                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                            title="Share Job"
+                            disabled={isSharing}
+                        >
+                            {isSharing ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-share-nodes" />
+                            )}
+                        </button>
+                    )}
+
                     {/* Edit Role */}
                     {actions.edit && (
                         <button
@@ -379,8 +446,10 @@ export default function RoleActionsToolbar({
                 {showSubmitModal && (
                     <SubmitCandidateWizard
                         roleId={job.id}
-                        roleTitle={job.title || 'Untitled Role'}
-                        companyName={job.company?.name || job.company_id || undefined}
+                        roleTitle={job.title || "Untitled Role"}
+                        companyName={
+                            job.company?.name || job.company_id || undefined
+                        }
                         onClose={() => setShowSubmitModal(false)}
                     />
                 )}
@@ -437,6 +506,22 @@ export default function RoleActionsToolbar({
                     </button>
                 )}
 
+                {/* Share Job */}
+                {actions.share && (
+                    <button
+                        onClick={handleShare}
+                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        disabled={isSharing}
+                    >
+                        {isSharing ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-share-nodes" />
+                        )}
+                        Share Job
+                    </button>
+                )}
+
                 {/* Edit Role */}
                 {actions.edit && (
                     <button
@@ -466,8 +551,10 @@ export default function RoleActionsToolbar({
             {showSubmitModal && (
                 <SubmitCandidateWizard
                     roleId={job.id}
-                    roleTitle={job.title || 'Untitled Role'}
-                    companyName={job.company?.name || job.company_id || undefined}
+                    roleTitle={job.title || "Untitled Role"}
+                    companyName={
+                        job.company?.name || job.company_id || undefined
+                    }
                     onClose={() => setShowSubmitModal(false)}
                 />
             )}

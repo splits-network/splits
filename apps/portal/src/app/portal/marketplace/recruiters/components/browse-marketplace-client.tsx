@@ -43,11 +43,11 @@ export function BrowseMarketplaceClient() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loadingCompanies, setLoadingCompanies] = useState(false);
 
-    // Memoize defaultFilters - show all active recruiters by default
-    // marketplace_enabled filter is optional since not all recruiters may have opted in yet
+    // Memoize defaultFilters - show only active recruiters who have opted into the marketplace
     const defaultFilters = useMemo<MarketplaceFilters>(
         () => ({
             status: "active",
+            marketplace_enabled: true,
         }),
         [],
     );
@@ -143,6 +143,13 @@ export function BrowseMarketplaceClient() {
         setShowInviteModal(false);
         toast.success("Invitation sent successfully!");
     }, [toast]);
+
+    const handleMessage = useCallback(
+        (conversationId: string, _recruiterName: string, _recruiterUserId: string) => {
+            router.push(`/portal/messages?conversationId=${conversationId}`);
+        },
+        [router],
+    );
 
     if (loading && recruiters.length === 0) {
         return <LoadingState message="Loading recruiters..." />;
@@ -251,6 +258,7 @@ export function BrowseMarketplaceClient() {
                     recruiter={selectedRecruiter}
                     onClose={handleClose}
                     onInvite={canInvite ? handleInvite : undefined}
+                    onMessage={handleMessage}
                 />
             </div>
 
