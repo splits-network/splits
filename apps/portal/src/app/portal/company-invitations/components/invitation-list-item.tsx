@@ -102,7 +102,7 @@ export function InvitationListItem({
         >
             <div className="flex items-start gap-3">
                 {/* Company Avatar */}
-                <div className="avatar placeholder shrink-0">
+                <div className="avaatar avatar-placeholder shrink-0">
                     {company?.logo_url ? (
                         <div className="w-10 h-10 rounded-lg">
                             <img src={company.logo_url} alt={company.name} />
@@ -168,10 +168,13 @@ export function InvitationListItem({
                     <span
                         className={`text-[10px] ${isPending ? "font-semibold text-primary" : "text-base-content/40"}`}
                     >
-                        {new Date(invitation.created_at).toLocaleDateString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                        })}
+                        {new Date(invitation.created_at).toLocaleDateString(
+                            undefined,
+                            {
+                                month: "short",
+                                day: "numeric",
+                            },
+                        )}
                     </span>
                 </div>
             </div>

@@ -577,6 +577,7 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:3000
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
       NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
+      NEXT_PUBLIC_CANDIDATE_APP_URL: http://localhost:3101
       CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
       IDENTITY_SERVICE_URL: http://identity-service:3001
