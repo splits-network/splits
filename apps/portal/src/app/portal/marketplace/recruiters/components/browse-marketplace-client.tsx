@@ -43,11 +43,11 @@ export function BrowseMarketplaceClient() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loadingCompanies, setLoadingCompanies] = useState(false);
 
-    // Memoize defaultFilters - show all active recruiters by default
-    // marketplace_enabled filter is optional since not all recruiters may have opted in yet
+    // Memoize defaultFilters - show only active recruiters who have opted into the marketplace
     const defaultFilters = useMemo<MarketplaceFilters>(
         () => ({
             status: "active",
+            marketplace_enabled: true,
         }),
         [],
     );

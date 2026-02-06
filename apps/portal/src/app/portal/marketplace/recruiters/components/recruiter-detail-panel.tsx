@@ -2,6 +2,8 @@
 
 import React from "react";
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
+import UserAvatar from "@/components/common/UserAvatar";
 
 // Extended type to include joined user data from Supabase
 interface RecruiterWithUser extends MarketplaceRecruiterDTO {
@@ -9,6 +11,7 @@ interface RecruiterWithUser extends MarketplaceRecruiterDTO {
         id: string;
         name: string;
         email: string;
+        profile_image_url?: string;
     };
 }
 
@@ -17,6 +20,11 @@ interface RecruiterDetailPanelProps {
     onClose: () => void;
     onInvite?: () => void;
 }
+
+// Helper component for empty state display
+const EmptyValue = ({ text = "Not provided" }: { text?: string }) => (
+    <span className="text-base-content/40 italic">{text}</span>
+);
 
 export function RecruiterDetailPanel({
     recruiter,
@@ -48,18 +56,67 @@ export function RecruiterDetailPanel({
         "Unknown Recruiter";
     const displayEmail = recruiter.users?.email || recruiter.email;
 
-    // Get initials for avatar (defensive)
-    const getInitials = (name: string | undefined | null) => {
-        if (!name) return "??";
-        const parts = name.trim().split(" ");
-        if (parts.length >= 2 && parts[0] && parts[1]) {
-            return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-        }
-        return name.slice(0, 2).toUpperCase();
-    };
-
     const specialties = recruiter.marketplace_specialties || [];
     const industries = recruiter.marketplace_industries || [];
+
+    // Format member since date
+    const formatMemberSince = (dateStr: string | undefined) => {
+        if (!dateStr) return null;
+        try {
+            return new Date(dateStr).toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+            });
+        } catch {
+            return null;
+        }
+    };
+
+    // Render marketplace_profile content
+    const renderMarketplaceProfile = () => {
+        if (
+            !recruiter.marketplace_profile ||
+            Object.keys(recruiter.marketplace_profile).length === 0
+        ) {
+            return null;
+        }
+
+        // If there's a description field, render it as markdown
+        if (recruiter.marketplace_profile.description) {
+            return (
+                <MarkdownRenderer
+                    content={recruiter.marketplace_profile.description}
+                />
+            );
+        }
+
+        // Otherwise render key-value pairs for other fields
+        const entries = Object.entries(recruiter.marketplace_profile).filter(
+            ([key, value]) => value !== null && value !== undefined && value !== "",
+        );
+
+        if (entries.length === 0) return null;
+
+        return (
+            <div className="space-y-2">
+                {entries.map(([fieldKey, value]) => (
+                    <div key={fieldKey} className="flex flex-col">
+                        <span className="text-xs text-base-content/50 capitalize">
+                            {fieldKey.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-base-content/80">
+                            {Array.isArray(value)
+                                ? value.join(", ")
+                                : String(value)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const memberSince = formatMemberSince(recruiter.created_at);
+    const marketplaceProfileContent = renderMarketplaceProfile();
 
     return (
         <div className="h-full flex flex-col">
@@ -81,92 +138,114 @@ export function RecruiterDetailPanel({
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-start gap-4">
-                        <div className="avatar avatar-placeholder">
-                            <div className="bg-primary text-primary-content rounded-full w-16 h-16">
-                                <span className="text-xl">
-                                    {getInitials(displayName)}
-                                </span>
-                            </div>
-                        </div>
+                        <UserAvatar
+                            user={{
+                                name: displayName,
+                                profile_image_url:
+                                    recruiter.users?.profile_image_url,
+                            }}
+                            size="lg"
+                        />
                         <div className="flex-1 min-w-0">
                             <h3 className="text-2xl font-bold truncate">
                                 {displayName}
                             </h3>
-                            {recruiter.marketplace_tagline && (
-                                <p className="text-base-content/70 mt-1">
-                                    {recruiter.marketplace_tagline}
-                                </p>
-                            )}
-                            {recruiter.marketplace_location && (
-                                <p className="text-sm text-base-content/50 mt-1">
-                                    <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
-                                    {recruiter.marketplace_location}
+                            <p className="text-base-content/70 mt-1">
+                                {recruiter.marketplace_tagline || (
+                                    <EmptyValue text="No tagline provided" />
+                                )}
+                            </p>
+                            <p className="text-sm text-base-content/50 mt-1">
+                                <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
+                                {recruiter.marketplace_location || (
+                                    <EmptyValue text="Location not specified" />
+                                )}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Quick Stats - Always show all 4 */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="stat bg-base-200 rounded-lg p-3">
+                            <div className="stat-title text-xs">Placements</div>
+                            <div className="stat-value text-lg text-primary">
+                                {recruiter.total_placements !== undefined
+                                    ? recruiter.total_placements
+                                    : "—"}
+                            </div>
+                        </div>
+                        <div className="stat bg-base-200 rounded-lg p-3">
+                            <div className="stat-title text-xs">
+                                Success Rate
+                            </div>
+                            <div className="stat-value text-lg text-success">
+                                {recruiter.success_rate !== undefined
+                                    ? `${Math.round(recruiter.success_rate)}%`
+                                    : "—"}
+                            </div>
+                        </div>
+                        <div className="stat bg-base-200 rounded-lg p-3">
+                            <div className="stat-title text-xs">Reputation</div>
+                            <div className="stat-value text-lg text-warning">
+                                {recruiter.reputation_score !== undefined
+                                    ? recruiter.reputation_score
+                                    : "—"}
+                            </div>
+                        </div>
+                        <div className="stat bg-base-200 rounded-lg p-3">
+                            <div className="stat-title text-xs">
+                                Avg. Time to Hire
+                            </div>
+                            <div className="stat-value text-lg text-info">
+                                {recruiter.average_time_to_hire !== undefined
+                                    ? `${recruiter.average_time_to_hire}d`
+                                    : "—"}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bio */}
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-user mr-2"></i>
+                                About
+                            </h4>
+                            {recruiter.bio ? (
+                                <div className="prose prose-sm max-w-none text-base-content/80">
+                                    <MarkdownRenderer content={recruiter.bio} />
+                                </div>
+                            ) : (
+                                <p>
+                                    <EmptyValue text="No bio provided" />
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    {/* Quick Stats */}
-                    {(recruiter.total_placements !== undefined ||
-                        recruiter.success_rate !== undefined ||
-                        recruiter.reputation_score !== undefined) && (
-                        <div className="grid grid-cols-3 gap-3">
-                            {recruiter.total_placements !== undefined && (
-                                <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">
-                                        Placements
-                                    </div>
-                                    <div className="stat-value text-lg text-primary">
-                                        {recruiter.total_placements}
-                                    </div>
-                                </div>
-                            )}
-                            {recruiter.success_rate !== undefined && (
-                                <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">
-                                        Success Rate
-                                    </div>
-                                    <div className="stat-value text-lg text-success">
-                                        {Math.round(recruiter.success_rate)}%
-                                    </div>
-                                </div>
-                            )}
-                            {recruiter.reputation_score !== undefined && (
-                                <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">
-                                        Reputation
-                                    </div>
-                                    <div className="stat-value text-lg text-warning">
-                                        {recruiter.reputation_score}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Bio */}
-                    {recruiter.bio && (
+                    {/* Marketplace Profile - Only show if has content */}
+                    {marketplaceProfileContent && (
                         <div className="card bg-base-200">
                             <div className="card-body">
                                 <h4 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-user mr-2"></i>
-                                    About
+                                    <i className="fa-duotone fa-regular fa-id-card mr-2"></i>
+                                    Profile Details
                                 </h4>
-                                <p className="text-base-content/80 whitespace-pre-wrap">
-                                    {recruiter.bio}
-                                </p>
+                                <div className="prose prose-sm max-w-none text-base-content/80">
+                                    {marketplaceProfileContent}
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* Specialties */}
-                    {specialties.length > 0 && (
-                        <div className="card bg-base-200">
-                            <div className="card-body">
-                                <h4 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
-                                    Specialties
-                                </h4>
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
+                                Specialties
+                            </h4>
+                            {specialties.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
                                     {specialties.map((specialty, index) => (
                                         <span
@@ -177,18 +256,22 @@ export function RecruiterDetailPanel({
                                         </span>
                                     ))}
                                 </div>
-                            </div>
+                            ) : (
+                                <p>
+                                    <EmptyValue text="No specialties listed" />
+                                </p>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {/* Industries */}
-                    {industries.length > 0 && (
-                        <div className="card bg-base-200">
-                            <div className="card-body">
-                                <h4 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-industry mr-2"></i>
-                                    Industries
-                                </h4>
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-industry mr-2"></i>
+                                Industries
+                            </h4>
+                            {industries.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
                                     {industries.map((industry, index) => (
                                         <span
@@ -199,51 +282,79 @@ export function RecruiterDetailPanel({
                                         </span>
                                     ))}
                                 </div>
-                            </div>
+                            ) : (
+                                <p>
+                                    <EmptyValue text="No industries specified" />
+                                </p>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {/* Experience */}
-                    {recruiter.marketplace_years_experience && (
-                        <div className="card bg-base-200">
-                            <div className="card-body">
-                                <h4 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-clock mr-2"></i>
-                                    Experience
-                                </h4>
-                                <p className="text-base-content/80">
-                                    {recruiter.marketplace_years_experience}+
-                                    years in recruitment
-                                </p>
-                            </div>
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-clock mr-2"></i>
+                                Experience
+                            </h4>
+                            <p className="text-base-content/80">
+                                {recruiter.marketplace_years_experience ? (
+                                    `${recruiter.marketplace_years_experience}+ years in recruitment`
+                                ) : (
+                                    <EmptyValue text="Not specified" />
+                                )}
+                            </p>
                         </div>
-                    )}
+                    </div>
 
                     {/* Contact Info */}
-                    {(displayEmail || recruiter.phone) && (
-                        <div className="card bg-base-200">
-                            <div className="card-body">
-                                <h4 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-address-card mr-2"></i>
-                                    Contact
-                                </h4>
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-address-card mr-2"></i>
+                                Contact
+                            </h4>
+                            {displayEmail || recruiter.phone ? (
                                 <div className="space-y-2">
-                                    {displayEmail && (
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-envelope text-base-content/50"></i>
-                                            <span>{displayEmail}</span>
-                                        </div>
-                                    )}
-                                    {recruiter.phone && (
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-phone text-base-content/50"></i>
-                                            <span>{recruiter.phone}</span>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-envelope text-base-content/50 w-5"></i>
+                                        <span>
+                                            {displayEmail || (
+                                                <EmptyValue text="No email provided" />
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-phone text-base-content/50 w-5"></i>
+                                        <span>
+                                            {recruiter.phone || (
+                                                <EmptyValue text="No phone provided" />
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <p>
+                                    <EmptyValue text="Contact information not available" />
+                                </p>
+                            )}
                         </div>
-                    )}
+                    </div>
+
+                    {/* Member Since */}
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h4 className="card-title text-lg">
+                                <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
+                                Member Since
+                            </h4>
+                            <p className="text-base-content/80">
+                                {memberSince || (
+                                    <EmptyValue text="Not available" />
+                                )}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
