@@ -35,36 +35,34 @@ export default function VerificationModal({
 
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error("Not authenticated");
-            }
+            if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
 
-            // Prepare verification metadata
             const verificationMetadata = {
                 notes: notes.trim() || undefined,
                 verified_at_timestamp: new Date().toISOString(),
                 verification_method: "manual_admin_review",
             };
 
-            // V2 Pattern: Single PATCH endpoint for all updates
-            const response = await client.patch(`/candidates/${candidate.id}`, {
-                verification_status: status,
-                verification_metadata: verificationMetadata,
-                verified_at: new Date().toISOString(),
-                // verified_by_user_id will be set server-side from auth context
-            });
+            const response = await client.patch(
+                `/candidates/${candidate.id}`,
+                {
+                    verification_status: status,
+                    verification_metadata: verificationMetadata,
+                    verified_at: new Date().toISOString(),
+                },
+            );
 
             onUpdate(response.data);
             onClose();
-
-            // Reset form
             setNotes("");
             setStatus("unverified");
         } catch (err: any) {
             console.error("Failed to update verification:", err);
-            setError(err.message || "Failed to update verification status");
+            setError(
+                err.message || "Failed to update verification status",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -79,7 +77,6 @@ export default function VerificationModal({
                     </h3>
 
                     <div className="space-y-4">
-                        {/* Current Status Display */}
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">
                                 Candidate
@@ -103,7 +100,6 @@ export default function VerificationModal({
                             </div>
                         </fieldset>
 
-                        {/* Verification Status */}
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">
                                 Verification Status *
@@ -121,7 +117,6 @@ export default function VerificationModal({
                             </select>
                         </fieldset>
 
-                        {/* Notes */}
                         <MarkdownEditor
                             className="fieldset"
                             label="Verification Notes"
@@ -133,9 +128,8 @@ export default function VerificationModal({
                             preview="edit"
                         />
 
-                        {/* Status Descriptions */}
                         <div className="alert alert-info">
-                            <i className="fa-duotone fa-regular fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle" />
                             <div className="text-sm">
                                 <strong>Status meanings:</strong>
                                 <ul className="list-disc list-inside mt-1 space-y-1">
@@ -153,23 +147,20 @@ export default function VerificationModal({
                                     </li>
                                     <li>
                                         <strong>Rejected:</strong> Verification
-                                        failed (e.g., fake profile, incorrect
-                                        info)
+                                        failed
                                     </li>
                                 </ul>
                             </div>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
                             <div className="alert alert-error">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation" />
                                 <span>{error}</span>
                             </div>
                         )}
                     </div>
 
-                    {/* Modal Actions */}
                     <div className="modal-action">
                         <button
                             type="button"
@@ -184,7 +175,11 @@ export default function VerificationModal({
                             className="btn btn-primary"
                             disabled={submitting}
                         >
-                            <ButtonLoading loading={submitting} text="Update Status" loadingText="Updating..." />
+                            <ButtonLoading
+                                loading={submitting}
+                                text="Update Status"
+                                loadingText="Updating..."
+                            />
                         </button>
                     </div>
                 </form>
