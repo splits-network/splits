@@ -15,7 +15,7 @@ export default function RoleListItem({
         <div
             onClick={() => onSelect(item.id)}
             className={`
-                group relative p-3 sm:p-4 border-b border-base-300 cursor-pointer transition-all duration-200
+                group relative px-3 pt-2 pb-4 border-b border-base-300 cursor-pointer transition-all duration-200
                 hover:bg-base-100
                 ${
                     isSelected
@@ -24,13 +24,13 @@ export default function RoleListItem({
                 }
             `}
         >
-            <div className="flex justify-between items-start mb-1">
-                <h3 className="font-semibold text-base-content line-clamp-1 group-hover:text-primary transition-colors">
+            <div className="flex justify-between items-start gap-2">
+                <h3 className="font-semibold text-sm text-base-content line-clamp-1 group-hover:text-primary transition-colors">
                     {item.title}
                 </h3>
                 {item.status && (
                     <span
-                        className={`badge badge-xs sm:badge-sm ${
+                        className={`badge badge-xs shrink-0 ${
                             item.status === "active"
                                 ? "badge-success text-success-content"
                                 : item.status === "closed"
@@ -43,29 +43,25 @@ export default function RoleListItem({
                 )}
             </div>
 
-            <div className="text-sm text-base-content/70 mb-2 line-clamp-1">
-                {item.company?.name || "Confidential Company"}
-            </div>
-
-            <div className="flex items-center justify-between text-base-content/60 mt-2">
-                <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between text-xs text-base-content/60 mt-1">
+                <div className="flex items-center gap-2 min-w-0">
+                    <span className="line-clamp-1">
+                        {item.company?.name || "Confidential"}
+                    </span>
                     {item.location && (
-                        <div className="flex items-center gap-1">
-                            <i className="fa-duotone fa-location-dot" />
-                            <span className="line-clamp-1 max-w-[100px]">
+                        <>
+                            <span className="text-base-content/30">•</span>
+                            <span className="line-clamp-1 shrink-0">
                                 {item.location}
                             </span>
-                        </div>
+                        </>
                     )}
                 </div>
-                <div>
-                    {/** TODO: let's do the calculation for max placement fee or potential commission like we do in hte rolecard here with the fee percentage*/}
-                    {(item.fee_percentage || 0) > 0 && (
-                        <div className="font-medium text-base-content/80">
-                            {item.fee_percentage}% Fee
-                        </div>
-                    )}
-                </div>
+                {(item.fee_percentage || 0) > 0 && (
+                    <span className="font-medium text-base-content/70 shrink-0 ml-2">
+                        {item.fee_percentage}%
+                    </span>
+                )}
             </div>
         </div>
     );

@@ -10,28 +10,11 @@ import {
 import { formatRelativeTime } from "@/lib/utils";
 import { getRoleBadges } from "@/lib/utils/role-badges";
 import { getJobStatusBadge } from "@/lib/utils/badge-styles";
-import RoleActionsToolbar from "./role-actions-toolbar";
+import RoleActionsToolbar from "./actions-toolbar";
+import { Job } from "../types";
 
-// ===== TYPES =====
-
-export interface Job {
-    id: string;
-    title: string;
-    company_id: string;
-    company: {
-        name: string;
-        industry?: string;
-        headquarters_location?: string;
-        logo_url?: string;
-    };
-    location?: string;
-    salary_min?: number;
-    salary_max?: number;
-    fee_percentage: number;
-    status: string;
-    created_at: string | Date;
-    application_count?: number;
-}
+// Re-export for backward compatibility
+export type { Job };
 
 interface Badge {
     class: string;

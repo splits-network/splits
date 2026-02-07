@@ -7,6 +7,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         <>
             <Header />
             {children}
+            <Footer />
         </>
     );
 }

@@ -137,7 +137,6 @@ export default async function RootLayout({
                             <CookieConsent />
                         </ToastProvider>
                     </UserProfileProvider>
-                    <Footer />
 
                     {/* HelpNinja widget loaded after page becomes interactive */}
                     {/** Commented out temporarily */}

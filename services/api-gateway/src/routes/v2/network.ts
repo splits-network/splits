@@ -79,6 +79,7 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);
     registerRecruiterCompanyRoutes(app, services);
+    registerCompanyInvitationRoutes(app, services);
     registerPublicRecruitersListRoute(app, services);
 
     // Register generic CRUD routes LAST (skip recruiters as we have custom routes)
@@ -368,7 +369,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    '/v2/recruiter-companies',
+                    '/api/v2/recruiter-companies',
                     request.query as Record<string, any>,
                     correlationId,
                     buildAuthHeaders(request)
@@ -409,7 +410,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    '/v2/recruiter-companies/manageable-companies',
+                    '/api/v2/recruiter-companies/manageable-companies',
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
@@ -429,7 +430,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    '/v2/recruiter-companies/manageable-companies-with-details',
+                    '/api/v2/recruiter-companies/manageable-companies-with-details',
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
@@ -470,7 +471,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().post(
-                    '/v2/recruiter-companies/invite',
+                    '/api/v2/recruiter-companies/invite',
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
@@ -561,6 +562,192 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 return reply.send(data);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to delete recruiter-company relationship');
+            }
+        }
+    );
+}
+
+/**
+ * Register company platform invitation routes
+ * Enables recruiters to invite companies to join the Splits Network platform
+ */
+function registerCompanyInvitationRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+
+    const routeOptions = () => ({
+        preHandler: requireAuth(),
+    });
+
+    const handleNetworkError = (
+        request: FastifyRequest,
+        reply: FastifyReply,
+        error: any,
+        message: string
+    ) => {
+        request.log.error({ error, message }, 'Company invitation route failed');
+        return reply.status(error?.statusCode || 500).send(error?.jsonBody || { error: message });
+    };
+
+    // LIST invitations (authenticated, recruiters see their own)
+    app.get(
+        '/api/v2/company-invitations',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/company-invitations',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list company invitations');
+            }
+        }
+    );
+
+    // PUBLIC LOOKUP - no auth required (for accept flow)
+    app.get(
+        '/api/v2/company-invitations/lookup',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/company-invitations/lookup',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                console.log('Lookup invitation result:', { data, correlationId });
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to lookup invitation');
+            }
+        }
+    );
+
+    // GET invitation by ID (authenticated)
+    app.get(
+        '/api/v2/company-invitations/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/api/v2/company-invitations/${id}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch company invitation');
+            }
+        }
+    );
+
+    // CREATE invitation (authenticated, recruiters only)
+    app.post(
+        '/api/v2/company-invitations',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    '/api/v2/company-invitations',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to create company invitation');
+            }
+        }
+    );
+
+    // ACCEPT invitation (authenticated)
+    app.post(
+        '/api/v2/company-invitations/:id/accept',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    `/api/v2/company-invitations/${id}/accept`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to accept invitation');
+            }
+        }
+    );
+
+    // RESEND email (authenticated)
+    app.post(
+        '/api/v2/company-invitations/:id/resend',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    `/api/v2/company-invitations/${id}/resend`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to resend invitation');
+            }
+        }
+    );
+
+    // REVOKE invitation (authenticated)
+    app.patch(
+        '/api/v2/company-invitations/:id/revoke',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().patch(
+                    `/api/v2/company-invitations/${id}/revoke`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to revoke invitation');
+            }
+        }
+    );
+
+    // DELETE invitation (authenticated)
+    app.delete(
+        '/api/v2/company-invitations/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().delete(
+                    `/api/v2/company-invitations/${id}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to delete invitation');
             }
         }
     );

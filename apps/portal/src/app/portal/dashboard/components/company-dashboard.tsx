@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/cards";
 import { AnalyticsChart } from "@/components/charts/analytics-chart";
 import { TrendBadge } from "@/components/ui";
-import RoleWizardModal from "../../roles/components/role-wizard-modal";
-import RoleActionsToolbar from "../../roles/components/role-actions-toolbar";
+import RoleWizardModal from "../../roles/components/modals/role-wizard-modal";
+import RoleActionsToolbar from "../../roles/components/actions-toolbar";
 
 interface CompanyStats {
     active_roles: number;
@@ -243,7 +243,11 @@ export default function CompanyDashboard() {
                 } catch (billingError: any) {
                     // Billing data not available (likely insufficient permissions)
                     // This is expected for non-billing users (e.g., hiring_manager)
-                    console.log("[Dashboard] Billing data not available for this user:", billingError?.response?.data?.error?.message || billingError.message);
+                    console.log(
+                        "[Dashboard] Billing data not available for this user:",
+                        billingError?.response?.data?.error?.message ||
+                            billingError.message,
+                    );
                     setBillingProfile(null);
                 }
             }
@@ -554,13 +558,15 @@ export default function CompanyDashboard() {
                                                             job={{
                                                                 id: role.id,
                                                                 title: role.title,
-                                                                company_id: '',
+                                                                company_id: "",
                                                                 status: role.status as any,
                                                             }}
                                                             variant="icon-only"
                                                             layout="horizontal"
                                                             size="xs"
-                                                            onRefresh={loadDashboardData}
+                                                            onRefresh={
+                                                                loadDashboardData
+                                                            }
                                                         />
                                                     </div>
                                                 </td>

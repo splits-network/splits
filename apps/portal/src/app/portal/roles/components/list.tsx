@@ -2,38 +2,28 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import {
-    useStandardList,
     PaginationControls,
-    SearchInput,
     EmptyState,
     LoadingState,
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { StatCard, StatCardGrid } from "@/components/ui/cards";
 import { DataTable, type TableColumn } from "@/components/ui/tables";
-import { useUserProfile } from "@/contexts";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import { RoleCard, type Job } from "./role-card";
-import { RoleTableRow } from "./role-table-row";
+import { RoleCard } from "./card";
+import { TableRow } from "./table-row";
 import {
     RolesTrendsChart,
     TIME_PERIODS,
     calculateStatTrends,
 } from "../../../../components/charts/roles-trends-chart";
-import RoleWizardModal from "./role-wizard-modal";
-import RoleDetailSidebar from "./role-detail-sidebar";
-import RolePipelineSidebar from "./role-pipeline-sidebar";
-import Link from "next/link";
+import RoleWizardModal from "./modals/role-wizard-modal";
+import DetailSidebar from "./detail-sidebar";
+import PipelineSidebar from "./pipeline-sidebar";
 import { ViewMode } from "@/hooks/use-view-mode";
+import { useRolesFilter } from "../contexts/roles-filter-context";
 
 // ===== TYPES =====
-
-interface JobFilters {
-    status?: string;
-    job_owner_filter?: "all" | "assigned";
-}
 
 interface RolesListProps {
     view: Exclude<ViewMode, "browse">; // Only grid or table
@@ -54,99 +44,33 @@ const roleColumns: TableColumn[] = [
 
 // ===== COMPONENT =====
 
-export default function RolesList({ view }: RolesListProps) {
+export default function List({ view }: RolesListProps) {
     const searchParams = useSearchParams();
-    const { getToken } = useAuth();
-    const {
-        profile,
-        isAdmin,
-        isRecruiter,
-        isCompanyUser,
-        isLoading: profileLoading,
-    } = useUserProfile();
 
-    // State for tracking if recruiter has manageable companies
-    const [hasManageableCompanies, setHasManageableCompanies] = useState(false);
-
-    // Derive user role from context
-    const userRole = isAdmin
-        ? "platform_admin"
-        : profile?.roles?.includes("company_admin")
-          ? "company_admin"
-          : profile?.roles?.includes("hiring_manager")
-            ? "hiring_manager"
-            : isRecruiter
-              ? "recruiter"
-              : profile?.roles?.[0] || null;
-
-    // Check if user can manage roles
-    const canManageRole = isAdmin || profile?.roles?.includes("company_admin");
-
-    // Check if recruiter has manageable companies
-    useEffect(() => {
-        if (isRecruiter && !profileLoading) {
-            async function checkManageableCompanies() {
-                try {
-                    const token = await getToken();
-                    if (!token) return;
-                    const client = createAuthenticatedClient(token);
-                    const response = await client.get<{ data: { id: string; name: string }[] }>(
-                        "/recruiter-companies/manageable-companies-with-details"
-                    );
-                    setHasManageableCompanies((response.data || []).length > 0);
-                } catch (err) {
-                    console.error("Failed to check manageable companies:", err);
-                    setHasManageableCompanies(false);
-                }
-            }
-            checkManageableCompanies();
-        }
-    }, [isRecruiter, profileLoading, getToken]);
-
-    // Memoize defaultFilters to prevent unnecessary re-renders
-    const defaultFilters = useMemo<JobFilters>(
-        () => ({
-            status: undefined,
-            job_owner_filter: "all",
-        }),
-        [],
-    );
-
-    // Use the standard list hook with server-side pagination/filtering
+    // Get filter state from context
     const {
         data: jobs,
-        pagination,
         loading,
         error,
-        searchInput,
-        setSearchInput,
-        clearSearch,
-        filters,
-        setFilter,
+        total,
         sortBy,
         sortOrder,
         handleSort,
         page,
         limit,
         totalPages,
-        total,
         goToPage,
         setLimit,
         refresh,
-    } = useStandardList<Job, JobFilters>({
-        endpoint: "/jobs",
-        defaultFilters,
-        defaultSortBy: "created_at",
-        defaultSortOrder: "desc",
-        defaultLimit: 25,
-        syncToUrl: true,
-    });
+        userRole,
+        canManageRole,
+        showStats,
+    } = useRolesFilter();
 
     // Time period state for trends (shared with chart)
     const [trendPeriod, setTrendPeriod] = useState(6);
 
-    // Modal state for adding new role
-    const [showAddModal, setShowAddModal] = useState(false);
+    // Modal state for editing role (add role is handled at page level now)
     const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
     // Sidebar state for viewing role details - check URL param for initial selection
@@ -192,7 +116,7 @@ export default function RolesList({ view }: RolesListProps) {
 
     // Handler for opening pipeline sidebar
     const handleViewPipeline = (jobId: string) => {
-        const job = jobs.find(j => j.id === jobId);
+        const job = jobs.find((j) => j.id === jobId);
         setPipelineRoleId(jobId);
         setPipelineRoleTitle(job?.title || "");
     };
@@ -203,11 +127,6 @@ export default function RolesList({ view }: RolesListProps) {
         setPipelineRoleTitle("");
     };
 
-    // Wait for profile to load
-    if (profileLoading) {
-        return <LoadingState message="Loading your profile..." />;
-    }
-
     // Handle error state
     if (error) {
         return <ErrorState message={error} onRetry={refresh} />;
@@ -215,8 +134,9 @@ export default function RolesList({ view }: RolesListProps) {
 
     return (
         <>
-            <div className="grid grid-cols-12 gap-6">
-                <div className="col-span-12 md:col-span-8 xl:col-span-10">
+            <div className="space-y-6">
+                {/* Stats and Chart Section */}
+                {showStats && (
                     <div className="card bg-base-200">
                         <StatCardGrid className="m-2 shadow-lg">
                             <StatCard
@@ -286,107 +206,10 @@ export default function RolesList({ view }: RolesListProps) {
                             />
                         </div>
                     </div>
-                </div>
+                )}
 
-                <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
-                    {/* Filters and View Toggle */}
-                    <div className="card bg-base-200 shadow">
-                        <div className="card-body p-4 space-y-4">
-                            <h3 className="card-title">
-                                <i className="fa-duotone fa-regular fa-filter mr-2" />
-                                Options
-                            </h3>
-                            {(isAdmin ||
-                                isCompanyUser ||
-                                (isRecruiter && hasManageableCompanies)) && (
-                                <button
-                                    className="btn btn-primary w-full"
-                                    onClick={() => setShowAddModal(true)}
-                                >
-                                    <i className="fa-duotone fa-regular fa-plus"></i>
-                                    Add Role
-                                </button>
-                            )}
-                            <div className="flex flex-wrap gap-4 items-center">
-                                {/* Status Filter */}
-                                <fieldset className="fieldset w-full">
-                                    <legend className="fieldset-legend">
-                                        Status Filter
-                                    </legend>
-                                    <select
-                                        name="status-selector"
-                                        className="select w-full"
-                                        value={filters.status || "all"}
-                                        onChange={(e) =>
-                                            setFilter(
-                                                "status",
-                                                e.target.value === "all"
-                                                    ? undefined
-                                                    : e.target.value,
-                                            )
-                                        }
-                                    >
-                                        <option value="all">
-                                            All Statuses
-                                        </option>
-                                        <option value="active">Active</option>
-                                        <option value="paused">Paused</option>
-                                        <option value="filled">Filled</option>
-                                        <option value="closed">Closed</option>
-                                    </select>
-                                </fieldset>
-
-                                {/* Ownership Filter (for recruiters and company users) */}
-                                {(userRole === "recruiter" ||
-                                    userRole === "company_admin" ||
-                                    userRole === "hiring_manager") && (
-                                    <fieldset className="fieldset w-full">
-                                        <legend className="fieldset-legend">
-                                            Job Assignment
-                                        </legend>
-                                        <select
-                                            name="job-owner-filter"
-                                            className="select w-full"
-                                            value={
-                                                filters.job_owner_filter ||
-                                                "all"
-                                            }
-                                            onChange={(e) =>
-                                                setFilter(
-                                                    "job_owner_filter",
-                                                    e.target.value as
-                                                        | "all"
-                                                        | "assigned",
-                                                )
-                                            }
-                                        >
-                                            <option value="all">
-                                                {userRole === "recruiter"
-                                                    ? "All Jobs"
-                                                    : "All Organization Jobs"}
-                                            </option>
-                                            <option value="assigned">
-                                                My Assigned Jobs
-                                            </option>
-                                        </select>
-                                    </fieldset>
-                                )}
-
-                                {/* Search */}
-                                <SearchInput
-                                    value={searchInput}
-                                    onChange={setSearchInput}
-                                    onClear={clearSearch}
-                                    placeholder="Search roles..."
-                                    loading={loading}
-                                    className="flex-1 min-w-[200px]"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-span-12 gap-4">
+                {/* Content Section */}
+                <div className="space-y-4">
                     {/* Loading State */}
                     {loading && jobs.length === 0 && <LoadingState />}
 
@@ -420,7 +243,7 @@ export default function RolesList({ view }: RolesListProps) {
                             loading={loading}
                         >
                             {jobs.map((job) => (
-                                <RoleTableRow
+                                <TableRow
                                     key={job.id}
                                     job={job}
                                     allJobs={jobs}
@@ -438,11 +261,7 @@ export default function RolesList({ view }: RolesListProps) {
                         <EmptyState
                             icon="fa-briefcase"
                             title="No Roles Found"
-                            description={
-                                searchInput
-                                    ? "Try adjusting your search or filters"
-                                    : "No roles have been created yet"
-                            }
+                            description="Try adjusting your search or filters"
                         />
                     )}
 
@@ -457,18 +276,6 @@ export default function RolesList({ view }: RolesListProps) {
                         loading={loading}
                     />
                 </div>
-
-                {/* Add Role Modal */}
-                {showAddModal && (
-                    <RoleWizardModal
-                        isOpen={showAddModal}
-                        onClose={() => setShowAddModal(false)}
-                        onSuccess={() => {
-                            setShowAddModal(false);
-                            refresh(); // Refresh the list
-                        }}
-                    />
-                )}
 
                 {/* Edit Role Modal */}
                 {editingJobId && (
@@ -485,14 +292,14 @@ export default function RolesList({ view }: RolesListProps) {
                 )}
 
                 {/* Role Detail Sidebar */}
-                <RoleDetailSidebar
+                <DetailSidebar
                     roleId={sidebarRoleId}
                     onClose={handleCloseSidebar}
                     onViewPipeline={handleViewPipeline}
                 />
 
                 {/* Pipeline Sidebar */}
-                <RolePipelineSidebar
+                <PipelineSidebar
                     roleId={pipelineRoleId}
                     roleTitle={pipelineRoleTitle}
                     onClose={handleClosePipeline}

@@ -61,8 +61,8 @@ const navItems: NavItem[] = [
         mobileDock: false,
     },
     {
-        href: "/portal/company-invitations",
-        label: "Company Invitations",
+        href: "/portal/invite-companies",
+        label: "Invite Companies",
         icon: "fa-building-user",
         roles: ["recruiter"],
         section: "management",

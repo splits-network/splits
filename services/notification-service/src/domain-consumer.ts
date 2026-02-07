@@ -10,6 +10,7 @@ import { ProposalsEventConsumer } from './consumers/proposals/consumer';
 import { CandidatesEventConsumer } from './consumers/candidates/consumer';
 import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
+import { CompanyInvitationsConsumer } from './consumers/company-invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
@@ -28,6 +29,7 @@ export class DomainEventConsumer {
     private candidatesConsumer: CandidatesEventConsumer;
     private collaborationConsumer: CollaborationEventConsumer;
     private invitationsConsumer: InvitationsConsumer;
+    private companyInvitationsConsumer: CompanyInvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
     private chatConsumer: ChatEventConsumer;
@@ -89,6 +91,13 @@ export class DomainEventConsumer {
             logger,
             portalUrl,
             candidateWebsiteUrl,
+            dataLookup,
+            contactLookup
+        );
+        this.companyInvitationsConsumer = new CompanyInvitationsConsumer(
+            notificationService,
+            logger,
+            portalUrl,
             dataLookup,
             contactLookup
         );
@@ -175,6 +184,10 @@ export class DomainEventConsumer {
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.revoked');
+
+            // Company platform invitation events
+            await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.accepted');
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
@@ -341,6 +354,15 @@ export class DomainEventConsumer {
             case 'invitation.revoked':
                 await this.invitationsConsumer.handleInvitationRevoked(event);
                 break;
+
+            // Company platform invitations domain
+            case 'company_invitation.created':
+                await this.companyInvitationsConsumer.handleCompanyInvitationCreated(event);
+                break;
+            case 'company_invitation.accepted':
+                await this.companyInvitationsConsumer.handleCompanyInvitationAccepted(event);
+                break;
+
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
                 break;

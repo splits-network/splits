@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
-import RoleActionsToolbar from "./role-actions-toolbar";
-import RoleDetailsView from "./role-details-view";
+import RoleActionsToolbar from "./actions-toolbar";
+import DetailsView from "./details-view";
 
 // ===== TYPES =====
 
@@ -51,7 +51,7 @@ interface Badge {
     animated?: boolean;
 }
 
-interface RoleDetailSidebarProps {
+interface DetailSidebarProps {
     roleId: string | null;
     onClose: () => void;
     onViewPipeline?: (roleId: string) => void;
@@ -59,11 +59,11 @@ interface RoleDetailSidebarProps {
 
 // ===== COMPONENT =====
 
-export default function RoleDetailSidebar({
+export default function DetailSidebar({
     roleId,
     onClose,
     onViewPipeline,
-}: RoleDetailSidebarProps) {
+}: DetailSidebarProps) {
     const { getToken } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(false);
@@ -222,7 +222,7 @@ export default function RoleDetailSidebar({
                         {job && !loading && (
                             <div className="p-4 space-y-4">
                                 {/* Role Details - FULL COMPREHENSIVE VIEW WITH TABS */}
-                                <RoleDetailsView
+                                <DetailsView
                                     job={job}
                                     loading={loading}
                                     compact={true}

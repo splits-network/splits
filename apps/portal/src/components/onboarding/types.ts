@@ -27,6 +27,13 @@ export interface StripePaymentInfo {
   appliedDiscount?: any;
 }
 
+// Invitation reference when user came from a recruiter invitation
+export interface FromInvitation {
+  id: string;
+  recruiter_id: string;
+  company_name_hint?: string;
+}
+
 export interface OnboardingState {
   // From database
   currentStep: number; // 1-4
@@ -39,6 +46,9 @@ export interface OnboardingState {
   // Plan selection state
   selectedPlan: SelectedPlan | null;
   stripePaymentInfo: StripePaymentInfo | null;
+
+  // Invitation reference (when user came from recruiter invitation)
+  fromInvitation?: FromInvitation;
 
   // Form data
   recruiterProfile?: {

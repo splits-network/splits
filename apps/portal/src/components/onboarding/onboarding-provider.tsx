@@ -22,6 +22,7 @@ import {
     UserRole,
     SelectedPlan,
     StripePaymentInfo,
+    FromInvitation,
 } from "./types";
 import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
@@ -49,6 +50,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         selectedRole: null,
         selectedPlan: null,
         stripePaymentInfo: null,
+        fromInvitation: undefined,
         recruiterProfile: {},
         companyInfo: {},
         submitting: false,
@@ -111,12 +113,22 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 }
 
                 // Load onboarding state from metadata if available
-                let loadedState = {
+                let loadedState: {
+                    currentStep: number;
+                    status: OnboardingState["status"];
+                    selectedRole: UserRole | null;
+                    selectedPlan: any;
+                    stripePaymentInfo: any;
+                    fromInvitation: FromInvitation | undefined;
+                    recruiterProfile: Record<string, any>;
+                    companyInfo: Record<string, any>;
+                } = {
                     currentStep: data.onboarding_step || 1,
                     status: data.onboarding_status || "pending",
-                    selectedRole: null as UserRole | null,
+                    selectedRole: null,
                     selectedPlan: null,
                     stripePaymentInfo: null,
+                    fromInvitation: undefined,
                     recruiterProfile: {},
                     companyInfo: {},
                 };
@@ -127,6 +139,24 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     Object.keys(data.onboarding_metadata).length > 0
                 ) {
                     const metadata = data.onboarding_metadata;
+
+                    // Check if user came from a recruiter invitation
+                    const fromInvitation = metadata.from_invitation as
+                        | FromInvitation
+                        | undefined;
+
+                    // Pre-fill company name from invitation hint if available
+                    let companyInfo = metadata.company_info || {};
+                    if (
+                        fromInvitation?.company_name_hint &&
+                        !companyInfo.name
+                    ) {
+                        companyInfo = {
+                            ...companyInfo,
+                            name: fromInvitation.company_name_hint,
+                        };
+                    }
+
                     loadedState = {
                         currentStep:
                             metadata.current_step || data.onboarding_step || 1,
@@ -139,8 +169,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         selectedRole: (metadata.user_type as UserRole) || null,
                         selectedPlan: metadata.selected_plan || null,
                         stripePaymentInfo: metadata.stripe_payment_info || null,
+                        fromInvitation: fromInvitation,
                         recruiterProfile: metadata.personal_info || {},
-                        companyInfo: metadata.company_info || {},
+                        companyInfo: companyInfo,
                     };
                 }
 
@@ -207,6 +238,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         : undefined,
                 selected_plan: state.selectedPlan,
                 stripe_payment_info: state.stripePaymentInfo,
+
+                // Preserve invitation reference if present
+                from_invitation: state.fromInvitation,
 
                 // Completion tracking
                 personal_info_completed:
@@ -472,6 +506,25 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             invoice_delivery_method: "email",
                         },
                     );
+
+                    // If user came from a recruiter invitation, complete the relationship
+                    if (state.fromInvitation?.id) {
+                        try {
+                            await client.post(
+                                "/company-invitations/complete-relationship",
+                                {
+                                    invitation_id: state.fromInvitation.id,
+                                    company_id: company.id,
+                                },
+                            );
+                        } catch (relError) {
+                            // Non-blocking - company is created, relationship can be fixed later
+                            console.error(
+                                "Failed to complete recruiter relationship:",
+                                relError,
+                            );
+                        }
+                    }
                 } else {
                     throw new Error("Invalid role");
                 }
