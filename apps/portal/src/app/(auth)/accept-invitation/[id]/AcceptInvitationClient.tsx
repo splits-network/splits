@@ -125,9 +125,9 @@ export default function AcceptInvitationClient({
                     const status = err.response.status;
                     const message = err.response.data?.message || err.message;
 
-                    if (status === 404 || message?.includes('not found')) {
+                    if (status === 404 || message?.includes("not found")) {
                         errorMessage = "invitation_not_found";
-                    } else if (status === 403 || message?.includes('access')) {
+                    } else if (status === 403 || message?.includes("access")) {
                         errorMessage = "no_access";
                     } else if (status === 401) {
                         errorMessage = "authentication_required";
@@ -173,7 +173,9 @@ export default function AcceptInvitationClient({
 
             // Backend has set onboarding_status: 'completed' and created membership with roles
             // Refresh the UserProfileContext to get the updated profile with roles
-            console.log("[AcceptInvitation] Refreshing user profile to load new roles...");
+            console.log(
+                "[AcceptInvitation] Refreshing user profile to load new roles...",
+            );
             await refreshProfile();
             console.log("[AcceptInvitation] Profile refreshed");
 
@@ -230,7 +232,7 @@ export default function AcceptInvitationClient({
                     <div className="card-body text-center">
                         <div className="flex justify-center mb-4">
                             <div className="rounded-full bg-success/10 p-6">
-                                <i className="fa-duotone fa-solid fa-check-circle text-6xl text-success"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-6xl text-success"></i>
                             </div>
                         </div>
 
@@ -245,8 +247,7 @@ export default function AcceptInvitationClient({
                         <p className="text-base-content/70 mb-4">
                             You've successfully joined as a{" "}
                             <strong>
-                                {roleLabels[acceptedRole || ""] ||
-                                    acceptedRole}
+                                {roleLabels[acceptedRole || ""] || acceptedRole}
                             </strong>
                             .
                         </p>
@@ -263,40 +264,71 @@ export default function AcceptInvitationClient({
 
     if (error) {
         // Define specific error scenarios with helpful messaging
-        const errorScenarios: Record<string, {
-            icon: string;
-            iconColor: string;
-            title: string;
-            message: string;
-            actions: Array<{ label: string; onClick: () => void; variant?: string }>;
-        }> = {
+        const errorScenarios: Record<
+            string,
+            {
+                icon: string;
+                iconColor: string;
+                title: string;
+                message: string;
+                actions: Array<{
+                    label: string;
+                    onClick: () => void;
+                    variant?: string;
+                }>;
+            }
+        > = {
             invitation_not_found: {
                 icon: "fa-envelope-circle-check",
                 iconColor: "text-warning",
                 title: "Invitation Not Found",
-                message: "This invitation link appears to be invalid or may have been removed. This can happen if the invitation was cancelled or if the link was mistyped.",
+                message:
+                    "This invitation link appears to be invalid or may have been removed. This can happen if the invitation was cancelled or if the link was mistyped.",
                 actions: [
-                    { label: "Go to Dashboard", onClick: () => router.push("/portal/dashboard") },
-                    { label: "Contact Support", onClick: () => router.push("/support"), variant: "outline" },
+                    {
+                        label: "Go to Dashboard",
+                        onClick: () => router.push("/portal/dashboard"),
+                    },
+                    {
+                        label: "Contact Support",
+                        onClick: () => router.push("/support"),
+                        variant: "outline",
+                    },
                 ],
             },
             no_access: {
                 icon: "fa-shield-exclamation",
                 iconColor: "text-error",
                 title: "Access Denied",
-                message: "You don't have permission to view this invitation. This invitation may be for a different email address.",
+                message:
+                    "You don't have permission to view this invitation. This invitation may be for a different email address.",
                 actions: [
-                    { label: "Go to Dashboard", onClick: () => router.push("/portal/dashboard") },
-                    { label: "Sign Out & Try Another Account", onClick: () => router.push("/sign-out"), variant: "outline" },
+                    {
+                        label: "Go to Dashboard",
+                        onClick: () => router.push("/portal/dashboard"),
+                    },
+                    {
+                        label: "Sign Out & Try Another Account",
+                        onClick: () => router.push("/sign-out"),
+                        variant: "outline",
+                    },
                 ],
             },
             authentication_required: {
                 icon: "fa-user-lock",
                 iconColor: "text-warning",
                 title: "Authentication Required",
-                message: "Your session has expired. Please sign in again to view this invitation.",
+                message:
+                    "Your session has expired. Please sign in again to view this invitation.",
                 actions: [
-                    { label: "Sign In", onClick: () => router.push(`/sign-in?redirect_url=${encodeURIComponent(`/accept-invitation/${invitationId}`)}`), variant: "primary" },
+                    {
+                        label: "Sign In",
+                        onClick: () =>
+                            router.push(
+                                `/sign-in?redirect_url=${encodeURIComponent(`/accept-invitation/${invitationId}`)}`,
+                            ),
+                        variant: "primary",
+                    },
                 ],
             },
         };
@@ -305,11 +337,25 @@ export default function AcceptInvitationClient({
             icon: "fa-circle-exclamation",
             iconColor: "text-error",
             title: "Something Went Wrong",
-            message: error || "We encountered an unexpected error while loading your invitation. Please try again or contact support if the problem persists.",
+            message:
+                error ||
+                "We encountered an unexpected error while loading your invitation. Please try again or contact support if the problem persists.",
             actions: [
-                { label: "Try Again", onClick: () => window.location.reload(), variant: "primary" },
-                { label: "Go to Dashboard", onClick: () => router.push("/portal/dashboard"), variant: "outline" },
-                { label: "Contact Support", onClick: () => router.push("/support"), variant: "ghost" },
+                {
+                    label: "Try Again",
+                    onClick: () => window.location.reload(),
+                    variant: "primary",
+                },
+                {
+                    label: "Go to Dashboard",
+                    onClick: () => router.push("/portal/dashboard"),
+                    variant: "outline",
+                },
+                {
+                    label: "Contact Support",
+                    onClick: () => router.push("/support"),
+                    variant: "ghost",
+                },
             ],
         };
 
@@ -318,7 +364,9 @@ export default function AcceptInvitationClient({
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <div className="flex justify-center mb-4">
-                            <i className={`fa-duotone fa-regular ${scenario.icon} text-6xl ${scenario.iconColor}`}></i>
+                            <i
+                                className={`fa-duotone fa-regular ${scenario.icon} text-6xl ${scenario.iconColor}`}
+                            ></i>
                         </div>
 
                         <h1 className="card-title text-2xl justify-center mb-2">
@@ -329,14 +377,16 @@ export default function AcceptInvitationClient({
                             {scenario.message}
                         </p>
 
-                        <div className="divider text-xs text-base-content/40">What would you like to do?</div>
+                        <div className="divider text-xs text-base-content/40">
+                            What would you like to do?
+                        </div>
 
                         <div className="flex flex-col gap-2 mt-4">
                             {scenario.actions.map((action, index) => (
                                 <button
                                     key={index}
                                     onClick={action.onClick}
-                                    className={`btn ${action.variant ? `btn-${action.variant}` : 'btn-primary'} w-full`}
+                                    className={`btn ${action.variant ? `btn-${action.variant}` : "btn-primary"} w-full`}
                                 >
                                     {action.label}
                                 </button>
@@ -344,7 +394,8 @@ export default function AcceptInvitationClient({
                         </div>
 
                         <p className="text-xs text-base-content/50 mt-6">
-                            Invitation ID: <code className="text-xs">{invitationId}</code>
+                            Invitation ID:{" "}
+                            <code className="text-xs">{invitationId}</code>
                         </p>
                     </div>
                 </div>
@@ -366,16 +417,21 @@ export default function AcceptInvitationClient({
                         </h1>
 
                         <p className="text-base-content/70 mb-6 leading-relaxed">
-                            This invitation link appears to be invalid or may have been removed. This can happen if:
+                            This invitation link appears to be invalid or may
+                            have been removed. This can happen if:
                         </p>
 
                         <ul className="text-left text-sm text-base-content/70 space-y-2 mb-6 list-disc list-inside">
-                            <li>The invitation was cancelled by the organization</li>
+                            <li>
+                                The invitation was cancelled by the organization
+                            </li>
                             <li>The link was mistyped or incomplete</li>
                             <li>The invitation already expired</li>
                         </ul>
 
-                        <div className="divider text-xs text-base-content/40">What would you like to do?</div>
+                        <div className="divider text-xs text-base-content/40">
+                            What would you like to do?
+                        </div>
 
                         <div className="flex flex-col gap-2 mt-4">
                             <button
@@ -393,7 +449,8 @@ export default function AcceptInvitationClient({
                         </div>
 
                         <p className="text-xs text-base-content/50 mt-6">
-                            Invitation ID: <code className="text-xs">{invitationId}</code>
+                            Invitation ID:{" "}
+                            <code className="text-xs">{invitationId}</code>
                         </p>
                     </div>
                 </div>
@@ -405,28 +462,38 @@ export default function AcceptInvitationClient({
     if (invitation.status !== "pending") {
         const statusScenarios: Record<
             string,
-            { icon: string; iconColor: string; title: string; message: string; details?: string }
+            {
+                icon: string;
+                iconColor: string;
+                title: string;
+                message: string;
+                details?: string;
+            }
         > = {
             accepted: {
                 icon: "fa-circle-check",
                 iconColor: "text-success",
                 title: "Already Accepted",
-                message: "This invitation has already been accepted. You're all set!",
-                details: "If you need to access this organization, go to your dashboard to see all your organizations.",
+                message:
+                    "This invitation has already been accepted. You're all set!",
+                details:
+                    "If you need to access this organization, go to your dashboard to see all your organizations.",
             },
             expired: {
                 icon: "fa-clock-rotate-left",
                 iconColor: "text-warning",
                 title: "Invitation Expired",
                 message: "This invitation expired and is no longer valid.",
-                details: "Contact the organization administrator to request a new invitation link.",
+                details:
+                    "Contact the organization administrator to request a new invitation link.",
             },
             revoked: {
                 icon: "fa-ban",
                 iconColor: "text-error",
                 title: "Invitation Revoked",
                 message: "This invitation was cancelled by the organization.",
-                details: "If you believe this was a mistake, please contact the organization administrator.",
+                details:
+                    "If you believe this was a mistake, please contact the organization administrator.",
             },
         };
 
@@ -457,7 +524,9 @@ export default function AcceptInvitationClient({
                             </p>
                         )}
 
-                        <div className="divider text-xs text-base-content/40">What would you like to do?</div>
+                        <div className="divider text-xs text-base-content/40">
+                            What would you like to do?
+                        </div>
 
                         <div className="flex flex-col gap-2 mt-4">
                             <button
@@ -466,7 +535,8 @@ export default function AcceptInvitationClient({
                             >
                                 Go to Dashboard
                             </button>
-                            {invitation.status === "expired" || invitation.status === "revoked" ? (
+                            {invitation.status === "expired" ||
+                            invitation.status === "revoked" ? (
                                 <button
                                     onClick={() => router.push("/support")}
                                     className="btn btn-outline w-full"
@@ -477,7 +547,10 @@ export default function AcceptInvitationClient({
                         </div>
 
                         <p className="text-xs text-base-content/50 mt-6">
-                            Organization: {organization?.display_name || organization?.name || "Unknown"}
+                            Organization:{" "}
+                            {organization?.display_name ||
+                                organization?.name ||
+                                "Unknown"}
                         </p>
                     </div>
                 </div>
@@ -502,18 +575,25 @@ export default function AcceptInvitationClient({
 
                         <p className="text-base-content/70 mb-3 leading-relaxed">
                             This invitation expired on{" "}
-                            <strong>{expiresAt.toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                            })}</strong>.
+                            <strong>
+                                {expiresAt.toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                })}
+                            </strong>
+                            .
                         </p>
 
                         <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
-                            Invitations have a limited validity period for security reasons. Contact the organization administrator to request a new invitation link.
+                            Invitations have a limited validity period for
+                            security reasons. Contact the organization
+                            administrator to request a new invitation link.
                         </p>
 
-                        <div className="divider text-xs text-base-content/40">What would you like to do?</div>
+                        <div className="divider text-xs text-base-content/40">
+                            What would you like to do?
+                        </div>
 
                         <div className="flex flex-col gap-2 mt-4">
                             <button
@@ -531,7 +611,10 @@ export default function AcceptInvitationClient({
                         </div>
 
                         <p className="text-xs text-base-content/50 mt-6">
-                            Organization: {organization?.display_name || organization?.name || "Unknown"}
+                            Organization:{" "}
+                            {organization?.display_name ||
+                                organization?.name ||
+                                "Unknown"}
                         </p>
                     </div>
                 </div>
