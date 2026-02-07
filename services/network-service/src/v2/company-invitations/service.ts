@@ -213,10 +213,22 @@ export class CompanyInvitationServiceV2 {
             throw new Error('Invitation not found');
         }
 
-        // Validate invitation status
-        const lookupResult = this.buildLookupResult(invitation as CompanyPlatformInvitation);
-        if (!lookupResult.is_valid) {
-            throw new Error(lookupResult.error_message || 'Invalid invitation');
+        // Validate invitation status inline (buildLookupResult requires recruiter join)
+        const now = new Date();
+        const expiresAt = new Date(invitation.expires_at);
+        const isExpired = now > expiresAt;
+
+        if (invitation.status === 'accepted') {
+            throw new Error('This invitation has already been used');
+        }
+        if (invitation.status === 'revoked') {
+            throw new Error('This invitation has been revoked');
+        }
+        if (isExpired || invitation.status === 'expired') {
+            throw new Error('This invitation has expired');
+        }
+        if (invitation.status !== 'pending') {
+            throw new Error('Invalid invitation');
         }
 
         // Check if user already has a company
@@ -243,12 +255,12 @@ export class CompanyInvitationServiceV2 {
             throw new Error('User not found');
         }
 
-        // Update user's onboarding state to force company flow at step 3
-        // Step 3 is the company info form (skipping plan selection since companies don't have subscriptions)
+        // Update user's onboarding state to force company_admin flow at step 2
+        // Step 2 is the company_admin info form (skipping plan selection since companies don't have subscriptions)
         const currentMetadata = (user.onboarding_metadata as Record<string, unknown>) || {};
         const updatedMetadata = {
             ...currentMetadata,
-            user_type: 'company',
+            user_type: 'company_admin',
             from_invitation: {
                 id: invitationId,
                 recruiter_id: invitation.recruiter_id,
@@ -260,7 +272,7 @@ export class CompanyInvitationServiceV2 {
             .from('users')
             .update({
                 onboarding_status: 'in_progress',
-                onboarding_step: 3,
+                onboarding_step: 2,
                 onboarding_metadata: updatedMetadata,
                 updated_at: new Date().toISOString()
             })

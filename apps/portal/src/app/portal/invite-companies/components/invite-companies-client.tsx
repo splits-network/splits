@@ -63,7 +63,7 @@ export function InviteCompaniesClient() {
         () => ({
             status: "",
         }),
-        []
+        [],
     );
 
     const {
@@ -78,12 +78,12 @@ export function InviteCompaniesClient() {
         setFilter,
         clearFilters,
         page,
-        setPage,
+        setLimit,
+        goToPage,
         refresh,
     } = useStandardList<CompanyInvitation, InvitationFilters>({
         endpoint: "/company-invitations",
         defaultFilters,
-        pageSize: 10,
     });
 
     const handleCreateSuccess = useCallback(() => {
@@ -100,7 +100,7 @@ export function InviteCompaniesClient() {
                 toast.error("Failed to copy code");
             }
         },
-        [toast]
+        [toast],
     );
 
     const handleCopyLink = useCallback(
@@ -115,7 +115,7 @@ export function InviteCompaniesClient() {
                 toast.error("Failed to copy link");
             }
         },
-        [toast]
+        [toast],
     );
 
     const handleShare = useCallback(
@@ -146,7 +146,7 @@ export function InviteCompaniesClient() {
                 }
             }
         },
-        [toast]
+        [toast],
     );
 
     const handleResend = useCallback(
@@ -154,18 +154,21 @@ export function InviteCompaniesClient() {
             setResendingId(id);
             try {
                 const token = await getToken();
+                if (!token) return;
+
                 const client = createAuthenticatedClient(token);
                 await client.post(`/company-invitations/${id}/resend`);
                 toast.success("Invitation email resent");
             } catch (e: any) {
                 toast.error(
-                    e?.response?.data?.error?.message || "Failed to resend invitation"
+                    e?.response?.data?.error?.message ||
+                        "Failed to resend invitation",
                 );
             } finally {
                 setResendingId(null);
             }
         },
-        [getToken, toast]
+        [getToken, toast],
     );
 
     const handleRevoke = useCallback(
@@ -173,19 +176,22 @@ export function InviteCompaniesClient() {
             setRevokingId(id);
             try {
                 const token = await getToken();
+                if (!token) return;
+
                 const client = createAuthenticatedClient(token);
                 await client.patch(`/company-invitations/${id}/revoke`);
                 toast.success("Invitation revoked");
                 refresh();
             } catch (e: any) {
                 toast.error(
-                    e?.response?.data?.error?.message || "Failed to revoke invitation"
+                    e?.response?.data?.error?.message ||
+                        "Failed to revoke invitation",
                 );
             } finally {
                 setRevokingId(null);
             }
         },
-        [getToken, toast, refresh]
+        [getToken, toast, refresh],
     );
 
     const getStatusBadge = (status: string) => {
@@ -262,7 +268,7 @@ export function InviteCompaniesClient() {
             {invitations.length === 0 ? (
                 <EmptyState
                     title="No invitations yet"
-                    message="Create your first invitation to start bringing companies to Splits Network"
+                    description="Create your first invitation to start bringing companies to Splits Network"
                     action={{
                         label: "Create Invitation",
                         onClick: () => setShowCreateModal(true),
@@ -312,15 +318,29 @@ export function InviteCompaniesClient() {
                                                     {invitation.invite_code}
                                                 </code>
                                             </td>
-                                            <td>{getStatusBadge(invitation.status)}</td>
-                                            <td>{formatDate(invitation.created_at)}</td>
-                                            <td>{formatDate(invitation.expires_at)}</td>
+                                            <td>
+                                                {getStatusBadge(
+                                                    invitation.status,
+                                                )}
+                                            </td>
+                                            <td>
+                                                {formatDate(
+                                                    invitation.created_at,
+                                                )}
+                                            </td>
+                                            <td>
+                                                {formatDate(
+                                                    invitation.expires_at,
+                                                )}
+                                            </td>
                                             <td className="text-right">
                                                 <div className="flex gap-1 justify-end">
                                                     <button
                                                         className="btn btn-ghost btn-xs"
                                                         onClick={() =>
-                                                            handleCopyCode(invitation.invite_code)
+                                                            handleCopyCode(
+                                                                invitation.invite_code,
+                                                            )
                                                         }
                                                         title="Copy code"
                                                     >
@@ -328,47 +348,67 @@ export function InviteCompaniesClient() {
                                                     </button>
                                                     <button
                                                         className="btn btn-ghost btn-xs"
-                                                        onClick={() => handleCopyLink(invitation)}
+                                                        onClick={() =>
+                                                            handleCopyLink(
+                                                                invitation,
+                                                            )
+                                                        }
                                                         title="Copy link"
                                                     >
                                                         <i className="fa-duotone fa-regular fa-link"></i>
                                                     </button>
                                                     <button
                                                         className="btn btn-ghost btn-xs"
-                                                        onClick={() => handleShare(invitation)}
+                                                        onClick={() =>
+                                                            handleShare(
+                                                                invitation,
+                                                            )
+                                                        }
                                                         title="Share"
                                                     >
                                                         <i className="fa-duotone fa-regular fa-share"></i>
                                                     </button>
-                                                    {invitation.status === "pending" &&
+                                                    {invitation.status ===
+                                                        "pending" &&
                                                         invitation.invited_email && (
                                                             <button
                                                                 className="btn btn-ghost btn-xs"
                                                                 onClick={() =>
-                                                                    handleResend(invitation.id)
+                                                                    handleResend(
+                                                                        invitation.id,
+                                                                    )
                                                                 }
                                                                 disabled={
-                                                                    resendingId === invitation.id
+                                                                    resendingId ===
+                                                                    invitation.id
                                                                 }
                                                                 title="Resend email"
                                                             >
-                                                                {resendingId === invitation.id ? (
+                                                                {resendingId ===
+                                                                invitation.id ? (
                                                                     <span className="loading loading-spinner loading-xs"></span>
                                                                 ) : (
                                                                     <i className="fa-duotone fa-regular fa-envelope"></i>
                                                                 )}
                                                             </button>
                                                         )}
-                                                    {invitation.status === "pending" && (
+                                                    {invitation.status ===
+                                                        "pending" && (
                                                         <button
                                                             className="btn btn-ghost btn-xs text-error"
                                                             onClick={() =>
-                                                                handleRevoke(invitation.id)
+                                                                handleRevoke(
+                                                                    invitation.id,
+                                                                )
                                                             }
-                                                            disabled={revokingId === invitation.id}
+                                                            disabled={
+                                                                revokingId ===
+                                                                invitation.id
+                                                            }
                                                             title="Revoke"
                                                         >
-                                                            {revokingId === invitation.id ? (
+                                                            {revokingId ===
+                                                            invitation.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
                                                                 <i className="fa-duotone fa-regular fa-ban"></i>
@@ -390,7 +430,9 @@ export function InviteCompaniesClient() {
                             <InvitationCard
                                 key={invitation.id}
                                 invitation={invitation}
-                                onCopyCode={() => handleCopyCode(invitation.invite_code)}
+                                onCopyCode={() =>
+                                    handleCopyCode(invitation.invite_code)
+                                }
                                 onCopyLink={() => handleCopyLink(invitation)}
                                 onShare={() => handleShare(invitation)}
                                 onResend={
@@ -415,7 +457,7 @@ export function InviteCompaniesClient() {
                         <PaginationControls
                             page={page}
                             totalPages={pagination.total_pages}
-                            onPageChange={setPage}
+                            onPageChange={goToPage}
                         />
                     )}
                 </>

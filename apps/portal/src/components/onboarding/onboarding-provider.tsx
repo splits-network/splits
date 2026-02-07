@@ -115,7 +115,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 // Load onboarding state from metadata if available
                 let loadedState: {
                     currentStep: number;
-                    status: string;
+                    status: OnboardingState["status"];
                     selectedRole: UserRole | null;
                     selectedPlan: any;
                     stripePaymentInfo: any;
@@ -141,12 +141,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     const metadata = data.onboarding_metadata;
 
                     // Check if user came from a recruiter invitation
-                    const fromInvitation = metadata.from_invitation as FromInvitation | undefined;
+                    const fromInvitation = metadata.from_invitation as
+                        | FromInvitation
+                        | undefined;
 
                     // Pre-fill company name from invitation hint if available
                     let companyInfo = metadata.company_info || {};
-                    if (fromInvitation?.company_name_hint && !companyInfo.name) {
-                        companyInfo = { ...companyInfo, name: fromInvitation.company_name_hint };
+                    if (
+                        fromInvitation?.company_name_hint &&
+                        !companyInfo.name
+                    ) {
+                        companyInfo = {
+                            ...companyInfo,
+                            name: fromInvitation.company_name_hint,
+                        };
                     }
 
                     loadedState = {
@@ -502,13 +510,19 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     // If user came from a recruiter invitation, complete the relationship
                     if (state.fromInvitation?.id) {
                         try {
-                            await client.post("/company-invitations/complete-relationship", {
-                                invitation_id: state.fromInvitation.id,
-                                company_id: company.id,
-                            });
+                            await client.post(
+                                "/company-invitations/complete-relationship",
+                                {
+                                    invitation_id: state.fromInvitation.id,
+                                    company_id: company.id,
+                                },
+                            );
                         } catch (relError) {
                             // Non-blocking - company is created, relationship can be fixed later
-                            console.error("Failed to complete recruiter relationship:", relError);
+                            console.error(
+                                "Failed to complete recruiter relationship:",
+                                relError,
+                            );
                         }
                     }
                 } else {

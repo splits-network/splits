@@ -33,6 +33,7 @@ export function CreateInvitationModal({
 
         try {
             const token = await getToken();
+            if (!token) return;
             const client = createAuthenticatedClient(token);
             const { data } = await client.post("/company-invitations", {
                 invited_email: invitedEmail || undefined,
@@ -45,7 +46,8 @@ export function CreateInvitationModal({
             toast.success("Invitation created successfully");
         } catch (e: any) {
             toast.error(
-                e?.response?.data?.error?.message || "Failed to create invitation"
+                e?.response?.data?.error?.message ||
+                    "Failed to create invitation",
             );
         } finally {
             setIsSubmitting(false);
@@ -127,8 +129,9 @@ export function CreateInvitationModal({
                         </h3>
 
                         <p className="text-sm text-base-content/70 mb-6">
-                            Create an invitation to bring a new company to Splits Network.
-                            You can send via email, share a link, or give them a code.
+                            Create an invitation to bring a new company to
+                            Splits Network. You can send via email, share a
+                            link, or give them a code.
                         </p>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +144,9 @@ export function CreateInvitationModal({
                                     className="input w-full"
                                     placeholder="e.g., Acme Corp"
                                     value={companyNameHint}
-                                    onChange={(e) => setCompanyNameHint(e.target.value)}
+                                    onChange={(e) =>
+                                        setCompanyNameHint(e.target.value)
+                                    }
                                     maxLength={255}
                                 />
                                 <p className="fieldset-label text-base-content/60">
@@ -158,7 +163,9 @@ export function CreateInvitationModal({
                                     className="input w-full"
                                     placeholder="e.g., hr@acmecorp.com"
                                     value={invitedEmail}
-                                    onChange={(e) => setInvitedEmail(e.target.value)}
+                                    onChange={(e) =>
+                                        setInvitedEmail(e.target.value)
+                                    }
                                 />
                                 <p className="fieldset-label text-base-content/60">
                                     We'll send them an invitation email
@@ -173,7 +180,9 @@ export function CreateInvitationModal({
                                     className="textarea w-full h-24"
                                     placeholder="Add a personal note to your invitation..."
                                     value={personalMessage}
-                                    onChange={(e) => setPersonalMessage(e.target.value)}
+                                    onChange={(e) =>
+                                        setPersonalMessage(e.target.value)
+                                    }
                                     maxLength={1000}
                                 />
                                 <p className="fieldset-label text-base-content/60">
@@ -187,7 +196,9 @@ export function CreateInvitationModal({
                                         type="checkbox"
                                         className="checkbox checkbox-primary checkbox-sm"
                                         checked={sendEmail}
-                                        onChange={(e) => setSendEmail(e.target.checked)}
+                                        onChange={(e) =>
+                                            setSendEmail(e.target.checked)
+                                        }
                                     />
                                     <span className="text-sm">
                                         Send invitation email now
@@ -226,8 +237,8 @@ export function CreateInvitationModal({
                         </h3>
 
                         <p className="text-sm text-base-content/70 mb-6">
-                            Share this invitation with the company. They can join using the
-                            link or code below.
+                            Share this invitation with the company. They can
+                            join using the link or code below.
                         </p>
 
                         {/* Invite Code */}
@@ -300,13 +311,17 @@ export function CreateInvitationModal({
                             <div className="alert alert-success mb-4">
                                 <i className="fa-duotone fa-regular fa-envelope-circle-check"></i>
                                 <span>
-                                    Email sent to {createdInvitation.invited_email}
+                                    Email sent to{" "}
+                                    {createdInvitation.invited_email}
                                 </span>
                             </div>
                         )}
 
                         <div className="modal-action">
-                            <button className="btn btn-primary" onClick={handleDone}>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleDone}
+                            >
                                 Done
                             </button>
                         </div>
