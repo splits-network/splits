@@ -1,46 +1,86 @@
 "use client";
 
-import InvitationsPageClient from "./components/invitations-client";
-import { BrowseInvitationsClient } from "./components/browse/browse-invitations-client";
+import { useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { useViewMode } from "@/hooks/use-view-mode";
+import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
 import { LoadingState } from "@splits-network/shared-ui";
+import { FilterProvider, useFilter } from "./contexts/filter-context";
+import HeaderFilters from "./components/shared/header-filters";
+import Stats from "./components/shared/stats";
+import BrowseView from "./components/browse/view";
+import TableView from "./components/table/view";
+import GridView from "./components/grid/view";
 
-export default function InvitationsPage() {
-    const { viewMode, setViewMode, isLoaded } = useViewMode(
-        "invitationsViewMode",
+export default function InvitationsNewPage() {
+    return (
+        <FilterProvider>
+            <InvitationsNewPageContent />
+        </FilterProvider>
+    );
+}
+
+function InvitationsNewPageContent() {
+    const { viewMode, setViewMode, isLoaded } =
+        useViewMode("invitationsNewViewMode");
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const {
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        loading,
+        refresh,
+        showStats,
+        setShowStats,
+    } = useFilter();
+
+    const handleViewChange = useCallback(
+        (newView: ViewMode) => {
+            router.replace(pathname);
+            setViewMode(newView);
+        },
+        [router, pathname, setViewMode],
     );
 
-    // Prevent hydration mismatch by not rendering until loaded
     if (!isLoaded) {
         return <LoadingState message="Loading invitations..." />;
     }
 
-    const getSubtitle = () => {
-        switch (viewMode) {
-            case "grid":
-                return "Track and manage your candidate invitations";
-            case "table":
-                return "Track and manage your candidate invitations";
-            case "browse":
-                return "Browse and manage candidate invitations";
-            default:
-                return "Track and manage your candidate invitations";
-        }
-    };
-
     return (
         <>
-            <PageTitle title="Invitations" subtitle={getSubtitle()}>
-                <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />
+            <PageTitle
+                title="Invitations"
+                subtitle="Track and manage your candidate invitations"
+            >
+                <HeaderFilters
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    clearSearch={clearSearch}
+                    filters={filters}
+                    setFilter={setFilter}
+                    loading={loading}
+                    refresh={refresh}
+                    showStats={showStats}
+                    setShowStats={setShowStats}
+                />
+                <ViewToggle
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
+                />
             </PageTitle>
 
-            {viewMode === "browse" ? (
-                <BrowseInvitationsClient />
-            ) : (
-                <InvitationsPageClient view={viewMode} />
-            )}
+            <div className="space-y-6">
+                {showStats && <Stats />}
+
+                {viewMode === "browse" && <BrowseView />}
+                {viewMode === "table" && <TableView />}
+                {viewMode === "grid" && <GridView />}
+            </div>
         </>
     );
 }

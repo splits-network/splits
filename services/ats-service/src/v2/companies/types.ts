@@ -10,6 +10,8 @@ export interface CompanyFilters extends PaginationParams, SortParams {
     organization_id?: string;
     identity_organization_id?: string;
     org_id?: string;
+    /** When true, skips organization-based filtering to show all companies (marketplace browse) */
+    browse_all?: string;
 }
 
 export interface CompanyUpdate {

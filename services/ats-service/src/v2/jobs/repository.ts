@@ -155,8 +155,9 @@ export class JobRepository {
         if (filters.employment_type) {
             query = query.eq('employment_type', filters.employment_type);
         }
-        if (filters.company_id) {
-            query = query.eq('company_id', filters.company_id);
+        const companyIdFilter = filters.company_id || params.company_id;
+        if (companyIdFilter) {
+            query = query.eq('company_id', companyIdFilter);
         }
 
         // Apply sorting - relevance-based when searching, otherwise by sort_by parameter

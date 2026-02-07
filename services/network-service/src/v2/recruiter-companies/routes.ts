@@ -15,7 +15,8 @@ import {
     InviteRecruiterRequest,
     AcceptInvitationRequest,
     TerminateRelationshipRequest,
-    RecruiterCompanyUpdate
+    RecruiterCompanyUpdate,
+    RequestConnectionRequest
 } from './types';
 
 const listSchema = {
@@ -88,7 +89,7 @@ export async function recruiterCompanyRoutes(
     const service = new RecruiterCompanyServiceV2(repository, supabase, eventPublisher);
 
     // LIST relationships
-    app.get('/v2/recruiter-companies', {
+    app.get('/api/v2/recruiter-companies', {
         schema: listSchema
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
@@ -99,7 +100,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // GET relationship by ID
-    app.get('/v2/recruiter-companies/:id', {
+    app.get('/api/v2/recruiter-companies/:id', {
         schema: {
             params: {
                 type: 'object',
@@ -124,8 +125,50 @@ export async function recruiterCompanyRoutes(
         }
     });
 
+    // CREATE - Recruiter requests connection with a company
+    app.post('/api/v2/recruiter-companies/request-connection', {
+        schema: {
+            body: {
+                type: 'object',
+                required: ['company_id'],
+                properties: {
+                    company_id: { type: 'string', format: 'uuid' },
+                    message: { type: 'string', maxLength: 500 },
+                    relationship_type: { type: 'string', enum: ['sourcer', 'recruiter'], default: 'recruiter' }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+        const connectionRequest = request.body as RequestConnectionRequest;
+
+        try {
+            const relationship = await service.requestConnection(connectionRequest, clerkUserId);
+            return reply.code(201).send({ data: relationship });
+        } catch (error) {
+            if (error instanceof Error) {
+                if (error.message.includes('not found')) {
+                    return reply.code(404).send({
+                        error: { code: 'COMPANY_NOT_FOUND', message: error.message }
+                    });
+                }
+                if (error.message.includes('already exists')) {
+                    return reply.code(409).send({
+                        error: { code: 'RELATIONSHIP_EXISTS', message: error.message }
+                    });
+                }
+                if (error.message.includes('Only recruiters')) {
+                    return reply.code(403).send({
+                        error: { code: 'FORBIDDEN', message: error.message }
+                    });
+                }
+            }
+            throw error;
+        }
+    });
+
     // CREATE - Invite recruiter to work with company
-    app.post('/v2/recruiter-companies/invite', {
+    app.post('/api/v2/recruiter-companies/invite', {
         schema: inviteSchema
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
@@ -152,7 +195,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // PATCH - Respond to invitation
-    app.patch('/v2/recruiter-companies/:id/respond', {
+    app.patch('/api/v2/recruiter-companies/:id/respond', {
         schema: {
             params: {
                 type: 'object',
@@ -208,7 +251,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // PATCH - Update relationship
-    app.patch('/v2/recruiter-companies/:id', {
+    app.patch('/api/v2/recruiter-companies/:id', {
         schema: {
             params: {
                 type: 'object',
@@ -236,7 +279,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // PATCH - Terminate relationship
-    app.patch('/v2/recruiter-companies/:id/terminate', {
+    app.patch('/api/v2/recruiter-companies/:id/terminate', {
         schema: {
             params: {
                 type: 'object',
@@ -264,7 +307,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // DELETE relationship
-    app.delete('/v2/recruiter-companies/:id', {
+    app.delete('/api/v2/recruiter-companies/:id', {
         schema: {
             params: {
                 type: 'object',
@@ -290,7 +333,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // GET companies recruiter can manage
-    app.get('/v2/recruiter-companies/manageable-companies', {
+    app.get('/api/v2/recruiter-companies/manageable-companies', {
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
 
@@ -322,7 +365,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // GET companies recruiter can manage with details (id, name)
-    app.get('/v2/recruiter-companies/manageable-companies-with-details', {
+    app.get('/api/v2/recruiter-companies/manageable-companies-with-details', {
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
 
@@ -354,7 +397,7 @@ export async function recruiterCompanyRoutes(
     });
 
     // GET check if recruiter can manage company jobs
-    app.get('/v2/recruiter-companies/can-manage/:companyId', {
+    app.get('/api/v2/recruiter-companies/can-manage/:companyId', {
         schema: {
             params: {
                 type: 'object',

@@ -72,7 +72,7 @@ export function HeaderFilters({
                         className="btn btn-ghost btn-xs btn-circle"
                         aria-label="Clear search"
                     >
-                        <i className="fa-solid fa-xmark" />
+                        <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 )}
                 {loading && (

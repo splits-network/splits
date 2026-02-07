@@ -390,7 +390,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { id } = request.params as { id: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    `/v2/recruiter-companies/${id}`,
+                    `/api/v2/recruiter-companies/${id}`,
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
@@ -451,7 +451,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { companyId } = request.params as { companyId: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    `/v2/recruiter-companies/can-manage/${companyId}`,
+                    `/api/v2/recruiter-companies/can-manage/${companyId}`,
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
@@ -459,6 +459,26 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 return reply.send(data);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to check company management permission');
+            }
+        }
+    );
+
+    // REQUEST CONNECTION - Recruiter requests connection with a company
+    app.post(
+        '/api/v2/recruiter-companies/request-connection',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    '/api/v2/recruiter-companies/request-connection',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to request company connection');
             }
         }
     );
@@ -492,7 +512,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { id } = request.params as { id: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().patch(
-                    `/v2/recruiter-companies/${id}/respond`,
+                    `/api/v2/recruiter-companies/${id}/respond`,
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
@@ -513,7 +533,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { id } = request.params as { id: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().patch(
-                    `/v2/recruiter-companies/${id}`,
+                    `/api/v2/recruiter-companies/${id}`,
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
@@ -534,7 +554,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { id } = request.params as { id: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().patch(
-                    `/v2/recruiter-companies/${id}/terminate`,
+                    `/api/v2/recruiter-companies/${id}/terminate`,
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
@@ -555,7 +575,7 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
                 const { id } = request.params as { id: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().delete(
-                    `/v2/recruiter-companies/${id}`,
+                    `/api/v2/recruiter-companies/${id}`,
                     correlationId,
                     buildAuthHeaders(request)
                 );

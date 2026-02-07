@@ -15,7 +15,8 @@ import {
     RecruiterCompanyFilters,
     InviteRecruiterRequest,
     AcceptInvitationRequest,
-    TerminateRelationshipRequest
+    TerminateRelationshipRequest,
+    RequestConnectionRequest
 } from './types';
 
 export class RecruiterCompanyServiceV2 {
@@ -125,6 +126,61 @@ export class RecruiterCompanyServiceV2 {
             companyId: request.company_id,
             canManageJobs: request.can_manage_company_jobs || false,
             invitedBy: userContext.identityUserId,
+            message: request.message
+        });
+
+        return relationship;
+    }
+
+    /**
+     * Recruiter-initiated connection request to a company
+     */
+    async requestConnection(
+        request: RequestConnectionRequest,
+        clerkUserId: string
+    ): Promise<RecruiterCompany> {
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        if (!userContext.recruiterId) {
+            throw new Error('Only recruiters can request company connections');
+        }
+
+        // Validate company exists
+        const { data: company } = await this.repository['supabase']
+            .from('companies')
+            .select('id, name')
+            .eq('id', request.company_id)
+            .maybeSingle();
+
+        if (!company) {
+            throw new Error('Company not found');
+        }
+
+        // Check for existing active or pending relationship
+        const existingRelationship = await this.repository.hasPendingOrActiveRelationship(
+            userContext.recruiterId,
+            request.company_id
+        );
+
+        if (existingRelationship) {
+            throw new Error('An active or pending relationship already exists with this company');
+        }
+
+        // Create pending relationship via recruiter-specific method
+        const relationship = await this.repository.createConnectionRequest({
+            recruiter_id: userContext.recruiterId,
+            company_id: request.company_id,
+            relationship_type: request.relationship_type || 'recruiter',
+            invited_by: userContext.identityUserId || undefined
+        });
+
+        // Publish event
+        await this.eventPublisher?.publish('recruiter_company.connection_requested', {
+            relationshipId: relationship.id,
+            recruiterId: userContext.recruiterId,
+            companyId: request.company_id,
+            relationshipType: request.relationship_type || 'recruiter',
+            requestedBy: userContext.identityUserId,
             message: request.message
         });
 
