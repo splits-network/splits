@@ -69,6 +69,7 @@ export default function ThreadPanel({
         null,
     );
     const [jobTitle, setJobTitle] = useState<string | null>(null);
+    const [companyName, setCompanyName] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
     const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
@@ -112,6 +113,7 @@ export default function ThreadPanel({
     const fetchContextDetails = async (
         applicationId?: string | null,
         jobId?: string | null,
+        companyId?: string | null,
     ) => {
         const token = await getToken();
         if (!token) return;
@@ -121,12 +123,15 @@ export default function ThreadPanel({
             try {
                 const response: any = await client.get(
                     `/applications/${applicationId}`,
-                    { params: { include: "job" } },
+                    { params: { include: "job,company" } },
                 );
                 const application = response?.data;
                 if (application?.job?.title) {
                     setApplicationTitle(application.job.title);
                     setJobTitle(application.job.title);
+                }
+                if (application?.job?.company?.name) {
+                    setCompanyName(application.job.company.name);
                 }
             } catch {
                 setApplicationTitle(applicationId);
@@ -135,11 +140,26 @@ export default function ThreadPanel({
 
         if (jobId) {
             try {
-                const response: any = await client.get(`/jobs/${jobId}`);
+                const response: any = await client.get(`/jobs/${jobId}`, {
+                    params: { include: "company" },
+                });
                 const job = response?.data;
                 if (job?.title) setJobTitle(job.title);
+                if (job?.company?.name) setCompanyName(job.company.name);
             } catch {
                 if (!jobTitle) setJobTitle(jobId);
+            }
+        }
+
+        if (companyId && !companyName) {
+            try {
+                const response: any = await client.get(
+                    `/companies/${companyId}`,
+                );
+                const company = response?.data;
+                if (company?.name) setCompanyName(company.name);
+            } catch {
+                // Fallback handled in render
             }
         }
     };
@@ -215,9 +235,10 @@ export default function ThreadPanel({
             fetchContextDetails(
                 data.conversation.application_id,
                 data.conversation.job_id,
+                data.conversation.company_id,
             );
         }
-    }, [data?.conversation?.application_id, data?.conversation?.job_id]);
+    }, [data?.conversation?.application_id, data?.conversation?.job_id, data?.conversation?.company_id]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchResync());
@@ -605,7 +626,9 @@ export default function ThreadPanel({
                             )}
                             {data.conversation.company_id && (
                                 <span>
-                                    Company: {data.conversation.company_id}
+                                    Company:{" "}
+                                    {companyName ||
+                                        data.conversation.company_id}
                                 </span>
                             )}
                         </div>
