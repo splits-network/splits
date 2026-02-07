@@ -2,31 +2,51 @@
 
 import { useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import ApplicationsList from "./components/applications-list";
-import BrowseApplicationsClient from "./components/browse/browse-applications-client";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { useViewMode, ViewMode } from "@/hooks/use-view-mode";
+import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
 import { LoadingState } from "@splits-network/shared-ui";
+import { FilterProvider, useFilter } from "./contexts/filter-context";
+import HeaderFilters from "./components/shared/header-filters";
+import Stats from "./components/shared/stats";
+import BrowseView from "./components/browse/view";
+import TableView from "./components/table/view";
+import GridView from "./components/grid/view";
 
-export default function ApplicationsPage() {
+export default function ApplicationsNewPage() {
+    return (
+        <FilterProvider>
+            <ApplicationsNewPageContent />
+        </FilterProvider>
+    );
+}
+
+function ApplicationsNewPageContent() {
+    const { viewMode, setViewMode, isLoaded } =
+        useViewMode("applicationsNewViewMode");
     const router = useRouter();
     const pathname = usePathname();
-    const { viewMode, setViewMode, isLoaded } = useViewMode(
-        "applicationsViewMode",
-    );
 
-    // Clear URL params when switching views to prevent stale selection state
+    const {
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        loading,
+        refresh,
+        showStats,
+        setShowStats,
+    } = useFilter();
+
     const handleViewChange = useCallback(
         (newView: ViewMode) => {
-            // Clear URL params (like applicationId) when changing views
             router.replace(pathname);
             setViewMode(newView);
         },
         [router, pathname, setViewMode],
     );
 
-    // Prevent hydration mismatch by not rendering until loaded
     if (!isLoaded) {
         return <LoadingState message="Loading applications..." />;
     }
@@ -35,20 +55,31 @@ export default function ApplicationsPage() {
         <>
             <PageTitle
                 title="Applications"
-                subtitle={
-                    viewMode === "browse"
-                        ? "Browse candidate applications"
-                        : "Track candidate applications"
-                }
+                subtitle="Track and manage candidate applications"
             >
-                <ViewToggle viewMode={viewMode} onViewChange={handleViewChange} />
+                <HeaderFilters
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    clearSearch={clearSearch}
+                    filters={filters}
+                    setFilter={setFilter}
+                    loading={loading}
+                    refresh={refresh}
+                    showStats={showStats}
+                    setShowStats={setShowStats}
+                />
+                <ViewToggle
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
+                />
             </PageTitle>
+
             <div className="space-y-6">
-                {viewMode === "browse" ? (
-                    <BrowseApplicationsClient />
-                ) : (
-                    <ApplicationsList view={viewMode} />
-                )}
+                {showStats && <Stats />}
+
+                {viewMode === "browse" && <BrowseView />}
+                {viewMode === "table" && <TableView />}
+                {viewMode === "grid" && <GridView />}
             </div>
         </>
     );

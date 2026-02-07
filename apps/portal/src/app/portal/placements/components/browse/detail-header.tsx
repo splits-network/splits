@@ -1,20 +1,14 @@
 "use client";
 
-import { Application } from "../../types";
+import type { Placement } from "../../types";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 interface DetailHeaderProps {
-    item: Application | null;
+    item: Placement | null;
     onClose: () => void;
-    onMessage?: (
-        conversationId: string,
-        candidateName: string,
-        candidateUserId: string,
-        context?: any,
-    ) => void;
 }
 
-export default function DetailHeader({ item, onClose, onMessage }: DetailHeaderProps) {
+export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
     return (
         <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center justify-between">
             {/* Mobile back button */}
@@ -27,23 +21,19 @@ export default function DetailHeader({ item, onClose, onMessage }: DetailHeaderP
             </button>
 
             <span className="text-sm font-medium text-base-content/60 hidden md:block">
-                Application Details
+                Placement Details
             </span>
 
             <div className="flex items-center gap-2">
                 {item && (
                     <ActionsToolbar
-                        application={item}
+                        placement={item}
                         variant="icon-only"
                         size="sm"
                         showActions={{
                             viewDetails: false,
-                            message: true,
-                            addNote: true,
-                            advanceStage: true,
-                            reject: true,
+                            statusActions: true,
                         }}
-                        onMessage={onMessage}
                     />
                 )}
                 <button

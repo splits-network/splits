@@ -1,9 +1,9 @@
 "use client";
 
-import { Application, getDisplayStatus } from "../../types";
+import { Placement, getStatusDisplay, formatCurrency } from "../../types";
 
 interface ListItemProps {
-    item: Application;
+    item: Placement;
     isSelected: boolean;
     onSelect: (id: string) => void;
 }
@@ -15,7 +15,7 @@ export default function ListItem({
 }: ListItemProps) {
     const candidate = item.candidate;
     const job = item.job;
-    const status = getDisplayStatus(item);
+    const status = getStatusDisplay(item);
 
     return (
         <div
@@ -44,7 +44,7 @@ export default function ListItem({
                         )}
                     </div>
 
-                    {/* Status + AI Score Badges */}
+                    {/* Status + Earnings Badges */}
                     <div className="flex flex-wrap gap-1.5">
                         <span
                             className={`badge badge-xs ${status.badgeClass} badge-soft gap-1 border-0`}
@@ -54,20 +54,18 @@ export default function ListItem({
                             />
                             {status.label}
                         </span>
-                        {item.ai_review?.fit_score != null && (
-                            <span className="badge badge-xs badge-accent badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-regular fa-robot text-[10px]" />
-                                {Math.round(item.ai_review.fit_score)}%
-                            </span>
-                        )}
+                        <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
+                            <i className="fa-duotone fa-regular fa-dollar-sign text-[10px]" />
+                            {formatCurrency(item.recruiter_share || 0)}
+                        </span>
                     </div>
                 </div>
 
                 {/* Date / Quick Actions */}
                 <div className="shrink-0 flex flex-col items-end gap-1">
                     <span className="text-[10px] text-base-content/40">
-                        {item.created_at
-                            ? new Date(item.created_at).toLocaleDateString(
+                        {item.hired_at
+                            ? new Date(item.hired_at).toLocaleDateString(
                                   undefined,
                                   { month: "short", day: "numeric" },
                               )
@@ -86,7 +84,7 @@ export default function ListItem({
                             title="Copy Link"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                const url = `${window.location.origin}${window.location.pathname}?applicationId=${item.id}`;
+                                const url = `${window.location.origin}${window.location.pathname}?placementId=${item.id}`;
                                 navigator.clipboard.writeText(url);
                             }}
                         >

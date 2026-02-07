@@ -27,12 +27,18 @@ interface NavItem {
 
 // Navigation items organized by section
 const navItems: NavItem[] = [
-    // Main section
+    {
+        href: "/portal/admin",
+        label: "Admin Dashboard",
+        icon: "fa-gauge-high",
+        roles: ["platform_admin"],
+        section: "main",
+    },
     {
         href: "/portal/dashboard",
         label: "Dashboard",
         icon: "fa-house",
-        roles: ["all"],
+        roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "main",
         mobileDock: true,
     },
@@ -159,39 +165,41 @@ const navItems: NavItem[] = [
         section: "settings",
         mobileDock: false,
     },
+
     {
-        href: "/portal/billing",
-        label: "Billing",
-        icon: "fa-credit-card",
-        roles: ["all"],
-        section: "settings",
-        mobileDock: false,
-    },
-    {
-        href: "/portal/company/settings",
-        label: "Company Settings",
+        href: "#company",
+        label: "Company",
         icon: "fa-building",
         roles: ["company_admin", "hiring_manager"],
         section: "settings",
         mobileDock: false,
-    },
-    {
-        href: "/portal/company/team",
-        label: "Team",
-        icon: "fa-user-group",
-        roles: ["company_admin", "hiring_manager"],
-        section: "settings",
-        mobileDock: false,
-    },
-];
-
-const adminNavItems: NavItem[] = [
-    {
-        href: "/portal/admin",
-        label: "Admin Dashboard",
-        icon: "fa-gauge-high",
-        roles: ["platform_admin"],
-        section: "main",
+        expandable: true,
+        children: [
+            {
+                href: "/portal/company/settings",
+                label: "Settings",
+                icon: "fa-buildings",
+                roles: ["company_admin", "hiring_manager"],
+                section: "management",
+                mobileDock: false,
+            },
+            {
+                href: "/portal/company/team",
+                label: "Team",
+                icon: "fa-user-group",
+                roles: ["company_admin", "hiring_manager"],
+                section: "management",
+                mobileDock: false,
+            },
+            {
+                href: "/portal/billing",
+                label: "Billing",
+                icon: "fa-credit-card",
+                roles: ["all"],
+                section: "management",
+                mobileDock: false,
+            },
+        ],
     },
 ];
 
@@ -553,23 +561,6 @@ export function Sidebar() {
                                 ))}
                             </div>
                         )}
-
-                        {/* Admin Section */}
-                        {isAdmin && adminNavItems.length > 0 && (
-                            <div>
-                                <SectionHeader title="Platform" />
-                                {adminNavItems.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            pathname.startsWith(item.href + "/")
-                                        }
-                                    />
-                                ))}
-                            </div>
-                        )}
                     </nav>
                 </aside>
             </div>
@@ -604,8 +595,7 @@ export function Sidebar() {
                         const moreItems = navItems.filter(
                             (i) => !i.mobileDock && filterByRole(i),
                         );
-                        const adminItems = isAdmin ? adminNavItems : [];
-                        const allMoreItems = [...moreItems, ...adminItems];
+                        const allMoreItems = [...moreItems];
 
                         dockItems.push(
                             <details
