@@ -3,6 +3,8 @@
  * Types for recruiter-initiated company platform invitations
  */
 
+import { Recruiter } from "@splits-network/shared-types";
+
 export interface CompanyPlatformInvitation {
     id: string;
     recruiter_id: string;
@@ -23,6 +25,13 @@ export interface CompanyPlatformInvitation {
     // Enriched data
     recruiter?: {
         id: string;
+        name: string;
+        tagline?: string;
+        location?: string;
+        years_experience?: number;
+        industries?: string[];
+        specialties?: string[];
+        profile_image_url?: string;
         user: {
             name: string;
             email: string;
@@ -73,6 +82,12 @@ export interface InvitationLookupResult {
     expires_at: string;
     recruiter: {
         name: string;
+        tagline?: string;
+        location?: string;
+        years_experience?: number;
+        industries?: string[];
+        specialties?: string[];
+        profile_image_url?: string;
     };
     is_valid: boolean;
     error_message?: string;

@@ -8,6 +8,7 @@ import {
     createUnauthenticatedClient,
 } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
+import UserAvatar from "@/components/common/UserAvatar";
 
 interface InvitationLookup {
     id: string;
@@ -18,6 +19,13 @@ interface InvitationLookup {
     expires_at: string;
     recruiter: {
         name: string;
+        tagline?: string;
+        location?: string;
+        years_experience?: number;
+        industries?: string[];
+        specialties?: string[];
+        total_placements?: number;
+        profile_image_url?: string;
     };
     is_valid: boolean;
     error_message?: string;
@@ -55,7 +63,7 @@ export default function JoinPlatformClient({ token, code }: Props) {
                 const response = await client.get(
                     `/company-invitations/lookup?${params.toString()}`,
                 );
-                setInvitation(response.data.data);
+                setInvitation(response.data);
             } catch (err: any) {
                 setError(
                     "Failed to load invitation. Please check your link and try again.",
@@ -257,48 +265,155 @@ export default function JoinPlatformClient({ token, code }: Props) {
 
         // Valid invitation - show accept card
         if (invitation?.is_valid) {
+            const recruiter = invitation.recruiter;
+
             return (
-                <div className="card bg-base-100 shadow-2xl w-full max-w-md">
-                    <div className="card-body text-center">
-                        <div className="mb-2">
-                            <i className="fa-duotone fa-regular fa-handshake text-5xl text-primary"></i>
+                <div className="card bg-base-100 shadow-2xl w-full max-w-md overflow-hidden">
+                    {/* Premium accent bar */}
+                    <div className="h-1.5 bg-gradient-to-r from-primary via-secondary to-accent" />
+
+                    <div className="card-body">
+                        {/* Recruiter Profile Header */}
+                        <div className="flex items-center gap-4 pb-4 border-b border-base-200">
+                            <UserAvatar
+                                user={{
+                                    name: recruiter.name,
+                                    profile_image_url:
+                                        recruiter.profile_image_url,
+                                }}
+                                size="lg"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="text-lg font-bold truncate">
+                                        {recruiter.name}
+                                    </h3>
+                                    {recruiter.years_experience &&
+                                        recruiter.years_experience > 0 && (
+                                            <span className="badge badge-sm badge-primary gap-1">
+                                                <i className="fa-duotone fa-regular fa-calendar-clock text-xs" />
+                                                {recruiter.years_experience}+
+                                                yrs
+                                            </span>
+                                        )}
+                                </div>
+                                {recruiter.tagline && (
+                                    <p className="text-sm text-base-content/70 line-clamp-2 mt-0.5">
+                                        {recruiter.tagline}
+                                    </p>
+                                )}
+                                {recruiter.location && (
+                                    <p className="text-xs text-base-content/50 mt-1 flex items-center gap-1">
+                                        <i className="fa-duotone fa-regular fa-location-dot" />
+                                        {recruiter.location}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
-                        <h2 className="text-xl font-bold">You're Invited!</h2>
-
-                        <p className="text-base-content/70 text-sm mt-1">
-                            <strong>{invitation.recruiter.name}</strong> has
-                            invited you to join as a company partner.
-                        </p>
-
-                        {invitation.company_name_hint && (
-                            <div className="badge badge-lg badge-outline mt-3">
-                                <i className="fa-duotone fa-regular fa-building mr-2"></i>
-                                {invitation.company_name_hint}
+                        {/* Credibility Badges */}
+                        {(recruiter.total_placements ||
+                            (recruiter.specialties &&
+                                recruiter.specialties.length > 0)) && (
+                            <div className="flex flex-wrap gap-2 py-3">
+                                {recruiter.total_placements &&
+                                    recruiter.total_placements > 0 && (
+                                        <span className="badge badge-sm badge-success badge-outline gap-1">
+                                            <i className="fa-duotone fa-regular fa-trophy text-xs" />
+                                            {recruiter.total_placements}{" "}
+                                            placements
+                                        </span>
+                                    )}
+                                {recruiter.specialties?.[0] && (
+                                    <span className="badge badge-sm badge-secondary badge-outline gap-1">
+                                        <i className="fa-duotone fa-regular fa-briefcase text-xs" />
+                                        {recruiter.specialties[0]}
+                                    </span>
+                                )}
                             </div>
                         )}
 
+                        {/* Invitation Header */}
+                        <div className="text-center py-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-3">
+                                <i className="fa-duotone fa-regular fa-envelope-open-text text-primary" />
+                                <span className="text-sm font-medium text-primary">
+                                    You're Invited
+                                </span>
+                            </div>
+
+                            <h2 className="text-xl font-bold">
+                                Partner with {recruiter.name}
+                            </h2>
+                            <p className="text-sm text-base-content/60 mt-1">
+                                Join Splits Network and access qualified
+                                candidates vetted by {recruiter.name} and their
+                                proven track record of successful placements.
+                            </p>
+                        </div>
+
+                        {/* Company Name Hint */}
+                        {invitation.company_name_hint && (
+                            <div className="flex justify-center">
+                                <h2 className="text-xl font-bold gap-2 px-4">
+                                    <i className="fa-duotone fa-regular fa-building" />
+                                    {invitation.company_name_hint}
+                                </h2>
+                            </div>
+                        )}
+
+                        {/* Personal Message */}
                         {invitation.personal_message && (
-                            <div className="bg-base-200 rounded-lg p-3 mt-3 text-left">
-                                <p className="text-sm italic text-base-content/80">
+                            <div className="bg-base-200/50 rounded-xl p-4 mt-3 border-l-4 border-primary">
+                                <p className="text-sm italic text-base-content/80 leading-relaxed">
                                     "{invitation.personal_message}"
                                 </p>
-                                <p className="text-xs text-base-content/60 mt-1">
-                                    — {invitation.recruiter.name}
+                                <p className="text-xs text-base-content/50 mt-2 flex items-center gap-1">
+                                    <i className="fa-duotone fa-regular fa-quote-left" />
+                                    {recruiter.name}
                                 </p>
                             </div>
                         )}
 
+                        {/* Industries/Specialties Preview */}
+                        {((recruiter.industries &&
+                            recruiter.industries.length > 0) ||
+                            (recruiter.specialties &&
+                                recruiter.specialties.length > 1)) && (
+                            <div className="flex flex-wrap gap-1.5 justify-center pt-3">
+                                {recruiter.industries?.map((industry) => (
+                                    <span
+                                        key={industry}
+                                        className="badge badge-xs badge-ghost"
+                                    >
+                                        {industry}
+                                    </span>
+                                ))}
+                                {recruiter.specialties
+                                    ?.slice(1)
+                                    .map((specialty) => (
+                                        <span
+                                            key={specialty}
+                                            className="badge badge-xs badge-outline"
+                                        >
+                                            {specialty}
+                                        </span>
+                                    ))}
+                            </div>
+                        )}
+
+                        {/* Error Display */}
                         {error && (
                             <div className="alert alert-error text-sm py-2 mt-3">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation" />
                                 <span>{error}</span>
                             </div>
                         )}
 
-                        <div className="mt-4 space-y-2">
+                        {/* CTA Section */}
+                        <div className="mt-6 space-y-2">
                             <button
-                                className="btn btn-primary w-full"
+                                className="btn btn-primary w-full btn-lg"
                                 onClick={handleAccept}
                                 disabled={accepting}
                             >
@@ -321,7 +436,9 @@ export default function JoinPlatformClient({ token, code }: Props) {
                             </button>
                         </div>
 
-                        <p className="text-xs text-base-content/40 mt-3">
+                        {/* Expiration */}
+                        <p className="text-xs text-base-content/40 text-center mt-4 flex items-center justify-center gap-1">
+                            <i className="fa-duotone fa-regular fa-clock" />
                             Expires{" "}
                             {new Date(invitation.expires_at).toLocaleDateString(
                                 "en-US",
@@ -439,8 +556,8 @@ export default function JoinPlatformClient({ token, code }: Props) {
                                     </h3>
                                     <p className="text-sm text-base-content/60">
                                         Every placement comes with a guarantee
-                                        period. If it doesn't work out, you
-                                        don't pay.
+                                        period, that you control. If it doesn't
+                                        work out, you don't pay.
                                     </p>
                                 </div>
                             </div>
@@ -454,9 +571,10 @@ export default function JoinPlatformClient({ token, code }: Props) {
                                         Split-Fee Model
                                     </h3>
                                     <p className="text-sm text-base-content/60">
-                                        Recruiters split fees, meaning
-                                        competitive rates and access to a wider
-                                        talent pool.
+                                        Recruiters can fill multiple roles and
+                                        split their commissions automatically,
+                                        meaning competitive rates and access to
+                                        a wider talent pool.
                                     </p>
                                 </div>
                             </div>

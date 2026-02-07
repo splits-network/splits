@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { PortalHeader } from "@/components/portal-header";
 import { AuthenticatedLayoutClient } from "./layout-client";
+import { Footer } from "@/components/footer";
 
 export default async function AuthenticatedLayout({
     children,
@@ -29,6 +30,7 @@ export default async function AuthenticatedLayout({
                     <main className="p-2 flex-1">{children}</main>
                 </div>
             </div>
+            <Footer />
         </AuthenticatedLayoutClient>
     );
 }

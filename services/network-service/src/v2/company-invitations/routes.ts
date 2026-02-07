@@ -152,6 +152,7 @@ export async function companyInvitationRoutes(
 
             return reply.send({ data: result });
         } catch (error) {
+            console.error('Invitation lookup failed:', error);
             return reply.code(500).send({
                 error: { code: 'LOOKUP_FAILED', message: 'Failed to lookup invitation' }
             });

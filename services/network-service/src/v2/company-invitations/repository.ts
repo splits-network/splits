@@ -24,7 +24,7 @@ function generateInviteCode(): string {
 }
 
 export class CompanyInvitationRepository {
-    constructor(private supabase: SupabaseClient) {}
+    constructor(private supabase: SupabaseClient) { }
 
     async list(
         clerkUserId: string,
@@ -134,7 +134,12 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    tagline,
+                    location,
+                    years_experience,
+                    industries,
+                    specialties,
+                    user:users!inner(name, email, profile_image_url)
                 )
             `)
             .eq('invite_code', code.toUpperCase())
@@ -151,12 +156,17 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    tagline,
+                    location,
+                    years_experience,
+                    industries,
+                    specialties,
+                    user:users!inner(name, email, profile_image_url)
                 )
             `)
             .eq('invite_link_token', token)
             .maybeSingle();
-
+        console.log('findByToken result:', { data, error, token });
         if (error) throw error;
         return data;
     }

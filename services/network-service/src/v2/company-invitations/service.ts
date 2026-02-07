@@ -126,6 +126,18 @@ export class CompanyInvitationServiceV2 {
         const expiresAt = new Date(invitation.expires_at);
         const isExpired = now > expiresAt;
 
+        // Transform recruiter data: flatten user fields into recruiter object
+        const rawRecruiter = invitation.recruiter as any;
+        const recruiter = {
+            name: rawRecruiter?.user?.name || 'Unknown',
+            tagline: rawRecruiter?.tagline,
+            location: rawRecruiter?.location,
+            years_experience: rawRecruiter?.years_experience,
+            industries: rawRecruiter?.industries,
+            specialties: rawRecruiter?.specialties,
+            profile_image_url: rawRecruiter?.user?.profile_image_url,
+        };
+
         if (invitation.status === 'accepted') {
             return {
                 id: invitation.id,
@@ -134,7 +146,7 @@ export class CompanyInvitationServiceV2 {
                 personal_message: invitation.personal_message,
                 status: 'accepted',
                 expires_at: invitation.expires_at,
-                recruiter: { name: invitation.recruiter?.user?.name || 'Unknown' },
+                recruiter,
                 is_valid: false,
                 error_message: 'This invitation has already been used'
             };
@@ -146,7 +158,7 @@ export class CompanyInvitationServiceV2 {
                 invite_code: invitation.invite_code,
                 status: 'revoked',
                 expires_at: invitation.expires_at,
-                recruiter: { name: invitation.recruiter?.user?.name || 'Unknown' },
+                recruiter,
                 is_valid: false,
                 error_message: 'This invitation has been revoked'
             };
@@ -158,7 +170,7 @@ export class CompanyInvitationServiceV2 {
                 invite_code: invitation.invite_code,
                 status: 'expired',
                 expires_at: invitation.expires_at,
-                recruiter: { name: invitation.recruiter?.user?.name || 'Unknown' },
+                recruiter,
                 is_valid: false,
                 error_message: 'This invitation has expired'
             };
@@ -171,7 +183,7 @@ export class CompanyInvitationServiceV2 {
             personal_message: invitation.personal_message,
             status: 'pending',
             expires_at: invitation.expires_at,
-            recruiter: { name: invitation.recruiter?.user?.name || 'Unknown' },
+            recruiter,
             is_valid: true
         };
     }
