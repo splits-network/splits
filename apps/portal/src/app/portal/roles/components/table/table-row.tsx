@@ -10,8 +10,8 @@ import {
     ExpandedDetailItem,
     ExpandedDetailSection,
 } from "@/components/ui/tables";
-import type { Job } from "./card";
-import RoleActionsToolbar from "./actions-toolbar";
+import { Job } from "../../types";
+import RoleActionsToolbar from "../shared/actions-toolbar";
 
 // ===== TYPES =====
 

@@ -11,17 +11,17 @@ import {
 import { StatCard, StatCardGrid } from "@/components/ui/cards";
 import { DataTable, type TableColumn } from "@/components/ui/tables";
 import { RoleCard } from "./card";
-import { TableRow } from "./table-row";
+import { TableRow } from "../table/table-row";
 import {
     RolesTrendsChart,
     TIME_PERIODS,
     calculateStatTrends,
-} from "../../../../components/charts/roles-trends-chart";
-import RoleWizardModal from "./modals/role-wizard-modal";
-import DetailSidebar from "./detail-sidebar";
-import PipelineSidebar from "./pipeline-sidebar";
+} from "../../../../../components/charts/roles-trends-chart";
+import RoleWizardModal from "../modals/role-wizard-modal";
+import DetailSidebar from "../detail-sidebar";
+import PipelineSidebar from "../pipeline-sidebar";
 import { ViewMode } from "@/hooks/use-view-mode";
-import { useRolesFilter } from "../contexts/roles-filter-context";
+import { useRolesFilter } from "../../contexts/roles-filter-context";
 
 // ===== TYPES =====
 
@@ -44,7 +44,7 @@ const roleColumns: TableColumn[] = [
 
 // ===== COMPONENT =====
 
-export default function List({ view }: RolesListProps) {
+export default function Grid({ view }: RolesListProps) {
     const searchParams = useSearchParams();
 
     // Get filter state from context
@@ -229,31 +229,6 @@ export default function List({ view }: RolesListProps) {
                                 />
                             ))}
                         </div>
-                    )}
-
-                    {/* Table View */}
-                    {!loading && view === "table" && jobs.length > 0 && (
-                        <DataTable
-                            columns={roleColumns}
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                            showExpandColumn={true}
-                            isEmpty={jobs.length === 0}
-                            loading={loading}
-                        >
-                            {jobs.map((job) => (
-                                <TableRow
-                                    key={job.id}
-                                    job={job}
-                                    allJobs={jobs}
-                                    canManageRole={canManageRole}
-                                    onEditRole={handleEditRole}
-                                    onViewDetails={handleViewDetails}
-                                    onViewPipeline={handleViewPipeline}
-                                />
-                            ))}
-                        </DataTable>
                     )}
 
                     {/* Empty State */}

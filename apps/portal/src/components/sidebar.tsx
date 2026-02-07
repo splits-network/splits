@@ -21,6 +21,8 @@ interface NavItem {
     section?: "main" | "management" | "settings";
     badge?: number;
     mobileDock?: boolean;
+    children?: NavItem[];
+    expandable?: boolean;
 }
 
 // Navigation items organized by section
@@ -53,25 +55,7 @@ const navItems: NavItem[] = [
         mobileDock: false,
     },
     {
-        href: "/portal/invitations",
-        label: "Invitations",
-        icon: "fa-envelope",
-        roles: ["recruiter"],
-        section: "management",
-        mobileDock: false,
-    },
-    {
-        href: "/portal/invite-companies",
-        label: "Invite Companies",
-        icon: "fa-building-user",
-        roles: ["recruiter"],
-        section: "management",
-        mobileDock: false,
-    },
-    // { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
-    // { href: '/portal/gate-reviews', label: 'Gate Reviews', icon: 'fa-clipboard-check', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: false },
-    {
-        href: "/portal/candidates",
+        href: "#candidates",
         label: "Candidates",
         icon: "fa-users",
         roles: [
@@ -82,7 +66,52 @@ const navItems: NavItem[] = [
         ],
         section: "management",
         mobileDock: true,
+        expandable: true,
+        children: [
+            {
+                href: "/portal/candidates",
+                label: "Manage",
+                icon: "fa-list",
+                roles: [
+                    "recruiter",
+                    "hiring_manager",
+                    "company_admin",
+                    "platform_admin",
+                ],
+                section: "management",
+                mobileDock: false,
+            },
+            {
+                href: "/portal/invitations",
+                label: "Invitations",
+                icon: "fa-envelope",
+                roles: ["recruiter"],
+                section: "management",
+                mobileDock: false,
+            },
+        ],
     },
+    {
+        href: "#companies",
+        label: "Companies",
+        icon: "fa-building",
+        roles: ["recruiter"],
+        section: "management",
+        mobileDock: false,
+        expandable: true,
+        children: [
+            {
+                href: "/portal/invite-companies",
+                label: "Invite Companies",
+                icon: "fa-building-user",
+                roles: ["recruiter"],
+                section: "management",
+                mobileDock: false,
+            },
+        ],
+    },
+    // { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
+    // { href: '/portal/gate-reviews', label: 'Gate Reviews', icon: 'fa-clipboard-check', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: false },
     {
         href: "/portal/applications",
         label: "Applications",
@@ -162,26 +191,40 @@ function NavItem({
     item,
     isActive,
     badge,
+    level = 0,
 }: {
     item: NavItem;
     isActive: boolean;
     badge?: number;
+    level?: number;
 }) {
-    return (
-        <Link
-            href={item.href}
-            className={`
-                group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
-                transition-all duration-200 mb-0.5
-                ${
-                    isActive
-                        ? "bg-base-100 text-primary font-medium"
-                        : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
-                }
-            `}
-        >
+    const pathname = usePathname();
+    const [isExpanded, setIsExpanded] = useState(false);
+    const hasChildren = item.children && item.children.length > 0;
+
+    // Check if any child is active to keep parent expanded
+    const hasActiveChild = item.children?.some(
+        (child) =>
+            pathname === child.href || pathname.startsWith(child.href + "/"),
+    );
+
+    useEffect(() => {
+        if (hasActiveChild) {
+            setIsExpanded(true);
+        }
+    }, [hasActiveChild]);
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (hasChildren && item.expandable) {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+        }
+    };
+
+    const itemContent = (
+        <>
             {/* Active indicator bar */}
-            {isActive && (
+            {isActive && level === 0 && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
             )}
 
@@ -203,7 +246,75 @@ function NavItem({
                     {badge > 99 ? "99+" : badge}
                 </span>
             )}
-        </Link>
+
+            {/* Expand/collapse icon */}
+            {hasChildren && item.expandable && (
+                <span
+                    className={`w-4 h-4 flex items-center justify-center transition-transform duration-200 ${
+                        isExpanded ? "rotate-90" : "rotate-0"
+                    }`}
+                >
+                    <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/40"></i>
+                </span>
+            )}
+        </>
+    );
+
+    return (
+        <>
+            {hasChildren && item.expandable ? (
+                <button
+                    type="button"
+                    onClick={handleClick}
+                    className={`
+                        group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
+                        transition-all duration-200 mb-0.5 w-full text-left
+                        ${level > 0 ? `ml-${level * 4} pl-${3 + level * 2}` : ""}
+                        ${
+                            hasActiveChild
+                                ? "bg-base-100 text-primary font-medium"
+                                : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
+                        }
+                    `}
+                >
+                    {itemContent}
+                </button>
+            ) : (
+                <Link
+                    href={item.href}
+                    className={`
+                        group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
+                        transition-all duration-200 mb-0.5
+                        ${level > 0 ? `ml-${level * 4} pl-${3 + level * 2}` : ""}
+                        ${
+                            isActive
+                                ? "bg-base-100 text-primary font-medium"
+                                : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
+                        }
+                    `}
+                >
+                    {itemContent}
+                </Link>
+            )}
+
+            {/* Render children */}
+            {hasChildren && isExpanded && (
+                <div className="ml-4">
+                    {item.children!.map((child) => (
+                        <NavItem
+                            key={child.href}
+                            item={child}
+                            isActive={
+                                pathname === child.href ||
+                                (child.href !== "/portal/dashboard" &&
+                                    pathname.startsWith(child.href))
+                            }
+                            level={level + 1}
+                        />
+                    ))}
+                </div>
+            )}
+        </>
     );
 }
 
@@ -352,9 +463,17 @@ export function Sidebar() {
         return false;
     };
 
+    // Recursively filter nav items and their children
+    const filterNavItems = (items: NavItem[]): NavItem[] => {
+        return items.filter(filterByRole).map((item) => ({
+            ...item,
+            children: item.children ? filterNavItems(item.children) : undefined,
+        }));
+    };
+
     // Group items by section
     const groupedItems = useMemo(() => {
-        const filtered = navItems.filter(filterByRole);
+        const filtered = filterNavItems(navItems);
         return {
             main: filtered.filter((i) => i.section === "main"),
             management: filtered.filter((i) => i.section === "management"),

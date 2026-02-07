@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import List from "./components/list";
+import Grid from "./components/grid/view";
+import List from "./components/table/view";
 import BrowseRolesView from "./components/browse/browse-view";
 import { HeaderFilters } from "./components/header-filters";
 import { PageTitle } from "@/components/page-title";
@@ -78,8 +79,10 @@ function RolesPageContent() {
             <div className="space-y-6">
                 {viewMode === "browse" ? (
                     <BrowseRolesView />
-                ) : (
+                ) : viewMode === "table" ? (
                     <List view={viewMode} />
+                ) : (
+                    <Grid view={viewMode} />
                 )}
             </div>
         </>

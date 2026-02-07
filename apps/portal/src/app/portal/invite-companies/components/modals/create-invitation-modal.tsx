@@ -5,14 +5,15 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ButtonLoading } from "@splits-network/shared-ui";
+import { CompanyInvitation } from "../../types";
 
 interface CreateInvitationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: (invitation: any) => void;
+    onSuccess: (invitation: CompanyInvitation) => void;
 }
 
-export function CreateInvitationModal({
+export default function CreateInvitationModal({
     isOpen,
     onClose,
     onSuccess,
@@ -25,7 +26,8 @@ export function CreateInvitationModal({
     const [personalMessage, setPersonalMessage] = useState("");
     const [sendEmail, setSendEmail] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [createdInvitation, setCreatedInvitation] = useState<any>(null);
+    const [createdInvitation, setCreatedInvitation] =
+        useState<CompanyInvitation | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,7 +57,6 @@ export function CreateInvitationModal({
     };
 
     const handleClose = () => {
-        // Reset form
         setInvitedEmail("");
         setCompanyNameHint("");
         setPersonalMessage("");
@@ -65,7 +66,9 @@ export function CreateInvitationModal({
     };
 
     const handleDone = () => {
-        onSuccess(createdInvitation);
+        if (createdInvitation) {
+            onSuccess(createdInvitation);
+        }
         handleClose();
     };
 
@@ -95,7 +98,7 @@ export function CreateInvitationModal({
         if (navigator.share && navigator.canShare?.(shareData)) {
             try {
                 await navigator.share(shareData);
-            } catch (e) {
+            } catch {
                 // User cancelled share
             }
         } else {
@@ -117,14 +120,14 @@ export function CreateInvitationModal({
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >
-                        <i className="fa-duotone fa-regular fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 </form>
 
                 {!createdInvitation ? (
                     <>
                         <h3 className="font-bold text-lg mb-4">
-                            <i className="fa-duotone fa-regular fa-building-user mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-building-user mr-2" />
                             Invite a Company
                         </h3>
 
@@ -232,7 +235,7 @@ export function CreateInvitationModal({
                 ) : (
                     <>
                         <h3 className="font-bold text-lg mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-check text-success mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check text-success mr-2" />
                             Invitation Created!
                         </h3>
 
@@ -255,7 +258,7 @@ export function CreateInvitationModal({
                                     onClick={handleCopyCode}
                                     title="Copy code"
                                 >
-                                    <i className="fa-duotone fa-regular fa-copy"></i>
+                                    <i className="fa-duotone fa-regular fa-copy" />
                                 </button>
                             </div>
                         </div>
@@ -269,7 +272,7 @@ export function CreateInvitationModal({
                                 <input
                                     type="text"
                                     className="input input-sm flex-1 font-mono text-xs"
-                                    value={createdInvitation.invite_url}
+                                    value={createdInvitation.invite_url || ""}
                                     readOnly
                                 />
                                 <button
@@ -277,7 +280,7 @@ export function CreateInvitationModal({
                                     onClick={handleCopyLink}
                                     title="Copy link"
                                 >
-                                    <i className="fa-duotone fa-regular fa-link"></i>
+                                    <i className="fa-duotone fa-regular fa-link" />
                                 </button>
                             </div>
                         </div>
@@ -288,28 +291,28 @@ export function CreateInvitationModal({
                                 className="btn btn-outline btn-sm flex-1"
                                 onClick={handleCopyLink}
                             >
-                                <i className="fa-duotone fa-regular fa-link mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-link mr-2" />
                                 Copy Link
                             </button>
                             <button
                                 className="btn btn-outline btn-sm flex-1"
                                 onClick={handleCopyCode}
                             >
-                                <i className="fa-duotone fa-regular fa-copy mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-copy mr-2" />
                                 Copy Code
                             </button>
                             <button
                                 className="btn btn-primary btn-sm flex-1"
                                 onClick={handleShare}
                             >
-                                <i className="fa-duotone fa-regular fa-share mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-share mr-2" />
                                 Share
                             </button>
                         </div>
 
                         {createdInvitation.email_sent_at && (
                             <div className="alert alert-success mb-4">
-                                <i className="fa-duotone fa-regular fa-envelope-circle-check"></i>
+                                <i className="fa-duotone fa-regular fa-envelope-circle-check" />
                                 <span>
                                     Email sent to{" "}
                                     {createdInvitation.invited_email}

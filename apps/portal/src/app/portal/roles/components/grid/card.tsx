@@ -10,11 +10,10 @@ import {
 import { formatRelativeTime } from "@/lib/utils";
 import { getRoleBadges } from "@/lib/utils/role-badges";
 import { getJobStatusBadge } from "@/lib/utils/badge-styles";
-import RoleActionsToolbar from "./actions-toolbar";
-import { Job } from "../types";
+import RoleActionsToolbar from "../shared/actions-toolbar";
+import { Job } from "../../types";
 
 // Re-export for backward compatibility
-export type { Job };
 
 interface Badge {
     class: string;

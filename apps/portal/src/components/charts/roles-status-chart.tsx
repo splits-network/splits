@@ -10,7 +10,7 @@ import {
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { registerChart } from "./chart-options";
-import type { Job } from "../../app/portal/roles/components/card";
+import type { Job } from "../../app/portal/roles/types";
 import { ChartLoadingState } from "@splits-network/shared-ui";
 
 // Register Chart.js components

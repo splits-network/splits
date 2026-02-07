@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
-import RoleActionsToolbar from "./actions-toolbar";
+import RoleActionsToolbar from "./shared/actions-toolbar";
 import DetailsView from "./details-view";
 
 // ===== TYPES =====
