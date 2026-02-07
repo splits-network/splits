@@ -12,6 +12,7 @@ import { ProposalsEmailService } from './services/proposals/service';
 import { CandidatesEmailService } from './services/candidates/service';
 import { CollaborationEmailService } from './services/collaboration/service';
 import { InvitationsEmailService } from './services/invitations/service';
+import { CompanyInvitationsEmailService } from './services/company-invitations/service';
 import { RecruiterSubmissionEmailService } from './services/recruiter-submission/service';
 import { SupportEmailService } from './services/support/service';
 import { ChatEmailService } from './services/chat/service';
@@ -23,6 +24,7 @@ export class NotificationService {
     public readonly candidates: CandidatesEmailService;
     public readonly collaboration: CollaborationEmailService;
     public readonly invitations: InvitationsEmailService;
+    public readonly companyInvitations: CompanyInvitationsEmailService;
     public readonly recruiterSubmission: RecruiterSubmissionEmailService;
     public readonly support: SupportEmailService;
     public readonly chat: ChatEmailService;
@@ -41,6 +43,7 @@ export class NotificationService {
         this.candidates = new CandidatesEmailService(resend, repository, fromEmail, logger);
         this.collaboration = new CollaborationEmailService(resend, repository, fromEmail, logger);
         this.invitations = new InvitationsEmailService(resend, repository, fromEmail, logger);
+        this.companyInvitations = new CompanyInvitationsEmailService(resend, repository, fromEmail, logger);
         this.recruiterSubmission = new RecruiterSubmissionEmailService(resend, repository, fromEmail, logger);
         this.support = new SupportEmailService(resend, repository, fromEmail, logger);
         this.chat = new ChatEmailService(resend, repository, fromEmail, logger);

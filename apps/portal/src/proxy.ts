@@ -24,6 +24,7 @@ export const config = {
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
         '/accept-invitation(.*)', // Invitation acceptance
+        //'/join(.*)', // Join platform (handled conditionally in page)
 
         // V2 API routes (authentication handled conditionally in middleware)
         '/api/v2/(.*)', // All V2 routes - public endpoints handled conditionally above

@@ -16,12 +16,14 @@ import { registerRecruiterCandidateRoutes } from './recruiter-candidates/routes'
 import { registerReputationRoutes } from './reputation/routes';
 import { registerProposalRoutes } from './proposals/routes';
 import { recruiterCompanyRoutes } from './recruiter-companies/routes';
+import { companyInvitationRoutes } from './company-invitations/routes';
 import { createClient } from '@supabase/supabase-js';
 
 interface V2Config {
     supabaseUrl: string;
     supabaseKey: string;
     eventPublisher: EventPublisherV2;
+    portalUrl?: string;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
@@ -53,4 +55,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     
     // Register recruiter-companies routes
     await recruiterCompanyRoutes(app, supabase, config.eventPublisher);
+
+    // Register company platform invitation routes
+    await companyInvitationRoutes(app, supabase, config.eventPublisher, config.portalUrl);
 }

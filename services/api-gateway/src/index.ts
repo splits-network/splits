@@ -335,6 +335,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for public company invitation lookup (join platform flow)
+        // GET /api/v2/company-invitations/lookup - lookup invitation by code or token
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/company-invitations/lookup')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }
