@@ -155,19 +155,6 @@ const navItems: NavItem[] = [
         section: "management",
         mobileDock: false,
     },
-    {
-        href: "/portal/placements-new",
-        label: "Placements (New)",
-        icon: "fa-trophy",
-        roles: [
-            "recruiter",
-            "company_admin",
-            "hiring_manager",
-            "platform_admin",
-        ],
-        section: "management",
-        mobileDock: false,
-    },
 
     // Settings section
     {
