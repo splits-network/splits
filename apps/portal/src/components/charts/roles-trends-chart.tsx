@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { dataset, registerChart } from "../charts/chart-options";
 import { Line } from "react-chartjs-2";
-import type { Job } from "../../app/portal/roles/components/card";
+import type { Job } from "../../app/portal/roles/types";
 import { ChartLoadingState } from "@splits-network/shared-ui";
 
 // Register Chart.js components

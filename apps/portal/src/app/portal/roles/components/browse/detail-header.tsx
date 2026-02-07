@@ -1,5 +1,5 @@
 import { Job } from "./types";
-import RoleActionsToolbar from "../actions-toolbar";
+import RoleActionsToolbar from "../shared/actions-toolbar";
 
 interface DetailHeaderProps {
     job: Job;

@@ -7,8 +7,8 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { ButtonLoading } from "@splits-network/shared-ui";
-import RoleWizardModal from "./modals/role-wizard-modal";
-import SubmitCandidateWizard from "./wizards/submit-candidate-wizard";
+import RoleWizardModal from "../modals/role-wizard-modal";
+import SubmitCandidateWizard from "../wizards/submit-candidate-wizard";
 
 // ===== TYPES =====
 

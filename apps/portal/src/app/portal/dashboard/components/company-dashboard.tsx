@@ -15,7 +15,7 @@ import {
 import { AnalyticsChart } from "@/components/charts/analytics-chart";
 import { TrendBadge } from "@/components/ui";
 import RoleWizardModal from "../../roles/components/modals/role-wizard-modal";
-import RoleActionsToolbar from "../../roles/components/actions-toolbar";
+import RoleActionsToolbar from "../../roles/components/shared/actions-toolbar";
 
 interface CompanyStats {
     active_roles: number;
