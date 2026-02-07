@@ -101,8 +101,16 @@ const navItems: NavItem[] = [
         expandable: true,
         children: [
             {
+                href: "/portal/companies",
+                label: "Browse",
+                icon: "fa-buildings",
+                roles: ["recruiter"],
+                section: "management",
+                mobileDock: false,
+            },
+            {
                 href: "/portal/invite-companies",
-                label: "Invite Companies",
+                label: "Invitations",
                 icon: "fa-building-user",
                 roles: ["recruiter"],
                 section: "management",

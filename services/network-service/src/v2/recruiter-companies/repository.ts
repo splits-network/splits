@@ -309,6 +309,57 @@ export class RecruiterCompanyRepository {
     }
 
     /**
+     * Check if active or pending relationship exists
+     */
+    async hasPendingOrActiveRelationship(recruiterId: string, companyId: string): Promise<boolean> {
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select('id')
+            .eq('recruiter_id', recruiterId)
+            .eq('company_id', companyId)
+            .in('status', ['active', 'pending'])
+            .maybeSingle();
+
+        if (error) throw error;
+        return !!data;
+    }
+
+    /**
+     * Create a recruiter-initiated connection request (bypasses org-based authorization)
+     */
+    async createConnectionRequest(
+        data: RecruiterCompanyCreate,
+    ): Promise<RecruiterCompany> {
+        const relationshipData = {
+            ...data,
+            status: 'pending' as const,
+            can_manage_company_jobs: data.can_manage_company_jobs || false
+        };
+
+        const { data: result, error } = await this.supabase
+            .from('recruiter_companies')
+            .insert(relationshipData)
+            .select(`
+                *,
+                recruiter:recruiters!inner(
+                    id,
+                    user_id,
+                    user:users!inner(name, email)
+                ),
+                company:companies!inner(
+                    id,
+                    name,
+                    industry,
+                    headquarters_location
+                )
+            `)
+            .single();
+
+        if (error) throw error;
+        return result;
+    }
+
+    /**
      * Get companies a recruiter can manage jobs for, with details
      */
     async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {

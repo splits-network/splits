@@ -63,3 +63,9 @@ export interface AcceptInvitationRequest {
 export interface TerminateRelationshipRequest {
     reason: string;
 }
+
+export interface RequestConnectionRequest {
+    company_id: string;
+    message?: string;
+    relationship_type?: 'sourcer' | 'recruiter';
+}

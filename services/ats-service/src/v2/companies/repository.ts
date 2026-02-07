@@ -31,11 +31,12 @@ export class CompanyRepository {
         const page = filters.page || 1;
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
-
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const organizationIds = accessContext.organizationIds;
+        const isBrowseAll = filters.browse_all === 'true';
 
-        if (!accessContext.isPlatformAdmin && organizationIds.length === 0) {
+        // For marketplace browse, skip org-based restrictions so all authenticated users can see all companies
+        if (!isBrowseAll && !accessContext.isPlatformAdmin && organizationIds.length === 0) {
             return { data: [], total: 0 };
         }
 
@@ -45,8 +46,8 @@ export class CompanyRepository {
             .from('companies')
             .select('*', { count: 'exact' });
 
-        // Apply organization filter
-        if (!accessContext.isPlatformAdmin && organizationIds.length > 0) {
+        // Apply organization filter (skip when browsing marketplace)
+        if (!isBrowseAll && !accessContext.isPlatformAdmin && organizationIds.length > 0) {
             query = query.in('identity_organization_id', organizationIds);
         }
 
@@ -65,6 +66,7 @@ export class CompanyRepository {
                 config: 'english'
             });
         }
+
         if (filters.status) {
             query = query.eq('status', filters.status);
         }
@@ -80,7 +82,7 @@ export class CompanyRepository {
         const { data, error, count } = await query;
 
         if (error) throw error;
-
+console.log('Query result:', { data, count });
         return {
             data: data || [],
             total: count || 0,

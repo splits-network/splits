@@ -3,32 +3,30 @@
 import { useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { BrowseLayout } from "@splits-network/shared-ui";
-import { PaginationControls, EmptyState } from "@/hooks/use-standard-list";
 import { LoadingState } from "@splits-network/shared-ui";
-import { useInvitationFilter } from "../../contexts/filter-context";
+import { EmptyState } from "@/hooks/use-standard-list";
+import { useFilter } from "../../contexts/filter-context";
 import ListItem from "./list-item";
 import DetailPanel from "./detail-panel";
 
 export default function BrowseView() {
-    const {
-        data: invitations,
-        loading,
-        pagination,
-        page,
-        goToPage,
-    } = useInvitationFilter();
+    const { activeTab, marketplaceContext, myCompaniesContext } = useFilter();
+    const activeContext =
+        activeTab === "marketplace" ? marketplaceContext : myCompaniesContext;
+
+    const { data, loading, pagination, page, goToPage } = activeContext;
 
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const selectedId = searchParams.get("invitationId");
+    const selectedId = searchParams.get("companyId");
     const totalPages = pagination?.total_pages || 1;
 
     const handleSelect = useCallback(
         (id: string) => {
             const params = new URLSearchParams(searchParams);
-            params.set("invitationId", id);
+            params.set("companyId", id);
             router.push(`${pathname}?${params.toString()}`);
         },
         [pathname, router, searchParams],
@@ -36,9 +34,15 @@ export default function BrowseView() {
 
     const handleClose = useCallback(() => {
         const params = new URLSearchParams(searchParams);
-        params.delete("invitationId");
+        params.delete("companyId");
         router.push(`${pathname}?${params.toString()}`);
     }, [pathname, router, searchParams]);
+
+    // Extract company ID from either Company or CompanyRelationship
+    const getItemCompanyId = (item: any) => {
+        if (activeTab === "marketplace") return item.id;
+        return item.company_id || item.company?.id;
+    };
 
     return (
         <BrowseLayout>
@@ -49,27 +53,35 @@ export default function BrowseView() {
                 }`}
             >
                 {/* List Content */}
-                <div className="flex-1 overflow-y-auto min-h-0 relative">
-                    {loading && invitations.length === 0 ? (
+                <div className="flex-1 overflow-y-auto min-h-0">
+                    {loading && data.length === 0 ? (
                         <div className="p-8">
-                            <LoadingState message="Loading invitations..." />
+                            <LoadingState message="Loading companies..." />
                         </div>
-                    ) : invitations.length === 0 ? (
+                    ) : data.length === 0 ? (
                         <div className="p-4">
                             <EmptyState
-                                title="No invitations found"
-                                description="Create your first invitation to start bringing companies to Splits Network"
+                                title="No companies found"
+                                description={
+                                    activeTab === "marketplace"
+                                        ? "Try adjusting your search or filters"
+                                        : "You don't have any company relationships yet. Browse the marketplace to connect."
+                                }
                             />
                         </div>
                     ) : (
-                        invitations.map((invitation) => (
-                            <ListItem
-                                key={invitation.id}
-                                invitation={invitation}
-                                isSelected={selectedId === invitation.id}
-                                onSelect={handleSelect}
-                            />
-                        ))
+                        data.map((item: any) => {
+                            const companyId = getItemCompanyId(item);
+                            return (
+                                <ListItem
+                                    key={item.id}
+                                    item={item}
+                                    activeTab={activeTab}
+                                    isSelected={selectedId === companyId}
+                                    onSelect={() => handleSelect(companyId)}
+                                />
+                            );
+                        })
                     )}
                 </div>
 
@@ -112,8 +124,8 @@ export default function BrowseView() {
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-base-content/60">
                         <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-envelope-open-text text-4xl mb-3 block" />
-                            <p>Select an invitation to view details</p>
+                            <i className="fa-duotone fa-regular fa-building text-4xl mb-3 block" />
+                            <p>Select a company to view details</p>
                         </div>
                     </div>
                 )}

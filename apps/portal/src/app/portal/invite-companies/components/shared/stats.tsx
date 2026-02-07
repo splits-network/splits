@@ -39,33 +39,22 @@ export default function Stats() {
 
             try {
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.get(
-                    "/company-invitations",
-                    { params: { limit: 1000 } },
-                );
-
-                const invitations = response.data || [];
-                const pending = invitations.filter(
-                    (i: any) => i.status === "pending",
-                ).length;
-                const accepted = invitations.filter(
-                    (i: any) => i.status === "accepted",
-                ).length;
-                const expired = invitations.filter(
-                    (i: any) => i.status === "expired",
-                ).length;
-                const revoked = invitations.filter(
-                    (i: any) => i.status === "revoked",
-                ).length;
+                const [totalRes, pendingRes, acceptedRes, expiredRes, revokedRes]: any[] =
+                    await Promise.all([
+                        client.get("/company-invitations", { params: { limit: 1 } }),
+                        client.get("/company-invitations", { params: { status: "pending", limit: 1 } }),
+                        client.get("/company-invitations", { params: { status: "accepted", limit: 1 } }),
+                        client.get("/company-invitations", { params: { status: "expired", limit: 1 } }),
+                        client.get("/company-invitations", { params: { status: "revoked", limit: 1 } }),
+                    ]);
 
                 if (!cancelled) {
                     setStats({
-                        total:
-                            response.pagination?.total || invitations.length,
-                        pending,
-                        accepted,
-                        expired,
-                        revoked,
+                        total: totalRes.pagination?.total || 0,
+                        pending: pendingRes.pagination?.total || 0,
+                        accepted: acceptedRes.pagination?.total || 0,
+                        expired: expiredRes.pagination?.total || 0,
+                        revoked: revokedRes.pagination?.total || 0,
                     });
                 }
             } catch (error) {

@@ -14,7 +14,23 @@ export function registerCompanyRoutes(
     app.get('/api/v2/companies', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const filters = request.query as any;
+            const query = request.query as any;
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
+            const filters = { ...query, ...parsedFilters };
+            delete filters.filters;
+
             const result = await config.companyService.getCompanies(clerkUserId, filters);
             return reply.send(result);
         } catch (error: any) {
