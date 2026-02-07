@@ -27,12 +27,18 @@ interface NavItem {
 
 // Navigation items organized by section
 const navItems: NavItem[] = [
-    // Main section
+    {
+        href: "/portal/admin",
+        label: "Admin Dashboard",
+        icon: "fa-gauge-high",
+        roles: ["platform_admin"],
+        section: "main",
+    },
     {
         href: "/portal/dashboard",
         label: "Dashboard",
         icon: "fa-house",
-        roles: ["all"],
+        roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "main",
         mobileDock: true,
     },
@@ -149,6 +155,19 @@ const navItems: NavItem[] = [
         section: "management",
         mobileDock: false,
     },
+    {
+        href: "/portal/placements-new",
+        label: "Placements (New)",
+        icon: "fa-trophy",
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
+        section: "management",
+        mobileDock: false,
+    },
 
     // Settings section
     {
@@ -194,16 +213,6 @@ const navItems: NavItem[] = [
                 mobileDock: false,
             },
         ],
-    },
-];
-
-const adminNavItems: NavItem[] = [
-    {
-        href: "/portal/admin",
-        label: "Admin Dashboard",
-        icon: "fa-gauge-high",
-        roles: ["platform_admin"],
-        section: "main",
     },
 ];
 
@@ -565,23 +574,6 @@ export function Sidebar() {
                                 ))}
                             </div>
                         )}
-
-                        {/* Admin Section */}
-                        {isAdmin && adminNavItems.length > 0 && (
-                            <div>
-                                <SectionHeader title="Platform" />
-                                {adminNavItems.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            pathname.startsWith(item.href + "/")
-                                        }
-                                    />
-                                ))}
-                            </div>
-                        )}
                     </nav>
                 </aside>
             </div>
@@ -616,8 +608,7 @@ export function Sidebar() {
                         const moreItems = navItems.filter(
                             (i) => !i.mobileDock && filterByRole(i),
                         );
-                        const adminItems = isAdmin ? adminNavItems : [];
-                        const allMoreItems = [...moreItems, ...adminItems];
+                        const allMoreItems = [...moreItems];
 
                         dockItems.push(
                             <details
