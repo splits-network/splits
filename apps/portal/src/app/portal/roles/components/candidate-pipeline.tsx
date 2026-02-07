@@ -5,8 +5,8 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import StageChangeDropdown from "./stage-change-dropdown";
-import HireModal from "./hire-modal";
-import PreScreenRequestModal from "./pre-screen-request-modal";
+import HireModal from "./modals/hire-modal";
+import PreScreenRequestModal from "./modals/pre-screen-request-modal";
 import DocumentList from "@/components/document-list";
 import type { ApplicationStage } from "@splits-network/shared-types";
 

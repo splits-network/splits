@@ -5,8 +5,8 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { Job } from "./types";
 import DetailHeader from "./detail-header";
-import RoleWizardModal from "../role-wizard-modal";
-import RoleDetailsView from "../role-details-view";
+import RoleWizardModal from "../modals/role-wizard-modal";
+import DetailsView from "../details-view";
 
 interface DetailPanelProps {
     id: string | null;
@@ -110,7 +110,7 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
             <DetailHeader job={job} onClose={onClose} onEdit={handleEdit} />
 
             <div className="p-6">
-                <RoleDetailsView
+                <DetailsView
                     job={job}
                     loading={loading}
                     compact={false}

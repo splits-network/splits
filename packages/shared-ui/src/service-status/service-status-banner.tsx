@@ -77,7 +77,7 @@ export function ServiceStatusBanner({
         unhealthyCount > 3 ? ` and ${unhealthyCount - 3} more` : "";
 
     return (
-        <div className="w-full p-4 bg-base-100 text-error border-b-4 border-error/20">
+        <div className="w-full p-2 text-error border-b-4 border-error/20">
             <div className="container mx-auto">
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">

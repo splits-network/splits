@@ -10,8 +10,8 @@ import {
     ExpandedDetailItem,
     ExpandedDetailSection,
 } from "@/components/ui/tables";
-import type { Job } from "./role-card";
-import RoleActionsToolbar from "./role-actions-toolbar";
+import type { Job } from "./card";
+import RoleActionsToolbar from "./actions-toolbar";
 
 // ===== TYPES =====
 
@@ -23,7 +23,7 @@ interface Badge {
     animated?: boolean;
 }
 
-interface RoleTableRowProps {
+interface TableRowProps {
     job: Job;
     allJobs: Job[];
     canManageRole: boolean | undefined;
@@ -34,14 +34,14 @@ interface RoleTableRowProps {
 
 // ===== COMPONENT =====
 
-export function RoleTableRow({
+export function TableRow({
     job,
     allJobs,
     canManageRole,
     onEditRole,
     onViewDetails,
     onViewPipeline,
-}: RoleTableRowProps) {
+}: TableRowProps) {
     const badges = getRoleBadges(job, allJobs);
     const maxPayout = job.salary_max
         ? Math.round((job.fee_percentage * job.salary_max) / 100)

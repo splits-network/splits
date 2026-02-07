@@ -5,12 +5,12 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
-import { FormData, Company } from "./wizard-steps/types";
-import Step1BasicInfo from "./wizard-steps/step-1-basic-info";
-import Step2Compensation from "./wizard-steps/step-2-compensation";
-import Step3Descriptions from "./wizard-steps/step-3-descriptions";
-import Step4Requirements from "./wizard-steps/step-4-requirements";
-import Step5PreScreenQuestions from "./wizard-steps/step-5-pre-screen-questions";
+import { FormData, Company } from "../wizards/wizard-steps/types";
+import Step1BasicInfo from "../wizards/wizard-steps/step-1-basic-info";
+import Step2Compensation from "../wizards/wizard-steps/step-2-compensation";
+import Step3Descriptions from "../wizards/wizard-steps/step-3-descriptions";
+import Step4Requirements from "../wizards/wizard-steps/step-4-requirements";
+import Step5PreScreenQuestions from "../wizards/wizard-steps/step-5-pre-screen-questions";
 
 interface RoleWizardModalProps {
     isOpen: boolean;
@@ -29,13 +29,20 @@ export default function RoleWizardModal({
 }: RoleWizardModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, isCompanyUser, isLoading: profileLoading } = useUserProfile();
+    const {
+        profile,
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        isLoading: profileLoading,
+    } = useUserProfile();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
-    const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] = useState(false);
+    const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] =
+        useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         // Step 1
@@ -180,10 +187,14 @@ export default function RoleWizardModal({
                     try {
                         const response = await client.get<{
                             data: Company[];
-                        }>("/recruiter-companies/manageable-companies-with-details");
+                        }>(
+                            "/recruiter-companies/manageable-companies-with-details",
+                        );
                         const manageableCompanies = response.data || [];
                         setCompanies(manageableCompanies);
-                        setIsRecruiterWithCompanyAccess(manageableCompanies.length > 0);
+                        setIsRecruiterWithCompanyAccess(
+                            manageableCompanies.length > 0,
+                        );
 
                         if (manageableCompanies.length === 1) {
                             // Auto-select if only one company
@@ -193,7 +204,10 @@ export default function RoleWizardModal({
                             }));
                         }
                     } catch (err: any) {
-                        console.error("Failed to load manageable companies:", err);
+                        console.error(
+                            "Failed to load manageable companies:",
+                            err,
+                        );
                         setCompanies([]);
                     }
                 } else if (isCompanyUser) {
@@ -244,7 +258,15 @@ export default function RoleWizardModal({
         }
 
         loadCompanies();
-    }, [isOpen, profileLoading, isAdmin, isRecruiter, isCompanyUser, profile, getToken]);
+    }, [
+        isOpen,
+        profileLoading,
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        profile,
+        getToken,
+    ]);
 
     // Reset form when modal opens
     useEffect(() => {
@@ -480,7 +502,10 @@ export default function RoleWizardModal({
                                     setFormData={setFormData}
                                     companies={companies}
                                     isAdmin={isAdmin}
-                                    isRecruiterWithMultipleCompanies={isRecruiterWithCompanyAccess && companies.length > 1}
+                                    isRecruiterWithMultipleCompanies={
+                                        isRecruiterWithCompanyAccess &&
+                                        companies.length > 1
+                                    }
                                 />
                             )}
                             {currentStep === 2 && (

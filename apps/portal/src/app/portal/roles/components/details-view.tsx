@@ -6,7 +6,7 @@ import { LoadingState } from "@splits-network/shared-ui";
 
 // ===== TYPES =====
 
-interface RoleDetailsViewProps {
+interface DetailsViewProps {
     job: Job;
     loading?: boolean;
     compact?: boolean;
@@ -102,14 +102,14 @@ function formatQuestionType(type: string): string {
 
 // ===== MAIN COMPONENT =====
 
-export default function RoleDetailsView({
+export default function DetailsView({
     job,
     loading = false,
     compact = false,
     tabbed = false,
     showSections = {},
     onRefresh,
-}: RoleDetailsViewProps) {
+}: DetailsViewProps) {
     const [descriptionTab, setDescriptionTab] = useState<
         "recruiter" | "candidate"
     >("recruiter");
@@ -380,7 +380,9 @@ function QuickStatsSection({ job, compact }: { job: Job; compact: boolean }) {
                         Posted
                     </div>
                     <div className="font-medium text-sm">
-                        {job.created_at ? formatRelativeTime(job.created_at) : "N/A"}
+                        {job.created_at
+                            ? formatRelativeTime(job.created_at)
+                            : "N/A"}
                     </div>
                 </div>
 
@@ -761,7 +763,8 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
                                 e.currentTarget.style.display = "none";
                                 const parent = e.currentTarget.parentElement;
                                 if (parent) {
-                                    parent.innerHTML = '<i class="fa-duotone fa-building text-base-content/30"></i>';
+                                    parent.innerHTML =
+                                        '<i class="fa-duotone fa-building text-base-content/30"></i>';
                                 }
                             }}
                         />
@@ -778,21 +781,40 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
                     {/* Company Info Badges - always show all */}
                     <div className="flex flex-wrap gap-2 mb-2">
                         {/* Industry */}
-                        <span className={job.company.industry ? "badge badge-primary" : "badge badge-ghost"}>
+                        <span
+                            className={
+                                job.company.industry
+                                    ? "badge badge-primary"
+                                    : "badge badge-ghost"
+                            }
+                        >
                             <i className="fa-duotone fa-industry mr-1" />
                             {job.company.industry || "Not provided"}
                         </span>
 
                         {/* Company Size */}
-                        <span className={job.company.company_size ? "badge badge-secondary" : "badge badge-ghost"}>
+                        <span
+                            className={
+                                job.company.company_size
+                                    ? "badge badge-secondary"
+                                    : "badge badge-ghost"
+                            }
+                        >
                             <i className="fa-duotone fa-users mr-1" />
                             {job.company.company_size || "Not provided"}
                         </span>
 
                         {/* Location */}
-                        <span className={job.company.headquarters_location ? "badge badge-accent" : "badge badge-ghost"}>
+                        <span
+                            className={
+                                job.company.headquarters_location
+                                    ? "badge badge-accent"
+                                    : "badge badge-ghost"
+                            }
+                        >
                             <i className="fa-duotone fa-location-dot mr-1" />
-                            {job.company.headquarters_location || "Not provided"}
+                            {job.company.headquarters_location ||
+                                "Not provided"}
                         </span>
                     </div>
 

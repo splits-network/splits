@@ -2,17 +2,38 @@
 
 import { useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import RolesList from "./components/roles-list";
-import BrowseRolesClient from "./components/browse/browse-roles-client";
+import List from "./components/list";
+import BrowseRolesView from "./components/browse/browse-view";
+import { HeaderFilters } from "./components/header-filters";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode, ViewMode } from "@/hooks/use-view-mode";
 import { LoadingState } from "@splits-network/shared-ui";
+import {
+    RolesFilterProvider,
+    useRolesFilter,
+} from "./contexts/roles-filter-context";
 
-export default function RolesPage() {
+function RolesPageContent() {
     const router = useRouter();
     const pathname = usePathname();
     const { viewMode, setViewMode, isLoaded } = useViewMode("rolesViewMode");
+
+    // Get filter state from context to pass to header filters
+    const {
+        profileLoading,
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        loading,
+        canCreateRole,
+        showJobAssignmentFilter,
+        refresh,
+        showStats,
+        setShowStats,
+    } = useRolesFilter();
 
     // Clear URL params when switching views to prevent stale selection state
     const handleViewChange = useCallback(
@@ -25,7 +46,7 @@ export default function RolesPage() {
     );
 
     // Prevent hydration mismatch by not rendering until loaded
-    if (!isLoaded) {
+    if (!isLoaded || profileLoading) {
         return <LoadingState message="Loading roles..." />;
     }
 
@@ -33,21 +54,42 @@ export default function RolesPage() {
         <>
             <PageTitle
                 title="Roles"
-                subtitle={
-                    viewMode === "browse"
-                        ? "Browse marketplace opportunities"
-                        : "Browse and manage job opportunities"
-                }
+                subtitle={"Browse and manage job opportunities"}
             >
-                <ViewToggle viewMode={viewMode} onViewChange={handleViewChange} />
+                <HeaderFilters
+                    viewMode={viewMode}
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    clearSearch={clearSearch}
+                    filters={filters}
+                    setFilter={setFilter}
+                    loading={loading}
+                    canCreateRole={canCreateRole}
+                    showJobAssignmentFilter={showJobAssignmentFilter}
+                    refresh={refresh}
+                    showStats={showStats}
+                    setShowStats={setShowStats}
+                />
+                <ViewToggle
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
+                />
             </PageTitle>
             <div className="space-y-6">
                 {viewMode === "browse" ? (
-                    <BrowseRolesClient />
+                    <BrowseRolesView />
                 ) : (
-                    <RolesList view={viewMode} />
+                    <List view={viewMode} />
                 )}
             </div>
         </>
+    );
+}
+
+export default function RolesPage() {
+    return (
+        <RolesFilterProvider>
+            <RolesPageContent />
+        </RolesFilterProvider>
     );
 }

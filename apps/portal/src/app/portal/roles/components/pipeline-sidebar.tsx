@@ -4,7 +4,7 @@ import CandidatePipeline from "./candidate-pipeline";
 
 // ===== TYPES =====
 
-interface RolePipelineSidebarProps {
+interface PipelineSidebarProps {
     roleId: string | null;
     roleTitle?: string;
     onClose: () => void;
@@ -12,11 +12,11 @@ interface RolePipelineSidebarProps {
 
 // ===== COMPONENT =====
 
-export default function RolePipelineSidebar({
+export default function PipelineSidebar({
     roleId,
     roleTitle,
     onClose,
-}: RolePipelineSidebarProps) {
+}: PipelineSidebarProps) {
     if (!roleId) {
         return null;
     }
