@@ -339,7 +339,7 @@ export class PlacementServiceV2 {
         // Get job data with company_id and job owner
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('id, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days')
+            .select('id, title, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days')
             .eq('id', application.job_id)
             .single();
 
@@ -347,9 +347,23 @@ export class PlacementServiceV2 {
             throw new Error(`Job ${application.job_id} not found`);
         }
 
+        // Get candidate data for denormalized fields
+        const { data: candidate } = await this.supabase
+            .from('candidates')
+            .select('full_name, email')
+            .eq('id', application.candidate_id)
+            .single();
+
+        // Get company data for denormalized fields
+        const { data: company } = await this.supabase
+            .from('companies')
+            .select('name')
+            .eq('id', job.company_id)
+            .single();
+
         // Get all 5 recruiter role IDs from referential data (all nullable)
         const candidateRecruiterId = application.candidate_recruiter_id;  // From application
-        const companyRecruiterId = job.company_recruiter_id;              // From job  
+        const companyRecruiterId = job.company_recruiter_id;              // From job
         const jobOwnerRecruiterId = job.job_owner_recruiter_id;           // From job
 
         // Get sourcer IDs from dedicated tables (all nullable)
@@ -381,7 +395,7 @@ export class PlacementServiceV2 {
             application_id: application.id,
             candidate_id: application.candidate_id,
             job_id: application.job_id,
-            company_id: job.company_id, // Add missing company_id from job
+            company_id: job.company_id,
 
             // Snapshot all 5 role IDs from referential data (all nullable)
             candidate_recruiter_id: candidateRecruiterId,
@@ -390,13 +404,20 @@ export class PlacementServiceV2 {
             candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
             company_sourcer_recruiter_id: companySourcerRecruiterId,
 
+            // Denormalized lookup fields
+            candidate_name: candidate?.full_name || null,
+            candidate_email: candidate?.email || null,
+            job_title: job.title || null,
+            company_name: company?.name || null,
+
             // Money details
             salary: salary,
             fee_percentage: feePercentage,
             placement_fee: placementFee,
+            fee_amount: placementFee,
 
             state: 'active',
-            start_date: startDate, // Default to current date, can be updated later
+            start_date: startDate,
             guarantee_days: guaranteeDays,
             guarantee_expires_at: guaranteeExpiresAt,
             created_at: new Date(),

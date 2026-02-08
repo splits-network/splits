@@ -490,39 +490,76 @@ export default async function ApplicationDetailPage({
                     )}
 
                     {/* Documents */}
-                    {application.documents && application.documents.length > 0 && (
-                        <div className="card bg-base-200 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title mb-4">
-                                    <i className="fa-duotone fa-regular fa-file"></i>
-                                    Documents
-                                </h2>
+                    {application.documents && application.documents.length > 0 && (() => {
+                        const companyDocTypes = ['offer_letter', 'employment_contract', 'benefits_summary', 'company_handbook', 'nda', 'company_document'];
+                        const candidateDocs = application.documents.filter((doc: any) => !companyDocTypes.includes(doc.document_type));
+                        const companyDocs = application.documents.filter((doc: any) => companyDocTypes.includes(doc.document_type));
+                        const isOfferStage = application.stage === 'offer';
 
-                                <div className="space-y-2">
-                                    {application.documents.map((doc: any) => (
-                                        <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-300 hover:bg-base-300 transition-colors">
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <i className={`fa-duotone fa-regular ${doc.document_type === 'resume' ? 'fa-file-text' :
-                                                    doc.document_type === 'cover_letter' ? 'fa-file-lines' :
-                                                        'fa-file'
-                                                    } text-primary`}></i>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-medium truncate">{doc.file_name}</div>
-                                                    <div className="text-sm text-base-content/60">
-                                                        {doc.document_type.replace('_', ' ').toUpperCase()}
-                                                        {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {doc.metadata?.is_primary && (
-                                                <span className="badge badge-primary badge-sm">Primary</span>
-                                            )}
+                        const renderDoc = (doc: any) => (
+                            <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-300 hover:bg-base-300 transition-colors">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <i className={`fa-duotone fa-regular ${
+                                        doc.document_type === 'resume' ? 'fa-file-text' :
+                                        doc.document_type === 'cover_letter' ? 'fa-file-lines' :
+                                        doc.document_type === 'offer_letter' ? 'fa-file-signature' :
+                                        doc.document_type === 'employment_contract' ? 'fa-file-contract' :
+                                        companyDocTypes.includes(doc.document_type) ? 'fa-building' :
+                                        'fa-file'
+                                    } text-primary`}></i>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-medium truncate">{doc.file_name}</div>
+                                        <div className="text-sm text-base-content/60">
+                                            {doc.document_type.replace(/_/g, ' ').toUpperCase()}
+                                            {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}
                                         </div>
-                                    ))}
+                                    </div>
                                 </div>
+                                {doc.metadata?.is_primary && (
+                                    <span className="badge badge-primary badge-sm">Primary</span>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        );
+
+                        return (
+                            <div className="space-y-4">
+                                {companyDocs.length > 0 && (
+                                    <div className={`card shadow ${isOfferStage ? 'bg-success/10 border-2 border-success' : 'bg-base-200'}`}>
+                                        <div className="card-body">
+                                            {isOfferStage && (
+                                                <div className="alert alert-success mb-3">
+                                                    <i className="fa-duotone fa-regular fa-party-horn"></i>
+                                                    <span>You have documents from the company to review! Please check your offer details below.</span>
+                                                </div>
+                                            )}
+                                            <h2 className="card-title mb-4">
+                                                <i className="fa-duotone fa-regular fa-building"></i>
+                                                Company Documents
+                                                {isOfferStage && <span className="badge badge-success">Action Required</span>}
+                                            </h2>
+                                            <div className="space-y-2">
+                                                {companyDocs.map(renderDoc)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {candidateDocs.length > 0 && (
+                                    <div className="card bg-base-200 shadow">
+                                        <div className="card-body">
+                                            <h2 className="card-title mb-4">
+                                                <i className="fa-duotone fa-regular fa-file"></i>
+                                                Your Documents
+                                            </h2>
+                                            <div className="space-y-2">
+                                                {candidateDocs.map(renderDoc)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
 
                     {/* Application Notes */}
                     {(application.notes || application.recruiter_notes) && (

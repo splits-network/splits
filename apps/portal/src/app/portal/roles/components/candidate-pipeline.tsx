@@ -4,23 +4,12 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { useUserProfile } from "@/contexts";
 import StageChangeDropdown from "./stage-change-dropdown";
-import HireModal from "./modals/hire-modal";
-import PreScreenRequestModal from "./modals/pre-screen-request-modal";
+import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import DocumentList from "@/components/document-list";
+import type { Application } from "@/app/portal/applications/types";
 import type { ApplicationStage } from "@splits-network/shared-types";
-
-interface Application {
-    id: string;
-    candidate_id: string;
-    job_id: string;
-    recruiter_id?: string | null;
-    stage: ApplicationStage;
-    status: string;
-    notes?: string;
-    created_at: string;
-    candidate?: any;
-}
 
 const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
     { key: "recruiter_proposed", label: "Proposed", color: "badge-secondary" },
@@ -43,21 +32,16 @@ interface CandidatePipelineProps {
 export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { isAdmin } = useUserProfile();
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedStage, setSelectedStage] = useState<ApplicationStage | null>(
         null,
     );
     const [showNeedsPreScreen, setShowNeedsPreScreen] = useState(false);
-    const [hireApplication, setHireApplication] = useState<Application | null>(
-        null,
-    );
-    const [preScreenApplication, setPreScreenApplication] =
-        useState<Application | null>(null);
     const [expandedCandidate, setExpandedCandidate] = useState<string | null>(
         null,
     );
-    const [companyId, setCompanyId] = useState<string>("");
 
     useEffect(() => {
         fetchApplications();
@@ -74,17 +58,14 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.get("/applications", {
-                params: { filters: { job_id: roleId } },
+                params: {
+                    filters: { job_id: roleId },
+                    include: "candidate,job,company",
+                },
             });
             // V2 API returns { data: [...] }
             const applicationsData = response.data || [];
             setApplications(applicationsData);
-
-            // Get company ID from first application (if any)
-            if (applicationsData.length > 0) {
-                const jobResponse: any = await client.get(`/jobs/${roleId}`);
-                setCompanyId(jobResponse.data?.company_id || "");
-            }
         } catch (error) {
             console.error("Failed to fetch applications:", error);
         } finally {
@@ -117,14 +98,14 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
     const filteredApplications = showNeedsPreScreen
         ? applications.filter(
-              (app) => !app.recruiter_id && app.stage === "submitted",
+              (app) => !app.candidate_recruiter_id && app.stage === "submitted",
           )
         : selectedStage
           ? applications.filter((app) => app.stage === selectedStage)
           : applications;
 
     const needsPreScreenCount = applications.filter(
-        (app) => !app.recruiter_id && app.stage === "submitted",
+        (app) => !app.candidate_recruiter_id && app.stage === "submitted",
     ).length;
 
     if (loading) {
@@ -243,7 +224,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                             <span className="">
                                                                 {(() => {
                                                                     const names =
-                                                                        application.candidate.full_name
+                                                                        (application.candidate?.full_name ?? "")
                                                                             .split(
                                                                                 " ",
                                                                             )
@@ -271,69 +252,52 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                             {
                                                                 application
                                                                     .candidate
-                                                                    .full_name
+                                                                    ?.full_name ?? "Unknown"
                                                             }
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <StageChangeDropdown
-                                                    currentStage={
-                                                        application.stage
-                                                    }
-                                                    stages={stages}
-                                                    onStageChange={(newStage) =>
-                                                        handleStageChange(
-                                                            application.id,
-                                                            newStage,
-                                                        )
-                                                    }
-                                                />
+                                                {isAdmin ? (
+                                                    <StageChangeDropdown
+                                                        currentStage={
+                                                            application.stage as ApplicationStage
+                                                        }
+                                                        stages={stages}
+                                                        onStageChange={(newStage) =>
+                                                            handleStageChange(
+                                                                application.id,
+                                                                newStage,
+                                                            )
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <span className={`badge ${stage?.color || "badge-ghost"}`}>
+                                                        {stage?.label || application.stage}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="max-w-xs truncate">
                                                 {application.notes || "-"}
                                             </td>
                                             <td>
-                                                {new Date(
-                                                    application.created_at,
-                                                ).toLocaleDateString()}
+                                                {application.created_at
+                                                    ? new Date(
+                                                          application.created_at,
+                                                      ).toLocaleDateString()
+                                                    : "-"}
                                             </td>
                                             <td>
-                                                <div className="flex gap-2">
-                                                    {!application.recruiter_id &&
-                                                        application.stage ===
-                                                            "submitted" && (
-                                                            <button
-                                                                className="btn btn-warning btn-xs gap-1"
-                                                                onClick={() =>
-                                                                    setPreScreenApplication(
-                                                                        application,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <i className="fa-duotone fa-regular fa-user-check"></i>
-                                                                Request
-                                                                Pre-Screen
-                                                            </button>
-                                                        )}
-                                                    {application.stage ===
-                                                        "offer" &&
-                                                        application.status ===
-                                                            "active" && (
-                                                            <button
-                                                                className="btn btn-success btn-xs gap-1"
-                                                                onClick={() =>
-                                                                    setHireApplication(
-                                                                        application,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <i className="fa-duotone fa-regular fa-check"></i>
-                                                                Hire
-                                                            </button>
-                                                        )}
-                                                </div>
+                                                <ActionsToolbar
+                                                    application={application}
+                                                    variant="icon-only"
+                                                    size="xs"
+                                                    showActions={{
+                                                        viewDetails: false,
+                                                    }}
+                                                    onRefresh={fetchApplications}
+                                                />
                                             </td>
                                         </tr>
                                         {isExpanded && (
@@ -350,7 +314,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                         <DocumentList
                                                             entityType="candidate"
                                                             entityId={
-                                                                application.candidate_id
+                                                                application.candidate_id!
                                                             }
                                                             showUpload={true}
                                                         />
@@ -384,29 +348,6 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                 </div>
             )}
 
-            {hireApplication && (
-                <HireModal
-                    application={hireApplication}
-                    onClose={() => setHireApplication(null)}
-                    onSuccess={() => {
-                        setHireApplication(null);
-                        fetchApplications();
-                    }}
-                />
-            )}
-
-            {preScreenApplication && (
-                <PreScreenRequestModal
-                    application={preScreenApplication}
-                    jobId={roleId}
-                    companyId={companyId}
-                    onClose={() => setPreScreenApplication(null)}
-                    onSuccess={() => {
-                        setPreScreenApplication(null);
-                        fetchApplications();
-                    }}
-                />
-            )}
         </>
     );
 }

@@ -13,12 +13,13 @@ import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
 import HireModal from "@/app/portal/roles/components/modals/hire-modal";
+import PreScreenRequestModal from "@/app/portal/roles/components/modals/pre-screen-request-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
     formatApplicationNote,
 } from "@/app/portal/applications/lib/permission-utils";
-import { useFilter } from "../../contexts/filter-context";
+import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
 import type { ApplicationStage } from "@splits-network/shared-types";
 
@@ -33,6 +34,7 @@ export interface ActionsToolbarProps {
         addNote?: boolean;
         advanceStage?: boolean;
         reject?: boolean;
+        requestPrescreen?: boolean;
     };
     onViewDetails?: (applicationId: string) => void;
     onMessage?: (
@@ -41,6 +43,8 @@ export interface ActionsToolbarProps {
         candidateUserId: string,
         context?: any,
     ) => void;
+    /** Called after any mutation. Falls back to FilterContext.refresh() when inside a FilterProvider. */
+    onRefresh?: () => void;
     className?: string;
 }
 
@@ -52,18 +56,21 @@ export default function ActionsToolbar({
     showActions = {},
     onViewDetails,
     onMessage,
+    onRefresh,
     className = "",
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const toast = useToast();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
-    const { refresh } = useFilter();
+    const filterContext = useFilterOptional();
+    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [showHireModal, setShowHireModal] = useState(false);
+    const [showPreScreenModal, setShowPreScreenModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -260,6 +267,8 @@ export default function ActionsToolbar({
         advanceStage:
             showActions.advanceStage !== false && permissions.canApprove,
         reject: showActions.reject !== false && permissions.canReject,
+        requestPrescreen:
+            showActions.requestPrescreen !== false && permissions.canRequestPrescreen,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -301,6 +310,19 @@ export default function ActionsToolbar({
                     onSuccess={() => {
                         setShowHireModal(false);
                         toast.success("Candidate hired successfully!");
+                        refresh();
+                    }}
+                />
+            )}
+            {showPreScreenModal && application.job_id && application.job?.company?.id && (
+                <PreScreenRequestModal
+                    application={application}
+                    jobId={application.job_id}
+                    companyId={application.job.company.id}
+                    onClose={() => setShowPreScreenModal(false)}
+                    onSuccess={() => {
+                        setShowPreScreenModal(false);
+                        toast.success("Pre-screen requested successfully!");
                         refresh();
                     }}
                 />
@@ -349,6 +371,16 @@ export default function ActionsToolbar({
                             disabled={actionLoading}
                         >
                             <i className="fa-duotone fa-regular fa-note-sticky" />
+                        </button>
+                    )}
+                    {actions.requestPrescreen && (
+                        <button
+                            onClick={() => setShowPreScreenModal(true)}
+                            className={`btn ${sizeClass} btn-square btn-warning`}
+                            title="Request Pre-Screen"
+                            disabled={actionLoading}
+                        >
+                            <i className="fa-duotone fa-regular fa-user-check" />
                         </button>
                     )}
                     {actions.advanceStage && (
@@ -419,6 +451,16 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-note-sticky" />
                         Add Note
+                    </button>
+                )}
+                {actions.requestPrescreen && (
+                    <button
+                        onClick={() => setShowPreScreenModal(true)}
+                        className={`btn ${sizeClass} btn-warning gap-2`}
+                        disabled={actionLoading}
+                    >
+                        <i className="fa-duotone fa-regular fa-user-check" />
+                        Request Pre-Screen
                     </button>
                 )}
                 {actions.advanceStage && (
