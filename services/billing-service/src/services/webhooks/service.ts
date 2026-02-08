@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/node';
+import { EventPublisher } from '../../v2/shared/events';
 
 /**
  * Webhook Service
@@ -14,7 +15,8 @@ export class WebhookService {
     constructor(
         private supabase: SupabaseClient,
         private logger: Logger,
-        stripeSecretKey?: string
+        stripeSecretKey?: string,
+        private eventPublisher?: EventPublisher
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
             apiVersion: '2025-11-17.clover',
@@ -84,6 +86,15 @@ export class WebhookService {
         const onboarded = !!account.charges_enabled && !!account.payouts_enabled && !!account.details_submitted;
         const onboardedAt = onboarded ? new Date().toISOString() : null;
 
+        // Fetch current status to detect transitions
+        const { data: recruiter } = await this.supabase
+            .from('recruiters')
+            .select('id, stripe_connect_onboarded')
+            .eq('stripe_connect_account_id', account.id)
+            .single();
+
+        const previouslyOnboarded = !!recruiter?.stripe_connect_onboarded;
+
         const { error } = await this.supabase
             .from('recruiters')
             .update({
@@ -95,6 +106,26 @@ export class WebhookService {
 
         if (error) {
             this.logger.error({ err: error, account_id: account.id }, 'Failed to update recruiter connect status');
+            return;
+        }
+
+        // Publish domain events on status transitions
+        if (this.eventPublisher && recruiter?.id) {
+            if (!previouslyOnboarded && onboarded) {
+                await this.eventPublisher.publish('recruiter.stripe_connect_onboarded', {
+                    recruiter_id: recruiter.id,
+                    account_id: account.id,
+                    onboarded_at: onboardedAt,
+                });
+                this.logger.info({ recruiter_id: recruiter.id, account_id: account.id }, 'Published recruiter.stripe_connect_onboarded event');
+            } else if (previouslyOnboarded && !onboarded) {
+                await this.eventPublisher.publish('recruiter.stripe_connect_disabled', {
+                    recruiter_id: recruiter.id,
+                    account_id: account.id,
+                    disabled_reason: (account.requirements as any)?.disabled_reason || 'requirements_changed',
+                });
+                this.logger.info({ recruiter_id: recruiter.id, account_id: account.id }, 'Published recruiter.stripe_connect_disabled event');
+            }
         }
     }
 

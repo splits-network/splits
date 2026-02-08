@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useUserProfile } from "@/contexts";
 import RecruiterSubscriptionSection from "./recruiter-subscription-section";
 import PaymentMethodSection from "./payment-method-section";
 import BillingHistorySection from "./billing-history-section";
+import { ConnectStatusCard } from "@/components/stripe/connect-status-card";
+import { ConnectDrawer } from "@/components/stripe/connect-drawer";
 
 export default function BillingContent() {
     const { profile, isLoading, isRecruiter, isCompanyUser } = useUserProfile();
+    const [connectDrawerOpen, setConnectDrawerOpen] = useState(false);
 
     if (isLoading) {
         return (
@@ -77,57 +81,16 @@ export default function BillingContent() {
 
                 {/* Payout Settings - Recruiters only */}
                 {isRecruiter && (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title">
-                                <i className="fa-duotone fa-regular fa-money-bill-transfer"></i>
-                                Payout Settings
-                            </h2>
-                            <div className="divider my-2"></div>
-
-                            <div className="alert alert-info">
-                                <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                <div>
-                                    <div className="font-semibold">
-                                        Stripe Connect Required
-                                    </div>
-                                    <div className="text-sm">
-                                        Connect your bank account to receive
-                                        payouts for successful placements.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 space-y-4">
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        Bank Account
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input w-full"
-                                        placeholder="Not configured"
-                                        disabled
-                                    />
-                                </fieldset>
-
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        Payout Schedule
-                                    </legend>
-                                    <select className="select w-full" disabled>
-                                        <option>Monthly</option>
-                                        <option>Weekly</option>
-                                    </select>
-                                </fieldset>
-
-                                <button className="btn btn-primary" disabled>
-                                    <i className="fa-duotone fa-regular fa-link"></i>
-                                    Configure Payout Settings
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <>
+                        <ConnectStatusCard
+                            variant="full"
+                            onAction={() => setConnectDrawerOpen(true)}
+                        />
+                        <ConnectDrawer
+                            open={connectDrawerOpen}
+                            onClose={() => setConnectDrawerOpen(false)}
+                        />
+                    </>
                 )}
 
                 {/* Danger Zone - Only for Admins */}

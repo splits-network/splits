@@ -329,6 +329,58 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
             }
         }
     );
+
+    app.post(
+        '/api/v2/stripe/connect/account-session',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/account-session',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect account session');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect account session' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/stripe/connect/dashboard-link',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/dashboard-link',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect dashboard link');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect dashboard link' } });
+            }
+        }
+    );
 }
 
 function registerPayoutTransactionRoutes(app: FastifyInstance, services: ServiceRegistry) {

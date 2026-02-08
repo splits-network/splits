@@ -11,6 +11,7 @@ This document defines the standard response format for all Splits Network APIs.
 ## Executive Summary
 
 All Splits Network backend services MUST return responses in a consistent, predictable format. This ensures:
+
 - **Client simplicity**: Frontend code can unwrap responses uniformly
 - **Type safety**: TypeScript interfaces can be reliably defined
 - **Debugging ease**: Response structure is always known
@@ -25,6 +26,7 @@ All Splits Network backend services MUST return responses in a consistent, predi
 We audited all service endpoints across the monorepo:
 
 **Services Reviewed**:
+
 - ✅ **identity-service**: All endpoints compliant
 - ✅ **ats-service**: All endpoints compliant
 - ✅ **network-service**: All endpoints compliant
@@ -39,6 +41,7 @@ reply.send({ data: <payload> })
 ```
 
 **Examples from production code**:
+
 - [identity-service/src/routes/users/routes.ts:26](../../services/identity-service/src/routes/users/routes.ts#L26)
 - [ats-service/src/routes/companies/routes.ts:15](../../services/ats-service/src/routes/companies/routes.ts#L15)
 - [network-service/src/routes/recruiters/routes.ts:22](../../services/network-service/src/routes/recruiters/routes.ts#L22)
@@ -67,13 +70,13 @@ All successful API responses MUST use this format:
 
 ```json
 {
-  "data": {
-    "id": "11ce3517-2925-4f62-8de2-3dceec3ec1f2",
-    "user_id": "41a7e453-e648-4368-aab0-1ee48eedf5b9",
-    "bio": "Experienced tech recruiter",
-    "status": "active",
-    "created_at": "2025-12-01T10:30:00Z"
-  }
+    "data": {
+        "id": "11ce3517-2925-4f62-8de2-3dceec3ec1f2",
+        "user_id": "41a7e453-e648-4368-aab0-1ee48eedf5b9",
+        "bio": "Experienced tech recruiter",
+        "status": "active",
+        "created_at": "2025-12-01T10:30:00Z"
+    }
 }
 ```
 
@@ -81,10 +84,10 @@ All successful API responses MUST use this format:
 
 ```json
 {
-  "data": [
-    { "id": "1", "name": "Company A" },
-    { "id": "2", "name": "Company B" }
-  ]
+    "data": [
+        { "id": "1", "name": "Company A" },
+        { "id": "2", "name": "Company B" }
+    ]
 }
 ```
 
@@ -92,7 +95,7 @@ All successful API responses MUST use this format:
 
 ```json
 {
-  "data": []
+    "data": []
 }
 ```
 
@@ -102,7 +105,7 @@ For simple boolean/status checks:
 
 ```json
 {
-  "data": { "is_active": true }
+    "data": { "is_active": true }
 }
 ```
 
@@ -114,7 +117,7 @@ For endpoints that may return nothing (optional lookups):
 
 ```json
 {
-  "data": null
+    "data": null
 }
 ```
 
@@ -153,14 +156,14 @@ Error responses MUST use a different format to distinguish them from successful 
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "user_id is required",
-    "details": {
-      "field": "user_id",
-      "constraint": "required"
+    "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "user_id is required",
+        "details": {
+            "field": "user_id",
+            "constraint": "required"
+        }
     }
-  }
 }
 ```
 
@@ -168,14 +171,14 @@ Error responses MUST use a different format to distinguish them from successful 
 
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Recruiter not found",
-    "details": {
-      "resource": "Recruiter",
-      "id": "invalid-id-123"
+    "error": {
+        "code": "NOT_FOUND",
+        "message": "Recruiter not found",
+        "details": {
+            "resource": "Recruiter",
+            "id": "invalid-id-123"
+        }
     }
-  }
 }
 ```
 
@@ -183,10 +186,10 @@ Error responses MUST use a different format to distinguish them from successful 
 
 ```json
 {
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Missing or invalid authorization header"
-  }
+    "error": {
+        "code": "UNAUTHORIZED",
+        "message": "Missing or invalid authorization header"
+    }
 }
 ```
 
@@ -201,14 +204,14 @@ All services use Fastify with the following patterns:
 #### ✅ Correct Implementation
 
 ```typescript
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 
-app.get('/recruiters/:id', async (request, reply) => {
+app.get("/recruiters/:id", async (request, reply) => {
     const recruiter = await service.getRecruiterById(request.params.id);
     return reply.send({ data: recruiter });
 });
 
-app.post('/recruiters', async (request, reply) => {
+app.post("/recruiters", async (request, reply) => {
     const recruiter = await service.createRecruiter(request.body);
     return reply.status(201).send({ data: recruiter });
 });
@@ -233,13 +236,13 @@ The API Gateway uses `ServiceClient` to proxy requests to backend services. It r
 
 ```typescript
 // From services/api-gateway/src/routes/recruiter-candidates/routes.ts
-app.get('/api/network/recruiters/:id', async (request, reply) => {
+app.get("/api/network/recruiters/:id", async (request, reply) => {
     const data = await networkService().get(
         `/recruiters/${request.params.id}`,
         undefined,
-        correlationId
+        correlationId,
     );
-    return reply.send(data);  // Already has { data: ... } format
+    return reply.send(data); // Already has { data: ... } format
 });
 ```
 
@@ -254,15 +257,15 @@ Frontend API clients MUST unwrap the `data` envelope:
 export async function fetchApi<T>(
     endpoint: string,
     options?: RequestInit,
-    authToken?: string | null
+    authToken?: string | null,
 ): Promise<T> {
     const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(options?.headers || {}),
     };
 
     if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers["Authorization"] = `Bearer ${authToken}`;
     }
 
     const response = await fetch(`${apiUrl}${endpoint}`, {
@@ -277,12 +280,12 @@ export async function fetchApi<T>(
     }
 
     const json = await response.json();
-    
+
     // Unwrap the data envelope
-    if (json && typeof json === 'object' && 'data' in json) {
+    if (json && typeof json === "object" && "data" in json) {
         return json.data as T;
     }
-    
+
     return json as T;
 }
 ```
@@ -320,8 +323,8 @@ For binary file responses (CSV exports, PDFs, etc.), use appropriate `Content-Ty
 
 ```typescript
 reply
-    .header('Content-Type', 'text/csv')
-    .header('Content-Disposition', 'attachment; filename="export.csv"')
+    .header("Content-Type", "text/csv")
+    .header("Content-Disposition", 'attachment; filename="export.csv"')
     .send(csvBuffer);
 ```
 
@@ -342,8 +345,8 @@ System endpoints like `/health` or `/ready` may use simplified formats:
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2025-12-18T10:00:00Z"
+    "status": "ok",
+    "timestamp": "2025-12-18T10:00:00Z"
 }
 ```
 
@@ -380,13 +383,15 @@ While HTTP status codes indicate success/failure, the response body structure mu
 ### Why Not Versioned Envelopes?
 
 Considered:
+
 ```json
 { "version": "1.0", "data": {...} }
 ```
 
 Rejected because:
+
 - Adds complexity for minimal benefit in Phase 1
-- API versioning should be done via URL path (`/v1/`, `/v2/`) or headers
+- API versioning should be done via URL path (`/v1/`, `/api/v2/`) or headers
 - Envelope format itself is unlikely to change
 
 ---
@@ -396,6 +401,7 @@ Rejected because:
 ### Code Review
 
 All PRs adding or modifying API endpoints MUST:
+
 - Follow this format
 - Include examples in PR description
 - Update API documentation
@@ -407,8 +413,8 @@ Shared test utilities should validate response format:
 ```typescript
 // packages/shared-testing/src/api-test-helpers.ts (future)
 export function expectWrappedResponse(response: any) {
-    expect(response).toHaveProperty('data');
-    expect(response).not.toHaveProperty('error');
+    expect(response).toHaveProperty("data");
+    expect(response).not.toHaveProperty("error");
 }
 ```
 
@@ -425,6 +431,7 @@ A: Wrap it: `{ data: [...] }`. The client will unwrap to get the array.
 
 **Q: What if I need to return multiple top-level properties?**  
 A: Put them inside the `data` object:
+
 ```json
 {
   "data": {

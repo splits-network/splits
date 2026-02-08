@@ -9,11 +9,13 @@
 **Issue**: Billing service maintains both V1 and V2 code simultaneously for webhook compatibility
 
 **Files**:
+
 - `services/billing-service/src/index.ts` (lines 6-8: mixed initialization)
 - `services/billing-service/src/service.ts` (V1 legacy code, marked TODO for removal)
 - `services/billing-service/src/routes/webhooks/routes.ts` (V1 webhook pattern)
 
 **Impact**:
+
 - Increased code complexity and maintenance burden
 - Duplication of repository and service logic
 - Risk of bug fixes being applied only to one version
@@ -28,12 +30,14 @@
 **Issue**: Legacy type definitions remain in multiple files while new database types exist in `./database`
 
 **Files**:
+
 - `packages/shared-types/src/index.ts` (line 7, TODO comment acknowledges the issue)
 - `packages/shared-types/src/models.ts` (legacy duplicate types)
 - `packages/shared-types/src/teams.ts` (legacy duplicate types)
 - `packages/shared-types/src/ats-integrations.ts` (legacy duplicate types)
 
 **Impact**:
+
 - Confusion about which types are source of truth
 - Risk of types diverging between old and new definitions
 - Increased package size
@@ -48,6 +52,7 @@
 **Issue**: Direct `console.log/error/warn/debug` calls remain in multiple service files alongside proper structured logging
 
 **Files**:
+
 - `services/api-gateway/src/routes/v2/ats.ts` (lines 204, 251: console.error debug statements)
 - `services/ats-service/src/v2/applications/repository.ts`
 - `services/ats-service/src/v2/jobs/repository.ts`
@@ -57,6 +62,7 @@
 - And 24 other service files (see grep results)
 
 **Impact**:
+
 - Inconsistent logging format makes debugging harder
 - Debug statements should not be in production code
 - Structured logging (via `shared-logging`) is bypassed
@@ -73,6 +79,7 @@
 **Issue**: Inconsistent path parameter syntax in two application proposal routes
 
 **Files**: `services/api-gateway/src/routes/v2/ats.ts`
+
 - Line 744: `'\api\v2\applications:id/accept-proposal'` (uses backslashes, missing `/`)
 - Line 770: `'\api\v2\applications:id/decline-proposal'` (uses backslashes, missing `/`)
 
@@ -91,10 +98,12 @@
 **Issue**: API Gateway conversion layer in `CLERK-ID-CONVERSION-FIX.md` was implemented but incomplete
 
 **Files**:
+
 - `services/api-gateway/src/clerk-id-converter.ts` (conversion utility)
 - `services/api-gateway/CLERK-ID-CONVERSION-FIX.md` (documentation of fix)
 
 **Impact**:
+
 - Frontend sends Clerk IDs (`user_XXXXX`) but backend expects internal UUIDs
 - Some routes handle conversion, but others don't
 - Creates intermittent failures: some operations work, others fail with UUID validation errors
@@ -113,11 +122,13 @@
 **Risk**: Sensitive data may be leaked via console.error statements left in production
 
 **Files**:
+
 - `services/api-gateway/src/routes/v2/ats.ts` (lines 204, 251: `[DEBUG CANDIDATES]` logs)
 
 **Current mitigation**: These are currently debug logs without sensitive content
 
 **Recommendations**:
+
 1. Remove all debug-prefixed console statements
 2. Add structured logging with appropriate log levels
 3. Never log request/response bodies for sensitive endpoints
@@ -132,20 +143,23 @@
 **Files**: `services/api-gateway/src/helpers/auth-headers.ts` (lines 65-68)
 
 **Code snippet**:
+
 ```typescript
 if (auth.memberships && auth.memberships.length > 0) {
     // Use first membership's org (for now - Phase 1 simplification)
     // TODO: Handle multi-org users in Phase 2
-    headers['x-organization-id'] = auth.memberships[0].organization_id;
+    headers["x-organization-id"] = auth.memberships[0].organization_id;
 }
 ```
 
 **Risk**:
+
 - If user has multiple org memberships, only first org is used
 - Could leak data across orgs if user accidentally has multiple memberships
 - No enforcement at database level
 
 **Recommendations**:
+
 1. Add organization context to JWT claims (Clerk metadata)
 2. Validate org membership on every request
 3. Return error if user has multiple orgs until proper selection UI exists
@@ -159,6 +173,7 @@ if (auth.memberships && auth.memberships.length > 0) {
 **Problem**: Multiple service files exceed 700 lines with complex business logic
 
 **Files**:
+
 - `services/notification-service/src/services/applications/service.ts` (1,346 lines)
 - `services/notification-service/src/consumers/applications/consumer.ts` (1,228 lines)
 - `services/notification-service/src/templates/applications/index.ts` (940 lines)
@@ -168,12 +183,14 @@ if (auth.memberships && auth.memberships.length > 0) {
 - `services/api-gateway/src/routes/v2/billing.ts` (589 lines)
 
 **Impact**:
+
 - Hard to understand and maintain
 - Difficult to test individual features
 - If any single method is slow, entire service suffers
 - N+1 query problems may hide in large files
 
 **Improvement path**:
+
 1. Break applications/service.ts into domain-specific services (e.g., ApplicationCreationService, ApplicationUpdateService)
 2. Extract template generation into separate service
 3. Move notification templates to separate files with smaller index
@@ -186,10 +203,12 @@ if (auth.memberships && auth.memberships.length > 0) {
 **Issue**: Some analytics/stats endpoints may return unbounded result sets
 
 **Files**:
+
 - `services/analytics-service/src/v2/proposal-stats/service.ts` (uses direct repository queries without pagination guidance)
 - `services/analytics-service/src/v2/stats/repository.ts` (may lack pagination)
 
 **Impact**:
+
 - Dashboard pages could time out if proposal counts are high
 - Memory spikes from loading all proposals into memory
 - No streaming or cursor-based pagination implemented
@@ -205,22 +224,26 @@ if (auth.memberships && auth.memberships.length > 0) {
 **Issue**: Proposal state transitions rely on application-level logic without database constraints
 
 **Files**:
+
 - `services/network-service/src/v2/proposals/routes.ts`
 - `services/ats-service/src/v2/applications/service.ts`
 
 **Why fragile**:
+
 - Race conditions if two services update same proposal simultaneously
 - No CHECK constraints enforcing valid state transitions
 - No version/lock column for optimistic concurrency control
 - Network timeouts during state change could leave proposal in intermediate state
 
 **Safe modification**: Before changing proposal state logic, add database constraints:
+
 1. Add `version INTEGER` column for optimistic locking
 2. Add CHECK constraint validating state transitions
 3. Use database transactions with explicit locking (SELECT ... FOR UPDATE)
 4. Document all valid state transitions
 
 **Test coverage gaps**:
+
 - No tests for concurrent state change attempts
 - No tests for network timeout during state change
 - No tests for partial failure recovery
@@ -232,17 +255,20 @@ if (auth.memberships && auth.memberships.length > 0) {
 **Issue**: Invitations table exists but with 0 integration code
 
 **Files**:
+
 - `supabase/migrations/20260201000001_add_company_scoped_invitations.sql` (table definition)
 - No service code exists to create/accept invitations
 - No routes to list/manage invitations
 
 **Why fragile**:
+
 - Table was added but implementation was never started
 - Frontend code may exist expecting endpoints that don't exist
 - New team members cannot be onboarded to companies
 - Clerk organization integration not completed
 
 **Safe modification**:
+
 1. Create `services/identity-service/src/v2/invitations/` with repository/service/routes
 2. Integrate with Clerk's organization invitations API
 3. Add email sending via notification service
@@ -258,17 +284,20 @@ if (auth.memberships && auth.memberships.length > 0) {
 **Files**: `services/billing-service/src/index.ts` (line 143)
 
 **Code**:
+
 ```typescript
-const systemUserId = process.env.SYSTEM_USER_ID || 'system'; // TODO: Create proper system user
+const systemUserId = process.env.SYSTEM_USER_ID || "system"; // TODO: Create proper system user
 ```
 
 **Risk**:
+
 - Automated payout jobs use placeholder system user ID
 - Audit logs show 'system' user instead of actual service that triggered action
 - No way to distinguish service-initiated vs user-initiated changes
 - If code uses this ID for JOINs, queries will fail silently
 
 **Safe modification**:
+
 1. Create system user in database during initialization
 2. Store UUID in environment variable (not string 'system')
 3. Add audit log fields to distinguish service vs user actions
@@ -281,12 +310,14 @@ const systemUserId = process.env.SYSTEM_USER_ID || 'system'; // TODO: Create pro
 **Issue**: Dashboard displays hardcoded zeros and TODOs instead of real metrics
 
 **Files**:
+
 - `apps/portal/src/app/portal/dashboard/components/admin-dashboard.tsx` (lines 104-106)
 - `apps/portal/src/app/portal/dashboard/components/company-dashboard.tsx` (line 206)
 - `apps/portal/src/app/portal/admin/payouts/escrow/page.tsx` (lines 111-112)
 - `apps/portal/src/app/portal/admin/payouts/schedules/page.tsx` (lines 101, 103, 615)
 
 **Code examples**:
+
 ```typescript
 recruiter_satisfaction: 0, // TODO: Add to analytics
 company_satisfaction: 0, // TODO: Add to analytics
@@ -294,14 +325,16 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 ```
 
 **Why fragile**:
+
 - Admin team relies on false data for business decisions
 - Metrics calculation logic doesn't exist
 - No V2 endpoints for health metrics
 - If real data becomes available, code must be rewritten
 
 **Safe modification**:
+
 1. Add analytics calculations to analytics-service
-2. Create `/v2/marketplace-metrics?type=health` endpoint
+2. Create `/api/v2/marketplace-metrics?type=health` endpoint
 3. Update dashboard to fetch from endpoint instead of hardcoded zeros
 4. Add historical metric tracking for trends
 
@@ -312,17 +345,20 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Issue**: `candidate_role_assignments` table was renamed/replaced but legacy code references may remain
 
 **Files**:
+
 - `services/api-gateway/src/routes/v2/ats.ts` (line 43: comment indicates table was dropped)
 - Database migration shows table dropped during "application flow consolidation"
 - Old table name still referenced in shared types potentially
 
 **Why fragile**:
+
 - If old code paths are triggered, queries will fail with "table not found"
 - Frontend may still expect old endpoints
 - Role assignment data may have been lost during consolidation
 - No clear migration path documented for existing applications
 
 **Safe modification**:
+
 1. Verify all old table references are removed from code
 2. Document what happened to role assignment functionality
 3. Ensure proposals table has all necessary fields to replace old functionality
@@ -341,6 +377,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Test coverage**: 0% - No test files exist
 
 **What's not tested**:
+
 - Proposal timeout after 72 hours
 - Multiple proposals timing out in batch
 - Proposals within timeout window (not expired)
@@ -351,6 +388,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 - Partial batch failures
 
 **Risk**:
+
 - Job could fail silently in production
 - Proposals may never expire
 - Database errors could go undetected
@@ -365,6 +403,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Issue**: Most services have minimal or zero integration tests
 
 **Files**:
+
 - `services/notification-service/` (consumers and services untested)
 - `services/ats-service/src/v2/applications/` (core business logic untested)
 - `services/billing-service/` (subscription logic untested)
@@ -373,6 +412,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **What's tested**: Only 1 service has tests (chat-service)
 
 **Coverage**:
+
 - Unit tests for utilities: limited
 - Integration tests with database: missing
 - End-to-end workflow tests: missing
@@ -389,6 +429,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Files**: `services/api-gateway/src/clerk-id-converter.ts`
 
 **What's not tested**:
+
 - Valid Clerk ID detection (format: `user_XXXXX`)
 - Successful conversion through identity service
 - Identity service timeout handling
@@ -397,6 +438,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 - Multiple fields in same body
 
 **Risk**:
+
 - If conversion fails silently, records are created with null/wrong user IDs
 - Email sending stops working without clear error message
 - Debugging is very difficult
@@ -408,12 +450,14 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Issue**: Complex workflows involving multiple services have no tests
 
 **Examples**:
+
 - Application creation → notification → email sending
 - Placement creation → billing/escrow setup → payout scheduling
 - Proposal acceptance → job update → recruiter payment → recruiter notification
 - Job posting → candidate matching → AI review → notification
 
 **Risk**:
+
 - Integration bugs discovered only in production
 - Service dependencies not enforced
 - Event ordering issues not caught
@@ -434,6 +478,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Limit**: Breaks when user belongs to multiple recruiting companies
 
 **Scaling path**:
+
 1. Add organization selection to auth flow
 2. Store selected org in JWT claims
 3. Add org context to all API requests
@@ -451,12 +496,14 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Current approach**: Creates Resend instance once during initialization
 
 **Scaling limits**:
+
 - If Resend service goes down, all emails fail
 - No fallback email provider
 - No retry queue for failed emails (relies on RabbitMQ consumers)
 - Resend API rate limits not enforced in code
 
 **Scaling path**:
+
 1. Add circuit breaker for Resend API
 2. Implement email queue with exponential backoff
 3. Add fallback email provider option
@@ -474,6 +521,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Impact**: Any changes to V1 BillingService affect production
 
 **Migration plan**:
+
 1. Create V2 webhook domain
 2. Migrate Stripe event handlers to V2 service methods
 3. Switch webhook routes to use V2 services
@@ -489,6 +537,7 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 **Risk**: Multiple sources of truth for types
 
 **Impact**:
+
 - Developers unsure which types to use
 - Type changes might not propagate everywhere
 - Database schema changes require manual type updates
@@ -502,11 +551,13 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 ### Organization Invitations
 
 **What's missing**:
+
 - No way to invite team members to organizations
 - No multi-user company accounts
 - No admin user management
 
 **Blocks**:
+
 - Hiring teams cannot onboard
 - Only single-user company accounts work
 - Company admins cannot delegate work
@@ -518,12 +569,14 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 ### Proposal Workflow
 
 **What's missing**:
+
 - Endpoints exist but business logic incomplete
 - Missing "I proposed this candidate" tracking
 - Missing proposal history and timeline
 - Missing proposal analytics
 
 **Blocks**:
+
 - Recruiters cannot efficiently manage candidates
 - Cannot track who proposed what when
 - No visibility into proposal acceptance rates
@@ -535,12 +588,14 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 ### Subscription Plans and Billing
 
 **What's missing**:
+
 - No plans defined in database
 - No plan selection during onboarding
 - No feature enforcement based on plan
 - No billing enforcement
 
 **Blocks**:
+
 - Cannot charge recruiters
 - No revenue model
 - All users have unlimited access
@@ -553,12 +608,14 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 ### ATS Integrations
 
 **What's missing**:
+
 - Lever integration types defined but client not implemented
 - Workable integration types defined but client not implemented
 - Ashby integration types defined but client not implemented
 - Generic/custom ATS integration incomplete
 
 **Blocks**:
+
 - Cannot sync candidates with recruiting platforms
 - Cannot sync job postings with ATS
 - Manual data entry required
@@ -599,4 +656,4 @@ avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
 
 ---
 
-*Concerns audit: 2026-01-31*
+_Concerns audit: 2026-01-31_

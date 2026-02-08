@@ -7,17 +7,19 @@
 ## Problem
 
 Frontend portal (`apps/portal/src/app/portal/proposals/page.tsx` line 105) calls:
+
 ```typescript
-const summary = await client.get('/proposals/summary');
+const summary = await client.get("/proposals/summary");
 ```
 
 Expected response:
+
 ```typescript
 interface ProposalSummary {
-    actionable_count: number;   // Proposals requiring recruiter action
-    waiting_count: number;       // Awaiting response from other party
-    urgent_count: number;        // Expiring in < 24 hours
-    overdue_count: number;       // Expired/timed out
+    actionable_count: number; // Proposals requiring recruiter action
+    waiting_count: number; // Awaiting response from other party
+    urgent_count: number; // Expiring in < 24 hours
+    overdue_count: number; // Expired/timed out
 }
 ```
 
@@ -45,6 +47,7 @@ Following V2 analytics service patterns (see `services/analytics-service/README.
 **Location**: `services/analytics-service/src/v2/proposal-stats/`
 
 **Files to create**:
+
 ```
 services/analytics-service/src/v2/proposal-stats/
 ├── types.ts              # ProposalSummary, ProposalStatsFilters
@@ -54,6 +57,7 @@ services/analytics-service/src/v2/proposal-stats/
 ```
 
 #### types.ts
+
 ```typescript
 export interface ProposalSummary {
     actionable_count: number;
@@ -69,31 +73,42 @@ export interface ProposalStatsFilters {
 ```
 
 #### repository.ts
+
 ```typescript
-import { SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { ProposalSummary, ProposalStatsFilters } from './types';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { resolveAccessContext } from "@splits-network/shared-access-context";
+import { ProposalSummary, ProposalStatsFilters } from "./types";
 
 export class ProposalStatsRepository {
     constructor(private supabase: SupabaseClient) {}
 
-    async getSummary(clerkUserId: string, filters: ProposalStatsFilters): Promise<ProposalSummary> {
+    async getSummary(
+        clerkUserId: string,
+        filters: ProposalStatsFilters,
+    ): Promise<ProposalSummary> {
         const context = await resolveAccessContext(clerkUserId, this.supabase);
 
         // Query candidate_role_assignments (proposals) table
         const query = this.supabase
-            
-            .from('candidate_role_assignments')
-            .select('id, state, expires_at, candidate_recruiter_id, company_recruiter_id');
+
+            .from("candidate_role_assignments")
+            .select(
+                "id, state, expires_at, candidate_recruiter_id, company_recruiter_id",
+            );
 
         // Apply role-based filtering (recruiters see own proposals only)
-        if (context.role === 'recruiter') {
+        if (context.role === "recruiter") {
             // Recruiter sees proposals where they're candidate OR company recruiter
-            query.or(`candidate_recruiter_id.eq.${context.userId},company_recruiter_id.eq.${context.userId}`);
+            query.or(
+                `candidate_recruiter_id.eq.${context.userId},company_recruiter_id.eq.${context.userId}`,
+            );
         } else if (context.isCompanyUser) {
             // Company users see proposals for their company's jobs (via company_recruiter_id)
             // TODO: Need to join jobs table or filter by accessible company IDs
-            query.in('company_recruiter_id', context.accessibleRecruiterIds || []);
+            query.in(
+                "company_recruiter_id",
+                context.accessibleRecruiterIds || [],
+            );
         }
         // Platform admins see everything (no filter)
 
@@ -108,50 +123,57 @@ export class ProposalStatsRepository {
         const urgent_threshold = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
 
         return {
-            actionable_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                // Actionable means recruiter is the recipient (not the proposer)
-                (p.company_recruiter_id === context.userId || p.candidate_recruiter_id === context.userId)
+            actionable_count: proposals.filter(
+                (p) =>
+                    p.state === "proposed" &&
+                    // Actionable means recruiter is the recipient (not the proposer)
+                    (p.company_recruiter_id === context.userId ||
+                        p.candidate_recruiter_id === context.userId),
             ).length,
-            
-            waiting_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                // Waiting means recruiter is the proposer (awaiting response)
-                // TODO: Need proposed_by field to determine who initiated
-                false // Placeholder - need proposed_by logic
+
+            waiting_count: proposals.filter(
+                (p) =>
+                    p.state === "proposed" &&
+                    // Waiting means recruiter is the proposer (awaiting response)
+                    // TODO: Need proposed_by field to determine who initiated
+                    false, // Placeholder - need proposed_by logic
             ).length,
-            
-            urgent_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                p.expires_at && 
-                new Date(p.expires_at) <= urgent_threshold && 
-                new Date(p.expires_at) > now
+
+            urgent_count: proposals.filter(
+                (p) =>
+                    p.state === "proposed" &&
+                    p.expires_at &&
+                    new Date(p.expires_at) <= urgent_threshold &&
+                    new Date(p.expires_at) > now,
             ).length,
-            
-            overdue_count: proposals.filter(p => 
-                p.state === 'timed_out'
-            ).length,
+
+            overdue_count: proposals.filter((p) => p.state === "timed_out")
+                .length,
         };
     }
 }
 ```
 
 #### service.ts
+
 ```typescript
-import Redis from 'ioredis';
-import { ProposalStatsRepository } from './repository';
-import { ProposalSummary, ProposalStatsFilters } from './types';
-import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { SupabaseClient } from '@supabase/supabase-js';
+import Redis from "ioredis";
+import { ProposalStatsRepository } from "./repository";
+import { ProposalSummary, ProposalStatsFilters } from "./types";
+import { resolveAccessContext } from "@splits-network/shared-access-context";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export class ProposalStatsService {
     constructor(
         private repository: ProposalStatsRepository,
         private redis: Redis,
-        private supabase: SupabaseClient
+        private supabase: SupabaseClient,
     ) {}
 
-    async getSummary(clerkUserId: string, filters: ProposalStatsFilters): Promise<ProposalSummary> {
+    async getSummary(
+        clerkUserId: string,
+        filters: ProposalStatsFilters,
+    ): Promise<ProposalSummary> {
         // Get access context for cache key
         const context = await resolveAccessContext(clerkUserId, this.supabase);
 
@@ -176,25 +198,31 @@ export class ProposalStatsService {
 ```
 
 #### routes.ts
-```typescript
-import { FastifyInstance } from 'fastify';
-import { ProposalStatsService } from './service';
 
-export function registerProposalStatsRoutes(app: FastifyInstance, service: ProposalStatsService) {
-    app.get('/v2/proposal-stats/summary', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+```typescript
+import { FastifyInstance } from "fastify";
+import { ProposalStatsService } from "./service";
+
+export function registerProposalStatsRoutes(
+    app: FastifyInstance,
+    service: ProposalStatsService,
+) {
+    app.get("/api/v2/proposal-stats/summary", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Unauthorized: Missing user ID' });
+            return reply
+                .code(401)
+                .send({ error: "Unauthorized: Missing user ID" });
         }
 
         try {
             const summary = await service.getSummary(clerkUserId, {});
             return reply.send({ data: summary });
         } catch (error) {
-            request.log.error({ error }, 'Failed to fetch proposal summary');
-            return reply.code(500).send({ 
-                error: 'Internal server error fetching proposal summary' 
+            request.log.error({ error }, "Failed to fetch proposal summary");
+            return reply.code(500).send({
+                error: "Internal server error fetching proposal summary",
             });
         }
     });
@@ -208,14 +236,14 @@ export function registerProposalStatsRoutes(app: FastifyInstance, service: Propo
 **File**: `services/analytics-service/src/v2/routes.ts`
 
 ```typescript
-import { registerProposalStatsRoutes } from './proposal-stats/routes';
+import { registerProposalStatsRoutes } from "./proposal-stats/routes";
 
 export function registerV2Routes(app: FastifyInstance) {
     // Existing routes...
     registerStatsRoutes(app, services.stats);
     registerMarketplaceMetricsRoutes(app, services.marketplaceMetrics);
     registerChartRoutes(app, services.charts);
-    
+
     // NEW: Register proposal stats routes
     registerProposalStatsRoutes(app, services.proposalStats);
 }
@@ -224,12 +252,16 @@ export function registerV2Routes(app: FastifyInstance) {
 **File**: `services/analytics-service/src/index.ts`
 
 ```typescript
-import { ProposalStatsRepository } from './v2/proposal-stats/repository';
-import { ProposalStatsService } from './v2/proposal-stats/service';
+import { ProposalStatsRepository } from "./v2/proposal-stats/repository";
+import { ProposalStatsService } from "./v2/proposal-stats/service";
 
 // In service initialization
 const proposalStatsRepository = new ProposalStatsRepository(supabase);
-const proposalStatsService = new ProposalStatsService(proposalStatsRepository, redis, supabase);
+const proposalStatsService = new ProposalStatsService(
+    proposalStatsRepository,
+    redis,
+    supabase,
+);
 
 const services = {
     stats: statsService,
@@ -246,20 +278,33 @@ const services = {
 **File**: `services/api-gateway/src/routes/analytics/routes.ts`
 
 Add new proxy route:
+
 ```typescript
-app.get('/api/v2/proposal-stats/summary', {
-    preHandler: requireRoles(['recruiter', 'company_admin', 'platform_admin'], services),
-}, async (request, reply) => {
-    try {
-        const response = await analyticsService.get('/v2/proposal-stats/summary', {
-            headers: buildAuthHeaders(request),
-        });
-        return reply.send(response.data);
-    } catch (error) {
-        request.log.error({ error }, 'Analytics service error');
-        return reply.code(500).send({ error: 'Failed to fetch proposal summary' });
-    }
-});
+app.get(
+    "/api/v2/proposal-stats/summary",
+    {
+        preHandler: requireRoles(
+            ["recruiter", "company_admin", "platform_admin"],
+            services,
+        ),
+    },
+    async (request, reply) => {
+        try {
+            const response = await analyticsService.get(
+                "/api/v2/proposal-stats/summary",
+                {
+                    headers: buildAuthHeaders(request),
+                },
+            );
+            return reply.send(response.data);
+        } catch (error) {
+            request.log.error({ error }, "Analytics service error");
+            return reply
+                .code(500)
+                .send({ error: "Failed to fetch proposal summary" });
+        }
+    },
+);
 ```
 
 ---
@@ -269,9 +314,10 @@ app.get('/api/v2/proposal-stats/summary', {
 **File**: `apps/portal/src/app/portal/proposals/page.tsx`
 
 Update API call:
+
 ```typescript
 // ✅ NEW - Call analytics service endpoint
-const summary = await client.get('/proposal-stats/summary');
+const summary = await client.get("/proposal-stats/summary");
 
 // ❌ OLD - Was calling non-existent network service endpoint
 // const summary = await client.get('/proposals/summary');
@@ -285,21 +331,29 @@ const summary = await client.get('/proposal-stats/summary');
 
 ```typescript
 // services/analytics-service/src/consumers/proposal-events.ts
-import { EventConsumer } from '@splits-network/shared-job-queue';
+import { EventConsumer } from "@splits-network/shared-job-queue";
 
 export class ProposalEventsConsumer {
     constructor(private redis: Redis) {}
 
     async onProposalCreated(event: ProposalCreatedEvent) {
         // Invalidate cache for both recruiters involved
-        await this.redis.del(`proposal-stats:summary:${event.candidateRecruiterId}:*`);
-        await this.redis.del(`proposal-stats:summary:${event.companyRecruiterId}:*`);
+        await this.redis.del(
+            `proposal-stats:summary:${event.candidateRecruiterId}:*`,
+        );
+        await this.redis.del(
+            `proposal-stats:summary:${event.companyRecruiterId}:*`,
+        );
     }
 
     async onProposalAccepted(event: ProposalAcceptedEvent) {
         // Invalidate cache for both recruiters
-        await this.redis.del(`proposal-stats:summary:${event.candidateRecruiterId}:*`);
-        await this.redis.del(`proposal-stats:summary:${event.companyRecruiterId}:*`);
+        await this.redis.del(
+            `proposal-stats:summary:${event.candidateRecruiterId}:*`,
+        );
+        await this.redis.del(
+            `proposal-stats:summary:${event.companyRecruiterId}:*`,
+        );
     }
 
     // onProposalDeclined, onProposalTimedOut, etc.
@@ -313,9 +367,10 @@ export class ProposalEventsConsumer {
 **No new tables needed!** Query existing `candidate_role_assignments` table.
 
 **Potential schema enhancement** (optional):
+
 - Add `proposed_by` column to `candidate_role_assignments` to distinguish proposer from recipient
-  - This would enable accurate "actionable" vs "waiting" counts
-  - Currently only `candidate_recruiter_id` and `company_recruiter_id` exist
+    - This would enable accurate "actionable" vs "waiting" counts
+    - Currently only `candidate_recruiter_id` and `company_recruiter_id` exist
 
 ---
 

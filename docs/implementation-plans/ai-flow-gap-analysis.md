@@ -1,4 +1,5 @@
 # AI-Assisted Application Flow - Gap Analysis
+
 **Date:** January 2, 2026  
 **Status:** ✅ COMPLETE - All Gaps Resolved (Updated: January 14, 2026)  
 **Related Document:** [ai-assisted-application-flow.md](./ai-assisted-application-flow.md)
@@ -12,6 +13,7 @@ This document analyzed the current state of the AI-assisted application flow imp
 ### Current Status: ✅ 100% COMPLETE - All Issues Resolved
 
 **Completed Implementation:**
+
 - ✅ Candidate portal application wizard exists and submits applications with `stage: 'ai_review'`
 - ✅ AI service exists with V2 routes and can analyze applications
 - ✅ AI service publishes `application.stage_changed` events after analysis
@@ -23,6 +25,7 @@ This document analyzed the current state of the AI-assisted application flow imp
 - ✅ **Stage transition logic from `ai_review` → `screen`/`submitted` operational**
 
 **All Previously Identified Gaps - NOW RESOLVED:**
+
 - ✅ AI service event consumer implemented (was missing)
 - ✅ Domain event consumer triggers AI analysis automatically (was missing)
 - ✅ Notification service handlers verified and operational (was unverified)
@@ -45,13 +48,14 @@ result = await submitApplication(
         primary_resume_id: formData.primary_resume_id!,
         pre_screen_answers: formData.pre_screen_answers,
         notes: formData.notes,
-        stage: 'ai_review',  // ✅ Sets stage to ai_review
+        stage: "ai_review", // ✅ Sets stage to ai_review
     },
-    token
+    token,
 );
 ```
 
 **What happens:**
+
 1. Candidate completes wizard and clicks "Submit Application"
 2. API call creates application with `stage: 'ai_review'`
 3. ATS service creates the application
@@ -61,16 +65,17 @@ result = await submitApplication(
 ✅ **WORKS** - Applications are being created with `stage: 'ai_review'`
 
 **Event Published:**
+
 ```typescript
 const userContext = await this.accessResolver.resolve(clerkUserId);
 // services/ats-service/src/v2/applications/service.ts:201
-await this.eventPublisher.publish('application.created', {
+await this.eventPublisher.publish("application.created", {
     application_id: application.id,
     job_id: application.job_id,
     candidate_id: application.candidate_id,
     recruiter_id: application.recruiter_id || null,
     has_recruiter: !!application.recruiter_id,
-    stage: application.stage,  // Will be 'ai_review'
+    stage: application.stage, // Will be 'ai_review'
     created_by: userContext.identityUserId,
 });
 ```
@@ -96,7 +101,7 @@ await this.eventPublisher.publish('application.created', {
 
 // Expected (CORRECT - direct event consumption):
 // import { DomainEventConsumer } from './domain-consumer';
-// 
+//
 // const consumer = new DomainEventConsumer(
 //     rabbitConfig.url,
 //     aiReviewService,
@@ -106,6 +111,7 @@ await this.eventPublisher.publish('application.created', {
 ```
 
 **Current flow (INCORRECT):**
+
 1. Application stage changes from `draft` → `ai_review`
 2. ATS service publishes `application.stage_changed` event
 3. ❌ **Automation service listens** for the event (services/automation-service/src/v2/shared/domain-consumer.ts)
@@ -115,6 +121,7 @@ await this.eventPublisher.publish('application.created', {
 7. AI service publishes `application.stage_changed` with next stage
 
 **Expected flow (CORRECT):**
+
 1. Application stage changes from `draft` → `ai_review`
 2. ATS service publishes `application.stage_changed` event
 3. ✅ **AI service listens directly** for the event
@@ -123,6 +130,7 @@ await this.eventPublisher.publish('application.created', {
 6. AI service publishes `application.stage_changed` with next stage
 
 **Why current approach is wrong:**
+
 - ❌ Automation service is unnecessary middleman
 - ❌ Extra HTTP call adds latency
 - ❌ Extra failure point (HTTP request can fail)
@@ -138,14 +146,14 @@ await this.eventPublisher.publish('application.created', {
 ```typescript
 // Publish application.stage_changed event (replaces ai_review.completed)
 if (this.eventPublisher) {
-    await this.eventPublisher.publish('application.stage_changed', {
+    await this.eventPublisher.publish("application.stage_changed", {
         application_id: input.application_id,
         candidate_id: input.candidate_id || application.candidate_id,
         job_id: input.job_id || application.job_id,
         company_id: application.company_id,
-        old_stage: 'ai_review',
-        new_stage: nextStage,  // 'screen' or 'submitted'
-        changed_by: 'ai_service',
+        old_stage: "ai_review",
+        new_stage: nextStage, // 'screen' or 'submitted'
+        changed_by: "ai_service",
         ai_review_id: review.id,
         fit_score: review.fit_score,
         recommendation: review.recommendation,
@@ -156,9 +164,12 @@ if (this.eventPublisher) {
 ```
 
 **Next stage logic:**
+
 ```typescript
-const application = await this.fetchApplicationForStageTransition(input.application_id);
-const nextStage = application.recruiter_id ? 'screen' : 'submitted';
+const application = await this.fetchApplicationForStageTransition(
+    input.application_id,
+);
+const nextStage = application.recruiter_id ? "screen" : "submitted";
 ```
 
 **Verification:**  
@@ -173,13 +184,18 @@ const nextStage = application.recruiter_id ? 'screen' : 'submitted';
 
 ```typescript
 // Phase 1.5 events - AI Review
-await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.started');
-await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.completed');
-await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.failed');
-await this.channel.bindQueue(this.queue, this.exchange, 'application.draft_completed');
+await this.channel.bindQueue(this.queue, this.exchange, "ai_review.started");
+await this.channel.bindQueue(this.queue, this.exchange, "ai_review.completed");
+await this.channel.bindQueue(this.queue, this.exchange, "ai_review.failed");
+await this.channel.bindQueue(
+    this.queue,
+    this.exchange,
+    "application.draft_completed",
+);
 ```
 
 **Event handling:**
+
 ```typescript
 // services/notification-service/src/domain-consumer.ts:207-215
 case 'ai_review.started':
@@ -198,6 +214,7 @@ case 'ai_review.failed':
 ✅ **RESOLVED**: Notification service now handles standardized `application.stage_changed` events
 
 **Current Implementation:**
+
 - AI service publishes: `application.stage_changed` (with `old_stage: 'ai_review'`)
 - Notification service listens for: `application.stage_changed` (standardized event)
 - **Result:** Notifications trigger correctly when AI review completes
@@ -213,7 +230,7 @@ await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_chang
 case 'application.stage_changed':
     // Always handle general stage changes (for any stage transition)
     await this.applicationsConsumer.handleApplicationStageChanged(event);
-    
+
     // Special handling for AI review completion
     if (event.payload.old_stage === 'ai_review') {
         await this.applicationsConsumer.handleAIReviewCompleted(event);
@@ -222,6 +239,7 @@ case 'application.stage_changed':
 ```
 
 **Why this matters:**
+
 - ✅ Notification service sends emails/in-app notifications for **all** stage changes
 - ✅ Special logic for AI review completion (includes fit score, recommendation)
 - ✅ Follows standardized event pattern (application.stage_changed for all transitions)
@@ -236,15 +254,16 @@ case 'application.stage_changed':
 **Status:** ✅ All handlers implemented and operational
 
 **Confirmed working:**
+
 1. ✅ `handleAIReviewCompleted` - Sends emails when AI review finishes
-   - To candidate (direct): "Your application has been reviewed (85/100)"
-   - To recruiter (represented): "AI review complete for [Candidate] - 85/100"
-   - To company (when submitted): "New application received - AI Fit Score: 85/100"
+    - To candidate (direct): "Your application has been reviewed (85/100)"
+    - To recruiter (represented): "AI review complete for [Candidate] - 85/100"
+    - To company (when submitted): "New application received - AI Fit Score: 85/100"
 
 2. ✅ `handleApplicationStageChanged` - General stage change handler
-   - Handles `old_stage: 'ai_review'` transitions
-   - Sends `ai_review` → `screen` notifications
-   - Sends `ai_review` → `submitted` notifications
+    - Handles `old_stage: 'ai_review'` transitions
+    - Sends `ai_review` → `screen` notifications
+    - Sends `ai_review` → `submitted` notifications
 
 **Email templates verified and operational**
 
@@ -260,13 +279,14 @@ case 'application.stage_changed':
 
 ```typescript
 // AI service expects this structure (WRONG):
-const primaryResume = application.find(doc => doc.extracted_text);
+const primaryResume = application.find((doc) => doc.extracted_text);
 if (primaryResume && primaryResume.extracted_text) {
-    resumeText = primaryResume.extracted_text;  // ❌ This field doesn't exist
+    resumeText = primaryResume.extracted_text; // ❌ This field doesn't exist
 }
 ```
 
 **Database Schema (VERIFIED):**
+
 ```sql
 -- documents table
 CREATE TABLE documents (
@@ -294,12 +314,14 @@ CREATE TABLE documents (
 ```
 
 **Document-Application Relationship (VERIFIED):**
+
 - Uses polymorphic pattern via `entity_type` + `entity_id`
 - For applications: `entity_type='application'` AND `entity_id` references `applications.id`
 - NO junction table - direct polymorphic relation
 - Query pattern: `WHERE entity_type='application' AND entity_id={application_id}`
 
 **Root Cause:**
+
 1. Documents table has `metadata` JSONB field for extracted text (schema confirmed)
 2. AI service expects `extracted_text` as direct property on document (line 109)
 3. Document service NOT extracting text from PDFs/docs yet (all 99 documents show `processing_status='pending'`)
@@ -308,83 +330,98 @@ CREATE TABLE documents (
 **Solution Required:**
 
 **Option 1: Fix AI service to read from metadata (recommended)**
+
 ```typescript
 // services/ai-service/src/v2/reviews/service.ts:109
 if (primaryResume && primaryResume.metadata?.extracted_text) {
     resumeText = primaryResume.metadata.extracted_text;
-    this.logger.info({ application_id: input.application_id, document_id: primaryResume.id }, 'Using extracted text from resume document');
+    this.logger.info(
+        { application_id: input.application_id, document_id: primaryResume.id },
+        "Using extracted text from resume document",
+    );
 } else if (primaryResume) {
-    this.logger.warn({ 
-        application_id: input.application_id, 
-        document_id: primaryResume.id,
-        processing_status: primaryResume.processing_status,
-        has_metadata: !!primaryResume.metadata
-    }, 'Resume document found but no extracted_text in metadata');
+    this.logger.warn(
+        {
+            application_id: input.application_id,
+            document_id: primaryResume.id,
+            processing_status: primaryResume.processing_status,
+            has_metadata: !!primaryResume.metadata,
+        },
+        "Resume document found but no extracted_text in metadata",
+    );
 }
 ```
 
 **Option 2: Add text extraction to document service**
 
 Document service needs to:
+
 1. Extract text from uploaded PDFs/DOCX files
 2. Store extracted text in `metadata.extracted_text`
 3. Update `processing_status` from `pending` → `processing` → `processed`
 4. Publish `document.processed` event when complete
 
 **Libraries for text extraction:**
+
 - PDF: `pdf-parse` or `pdfjs-dist`
 - DOCX: `mammoth` or `docx`
 - Plain text: direct read
 
 **Example document service processing:**
+
 ```typescript
 // After upload, trigger background processing
 async function processDocument(documentId: string) {
     const doc = await getDocument(documentId);
-    
+
     // Update status
     await supabase
-        .from('documents')
-        .update({ processing_status: 'processing' })
-        .eq('id', documentId);
-    
+        .from("documents")
+        .update({ processing_status: "processing" })
+        .eq("id", documentId);
+
     // Download file from storage
     const { data: file } = await supabase.storage
         .from(doc.bucket_name)
         .download(doc.storage_path);
-    
+
     // Extract text based on content type
-    let extractedText = '';
-    if (doc.content_type === 'application/pdf') {
+    let extractedText = "";
+    if (doc.content_type === "application/pdf") {
         extractedText = await extractTextFromPDF(file);
-    } else if (doc.content_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    } else if (
+        doc.content_type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
         extractedText = await extractTextFromDocx(file);
     }
-    
+
     // Save extracted text to metadata
     await supabase
-        .from('documents')
-        .update({ 
-            processing_status: 'processed',
-            metadata: { extracted_text: extractedText }
+        .from("documents")
+        .update({
+            processing_status: "processed",
+            metadata: { extracted_text: extractedText },
         })
-        .eq('id', documentId);
-    
+        .eq("id", documentId);
+
     // Publish event
-    await eventPublisher.publish('document.processed', {
+    await eventPublisher.publish("document.processed", {
         document_id: documentId,
         entity_type: doc.entity_type,
         entity_id: doc.entity_id,
-        has_text: extractedText.length > 0
+        has_text: extractedText.length > 0,
     });
 }
 ```
 
 **Immediate Fix (Unblocks AI reviews):**
+
 1. Update AI service line 109 to read from `metadata.extracted_text`
 2. Verify ATS service passes full document objects with metadata
 
 **Long-term Fix (Complete feature):**
+
 1. Implement text extraction in document service
 2. Process existing documents retroactively
 3. Auto-process new uploads
@@ -396,42 +433,51 @@ async function processDocument(documentId: string) {
 **File to create:** `services/ai-service/src/domain-consumer.ts`
 
 **Required functionality:**
+
 ```typescript
-import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
-import { Logger } from '@splits-network/shared-logging';
-import { DomainEvent } from '@splits-network/shared-types';
-import { AIReviewServiceV2 } from './v2/reviews/service';
+import amqp, { Connection, Channel, ConsumeMessage } from "amqplib";
+import { Logger } from "@splits-network/shared-logging";
+import { DomainEvent } from "@splits-network/shared-types";
+import { AIReviewServiceV2 } from "./v2/reviews/service";
 
 export class DomainEventConsumer {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
-    private readonly exchange = 'splits-network-events';
-    private readonly queue = 'ai-service-queue';
+    private readonly exchange = "splits-network-events";
+    private readonly queue = "ai-service-queue";
 
     constructor(
         private rabbitMqUrl: string,
         private aiReviewService: AIReviewServiceV2,
-        private logger: Logger
+        private logger: Logger,
     ) {}
 
     async connect(): Promise<void> {
         this.connection = await amqp.connect(this.rabbitMqUrl);
         this.channel = await this.connection.createChannel();
 
-        await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
+        await this.channel.assertExchange(this.exchange, "topic", {
+            durable: true,
+        });
         await this.channel.assertQueue(this.queue, { durable: true });
 
         // Bind to events we care about
-        await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
+        await this.channel.bindQueue(
+            this.queue,
+            this.exchange,
+            "application.stage_changed",
+        );
 
-        this.logger.info('AI service connected to RabbitMQ and bound to events');
+        this.logger.info(
+            "AI service connected to RabbitMQ and bound to events",
+        );
 
         await this.startConsuming();
     }
 
     private async startConsuming(): Promise<void> {
         if (!this.channel) {
-            throw new Error('Channel not initialized');
+            throw new Error("Channel not initialized");
         }
 
         await this.channel.consume(
@@ -440,44 +486,58 @@ export class DomainEventConsumer {
                 if (!msg) return;
 
                 try {
-                    const event: DomainEvent = JSON.parse(msg.content.toString());
-                    this.logger.info({ event_type: event.event_type }, 'Processing event');
+                    const event: DomainEvent = JSON.parse(
+                        msg.content.toString(),
+                    );
+                    this.logger.info(
+                        { event_type: event.event_type },
+                        "Processing event",
+                    );
 
                     await this.handleEvent(event);
-                    
+
                     this.channel!.ack(msg);
                 } catch (error) {
-                    this.logger.error({ err: error }, 'Error processing message');
+                    this.logger.error(
+                        { err: error },
+                        "Error processing message",
+                    );
                     this.channel!.nack(msg, false, false);
                 }
             },
-            { noAck: false }
+            { noAck: false },
         );
 
-        this.logger.info('Started consuming events');
+        this.logger.info("Started consuming events");
     }
 
     private async handleEvent(event: DomainEvent): Promise<void> {
         switch (event.event_type) {
-            case 'application.stage_changed':
+            case "application.stage_changed":
                 await this.handleApplicationStageChanged(event);
                 break;
             default:
-                this.logger.debug({ event_type: event.event_type }, 'Ignoring event');
+                this.logger.debug(
+                    { event_type: event.event_type },
+                    "Ignoring event",
+                );
         }
     }
 
-    private async handleApplicationStageChanged(event: DomainEvent): Promise<void> {
-        const { application_id, old_stage, new_stage, candidate_id, job_id } = event.payload;
+    private async handleApplicationStageChanged(
+        event: DomainEvent,
+    ): Promise<void> {
+        const { application_id, old_stage, new_stage, candidate_id, job_id } =
+            event.payload;
 
         // Only process when transitioning TO ai_review
-        if (new_stage !== 'ai_review') {
+        if (new_stage !== "ai_review") {
             return;
         }
 
         this.logger.info(
             { application_id, old_stage, new_stage },
-            'Triggering AI review for application'
+            "Triggering AI review for application",
         );
 
         try {
@@ -492,12 +552,12 @@ export class DomainEventConsumer {
 
             this.logger.info(
                 { application_id },
-                'AI review completed successfully'
+                "AI review completed successfully",
             );
         } catch (error) {
             this.logger.error(
                 { err: error, application_id },
-                'Failed to process AI review'
+                "Failed to process AI review",
             );
             // Error is already handled by service (publishes ai_review.failed event)
         }
@@ -506,12 +566,13 @@ export class DomainEventConsumer {
     async close(): Promise<void> {
         await this.channel?.close();
         await this.connection?.close();
-        this.logger.info('AI service domain consumer closed');
+        this.logger.info("AI service domain consumer closed");
     }
 }
 ```
 
 **Integration in `services/ai-service/src/index.ts`:**
+
 ```typescript
 import { DomainEventConsumer } from './domain-consumer';
 
@@ -547,17 +608,20 @@ process.on('SIGTERM', async () => {
 **Current behavior:**
 
 When ATS service receives `application.stage_changed` from AI service:
+
 - Event payload: `{ old_stage: 'ai_review', new_stage: 'screen' | 'submitted', ... }`
 - ATS service should update application stage in database
 
 **File:** `services/ats-service/src/v2/applications/service.ts`
 
 **Need to verify:**
+
 1. Does ATS service listen for `application.stage_changed` events from AI service?
 2. Does it update the application stage automatically?
 3. Or does it require explicit API call?
 
 **Expected flow:**
+
 ```typescript
 // In ATS service domain-consumer (if it exists)
 case 'application.stage_changed':
@@ -579,10 +643,10 @@ case 'application.stage_changed':
 ```typescript
 // In AI service after publishing event
 await fetch(`${this.atsServiceUrl}/api/v2/applications/${application_id}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-        'Content-Type': 'application/json',
-        'x-internal-service-key': process.env.INTERNAL_SERVICE_KEY || '',
+        "Content-Type": "application/json",
+        "x-internal-service-key": process.env.INTERNAL_SERVICE_KEY || "",
     },
     body: JSON.stringify({
         stage: nextStage,
@@ -601,13 +665,13 @@ await fetch(`${this.atsServiceUrl}/api/v2/applications/${application_id}`, {
 **Files to modify:**
 
 1. **services/automation-service/src/v2/shared/domain-consumer.ts**
-   - Currently binds to `application.created` and `application.stage_changed`
-   - Calls `aiReviewService.triggerReview()` for both events
-   - **Action:** Remove AI review triggering logic
+    - Currently binds to `application.created` and `application.stage_changed`
+    - Calls `aiReviewService.triggerReview()` for both events
+    - **Action:** Remove AI review triggering logic
 
 2. **services/automation-service/src/v2/ai-review/service.ts**
-   - Makes HTTP POST to AI service `/v2/ai-reviews`
-   - **Action:** Delete this entire file (no longer needed)
+    - Makes HTTP POST to AI service `/api/v2/ai-reviews`
+    - **Action:** Delete this entire file (no longer needed)
 
 **Cleanup steps:**
 
@@ -625,7 +689,7 @@ case 'application.created':
 case 'application.stage_changed':
     // Only trigger AI review when stage changes to ai_review
     if (event.payload.new_stage === 'ai_review') {
-        this.logger.info({ 
+        this.logger.info({
             application_id: event.payload.application_id,
             old_stage: event.payload.old_stage,
             new_stage: event.payload.new_stage
@@ -636,12 +700,14 @@ case 'application.stage_changed':
 ```
 
 **Rationale:**
+
 - Automation service should handle complex multi-step workflows
 - AI review is a simple 1-to-1 event trigger (AI service should listen directly)
 - Removes unnecessary HTTP calls between services
 - Cleaner separation of concerns
 
 **After cleanup, automation service should focus on:**
+
 - Fraud detection monitoring
 - Metrics aggregation
 - Rule-based automation (e.g., "if fit_score > 90, auto-advance to interview")
@@ -654,16 +720,17 @@ case 'application.stage_changed':
 **Current implementation:** Seems to be handled by ATS service stage transitions
 
 **Validation rules:** `services/ats-service/src/v2/applications/service.ts:365-375`
+
 ```typescript
 const validTransitions: Record<ApplicationStage, ApplicationStage[]> = {
-    draft: ['ai_review', 'screen', 'rejected'],
-    recruiter_proposed: ['ai_review', 'draft', 'rejected'],
-    recruiter_request: ['draft', 'ai_review', 'rejected'],
-    ai_review: ['screen', 'rejected'],  // ✅ ai_review can go to screen
-    screen: ['submitted', 'recruiter_request', 'rejected'],  // ✅ screen can go to submitted
-    submitted: ['interview', 'rejected'],
-    interview: ['offer', 'rejected'],
-    offer: ['hired', 'rejected'],
+    draft: ["ai_review", "screen", "rejected"],
+    recruiter_proposed: ["ai_review", "draft", "rejected"],
+    recruiter_request: ["draft", "ai_review", "rejected"],
+    ai_review: ["screen", "rejected"], // ✅ ai_review can go to screen
+    screen: ["submitted", "recruiter_request", "rejected"], // ✅ screen can go to submitted
+    submitted: ["interview", "rejected"],
+    interview: ["offer", "rejected"],
+    offer: ["hired", "rejected"],
     hired: [],
     rejected: [],
     withdrawn: [],
@@ -678,6 +745,7 @@ const validTransitions: Record<ApplicationStage, ApplicationStage[]> = {
 ## 3. Event Flow Diagram (Current vs Expected)
 
 ### Current Flow (WRONG - Automation Service as Middleman)
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │ 1. Candidate submits application wizard                         │
@@ -727,6 +795,7 @@ const validTransitions: Record<ApplicationStage, ApplicationStage[]> = {
 ---
 
 ### Expected Flow (Designed)
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │ 1. Candidate submits application wizard                         │
@@ -783,6 +852,7 @@ const validTransitions: Record<ApplicationStage, ApplicationStage[]> = {
 ```
 
 ### Current Flow (What Actually Happens)
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │ 1. Candidate submits application wizard                         │
@@ -795,13 +865,13 @@ const validTransitions: Record<ApplicationStage, ApplicationStage[]> = {
 └──────────────────────────────────────────────────────────────────┘
                               ↓
                               ❌ STOPS HERE ❌
-                              
+
                     (AI service doesn't listen)
                     (No automatic processing)
-                    
-                    
+
+
 Manual workaround (via API Gateway):
-                              
+
 ┌──────────────────────────────────────────────────────────────────┐
 │ API call: POST /api/v2/ai-reviews                               │
 │ { application_id: "..." }                                        │
@@ -822,55 +892,55 @@ Manual workaround (via API Gateway):
 ### Phase 1: Critical Path (Immediate)
 
 - [ ] **Create AI service domain event consumer**
-  - [ ] File: `services/ai-service/src/domain-consumer.ts`
-  - [ ] Listen for `application.stage_changed` events
-  - [ ] Filter for `new_stage === 'ai_review'`
-  - [ ] Trigger AI analysis automatically
-  - [ ] Handle errors and publish `ai_review.failed` events
+    - [ ] File: `services/ai-service/src/domain-consumer.ts`
+    - [ ] Listen for `application.stage_changed` events
+    - [ ] Filter for `new_stage === 'ai_review'`
+    - [ ] Trigger AI analysis automatically
+    - [ ] Handle errors and publish `ai_review.failed` events
 
 - [ ] **Integrate consumer into AI service startup**
-  - [ ] Update `services/ai-service/src/index.ts`
-  - [ ] Initialize consumer after event publisher
-  - [ ] Add to graceful shutdown
+    - [ ] Update `services/ai-service/src/index.ts`
+    - [ ] Initialize consumer after event publisher
+    - [ ] Add to graceful shutdown
 
 - [ ] **Verify ATS service stage synchronization**
-  - [ ] Option A: AI service calls ATS API to update stage
-  - [ ] Option B: ATS service listens for AI's stage_changed event
-  - [ ] Test: Application stage updates after AI review completes
+    - [ ] Option A: AI service calls ATS API to update stage
+    - [ ] Option B: ATS service listens for AI's stage_changed event
+    - [ ] Test: Application stage updates after AI review completes
 
 - [ ] **Update notification service event handling**
-  - [ ] Option: Handle `application.stage_changed` with `old_stage === 'ai_review'`
-  - [ ] OR: Keep listening to `ai_review.completed` (AI service publishes both)
-  - [ ] Verify email templates exist for all scenarios
+    - [ ] Option: Handle `application.stage_changed` with `old_stage === 'ai_review'`
+    - [ ] OR: Keep listening to `ai_review.completed` (AI service publishes both)
+    - [ ] Verify email templates exist for all scenarios
 
 ### Phase 2: Testing & Validation (Next)
 
 - [ ] **End-to-end flow testing**
-  - [ ] Test direct candidate application (no recruiter)
-  - [ ] Test represented candidate application (with recruiter)
-  - [ ] Verify stage transitions: draft → ai_review → screen/submitted
-  - [ ] Verify all emails are sent at correct times
+    - [ ] Test direct candidate application (no recruiter)
+    - [ ] Test represented candidate application (with recruiter)
+    - [ ] Verify stage transitions: draft → ai_review → screen/submitted
+    - [ ] Verify all emails are sent at correct times
 
 - [ ] **Error handling**
-  - [ ] Test AI service failure scenarios
-  - [ ] Verify `ai_review.failed` event handling
-  - [ ] Test notification service retry logic
+    - [ ] Test AI service failure scenarios
+    - [ ] Verify `ai_review.failed` event handling
+    - [ ] Test notification service retry logic
 
 - [ ] **Performance & monitoring**
-  - [ ] Add timing metrics for AI processing
-  - [ ] Monitor RabbitMQ queue depths
-  - [ ] Alert on AI processing delays > 30 seconds
+    - [ ] Add timing metrics for AI processing
+    - [ ] Monitor RabbitMQ queue depths
+    - [ ] Alert on AI processing delays > 30 seconds
 
 ### Phase 3: Documentation & Cleanup (Later)
 
 - [ ] **Update architecture diagrams**
-  - [ ] Document final event flow
-  - [ ] Update service interaction diagrams
+    - [ ] Document final event flow
+    - [ ] Update service interaction diagrams
 
 - [ ] **Code cleanup**
-  - [ ] Remove manual AI review triggers (if any)
-  - [ ] Consolidate event schemas in shared-types
-  - [ ] Add OpenAPI specs for new endpoints
+    - [ ] Remove manual AI review triggers (if any)
+    - [ ] Consolidate event schemas in shared-types
+    - [ ] Add OpenAPI specs for new endpoints
 
 ---
 
@@ -881,21 +951,25 @@ Manual workaround (via API Gateway):
 **Question:** How should AI service update the application stage after review?
 
 **Option A: Direct API call (Recommended)**
+
 ```typescript
 // AI service calls ATS API
 await fetch(`${this.atsServiceUrl}/api/v2/applications/${id}`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify({ stage: nextStage }),
 });
 ```
+
 **Pros:** Reliable, immediate, transactional  
 **Cons:** Tight coupling between services
 
 **Option B: Event-based sync**
+
 ```typescript
 // ATS service listens for application.stage_changed from AI service
 // and updates its own database
 ```
+
 **Pros:** Loose coupling, event-driven  
 **Cons:** Eventual consistency, requires ATS domain consumer
 
@@ -908,14 +982,17 @@ await fetch(`${this.atsServiceUrl}/api/v2/applications/${id}`, {
 **Question:** Should AI service publish `ai_review.completed` or rely on `application.stage_changed`?
 
 **Option A: Publish BOTH events** (backward compatible)
+
 ```typescript
 await this.eventPublisher.publish('application.stage_changed', { ... });
 await this.eventPublisher.publish('ai_review.completed', { ... });
 ```
+
 **Pros:** Backward compatible with existing notification handlers  
 **Cons:** Duplicate events, extra message volume
 
 **Option B: Notification service handles generic `application.stage_changed`**
+
 ```typescript
 case 'application.stage_changed':
     if (event.payload.old_stage === 'ai_review') {
@@ -924,6 +1001,7 @@ case 'application.stage_changed':
     await this.handleStageChanged(event);
     break;
 ```
+
 **Pros:** Clean, follows standardized pattern  
 **Cons:** Requires notification service updates
 
@@ -936,11 +1014,13 @@ case 'application.stage_changed':
 **Question:** What happens when recruiter clicks "Request Changes" from `screen` stage?
 
 **Current validation:**
+
 ```typescript
-screen: ['submitted', 'recruiter_request', 'rejected']
+screen: ["submitted", "recruiter_request", "rejected"];
 ```
 
 **Expected flow:**
+
 1. Recruiter reviews application in `screen` stage
 2. Recruiter decides candidate needs to update something
 3. Application moves to `recruiter_request` stage
@@ -956,45 +1036,51 @@ screen: ['submitted', 'recruiter_request', 'rejected']
 ## 6. Risk Assessment
 
 ### High Risk ❌
+
 1. **AI service has no domain consumer** - Applications stuck in `ai_review` stage
-   - **Impact:** Feature completely broken, candidates see no progress
-   - **Mitigation:** Implement consumer immediately (1-2 days)
+    - **Impact:** Feature completely broken, candidates see no progress
+    - **Mitigation:** Implement consumer immediately (1-2 days)
 
 2. **Stage synchronization unclear** - Application stage may not update after AI review
-   - **Impact:** UI shows wrong status, notifications fail
-   - **Mitigation:** Choose sync approach (API call vs event) and implement
+    - **Impact:** UI shows wrong status, notifications fail
+    - **Mitigation:** Choose sync approach (API call vs event) and implement
 
 ### Medium Risk ⚠️
+
 3. **Notification templates may not exist** - Users don't receive expected emails
-   - **Impact:** Poor user experience, users confused about application status
-   - **Mitigation:** Audit notification handlers and templates (1 day)
+    - **Impact:** Poor user experience, users confused about application status
+    - **Mitigation:** Audit notification handlers and templates (1 day)
 
 4. **Error handling incomplete** - Failed AI reviews leave applications in limbo
-   - **Impact:** Applications stuck, manual intervention needed
-   - **Mitigation:** Add retry logic and error notifications (1 day)
+    - **Impact:** Applications stuck, manual intervention needed
+    - **Mitigation:** Add retry logic and error notifications (1 day)
 
 ### Low Risk ℹ️
+
 5. **Performance concerns** - AI processing may take too long
-   - **Impact:** Perceived slowness, but doesn't break functionality
-   - **Mitigation:** Add progress indicators, optimize API calls
+    - **Impact:** Perceived slowness, but doesn't break functionality
+    - **Mitigation:** Add progress indicators, optimize API calls
 
 ---
 
 ## 7. Next Steps
 
 ### Immediate Actions (This Week)
+
 1. ✅ Create this gap analysis document
 2. ❌ **Implement AI service domain consumer** (Priority 1)
 3. ❌ **Decide on ATS stage sync approach** (Priority 1)
 4. ❌ **Test end-to-end flow manually** (Priority 2)
 
 ### Short Term (Next Week)
+
 5. ❌ Update notification service event handling
 6. ❌ Verify email templates exist and are correct
 7. ❌ Add error handling and retry logic
 8. ❌ Write integration tests
 
 ### Medium Term (Next Sprint)
+
 9. ❌ Add performance monitoring
 10. ❌ Optimize AI processing (parallel document fetch, caching)
 11. ❌ Update documentation
@@ -1007,27 +1093,32 @@ screen: ['submitted', 'recruiter_request', 'rejected']
 The AI-assisted application flow is considered **complete and production-ready** when:
 
 ✅ **Automated Processing**
+
 - [ ] Applications automatically move from `draft` to `ai_review` when submitted
 - [ ] AI service automatically processes `ai_review` applications without manual trigger
 - [ ] Applications automatically move to `screen` (represented) or `submitted` (direct) after AI review
 
 ✅ **Notifications**
+
 - [ ] Candidates receive email when AI review starts
 - [ ] Candidates receive email when AI review completes with fit score
 - [ ] Recruiters receive email when represented candidate is ready for screen
 - [ ] Companies receive email when direct candidate application is submitted
 
 ✅ **Error Handling**
+
 - [ ] Failed AI reviews publish `ai_review.failed` events
 - [ ] Users receive notification when AI review fails
 - [ ] Applications can be manually retried after failure
 
 ✅ **Performance**
+
 - [ ] AI review completes in < 30 seconds (p95)
 - [ ] No applications stuck in `ai_review` for > 5 minutes
 - [ ] RabbitMQ queue depths remain < 100 messages
 
 ✅ **Testing**
+
 - [ ] End-to-end tests pass for direct and represented flows
 - [ ] Error scenarios tested and handled
 - [ ] Load testing shows system can handle 100+ concurrent reviews
@@ -1037,6 +1128,7 @@ The AI-assisted application flow is considered **complete and production-ready**
 ## Appendix A: Event Schemas
 
 ### application.stage_changed (from ATS)
+
 ```typescript
 {
     event_type: 'application.stage_changed',
@@ -1055,6 +1147,7 @@ The AI-assisted application flow is considered **complete and production-ready**
 ```
 
 ### application.stage_changed (from AI)
+
 ```typescript
 {
     event_type: 'application.stage_changed',
@@ -1076,6 +1169,7 @@ The AI-assisted application flow is considered **complete and production-ready**
 ```
 
 ### ai_review.failed
+
 ```typescript
 {
     event_type: 'ai_review.failed',

@@ -17,6 +17,7 @@ This document outlines the standard patterns for implementing server-side pagina
 **ALWAYS use server-side pagination, filtering, and sorting.**
 
 All V2 APIs must use the standardized types from `@splits-network/shared-types`:
+
 - **Request Parameters**: `StandardListParams` interface
 - **Response Format**: `StandardListResponse<T>` interface with data and pagination
 
@@ -31,41 +32,47 @@ All V2 services must use the standardized interfaces from `@splits-network/share
 ### Request Parameters: `StandardListParams`
 
 ```typescript
-import { StandardListParams } from '@splits-network/shared-types';
+import { StandardListParams } from "@splits-network/shared-types";
 
 interface StandardListParams {
-    page?: number;           // Default: 1
-    limit?: number;          // Default: 25
-    search?: string;         // Search query
+    page?: number; // Default: 1
+    limit?: number; // Default: 25
+    search?: string; // Search query
     filters?: Record<string, any>; // Resource-specific filters
-    include?: string;        // Comma-separated related resources
-    sort_by?: string;        // Column to sort by
-    sort_order?: 'asc' | 'desc'; // Sort direction
+    include?: string; // Comma-separated related resources
+    sort_by?: string; // Column to sort by
+    sort_order?: "asc" | "desc"; // Sort direction
 }
 ```
 
 ### Response Format: `StandardListResponse<T>`
 
 ```typescript
-import { StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
+import {
+    StandardListResponse,
+    PaginationResponse,
+} from "@splits-network/shared-types";
 
 interface StandardListResponse<T> {
-    data: T[];                    // Array of resources
+    data: T[]; // Array of resources
     pagination: PaginationResponse; // Pagination metadata
 }
 
 interface PaginationResponse {
-    total: number;        // Total number of resources
-    page: number;         // Current page number
-    limit: number;        // Items per page
-    total_pages: number;  // Total pages available
+    total: number; // Total number of resources
+    page: number; // Current page number
+    limit: number; // Items per page
+    total_pages: number; // Total pages available
 }
 ```
 
 ### Helper Functions
 
 ```typescript
-import { buildPaginationResponse, parseFilters } from '@splits-network/shared-types';
+import {
+    buildPaginationResponse,
+    parseFilters,
+} from "@splits-network/shared-types";
 
 // Build pagination response object
 const pagination = buildPaginationResponse(page, limit, totalCount);
@@ -116,7 +123,7 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     WITH filtered_results AS (
-        SELECT 
+        SELECT
             a.id,
             a.job_id,
             a.candidate_id,
@@ -128,9 +135,9 @@ BEGIN
             j.title as job_title,
             comp.name as company_name,
             -- Search relevance scoring
-            CASE 
+            CASE
                 WHEN search_terms IS NULL THEN 0
-                ELSE 
+                ELSE
                     (CASE WHEN c.full_name ILIKE '%' || search_terms[1] || '%' THEN 5 ELSE 0 END) +
                     (CASE WHEN c.email ILIKE '%' || search_terms[1] || '%' THEN 4 ELSE 0 END) +
                     (CASE WHEN j.title ILIKE '%' || search_terms[1] || '%' THEN 3 ELSE 0 END) +
@@ -140,7 +147,7 @@ BEGIN
         LEFT JOIN candidates c ON a.candidate_id = c.id
         LEFT JOIN jobs j ON a.job_id = j.id
         LEFT JOIN companies comp ON j.company_id = comp.id
-        WHERE 
+        WHERE
             -- Apply all filters
             (filter_recruiter_id IS NULL OR a.recruiter_id = filter_recruiter_id)
             AND (filter_job_id IS NULL OR a.job_id = filter_job_id)
@@ -148,7 +155,7 @@ BEGIN
             AND (filter_company_id IS NULL OR j.company_id = filter_company_id)
             -- Apply search
             AND (
-                search_terms IS NULL 
+                search_terms IS NULL
                 OR c.full_name ILIKE '%' || search_terms[1] || '%'
                 OR c.email ILIKE '%' || search_terms[1] || '%'
                 OR j.title ILIKE '%' || search_terms[1] || '%'
@@ -162,7 +169,7 @@ BEGIN
     )
     SELECT *
     FROM counted_results
-    ORDER BY 
+    ORDER BY
         -- Dynamic sorting
         CASE WHEN sort_column = 'created_at' AND sort_direction = 'desc' THEN created_at END DESC,
         CASE WHEN sort_column = 'created_at' AND sort_direction = 'asc' THEN created_at END ASC,
@@ -189,8 +196,8 @@ $$ LANGUAGE plpgsql STABLE;
 
 ```sql
 -- Covering index for recruiter queries (most common filter)
-CREATE INDEX idx_applications_enriched_recruiter 
-ON applications (recruiter_id) 
+CREATE INDEX idx_applications_enriched_recruiter
+ON applications (recruiter_id)
 INCLUDE (id, candidate_id, job_id, stage, created_at);
 
 -- Stage filtering
@@ -222,18 +229,18 @@ async findApplicationsPaginated(params: StandardListParams): Promise<StandardLis
     const page = params.page || 1;
     const limit = params.limit || 25;
     const offset = (page - 1) * limit;
-    
+
     // Parse search into terms array
-    const searchTerms = params.search 
+    const searchTerms = params.search
         ? params.search.trim().split(/\s+/).filter(term => term.length > 0)
         : null;
 
     // Extract filters for type safety
     const filters = params.filters || {};
-    
+
     // Call PostgreSQL function
     const { data, error } = await this.supabase
-        
+
         .rpc('search_applications_paginated', {
             search_terms: searchTerms,
             filter_recruiter_id: filters.recruiter_id || null,
@@ -303,21 +310,24 @@ async getApplicationsPaginated(params: StandardListParams): Promise<StandardList
 ### Route Handler
 
 ```typescript
-import { StandardListParams, parseFilters } from '@splits-network/shared-types';
+import { StandardListParams, parseFilters } from "@splits-network/shared-types";
 
 app.get(
-    '/v2/applications',
-    async (request: FastifyRequest<{ 
-        Querystring: { 
-            search?: string;
-            filters?: string; // JSON string of filters
-            include?: string;
-            sort_by?: string;
-            sort_order?: 'asc' | 'desc';
-            page?: string;
-            limit?: string;
-        } 
-    }>, reply: FastifyReply) => {
+    "/api/v2/applications",
+    async (
+        request: FastifyRequest<{
+            Querystring: {
+                search?: string;
+                filters?: string; // JSON string of filters
+                include?: string;
+                sort_by?: string;
+                sort_order?: "asc" | "desc";
+                page?: string;
+                limit?: string;
+            };
+        }>,
+        reply: FastifyReply,
+    ) => {
         // Parse query parameters to StandardListParams
         const params: StandardListParams = {
             search: request.query.search,
@@ -326,14 +336,16 @@ app.get(
             sort_by: request.query.sort_by,
             sort_order: request.query.sort_order,
             page: request.query.page ? parseInt(request.query.page) : undefined,
-            limit: request.query.limit ? parseInt(request.query.limit) : undefined,
+            limit: request.query.limit
+                ? parseInt(request.query.limit)
+                : undefined,
         };
 
         const result = await service.getApplicationsPaginated(params);
-        
+
         // Standard V2 response format - already matches StandardListResponse<T>
         return reply.send(result);
-    }
+    },
 );
 ```
 
@@ -346,38 +358,42 @@ The API Gateway already handles pagination correctly by **proxying all query par
 ### Standard Pattern
 
 ```typescript
-app.get('/api/applications/paginated', {
-    schema: {
-        description: 'Get paginated applications with filtering',
-        tags: ['applications'],
-        security: [{ clerkAuth: [] }],
+app.get(
+    "/api/applications/paginated",
+    {
+        schema: {
+            description: "Get paginated applications with filtering",
+            tags: ["applications"],
+            security: [{ clerkAuth: [] }],
+        },
     },
-}, async (request: FastifyRequest, reply: FastifyReply) => {
-    const req = request as AuthenticatedRequest;
-    const atsService = services.get('ats');
-    const correlationId = (request as any).correlationId;
+    async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const atsService = services.get("ats");
+        const correlationId = (request as any).correlationId;
 
-    // Build query parameters
-    const queryParams = new URLSearchParams(request.query as any);
+        // Build query parameters
+        const queryParams = new URLSearchParams(request.query as any);
 
-    // Add RBAC filtering (Gateway's responsibility)
-    if (isRecruiter(req.auth)) {
-        const recruiterResponse: any = await networkService().get(
-            `/recruiters/by-user/${req.auth.userId}`,
-            undefined,
-            correlationId
-        );
-        if (recruiterResponse.data?.status === 'active') {
-            queryParams.set('recruiter_id', recruiterResponse.data.id);
+        // Add RBAC filtering (Gateway's responsibility)
+        if (isRecruiter(req.auth)) {
+            const recruiterResponse: any = await networkService().get(
+                `/recruiters/by-user/${req.auth.userId}`,
+                undefined,
+                correlationId,
+            );
+            if (recruiterResponse.data?.status === "active") {
+                queryParams.set("recruiter_id", recruiterResponse.data.id);
+            }
         }
-    }
 
-    // Forward to ATS service with all params
-    const path = `/applications/paginated?${queryParams.toString()}`;
-    const response = await atsService.get(path, undefined, correlationId);
-    
-    return reply.send(response);
-});
+        // Forward to ATS service with all params
+        const path = `/applications/paginated?${queryParams.toString()}`;
+        const response = await atsService.get(path, undefined, correlationId);
+
+        return reply.send(response);
+    },
+);
 ```
 
 ### Key Points:
@@ -394,6 +410,7 @@ app.get('/api/applications/paginated', {
 ### Pattern: URL State Persistence
 
 Always persist pagination state in the URL for:
+
 - Back button navigation
 - Bookmark/share links
 - Browser refresh preservation
@@ -401,41 +418,48 @@ Always persist pagination state in the URL for:
 ### Example Component
 
 ```tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import type { StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import type {
+    StandardListResponse,
+    PaginationResponse,
+} from "@splits-network/shared-types";
 
 export default function ApplicationsListClient() {
     const { getToken } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     // Initialize state from URL params
     const [applications, setApplications] = useState<Application[]>([]);
     const [pagination, setPagination] = useState<PaginationResponse>({
         total: 0,
-        page: parseInt(searchParams.get('page') || '1'),
+        page: parseInt(searchParams.get("page") || "1"),
         limit: 25,
         total_pages: 0,
     });
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-    const [stageFilter, setStageFilter] = useState(searchParams.get('stage') || '');
+    const [searchQuery, setSearchQuery] = useState(
+        searchParams.get("search") || "",
+    );
+    const [stageFilter, setStageFilter] = useState(
+        searchParams.get("stage") || "",
+    );
     const [loading, setLoading] = useState(true);
 
     // Update URL when state changes (without navigation)
     useEffect(() => {
         const params = new URLSearchParams();
-        if (searchQuery) params.set('search', searchQuery);
-        if (stageFilter) params.set('stage', stageFilter);
-        if (pagination.page > 1) params.set('page', pagination.page.toString());
-        
-        const newUrl = params.toString() 
-            ? `/applications?${params.toString()}` 
-            : '/applications';
+        if (searchQuery) params.set("search", searchQuery);
+        if (stageFilter) params.set("stage", stageFilter);
+        if (pagination.page > 1) params.set("page", pagination.page.toString());
+
+        const newUrl = params.toString()
+            ? `/applications?${params.toString()}`
+            : "/applications";
         router.replace(newUrl, { scroll: false });
     }, [searchQuery, stageFilter, pagination.page, router]);
 
@@ -443,7 +467,7 @@ export default function ApplicationsListClient() {
     useEffect(() => {
         const timer = setTimeout(() => {
             // Reset to page 1 when search/filter changes
-            setPagination(prev => ({ ...prev, page: 1 }));
+            setPagination((prev) => ({ ...prev, page: 1 }));
             loadApplications();
         }, 300); // 300ms debounce
         return () => clearTimeout(timer);
@@ -468,38 +492,42 @@ export default function ApplicationsListClient() {
             const params = new URLSearchParams({
                 page: pagination.page.toString(),
                 limit: pagination.limit.toString(),
-                sort_by: 'created_at',
-                sort_order: 'desc',
+                sort_by: "created_at",
+                sort_order: "desc",
             });
 
-            if (searchQuery) params.append('search', searchQuery);
-            
+            if (searchQuery) params.append("search", searchQuery);
+
             // Use filters parameter for complex filtering
             const filters: Record<string, any> = {};
             if (stageFilter) filters.stage = stageFilter;
             if (Object.keys(filters).length > 0) {
-                params.append('filters', JSON.stringify(filters));
+                params.append("filters", JSON.stringify(filters));
             }
 
             // Call API with all params
-            const response = await client.get(`/applications/paginated?${params.toString()}`);
+            const response = await client.get(
+                `/applications/paginated?${params.toString()}`,
+            );
 
             setApplications(response.data || []);
-            setPagination(response.pagination || {
-                total: 0,
-                page: 1,
-                limit: 25,
-                total_pages: 0,
-            });
+            setPagination(
+                response.pagination || {
+                    total: 0,
+                    page: 1,
+                    limit: 25,
+                    total_pages: 0,
+                },
+            );
         } catch (error) {
-            console.error('Failed to load applications:', error);
+            console.error("Failed to load applications:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handlePageChange = (newPage: number) => {
-        setPagination(prev => ({ ...prev, page: newPage }));
+        setPagination((prev) => ({ ...prev, page: newPage }));
     };
 
     return (
@@ -530,7 +558,7 @@ export default function ApplicationsListClient() {
                 <div>Loading...</div>
             ) : (
                 <div>
-                    {applications.map(app => (
+                    {applications.map((app) => (
                         <ApplicationCard key={app.id} application={app} />
                     ))}
                 </div>
@@ -556,31 +584,35 @@ interface PaginationControlsProps {
     onPageChange: (page: number) => void;
 }
 
-export function PaginationControls({ 
-    currentPage, 
-    totalPages, 
-    onPageChange 
+export function PaginationControls({
+    currentPage,
+    totalPages,
+    onPageChange,
 }: PaginationControlsProps) {
     if (totalPages <= 1) return null;
 
     const pages: (number | string)[] = [];
-    
+
     // Always show first page
     pages.push(1);
-    
+
     // Show ellipsis and pages around current page
     if (currentPage > 3) {
-        pages.push('...');
+        pages.push("...");
     }
-    
+
     // Pages around current
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+    for (
+        let i = Math.max(2, currentPage - 1);
+        i <= Math.min(totalPages - 1, currentPage + 1);
+        i++
+    ) {
         pages.push(i);
     }
-    
+
     // Show ellipsis and last page
     if (currentPage < totalPages - 2) {
-        pages.push('...');
+        pages.push("...");
     }
     if (totalPages > 1) {
         pages.push(totalPages);
@@ -596,19 +628,21 @@ export function PaginationControls({
                 <i className="fa-duotone fa-regular fa-chevron-left"></i>
             </button>
 
-            {pages.map((page, idx) => (
-                typeof page === 'number' ? (
+            {pages.map((page, idx) =>
+                typeof page === "number" ? (
                     <button
                         key={page}
-                        className={`btn btn-sm ${page === currentPage ? 'btn-primary' : ''}`}
+                        className={`btn btn-sm ${page === currentPage ? "btn-primary" : ""}`}
                         onClick={() => onPageChange(page)}
                     >
                         {page}
                     </button>
                 ) : (
-                    <span key={`ellipsis-${idx}`} className="px-2">...</span>
-                )
-            ))}
+                    <span key={`ellipsis-${idx}`} className="px-2">
+                        ...
+                    </span>
+                ),
+            )}
 
             <button
                 className="btn btn-sm"
@@ -677,7 +711,7 @@ When query performance degrades (>200-300ms consistently):
 Add snapshot columns to avoid JOINs:
 
 ```sql
-ALTER TABLE applications 
+ALTER TABLE applications
 ADD COLUMN candidate_name_snapshot TEXT,
 ADD COLUMN job_title_snapshot TEXT,
 ADD COLUMN company_name_snapshot TEXT;
@@ -695,7 +729,7 @@ CREATE MATERIALIZED VIEW applications_enriched AS
 SELECT a.*, c.full_name, j.title, comp.name as company_name
 FROM applications a
 LEFT JOIN candidates c ON a.candidate_id = c.id
-LEFT JOIN jobs j ON a.job_id = j.id  
+LEFT JOIN jobs j ON a.job_id = j.id
 LEFT JOIN companies comp ON j.company_id = comp.id;
 
 -- Refresh every 5 minutes (concurrently to avoid locks)
@@ -752,6 +786,7 @@ When implementing pagination, verify:
 ## Summary
 
 **Flow:**
+
 1. User changes filter/page → URL updates
 2. React detects URL change → Calls API with query params
 3. Gateway adds RBAC filters → Forwards to service
@@ -759,6 +794,7 @@ When implementing pagination, verify:
 5. React updates state → Displays results
 
 **Key Files:**
+
 - Database: `services/{service}/migrations/*.sql`
 - Repository: `services/{service}/src/repository.ts`
 - Routes: `services/{service}/src/routes/*.ts`

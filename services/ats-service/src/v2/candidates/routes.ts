@@ -124,7 +124,7 @@ export function registerCandidateRoutes(
     });
 
     app.get(
-        '/v2/candidate-dashboard/recent-applications',
+        '/api/v2/candidate-dashboard/recent-applications',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
                 const { clerkUserId } = requireUserContext(request);

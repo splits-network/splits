@@ -219,7 +219,7 @@ Copilot: keep this service focused on identity, not ATS or billing concerns.
   - Stages and notes
   - Placements (Phase 1: single recruiter per placement)
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/jobs`, `/v2/companies`, `/v2/candidates`, `/v2/applications`, `/v2/placements`
+  - `/api/v2/jobs`, `/api/v2/companies`, `/api/v2/candidates`, `/api/v2/applications`, `/api/v2/placements`
   - Domain-based folder structure under `src/v2/`
   - Direct Supabase queries with role-based scoping
   - Single update methods with smart validation
@@ -234,7 +234,7 @@ Copilot:
   - `role_assignments`
   - `candidate_role_assignments` (proposals)
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/recruiters`, `/v2/assignments`, `/v2/recruiter-candidates`, `/v2/reputation`, `/v2/proposals`
+  - `/api/v2/recruiters`, `/api/v2/assignments`, `/api/v2/recruiter-candidates`, `/api/v2/reputation`, `/api/v2/proposals`
   - Domain-based folder structure under `src/v2/`
   - Enriched queries with recruiter metadata
   - Marketplace visibility and capacity management
@@ -252,7 +252,7 @@ Copilot:
   - `subscriptions`
   - `payouts` - recruiter payment tracking
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/plans`, `/v2/subscriptions`, `/v2/payouts`
+  - `/api/v2/plans`, `/api/v2/subscriptions`, `/api/v2/payouts`
   - Role-aware access (recruiters see their own, billing admins see all)
   - Event publishing for all lifecycle hooks
 - Handles Stripe webhooks
@@ -267,7 +267,7 @@ Copilot:
 - Listens to RabbitMQ events from other services
 - Sends transactional email using **Resend**
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/notifications`, `/v2/templates`
+  - `/api/v2/notifications`, `/api/v2/templates`
   - User-scoped notification access
   - Template management for email content
 - Example events:
@@ -285,7 +285,7 @@ Copilot:
 - Rule-based automation execution with human approval workflows
 - Marketplace metrics aggregation and health scoring
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/matches`, `/v2/fraud`, `/v2/rules`, `/v2/metrics`
+  - `/api/v2/matches`, `/api/v2/fraud`, `/api/v2/rules`, `/api/v2/metrics`
   - Admin-gated access for sensitive operations
   - Event-driven automation triggers
 - Handles:
@@ -301,7 +301,7 @@ Copilot:
 
 - AI-powered candidate-job fit analysis and scoring
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/reviews` - Generate and retrieve AI reviews
+  - `/api/v2/reviews` - Generate and retrieve AI reviews
   - Event-driven architecture - publishes `ai_review.completed` events
   - No direct service-to-service HTTP calls
 - Handles:
@@ -319,7 +319,7 @@ Copilot:
 
 - Universal document storage using Supabase Storage
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
-  - `/v2/documents`
+  - `/api/v2/documents`
   - Role-based access to documents
   - Pre-signed URL generation and validation
 - Handles uploads for:

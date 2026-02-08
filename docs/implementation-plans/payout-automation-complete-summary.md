@@ -15,6 +15,7 @@ Implemented a complete automated payout processing system for the Splits Network
 ## Implementation Statistics
 
 ### Backend & Infrastructure
+
 - **Services Created**: 3 core services (schedules, escrow, audit logging)
 - **API Endpoints**: 15+ endpoints across all services
 - **Database Tables**: 3 new tables (payout_schedules, escrow_holds, payout_audit_log)
@@ -22,11 +23,13 @@ Implemented a complete automated payout processing system for the Splits Network
 - **Lines of Code**: ~3,500 lines (backend services, repositories, types)
 
 ### Frontend
+
 - **Dashboards Created**: 3 admin dashboards
 - **UI Components**: 15+ reusable components (stats cards, filters, tables, badges)
 - **Lines of Code**: ~1,400 lines (React/TypeScript)
 
 ### Documentation
+
 - **Implementation Trackers**: 2 comprehensive tracking documents
 - **API Contracts**: Full OpenAPI specifications
 - **Architecture Diagrams**: Flow diagrams and data models
@@ -36,6 +39,7 @@ Implemented a complete automated payout processing system for the Splits Network
 ## Technical Stack
 
 ### Backend
+
 - **Framework**: Fastify (Node.js)
 - **Database**: Supabase Postgres (`billing` schema)
 - **Events**: RabbitMQ for domain event publishing
@@ -44,6 +48,7 @@ Implemented a complete automated payout processing system for the Splits Network
 - **Authorization**: V2 RBAC with access context
 
 ### Frontend
+
 - **Framework**: Next.js 16 App Router
 - **UI Library**: DaisyUI + TailwindCSS
 - **Icons**: Font Awesome Duotone
@@ -52,6 +57,7 @@ Implemented a complete automated payout processing system for the Splits Network
 - **API Client**: @splits-network/shared-api-client
 
 ### Infrastructure
+
 - **Orchestration**: Kubernetes
 - **Scheduling**: CronJobs (2am/3am UTC daily)
 - **Secrets Management**: Kubernetes Secrets
@@ -62,6 +68,7 @@ Implemented a complete automated payout processing system for the Splits Network
 ## Core Features
 
 ### 1. Automated Payout Scheduling
+
 - Automatic schedule creation on placement activation
 - Trigger events: guarantee_period_end, milestone_reached, contract_signed, manual
 - Retry logic with exponential backoff (3 attempts)
@@ -70,6 +77,7 @@ Implemented a complete automated payout processing system for the Splits Network
 - Status tracking: pending → processing → completed/failed/cancelled
 
 ### 2. Escrow Hold Management
+
 - Automatic hold creation during guarantee periods
 - Hold reasons: guarantee_period, dispute, verification, other
 - Scheduled releases when guarantee period ends
@@ -78,6 +86,7 @@ Implemented a complete automated payout processing system for the Splits Network
 - Status tracking: active → released/cancelled
 
 ### 3. Comprehensive Audit Logging
+
 - All payout automation actions logged
 - Before/after state tracking
 - User attribution (changed_by + role)
@@ -86,32 +95,32 @@ Implemented a complete automated payout processing system for the Splits Network
 - Timeline view for forensic analysis
 
 ### 4. Admin Dashboards
+
 - **Payout Schedules Dashboard**:
-  - Stats cards (pending, processed, failed, total amount)
-  - Filters (status, trigger event)
-  - Search by payout/placement ID
-  - Action buttons (trigger, cancel)
-  - Error tooltips for failed schedules
-  
+    - Stats cards (pending, processed, failed, total amount)
+    - Filters (status, trigger event)
+    - Search by payout/placement ID
+    - Action buttons (trigger, cancel)
+    - Error tooltips for failed schedules
 - **Escrow Holds Dashboard**:
-  - Stats cards (active holds, total held, due for release, released today)
-  - Filters (status, hold reason)
-  - Search by payout/placement ID
-  - Action buttons (release, cancel)
-  - "Due now" warnings for overdue holds
-  
+    - Stats cards (active holds, total held, due for release, released today)
+    - Filters (status, hold reason)
+    - Search by payout/placement ID
+    - Action buttons (release, cancel)
+    - "Due now" warnings for overdue holds
 - **Audit Log Viewer**:
-  - Timeline view of all actions
-  - Filters (action type, entity type, date range)
-  - Expandable event details (before/after state, metadata)
-  - Search by entity ID
-  - Navigation to related dashboards
+    - Timeline view of all actions
+    - Filters (action type, entity type, date range)
+    - Expandable event details (before/after state, metadata)
+    - Search by entity ID
+    - Navigation to related dashboards
 
 ---
 
 ## API Endpoints
 
-### Payout Schedules (`/v2/payout-schedules`)
+### Payout Schedules (`/api/v2/payout-schedules`)
+
 - `GET /v2/payout-schedules` - List with pagination, filtering, search
 - `GET /v2/payout-schedules/:id` - Get single schedule
 - `POST /v2/payout-schedules` - Create schedule (automated)
@@ -119,7 +128,8 @@ Implemented a complete automated payout processing system for the Splits Network
 - `DELETE /v2/payout-schedules/:id` - Cancel schedule
 - `POST /v2/payout-schedules/:id/trigger` - Manual trigger
 
-### Escrow Holds (`/v2/escrow-holds`)
+### Escrow Holds (`/api/v2/escrow-holds`)
+
 - `GET /v2/escrow-holds` - List with pagination, filtering, search
 - `GET /v2/escrow-holds/:id` - Get single hold
 - `POST /v2/escrow-holds` - Create hold (automated)
@@ -127,7 +137,8 @@ Implemented a complete automated payout processing system for the Splits Network
 - `DELETE /v2/escrow-holds/:id` - Cancel hold
 - `POST /v2/escrow-holds/:id/release` - Release hold early
 
-### Audit Log (`/v2/payout-audit-log`)
+### Audit Log (`/api/v2/payout-audit-log`)
+
 - `GET /v2/payout-audit-log` - List with pagination, filtering, search, date range
 - `GET /v2/payout-audit-log/:id` - Get single entry
 
@@ -136,6 +147,7 @@ Implemented a complete automated payout processing system for the Splits Network
 ## Kubernetes Configuration
 
 ### CronJob: payout-schedules
+
 - **Schedule**: `0 2 * * *` (2:00 AM UTC daily)
 - **Command**: `node dist/scripts/process-payout-schedules.js`
 - **Resources**: 250m CPU / 256Mi memory (requests), 500m / 512Mi (limits)
@@ -146,6 +158,7 @@ Implemented a complete automated payout processing system for the Splits Network
 - **History**: 3 successful, 3 failed jobs retained
 
 ### CronJob: escrow-releases
+
 - **Schedule**: `0 3 * * *` (3:00 AM UTC daily)
 - **Command**: `node dist/scripts/process-escrow-releases.js`
 - **Resources**: 250m CPU / 256Mi memory (requests), 500m / 512Mi (limits)
@@ -156,11 +169,12 @@ Implemented a complete automated payout processing system for the Splits Network
 - **History**: 3 successful, 3 failed jobs retained
 
 **Secret Configuration**:
+
 - `supabase-secrets`:
-  - `supabase-url`: Supabase project URL
-  - `supabase-service-role-key`: Service role key for direct access
+    - `supabase-url`: Supabase project URL
+    - `supabase-service-role-key`: Service role key for direct access
 - `stripe-secrets`:
-  - `stripe-secret-key`: Stripe API key for transfers
+    - `stripe-secret-key`: Stripe API key for transfers
 - RabbitMQ: Direct connection string (amqp://splits:splits_production@rabbitmq:5672)
 
 ---
@@ -168,6 +182,7 @@ Implemented a complete automated payout processing system for the Splits Network
 ## Database Schema
 
 ### payout_schedules
+
 ```sql
 CREATE TABLE payout_schedules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -188,6 +203,7 @@ CREATE INDEX idx_payout_schedules_scheduled_date ON payout_schedules(scheduled_d
 ```
 
 ### escrow_holds
+
 ```sql
 CREATE TABLE escrow_holds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -208,6 +224,7 @@ CREATE INDEX idx_escrow_holds_release_date ON escrow_holds(release_date);
 ```
 
 ### payout_audit_log
+
 ```sql
 CREATE TABLE payout_audit_log (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -232,11 +249,13 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 ## Security & Access Control
 
 ### Authorization (V2 RBAC)
+
 - **Platform Admins**: Full access to all operations (list, create, update, delete, trigger, release, cancel)
 - **Billing Admins**: Read-only access to schedules and holds, limited write access
 - **Regular Users**: No access (endpoints require platform_admin role)
 
 ### Audit Logging
+
 - All CRUD operations logged with user attribution
 - Before/after state captured for updates
 - Metadata includes payout_id, placement_id, amounts, reason codes
@@ -244,6 +263,7 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 - User and role tracking for accountability
 
 ### Data Protection
+
 - Sensitive payout amounts tracked in audit log
 - Access context filtering via resolveAccessContext
 - Clerk JWT validation on all requests
@@ -254,6 +274,7 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 ## Event Publishing
 
 ### Schedule Events
+
 - `payout_schedule.created` - Schedule created (automated or manual)
 - `payout_schedule.triggered` - Manual trigger initiated
 - `payout_schedule.processed` - Processing completed successfully
@@ -261,11 +282,13 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 - `payout_schedule.cancelled` - Schedule cancelled
 
 ### Hold Events
+
 - `escrow_hold.created` - Hold created on placement
 - `escrow_hold.released` - Hold released (scheduled or manual)
 - `escrow_hold.cancelled` - Hold cancelled
 
 ### Audit Events
+
 - All above events logged to payout_audit_log
 - Published to RabbitMQ for notification service integration
 - Includes metadata for downstream processing
@@ -275,21 +298,24 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 ## Monitoring & Observability
 
 ### Sentry Integration
+
 - All CronJobs configured with Sentry DSN
 - Error tracking for:
-  - Schedule processing failures
-  - Escrow release failures
-  - API request failures
-  - Authorization failures
+    - Schedule processing failures
+    - Escrow release failures
+    - API request failures
+    - Authorization failures
 - Context includes: payout_id, placement_id, user_id, error details
 
 ### Logging
+
 - Console logging in CronJob containers
 - kubectl logs available: `kubectl logs -n splits-network job/payout-schedules-[timestamp]`
 - Structured JSON logging with timestamps
 - Error stack traces captured
 
 ### Metrics
+
 - CronJob success/failure counts (Kubernetes metrics)
 - Processing duration tracked
 - Retry counts tracked in database
@@ -300,14 +326,16 @@ CREATE INDEX idx_payout_audit_log_created_at ON payout_audit_log(created_at);
 ## Deployment Instructions
 
 ### Prerequisites
+
 1. Kubernetes cluster access with `splits-network` namespace
 2. Secrets configured:
-   - `supabase-secrets` (supabase-url, supabase-service-role-key)
-   - `stripe-secrets` (stripe-secret-key)
+    - `supabase-secrets` (supabase-url, supabase-service-role-key)
+    - `stripe-secrets` (stripe-secret-key)
 3. RabbitMQ service running in cluster
 4. Database migrations applied to billing schema
 
 ### Backend Services Deployment
+
 ```bash
 # Build backend services
 cd services/billing-service
@@ -330,6 +358,7 @@ kubectl logs -n splits-network job/billing-service-payout-schedules-test-[timest
 ```
 
 ### Frontend Deployment
+
 ```bash
 # Build frontend
 cd apps/portal
@@ -344,6 +373,7 @@ kubectl get pods -n splits-network | grep portal
 ```
 
 ### Production Rollout
+
 ```bash
 # Apply to production (after staging verification)
 kubectl apply -f infra/k8s/billing-service/cronjobs/ --context production
@@ -359,6 +389,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 ## Testing Checklist
 
 ### Backend API Testing
+
 - ✅ Schedule CRUD operations work
 - ✅ Hold CRUD operations work
 - ✅ Audit log entries created
@@ -371,6 +402,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 - ✅ Event publishing confirmed
 
 ### CronJob Testing
+
 - ✅ CronJobs created successfully
 - ✅ Manual test runs complete without errors
 - ✅ Logs accessible and readable
@@ -383,6 +415,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 - ✅ Resource limits respected
 
 ### Frontend Dashboard Testing
+
 - ✅ All three dashboards load
 - ✅ Navigation cards work
 - ✅ Filters update correctly
@@ -400,6 +433,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 - ✅ Status badges colored appropriately
 
 ### Integration Testing
+
 - ✅ End-to-end placement → schedule → process flow
 - ✅ End-to-end placement → hold → release flow
 - ✅ Manual trigger updates schedule status
@@ -414,6 +448,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 ## Known Limitations & Future Enhancements
 
 ### Current Limitations
+
 - Stats cards on dashboards use client-side aggregation (not scalable)
 - No bulk operations (trigger/release multiple at once)
 - No real-time updates (requires manual refresh)
@@ -422,62 +457,67 @@ kubectl apply -f infra/k8s/portal/ --context production
 - No email notifications for failures (integration pending)
 
 ### Phase 4 Enhancements (Future)
+
 1. **Backend Aggregation Endpoints**:
-   - GET /payout-schedules/stats (aggregate counts/amounts)
-   - GET /escrow-holds/stats (aggregate counts/amounts)
-   - GET /payout-audit-log/stats (action counts by type)
+    - GET /payout-schedules/stats (aggregate counts/amounts)
+    - GET /escrow-holds/stats (aggregate counts/amounts)
+    - GET /payout-audit-log/stats (action counts by type)
 
 2. **Bulk Operations**:
-   - POST /payout-schedules/bulk-trigger
-   - POST /escrow-holds/bulk-release
-   - Checkbox selection UI in dashboards
+    - POST /payout-schedules/bulk-trigger
+    - POST /escrow-holds/bulk-release
+    - Checkbox selection UI in dashboards
 
 3. **Real-Time Updates**:
-   - WebSocket integration for processing status
-   - Live updates on dashboard without refresh
-   - Toast notifications for completed actions
+    - WebSocket integration for processing status
+    - Live updates on dashboard without refresh
+    - Toast notifications for completed actions
 
 4. **Advanced Filtering**:
-   - Date range pickers on all dashboards
-   - Multi-select filters (status, trigger event, etc.)
-   - Saved filter presets
+    - Date range pickers on all dashboards
+    - Multi-select filters (status, trigger event, etc.)
+    - Saved filter presets
 
 5. **Export Functionality**:
-   - CSV download for schedules
-   - CSV download for holds
-   - CSV download for audit log
-   - PDF reports with charts
+    - CSV download for schedules
+    - CSV download for holds
+    - CSV download for audit log
+    - PDF reports with charts
 
 6. **Notifications**:
-   - Email alerts for failed schedules
-   - Email alerts for overdue holds
-   - Slack integration for admin notifications
-   - SMS alerts for critical failures
+    - Email alerts for failed schedules
+    - Email alerts for overdue holds
+    - Slack integration for admin notifications
+    - SMS alerts for critical failures
 
 7. **Analytics**:
-   - Trends charts (schedules over time)
-   - Success/failure rate graphs
-   - Average processing time metrics
-   - Escrow hold duration analytics
+    - Trends charts (schedules over time)
+    - Success/failure rate graphs
+    - Average processing time metrics
+    - Escrow hold duration analytics
 
 ---
 
 ## Documentation References
 
 ### Implementation Trackers
+
 - [Backend & Infrastructure Tracker](./payout-automation-api-backend.md)
 - [Frontend Tracker](./payout-automation-api-frontend.md)
 
 ### Architecture
+
 - [Phase 3 PRD](../splits-network-phase3-prd.md) - Original requirements
 - [Service Architecture](../guidance/service-architecture-pattern.md)
 - [V2 API Standards](../migration/v2/V2-ARCHITECTURE-IMPLEMENTATION-GUIDE.md)
 
 ### API Contracts
+
 - OpenAPI specs in billing-service/docs/
 - Endpoint documentation in backend tracker
 
 ### Database
+
 - Migrations: services/billing-service/migrations/
 - Schema diagrams in docs/design/
 
@@ -486,6 +526,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 ## Success Metrics
 
 ### Technical Metrics
+
 - ✅ 100% backend implementation complete (18/18 tasks)
 - ✅ 100% frontend implementation complete (3/3 dashboards)
 - ✅ 100% Kubernetes configuration complete (2/2 CronJobs)
@@ -495,6 +536,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 - ✅ Ready for production deployment
 
 ### Business Metrics (Future)
+
 - Automated payout processing rate (target: 95%+)
 - Manual intervention rate (target: <5%)
 - Average processing time (target: <5 minutes)
@@ -506,12 +548,14 @@ kubectl apply -f infra/k8s/portal/ --context production
 ## Team & Acknowledgments
 
 **Implementation Team**:
+
 - Backend Development: Billing Service team
 - Frontend Development: Portal team
 - DevOps: Infrastructure team
 - Documentation: Technical writing team
 
 **Timeline**:
+
 - Planning: Week of January 6, 2026
 - Backend Development: January 6-10, 2026
 - Frontend Development: January 10-11, 2026
@@ -523,6 +567,7 @@ kubectl apply -f infra/k8s/portal/ --context production
 ## Conclusion
 
 The Payout Automation System is now **production-ready** with:
+
 - Comprehensive backend APIs following V2 standards
 - Automated daily processing via Kubernetes CronJobs
 - Full-featured admin dashboards for management

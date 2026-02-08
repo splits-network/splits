@@ -1390,7 +1390,7 @@ export class PayoutServiceV2 {
 app.get('/api/v2/company-sourcers', {
     preHandler: requireRoles(['recruiter', 'company_admin', 'platform_admin'], services)
 }, async (request, reply) => {
-    const response = await services.ats.get('/v2/company-sourcers', {
+    const response = await services.ats.get('/api/v2/company-sourcers', {
         headers: buildAuthHeaders(request)
     });
     return reply.send(response.data);
@@ -1400,7 +1400,7 @@ app.get('/api/v2/company-sourcers/:id', {
     preHandler: requireRoles(['recruiter', 'company_admin', 'platform_admin'], services)
 }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const response = await services.ats.get(`/v2/company-sourcers/${id}`, {
+    const response = await services.ats.get(`/api/v2/company-sourcers/${id}`, {
         headers: buildAuthHeaders(request)
     });
     return reply.send(response.data);
@@ -1409,7 +1409,7 @@ app.get('/api/v2/company-sourcers/:id', {
 app.post('/api/v2/company-sourcers', {
     preHandler: requireRoles(['recruiter', 'platform_admin'], services)
 }, async (request, reply) => {
-    const response = await services.ats.post('/v2/company-sourcers', request.body, {
+    const response = await services.ats.post('/api/v2/company-sourcers', request.body, {
         headers: buildAuthHeaders(request)
     });
     return reply.code(201).send(response.data);
@@ -1419,7 +1419,7 @@ app.delete('/api/v2/company-sourcers/:id', {
     preHandler: requireRoles(['platform_admin'], services)
 }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    await services.ats.delete(`/v2/company-sourcers/${id}`, {
+    await services.ats.delete(`/api/v2/company-sourcers/${id}`, {
         headers: buildAuthHeaders(request)
     });
     return reply.code(204).send();

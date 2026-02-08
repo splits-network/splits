@@ -1,7 +1,13 @@
 import Stripe from 'stripe';
 import type { AccessContext } from '../shared/access';
 import { StripeConnectRepository } from './repository';
-import { StripeConnectAccountStatus, StripeConnectLinkRequest, StripeConnectLinkResponse } from './types';
+import {
+    StripeConnectAccountStatus,
+    StripeConnectLinkRequest,
+    StripeConnectLinkResponse,
+    StripeAccountSessionResponse,
+    StripeDashboardLinkResponse,
+} from './types';
 
 export class StripeConnectService {
     private stripe: Stripe;
@@ -76,6 +82,35 @@ export class StripeConnectService {
             onboarded,
             recruiter_id: access.recruiterId,
         };
+    }
+
+    async createAccountSession(clerkUserId: string): Promise<StripeAccountSessionResponse> {
+        const status = await this.getOrCreateAccount(clerkUserId);
+
+        const accountSession = await this.stripe.accountSessions.create({
+            account: status.account_id,
+            components: {
+                account_onboarding: { enabled: true },
+                account_management: {
+                    enabled: true,
+                    features: {
+                        external_account_collection: true,
+                    },
+                },
+            },
+        });
+
+        return { client_secret: accountSession.client_secret };
+    }
+
+    async createDashboardLink(clerkUserId: string): Promise<StripeDashboardLinkResponse> {
+        const status = await this.getAccountStatus(clerkUserId);
+        if (!status.onboarded) {
+            throw new Error('Account must be fully onboarded to access dashboard');
+        }
+
+        const loginLink = await this.stripe.accounts.createLoginLink(status.account_id);
+        return { url: loginLink.url };
     }
 
     async createOnboardingLink(

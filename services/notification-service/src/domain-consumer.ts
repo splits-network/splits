@@ -14,6 +14,7 @@ import { CompanyInvitationsConsumer } from './consumers/company-invitations/cons
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
+import { BillingEventConsumer } from './consumers/billing/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -33,6 +34,7 @@ export class DomainEventConsumer {
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
     private chatConsumer: ChatEventConsumer;
+    private billingConsumer: BillingEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -118,6 +120,12 @@ export class DomainEventConsumer {
             portalUrl,
             candidateWebsiteUrl
         );
+        this.billingConsumer = new BillingEventConsumer(
+            notificationService.billing,
+            logger,
+            portalUrl,
+            contactLookup
+        );
     }
 
     async connect(): Promise<void> {
@@ -188,6 +196,10 @@ export class DomainEventConsumer {
             // Company platform invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.accepted');
+
+            // Billing events - Stripe Connect onboarding
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_onboarded');
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_disabled');
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
@@ -361,6 +373,14 @@ export class DomainEventConsumer {
                 break;
             case 'company_invitation.accepted':
                 await this.companyInvitationsConsumer.handleCompanyInvitationAccepted(event);
+                break;
+
+            // Billing domain - Stripe Connect
+            case 'recruiter.stripe_connect_onboarded':
+                await this.billingConsumer.handleStripeConnectOnboarded(event);
+                break;
+            case 'recruiter.stripe_connect_disabled':
+                await this.billingConsumer.handleStripeConnectDisabled(event);
                 break;
 
             case 'status.contact_submitted':

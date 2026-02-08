@@ -20,7 +20,7 @@ The AI Service is a **V2-only service** that provides AI-powered features includ
 - No legacy route handlers outside `src/v2/`
 - No `/me` endpoints or user-specific routes
 - No V1 service patterns
-- All routes follow `/v2/` prefix conventions
+- All routes follow `/api/v2/` prefix conventions
 
 ## Current Domains
 

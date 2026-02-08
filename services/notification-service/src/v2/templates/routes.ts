@@ -29,7 +29,7 @@ export async function registerTemplateRoutes(
         config.eventPublisher
     );
 
-    app.get('/v2/templates', async (request, reply) => {
+    app.get('/api/v2/templates', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
@@ -49,7 +49,7 @@ export async function registerTemplateRoutes(
         }
     });
 
-    app.get('/v2/templates/:id', async (request, reply) => {
+    app.get('/api/v2/templates/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -62,7 +62,7 @@ export async function registerTemplateRoutes(
         }
     });
 
-    app.post('/v2/templates', async (request, reply) => {
+    app.post('/api/v2/templates', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as TemplateCreateInput;
@@ -82,7 +82,7 @@ export async function registerTemplateRoutes(
         }
     });
 
-    app.patch('/v2/templates/:id', async (request, reply) => {
+    app.patch('/api/v2/templates/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -96,7 +96,7 @@ export async function registerTemplateRoutes(
         }
     });
 
-    app.delete('/v2/templates/:id', async (request, reply) => {
+    app.delete('/api/v2/templates/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

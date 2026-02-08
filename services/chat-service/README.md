@@ -49,7 +49,7 @@ Optional:
 
 All endpoints follow V2 standardized patterns with role-based access control.
 
-### Conversations (`/v2/conversations`)
+### Conversations (`/api/v2/conversations`)
 
 #### Core CRUD Operations
 
@@ -66,7 +66,7 @@ All endpoints follow V2 standardized patterns with role-based access control.
 - `PATCH /v2/conversations/:id/participant-state` - Update read status, typing indicators
 - `GET /v2/conversations/:id/attachments` - List conversation file attachments
 
-### Messages (`/v2/messages`)
+### Messages (`/api/v2/messages`)
 
 #### Message Operations
 
@@ -80,7 +80,7 @@ All endpoints follow V2 standardized patterns with role-based access control.
 - `GET /v2/messages/search` - Search messages across conversations
 - `GET /v2/messages/history` - Get user's complete message history
 
-### File Attachments (`/v2/attachments`)
+### File Attachments (`/api/v2/attachments`)
 
 #### Attachment Management
 

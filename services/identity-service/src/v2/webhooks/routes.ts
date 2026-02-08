@@ -25,7 +25,7 @@ export async function webhooksRoutesV2(
      * Handle Clerk user lifecycle webhooks
      * POST /v2/webhooks/clerk
      */
-    app.post('/v2/webhooks/clerk', {
+    app.post('/api/v2/webhooks/clerk', {
         schema: {
             description: 'Handle Clerk user lifecycle webhook events',
             tags: ['webhooks'],
@@ -95,7 +95,7 @@ export async function webhooksRoutesV2(
             const webhook = new Webhook(WEBHOOK_SECRET);
             const headers = {
                 'svix-id': request.headers['svix-id'],
-                'svix-timestamp': request.headers['svix-timestamp'], 
+                'svix-timestamp': request.headers['svix-timestamp'],
                 'svix-signature': request.headers['svix-signature']
             };
 
@@ -125,7 +125,7 @@ export async function webhooksRoutesV2(
                     headers: request.headers,
                     error: error.message
                 }, 'Invalid webhook signature');
-                
+
                 return reply.code(400).send({
                     error: {
                         code: 'INVALID_SIGNATURE',
@@ -152,7 +152,7 @@ export async function webhooksRoutesV2(
      * Health check endpoint for webhook monitoring
      * GET /v2/webhooks/health
      */
-    app.get('/v2/webhooks/health', {
+    app.get('/api/v2/webhooks/health', {
         schema: {
             description: 'Webhook service health check',
             tags: ['webhooks'],

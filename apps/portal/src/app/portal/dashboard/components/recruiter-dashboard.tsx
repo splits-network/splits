@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/cards";
 import { TrendBadge } from "@/components/ui";
 import { AnalyticsChart } from "@/components/charts/analytics-chart";
+import { ConnectPromptBanner } from "@/components/stripe/connect-prompt-banner";
+import { ConnectDrawer } from "@/components/stripe/connect-drawer";
 
 interface RecruiterStats {
     active_roles: number;
@@ -100,6 +102,7 @@ export default function RecruiterDashboard() {
     const [topRoles, setTopRoles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
+    const [connectDrawerOpen, setConnectDrawerOpen] = useState(false);
 
     useEffect(() => {
         loadDashboardData();
@@ -194,6 +197,12 @@ export default function RecruiterDashboard() {
 
     return (
         <div className="space-y-6 animate-fade-in">
+            <ConnectPromptBanner onSetUp={() => setConnectDrawerOpen(true)} />
+            <ConnectDrawer
+                open={connectDrawerOpen}
+                onClose={() => setConnectDrawerOpen(false)}
+            />
+
             {/* Key Stats Grid - Using new StatCard component */}
             <div className="card bg-base-200">
                 <StatCardGrid className="m-2">

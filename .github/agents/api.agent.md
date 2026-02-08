@@ -281,7 +281,7 @@ export async function featureRoutes(app: FastifyInstance) {
     const service = new FeatureServiceV2(/* dependencies */);
 
     // LIST - Role-scoped collection
-    app.get('/v2/features', async (request, reply) => {
+    app.get('/api/v2/features', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
         const params = {
             page: Number(request.query.page) || 1,
@@ -297,7 +297,7 @@ export async function featureRoutes(app: FastifyInstance) {
     });
 
     // GET BY ID - Single resource
-    app.get('/v2/features/:id', async (request, reply) => {
+    app.get('/api/v2/features/:id', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
         const { id } = request.params as { id: string };
         
@@ -306,7 +306,7 @@ export async function featureRoutes(app: FastifyInstance) {
     });
 
     // CREATE - New resource
-    app.post('/v2/features', async (request, reply) => {
+    app.post('/api/v2/features', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
         const data = request.body as FeatureCreate;
         
@@ -315,7 +315,7 @@ export async function featureRoutes(app: FastifyInstance) {
     });
 
     // UPDATE - Single method handles all updates
-    app.patch('/v2/features/:id', async (request, reply) => {
+    app.patch('/api/v2/features/:id', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
         const { id } = request.params as { id: string };
         const data = request.body as FeatureUpdate;
@@ -325,7 +325,7 @@ export async function featureRoutes(app: FastifyInstance) {
     });
 
     // DELETE - Soft delete
-    app.delete('/v2/features/:id', async (request, reply) => {
+    app.delete('/api/v2/features/:id', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
         const { id } = request.params as { id: string };
         

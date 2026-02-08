@@ -12,6 +12,7 @@ import {
     getCompletionIncentives,
 } from "@/lib/utils/profile-completeness";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import { ConnectStatusCard } from "@/components/stripe/connect-status-card";
 
 interface MarketplaceSettings {
     marketplace_enabled: boolean;
@@ -289,6 +290,9 @@ export function MarketplaceSettings() {
 
     return (
         <div className="space-y-6">
+            {/* Payout Status */}
+            <ConnectStatusCard variant="compact" />
+
             {/* Profile Completeness Indicator */}
             <div className="card bg-primary/10 border border-primary/20">
                 <div className="card-body">
