@@ -268,13 +268,19 @@ function OverviewTab({
                     <div className="text-base text-base-content/80">
                         {candidate.current_title || "Title not provided"}
                         <span className="text-base-content/60">
-                            {candidate.current_company ? ` at ${candidate.current_company}` : " • Company not provided"}
+                            {candidate.current_company
+                                ? ` at ${candidate.current_company}`
+                                : " • Company not provided"}
                         </span>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-base-content/60 pt-1">
                         <a
-                            href={candidate.email ? `mailto:${candidate.email}` : '#'}
-                            className={`flex items-center gap-1.5 ${candidate.email ? 'hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                            href={
+                                candidate.email
+                                    ? `mailto:${candidate.email}`
+                                    : "#"
+                            }
+                            className={`flex items-center gap-1.5 ${candidate.email ? "hover:text-primary transition-colors" : "cursor-not-allowed opacity-50"}`}
                         >
                             <i className="fa-duotone fa-regular fa-envelope" />
                             {candidate.email || "Email not provided"}
@@ -290,31 +296,53 @@ function OverviewTab({
                     </div>
                     <div className="flex flex-wrap gap-2 pt-2">
                         <a
-                            href={candidate.linkedin_url || '#'}
-                            target={candidate.linkedin_url ? "_blank" : undefined}
-                            rel={candidate.linkedin_url ? "noopener noreferrer" : undefined}
-                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.linkedin_url ? 'text-base-content/70' : 'text-base-content/40 cursor-not-allowed'}`}
+                            href={candidate.linkedin_url || "#"}
+                            target={
+                                candidate.linkedin_url ? "_blank" : undefined
+                            }
+                            rel={
+                                candidate.linkedin_url
+                                    ? "noopener noreferrer"
+                                    : undefined
+                            }
+                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.linkedin_url ? "text-base-content/70" : "text-base-content/40 cursor-not-allowed"}`}
                         >
                             <i className="fa-brands fa-linkedin" />
-                            {candidate.linkedin_url ? "LinkedIn" : "LinkedIn not provided"}
+                            {candidate.linkedin_url
+                                ? "LinkedIn"
+                                : "LinkedIn not provided"}
                         </a>
                         <a
-                            href={candidate.github_url || '#'}
+                            href={candidate.github_url || "#"}
                             target={candidate.github_url ? "_blank" : undefined}
-                            rel={candidate.github_url ? "noopener noreferrer" : undefined}
-                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.github_url ? 'text-base-content/70' : 'text-base-content/40 cursor-not-allowed'}`}
+                            rel={
+                                candidate.github_url
+                                    ? "noopener noreferrer"
+                                    : undefined
+                            }
+                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.github_url ? "text-base-content/70" : "text-base-content/40 cursor-not-allowed"}`}
                         >
                             <i className="fa-brands fa-github" />
-                            {candidate.github_url ? "GitHub" : "GitHub not provided"}
+                            {candidate.github_url
+                                ? "GitHub"
+                                : "GitHub not provided"}
                         </a>
                         <a
-                            href={candidate.portfolio_url || '#'}
-                            target={candidate.portfolio_url ? "_blank" : undefined}
-                            rel={candidate.portfolio_url ? "noopener noreferrer" : undefined}
-                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.portfolio_url ? 'text-base-content/70' : 'text-base-content/40 cursor-not-allowed'}`}
+                            href={candidate.portfolio_url || "#"}
+                            target={
+                                candidate.portfolio_url ? "_blank" : undefined
+                            }
+                            rel={
+                                candidate.portfolio_url
+                                    ? "noopener noreferrer"
+                                    : undefined
+                            }
+                            className={`btn btn-xs btn-ghost gap-1.5 ${candidate.portfolio_url ? "text-base-content/70" : "text-base-content/40 cursor-not-allowed"}`}
                         >
                             <i className="fa-duotone fa-regular fa-globe" />
-                            {candidate.portfolio_url ? "Portfolio" : "Portfolio not provided"}
+                            {candidate.portfolio_url
+                                ? "Portfolio"
+                                : "Portfolio not provided"}
                         </a>
                     </div>
                 </div>
@@ -480,25 +508,36 @@ function OverviewTab({
                                 Verification Status
                             </span>
                             <div className="font-medium flex items-center gap-2">
-                                {candidate.verification_status === 'verified' ? (
+                                {candidate.verification_status ===
+                                "verified" ? (
                                     <>
                                         <i className="fa-duotone fa-regular fa-badge-check text-success" />
-                                        <span className="text-success">Verified</span>
+                                        <span className="text-success">
+                                            Verified
+                                        </span>
                                     </>
-                                ) : candidate.verification_status === 'pending' ? (
+                                ) : candidate.verification_status ===
+                                  "pending" ? (
                                     <>
                                         <i className="fa-duotone fa-regular fa-clock text-warning" />
-                                        <span className="text-warning">Pending</span>
+                                        <span className="text-warning">
+                                            Pending
+                                        </span>
                                     </>
-                                ) : candidate.verification_status === 'rejected' ? (
+                                ) : candidate.verification_status ===
+                                  "rejected" ? (
                                     <>
                                         <i className="fa-duotone fa-regular fa-times-circle text-error" />
-                                        <span className="text-error">Rejected</span>
+                                        <span className="text-error">
+                                            Rejected
+                                        </span>
                                     </>
                                 ) : (
                                     <>
                                         <i className="fa-duotone fa-regular fa-question-circle text-base-content/40" />
-                                        <span className="text-base-content/60">Unverified</span>
+                                        <span className="text-base-content/60">
+                                            Unverified
+                                        </span>
                                     </>
                                 )}
                             </div>
@@ -508,7 +547,7 @@ function OverviewTab({
                                 Marketplace Visibility
                             </span>
                             <span className="font-medium capitalize">
-                                {candidate.marketplace_visibility || 'Not set'}
+                                {candidate.marketplace_visibility || "Not set"}
                             </span>
                         </div>
                         <div className="flex flex-col">
@@ -516,7 +555,12 @@ function OverviewTab({
                                 Onboarding Status
                             </span>
                             <span className="font-medium capitalize">
-                                {candidate.onboarding_status ? candidate.onboarding_status.replace(/_/g, ' ') : 'Not specified'}
+                                {candidate.onboarding_status
+                                    ? candidate.onboarding_status.replace(
+                                          /_/g,
+                                          " ",
+                                      )
+                                    : "Not specified"}
                             </span>
                         </div>
                         <div className="flex flex-col">
@@ -524,7 +568,11 @@ function OverviewTab({
                                 Profile Created
                             </span>
                             <span className="font-medium">
-                                {candidate.created_at ? new Date(candidate.created_at).toLocaleDateString() : 'Date not available'}
+                                {candidate.created_at
+                                    ? new Date(
+                                          candidate.created_at,
+                                      ).toLocaleDateString()
+                                    : "Date not available"}
                             </span>
                         </div>
                     </div>
@@ -552,18 +600,26 @@ function OverviewTab({
                                     Work Availability
                                 </span>
                                 <div className="font-medium flex items-center gap-2">
-                                    {candidate.marketplace_profile?.available_for_work ? (
+                                    {candidate.marketplace_profile
+                                        ?.available_for_work ? (
                                         <>
                                             <i className="fa-duotone fa-regular fa-check-circle text-success" />
-                                            <span className="text-success">Available</span>
+                                            <span className="text-success">
+                                                Available
+                                            </span>
                                         </>
-                                    ) : candidate.marketplace_profile?.available_for_work === false ? (
+                                    ) : candidate.marketplace_profile
+                                          ?.available_for_work === false ? (
                                         <>
                                             <i className="fa-duotone fa-regular fa-times-circle text-error" />
-                                            <span className="text-error">Unavailable</span>
+                                            <span className="text-error">
+                                                Unavailable
+                                            </span>
                                         </>
                                     ) : (
-                                        <span className="text-base-content/60">Not specified</span>
+                                        <span className="text-base-content/60">
+                                            Not specified
+                                        </span>
                                     )}
                                 </div>
                             </div>
@@ -572,21 +628,28 @@ function OverviewTab({
                                     Max Concurrent Roles
                                 </span>
                                 <span className="font-medium">
-                                    {candidate.marketplace_profile?.max_concurrent_roles || 'Not specified'}
+                                    {candidate.marketplace_profile
+                                        ?.max_concurrent_roles ||
+                                        "Not specified"}
                                 </span>
                             </div>
                         </div>
-                        
+
                         {/* Professional Links */}
-                        {candidate.marketplace_profile?.linkedin_url || candidate.marketplace_profile?.website_url ? (
+                        {candidate.marketplace_profile?.linkedin_url ||
+                        candidate.marketplace_profile?.website_url ? (
                             <div className="flex flex-col">
                                 <span className="text-xs font-medium opacity-60 uppercase tracking-wider mb-2">
                                     Professional Links
                                 </span>
                                 <div className="flex flex-wrap gap-2">
-                                    {candidate.marketplace_profile?.linkedin_url && (
+                                    {candidate.marketplace_profile
+                                        ?.linkedin_url && (
                                         <a
-                                            href={candidate.marketplace_profile.linkedin_url}
+                                            href={
+                                                candidate.marketplace_profile
+                                                    .linkedin_url
+                                            }
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-xs btn-ghost gap-1.5 text-base-content/70"
@@ -595,9 +658,13 @@ function OverviewTab({
                                             Professional LinkedIn
                                         </a>
                                     )}
-                                    {candidate.marketplace_profile?.website_url && (
+                                    {candidate.marketplace_profile
+                                        ?.website_url && (
                                         <a
-                                            href={candidate.marketplace_profile.website_url}
+                                            href={
+                                                candidate.marketplace_profile
+                                                    .website_url
+                                            }
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-xs btn-ghost gap-1.5 text-base-content/70"
@@ -613,7 +680,9 @@ function OverviewTab({
                                 <span className="text-xs font-medium opacity-60 uppercase tracking-wider">
                                     Professional Links
                                 </span>
-                                <span className="text-sm text-base-content/60 italic">No additional professional links provided</span>
+                                <span className="text-sm text-base-content/60 italic">
+                                    No additional professional links provided
+                                </span>
                             </div>
                         )}
                     </div>
@@ -624,58 +693,82 @@ function OverviewTab({
                             <i className="fa-duotone fa-regular fa-bullseye text-secondary" />
                             Recruitment Specialization
                         </h5>
-                        
+
                         {/* Industries */}
                         <div className="flex flex-col">
                             <span className="text-xs font-medium opacity-60 uppercase tracking-wider mb-2">
                                 Industries
                             </span>
-                            {candidate.marketplace_profile?.industries?.length ? (
+                            {candidate.marketplace_profile?.industries
+                                ?.length ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {candidate.marketplace_profile.industries.map((industry, i) => (
-                                        <span key={i} className="badge badge-lg bg-primary/10 border-primary/20 text-primary p-3">
-                                            {industry}
-                                        </span>
-                                    ))}
+                                    {candidate.marketplace_profile.industries.map(
+                                        (industry, i) => (
+                                            <span
+                                                key={i}
+                                                className="badge badge-lg bg-primary/10 border-primary/20 text-primary p-3"
+                                            >
+                                                {industry}
+                                            </span>
+                                        ),
+                                    )}
                                 </div>
                             ) : (
-                                <span className="text-sm text-base-content/60 italic">No industry specializations listed</span>
+                                <span className="text-sm text-base-content/60 italic">
+                                    No industry specializations listed
+                                </span>
                             )}
                         </div>
-                        
+
                         {/* Job Levels */}
                         <div className="flex flex-col">
                             <span className="text-xs font-medium opacity-60 uppercase tracking-wider mb-2">
                                 Job Levels
                             </span>
-                            {candidate.marketplace_profile?.job_levels?.length ? (
+                            {candidate.marketplace_profile?.job_levels
+                                ?.length ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {candidate.marketplace_profile.job_levels.map((level, i) => (
-                                        <span key={i} className="badge badge-lg bg-secondary/10 border-secondary/20 text-secondary p-3">
-                                            {level}
-                                        </span>
-                                    ))}
+                                    {candidate.marketplace_profile.job_levels.map(
+                                        (level, i) => (
+                                            <span
+                                                key={i}
+                                                className="badge badge-lg bg-secondary/10 border-secondary/20 text-secondary p-3"
+                                            >
+                                                {level}
+                                            </span>
+                                        ),
+                                    )}
                                 </div>
                             ) : (
-                                <span className="text-sm text-base-content/60 italic">No job level specializations listed</span>
+                                <span className="text-sm text-base-content/60 italic">
+                                    No job level specializations listed
+                                </span>
                             )}
                         </div>
-                        
+
                         {/* Skills Expertise */}
                         <div className="flex flex-col">
                             <span className="text-xs font-medium opacity-60 uppercase tracking-wider mb-2">
                                 Skills Expertise
                             </span>
-                            {candidate.marketplace_profile?.skills_expertise?.length ? (
+                            {candidate.marketplace_profile?.skills_expertise
+                                ?.length ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {candidate.marketplace_profile.skills_expertise.map((skill, i) => (
-                                        <span key={i} className="badge badge-lg bg-accent/10 border-accent/20 text-accent p-3">
-                                            {skill}
-                                        </span>
-                                    ))}
+                                    {candidate.marketplace_profile.skills_expertise.map(
+                                        (skill, i) => (
+                                            <span
+                                                key={i}
+                                                className="badge badge-lg bg-accent/10 border-accent/20 text-accent p-3"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ),
+                                    )}
                                 </div>
                             ) : (
-                                <span className="text-sm text-base-content/60 italic">No skills expertise listed</span>
+                                <span className="text-sm text-base-content/60 italic">
+                                    No skills expertise listed
+                                </span>
                             )}
                         </div>
                     </div>
@@ -692,7 +785,8 @@ function OverviewTab({
                                     Fee Structure
                                 </span>
                                 <span className="font-medium capitalize">
-                                    {candidate.marketplace_profile?.placement_fee_type || 'Not specified'}
+                                    {candidate.marketplace_profile
+                                        ?.placement_fee_type || "Not specified"}
                                 </span>
                             </div>
                             <div className="flex flex-col">
@@ -700,11 +794,14 @@ function OverviewTab({
                                     Fee Amount
                                 </span>
                                 <span className="font-medium">
-                                    {candidate.marketplace_profile?.placement_fee_amount
-                                        ? candidate.marketplace_profile.placement_fee_type === 'percentage'
+                                    {candidate.marketplace_profile
+                                        ?.placement_fee_amount
+                                        ? candidate.marketplace_profile
+                                              .placement_fee_type ===
+                                          "percentage"
                                             ? `${candidate.marketplace_profile.placement_fee_amount}%`
                                             : `$${candidate.marketplace_profile.placement_fee_amount.toLocaleString()}`
-                                        : 'Not specified'}
+                                        : "Not specified"}
                                 </span>
                             </div>
                         </div>
@@ -720,16 +817,24 @@ function OverviewTab({
                             <span className="text-xs font-medium opacity-60 uppercase tracking-wider mb-2">
                                 Preferred Methods
                             </span>
-                            {candidate.marketplace_profile?.preferred_communication?.length ? (
+                            {candidate.marketplace_profile
+                                ?.preferred_communication?.length ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {candidate.marketplace_profile.preferred_communication.map((method, i) => (
-                                        <span key={i} className="badge badge-lg bg-info/10 border-info/20 text-info p-3 capitalize">
-                                            {method.replace(/_/g, ' ')}
-                                        </span>
-                                    ))}
+                                    {candidate.marketplace_profile.preferred_communication.map(
+                                        (method, i) => (
+                                            <span
+                                                key={i}
+                                                className="badge badge-lg bg-info/10 border-info/20 text-info p-3 capitalize"
+                                            >
+                                                {method.replace(/_/g, " ")}
+                                            </span>
+                                        ),
+                                    )}
                                 </div>
                             ) : (
-                                <span className="text-sm text-base-content/60 italic">No communication preferences specified</span>
+                                <span className="text-sm text-base-content/60 italic">
+                                    No communication preferences specified
+                                </span>
                             )}
                         </div>
                     </div>
