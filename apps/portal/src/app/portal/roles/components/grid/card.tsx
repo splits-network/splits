@@ -126,7 +126,7 @@ export function RoleCard({
                     </div>
                 </div>
             </MetricCard.Header>
-            <MetricCard.Body>
+            <MetricCard.Header>
                 {/* Key Metric */}
                 <KeyMetric
                     label={getKeyMetricLabel()}
@@ -139,6 +139,8 @@ export function RoleCard({
                     }
                     progressColor={getProgressColor()}
                 />
+            </MetricCard.Header>
+            <MetricCard.Body>
                 {/* Data Rows */}
                 <DataList compact>
                     {job.location && (

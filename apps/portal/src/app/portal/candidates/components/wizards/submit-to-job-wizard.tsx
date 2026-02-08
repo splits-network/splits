@@ -128,7 +128,8 @@ export default function SubmitToJobWizard({
         }
 
         loadJobs();
-    }, [currentStep, page, statusFilter, debouncedSearch, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentStep, page, statusFilter, debouncedSearch]);
 
     useEffect(() => {
         if (currentStep !== 2 || documents.length > 0) return;
@@ -154,7 +155,8 @@ export default function SubmitToJobWizard({
         }
 
         loadDocuments();
-    }, [currentStep, candidateId, getToken, documents.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentStep, candidateId, documents.length]);
 
     const toggleDocument = (docId: string) => {
         const newSet = new Set(selectedDocIds);

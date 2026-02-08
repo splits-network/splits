@@ -122,7 +122,8 @@ export function RolesFilterProvider({ children }: RolesFilterProviderProps) {
             }
             checkManageableCompanies();
         }
-    }, [isRecruiter, profileLoading, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isRecruiter, profileLoading]);
 
     // Permission check for creating roles
     const canCreateRole =

@@ -11,6 +11,30 @@ import {
     ParticipantDetails,
 } from './types';
 
+/**
+ * Derive a user's primary role from Supabase relation expansion data.
+ * Handles both array and single-object cases (Supabase returns object for 1:1, array for 1:many).
+ */
+function deriveUserRole(user: any): string | null {
+    const recruiters = Array.isArray(user.recruiters)
+        ? user.recruiters
+        : user.recruiters ? [user.recruiters] : [];
+    if (recruiters.some((r: any) => r.status === 'active')) return 'recruiter';
+
+    const candidates = Array.isArray(user.candidates)
+        ? user.candidates
+        : user.candidates ? [user.candidates] : [];
+    if (candidates.length > 0) return 'candidate';
+
+    const memberships = Array.isArray(user.memberships)
+        ? user.memberships
+        : user.memberships ? [user.memberships] : [];
+    if (memberships.some((m: any) => ['company_admin', 'hiring_manager'].includes(m.role)))
+        return 'company';
+
+    return null;
+}
+
 export class ChatRepository {
     private supabase: SupabaseClient;
 
@@ -29,6 +53,7 @@ export class ChatRepository {
             application_id?: string | null;
             job_id?: string | null;
             company_id?: string | null;
+            candidate_id?: string | null;
         }
     ): Promise<ChatConversation | null> {
         let query = this.supabase
@@ -55,6 +80,12 @@ export class ChatRepository {
             query = query.is('company_id', null);
         }
 
+        if (context.candidate_id) {
+            query = query.eq('candidate_id', context.candidate_id);
+        } else {
+            query = query.is('candidate_id', null);
+        }
+
         const { data, error } = await query.maybeSingle();
         if (error) {
             throw error;
@@ -69,6 +100,7 @@ export class ChatRepository {
             application_id?: string | null;
             job_id?: string | null;
             company_id?: string | null;
+            candidate_id?: string | null;
         }
     ): Promise<ChatConversation> {
         const { data, error } = await this.supabase
@@ -79,6 +111,7 @@ export class ChatRepository {
                 application_id: context.application_id ?? null,
                 job_id: context.job_id ?? null,
                 company_id: context.company_id ?? null,
+                candidate_id: context.candidate_id ?? null,
             })
             .select()
             .single();
@@ -167,6 +200,7 @@ export class ChatRepository {
                     application_id,
                     job_id,
                     company_id,
+                    candidate_id,
                     last_message_at,
                     last_message_id,
                     created_at,
@@ -234,10 +268,15 @@ export class ChatRepository {
             }
         });
 
-        // Fetch all participant details in one query
+        // Fetch all participant details in one query (with role data via relation expansion)
         const { data: users, error: usersError } = await this.supabase
             .from('users')
-            .select('id, name, email, profile_image_url')
+            .select(`
+                id, name, email, profile_image_url,
+                recruiters!recruiters_user_id_fkey ( id, status ),
+                candidates!candidates_user_id_fkey ( id ),
+                memberships!memberships_user_id_fkey ( role )
+            `)
             .in('id', Array.from(userIds));
 
         if (usersError) {
@@ -252,6 +291,7 @@ export class ChatRepository {
                 name: user.name,
                 email: user.email,
                 profile_image_url: user.profile_image_url,
+                user_role: deriveUserRole(user),
             });
         });
 
@@ -263,12 +303,14 @@ export class ChatRepository {
                 name: null,
                 email: 'Unknown',
                 profile_image_url: null,
+                user_role: null,
             };
             const participantB = userMap.get(conv.participant_b_id) || {
                 id: conv.participant_b_id,
                 name: null,
                 email: 'Unknown',
                 profile_image_url: null,
+                user_role: null,
             };
 
             return {
@@ -306,10 +348,15 @@ export class ChatRepository {
             return null;
         }
 
-        // Fetch both participants' details
+        // Fetch both participants' details (with role data via relation expansion)
         const { data: users, error } = await this.supabase
             .from('users')
-            .select('id, name, email, profile_image_url')
+            .select(`
+                id, name, email, profile_image_url,
+                recruiters!recruiters_user_id_fkey ( id, status ),
+                candidates!candidates_user_id_fkey ( id ),
+                memberships!memberships_user_id_fkey ( role )
+            `)
             .in('id', [conversation.participant_a_id, conversation.participant_b_id]);
 
         if (error) {
@@ -323,6 +370,7 @@ export class ChatRepository {
                 name: user.name,
                 email: user.email,
                 profile_image_url: user.profile_image_url,
+                user_role: deriveUserRole(user),
             });
         });
 
@@ -331,18 +379,115 @@ export class ChatRepository {
             name: null,
             email: 'Unknown',
             profile_image_url: null,
+            user_role: null,
         };
         const participantB = userMap.get(conversation.participant_b_id) || {
             id: conversation.participant_b_id,
             name: null,
             email: 'Unknown',
             profile_image_url: null,
+            user_role: null,
         };
 
         return {
             ...conversation,
             participant_a: participantA,
             participant_b: participantB,
+        };
+    }
+
+    /**
+     * Check if a candidate (by user_id) has an active representing recruiter.
+     * Requires BOTH recruiter_candidates (active + consent + valid dates)
+     * AND candidate_sourcers (active protection window) to be satisfied.
+     * Returns the recruiter's user_id for routing, or routed=false if no active representation.
+     */
+    async resolveRepresentation(
+        candidateUserId: string,
+        senderUserId: string,
+    ): Promise<{
+        routed: boolean;
+        recruiterUserId: string | null;
+        candidateId: string | null;
+        candidateName: string | null;
+        recruiterName: string | null;
+    }> {
+        const noRoute = { routed: false, recruiterUserId: null, candidateId: null, candidateName: null, recruiterName: null };
+
+        // Step 1: Find the candidate record by user_id
+        const { data: candidate, error: candErr } = await this.supabase
+            .from('candidates')
+            .select('id, full_name')
+            .eq('user_id', candidateUserId)
+            .maybeSingle();
+
+        if (candErr || !candidate) {
+            return noRoute;
+        }
+
+        // Step 2: Check recruiter_candidates for active representation with consent
+        const { data: relationship, error: relErr } = await this.supabase
+            .from('recruiter_candidates')
+            .select('recruiter_id, relationship_end_date')
+            .eq('candidate_id', candidate.id)
+            .eq('status', 'active')
+            .eq('consent_given', true)
+            .maybeSingle();
+
+        if (relErr || !relationship) {
+            return noRoute;
+        }
+
+        // Check relationship hasn't expired
+        if (relationship.relationship_end_date && new Date(relationship.relationship_end_date) < new Date()) {
+            return noRoute;
+        }
+
+        // Step 3: Check candidate_sourcers for active protection
+        const { data: sourcer, error: srcErr } = await this.supabase
+            .from('candidate_sourcers')
+            .select('sourcer_recruiter_id, protection_expires_at')
+            .eq('candidate_id', candidate.id)
+            .maybeSingle();
+
+        if (srcErr || !sourcer || !sourcer.protection_expires_at || new Date(sourcer.protection_expires_at) < new Date()) {
+            return noRoute;
+        }
+
+        // Step 4: Get the recruiter's user_id and name (must be active)
+        const { data: recruiter, error: recErr } = await this.supabase
+            .from('recruiters')
+            .select('id, user_id')
+            .eq('id', relationship.recruiter_id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (recErr || !recruiter || !recruiter.user_id) {
+            return noRoute;
+        }
+
+        // Step 5: No self-redirect
+        if (recruiter.user_id === senderUserId) {
+            return noRoute;
+        }
+
+        // Step 6: Get recruiter's display name from users table
+        let recruiterName: string | null = null;
+        const { data: recruiterUser } = await this.supabase
+            .from('users')
+            .select('name')
+            .eq('id', recruiter.user_id)
+            .maybeSingle();
+        if (recruiterUser) {
+            recruiterName = recruiterUser.name;
+        }
+
+        return {
+            routed: true,
+            recruiterUserId: recruiter.user_id,
+            candidateId: candidate.id,
+            candidateName: candidate.full_name,
+            recruiterName,
         };
     }
 

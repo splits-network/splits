@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode, useState, useCallback } from 'react';
+import { ReactNode, useState, useCallback } from "react";
+import { useTableAccordion } from "./table-accordion-context";
 
 export interface ExpandableTableRowProps {
     /** Main row cells content */
@@ -29,7 +30,7 @@ export interface ExpandableTableRowProps {
 
 /**
  * ExpandableTableRow - Table row that expands to show more detail
- * 
+ *
  * Features:
  * - Click to expand/collapse
  * - Chevron indicator rotates on expand
@@ -45,31 +46,41 @@ export function ExpandableTableRow({
     onExpandChange,
     showToggle = true,
     rowId,
-    className = '',
+    className = "",
     selected = false,
     onSelect,
     lazyLoad = false,
     loading = false,
 }: ExpandableTableRowProps) {
+    // Accordion context: if present, only one row expands at a time
+    const accordion = useTableAccordion();
+
     // Support both controlled and uncontrolled modes
     const [internalExpanded, setInternalExpanded] = useState(false);
-    const isExpanded = controlledExpanded ?? internalExpanded;
+    const isExpanded =
+        controlledExpanded ??
+        (accordion ? accordion.expandedRowId === rowId : internalExpanded);
 
     const toggleExpanded = useCallback(() => {
         const newState = !isExpanded;
         if (onExpandChange) {
             onExpandChange(newState);
+        } else if (accordion) {
+            accordion.setExpandedRowId(newState ? rowId : null);
         } else {
             setInternalExpanded(newState);
         }
-    }, [isExpanded, onExpandChange]);
+    }, [isExpanded, onExpandChange, accordion, rowId]);
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleExpanded();
-        }
-    }, [toggleExpanded]);
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleExpanded();
+            }
+        },
+        [toggleExpanded],
+    );
 
     return (
         <>
@@ -77,8 +88,8 @@ export function ExpandableTableRow({
             <tr
                 className={`
                     hover:bg-base-200/50 cursor-pointer transition-colors
-                    ${isExpanded ? 'bg-base-100 shadow-lg' : ''}
-                    ${selected ? 'bg-primary/5' : ''}
+                    ${isExpanded ? "bg-base-100 expanded-row" : ""}
+                    ${selected ? "bg-primary/5" : ""}
                     ${className}
                 `}
                 onClick={toggleExpanded}
@@ -110,9 +121,13 @@ export function ExpandableTableRow({
                                 e.stopPropagation();
                                 toggleExpanded();
                             }}
-                            aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                            aria-label={
+                                isExpanded ? "Collapse row" : "Expand row"
+                            }
                         >
-                            <i className={`fa-duotone fa-regular fa-chevron-right transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}></i>
+                            <i
+                                className={`fa-duotone fa-regular fa-chevron-right transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                            ></i>
                         </button>
                     </td>
                 )}
@@ -123,12 +138,9 @@ export function ExpandableTableRow({
 
             {/* Expanded detail row */}
             {isExpanded && (
-                <tr id={`${rowId}-detail`} className="bg-base-100">
-                    <td
-                        colSpan={100}
-                        className="p-0"
-                    >
-                        <div className="p-4 border-l-4 border-primary/30">
+                <tr id={`${rowId}-detail`} className="expanded-row-detail">
+                    <td colSpan={100} className="p-0">
+                        <div className="p-4">
                             {loading ? (
                                 <ExpandedContentSkeleton />
                             ) : lazyLoad && !expandedContent ? (
@@ -187,7 +199,7 @@ export interface ExpandedDetailSectionProps {
 export function ExpandedDetailSection({
     title,
     children,
-    className = '',
+    className = "",
 }: ExpandedDetailSectionProps) {
     return (
         <div className={className}>
@@ -213,12 +225,12 @@ export interface ExpandedDetailGridProps {
 export function ExpandedDetailGrid({
     children,
     cols = 3,
-    className = '',
+    className = "",
 }: ExpandedDetailGridProps) {
     const gridClasses = {
-        2: 'grid-cols-1 sm:grid-cols-2',
-        3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-        4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+        2: "grid-cols-1 sm:grid-cols-2",
+        3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+        4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
     };
 
     return (
@@ -242,16 +254,20 @@ export function ExpandedDetailItem({
     label,
     value,
     icon,
-    className = '',
+    className = "",
 }: ExpandedDetailItemProps) {
     return (
         <div className={`flex items-start gap-2 ${className}`}>
             {icon && (
-                <i className={`fa-duotone fa-regular ${icon} text-base-content/40 mt-0.5`}></i>
+                <i
+                    className={`fa-duotone fa-regular ${icon} text-base-content/40 mt-0.5`}
+                ></i>
             )}
             <div>
                 <dt className="text-xs text-base-content/50">{label}</dt>
-                <dd className="text-sm text-base-content font-medium">{value}</dd>
+                <dd className="text-sm text-base-content font-medium">
+                    {value}
+                </dd>
             </div>
         </div>
     );

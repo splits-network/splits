@@ -163,7 +163,8 @@ export default function BillingHistorySection() {
                 setLoadingMore(false);
             }
         },
-        [getToken, limit],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [limit],
     );
 
     useEffect(() => {

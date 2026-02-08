@@ -45,5 +45,7 @@
       "**/.git",
       "**/.github"
     ]
-  }
+  },
+  "vitest.root": "services/ats-service",
+  "vitest.configFile": "services/ats-service/vitest.config.ts"
 }

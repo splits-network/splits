@@ -8,6 +8,7 @@
 ## Completed: Phase 1 - ATS Service V2
 
 ### Structure Created
+
 ```
 services/ats-service/src/v2/
 |- types.ts           (complete - shared resource types, filters, updates)
@@ -27,6 +28,7 @@ services/ats-service/src/v2/
 ```
 
 ### Features Implemented
+
 - Standardized 5-route pattern (LIST, GET, CREATE, UPDATE, DELETE)
 - Role-based data scoping via memberships
 - Direct Supabase queries with enriched JOINs
@@ -37,7 +39,9 @@ services/ats-service/src/v2/
 - Integration with main index.ts
 
 ### API Endpoints Available
+
 **Jobs (5 routes)**:
+
 - GET /v2/jobs - List with role-scoping
 - GET /v2/jobs/:id - Single job
 - POST /v2/jobs - Create
@@ -45,6 +49,7 @@ services/ats-service/src/v2/
 - DELETE /v2/jobs/:id - Soft delete
 
 **Companies (5 routes)**:
+
 - GET /v2/companies - List
 - GET /v2/companies/:id - Single
 - POST /v2/companies - Create
@@ -52,6 +57,7 @@ services/ats-service/src/v2/
 - DELETE /v2/companies/:id - Soft delete
 
 **Candidates (5 routes)**:
+
 - GET /v2/candidates - List
 - GET /v2/candidates/:id - Single
 - POST /v2/candidates - Create
@@ -59,6 +65,7 @@ services/ats-service/src/v2/
 - DELETE /v2/candidates/:id - Soft delete
 
 **Applications (5 routes)**:
+
 - GET /v2/applications - List with enriched data
 - GET /v2/applications/:id - Single with candidate/job data
 - POST /v2/applications - Create
@@ -66,6 +73,7 @@ services/ats-service/src/v2/
 - DELETE /v2/applications/:id - Soft delete
 
 **Placements (5 routes)**:
+
 - GET /v2/placements - List with enriched data
 - GET /v2/placements/:id - Single with full context
 - POST /v2/placements - Create
@@ -77,6 +85,7 @@ services/ats-service/src/v2/
 ## Completed: Phase 2 - Network Service V2
 
 ### Structure Created
+
 ```
 services/network-service/src/v2/
 |- types.ts
@@ -110,6 +119,7 @@ services/network-service/src/v2/
 ```
 
 ### Features Implemented
+
 - Standardized 5-route pattern across recruiters, assignments, recruiter-candidates, reputation, and proposals
 - Role-based data scoping using requireUserContext and scoped Supabase queries
 - Dedicated repositories per domain with enriched JOINs and zero service-to-service calls
@@ -119,7 +129,9 @@ services/network-service/src/v2/
 - services/network-service/src/index.ts registers both legacy and v2 routes for dual-run support
 
 ### API Endpoints Available
+
 **Recruiters (5 routes)**:
+
 - GET /v2/recruiters - List with filters and pagination
 - GET /v2/recruiters/:id - Single recruiter profile
 - POST /v2/recruiters - Create
@@ -127,6 +139,7 @@ services/network-service/src/v2/
 - DELETE /v2/recruiters/:id - Soft delete
 
 **Assignments (5 routes)**:
+
 - GET /v2/assignments - List recruiter-job assignments
 - GET /v2/assignments/:id - Single assignment with job/recruiter context
 - POST /v2/assignments - Create
@@ -134,6 +147,7 @@ services/network-service/src/v2/
 - DELETE /v2/assignments/:id - Soft delete
 
 **Recruiter-Candidates (5 routes)**:
+
 - GET /v2/recruiter-candidates - List recruiter <> candidate relationships
 - GET /v2/recruiter-candidates/:id - Single record with metadata
 - POST /v2/recruiter-candidates - Create
@@ -141,6 +155,7 @@ services/network-service/src/v2/
 - DELETE /v2/recruiter-candidates/:id - Soft delete
 
 **Reputation (5 routes)**:
+
 - GET /v2/reputation - List recruiter reputation metrics
 - GET /v2/reputation/:id - Single metric bundle
 - POST /v2/reputation - Create
@@ -148,6 +163,7 @@ services/network-service/src/v2/
 - DELETE /v2/reputation/:id - Hard delete when needed
 
 **Proposals (5 routes)**:
+
 - GET /v2/proposals - List proposals with filtering
 - GET /v2/proposals/:id - Single proposal with recruiter + company context
 - POST /v2/proposals - Create
@@ -159,6 +175,7 @@ services/network-service/src/v2/
 ## Completed: Phase 3 - Billing Service V2
 
 ### Structure Created
+
 ```
 services/billing-service/src/v2/
 |- types.ts
@@ -181,6 +198,7 @@ services/billing-service/src/v2/
 ```
 
 ### Features Implemented
+
 - Standardized 5-route pattern across plans, subscriptions, and payouts
 - Direct Supabase queries per resource with pagination + filtering support
 - Role-aware subscription access (recruiters see their own, admins see all)
@@ -191,6 +209,7 @@ services/billing-service/src/v2/
 ### API Endpoints Available
 
 **Plans (5 routes)**:
+
 - GET /v2/plans - List with filters + pagination
 - GET /v2/plans/:id - Single plan
 - POST /v2/plans - Create (billing admin only)
@@ -198,6 +217,7 @@ services/billing-service/src/v2/
 - DELETE /v2/plans/:id - Archive plan (billing admin only)
 
 **Subscriptions (5 routes)**:
+
 - GET /v2/subscriptions - List (self-service for recruiters, global for admins)
 - GET /v2/subscriptions/:id - Single subscription with authorization guard
 - POST /v2/subscriptions - Create (non-admin auto-binds to caller)
@@ -205,6 +225,7 @@ services/billing-service/src/v2/
 - DELETE /v2/subscriptions/:id - Cancel subscription (soft delete)
 
 **Payouts (5 routes)**:
+
 - GET /v2/payouts - List payouts (billing admin only)
 - GET /v2/payouts/:id - Single payout (billing admin only)
 - POST /v2/payouts - Create payout record
@@ -212,6 +233,7 @@ services/billing-service/src/v2/
 - DELETE /v2/payouts/:id - Mark payout as failed/removed (soft delete)
 
 ### Combined Progress
+
 - ATS Service: 25 V2 routes (jobs, companies, candidates, applications, placements)
 - Network Service: 25 V2 routes (recruiters, assignments, recruiter-candidates, reputation, proposals)
 - Billing Service: 15 V2 routes (plans, subscriptions, payouts)
@@ -225,6 +247,7 @@ services/billing-service/src/v2/
 ## Completed: Phase 4 - Supporting Services (Document, Notification, Automation)
 
 ### Structure Created
+
 ```
 services/document-service/src/v2/
 |- shared/helpers.ts
@@ -267,6 +290,7 @@ services/automation-service/src/v2/
 ```
 
 ### Features Implemented
+
 - Standardized 5-route pattern applied to eight new resources (documents, notifications, templates, matches, fraud signals, automation rules, marketplace metrics)
 - Multipart upload support + Supabase Storage integration for documents with signed URL responses
 - Notification routes expose log management + template CRUD with event publishing hooks
@@ -274,6 +298,7 @@ services/automation-service/src/v2/
 - All three services now register both legacy and V2 routes for safe cutover
 
 ### API Endpoints Available
+
 **Documents (5 routes)**  
 `GET /v2/documents`, `GET /v2/documents/:id`, `POST /v2/documents`, `PATCH /v2/documents/:id`, `DELETE /v2/documents/:id`
 
@@ -300,12 +325,14 @@ services/automation-service/src/v2/
 ## Remaining Work
 
 ### Phase 5: API Gateway V2 Routes (Estimated: 2 hours)
+
 - [ ] Create services/api-gateway/src/routes/v2/routes.ts
 - [ ] Register proxy routes for ATS, Network, Billing, Document, Notification, and Automation (100 routes)
 - [ ] Apply requireRoles() middleware for each proxy
 - [ ] Update api-gateway/src/index.ts to register both legacy and V2 proxies
 
 ### Phase 6: Frontend Migration + Testing & Cleanup (Estimated: 6-8 hours)
+
 - [ ] Wire portal + candidate apps to `/api/v2/*` endpoints page-by-page
 - [ ] Test all ATS V2 endpoints
 - [ ] Test all Network V2 endpoints
@@ -319,7 +346,9 @@ services/automation-service/src/v2/
 ## Key Principles Followed
 
 ### 1. Standardized 5-Route Pattern
+
 Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
+
 - GET /v2/:resource - LIST with pagination
 - GET /v2/:resource/:id - GET single
 - POST /v2/:resource - CREATE
@@ -327,21 +356,25 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 - DELETE /v2/:resource/:id - DELETE (soft delete unless otherwise noted)
 
 ### 2. Single Update Methods
+
 - No separate endpoints for status changes, stage transitions, etc.
 - PATCH handles everything with smart validation
 - Service layer inspects updates and validates accordingly
 
 ### 3. Direct Supabase Queries
+
 - No SQL functions
 - No service-to-service calls
 - Role resolution in TypeScript using parallel queries
 - Enriched queries with JOINs for related data
 
 ### 4. Consistent Response Format
+
 - Success: `{ data: {...} }` or `{ data: [...], pagination: {...} }`
 - Error: `{ error: { message: 'Description' } }`
 
 ### 5. Role-Based Scoping
+
 - Backend determines data access via memberships
 - No authorization logic duplicated in downstream services
 - Organization ID resolved from user's memberships or recruiter status
@@ -357,6 +390,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 ---
 
 ## Performance Impact (Projected)
+
 - Query time: 100-200ms (vs 3-5s in V1)
 - Network requests: 4-5 per page (vs 15-20+ in V1)
 - Code complexity: 70-80% reduction
@@ -367,6 +401,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 ## Files Created So Far
 
 ### ATS Service (Complete)
+
 1. Domain type modules under `services/ats-service/src/v2/<domain>/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/ats-service/src/v2/helpers.ts`
 3. `services/ats-service/src/v2/shared/helpers.ts`
@@ -392,6 +427,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 23. Updated `services/ats-service/src/index.ts`
 
 ### Network Service (Complete)
+
 1. Domain type modules under `services/network-service/src/v2/<domain>/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/network-service/src/v2/helpers.ts`
 3. Removed `services/network-service/src/v2/repository.ts` after splitting repositories per domain
@@ -417,6 +453,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 23. Updated `services/network-service/src/index.ts`
 
 ### Billing Service (Complete)
+
 1. Domain type modules under `services/billing-service/src/v2/{plans,subscriptions,payouts}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/billing-service/src/v2/shared/helpers.ts`
 3. `services/billing-service/src/v2/shared/events.ts`
@@ -433,6 +470,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 14. Updated `services/billing-service/src/index.ts`
 
 ### Document Service (Complete)
+
 1. Domain type modules under `services/document-service/src/v2/documents/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/document-service/src/v2/shared/helpers.ts`
 3. `services/document-service/src/v2/shared/events.ts`
@@ -442,6 +480,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 7. Updated `services/document-service/src/index.ts`
 
 ### Notification Service (Complete)
+
 1. Domain type modules under `services/notification-service/src/v2/{notifications,templates}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/notification-service/src/v2/shared/helpers.ts`
 3. `services/notification-service/src/v2/shared/events.ts`
@@ -453,6 +492,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 9. Updated `services/notification-service/src/index.ts`
 
 ### Automation Service (Complete)
+
 1. Domain type modules under `services/automation-service/src/v2/{matches,fraud-signals,rules,metrics}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/automation-service/src/v2/shared/helpers.ts`
 3. `services/automation-service/src/v2/shared/events.ts`
@@ -468,14 +508,16 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 13. Updated `services/automation-service/src/index.ts`
 
 ### Identity Service (In Progress)
+
 1. Domain type modules under `services/identity-service/src/v2/{users,organizations,memberships,invitations}/types.ts`
 2. Added per-domain repositories at `services/identity-service/src/v2/<domain>/repository.ts` (legacy `src/v2/repository.ts` removed)
 3. Moved service logic to `services/identity-service/src/v2/<domain>/service.ts` (legacy `src/v2/services/*.ts` removed)
 4. `services/identity-service/src/v2/routes.ts` now instantiates each domain repository/service directly
 
 ### Candidate Portal (Complete) ✅
+
 1. `/jobs` list now consumes the V2 jobs payload shape (`data` + `pagination`) via the public gateway proxy
-2. `services/api-gateway/src/routes/jobs/public-routes.ts` proxies `/api/public/jobs*` to `/v2/jobs*` so public pages read from the new backend
+2. `services/api-gateway/src/routes/jobs/public-routes.ts` proxies `/api/public/jobs*` to `/api/v2/jobs*` so public pages read from the new backend
 3. `/applications` dashboard and detail pages now call `/api/v2/applications` using the shared API client; responses consume the V2 `{ data, pagination }` format
 4. In-app notifications proxy through `/api/v2/notifications*`, leveraging the shared `resolveAccessContext` helper for per-user scoping (list/read/dismiss/unread-count)
 5. Recruiter relationships page now queries `/api/v2/recruiter-candidates`, with candidate-scoped access enforced in `services/network-service/src/v2/recruiter-candidates/repository.ts`
@@ -486,7 +528,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 10. Recruiter invitation acceptance/decline now uses `/api/v2/recruiter-candidates/invitations/*`, with the network service handling token validation + candidate linking inside its V2 service, so the invitation UI no longer depends on `/api/network/recruiter-candidates/invitation/*`.
 11. AI review reads/triggers live at `/api/v2/ai-reviews` (`GET ?application_id=...`, `GET /:id`, `POST`) plus `/api/v2/ai-review-stats?job_id=...`, backed by new ATS V2 routes that enforce access via the shared resolveAccessContext helper.
 12. **Application submission V2**: `POST /v2/applications` replaces legacy `/applications/submit` endpoint
-13. **Pre-screen questions V2**: `GET /v2/job-pre-screen-questions?job_id=...` replaces legacy `/jobs/:id/pre-screen-questions` 
+13. **Pre-screen questions V2**: `GET /v2/job-pre-screen-questions?job_id=...` replaces legacy `/jobs/:id/pre-screen-questions`
 14. **All API client endpoints V2**: Complete migration from legacy endpoints to standardized V2 5-route pattern
 
 ---
@@ -494,6 +536,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 ## Success Metrics
 
 ### Phase 1 (ATS) - Complete
+
 - [x] All 25 ATS V2 routes registered
 - [x] All services follow standardized pattern
 - [x] All CRUD operations in single repository files
@@ -504,6 +547,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 - [x] Event publishing after operations
 
 ### Phase 2 (Network) - Complete
+
 - [x] All 25 Network V2 routes registered
 - [x] Dedicated repositories + services per domain with Supabase JOINs
 - [x] Single update methods enforcing recruiter workflow rules
@@ -511,22 +555,26 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 - [x] services/network-service/src/index.ts registers both legacy + V2 routes
 
 ### Phase 3 (Billing) - Complete
+
 - [x] 15 V2 routes (plans, subscriptions, payouts)
 - [x] Repository + services mirroring ATS/Network patterns
 - [x] Dual registration alongside v1 until frontend migration completes
 
 ### Phase 4 (Supporting Services) - Complete
+
 - [x] Document service V2 structure with storage + event publisher
 - [x] Notification service V2 routes for logs and templates
 - [x] Automation service V2 routes for matches, fraud, rules, metrics
-- [x] services/*/src/index.ts updated to register V1 + V2 side-by-side
+- [x] services/\*/src/index.ts updated to register V1 + V2 side-by-side
 
 ### Phase 5 (API Gateway) - Pending
+
 - [ ] Register API Gateway proxies for all 100 V2 endpoints
 - [ ] Apply role requirements per proxy route
 - [ ] Confirm gateway forwards user-context headers for RBAC
 
 ### Phase 6 (Frontend + Cleanup) - Pending
+
 - [ ] Frontend routes migrated to `/api/v2/*`
 - [ ] V1 traffic monitored for safe deprecation
 - [ ] Side-by-side testing + documentation refresh

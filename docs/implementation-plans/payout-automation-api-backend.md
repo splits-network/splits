@@ -13,6 +13,7 @@
 Automate payout processing with scheduled payments, escrow holds, and comprehensive audit logging. Currently all payouts are processed manually which is unreliable and doesn't scale.
 
 **Related Documents**:
+
 - Feature Plan: `docs/plan-databaseTableIntegration2.prompt.md` (Feature 2)
 - UI Tracker: `docs/implementation-plans/payout-automation-ui-frontend.md`
 
@@ -21,6 +22,7 @@ Automate payout processing with scheduled payments, escrow holds, and comprehens
 ## Backend Status Summary
 
 ### ✅ Complete (V2 Implementation)
+
 - [x] `payouts` table and V2 domain in billing-service
 - [x] Payout CRUD operations with role-based access
 - [x] Stripe integration for basic payouts
@@ -28,6 +30,7 @@ Automate payout processing with scheduled payments, escrow holds, and comprehens
 - [x] Email notifications for payout events
 
 ### ✅ Complete (V2 Payout Automation)
+
 - [x] `payout_schedules` table with V2 domain
 - [x] PayoutScheduleServiceV2 with full automation logic
 - [x] Automated scheduler job (process-payout-schedules.ts)
@@ -42,6 +45,7 @@ Automate payout processing with scheduled payments, escrow holds, and comprehens
 - [x] Event-driven architecture integration
 
 ### ⏳ Pending Deployment
+
 - [ ] Kubernetes CronJob manifests
 - [ ] Monitoring and alerting configuration
 
@@ -56,6 +60,7 @@ Automate payout processing with scheduled payments, escrow holds, and comprehens
 **File**: `services/billing-service/migrations/00X_enhance_payout_schedules.sql`
 
 #### Current Schema
+
 ```sql
 CREATE TABLE payout_schedules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -68,6 +73,7 @@ CREATE TABLE payout_schedules (
 ```
 
 #### Enhancement Tasks
+
 - [x] Add `guarantee_completion_date` column (timestamptz) ✅ **COMPLETE** - Column exists in database
 - [x] Add `placement_id` column (UUID, references placements) ✅ **COMPLETE** - Column exists with FK constraint
 - [x] Add `processed_at` column (timestamptz) ✅ **COMPLETE** - Column exists in database
@@ -78,9 +84,10 @@ CREATE TABLE payout_schedules (
 - [x] Add check constraint: status IN ('pending', 'processing', 'processed', 'failed', 'cancelled') ✅ **COMPLETE** - Constraint exists on status column
 
 #### Migration SQL
+
 ```sql
 -- 00X_enhance_payout_schedules.sql
-ALTER TABLE payout_schedules 
+ALTER TABLE payout_schedules
 ADD COLUMN IF NOT EXISTS guarantee_completion_date TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS placement_id UUID REFERENCES placements(id),
 ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ,
@@ -92,8 +99,8 @@ CREATE INDEX IF NOT EXISTS idx_payout_schedules_status ON payout_schedules(statu
 CREATE INDEX IF NOT EXISTS idx_payout_schedules_scheduled_date ON payout_schedules(scheduled_date);
 CREATE INDEX IF NOT EXISTS idx_payout_schedules_placement ON payout_schedules(placement_id);
 
-ALTER TABLE payout_schedules 
-ADD CONSTRAINT check_schedule_status 
+ALTER TABLE payout_schedules
+ADD CONSTRAINT check_schedule_status
 CHECK (status IN ('pending', 'processing', 'processed', 'failed', 'cancelled'));
 ```
 
@@ -104,40 +111,42 @@ CHECK (status IN ('pending', 'processing', 'processed', 'failed', 'cancelled'));
 **File**: `services/billing-service/migrations/00Y_create_escrow_holds.sql`
 
 #### Tasks
+
 - [x] Create `escrow_holds` table ✅ **COMPLETE** - Table exists in database
 - [x] Add foreign keys to placements and payouts ✅ **COMPLETE** - FK constraints present
 - [x] Add indexes for common queries ✅ **COMPLETE** - Indexes created
 - [x] Add check constraints for valid amounts and statuses ✅ **COMPLETE** - Constraints exist
 
 #### Schema Design
+
 ```sql
 -- 00Y_create_escrow_holds.sql
 CREATE TABLE escrow_holds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     placement_id UUID NOT NULL REFERENCES placements(id),
     payout_id UUID REFERENCES payouts(id),
-    
+
     -- Financial details
     hold_amount DECIMAL(10, 2) NOT NULL CHECK (hold_amount >= 0),
     holdback_percentage DECIMAL(5, 2) NOT NULL CHECK (holdback_percentage BETWEEN 0 AND 100),
-    
+
     -- Timing
     hold_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     release_date TIMESTAMPTZ NOT NULL,
     released_at TIMESTAMPTZ,
-    
+
     -- Status
     status VARCHAR(50) NOT NULL DEFAULT 'active',
-    
+
     -- Metadata
     reason TEXT,
     released_by UUID REFERENCES users(id),
     release_notes TEXT,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     CONSTRAINT check_escrow_status CHECK (status IN ('active', 'released', 'forfeited', 'cancelled'))
 );
 
@@ -158,31 +167,33 @@ COMMENT ON COLUMN escrow_holds.release_date IS 'Date when escrow should be autom
 **File**: `services/billing-service/migrations/00Z_create_payout_audit_log.sql`
 
 #### Tasks
+
 - [x] Create `payout_audit_log` table ✅ **COMPLETE** - Table exists in database
 - [x] Add indexes for querying audit history ✅ **COMPLETE** - Indexes created
 - [x] Add foreign key to payouts table ✅ **COMPLETE** - FK constraint present
 - [x] Design for immutability (append-only) ✅ **COMPLETE** - Append-only design implemented
 
 #### Schema Design
+
 ```sql
 -- 00Z_create_payout_audit_log.sql
 CREATE TABLE payout_audit_log (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     payout_id UUID NOT NULL REFERENCES payouts(id),
-    
+
     -- Change tracking
     action VARCHAR(100) NOT NULL,
     old_status VARCHAR(50),
     new_status VARCHAR(50),
-    
+
     -- Actor tracking
     changed_by UUID NOT NULL REFERENCES users(id),
     changed_by_role VARCHAR(50),
-    
+
     -- Context
     reason TEXT,
     metadata JSONB DEFAULT '{}',
-    
+
     -- Timestamp (append-only)
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -206,6 +217,7 @@ COMMENT ON COLUMN payout_audit_log.metadata IS 'Additional context like Stripe I
 **File**: `services/billing-service/src/v2/payout-schedules/repository.ts`
 
 #### Tasks
+
 - [x] Implement `PayoutScheduleRepository` class ✅ **COMPLETE**
 - [x] Add role-based access control (recruiters see own, admins see all) ✅ **COMPLETE**
 - [x] Implement list with filters (status, date range, placement) ✅ **COMPLETE**
@@ -216,10 +228,14 @@ COMMENT ON COLUMN payout_audit_log.metadata IS 'Additional context like Stripe I
 - [x] Add enrichment method to include placement/payout data ✅ **COMPLETE**
 
 #### Implementation Template
+
 ```typescript
-import { SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { resolveAccessContext } from "@splits-network/shared-access-context";
+import {
+    StandardListParams,
+    StandardListResponse,
+} from "@splits-network/shared-types";
 
 export interface PayoutSchedule {
     id: string;
@@ -227,7 +243,7 @@ export interface PayoutSchedule {
     placement_id: string;
     scheduled_date: string;
     guarantee_completion_date: string;
-    status: 'pending' | 'processing' | 'processed' | 'failed' | 'cancelled';
+    status: "pending" | "processing" | "processed" | "failed" | "cancelled";
     processed_at?: string;
     failure_reason?: string;
     retry_count: number;
@@ -248,79 +264,82 @@ export class PayoutScheduleRepository {
 
     async list(
         clerkUserId: string,
-        params: StandardListParams
+        params: StandardListParams,
     ): Promise<StandardListResponse<PayoutSchedule>> {
         const context = await resolveAccessContext(clerkUserId, this.supabase);
-        
+
         const { page = 1, limit = 25, filters = {} } = params;
         const offset = (page - 1) * limit;
-        
+
         let query = this.supabase
-            .from('payout_schedules')
-            .select('*', { count: 'exact' });
-        
+            .from("payout_schedules")
+            .select("*", { count: "exact" });
+
         // Role-based filtering
-        if (context.role === 'recruiter') {
+        if (context.role === "recruiter") {
             // Recruiters see only their schedules
             const { data: payouts } = await this.supabase
-                .from('payouts')
-                .select('id')
-                .eq('recruiter_user_id', context.userId);
-            
-            const payoutIds = payouts?.map(p => p.id) || [];
-            query = query.in('payout_id', payoutIds);
+                .from("payouts")
+                .select("id")
+                .eq("recruiter_user_id", context.userId);
+
+            const payoutIds = payouts?.map((p) => p.id) || [];
+            query = query.in("payout_id", payoutIds);
         } else if (context.isCompanyUser) {
             // Company users see schedules for their placements
             const { data: placements } = await this.supabase
-                .from('placements')
-                .select('id')
-                .in('company_id', context.accessibleCompanyIds);
-            
-            const placementIds = placements?.map(p => p.id) || [];
-            query = query.in('placement_id', placementIds);
+                .from("placements")
+                .select("id")
+                .in("company_id", context.accessibleCompanyIds);
+
+            const placementIds = placements?.map((p) => p.id) || [];
+            query = query.in("placement_id", placementIds);
         }
         // Platform admins see everything
-        
+
         // Apply filters
         if (filters.status) {
-            query = query.eq('status', filters.status);
+            query = query.eq("status", filters.status);
         }
         if (filters.date_from) {
-            query = query.gte('scheduled_date', filters.date_from);
+            query = query.gte("scheduled_date", filters.date_from);
         }
         if (filters.date_to) {
-            query = query.lte('scheduled_date', filters.date_to);
+            query = query.lte("scheduled_date", filters.date_to);
         }
         if (filters.placement_id) {
-            query = query.eq('placement_id', filters.placement_id);
+            query = query.eq("placement_id", filters.placement_id);
         }
-        
+
         // Pagination
         query = query
-            .order('scheduled_date', { ascending: true })
+            .order("scheduled_date", { ascending: true })
             .range(offset, offset + limit - 1);
-        
+
         const { data, error, count } = await query;
         if (error) throw error;
-        
+
         return {
             data: data || [],
             pagination: {
                 total: count || 0,
                 page,
                 limit,
-                total_pages: Math.ceil((count || 0) / limit)
-            }
+                total_pages: Math.ceil((count || 0) / limit),
+            },
         };
     }
 
-    async create(clerkUserId: string, data: ScheduleCreate): Promise<PayoutSchedule> {
+    async create(
+        clerkUserId: string,
+        data: ScheduleCreate,
+    ): Promise<PayoutSchedule> {
         const { data: schedule, error } = await this.supabase
-            .from('payout_schedules')
+            .from("payout_schedules")
             .insert(data)
             .select()
             .single();
-        
+
         if (error) throw error;
         return schedule;
     }
@@ -328,30 +347,30 @@ export class PayoutScheduleRepository {
     async update(
         id: string,
         clerkUserId: string,
-        data: ScheduleUpdate
+        data: ScheduleUpdate,
     ): Promise<PayoutSchedule> {
         const { data: updated, error } = await this.supabase
-            .from('payout_schedules')
+            .from("payout_schedules")
             .update({
                 ...data,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
             })
-            .eq('id', id)
+            .eq("id", id)
             .select()
             .single();
-        
+
         if (error) throw error;
         return updated;
     }
 
     async findDueSchedules(beforeDate: string): Promise<PayoutSchedule[]> {
         const { data, error } = await this.supabase
-            .from('payout_schedules')
-            .select('*')
-            .eq('status', 'pending')
-            .lte('scheduled_date', beforeDate)
-            .lte('guarantee_completion_date', new Date().toISOString());
-        
+            .from("payout_schedules")
+            .select("*")
+            .eq("status", "pending")
+            .lte("scheduled_date", beforeDate)
+            .lte("guarantee_completion_date", new Date().toISOString());
+
         if (error) throw error;
         return data || [];
     }
@@ -365,6 +384,7 @@ export class PayoutScheduleRepository {
 **File**: `services/billing-service/src/v2/payout-schedules/service.ts`
 
 #### Tasks
+
 - [x] Implement `PayoutScheduleServiceV2` class ✅ **COMPLETE**
 - [x] Add validation for schedule creation ✅ **COMPLETE**
 - [x] Implement status transition validation ✅ **COMPLETE**
@@ -373,14 +393,15 @@ export class PayoutScheduleRepository {
 - [x] Add cancellation logic with audit trail ✅ **COMPLETE**
 
 #### Implementation Template
+
 ```typescript
-import { EventPublisher } from '../shared/events';
-import { PayoutScheduleRepository } from './repository';
+import { EventPublisher } from "../shared/events";
+import { PayoutScheduleRepository } from "./repository";
 
 export class PayoutScheduleServiceV2 {
     constructor(
         private repository: PayoutScheduleRepository,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: EventPublisher,
     ) {}
 
     async list(clerkUserId: string, params: StandardListParams) {
@@ -390,17 +411,17 @@ export class PayoutScheduleServiceV2 {
     async create(clerkUserId: string, data: ScheduleCreate) {
         // Validation
         this.validateScheduleCreate(data);
-        
+
         const schedule = await this.repository.create(clerkUserId, data);
-        
+
         // Publish event
-        await this.eventPublisher?.publish('payout_schedule.created', {
+        await this.eventPublisher?.publish("payout_schedule.created", {
             scheduleId: schedule.id,
             payoutId: schedule.payout_id,
             scheduledDate: schedule.scheduled_date,
-            createdBy: clerkUserId
+            createdBy: clerkUserId,
         });
-        
+
         return schedule;
     }
 
@@ -409,66 +430,69 @@ export class PayoutScheduleServiceV2 {
         if (data.status) {
             this.validateStatusTransition(data.status);
         }
-        
+
         const schedule = await this.repository.update(id, clerkUserId, data);
-        
+
         // Publish event
-        await this.eventPublisher?.publish('payout_schedule.updated', {
+        await this.eventPublisher?.publish("payout_schedule.updated", {
             scheduleId: id,
             changes: Object.keys(data),
-            updatedBy: clerkUserId
+            updatedBy: clerkUserId,
         });
-        
+
         return schedule;
     }
 
     async processDueSchedules(): Promise<number> {
         const now = new Date().toISOString();
         const dueSchedules = await this.repository.findDueSchedules(now);
-        
+
         let processed = 0;
-        
+
         for (const schedule of dueSchedules) {
             try {
                 // Mark as processing
-                await this.repository.update(schedule.id, 'system', {
-                    status: 'processing'
+                await this.repository.update(schedule.id, "system", {
+                    status: "processing",
                 });
-                
+
                 // Trigger payout processing (integration with Stripe)
                 await this.processScheduledPayout(schedule);
-                
+
                 // Mark as processed
-                await this.repository.update(schedule.id, 'system', {
-                    status: 'processed',
-                    processed_at: new Date().toISOString()
+                await this.repository.update(schedule.id, "system", {
+                    status: "processed",
+                    processed_at: new Date().toISOString(),
                 });
-                
+
                 // Publish event
-                await this.eventPublisher?.publish('payout_schedule.processed', {
-                    scheduleId: schedule.id,
-                    payoutId: schedule.payout_id
-                });
-                
+                await this.eventPublisher?.publish(
+                    "payout_schedule.processed",
+                    {
+                        scheduleId: schedule.id,
+                        payoutId: schedule.payout_id,
+                    },
+                );
+
                 processed++;
             } catch (error) {
                 // Mark as failed
-                await this.repository.update(schedule.id, 'system', {
-                    status: 'failed',
+                await this.repository.update(schedule.id, "system", {
+                    status: "failed",
                     failure_reason: error.message,
                     retry_count: schedule.retry_count + 1,
-                    last_retry_at: new Date().toISOString()
+                    last_retry_at: new Date().toISOString(),
                 });
-                
+
                 // Publish failure event
-                await this.eventPublisher?.publish('payout_schedule.failed', {
+                await this.eventPublisher?.publish("payout_schedule.failed", {
                     scheduleId: schedule.id,
                     payoutId: schedule.payout_id,
-                    error: error.message
+                    error: error.message,
                 });
             }
         }
-        
+
         return processed;
     }
 
@@ -479,19 +503,25 @@ export class PayoutScheduleServiceV2 {
     }
 
     private validateScheduleCreate(data: ScheduleCreate) {
-        if (!data.payout_id) throw new Error('Payout ID required');
-        if (!data.scheduled_date) throw new Error('Scheduled date required');
-        
+        if (!data.payout_id) throw new Error("Payout ID required");
+        if (!data.scheduled_date) throw new Error("Scheduled date required");
+
         const scheduledDate = new Date(data.scheduled_date);
         const now = new Date();
-        
+
         if (scheduledDate < now) {
-            throw new Error('Scheduled date must be in the future');
+            throw new Error("Scheduled date must be in the future");
         }
     }
 
     private validateStatusTransition(newStatus: string) {
-        const valid = ['pending', 'processing', 'processed', 'failed', 'cancelled'];
+        const valid = [
+            "pending",
+            "processing",
+            "processed",
+            "failed",
+            "cancelled",
+        ];
         if (!valid.includes(newStatus)) {
             throw new Error(`Invalid status: ${newStatus}`);
         }
@@ -506,6 +536,7 @@ export class PayoutScheduleServiceV2 {
 **File**: `services/billing-service/src/v2/payout-schedules/routes.ts`
 
 #### Tasks
+
 - [x] Implement standard 5-route pattern ✅ **COMPLETE**
 - [x] Add role-based authorization checks ✅ **COMPLETE**
 - [x] Implement manual trigger endpoint for admins ✅ **COMPLETE**
@@ -513,65 +544,66 @@ export class PayoutScheduleServiceV2 {
 - [x] Return proper response envelopes ✅ **COMPLETE**
 
 #### Implementation Template
+
 ```typescript
-import { FastifyInstance } from 'fastify';
-import { PayoutScheduleServiceV2 } from './service';
+import { FastifyInstance } from "fastify";
+import { PayoutScheduleServiceV2 } from "./service";
 
 export async function payoutScheduleRoutes(app: FastifyInstance) {
     const service = new PayoutScheduleServiceV2(/* dependencies */);
 
     // LIST
-    app.get('/v2/payout-schedules', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    app.get("/api/v2/payout-schedules", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
         const params = {
             page: Number(request.query.page) || 1,
             limit: Number(request.query.limit) || 25,
-            filters: request.query.filters || {}
+            filters: request.query.filters || {},
         };
-        
+
         const result = await service.list(clerkUserId, params);
         return reply.send({ data: result.data, pagination: result.pagination });
     });
 
     // GET BY ID
-    app.get('/v2/payout-schedules/:id', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    app.get("/api/v2/payout-schedules/:id", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
         const { id } = request.params as { id: string };
-        
+
         const schedule = await service.getById(id, clerkUserId);
         return reply.send({ data: schedule });
     });
 
     // CREATE
-    app.post('/v2/payout-schedules', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    app.post("/api/v2/payout-schedules", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
         const data = request.body as ScheduleCreate;
-        
+
         const schedule = await service.create(clerkUserId, data);
         return reply.code(201).send({ data: schedule });
     });
 
     // UPDATE
-    app.patch('/v2/payout-schedules/:id', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    app.patch("/api/v2/payout-schedules/:id", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
         const { id } = request.params as { id: string };
         const data = request.body as ScheduleUpdate;
-        
+
         const schedule = await service.update(id, clerkUserId, data);
         return reply.send({ data: schedule });
     });
 
     // DELETE (cancel)
-    app.delete('/v2/payout-schedules/:id', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    app.delete("/api/v2/payout-schedules/:id", async (request, reply) => {
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
         const { id } = request.params as { id: string };
-        
-        await service.update(id, clerkUserId, { status: 'cancelled' });
-        return reply.send({ data: { message: 'Schedule cancelled' } });
+
+        await service.update(id, clerkUserId, { status: "cancelled" });
+        return reply.send({ data: { message: "Schedule cancelled" } });
     });
 
     // ADMIN: Manual trigger
-    app.post('/v2/payout-schedules/process-due', async (request, reply) => {
+    app.post("/api/v2/payout-schedules/process-due", async (request, reply) => {
         // Admin only
         const processed = await service.processDueSchedules();
         return reply.send({ data: { processed_count: processed } });
@@ -588,6 +620,7 @@ export async function payoutScheduleRoutes(app: FastifyInstance) {
 **File**: `services/billing-service/src/v2/escrow-holds/repository.ts`
 
 #### Tasks
+
 - [x] Implement `EscrowRepository` class ✅ **COMPLETE**
 - [x] Add role-based access control ✅ **COMPLETE**
 - [x] Implement list with filters (placement, status, release date) ✅ **COMPLETE**
@@ -596,6 +629,7 @@ export async function payoutScheduleRoutes(app: FastifyInstance) {
 - [x] Add query for holds due for release ✅ **COMPLETE**
 
 #### Implementation Template
+
 ```typescript
 export interface EscrowHold {
     id: string;
@@ -606,7 +640,7 @@ export interface EscrowHold {
     hold_date: string;
     release_date: string;
     released_at?: string;
-    status: 'active' | 'released' | 'forfeited' | 'cancelled';
+    status: "active" | "released" | "forfeited" | "cancelled";
     reason?: string;
     released_by?: string;
     release_notes?: string;
@@ -619,72 +653,72 @@ export class EscrowRepository {
 
     async list(
         clerkUserId: string,
-        params: StandardListParams
+        params: StandardListParams,
     ): Promise<StandardListResponse<EscrowHold>> {
         const context = await resolveAccessContext(clerkUserId, this.supabase);
-        
+
         const { page = 1, limit = 25, filters = {} } = params;
         const offset = (page - 1) * limit;
-        
+
         let query = this.supabase
-            .from('escrow_holds')
-            .select('*', { count: 'exact' });
-        
+            .from("escrow_holds")
+            .select("*", { count: "exact" });
+
         // Role-based filtering
-        if (context.role === 'recruiter') {
+        if (context.role === "recruiter") {
             // Recruiters see escrow for their placements
             const { data: placements } = await this.supabase
-                .from('placements')
-                .select('id')
-                .eq('recruiter_user_id', context.userId);
-            
-            const placementIds = placements?.map(p => p.id) || [];
-            query = query.in('placement_id', placementIds);
+                .from("placements")
+                .select("id")
+                .eq("recruiter_user_id", context.userId);
+
+            const placementIds = placements?.map((p) => p.id) || [];
+            query = query.in("placement_id", placementIds);
         } else if (context.isCompanyUser) {
             // Company users see escrow for their placements
             const { data: placements } = await this.supabase
-                .from('placements')
-                .select('id')
-                .in('company_id', context.accessibleCompanyIds);
-            
-            const placementIds = placements?.map(p => p.id) || [];
-            query = query.in('placement_id', placementIds);
+                .from("placements")
+                .select("id")
+                .in("company_id", context.accessibleCompanyIds);
+
+            const placementIds = placements?.map((p) => p.id) || [];
+            query = query.in("placement_id", placementIds);
         }
-        
+
         // Apply filters
         if (filters.status) {
-            query = query.eq('status', filters.status);
+            query = query.eq("status", filters.status);
         }
         if (filters.placement_id) {
-            query = query.eq('placement_id', filters.placement_id);
+            query = query.eq("placement_id", filters.placement_id);
         }
-        
+
         // Pagination
         query = query
-            .order('release_date', { ascending: true })
+            .order("release_date", { ascending: true })
             .range(offset, offset + limit - 1);
-        
+
         const { data, error, count } = await query;
         if (error) throw error;
-        
+
         return {
             data: data || [],
             pagination: {
                 total: count || 0,
                 page,
                 limit,
-                total_pages: Math.ceil((count || 0) / limit)
-            }
+                total_pages: Math.ceil((count || 0) / limit),
+            },
         };
     }
 
     async create(clerkUserId: string, data: EscrowCreate): Promise<EscrowHold> {
         const { data: hold, error } = await this.supabase
-            .from('escrow_holds')
+            .from("escrow_holds")
             .insert(data)
             .select()
             .single();
-        
+
         if (error) throw error;
         return hold;
     }
@@ -692,32 +726,32 @@ export class EscrowRepository {
     async release(
         id: string,
         clerkUserId: string,
-        notes?: string
+        notes?: string,
     ): Promise<EscrowHold> {
         const { data: released, error } = await this.supabase
-            .from('escrow_holds')
+            .from("escrow_holds")
             .update({
-                status: 'released',
+                status: "released",
                 released_at: new Date().toISOString(),
                 released_by: clerkUserId,
                 release_notes: notes,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
             })
-            .eq('id', id)
+            .eq("id", id)
             .select()
             .single();
-        
+
         if (error) throw error;
         return released;
     }
 
     async findDueForRelease(beforeDate: string): Promise<EscrowHold[]> {
         const { data, error } = await this.supabase
-            .from('escrow_holds')
-            .select('*')
-            .eq('status', 'active')
-            .lte('release_date', beforeDate);
-        
+            .from("escrow_holds")
+            .select("*")
+            .eq("status", "active")
+            .lte("release_date", beforeDate);
+
         if (error) throw error;
         return data || [];
     }
@@ -731,6 +765,7 @@ export class EscrowRepository {
 **File**: `services/billing-service/src/v2/escrow-holds/service.ts`
 
 #### Tasks
+
 - [x] Implement `EscrowServiceV2` class ✅ **COMPLETE**
 - [x] Add automatic escrow calculation on placement creation ✅ **COMPLETE**
 - [x] Implement release logic with validation ✅ **COMPLETE**
@@ -739,85 +774,93 @@ export class EscrowRepository {
 - [x] Add event publishing ✅ **COMPLETE**
 
 #### Implementation Template
+
 ```typescript
 export class EscrowServiceV2 {
     constructor(
         private repository: EscrowRepository,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: EventPublisher,
     ) {}
 
     async createForPlacement(
         placementId: string,
         payoutId: string,
         payoutAmount: number,
-        guaranteePeriodDays: number = 90
+        guaranteePeriodDays: number = 90,
     ): Promise<EscrowHold> {
         // Calculate escrow hold (e.g., 20% of payout)
         const holdbackPercentage = 20;
         const holdAmount = (payoutAmount * holdbackPercentage) / 100;
-        
+
         // Calculate release date (after guarantee period)
         const releaseDate = new Date();
         releaseDate.setDate(releaseDate.getDate() + guaranteePeriodDays);
-        
-        const hold = await this.repository.create('system', {
+
+        const hold = await this.repository.create("system", {
             placement_id: placementId,
             payout_id: payoutId,
             hold_amount: holdAmount,
             holdback_percentage: holdbackPercentage,
             release_date: releaseDate.toISOString(),
-            status: 'active',
-            reason: `${guaranteePeriodDays}-day guarantee period`
+            status: "active",
+            reason: `${guaranteePeriodDays}-day guarantee period`,
         });
-        
+
         // Publish event
-        await this.eventPublisher?.publish('escrow_hold.created', {
+        await this.eventPublisher?.publish("escrow_hold.created", {
             escrowId: hold.id,
             placementId,
             payoutId,
-            holdAmount
+            holdAmount,
         });
-        
+
         return hold;
     }
 
     async release(id: string, clerkUserId: string, notes?: string) {
         const hold = await this.repository.release(id, clerkUserId, notes);
-        
+
         // Trigger Stripe transfer for released funds
         await this.transferEscrowFunds(hold);
-        
+
         // Publish event
-        await this.eventPublisher?.publish('escrow_hold.released', {
+        await this.eventPublisher?.publish("escrow_hold.released", {
             escrowId: id,
             placementId: hold.placement_id,
-            releasedBy: clerkUserId
+            releasedBy: clerkUserId,
         });
-        
+
         return hold;
     }
 
     async processDueReleases(): Promise<number> {
         const now = new Date().toISOString();
         const dueHolds = await this.repository.findDueForRelease(now);
-        
+
         let released = 0;
-        
+
         for (const hold of dueHolds) {
             try {
-                await this.release(hold.id, 'system', 'Automatic release after guarantee period');
+                await this.release(
+                    hold.id,
+                    "system",
+                    "Automatic release after guarantee period",
+                );
                 released++;
             } catch (error) {
                 console.error(`Failed to release escrow ${hold.id}:`, error);
-                
+
                 // Publish failure event
-                await this.eventPublisher?.publish('escrow_hold.release_failed', {
-                    escrowId: hold.id,
-                    error: error.message
-                });
+                await this.eventPublisher?.publish(
+                    "escrow_hold.release_failed",
+                    {
+                        escrowId: hold.id,
+                        error: error.message,
+                    },
+                );
             }
         }
-        
+
         return released;
     }
 
@@ -837,16 +880,17 @@ export class EscrowServiceV2 {
 **File**: `services/billing-service/src/v2/audit/repository.ts`
 
 #### Tasks
+
 - [x] Implement `PayoutAuditRepository` class
 - [x] Add append-only insert method (logChange)
 - [x] Implement specialized logging methods:
-  - [x] logAction - explicit actions with metadata
-  - [x] logCreation - payout creation with amount
-  - [x] logProcessing - processing start
-  - [x] logCompletion - successful completion
-  - [x] logFailure - error logging
-  - [x] logStatusChange - status transitions
-  - [x] logAmountChange - amount modifications
+    - [x] logAction - explicit actions with metadata
+    - [x] logCreation - payout creation with amount
+    - [x] logProcessing - processing start
+    - [x] logCompletion - successful completion
+    - [x] logFailure - error logging
+    - [x] logStatusChange - status transitions
+    - [x] logAmountChange - amount modifications
 - [x] Implement query methods (by payout, by user, date range)
 - [x] Add enrichment for user details
 
@@ -854,32 +898,35 @@ export class EscrowServiceV2 {
 
 ### 4.2 Integrate Audit Logging into Payout Services ✅ COMPLETE
 
-**Files**: 
+**Files**:
+
 - `services/billing-service/src/v2/payout-schedules/service.ts`
 - `services/billing-service/src/v2/escrow-holds/service.ts`
 
 #### Tasks
+
 - [x] Add audit logging to PayoutScheduleServiceV2 (8 audit points):
-  - [x] create - schedule creation (logAction)
-  - [x] update - schedule modifications (logAction)
-  - [x] delete - schedule deletion (logAction)
-  - [x] processSchedule - processing start (logProcessing)
-  - [x] processSchedule completion - success (logCompletion)
-  - [x] handleScheduleFailure - errors (logFailure)
-  - [x] triggerProcessing - manual triggers (logAction)
+    - [x] create - schedule creation (logAction)
+    - [x] update - schedule modifications (logAction)
+    - [x] delete - schedule deletion (logAction)
+    - [x] processSchedule - processing start (logProcessing)
+    - [x] processSchedule completion - success (logCompletion)
+    - [x] handleScheduleFailure - errors (logFailure)
+    - [x] triggerProcessing - manual triggers (logAction)
 - [x] Add audit logging to EscrowHoldServiceV2 (6 audit points):
-  - [x] create - hold creation with amount (logCreation)
-  - [x] update - hold modifications (logAction)
-  - [x] delete - hold deletion (logAction)
-  - [x] release - manual release (logAction)
-  - [x] cancel - hold cancellation (logAction)
-  - [x] processHoldRelease - auto-release (logAction)
+    - [x] create - hold creation with amount (logCreation)
+    - [x] update - hold modifications (logAction)
+    - [x] delete - hold deletion (logAction)
+    - [x] release - manual release (logAction)
+    - [x] cancel - hold cancellation (logAction)
+    - [x] processHoldRelease - auto-release (logAction)
 - [x] All logging conditional on optional payout_id fields
 - [x] Include metadata (trigger events, amounts, schedules)
 - [x] Add actor tracking (clerkUserId and role)
 - [x] Correct semantics: schedules use logAction, payouts use logCreation
 
 #### Implementation Pattern
+
 ```typescript
 async function logAudit(
     payoutId: string,
@@ -887,7 +934,7 @@ async function logAudit(
     oldStatus: string | null,
     newStatus: string,
     changedBy: string,
-    reason?: string
+    reason?: string,
 ) {
     await this.auditRepository.create({
         payout_id: payoutId,
@@ -897,8 +944,8 @@ async function logAudit(
         changed_by: changedBy,
         reason,
         metadata: {
-            timestamp: new Date().toISOString()
-        }
+            timestamp: new Date().toISOString(),
+        },
     });
 }
 ```
@@ -912,6 +959,7 @@ async function logAudit(
 **File**: `services/billing-service/src/jobs/process-payout-schedules.ts`
 
 #### Tasks
+
 - [x] Create scheduler job file
 - [x] Implement query for due schedules (repository.findDueSchedules)
 - [x] Trigger schedule processing (service.processDueSchedules)
@@ -923,25 +971,26 @@ async function logAudit(
 - [ ] Add Prometheus metrics (future enhancement)
 
 #### Implementation Template
+
 ```typescript
-import { createClient } from '@supabase/supabase-js';
-import { EventPublisher } from '@splits-network/shared-job-queue';
-import { PayoutScheduleServiceV2 } from '../v2/payout-schedules/service';
+import { createClient } from "@supabase/supabase-js";
+import { EventPublisher } from "@splits-network/shared-job-queue";
+import { PayoutScheduleServiceV2 } from "../v2/payout-schedules/service";
 
 export async function processScheduledPayouts() {
     const supabase = createClient(
         process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
-    
+
     const service = new PayoutScheduleServiceV2(/* dependencies */);
-    
-    console.log('Starting scheduled payout processing...');
-    
+
+    console.log("Starting scheduled payout processing...");
+
     const processed = await service.processDueSchedules();
-    
+
     console.log(`Processed ${processed} scheduled payouts`);
-    
+
     return processed;
 }
 ```
@@ -953,6 +1002,7 @@ export async function processScheduledPayouts() {
 **File**: `services/billing-service/src/jobs/process-escrow-releases.ts`
 
 #### Tasks
+
 - [x] Create escrow release job file
 - [x] Query holds due for release (repository.findDueForRelease)
 - [x] Process releases via service (service.processDueReleases)
@@ -968,11 +1018,13 @@ export async function processScheduledPayouts() {
 
 ### 5.3 Kubernetes CronJob Configuration ✅ COMPLETE
 
-**Files**: 
+**Files**:
+
 - `infra/k8s/billing-service/cronjobs/payout-schedules.yaml`
 - `infra/k8s/billing-service/cronjobs/escrow-releases.yaml`
 
 #### Tasks
+
 - [x] Create CronJob manifest for payout scheduler
 - [x] Set schedule: Daily at 2am UTC (`0 2 * * *`)
 - [x] Create CronJob manifest for escrow releases
@@ -987,6 +1039,7 @@ export async function processScheduledPayouts() {
 #### Configuration Summary
 
 **Payout Schedules CronJob**:
+
 - Schedule: `0 2 * * *` (2am UTC daily)
 - Command: `node dist/jobs/process-payout-schedules.js`
 - Image: `ghcr.io/splits-network/billing-service:latest`
@@ -997,6 +1050,7 @@ export async function processScheduledPayouts() {
 - No automatic retries (backoffLimit: 0)
 
 **Escrow Releases CronJob**:
+
 - Schedule: `0 3 * * *` (3am UTC daily)
 - Command: `node dist/jobs/process-escrow-releases.js`
 - Image: `ghcr.io/splits-network/billing-service:latest`
@@ -1007,6 +1061,7 @@ export async function processScheduledPayouts() {
 - No automatic retries (backoffLimit: 0)
 
 #### Deployment Commands
+
 ```bash
 # Apply CronJob manifests
 kubectl apply -f infra/k8s/billing-service/cronjobs/
@@ -1026,6 +1081,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 ```
 
 #### Key Configuration Decisions
+
 - ✅ Secret names updated to match main deployment (supabase-secrets, stripe-secrets)
 - ✅ RabbitMQ URL uses in-cluster service name (no secret needed)
 - ✅ No automatic retries - failed jobs require manual investigation
@@ -1041,6 +1097,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 **File**: `packages/shared-types/src/models.ts`
 
 #### Status: Already Exported
+
 - [x] PayoutSchedule interface
 - [x] PayoutScheduleStatus type
 - [x] EscrowHold interface
@@ -1053,6 +1110,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 **File**: `services/api-gateway/src/routes/v2/billing.ts`
 
 #### Tasks
+
 - [x] Add `/api/v2/payout-schedules` resource proxy
 - [x] Add `/api/v2/escrow-holds` resource proxy
 - [x] Standard V2 routing (LIST, GET, CREATE, UPDATE, DELETE + custom actions)
@@ -1065,9 +1123,10 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 **File**: `services/billing-service/package.json`
 
 #### Tasks
+
 - [x] Add npm scripts for job execution:
-  - [x] `job:payout-schedules` - Run payout schedule processing
-  - [x] `job:escrow-releases` - Run escrow hold releases
+    - [x] `job:payout-schedules` - Run payout schedule processing
+    - [x] `job:escrow-releases` - Run escrow hold releases
 - [x] Verify TypeScript compiles jobs to dist/jobs/
 - [x] Verify Dockerfile includes job artifacts
 - [x] Fix pino import issue (use @splits-network/shared-logging)
@@ -1081,6 +1140,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 **File**: `services/billing-service/tests/integration/payout-automation.test.ts`
 
 ### Test Cases (To Be Implemented Later)
+
 - [ ] Test schedule creation with guarantee date
 - [ ] Test automatic processing of due schedules
 - [ ] Test escrow hold creation on placement
@@ -1097,6 +1157,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 ## Acceptance Criteria
 
 ### Functional Requirements
+
 - [x] Payouts automatically scheduled based on guarantee completion ✅ **COMPLETE**
 - [x] Schedules processed daily by automated job ✅ **COMPLETE** - CronJob configured
 - [x] Escrow holds created automatically on placements ✅ **COMPLETE**
@@ -1107,6 +1168,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 - [x] Admin can manually release escrow early ✅ **COMPLETE**
 
 ### Technical Requirements
+
 - [x] All endpoints return `{ data }` envelope ✅ **COMPLETE**
 - [x] Role-based access control enforced ✅ **COMPLETE**
 - [x] Events published for all state changes ✅ **COMPLETE**
@@ -1115,6 +1177,7 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 - [x] Error handling prevents partial state ✅ **COMPLETE**
 
 ### Testing Requirements
+
 - [ ] Unit tests for business logic ⏸️ **DEFERRED** - Manual testing initially
 - [ ] Integration tests with database ⏸️ **DEFERRED** - Manual testing initially
 - [ ] Load testing with large datasets ⏸️ **DEFERRED** - Future enhancement
@@ -1125,34 +1188,40 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 ## Implementation Timeline
 
 ### Days 1-2: Database & Schemas ✅ COMPLETE
+
 - [x] Create/enhance database tables ✅ **COMPLETE**
 - [x] Run migrations on dev/staging ✅ **COMPLETE**
 - [x] Test schema constraints ✅ **COMPLETE**
 
 ### Days 3-4: Payout Schedules Domain ✅ COMPLETE
+
 - [x] Implement repository ✅ **COMPLETE**
 - [x] Implement service layer ✅ **COMPLETE**
 - [x] Create routes ✅ **COMPLETE**
 - [x] Test CRUD operations ✅ **COMPLETE**
 
 ### Days 5-6: Escrow Holds Domain ✅ COMPLETE
+
 - [x] Implement repository ✅ **COMPLETE**
 - [x] Implement service layer ✅ **COMPLETE**
 - [x] Create routes ✅ **COMPLETE**
 - [x] Test escrow logic ✅ **COMPLETE**
 
 ### Day 7: Audit Logging ✅ COMPLETE
+
 - [x] Implement audit repository ✅ **COMPLETE**
 - [x] Integrate into payout service ✅ **COMPLETE**
 - [x] Test audit trail ✅ **COMPLETE**
 
 ### Days 8-9: Automation Jobs ✅ COMPLETE
+
 - [x] Create scheduler job ✅ **COMPLETE**
 - [x] Create escrow release job ✅ **COMPLETE**
 - [x] Create Kubernetes manifests ✅ **COMPLETE**
 - [x] Deploy to dev cluster ✅ **READY** - Manifests created
 
 ### Day 10: Testing & Production
+
 - [ ] Integration testing ⏸️ **DEFERRED**
 - [ ] Load testing ⏸️ **DEFERRED**
 - [ ] Deploy to production 🎯 **READY NOW**
@@ -1181,7 +1250,8 @@ kubectl create job --from=cronjob/billing-service-payout-schedules test-run-1 -n
 ---
 
 **Last Updated**: January 14, 2026 (Backend Complete - Testing Deferred)  
-**Next Steps**: 
+**Next Steps**:
+
 1. ✅ ~~Create Kubernetes CronJob manifests (Section 5.3)~~ DONE
 2. ⏸️ ~~Write integration tests (Section 7)~~ DEFERRED
 3. 🎯 **Deploy to staging environment** - Ready Now

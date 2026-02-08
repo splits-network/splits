@@ -12,6 +12,7 @@ import { Presence } from "@/components/presense";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
+import HireModal from "@/app/portal/roles/components/modals/hire-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -62,6 +63,7 @@ export default function ActionsToolbar({
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
+    const [showHireModal, setShowHireModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -128,12 +130,18 @@ export default function ActionsToolbar({
         }
     };
 
+    const isOfferStage = application.stage === "offer";
+
     const handleApprove = (toOffer: boolean = false) => {
+        if (isOfferStage) {
+            setShowHireModal(true);
+            return;
+        }
         setMoveToOffer(toOffer);
         setShowApproveModal(true);
     };
 
-    const handleConfirmApprove = async (note?: string, salary?: number) => {
+    const handleConfirmApprove = async (note?: string) => {
         setActionLoading(true);
         try {
             const token = await getToken();
@@ -160,7 +168,6 @@ export default function ActionsToolbar({
                         isAdmin || false,
                     ),
                 }),
-                ...(salary && { salary }),
                 ...(isAcceptingApplication && {
                     accepted_by_company: true,
                     accepted_at: new Date().toISOString(),
@@ -169,9 +176,7 @@ export default function ActionsToolbar({
 
             await client.patch(`/applications/${application.id}`, updateData);
 
-            if (targetStage === "hired") {
-                toast.success("Candidate marked as hired successfully!");
-            } else if (isAcceptingApplication) {
+            if (isAcceptingApplication) {
                 toast.success(
                     "Application accepted and moved to company review",
                 );
@@ -270,7 +275,6 @@ export default function ActionsToolbar({
                 candidateName={application.candidate?.full_name || "Unknown"}
                 jobTitle={application.job?.title || "Unknown"}
                 gateName={permissions.stageLabel}
-                isHireTransition={application.stage === "offer"}
                 applicationId={application.id}
                 currentStage={application.stage ?? undefined}
             />
@@ -288,6 +292,17 @@ export default function ActionsToolbar({
                     onClose={() => setShowNoteModal(false)}
                     onSave={handleSaveNote}
                     loading={actionLoading}
+                />
+            )}
+            {showHireModal && (
+                <HireModal
+                    application={application}
+                    onClose={() => setShowHireModal(false)}
+                    onSuccess={() => {
+                        setShowHireModal(false);
+                        toast.success("Candidate hired successfully!");
+                        refresh();
+                    }}
                 />
             )}
         </>

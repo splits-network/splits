@@ -1,23 +1,22 @@
 "use client";
 
-import ThreadPanel from "../thread-panel";
+import type { ConversationRow } from "../../types";
+import DetailHeader from "./detail-header";
+import ThreadPanel from "../shared/thread-panel";
 
 interface DetailPanelProps {
-    id: string | null;
+    id: string;
+    item: ConversationRow | null;
     onClose: () => void;
 }
 
-export default function DetailPanel({ id, onClose }: DetailPanelProps) {
-    if (!id) {
-        return (
-            <div className="flex h-full items-center justify-center text-base-content/60">
-                <div className="text-center">
-                    <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 opacity-40"></i>
-                    <p>Select a conversation to view messages.</p>
-                </div>
+export default function DetailPanel({ id, item, onClose }: DetailPanelProps) {
+    return (
+        <div className="flex-1 flex flex-col bg-base-100 w-full overflow-hidden">
+            <DetailHeader item={item} onClose={onClose} />
+            <div className="flex-1 overflow-y-auto min-h-0">
+                <ThreadPanel conversationId={id} />
             </div>
-        );
-    }
-
-    return <ThreadPanel conversationId={id} onClose={onClose} />;
+        </div>
+    );
 }

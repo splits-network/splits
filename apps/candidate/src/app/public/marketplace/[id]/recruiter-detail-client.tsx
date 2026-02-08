@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useToast } from '@/lib/toast-context';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { MarkdownEditor } from '@splits-network/shared-ui';
+import RecruiterReputation from '../components/recruiter-reputation';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -110,7 +111,7 @@ export default function RecruiterDetailClient({
             const client = token ? createAuthenticatedClient(token) : apiClient;
 
             const result = await client.get<any>(`/recruiters/${recruiterId}`, {
-                params: { include: 'user,marketplace_profile' },
+                params: { include: 'user,marketplace_profile,reputation' },
             });
             setRecruiter(result.data);
         } catch (err) {
@@ -284,9 +285,22 @@ export default function RecruiterDetailClient({
                 </div>
             </div>
 
+            {/* Reputation Section - Always show */}
+            <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-medal text-primary" />
+                    Recruiter Reputation
+                </h2>
+                <RecruiterReputation
+                    reputationScore={recruiter.reputation_score ?? null}
+                    totalPlacements={recruiter.total_placements}
+                    variant="full"
+                />
+            </div>
+
             {/* Stats */}
             {recruiter.total_placements !== undefined && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="stats bg-base-100 shadow w-full mb-6">
                         <div className="stat">
                             <div className='stat-figure'>
@@ -306,18 +320,6 @@ export default function RecruiterDetailClient({
                                 <div className="stat-title">Success Rate</div>
                                 <div className="stat-value text-secondary">{Math.round(recruiter.success_rate * 100)}%</div>
                                 <div className="stat-desc wrap-normal">Percentage of successful placements.</div>
-                            </div>
-                        )}
-                    </div>
-                    <div className="stats bg-base-100 shadow w-full mb-6">
-                        {recruiter.reputation_score !== undefined && (
-                            <div className="stat">
-                                <div className='stat-figure'>
-                                    <i className="fa-duotone fa-regular fa-star text-accent text-3xl"></i>
-                                </div>
-                                <div className="stat-title">Reputation Score</div>
-                                <div className="stat-value text-accent">{recruiter.reputation_score.toFixed(1)}</div>
-                                <div className="stat-desc wrap-normal">Based on client and candidate feedback.</div>
                             </div>
                         )}
                     </div>

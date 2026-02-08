@@ -9,6 +9,7 @@
         "build": "tsc -b",
         "start": "node dist/index.js",
         "start:worker": "node dist/sync-worker.js",
+        "test": "vitest",
         "clean": "rm -rf dist *.tsbuildinfo",
         "job:complete-expired-guarantees": "node dist/jobs/complete-expired-guarantees.js",
         "job:backfill-guarantee-expires": "node dist/jobs/backfill-guarantee-expires.js"
@@ -29,7 +30,9 @@
     "devDependencies": {
         "@types/amqplib": "^0.10.5",
         "@types/node": "^24.10.1",
+        "@vitest/coverage-v8": "^2.1.9",
         "tsx": "^4.19.2",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vitest": "^2.1.9"
     }
 }

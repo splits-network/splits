@@ -14,6 +14,8 @@ import { CompanyInvitationsConsumer } from './consumers/company-invitations/cons
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
+import { BillingEventConsumer } from './consumers/billing/consumer';
+import { ReputationEventConsumer } from './consumers/reputation/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -33,6 +35,8 @@ export class DomainEventConsumer {
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
     private chatConsumer: ChatEventConsumer;
+    private billingConsumer: BillingEventConsumer;
+    private reputationConsumer: ReputationEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -118,6 +122,18 @@ export class DomainEventConsumer {
             portalUrl,
             candidateWebsiteUrl
         );
+        this.billingConsumer = new BillingEventConsumer(
+            notificationService.billing,
+            logger,
+            portalUrl,
+            contactLookup
+        );
+        this.reputationConsumer = new ReputationEventConsumer(
+            notificationService.reputation,
+            logger,
+            portalUrl,
+            contactLookup
+        );
     }
 
     async connect(): Promise<void> {
@@ -181,6 +197,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'collaborator.added');
             await this.channel.bindQueue(this.queue, this.exchange, 'reputation.updated');
 
+            // Reputation tier change events
+            await this.channel.bindQueue(this.queue, this.exchange, 'reputation.tier_changed');
+
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.revoked');
@@ -188,6 +207,13 @@ export class DomainEventConsumer {
             // Company platform invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.accepted');
+
+            // Billing events - Stripe Connect onboarding
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_onboarded');
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_disabled');
+
+            // Billing events - Company billing setup
+            await this.channel.bindQueue(this.queue, this.exchange, 'company.billing_profile_completed');
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
@@ -363,11 +389,29 @@ export class DomainEventConsumer {
                 await this.companyInvitationsConsumer.handleCompanyInvitationAccepted(event);
                 break;
 
+            // Billing domain - Stripe Connect
+            case 'recruiter.stripe_connect_onboarded':
+                await this.billingConsumer.handleStripeConnectOnboarded(event);
+                break;
+            case 'recruiter.stripe_connect_disabled':
+                await this.billingConsumer.handleStripeConnectDisabled(event);
+                break;
+
+            // Billing domain - Company billing setup
+            case 'company.billing_profile_completed':
+                await this.billingConsumer.handleCompanyBillingProfileCompleted(event);
+                break;
+
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
                 break;
             case 'chat.message.created':
                 await this.chatConsumer.handleMessageCreated(event.payload as any);
+                break;
+
+            // Reputation tier changes
+            case 'reputation.tier_changed':
+                await this.reputationConsumer.handleTierChanged(event);
                 break;
 
             default:

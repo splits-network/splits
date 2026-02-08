@@ -7,7 +7,7 @@ The ATS (Applicant Tracking System) Service manages core recruiting data includi
 ## Responsibilities
 
 - **Companies**: Company profiles and organizational data
-- **Jobs**: Job postings, requirements, pre-screening questions  
+- **Jobs**: Job postings, requirements, pre-screening questions
 - **Candidates**: Candidate profiles and document management
 - **Applications**: Application lifecycle, stages, and notes
 - **Placements**: Successful placements and recruiter assignments
@@ -17,6 +17,7 @@ The ATS (Applicant Tracking System) Service manages core recruiting data includi
 ## V2 Architecture ✅
 
 This service uses **V2 patterns exclusively**:
+
 - Domain-based folder structure (`src/v2/`)
 - Repository pattern with direct Supabase access
 - Service layer with business logic and validation
@@ -28,12 +29,14 @@ This service uses **V2 patterns exclusively**:
 ## Environment Variables
 
 Required:
+
 - `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key  
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key
 - `RABBITMQ_URL`: RabbitMQ connection string
 - `PORT`: Service port (default: 3002)
 
 Optional:
+
 - `SENTRY_DSN`: Error tracking and monitoring
 - `SENTRY_RELEASE`: Release version for Sentry
 
@@ -41,35 +44,40 @@ Optional:
 
 All endpoints follow V2 standardized patterns:
 
-### Companies (`/v2/companies`)
+### Companies (`/api/v2/companies`)
+
 - `GET /v2/companies` - List companies (role-filtered)
 - `GET /v2/companies/:id` - Get company details
 - `POST /v2/companies` - Create company
 - `PATCH /v2/companies/:id` - Update company
 - `DELETE /v2/companies/:id` - Soft delete company
 
-### Jobs (`/v2/jobs`)
+### Jobs (`/api/v2/jobs`)
+
 - `GET /v2/jobs` - List jobs with filtering and search
 - `GET /v2/jobs/:id` - Get job with optional includes (requirements, pre-screen, etc.)
 - `POST /v2/jobs` - Create new job posting
 - `PATCH /v2/jobs/:id` - Update job details
 - `DELETE /v2/jobs/:id` - Soft delete job
 
-### Candidates (`/v2/candidates`)
+### Candidates (`/api/v2/candidates`)
+
 - `GET /v2/candidates` - List candidates (role-filtered)
 - `GET /v2/candidates/:id` - Get candidate profile
 - `POST /v2/candidates` - Create candidate profile
 - `PATCH /v2/candidates/:id` - Update candidate
 - `DELETE /v2/candidates/:id` - Soft delete candidate
 
-### Applications (`/v2/applications`)
+### Applications (`/api/v2/applications`)
+
 - `GET /v2/applications` - List applications with filtering
 - `GET /v2/applications/:id?include=candidate,job,documents,ai_review` - Get application with related data
 - `POST /v2/applications` - Submit new application
 - `PATCH /v2/applications/:id` - Update application (stage, notes, etc.)
 - `DELETE /v2/applications/:id` - Withdraw application
 
-### Placements (`/v2/placements`)
+### Placements (`/api/v2/placements`)
+
 - `GET /v2/placements` - List placements (role-filtered)
 - `GET /v2/placements/:id` - Get placement details
 - `POST /v2/placements` - Create placement record
@@ -77,10 +85,11 @@ All endpoints follow V2 standardized patterns:
 - `DELETE /v2/placements/:id` - Soft delete placement
 
 ### Additional Resources
-- **Job Requirements**: `/v2/job-requirements` - Job skill/experience requirements
-- **Pre-Screen Questions**: `/v2/job-pre-screen-questions` - Job-specific questionnaires
-- **Pre-Screen Answers**: `/v2/job-pre-screen-answers` - Candidate responses
-- **Statistics**: `/v2/stats` - Dashboard metrics and analytics
+
+- **Job Requirements**: `/api/v2/job-requirements` - Job skill/experience requirements
+- **Pre-Screen Questions**: `/api/v2/job-pre-screen-questions` - Job-specific questionnaires
+- **Pre-Screen Answers**: `/api/v2/job-pre-screen-answers` - Candidate responses
+- **Statistics**: `/api/v2/stats` - Dashboard metrics and analytics
 
 ## Database Schema
 
@@ -88,7 +97,7 @@ Uses `*` schema in shared Supabase database:
 
 - `companies` - Company profiles
 - `jobs` - Job postings and details
-- `candidates` - Candidate profiles  
+- `candidates` - Candidate profiles
 - `applications` - Application records and stages
 - `placements` - Successful placement records
 - `job_requirements` - Job skill requirements
@@ -117,11 +126,12 @@ Access control uses shared access context patterns:
 ## Development
 
 ### Local Development
+
 ```bash
 # Install dependencies
 pnpm install
 
-# Start in development mode  
+# Start in development mode
 pnpm dev
 
 # Build for production
@@ -129,15 +139,18 @@ pnpm build
 ```
 
 ### Testing
+
 Service includes comprehensive test coverage for repositories, services, and routes.
 
 ### API Documentation
+
 - Swagger docs available at `/docs` when running locally
 - OpenAPI spec covers all V2 endpoints with examples
 
 ## Migration Notes
 
 **V1 Cleanup Completed**: January 2, 2026
+
 - Removed all legacy V1 routes, services, and repositories
 - Removed unused integration code (moved to `FUTURE-INTEGRATIONS.md`)
 - Updated to V2-only architecture throughout

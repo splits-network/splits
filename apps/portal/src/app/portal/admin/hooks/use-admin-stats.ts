@@ -163,7 +163,8 @@ export function useAdminStats(): UseAdminStatsReturn {
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         fetchStats();

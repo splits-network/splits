@@ -5,6 +5,7 @@ import { Logger } from '@splits-network/shared-logging';
 // import { PlanServiceV2 } from './v2/plans/service';
 // import { SubscriptionServiceV2 } from './v2/subscriptions/service';
 import { WebhookService } from './services/webhooks/service';
+import { EventPublisher } from './v2/shared/events';
 import { Plan, Subscription } from '@splits-network/shared-types';
 
 /**
@@ -23,7 +24,8 @@ export class BillingService {
     constructor(
         private repository: BillingRepository,
         stripeSecretKey: string,
-        private logger: Logger
+        private logger: Logger,
+        eventPublisher?: EventPublisher
     ) {
         this.stripe = new Stripe(stripeSecretKey, {
             apiVersion: '2025-11-17.clover',
@@ -33,7 +35,7 @@ export class BillingService {
         // TODO: Properly initialize V2 services when webhooks are migrated
         // this.plans = new PlanServiceV2(repository);
         // this.subscriptions = new SubscriptionServiceV2(repository, stripeSecretKey, logger);
-        this.webhooks = new WebhookService(repository.getClient(), logger, stripeSecretKey);
+        this.webhooks = new WebhookService(repository.getClient(), logger, stripeSecretKey, eventPublisher);
     }
 
     // ========================================================================

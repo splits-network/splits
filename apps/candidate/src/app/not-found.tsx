@@ -19,7 +19,7 @@ export default function NotFound() {
                                     <span className="relative flex h-6 w-6">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-6 w-6 bg-error">
-                                            <i className="fa-regular fa-question text-white text-xs m-auto"></i>
+                                            <i className="fa-duotone fa-regular fa-question text-white text-xs m-auto"></i>
                                         </span>
                                     </span>
                                 </div>

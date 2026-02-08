@@ -58,4 +58,49 @@ export function companyBillingProfileRoutes(
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
+
+    app.post(`${basePath}/:companyId/setup-intent`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { companyId } = request.params as { companyId: string };
+            const result = await service.createSetupIntent(companyId, clerkUserId);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.get(`${basePath}/:companyId/payment-method`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { companyId } = request.params as { companyId: string };
+            const result = await service.getPaymentMethod(companyId, clerkUserId);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.post(`${basePath}/:companyId/payment-method`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { companyId } = request.params as { companyId: string };
+            const { payment_method_id } = request.body as { payment_method_id: string };
+            const result = await service.updatePaymentMethod(companyId, payment_method_id, clerkUserId);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.get(`${basePath}/:companyId/billing-readiness`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { companyId } = request.params as { companyId: string };
+            const result = await service.getBillingReadiness(companyId, clerkUserId);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
 }

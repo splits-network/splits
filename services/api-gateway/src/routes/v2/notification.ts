@@ -9,7 +9,7 @@ const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
         name: 'notifications',
         service: 'notification',
         basePath: '/notifications',
-        serviceBasePath: '/v2/notifications',
+        serviceBasePath: '/api/v2/notifications',
         tag: 'notifications',
     },
 ];
@@ -31,7 +31,7 @@ function registerNotificationActions(app: FastifyInstance, services: ServiceRegi
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
             const data = await notificationService().post(
-                '/v2/notifications/mark-all-read',
+                '/api/v2/notifications/mark-all-read',
                 request.body,
                 correlationId,
                 authHeaders
@@ -50,9 +50,27 @@ function registerNotificationActions(app: FastifyInstance, services: ServiceRegi
             const authHeaders = buildAuthHeaders(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
             const path = queryString
-                ? `/v2/notifications/unread-count?${queryString}`
-                : '/v2/notifications/unread-count';
+                ? `/api/v2/notifications/unread-count?${queryString}`
+                : '/api/v2/notifications/unread-count';
             const data = await notificationService().get(path, undefined, correlationId, authHeaders);
+            return reply.send(data);
+        }
+    );
+
+    app.get(
+        '/api/v2/notifications/counts-by-category',
+        {
+            // No schema needed for Fastify 5.x
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await notificationService().get(
+                '/api/v2/notifications/counts-by-category',
+                undefined,
+                correlationId,
+                authHeaders
+            );
             return reply.send(data);
         }
     );

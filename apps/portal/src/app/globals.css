@@ -203,3 +203,31 @@
     outline: 2px solid oklch(var(--color-primary));
     outline-offset: 2px;
 }
+
+/* .expanded-row {
+    animation: expand-down 0.3s ease-out;
+} */
+
+.expanded-row td {
+    @apply border-t-4 border-primary border-b-0 bg-base-100;
+}
+
+.expanded-row td:first-child {
+    @apply rounded-tl-lg;
+}
+
+.expanded-row td:last-child {
+    @apply rounded-tr-lg;
+}
+
+.expanded-row-detail td {
+    @apply bg-base-100 shadow-xl p-0 border-t-0;
+}
+
+.expanded-row-detail td:first-child {
+    @apply rounded-bl-lg;
+}
+
+.expanded-row-detail td:last-child {
+    @apply rounded-br-lg;
+}

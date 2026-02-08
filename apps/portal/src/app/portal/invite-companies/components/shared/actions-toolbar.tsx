@@ -110,7 +110,8 @@ export default function InvitationActionsToolbar({
         } finally {
             setResending(false);
         }
-    }, [invitation.id, getToken, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [invitation.id, toast]);
 
     const handleRevoke = useCallback(async () => {
         if (!confirm("Are you sure you want to revoke this invitation?")) {
@@ -132,7 +133,8 @@ export default function InvitationActionsToolbar({
         } finally {
             setRevoking(false);
         }
-    }, [invitation.id, getToken, toast, onRefresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [invitation.id, toast, onRefresh]);
 
     const handleViewDetails = useCallback(() => {
         onViewDetails?.(invitation.id);

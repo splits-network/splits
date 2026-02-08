@@ -121,4 +121,15 @@ export class NotificationServiceV2 {
         const count = await this.repository.countUnread(targetUserId);
         return { data: { count } };
     }
+
+    async getUnreadCountsByCategory(clerkUserId: string) {
+        const access = await this.requireIdentityUser(clerkUserId);
+
+        if (!access.identityUserId) {
+            throw new Error('User identity not found');
+        }
+
+        const counts = await this.repository.countUnreadByCategory(access.identityUserId);
+        return { data: counts };
+    }
 }

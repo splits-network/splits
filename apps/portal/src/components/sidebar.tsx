@@ -191,14 +191,6 @@ const navItems: NavItem[] = [
                 section: "management",
                 mobileDock: false,
             },
-            {
-                href: "/portal/billing",
-                label: "Billing",
-                icon: "fa-credit-card",
-                roles: ["all"],
-                section: "management",
-                mobileDock: false,
-            },
         ],
     },
 ];
@@ -207,11 +199,13 @@ function NavItem({
     item,
     isActive,
     badge,
+    badges,
     level = 0,
 }: {
     item: NavItem;
     isActive: boolean;
     badge?: number;
+    badges?: Record<string, number>;
     level?: number;
 }) {
     const pathname = usePathname();
@@ -325,6 +319,8 @@ function NavItem({
                                 (child.href !== "/portal/dashboard" &&
                                     pathname.startsWith(child.href))
                             }
+                            badge={badges?.[child.href]}
+                            badges={badges}
                             level={level + 1}
                         />
                     ))}
@@ -419,7 +415,35 @@ export function Sidebar() {
                 "/portal/messages": 0,
             }));
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Fetch notification counts by category for sidebar badges
+    const fetchNotificationCounts = useCallback(async () => {
+        const token = await getToken();
+        if (!token) return;
+        const client = createAuthenticatedClient(token);
+
+        try {
+            const response: any = await client.get(
+                "/notifications/counts-by-category",
+            );
+            const counts = response?.data || {};
+
+            // Map notification categories to sidebar routes
+            setBadges((prev) => ({
+                ...prev,
+                "/portal/applications": counts.application || 0,
+                "/portal/candidates": counts.candidate || 0,
+                "/portal/placements": counts.placement || 0,
+                "/portal/roles": counts.proposal || 0,
+                "/portal/invitations": counts.invitation || 0,
+            }));
+        } catch (error) {
+            console.warn("Failed to fetch notification counts:", error);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -428,12 +452,18 @@ export function Sidebar() {
             if (!mounted) return;
             setCurrentUserId(userId);
             await fetchUnreadCount();
+            await fetchNotificationCounts();
         };
         load();
+
+        // Poll notification counts every 30 seconds
+        const interval = setInterval(fetchNotificationCounts, 30000);
         return () => {
             mounted = false;
+            clearInterval(interval);
         };
-    }, [fetchUnreadCount, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchUnreadCount, fetchNotificationCounts]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchUnreadCount());
@@ -521,6 +551,7 @@ export function Sidebar() {
                                                 pathname.startsWith(item.href))
                                         }
                                         badge={badges[item.href]}
+                                        badges={badges}
                                     />
                                 ))}
                             </div>
@@ -530,17 +561,24 @@ export function Sidebar() {
                         {groupedItems.management.length > 0 && (
                             <div>
                                 <SectionHeader title="Management" />
-                                {groupedItems.management.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            pathname.startsWith(item.href)
-                                        }
-                                        badge={badges[item.href]}
-                                    />
-                                ))}
+                                {groupedItems.management.map((item) => {
+                                    // For expandable parents, sum child badges
+                                    const itemBadge = item.expandable && item.children
+                                        ? item.children.reduce((sum, child) => sum + (badges[child.href] || 0), 0)
+                                        : badges[item.href];
+                                    return (
+                                        <NavItem
+                                            key={item.href}
+                                            item={item}
+                                            isActive={
+                                                pathname === item.href ||
+                                                pathname.startsWith(item.href)
+                                            }
+                                            badge={itemBadge}
+                                            badges={badges}
+                                        />
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -557,6 +595,7 @@ export function Sidebar() {
                                             pathname.startsWith(item.href)
                                         }
                                         badge={badges[item.href]}
+                                        badges={badges}
                                     />
                                 ))}
                             </div>

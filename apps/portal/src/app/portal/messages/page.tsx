@@ -1,28 +1,56 @@
+"use client";
+
 import { PageTitle } from "@/components/page-title";
-import BrowseMessagesClient from "./components/browse/browse-messages-client";
+import { FilterProvider, useFilter } from "./contexts/filter-context";
+import HeaderFilters from "./components/shared/header-filters";
+import Stats from "./components/shared/stats";
+import BrowseView from "./components/browse/view";
 
-type MessagesSearchParams = {
-    conversationId?: string;
-};
+export default function MessagesNewPage() {
+    return (
+        <FilterProvider>
+            <MessagesNewPageContent />
+        </FilterProvider>
+    );
+}
 
-type MessagesPageProps = {
-    searchParams?: Promise<MessagesSearchParams>;
-};
+function MessagesNewPageContent() {
+    const {
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        loading,
+        refresh,
+        showStats,
+        setShowStats,
+        requestCount,
+    } = useFilter();
 
-export default async function MessagesPage({ searchParams }: MessagesPageProps) {
-    const resolvedParams = await searchParams;
     return (
         <>
             <PageTitle
                 title="Messages"
                 subtitle="Manage candidate and company conversations"
-            />
-            <div className="space-y-6">
-                <BrowseMessagesClient
-                    initialConversationId={
-                        resolvedParams?.conversationId ?? null
-                    }
+            >
+                <HeaderFilters
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    clearSearch={clearSearch}
+                    filters={filters}
+                    setFilter={setFilter}
+                    loading={loading}
+                    refresh={refresh}
+                    showStats={showStats}
+                    setShowStats={setShowStats}
+                    requestCount={requestCount}
                 />
+            </PageTitle>
+
+            <div className="space-y-6">
+                {showStats && <Stats />}
+                <BrowseView />
             </div>
         </>
     );

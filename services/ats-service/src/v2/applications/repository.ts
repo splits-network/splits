@@ -35,6 +35,17 @@ export class ApplicationRepository {
         const offset = (page - 1) * limit;
         let filters: Record<string, any> = {};
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
+
+        // Merge top-level filter params (from flat query strings) into filters.
+        // Route handlers pass job_id, stage, etc. as top-level params, but
+        // the filters object expects them nested. This ensures both formats work.
+        const topLevelFilterKeys = ['search', 'stage', 'job_id', 'candidate_id', 'sort_by', 'sort_order'];
+        for (const key of topLevelFilterKeys) {
+            if ((params as any)[key] !== undefined && filters[key] === undefined) {
+                filters[key] = (params as any)[key];
+            }
+        }
+
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build select clause with optional includes
@@ -102,7 +113,7 @@ export class ApplicationRepository {
                 query = query.in('job_id', jobIds);
 
                 // Company admins and hiring managers only see applications in company-relevant stages
-                query = query.in('stage', ['submitted', 'interview', 'offer', 'hired', 'rejected']);
+                query = query.in('stage', ['submitted', 'company_review', 'company_feedback', 'screen', 'interview', 'offer', 'hired', 'rejected']);
             } else {
                 return {
                     data: [],
@@ -124,9 +135,6 @@ export class ApplicationRepository {
                 type: 'websearch',
                 config: 'english'
             });
-        }
-        if (filters.stage) {
-            query = query.eq('stage', filters.stage);
         }
         if (filters.stage) {
             query = query.eq('stage', filters.stage);

@@ -16,7 +16,7 @@ Ensure implementations follow V2 architecture, security best practices, and proj
 
 #### V2 Architecture Compliance
 - [ ] Routes follow 5-route pattern (LIST, GET, CREATE, PATCH, DELETE)
-- [ ] Endpoints use `/v2/{resource}` prefix
+- [ ] Endpoints use `/api/v2/{resource}` prefix
 - [ ] Response format: `{ data, pagination }` for all endpoints
 - [ ] Single update method (no separate methods per field)
 - [ ] Repository pattern used with access context

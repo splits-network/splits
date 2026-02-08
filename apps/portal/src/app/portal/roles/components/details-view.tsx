@@ -137,8 +137,8 @@ export default function DetailsView({
     // Tabbed layout (for sidebar)
     if (tabbed) {
         return (
-            <div>
-                <div className="overflow-x-auto">
+            <div className="flex flex-col h-full min-h-0">
+                <div className="overflow-x-auto shrink-0">
                     {/* Tabs */}
                     <div
                         role="tablist"
@@ -206,7 +206,7 @@ export default function DetailsView({
                 </div>
 
                 {/* Tab Content */}
-                <div className={spacing}>
+                <div className={`${spacing} flex-1 min-h-0 overflow-y-auto`}>
                     {activeTab === "overview" && (
                         <>
                             {sections.quickStats && (
@@ -413,15 +413,14 @@ function DescriptionsSection({
     activeTab: "recruiter" | "candidate";
     onTabChange: (tab: "recruiter" | "candidate") => void;
 }) {
-    const hasBothDescriptions =
-        job.candidate_description &&
-        job.candidate_description !== job.recruiter_description &&
-        job.candidate_description !== job.description;
+    const hasBothDescriptions = !!job.candidate_description;
 
     return (
-        <section className={compact ? "space-y-2" : "space-y-3"}>
+        <section
+            className={`flex flex-col flex-1 min-h-0 ${compact ? "gap-2" : "gap-3"}`}
+        >
             {/* Tabs */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto shrink-0">
                 <div role="tablist" className="tabs tabs-lift min-w-max">
                     <a
                         role="tab"
@@ -445,7 +444,7 @@ function DescriptionsSection({
             </div>
 
             {/* Tab Content */}
-            <div>
+            <div className="flex-1 min-h-0 flex flex-col">
                 {activeTab === "recruiter" && (
                     <DescriptionBox
                         content={job.recruiter_description || job.description}
@@ -484,17 +483,15 @@ function DescriptionBox({
     content?: string | null;
     compact: boolean;
 }) {
-    const maxHeight = compact ? "max-h-60" : "max-h-80";
-
     return (
-        <div className="space-y-2">
+        <div className="flex flex-col flex-1 min-h-0 gap-2">
             {title && icon && iconColor && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <i className={`fa-duotone ${icon} ${iconColor}`} />
                     <h4 className="font-semibold text-sm">{title}</h4>
                 </div>
             )}
-            <div className={`${maxHeight} overflow-y-auto`}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
                 {content ? (
                     <div className="whitespace-pre-wrap text-sm leading-relaxed">
                         {content}

@@ -3,10 +3,10 @@ name: error-handling
 description: Comprehensive error handling patterns for Splits Network services and apps
 alwaysApply: false
 applyTo:
-  - "services/**/*.ts"
-  - "apps/**/*.ts"
-  - "apps/**/*.tsx"
-  - "packages/**/*.ts"
+    - "services/**/*.ts"
+    - "apps/**/*.ts"
+    - "apps/**/*.tsx"
+    - "packages/**/*.ts"
 ---
 
 # Error Handling Skill
@@ -16,6 +16,7 @@ This skill provides guidance for consistent, user-friendly error handling across
 ## Purpose
 
 Help developers implement robust error handling:
+
 - **HTTP Status Codes**: Correct status codes for API responses
 - **Error Response Format**: Standardized error structure
 - **Error Classes**: Custom error types for different scenarios
@@ -25,6 +26,7 @@ Help developers implement robust error handling:
 ## When to Use This Skill
 
 Use this skill when:
+
 - Implementing API error responses
 - Creating custom error classes
 - Handling errors in frontend components
@@ -203,63 +205,63 @@ Create typed error classes for different scenarios:
 ```typescript
 // Base application error
 export class AppError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-    public statusCode: number = 500,
-    public details?: any
-  ) {
-    super(message);
-    this.name = 'AppError';
-  }
+    constructor(
+        public code: string,
+        message: string,
+        public statusCode: number = 500,
+        public details?: any,
+    ) {
+        super(message);
+        this.name = "AppError";
+    }
 }
 
 // Validation errors (400)
 export class ValidationError extends AppError {
-  constructor(message: string, details?: any) {
-    super('VALIDATION_ERROR', message, 400, details);
-    this.name = 'ValidationError';
-  }
+    constructor(message: string, details?: any) {
+        super("VALIDATION_ERROR", message, 400, details);
+        this.name = "ValidationError";
+    }
 }
 
 // Not found errors (404)
 export class NotFoundError extends AppError {
-  constructor(resource: string) {
-    super('NOT_FOUND', `${resource} not found`, 404);
-    this.name = 'NotFoundError';
-  }
+    constructor(resource: string) {
+        super("NOT_FOUND", `${resource} not found`, 404);
+        this.name = "NotFoundError";
+    }
 }
 
 // Permission errors (403)
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Access denied') {
-    super('FORBIDDEN', message, 403);
-    this.name = 'ForbiddenError';
-  }
+    constructor(message: string = "Access denied") {
+        super("FORBIDDEN", message, 403);
+        this.name = "ForbiddenError";
+    }
 }
 
 // Conflict errors (409)
 export class ConflictError extends AppError {
-  constructor(message: string) {
-    super('CONFLICT', message, 409);
-    this.name = 'ConflictError';
-  }
+    constructor(message: string) {
+        super("CONFLICT", message, 409);
+        this.name = "ConflictError";
+    }
 }
 
 // State errors (422)
 export class InvalidStateError extends AppError {
-  constructor(message: string) {
-    super('INVALID_STATE', message, 422);
-    this.name = 'InvalidStateError';
-  }
+    constructor(message: string) {
+        super("INVALID_STATE", message, 422);
+        this.name = "InvalidStateError";
+    }
 }
 
 // Usage
-throw new NotFoundError('Job');
-throw new ValidationError('Invalid email', { field: 'email' });
-throw new ForbiddenError('Only recruiters can submit candidates');
-throw new ConflictError('Application already exists');
-throw new InvalidStateError('Cannot reopen closed job');
+throw new NotFoundError("Job");
+throw new ValidationError("Invalid email", { field: "email" });
+throw new ForbiddenError("Only recruiters can submit candidates");
+throw new ConflictError("Application already exists");
+throw new InvalidStateError("Cannot reopen closed job");
 ```
 
 See [examples/error-classes.ts](./examples/error-classes.ts).
@@ -271,54 +273,54 @@ Fastify error handler catches all errors:
 ```typescript
 // services/ats-service/src/index.ts
 app.setErrorHandler((error, request, reply) => {
-  // Log error with context
-  console.error('Error handling request:', {
-    method: request.method,
-    url: request.url,
-    error: error.message,
-    stack: error.stack,
-    userId: request.headers['x-clerk-user-id']
-  });
-
-  // Handle custom AppError
-  if (error instanceof AppError) {
-    return reply.code(error.statusCode).send({
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details
-      }
+    // Log error with context
+    console.error("Error handling request:", {
+        method: request.method,
+        url: request.url,
+        error: error.message,
+        stack: error.stack,
+        userId: request.headers["x-clerk-user-id"],
     });
-  }
 
-  // Handle Fastify validation errors
-  if (error.validation) {
-    return reply.code(400).send({
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Request validation failed',
-        details: error.validation
-      }
-    });
-  }
-
-  // Handle Supabase errors
-  if (error.code?.startsWith('PGRST')) {
-    return reply.code(500).send({
-      error: {
-        code: 'DATABASE_ERROR',
-        message: 'Database operation failed'
-      }
-    });
-  }
-
-  // Fallback to 500 for unexpected errors
-  return reply.code(500).send({
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected error occurred'
+    // Handle custom AppError
+    if (error instanceof AppError) {
+        return reply.code(error.statusCode).send({
+            error: {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+            },
+        });
     }
-  });
+
+    // Handle Fastify validation errors
+    if (error.validation) {
+        return reply.code(400).send({
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Request validation failed",
+                details: error.validation,
+            },
+        });
+    }
+
+    // Handle Supabase errors
+    if (error.code?.startsWith("PGRST")) {
+        return reply.code(500).send({
+            error: {
+                code: "DATABASE_ERROR",
+                message: "Database operation failed",
+            },
+        });
+    }
+
+    // Fallback to 500 for unexpected errors
+    return reply.code(500).send({
+        error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred",
+        },
+    });
 });
 ```
 
@@ -414,43 +416,44 @@ Log errors with context for debugging:
 ```typescript
 // Backend error logging
 function logError(
-  error: Error,
-  context: {
-    service: string;
-    method: string;
-    userId?: string;
-    resourceId?: string;
-  }
-): void {
-  console.error('Error:', {
-    service: context.service,
-    method: context.method,
-    userId: context.userId,
-    resourceId: context.resourceId,
-    error: {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
+    error: Error,
+    context: {
+        service: string;
+        method: string;
+        userId?: string;
+        resourceId?: string;
     },
-    timestamp: new Date().toISOString()
-  });
+): void {
+    console.error("Error:", {
+        service: context.service,
+        method: context.method,
+        userId: context.userId,
+        resourceId: context.resourceId,
+        error: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+        },
+        timestamp: new Date().toISOString(),
+    });
 }
 
 // Usage
 try {
-  await repository.update(id, data);
+    await repository.update(id, data);
 } catch (error) {
-  logError(error as Error, {
-    service: 'ats-service',
-    method: 'JobRepository.update',
-    userId: clerkUserId,
-    resourceId: id
-  });
-  throw error;
+    logError(error as Error, {
+        service: "ats-service",
+        method: "JobRepository.update",
+        userId: clerkUserId,
+        resourceId: id,
+    });
+    throw error;
 }
 ```
 
 **Logging Rules**:
+
 - ✅ Log all 500 errors with full context
 - ✅ Include user ID and resource ID
 - ✅ Include timestamp
@@ -467,43 +470,43 @@ Handle errors in async operations:
 ```typescript
 // Try-catch for async functions
 async function fetchJob(id: string): Promise<Job> {
-  try {
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+        const { data, error } = await supabase
+            .from("jobs")
+            .select("*")
+            .eq("id", id)
+            .single();
 
-    if (error) throw error;
-    if (!data) throw new NotFoundError('Job');
+        if (error) throw error;
+        if (!data) throw new NotFoundError("Job");
 
-    return data;
-  } catch (error) {
-    // Log error
-    console.error('Failed to fetch job:', error);
-    throw error; // Re-throw for caller to handle
-  }
+        return data;
+    } catch (error) {
+        // Log error
+        console.error("Failed to fetch job:", error);
+        throw error; // Re-throw for caller to handle
+    }
 }
 
 // Promise.allSettled for parallel operations
 async function fetchMultipleJobs(ids: string[]): Promise<Job[]> {
-  const results = await Promise.allSettled(
-    ids.map(id => fetchJob(id))
-  );
+    const results = await Promise.allSettled(ids.map((id) => fetchJob(id)));
 
-  const jobs = results
-    .filter((r): r is PromiseFulfilledResult<Job> => r.status === 'fulfilled')
-    .map(r => r.value);
+    const jobs = results
+        .filter(
+            (r): r is PromiseFulfilledResult<Job> => r.status === "fulfilled",
+        )
+        .map((r) => r.value);
 
-  const errors = results
-    .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-    .map(r => r.reason);
+    const errors = results
+        .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+        .map((r) => r.reason);
 
-  if (errors.length > 0) {
-    console.warn(`Failed to fetch ${errors.length} jobs:`, errors);
-  }
+    if (errors.length > 0) {
+        console.warn(`Failed to fetch ${errors.length} jobs:`, errors);
+    }
 
-  return jobs;
+    return jobs;
 }
 ```
 
@@ -515,41 +518,46 @@ Handle Supabase/PostgreSQL errors:
 
 ```typescript
 async function createJob(data: JobCreate): Promise<Job> {
-  try {
-    const { data: job, error } = await supabase
-      .from('jobs')
-      .insert(data)
-      .select()
-      .single();
+    try {
+        const { data: job, error } = await supabase
+            .from("jobs")
+            .insert(data)
+            .select()
+            .single();
 
-    if (error) {
-      // Handle specific error codes
-      switch (error.code) {
-        case '23505': // Unique constraint violation
-          throw new ConflictError('Job with this title already exists');
-        
-        case '23503': // Foreign key violation
-          throw new ValidationError('Invalid company ID');
-        
-        case '23502': // Not null violation
-          throw new ValidationError('Missing required field');
-        
-        case 'PGRST116': // Not found
-          throw new NotFoundError('Job');
-        
-        default:
-          console.error('Database error:', error);
-          throw new AppError('DATABASE_ERROR', 'Database operation failed');
-      }
+        if (error) {
+            // Handle specific error codes
+            switch (error.code) {
+                case "23505": // Unique constraint violation
+                    throw new ConflictError(
+                        "Job with this title already exists",
+                    );
+
+                case "23503": // Foreign key violation
+                    throw new ValidationError("Invalid company ID");
+
+                case "23502": // Not null violation
+                    throw new ValidationError("Missing required field");
+
+                case "PGRST116": // Not found
+                    throw new NotFoundError("Job");
+
+                default:
+                    console.error("Database error:", error);
+                    throw new AppError(
+                        "DATABASE_ERROR",
+                        "Database operation failed",
+                    );
+            }
+        }
+
+        return job;
+    } catch (error) {
+        if (error instanceof AppError) throw error;
+
+        console.error("Unexpected database error:", error);
+        throw new AppError("DATABASE_ERROR", "Database operation failed");
     }
-
-    return job;
-  } catch (error) {
-    if (error instanceof AppError) throw error;
-    
-    console.error('Unexpected database error:', error);
-    throw new AppError('DATABASE_ERROR', 'Database operation failed');
-  }
 }
 ```
 
@@ -580,38 +588,36 @@ See [references/error-codes.md](./references/error-codes.md).
 Test error scenarios:
 
 ```typescript
-describe('JobRepository', () => {
-  it('should throw NotFoundError for non-existent job', async () => {
-    mockSupabase.single.mockResolvedValue({ data: null, error: null });
-    
-    await expect(repository.getById('999'))
-      .rejects.toThrow(NotFoundError);
-  });
+describe("JobRepository", () => {
+    it("should throw NotFoundError for non-existent job", async () => {
+        mockSupabase.single.mockResolvedValue({ data: null, error: null });
 
-  it('should throw ConflictError for duplicate job', async () => {
-    mockSupabase.insert.mockResolvedValue({
-      data: null,
-      error: { code: '23505' }
-    });
-    
-    await expect(repository.create(jobData))
-      .rejects.toThrow(ConflictError);
-  });
-
-  it('should return 404 for non-existent job', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/v2/jobs/non-existent-id'
+        await expect(repository.getById("999")).rejects.toThrow(NotFoundError);
     });
 
-    expect(response.statusCode).toBe(404);
-    expect(JSON.parse(response.body)).toMatchObject({
-      error: {
-        code: 'NOT_FOUND',
-        message: expect.any(String)
-      }
+    it("should throw ConflictError for duplicate job", async () => {
+        mockSupabase.insert.mockResolvedValue({
+            data: null,
+            error: { code: "23505" },
+        });
+
+        await expect(repository.create(jobData)).rejects.toThrow(ConflictError);
     });
-  });
+
+    it("should return 404 for non-existent job", async () => {
+        const response = await app.inject({
+            method: "GET",
+            url: "/api/v2/jobs/non-existent-id",
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(JSON.parse(response.body)).toMatchObject({
+            error: {
+                code: "NOT_FOUND",
+                message: expect.any(String),
+            },
+        });
+    });
 });
 ```
 
@@ -624,17 +630,17 @@ See [examples/error-testing.ts](./examples/error-testing.ts).
 ```typescript
 // WRONG - Silent failure
 try {
-  await saveData();
+    await saveData();
 } catch (error) {
-  // Do nothing - error is lost!
+    // Do nothing - error is lost!
 }
 
 // CORRECT - Log and handle
 try {
-  await saveData();
+    await saveData();
 } catch (error) {
-  console.error('Failed to save data:', error);
-  throw error; // Or handle appropriately
+    console.error("Failed to save data:", error);
+    throw error; // Or handle appropriately
 }
 ```
 
@@ -642,10 +648,10 @@ try {
 
 ```typescript
 // WRONG - Unhelpful
-throw new Error('Something went wrong');
+throw new Error("Something went wrong");
 
 // CORRECT - Specific
-throw new ValidationError('Email format is invalid');
+throw new ValidationError("Email format is invalid");
 ```
 
 ### ❌ Exposing Stack Traces to Users
@@ -653,15 +659,15 @@ throw new ValidationError('Email format is invalid');
 ```typescript
 // WRONG - Security risk
 return reply.code(500).send({
-  error: error.stack // Exposes internal details!
+    error: error.stack, // Exposes internal details!
 });
 
 // CORRECT - Generic message
 return reply.code(500).send({
-  error: {
-    code: 'INTERNAL_SERVER_ERROR',
-    message: 'An unexpected error occurred'
-  }
+    error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred",
+    },
 });
 ```
 
@@ -670,16 +676,16 @@ return reply.code(500).send({
 ```typescript
 // WRONG - Always 200
 return reply.send({
-  success: false,
-  error: 'Not found'
+    success: false,
+    error: "Not found",
 });
 
 // CORRECT - Use status code
 return reply.code(404).send({
-  error: {
-    code: 'NOT_FOUND',
-    message: 'Job not found'
-  }
+    error: {
+        code: "NOT_FOUND",
+        message: "Job not found",
+    },
 });
 ```
 

@@ -12,54 +12,15 @@ import {
 import { useToast } from "@/lib/toast-context";
 import { MarkdownEditor } from "@splits-network/shared-ui";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-
-type ParticipantDetails = {
-    id: string;
-    name: string | null;
-    email: string;
-    profile_image_url?: string | null;
-};
-
-type ResyncData = {
-    conversation: {
-        id: string;
-        participant_a_id: string;
-        participant_b_id: string;
-        application_id: string | null;
-        job_id: string | null;
-        company_id: string | null;
-        last_message_at: string | null;
-        participant_a: ParticipantDetails;
-        participant_b: ParticipantDetails;
-    };
-    participant: {
-        user_id: string;
-        muted_at: string | null;
-        archived_at: string | null;
-        request_state: "none" | "pending" | "accepted" | "declined";
-        unread_count: number;
-    };
-    messages: Array<{
-        id: string;
-        sender_id: string;
-        body: string | null;
-        created_at: string;
-    }>;
-};
-
-type UserSummary = ParticipantDetails;
+import { LoadingState } from "@splits-network/shared-ui";
+import type { ResyncData, Message } from "../../types";
+import { getInitials } from "../../types";
 
 interface ThreadPanelProps {
     conversationId: string;
-    onClose?: () => void;
-    showHeader?: boolean;
 }
 
-export default function ThreadPanel({
-    conversationId,
-    onClose,
-    showHeader = true,
-}: ThreadPanelProps) {
+export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
     const { getToken } = useAuth();
     const toast = useToast();
     const [loading, setLoading] = useState(false);
@@ -70,6 +31,7 @@ export default function ThreadPanel({
     );
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
+    const [candidateName, setCandidateName] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
     const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
@@ -87,17 +49,7 @@ export default function ThreadPanel({
         const response: any = await client.get(
             `/chat/conversations/${conversationId}/resync`,
         );
-        let payload = response?.data;
-
-        // TEMPORARY: Handle old API format during migration
-        // Old format: { conversation: {...}, participant: {...}, messages: [...] }
-        // New format: same, but conversation includes participant_a and participant_b
-        // If old format (no participant_a), we can still use it but won't have inline user data
-        if (payload && !payload.conversation?.participant_a) {
-            console.warn(
-                "Received old API format without inline participant data",
-            );
-        }
+        const payload = response?.data;
 
         setData(payload as ResyncData);
         setHasMore((payload?.messages?.length || 0) >= pageSize);
@@ -108,61 +60,79 @@ export default function ThreadPanel({
         if (lastMessageId) {
             await markRead(lastMessageId);
         }
-    }, [conversationId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId]);
 
-    const fetchContextDetails = async (
-        applicationId?: string | null,
-        jobId?: string | null,
-        companyId?: string | null,
-    ) => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
+    const fetchContextDetails = useCallback(
+        async (
+            applicationId?: string | null,
+            jobId?: string | null,
+            companyId?: string | null,
+            candidateId?: string | null,
+        ) => {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
 
-        if (applicationId) {
-            try {
-                const response: any = await client.get(
-                    `/applications/${applicationId}`,
-                    { params: { include: "job,company" } },
-                );
-                const application = response?.data;
-                if (application?.job?.title) {
-                    setApplicationTitle(application.job.title);
-                    setJobTitle(application.job.title);
+            if (applicationId) {
+                try {
+                    const response: any = await client.get(
+                        `/applications/${applicationId}`,
+                        { params: { include: "job,company" } },
+                    );
+                    const application = response?.data;
+                    if (application?.job?.title) {
+                        setApplicationTitle(application.job.title);
+                        setJobTitle(application.job.title);
+                    }
+                    if (application?.job?.company?.name) {
+                        setCompanyName(application.job.company.name);
+                    }
+                } catch {
+                    setApplicationTitle(applicationId);
                 }
-                if (application?.job?.company?.name) {
-                    setCompanyName(application.job.company.name);
+            }
+
+            if (jobId) {
+                try {
+                    const response: any = await client.get(`/jobs/${jobId}`, {
+                        params: { include: "company" },
+                    });
+                    const job = response?.data;
+                    if (job?.title) setJobTitle(job.title);
+                    if (job?.company?.name) setCompanyName(job.company.name);
+                } catch {
+                    // fallback handled in render
                 }
-            } catch {
-                setApplicationTitle(applicationId);
             }
-        }
 
-        if (jobId) {
-            try {
-                const response: any = await client.get(`/jobs/${jobId}`, {
-                    params: { include: "company" },
-                });
-                const job = response?.data;
-                if (job?.title) setJobTitle(job.title);
-                if (job?.company?.name) setCompanyName(job.company.name);
-            } catch {
-                if (!jobTitle) setJobTitle(jobId);
+            if (companyId) {
+                try {
+                    const response: any = await client.get(
+                        `/companies/${companyId}`,
+                    );
+                    const company = response?.data;
+                    if (company?.name) setCompanyName(company.name);
+                } catch {
+                    // fallback handled in render
+                }
             }
-        }
 
-        if (companyId && !companyName) {
-            try {
-                const response: any = await client.get(
-                    `/companies/${companyId}`,
-                );
-                const company = response?.data;
-                if (company?.name) setCompanyName(company.name);
-            } catch {
-                // Fallback handled in render
+            if (candidateId) {
+                try {
+                    const response: any = await client.get(
+                        `/candidates/${candidateId}`,
+                    );
+                    const candidate = response?.data;
+                    if (candidate?.full_name) setCandidateName(candidate.full_name);
+                } catch {
+                    // fallback handled in render
+                }
             }
-        }
-    };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
+    );
 
     const markRead = async (lastReadMessageId: string) => {
         const token = await getToken();
@@ -171,12 +141,10 @@ export default function ThreadPanel({
         try {
             await client.post(
                 `/chat/conversations/${conversationId}/read-receipt`,
-                {
-                    lastReadMessageId,
-                },
+                { lastReadMessageId },
             );
         } catch {
-            // Best-effort; avoid breaking the thread view.
+            // Best-effort
         }
     };
 
@@ -185,6 +153,7 @@ export default function ThreadPanel({
         const load = async () => {
             setLoading(true);
             setError(null);
+            initialScrollDoneRef.current = false;
             try {
                 await fetchResync();
             } catch (err: any) {
@@ -210,24 +179,12 @@ export default function ThreadPanel({
 
     const otherUser = useMemo(() => {
         if (!data || !otherUserId) return null;
-
-        // Try to get from inline participant data (new format)
         const participant =
             otherUserId === data.conversation.participant_a_id
                 ? data.conversation.participant_a
                 : data.conversation.participant_b;
-
-        // If we have inline participant data, use it
-        if (participant) {
-            return participant;
-        }
-
-        // Fallback for old API format: create minimal user object
-        return {
-            id: otherUserId,
-            name: null,
-            email: "Loading...",
-        };
+        if (participant) return participant;
+        return { id: otherUserId, name: null, email: "Loading..." };
     }, [data, otherUserId]);
 
     useEffect(() => {
@@ -236,9 +193,16 @@ export default function ThreadPanel({
                 data.conversation.application_id,
                 data.conversation.job_id,
                 data.conversation.company_id,
+                data.conversation.candidate_id,
             );
         }
-    }, [data?.conversation?.application_id, data?.conversation?.job_id, data?.conversation?.company_id]);
+    }, [
+        data?.conversation?.application_id,
+        data?.conversation?.job_id,
+        data?.conversation?.company_id,
+        data?.conversation?.candidate_id,
+        fetchContextDetails,
+    ]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchResync());
@@ -292,7 +256,6 @@ export default function ThreadPanel({
         } catch (err: any) {
             const errorMessage = err?.message || "Failed to send message";
 
-            // Handle conversation request pending - this is expected behavior, not an error
             if (
                 errorMessage.includes("Request pending") ||
                 errorMessage.includes("cannot send additional messages")
@@ -301,98 +264,14 @@ export default function ThreadPanel({
                     "Your message is waiting for them to accept your conversation request.",
                     4000,
                 );
-                // Don't set this as an error since it's expected behavior
                 return;
             }
 
-            // Handle other actual errors
             setError(errorMessage);
             toast.error(errorMessage);
         } finally {
             setSending(false);
         }
-    };
-
-    const handleAccept = async () => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        await client.post(`/chat/conversations/${conversationId}/accept`);
-        await fetchResync();
-    };
-
-    const handleDecline = async () => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        await client.post(`/chat/conversations/${conversationId}/decline`);
-        toast.success("Conversation declined");
-        await fetchResync();
-        requestChatRefresh();
-    };
-
-    const handleArchive = async () => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        if (data?.participant.archived_at) {
-            await client.delete(
-                `/chat/conversations/${conversationId}/archive`,
-            );
-        } else {
-            await client.post(`/chat/conversations/${conversationId}/archive`);
-        }
-        await fetchResync();
-    };
-
-    const handleMute = async () => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        if (data?.participant.muted_at) {
-            await client.delete(`/chat/conversations/${conversationId}/mute`);
-        } else {
-            await client.post(`/chat/conversations/${conversationId}/mute`);
-        }
-        await fetchResync();
-    };
-
-    const handleBlock = async () => {
-        if (!otherUserId) return;
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        await client.post(`/chat/blocks`, { blockedUserId: otherUserId });
-        toast.success("User blocked");
-        await fetchResync();
-        requestChatRefresh();
-    };
-
-    const handleReport = async () => {
-        if (!otherUserId) return;
-        const category = window.prompt(
-            "Report category (spam, harassment, fraud, other):",
-            "spam",
-        );
-        if (!category) return;
-        const description = window.prompt("Optional details:");
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        await client.post(`/chat/reports`, {
-            conversationId,
-            reportedUserId: otherUserId,
-            category,
-            description,
-        });
-        toast.success("Report submitted");
-    };
-
-    const getInitials = (value?: string | null) => {
-        if (!value) return "??";
-        const parts = value.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase();
-        return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
     };
 
     const scrollToBottom = useCallback(() => {
@@ -419,7 +298,7 @@ export default function ThreadPanel({
                 `/chat/conversations/${conversationId}/messages`,
                 { params: { before: oldestMessageId, limit: pageSize } },
             );
-            const incoming = (response?.data || []) as ResyncData["messages"];
+            const incoming = (response?.data || []) as Message[];
             setHasMore(incoming.length >= pageSize);
 
             if (incoming.length > 0) {
@@ -454,7 +333,8 @@ export default function ThreadPanel({
         } finally {
             setIsLoadingMore(false);
         }
-    }, [conversationId, data?.messages, getToken, hasMore, isLoadingMore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId, data?.messages, hasMore, isLoadingMore]);
 
     const handleScroll = useCallback(() => {
         const container = messagesRef.current;
@@ -486,7 +366,7 @@ export default function ThreadPanel({
     if (loading) {
         return (
             <div className="p-6">
-                <span className="loading loading-spinner loading-md"></span>
+                <LoadingState message="Loading conversation..." />
             </div>
         );
     }
@@ -506,106 +386,39 @@ export default function ThreadPanel({
         requestDeclined ||
         data.participant.archived_at !== null;
 
-    const headerTitle = otherUser?.name || otherUser?.email || "Conversation";
-    const headerSubtitle = requestPending
-        ? "Request pending"
+    const placeholderText = requestPending
+        ? "Accept this request to reply."
         : requestDeclined
-          ? "Declined"
-          : data.messages.length === 1 &&
-              data.participant.request_state === "accepted"
-            ? "Waiting for them to accept your conversation request"
-            : "Chat thread";
+          ? "Conversation declined."
+          : data.participant.archived_at
+            ? "Unarchive to reply."
+            : data.messages.length === 1 &&
+                data.participant.request_state === "accepted"
+              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
+              : "Type your message...";
 
     return (
         <div className="flex h-full flex-col">
-            {showHeader && (
-                <div className="border-b border-base-300 bg-base-100/80 backdrop-blur-sm p-4 sticky top-0 z-10">
-                    <div className="flex items-start justify-between gap-3">
-                        <div>
-                            <div className="text-lg font-semibold">
-                                {headerTitle}
-                            </div>
-                            <div className="text-sm text-base-content/60">
-                                {headerSubtitle}
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {requestPending && (
-                                <>
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={handleAccept}
-                                    >
-                                        Accept
-                                    </button>
-                                    <button
-                                        className="btn btn-ghost btn-sm"
-                                        onClick={handleDecline}
-                                    >
-                                        Decline
-                                    </button>
-                                </>
-                            )}
-                            <div className="dropdown dropdown-end">
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost btn-sm btn-circle"
-                                    aria-label="Conversation actions"
-                                >
-                                    <i className="fa-duotone fa-ellipsis-vertical"></i>
-                                </button>
-                                <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li>
-                                        <button onClick={handleMute}>
-                                            <i className="fa-duotone fa-volume"></i>
-                                            {data.participant.muted_at
-                                                ? "Unmute"
-                                                : "Mute"}
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={handleArchive}>
-                                            <i className="fa-duotone fa-box-archive"></i>
-                                            {data.participant.archived_at
-                                                ? "Unarchive"
-                                                : "Archive"}
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={handleBlock}>
-                                            <i className="fa-duotone fa-ban"></i>
-                                            Block
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button onClick={handleReport}>
-                                            <i className="fa-duotone fa-flag"></i>
-                                            Report
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                            {onClose && (
-                                <button
-                                    className="btn btn-ghost btn-sm btn-circle"
-                                    onClick={onClose}
-                                    aria-label="Close thread"
-                                >
-                                    <i className="fa-duotone fa-xmark"></i>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="flex-1 min-h-0 flex flex-col gap-4 p-4">
+                {/* Context Links */}
                 {(data.conversation.application_id ||
                     data.conversation.job_id ||
-                    data.conversation.company_id) && (
+                    data.conversation.company_id ||
+                    data.conversation.candidate_id) && (
                     <div className="rounded-lg border border-base-200 bg-base-100 p-4 text-sm">
                         <div className="font-semibold mb-2">Context</div>
                         <div className="flex flex-wrap gap-3 text-base-content/70">
+                            {data.conversation.candidate_id && (
+                                <Link
+                                    className="link link-hover"
+                                    href={`/portal/candidates?candidateId=${data.conversation.candidate_id}`}
+                                >
+                                    <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                                    Regarding:{" "}
+                                    {candidateName ||
+                                        data.conversation.candidate_id}
+                                </Link>
+                            )}
                             {data.conversation.application_id && (
                                 <Link
                                     className="link link-hover"
@@ -621,7 +434,8 @@ export default function ThreadPanel({
                                     className="link link-hover"
                                     href={`/portal/roles/${data.conversation.job_id}`}
                                 >
-                                    Role: {jobTitle || data.conversation.job_id}
+                                    Role:{" "}
+                                    {jobTitle || data.conversation.job_id}
                                 </Link>
                             )}
                             {data.conversation.company_id && (
@@ -635,6 +449,7 @@ export default function ThreadPanel({
                     </div>
                 )}
 
+                {/* Messages */}
                 <div
                     ref={messagesRef}
                     onScroll={handleScroll}
@@ -642,13 +457,13 @@ export default function ThreadPanel({
                 >
                     {isLoadingMore && (
                         <div className="text-center text-xs text-base-content/50">
-                            Loading more messages…
+                            Loading more messages...
                         </div>
                     )}
                     {data.messages.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-center text-base-content/50">
                             <div>
-                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 opacity-30"></i>
+                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 opacity-30" />
                                 <p>No messages yet.</p>
                                 <p className="text-sm mt-1 opacity-60">
                                     Start the conversation!
@@ -657,6 +472,20 @@ export default function ThreadPanel({
                         </div>
                     ) : (
                         data.messages.map((msg) => {
+                            if (msg.kind === "system") {
+                                return (
+                                    <div
+                                        key={msg.id}
+                                        className="flex justify-center my-4"
+                                    >
+                                        <div className="bg-base-200 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
+                                            <i className="fa-duotone fa-regular fa-route mr-2" />
+                                            {msg.body || "System message"}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             const isOwnMessage =
                                 msg.sender_id === data.participant.user_id;
                             const senderLabel = isOwnMessage
@@ -672,14 +501,16 @@ export default function ThreadPanel({
                                 <div
                                     key={msg.id}
                                     className={`chat ${
-                                        isOwnMessage ? "chat-end" : "chat-start"
+                                        isOwnMessage
+                                            ? "chat-end"
+                                            : "chat-start"
                                     }`}
                                 >
                                     <div className="chat-image avatar avatar-placeholder">
                                         <div className="bg-base-200 text-base-content rounded-full w-10">
                                             <span className="text-sm text-primary font-semibold">
                                                 {isOwnMessage ? (
-                                                    <i className="fa-duotone fa-user text-2xl"></i>
+                                                    <i className="fa-duotone fa-user text-2xl" />
                                                 ) : (
                                                     getInitials(senderLabel)
                                                 )}
@@ -714,13 +545,14 @@ export default function ThreadPanel({
                                 className="btn btn-circle btn-primary shadow-md"
                                 aria-label="Jump to latest"
                             >
-                                <i className="fa-duotone fa-arrow-down"></i>
+                                <i className="fa-duotone fa-arrow-down" />
                             </button>
                         </div>
                     )}
                 </div>
             </div>
 
+            {/* Compose */}
             <div className="border-t border-base-300 bg-base-100 p-4 mt-auto">
                 <div className="flex gap-2 items-start">
                     <div className="flex-1 space-y-2 relative">
@@ -732,20 +564,7 @@ export default function ThreadPanel({
                                 height={140}
                                 preview="edit"
                                 disabled={disabled}
-                                placeholder={
-                                    requestPending
-                                        ? "Accept this request to reply."
-                                        : requestDeclined
-                                          ? "Conversation declined."
-                                          : data.participant.archived_at
-                                            ? "Unarchive to reply."
-                                            : data.messages.length === 1 &&
-                                                data.participant
-                                                    .request_state ===
-                                                    "accepted"
-                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
-                                              : "Type your message..."
-                                }
+                                placeholder={placeholderText}
                             />
                         ) : (
                             <textarea
@@ -754,27 +573,14 @@ export default function ThreadPanel({
                                 onChange={(e) => setDraft(e.target.value)}
                                 rows={5}
                                 disabled={disabled}
-                                placeholder={
-                                    requestPending
-                                        ? "Accept this request to reply."
-                                        : requestDeclined
-                                          ? "Conversation declined."
-                                          : data.participant.archived_at
-                                            ? "Unarchive to reply."
-                                            : data.messages.length === 1 &&
-                                                data.participant
-                                                    .request_state ===
-                                                    "accepted"
-                                              ? "They'll be notified of your first message. Additional messages will be held until they accept..."
-                                              : "Type your message..."
-                                }
+                                placeholder={placeholderText}
                             />
                         )}
                         <button
                             className="btn btn-primary btn-circle btn-soft absolute bottom-4 right-2"
                             onClick={handleSend}
                             disabled={disabled || sending}
-                            title={"Send message"}
+                            title="Send message"
                         >
                             <i className="fa-duotone fa-paper-plane" />
                         </button>

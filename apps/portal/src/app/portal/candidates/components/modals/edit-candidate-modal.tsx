@@ -88,7 +88,8 @@ export default function EditCandidateModal({
         }
 
         loadCandidate();
-    }, [candidateId, isOpen, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [candidateId, isOpen]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

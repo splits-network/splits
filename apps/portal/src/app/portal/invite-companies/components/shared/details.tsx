@@ -45,7 +45,8 @@ export default function Details({ invitationId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [invitationId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [invitationId]);
 
     useEffect(() => {
         fetchDetail();

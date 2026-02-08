@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 
 interface DetailsProps {
@@ -26,7 +27,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             const client = createAuthenticatedClient(token);
             const response: any = await client.get(
                 `/recruiters/${itemId}`,
-                { params: { include: "user" } },
+                { params: { include: "user,reputation" } },
             );
             setRecruiter(response.data);
         } catch (err) {
@@ -34,7 +35,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     useEffect(() => {
         fetchDetail();
@@ -95,6 +97,29 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 </div>
             </section>
 
+            {/* Reputation Section - Always show for recruiters */}
+            <section>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-medal text-primary"></i>
+                    Reputation
+                </h3>
+                <RecruiterReputationBadge
+                    reputation={{
+                        recruiter_id: recruiter.id,
+                        total_submissions: (recruiter as any).total_submissions || 0,
+                        total_hires: (recruiter as any).total_hires || 0,
+                        completed_placements: recruiter.total_placements || 0,
+                        failed_placements: (recruiter as any).total_failures || 0,
+                        hire_rate: (recruiter as any).hire_rate ?? null,
+                        completion_rate: (recruiter as any).completion_rate ?? null,
+                        reputation_score: recruiter.reputation_score ?? null,
+                        avg_time_to_hire_days: (recruiter as any).avg_time_to_hire_days,
+                        avg_response_time_hours: (recruiter as any).avg_response_time_hours,
+                    }}
+                    showDetails
+                />
+            </section>
+
             {/* Performance Stats */}
             <section>
                 <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -118,12 +143,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                         icon="fa-bullseye"
                         colorClass="text-success"
                         suffix="%"
-                    />
-                    <StatCard
-                        title="Reputation"
-                        value={recruiter.reputation_score}
-                        icon="fa-star"
-                        colorClass="text-warning"
                     />
                     <StatCard
                         title="Avg. Time to Hire"

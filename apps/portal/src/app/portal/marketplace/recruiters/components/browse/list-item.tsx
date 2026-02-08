@@ -1,6 +1,7 @@
 "use client";
 
 import UserAvatar from "@/components/common/UserAvatar";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 
 interface ListItemProps {
@@ -64,13 +65,16 @@ export default function ListItem({ item, isSelected, onSelect }: ListItemProps) 
                                 </span>
                             )}
 
-                        {item.reputation_score !== undefined &&
-                            item.reputation_score >= 80 && (
-                                <span className="badge badge-xs badge-warning badge-soft gap-1 border-0">
-                                    <i className="fa-duotone fa-regular fa-star text-[10px]"></i>
-                                    Top Rated
-                                </span>
-                            )}
+                        <RecruiterReputationBadge
+                            reputation={{
+                                total_submissions: (item as any).total_submissions || 0,
+                                total_hires: (item as any).total_hires || 0,
+                                hire_rate: (item as any).hire_rate ?? null,
+                                completion_rate: (item as any).completion_rate ?? null,
+                                reputation_score: item.reputation_score ?? null,
+                            }}
+                            compact
+                        />
                     </div>
                 </div>
 

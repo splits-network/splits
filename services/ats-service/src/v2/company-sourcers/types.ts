@@ -2,25 +2,21 @@ import { RecruiterCompany } from '@splits-network/shared-types';
 
 export interface CompanySourcerFilters {
     company_id?: string;
-    sourcer_recruiter_id?: string;
-    sourcer_type?: 'recruiter' | 'tsn';
-    active_protection?: boolean; // Filter by protection_expires_at > now
+    recruiter_id?: string;
+    status?: 'pending' | 'active' | 'declined' | 'terminated';
 }
 
 export interface CompanySourcerCreate {
     company_id: string;
-    sourcer_recruiter_id: string;
-    sourcer_type: 'recruiter' | 'tsn';
-    sourced_at?: Date;
-    protection_window_days?: number;
-    protection_expires_at: Date;
+    recruiter_id: string;
+    relationship_start_date?: string;
     notes?: string;
 }
 
 export interface CompanySourcerUpdate {
-    notes?: string;
-    protection_window_days?: number;
-    protection_expires_at?: Date;
+    status?: 'pending' | 'active' | 'declined' | 'terminated';
+    relationship_end_date?: string;
+    termination_reason?: string;
 }
 
 export { RecruiterCompany };

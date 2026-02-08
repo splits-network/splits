@@ -18,3 +18,31 @@ export interface CompanyBillingProfile {
 
 export type CompanyBillingProfileCreate = Omit<CompanyBillingProfile, 'id' | 'created_at' | 'updated_at'>;
 export type CompanyBillingProfileUpdate = Partial<Omit<CompanyBillingProfile, 'id' | 'created_at' | 'updated_at'>>;
+
+export interface PaymentMethodDetails {
+    id: string;
+    type: string;
+    // Card fields
+    brand?: string;
+    last4?: string;
+    exp_month?: number;
+    exp_year?: number;
+    // Bank account fields (ACH)
+    bank_name?: string;
+    account_type?: string;
+    // Generic label for display
+    display_label: string;
+}
+
+export interface CompanyBillingReadiness {
+    status: 'not_started' | 'incomplete' | 'ready';
+    has_billing_profile: boolean;
+    has_billing_email: boolean;
+    has_billing_terms: boolean;
+    has_stripe_customer: boolean;
+    has_payment_method: boolean;
+    has_billing_contact: boolean;
+    has_billing_address: boolean;
+    requires_payment_method: boolean;
+    billing_terms: BillingTerms | null;
+}

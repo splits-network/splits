@@ -60,7 +60,8 @@ export function useGlobalPresence({
         } catch (error) {
             log('Failed to send presence ping:', error);
         }
-    }, [getToken, isSignedIn, userId, log]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn, userId, log]);
 
     // Update activity timestamp and check idle status
     const updateActivity = useCallback(() => {

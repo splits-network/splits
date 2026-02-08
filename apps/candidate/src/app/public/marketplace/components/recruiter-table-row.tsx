@@ -8,6 +8,7 @@ import {
     ExpandedDetailGrid,
     ExpandedDetailItem,
 } from '@/components/ui/tables';
+import RecruiterReputation from './recruiter-reputation';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -90,22 +91,11 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                 )}
             </td>
             <td>
-                {recruiter.reputation_score !== undefined && (
-                    <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                            <i
-                                key={i}
-                                className={`fa-duotone fa-regular fa-star text-xs ${i < Math.round(recruiter.reputation_score! / 20)
-                                    ? 'text-warning'
-                                    : 'text-base-300'
-                                    }`}
-                            ></i>
-                        ))}
-                        <span className="text-sm ml-1">
-                            ({recruiter.total_placements || 0} placements)
-                        </span>
-                    </div>
-                )}
+                <RecruiterReputation
+                    reputationScore={recruiter.reputation_score ?? null}
+                    totalPlacements={recruiter.total_placements}
+                    variant="compact"
+                />
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <button

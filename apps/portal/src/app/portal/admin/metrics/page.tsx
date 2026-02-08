@@ -17,7 +17,8 @@ export default function MarketplaceMetricsPage() {
         loadMetrics();
         loadHealthScore();
         loadChatMetrics();
-    }, [dateRange, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dateRange]);
 
     const loadHealthScore = async () => {
         try {

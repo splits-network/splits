@@ -11,7 +11,6 @@ import ApplicationTimeline from "./application-timeline";
 import AIReviewDisplay from "./ai-review-display";
 import DocumentViewerModal from "../modals/document-viewer-modal";
 import { categorizeDocuments } from "@/app/portal/applications/lib/permission-utils";
-import { useFilter } from "../../contexts/filter-context";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
 
@@ -23,7 +22,6 @@ interface DetailsProps {
 export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
     const { isRecruiter, isCompanyUser } = useUserProfile();
-    const { refresh } = useFilter();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
@@ -56,7 +54,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     useEffect(() => {
         fetchDetail();
@@ -64,9 +63,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
     const handleUpdate = useCallback(() => {
         fetchDetail();
-        refresh();
         onRefresh?.();
-    }, [fetchDetail, refresh, onRefresh]);
+    }, [fetchDetail, onRefresh]);
 
     if (loading && !application) {
         return (
@@ -92,9 +90,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         application.timeline || (application as any).audit_log || [];
 
     return (
-        <div className="p-4 md:p-6 space-y-6">
+        <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
             {/* Header */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between shrink-0">
                 <div>
                     <h3 className="text-2xl font-bold">
                         {candidate?.full_name || "Unknown Candidate"}
@@ -110,8 +108,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="overflow-x-auto">
-                <div role="tablist" className="tabs tabs-lift min-w-max mb-4">
+            <div className="overflow-x-auto shrink-0">
+                <div role="tablist" className="tabs tabs-lift min-w-max">
                     <a
                         role="tab"
                         className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
@@ -174,7 +172,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tab Content */}
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
                 {activeTab === "overview" && (
                     <OverviewTab application={application} />
                 )}

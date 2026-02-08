@@ -104,12 +104,11 @@ async function main() {
         }
     );
 
-    // Initialize V1 repository and service (for webhook compatibility only)
+    // Initialize V1 repository (for webhook compatibility only)
     const repository = new BillingRepository(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
-    const service = new BillingService(repository, stripeConfig.secretKey, logger);
 
     // Initialize V2 event publisher
     const v2EventPublisher = new V2EventPublisher(
@@ -124,6 +123,9 @@ async function main() {
     } catch (error) {
         logger.warn({ err: error }, 'Failed to connect Billing V2 event publisher - continuing without events');
     }
+
+    // Initialize V1 service with event publisher for webhook domain events
+    const service = new BillingService(repository, stripeConfig.secretKey, logger, v2EventPublisher);
 
     // Initialize placement snapshot domain and event consumer
     const supabase = createClient(

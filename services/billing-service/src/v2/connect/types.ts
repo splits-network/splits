@@ -16,3 +16,11 @@ export interface StripeConnectLinkRequest {
 export interface StripeConnectLinkResponse {
     url: string;
 }
+
+export interface StripeAccountSessionResponse {
+    client_secret: string;
+}
+
+export interface StripeDashboardLinkResponse {
+    url: string;
+}

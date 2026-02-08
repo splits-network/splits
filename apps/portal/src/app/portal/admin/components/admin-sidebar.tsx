@@ -407,7 +407,8 @@ export function AdminSidebar() {
             console.error("Failed to fetch badge counts:", error);
             setBadges({});
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         fetchBadgeCounts();

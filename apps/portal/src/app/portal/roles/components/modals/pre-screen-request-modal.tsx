@@ -21,8 +21,9 @@ export default function PreScreenRequestModal({
     onSuccess,
 }: PreScreenRequestModalProps) {
     const { getToken } = useAuth();
-    const [recruiters, setRecruiters] = useState<any[]>([]);
-    const [loadingRecruiters, setLoadingRecruiters] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [jobCompanyRecruiter, setJobCompanyRecruiter] = useState<any>(null);
+    const [companyRecruiters, setCompanyRecruiters] = useState<any[]>([]);
     const [selectedRecruiterId, setSelectedRecruiterId] =
         useState<string>("auto");
     const [message, setMessage] = useState("");
@@ -30,22 +31,38 @@ export default function PreScreenRequestModal({
     const [error, setError] = useState("");
 
     useEffect(() => {
-        fetchRecruiters();
+        loadData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchRecruiters = async () => {
+    const loadData = async () => {
         try {
             const token = await getToken();
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            // Get recruiters assigned to this job
-            const response: any = await client.get(`/jobs/${jobId}/recruiters`);
-            setRecruiters(response.data || []);
-        } catch (error) {
-            console.error("Failed to fetch recruiters:", error);
+
+            // Fetch job to check for existing company recruiter
+            const jobResponse: any = await client.get(`/jobs/${jobId}`);
+            const job = jobResponse.data;
+
+            if (job?.company_recruiter_id && job?.company_recruiter) {
+                // Job already has a company recruiter assigned
+                setJobCompanyRecruiter(job.company_recruiter);
+            } else {
+                // No company recruiter on job — fetch company's recruiters
+                const rcResponse: any = await client.get(
+                    `/recruiter-companies?company_id=${companyId}&status=active`,
+                );
+                const recruiterList = (rcResponse.data || []).map(
+                    (rc: any) => rc.recruiter,
+                );
+                setCompanyRecruiters(recruiterList);
+            }
+        } catch (err) {
+            console.error("Failed to load pre-screen data:", err);
         } finally {
-            setLoadingRecruiters(false);
+            setLoading(false);
         }
     };
 
@@ -67,8 +84,9 @@ export default function PreScreenRequestModal({
                 `/applications/${application.id}/request-prescreen`,
                 {
                     company_id: companyId,
+                    // Only send recruiter_id when manually picking (not auto, not job-level)
                     recruiter_id:
-                        selectedRecruiterId === "auto"
+                        jobCompanyRecruiter || selectedRecruiterId === "auto"
                             ? undefined
                             : selectedRecruiterId,
                     message: message.trim() || undefined,
@@ -82,6 +100,12 @@ export default function PreScreenRequestModal({
             setSubmitting(false);
         }
     };
+
+    const recruiterName = jobCompanyRecruiter
+        ? jobCompanyRecruiter.user?.name ||
+          jobCompanyRecruiter.user?.email ||
+          "Assigned Recruiter"
+        : null;
 
     return (
         <div className="modal modal-open">
@@ -110,35 +134,61 @@ export default function PreScreenRequestModal({
                         </p>
                     </div>
 
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">
-                            Assign Recruiter
-                        </legend>
-                        <select
-                            className="select w-full"
-                            value={selectedRecruiterId}
-                            onChange={(e) =>
-                                setSelectedRecruiterId(e.target.value)
-                            }
-                            disabled={loadingRecruiters || submitting}
-                        >
-                            <option value="auto">
-                                Auto-assign (System will select)
-                            </option>
-                            {recruiters.map((recruiter) => (
-                                <option key={recruiter.id} value={recruiter.id}>
-                                    {recruiter.user?.full_name ||
-                                        recruiter.user?.email ||
-                                        `Recruiter ${recruiter.id}`}
+                    {loading ? (
+                        <div className="flex items-center gap-2 py-4">
+                            <span className="loading loading-spinner loading-sm"></span>
+                            <span className="text-sm opacity-70">
+                                Loading recruiter options...
+                            </span>
+                        </div>
+                    ) : jobCompanyRecruiter ? (
+                        <div className="bg-base-200 p-4 rounded-lg">
+                            <p className="text-sm font-semibold mb-1">
+                                Company Recruiter
+                            </p>
+                            <p className="text-sm">
+                                <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
+                                {recruiterName} will screen this candidate.
+                            </p>
+                        </div>
+                    ) : (
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Assign Company Recruiter
+                            </legend>
+                            <select
+                                className="select w-full"
+                                value={selectedRecruiterId}
+                                onChange={(e) =>
+                                    setSelectedRecruiterId(e.target.value)
+                                }
+                                disabled={submitting}
+                            >
+                                <option value="auto">
+                                    {companyRecruiters.length > 0
+                                        ? "Auto-assign from company recruiters"
+                                        : "Auto-assign from platform (will become your company recruiter)"}
                                 </option>
-                            ))}
-                        </select>
-                        <p className="fieldset-label">
-                            {selectedRecruiterId === "auto"
-                                ? "The system will automatically assign an available recruiter"
-                                : "The selected recruiter will receive a notification"}
-                        </p>
-                    </fieldset>
+                                {companyRecruiters.map((recruiter) => (
+                                    <option
+                                        key={recruiter.id}
+                                        value={recruiter.id}
+                                    >
+                                        {recruiter.user?.name ||
+                                            recruiter.user?.email ||
+                                            `Recruiter ${recruiter.id}`}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="fieldset-label">
+                                {selectedRecruiterId === "auto"
+                                    ? companyRecruiters.length > 0
+                                        ? "The system will pick from your company's recruiters"
+                                        : "The system will assign a recruiter from the platform and add them to your company"
+                                    : "This recruiter will become the company recruiter for this job"}
+                            </p>
+                        </fieldset>
+                    )}
 
                     <MarkdownEditor
                         className="fieldset"
@@ -181,7 +231,7 @@ export default function PreScreenRequestModal({
                         <button
                             type="submit"
                             className="btn btn-primary"
-                            disabled={submitting || loadingRecruiters}
+                            disabled={submitting || loading}
                         >
                             {submitting ? (
                                 <>

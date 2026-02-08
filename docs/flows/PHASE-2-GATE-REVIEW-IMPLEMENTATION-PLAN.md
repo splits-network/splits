@@ -39,15 +39,15 @@ Phase 2 implements the **gate review system**, which is the core marketplace dif
 
 ```sql
 -- Gate routing metadata
-ALTER TABLE candidate_role_assignments 
-ADD COLUMN IF NOT EXISTS current_gate TEXT 
+ALTER TABLE candidate_role_assignments
+ADD COLUMN IF NOT EXISTS current_gate TEXT
 CHECK (current_gate IN ('candidate_recruiter', 'company_recruiter', 'company', 'none'));
 
-ALTER TABLE candidate_role_assignments 
+ALTER TABLE candidate_role_assignments
 ADD COLUMN IF NOT EXISTS gate_sequence JSONB DEFAULT '[]';
 -- Example: ['candidate_recruiter', 'company_recruiter', 'company']
 
-ALTER TABLE candidate_role_assignments 
+ALTER TABLE candidate_role_assignments
 ADD COLUMN IF NOT EXISTS gate_history JSONB DEFAULT '[]';
 -- Example: [
 --   {
@@ -60,18 +60,18 @@ ADD COLUMN IF NOT EXISTS gate_history JSONB DEFAULT '[]';
 -- ]
 
 -- Routing flags (cached for query performance)
-ALTER TABLE candidate_role_assignments 
+ALTER TABLE candidate_role_assignments
 ADD COLUMN IF NOT EXISTS has_candidate_recruiter BOOLEAN DEFAULT FALSE;
 
-ALTER TABLE candidate_role_assignments 
+ALTER TABLE candidate_role_assignments
 ADD COLUMN IF NOT EXISTS has_company_recruiter BOOLEAN DEFAULT FALSE;
 
 -- Add indexes
-CREATE INDEX IF NOT EXISTS idx_cra_current_gate 
-ON candidate_role_assignments(current_gate) 
+CREATE INDEX IF NOT EXISTS idx_cra_current_gate
+ON candidate_role_assignments(current_gate)
 WHERE current_gate IS NOT NULL;
 
-CREATE INDEX IF NOT EXISTS idx_cra_routing_flags 
+CREATE INDEX IF NOT EXISTS idx_cra_routing_flags
 ON candidate_role_assignments(has_candidate_recruiter, has_company_recruiter);
 ```
 
@@ -83,14 +83,14 @@ ON candidate_role_assignments(has_candidate_recruiter, has_company_recruiter);
 CREATE TABLE IF NOT EXISTS cra_gate_feedback (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     assignment_id UUID NOT NULL REFERENCES candidate_role_assignments(id) ON DELETE CASCADE,
-    
+
     -- Which gate is this at?
     gate_name TEXT NOT NULL CHECK (gate_name IN (
         'candidate_recruiter',
         'company_recruiter',
         'company'
     )),
-    
+
     -- Who created this feedback
     created_by_user_id UUID NOT NULL REFERENCES users(id),
     created_by_type TEXT NOT NULL CHECK (created_by_type IN (
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS cra_gate_feedback (
         'hiring_manager',
         'platform_admin'
     )),
-    
+
     -- What type of communication
     feedback_type TEXT NOT NULL CHECK (feedback_type IN (
         'info_request',    -- Gate reviewer needs more info
@@ -109,25 +109,25 @@ CREATE TABLE IF NOT EXISTS cra_gate_feedback (
         'approval_note',   -- Note attached to approval
         'denial_reason'    -- Reason for denial
     )),
-    
+
     -- The message
     message_text TEXT NOT NULL,
-    
+
     -- Thread reference (which message is this responding to?)
     in_response_to_id UUID REFERENCES cra_gate_feedback(id),
-    
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes
-CREATE INDEX idx_cra_feedback_assignment 
+CREATE INDEX idx_cra_feedback_assignment
 ON cra_gate_feedback(assignment_id, created_at DESC);
 
-CREATE INDEX idx_cra_feedback_gate 
+CREATE INDEX idx_cra_feedback_gate
 ON cra_gate_feedback(assignment_id, gate_name, created_at DESC);
 
-CREATE INDEX idx_cra_feedback_thread 
+CREATE INDEX idx_cra_feedback_thread
 ON cra_gate_feedback(in_response_to_id);
 
 COMMENT ON TABLE cra_gate_feedback IS 'Communication between gate reviewers and candidates during gate review process';
@@ -162,8 +162,8 @@ ALTER TABLE candidate_role_assignments ALTER COLUMN job_id SET NOT NULL;
 ALTER TABLE candidate_role_assignments ALTER COLUMN proposed_by SET NOT NULL;
 
 -- Add uniqueness constraint (one active deal per candidate-job pair)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_cra_unique_active_deal 
-ON candidate_role_assignments(candidate_id, job_id) 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cra_unique_active_deal
+ON candidate_role_assignments(candidate_id, job_id)
 WHERE state NOT IN ('rejected', 'declined', 'withdrawn', 'timed_out', 'closed');
 
 -- Update indexes
@@ -175,11 +175,11 @@ CREATE INDEX IF NOT EXISTS idx_cra_company_sourcer ON candidate_role_assignments
 -- Update existing 'proposed' assignments to proper gate state
 -- This is a data migration for historical records
 UPDATE candidate_role_assignments
-SET 
+SET
     state = 'awaiting_company',
     current_gate = 'company'
-WHERE state = 'proposed' 
-AND NOT has_candidate_recruiter 
+WHERE state = 'proposed'
+AND NOT has_candidate_recruiter
 AND NOT has_company_recruiter;
 
 COMMENT ON COLUMN candidate_role_assignments.candidate_recruiter_id IS 'Represents the candidate (Closer role)';
@@ -191,6 +191,7 @@ COMMENT ON TYPE candidate_role_assignment_state IS 'Lifecycle states for CRA inc
 ```
 
 **Important Notes:**
+
 - `candidate_recruiter_id` vs `company_recruiter_id` are distinct roles, not redundant fields
 - Both can be null (direct candidate application or direct company hire)
 - `proposed_by` tracks who initiated the deal (could be candidate, recruiter, or admin)
@@ -212,11 +213,11 @@ COMMENT ON TYPE candidate_role_assignment_state IS 'Lifecycle states for CRA inc
  * Determines which gates an application must pass through
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Logger } from '@splits-network/shared-logging';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Logger } from "@splits-network/shared-logging";
 
 export interface GateRouting {
-    firstGate: 'candidate_recruiter' | 'company_recruiter' | 'company';
+    firstGate: "candidate_recruiter" | "company_recruiter" | "company";
     gateSequence: string[];
     hasCandidateRecruiter: boolean;
     hasCompanyRecruiter: boolean;
@@ -227,27 +228,30 @@ export interface GateRouting {
 export class GateRoutingService {
     constructor(
         private supabase: SupabaseClient,
-        private logger: Logger
+        private logger: Logger,
     ) {}
 
     /**
      * Determine gate routing for an application
      * Based on candidate recruiter and company recruiter presence
      */
-    async determineRouting(jobId: string, candidateId: string): Promise<GateRouting> {
+    async determineRouting(
+        jobId: string,
+        candidateId: string,
+    ): Promise<GateRouting> {
         // Check for active candidate recruiter relationship
         const { data: candidateRecruiter } = await this.supabase
-            .from('recruiter_candidates')
-            .select('recruiter_id, recruiter_user_id')
-            .eq('candidate_id', candidateId)
-            .eq('status', 'active')
+            .from("recruiter_candidates")
+            .select("recruiter_id, recruiter_user_id")
+            .eq("candidate_id", candidateId)
+            .eq("status", "active")
             .maybeSingle();
 
         // Check for company recruiter assignment on job
         const { data: job } = await this.supabase
-            .from('jobs')
-            .select('recruiter_id, company_id')  // This becomes company_recruiter_id in CRA
-            .eq('id', jobId)
+            .from("jobs")
+            .select("recruiter_id, company_id") // This becomes company_recruiter_id in CRA
+            .eq("id", jobId)
             .single();
 
         if (!job) {
@@ -259,20 +263,20 @@ export class GateRoutingService {
 
         // Build gate sequence based on routing matrix
         const gateSequence: string[] = [];
-        let firstGate: 'candidate_recruiter' | 'company_recruiter' | 'company';
+        let firstGate: "candidate_recruiter" | "company_recruiter" | "company";
 
         if (hasCandidateRecruiter) {
-            gateSequence.push('candidate_recruiter');
-            firstGate = 'candidate_recruiter';
+            gateSequence.push("candidate_recruiter");
+            firstGate = "candidate_recruiter";
         }
 
         if (hasCompanyRecruiter) {
-            gateSequence.push('company_recruiter');
-            if (!firstGate!) firstGate = 'company_recruiter';
+            gateSequence.push("company_recruiter");
+            if (!firstGate!) firstGate = "company_recruiter";
         }
 
-        gateSequence.push('company');
-        if (!firstGate!) firstGate = 'company';
+        gateSequence.push("company");
+        if (!firstGate!) firstGate = "company";
 
         this.logger.info(
             {
@@ -285,7 +289,7 @@ export class GateRoutingService {
                 candidateRecruiterId: candidateRecruiter?.recruiter_id,
                 companyRecruiterId: job.recruiter_id,
             },
-            'Determined gate routing'
+            "Determined gate routing",
         );
 
         return {
@@ -293,8 +297,8 @@ export class GateRoutingService {
             gateSequence,
             hasCandidateRecruiter,
             hasCompanyRecruiter,
-            candidateRecruiterId: candidateRecruiter?.recruiter_id,  // Stored in CRA.candidate_recruiter_id
-            companyRecruiterId: job.recruiter_id,                    // Stored in CRA.company_recruiter_id
+            candidateRecruiterId: candidateRecruiter?.recruiter_id, // Stored in CRA.candidate_recruiter_id
+            companyRecruiterId: job.recruiter_id, // Stored in CRA.company_recruiter_id
         };
     }
 
@@ -311,82 +315,87 @@ export class GateRoutingService {
 
     /**
      * Check if user has permission to review at this gate
-     * 
+     *
      * CRITICAL: Uses candidate_recruiter_id and company_recruiter_id from CRA
      * See docs/guidance/cra-schema-specifications.md for complete schema
      */
     async validateGatePermission(
         clerkUserId: string,
         assignmentId: string,
-        gateName: string
+        gateName: string,
     ): Promise<boolean> {
         // Fetch CRA with separated recruiter IDs
         const { data: assignment } = await this.supabase
-            .from('candidate_role_assignments')
-            .select(`
+            .from("candidate_role_assignments")
+            .select(
+                `
                 *,
                 candidate_recruiter:recruiters!candidate_recruiter_id(id, user_id),
                 company_recruiter:recruiters!company_recruiter_id(id, user_id),
                 jobs(recruiter_id, company_id)
-            `)
-            .eq('id', assignmentId)
+            `,
+            )
+            .eq("id", assignmentId)
             .single();
 
         if (!assignment) {
-            throw new Error('Assignment not found');
+            throw new Error("Assignment not found");
         }
 
         // Get user context
         const { data: user } = await this.supabase
-            .from('users')
-            .select('id, clerk_user_id')
-            .eq('clerk_user_id', clerkUserId)
+            .from("users")
+            .select("id, clerk_user_id")
+            .eq("clerk_user_id", clerkUserId)
             .single();
 
         if (!user) {
-            throw new Error('User not found');
+            throw new Error("User not found");
         }
 
         // Check permissions based on gate
         switch (gateName) {
-            case 'candidate_recruiter':
+            case "candidate_recruiter":
                 // Check if user is the candidate recruiter
                 const { data: recruiterCandidate } = await this.supabase
-                    .from('recruiter_candidates')
-                    .select('recruiter_user_id')
-                    .eq('candidate_id', assignment.candidate_id)
-                    .eq('status', 'active')
+                    .from("recruiter_candidates")
+                    .select("recruiter_user_id")
+                    .eq("candidate_id", assignment.candidate_id)
+                    .eq("status", "active")
                     .single();
 
                 return recruiterCandidate?.recruiter_user_id === user.id;
 
-            case 'company_recruiter':
+            case "company_recruiter":
                 // Check if user is the company recruiter for this job
                 const { data: recruiter } = await this.supabase
-                    .from('recruiters')
-                    .select('id')
-                    .eq('user_id', user.id)
+                    .from("recruiters")
+                    .select("id")
+                    .eq("user_id", user.id)
                     .single();
 
                 return assignment.jobs?.recruiter_id === recruiter?.id;
 
-            case 'company':
+            case "company":
                 // Check if user is company admin or hiring manager for this company
                 const { data: membership } = await this.supabase
-                    .from('memberships')
-                    .select('role, organization_id')
-                    .eq('user_id', user.id)
-                    .in('role', ['company_admin', 'hiring_manager'])
+                    .from("memberships")
+                    .select("role, organization_id")
+                    .eq("user_id", user.id)
+                    .in("role", ["company_admin", "hiring_manager"])
                     .maybeSingle();
 
                 // Get company's organization_id
                 const { data: company } = await this.supabase
-                    .from('companies')
-                    .select('identity_organization_id')
-                    .eq('id', assignment.jobs?.company_id)
+                    .from("companies")
+                    .select("identity_organization_id")
+                    .eq("id", assignment.jobs?.company_id)
                     .single();
 
-                return membership?.organization_id === company?.identity_organization_id;
+                return (
+                    membership?.organization_id ===
+                    company?.identity_organization_id
+                );
 
             default:
                 return false;
@@ -405,16 +414,16 @@ export class GateRoutingService {
  * Handles approve, deny, request info actions for gate reviews
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Logger } from '@splits-network/shared-logging';
-import { EventPublisher } from '../shared/events';
-import { GateRoutingService } from './gate-routing';
-import type { CandidateRoleAssignment } from '@splits-network/shared-types';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Logger } from "@splits-network/shared-logging";
+import { EventPublisher } from "../shared/events";
+import { GateRoutingService } from "./gate-routing";
+import type { CandidateRoleAssignment } from "@splits-network/shared-types";
 
 export interface GateAction {
     assignment_id: string;
     gate_name: string;
-    action: 'approved' | 'denied' | 'info_requested';
+    action: "approved" | "denied" | "info_requested";
     reviewer_user_id: string;
     notes?: string;
 }
@@ -424,7 +433,7 @@ export class GateActionsService {
         private supabase: SupabaseClient,
         private gateRouting: GateRoutingService,
         private eventPublisher: EventPublisher | null,
-        private logger: Logger
+        private logger: Logger,
     ) {}
 
     /**
@@ -434,49 +443,57 @@ export class GateActionsService {
     async approveGate(
         clerkUserId: string,
         assignmentId: string,
-        notes?: string
+        notes?: string,
     ): Promise<CandidateRoleAssignment> {
         // Get assignment
         const { data: assignment, error } = await this.supabase
-            .from('candidate_role_assignments')
-            .select('*')
-            .eq('id', assignmentId)
+            .from("candidate_role_assignments")
+            .select("*")
+            .eq("id", assignmentId)
             .single();
 
         if (error || !assignment) {
-            throw new Error('Assignment not found');
+            throw new Error("Assignment not found");
         }
 
         // Validate permission
         const hasPermission = await this.gateRouting.validateGatePermission(
             clerkUserId,
             assignmentId,
-            assignment.current_gate
+            assignment.current_gate,
         );
 
         if (!hasPermission) {
-            throw new Error('User does not have permission to review at this gate');
+            throw new Error(
+                "User does not have permission to review at this gate",
+            );
         }
 
         // Get user ID for audit
         const { data: user } = await this.supabase
-            .from('users')
-            .select('id')
-            .eq('clerk_user_id', clerkUserId)
+            .from("users")
+            .select("id")
+            .eq("clerk_user_id", clerkUserId)
             .single();
 
         // Add approval to gate history
-        const gateHistory = [...(assignment.gate_history || []), {
-            gate: assignment.current_gate,
-            action: 'approved',
-            timestamp: new Date().toISOString(),
-            reviewer_user_id: user?.id,
-            notes: notes || null,
-        }];
+        const gateHistory = [
+            ...(assignment.gate_history || []),
+            {
+                gate: assignment.current_gate,
+                action: "approved",
+                timestamp: new Date().toISOString(),
+                reviewer_user_id: user?.id,
+                notes: notes || null,
+            },
+        ];
 
         // Determine next gate
         const gateSequence = assignment.gate_sequence || [];
-        const nextGate = this.gateRouting.getNextGate(assignment.current_gate, gateSequence);
+        const nextGate = this.gateRouting.getNextGate(
+            assignment.current_gate,
+            gateSequence,
+        );
 
         let newState: string;
         let newCurrentGate: string | null;
@@ -487,41 +504,41 @@ export class GateActionsService {
             newCurrentGate = nextGate;
         } else {
             // All gates passed - submit to company
-            newState = 'submitted_to_company';
-            newCurrentGate = 'none';
+            newState = "submitted_to_company";
+            newCurrentGate = "none";
         }
 
         // Update assignment
         const { data: updated, error: updateError } = await this.supabase
-            .from('candidate_role_assignments')
+            .from("candidate_role_assignments")
             .update({
                 state: newState,
                 current_gate: newCurrentGate,
                 gate_history: gateHistory,
                 updated_at: new Date(),
             })
-            .eq('id', assignmentId)
+            .eq("id", assignmentId)
             .select()
             .single();
 
         if (updateError) {
-            throw new Error(`Failed to update assignment: ${updateError.message}`);
+            throw new Error(
+                `Failed to update assignment: ${updateError.message}`,
+            );
         }
 
         // Create feedback record
-        await this.supabase
-            .from('cra_gate_feedback')
-            .insert({
-                assignment_id: assignmentId,
-                gate_name: assignment.current_gate,
-                created_by_user_id: user?.id,
-                created_by_type: this.getReviewerType(assignment.current_gate),
-                feedback_type: 'approval_note',
-                message_text: notes || 'Approved',
-            });
+        await this.supabase.from("cra_gate_feedback").insert({
+            assignment_id: assignmentId,
+            gate_name: assignment.current_gate,
+            created_by_user_id: user?.id,
+            created_by_type: this.getReviewerType(assignment.current_gate),
+            feedback_type: "approval_note",
+            message_text: notes || "Approved",
+        });
 
         // Publish event
-        await this.eventPublisher?.publish('cra.gate.approved', {
+        await this.eventPublisher?.publish("cra.gate.approved", {
             assignment_id: assignmentId,
             gate: assignment.current_gate,
             next_gate: nextGate,
@@ -537,7 +554,7 @@ export class GateActionsService {
                 nextGate,
                 newState,
             },
-            'Gate approved'
+            "Gate approved",
         );
 
         return updated;
@@ -550,78 +567,81 @@ export class GateActionsService {
     async denyGate(
         clerkUserId: string,
         assignmentId: string,
-        reason: string
+        reason: string,
     ): Promise<CandidateRoleAssignment> {
         if (!reason || reason.trim().length === 0) {
-            throw new Error('Denial reason is required');
+            throw new Error("Denial reason is required");
         }
 
         // Get assignment
         const { data: assignment } = await this.supabase
-            .from('candidate_role_assignments')
-            .select('*')
-            .eq('id', assignmentId)
+            .from("candidate_role_assignments")
+            .select("*")
+            .eq("id", assignmentId)
             .single();
 
         if (!assignment) {
-            throw new Error('Assignment not found');
+            throw new Error("Assignment not found");
         }
 
         // Validate permission
         const hasPermission = await this.gateRouting.validateGatePermission(
             clerkUserId,
             assignmentId,
-            assignment.current_gate
+            assignment.current_gate,
         );
 
         if (!hasPermission) {
-            throw new Error('User does not have permission to review at this gate');
+            throw new Error(
+                "User does not have permission to review at this gate",
+            );
         }
 
         // Get user ID
         const { data: user } = await this.supabase
-            .from('users')
-            .select('id')
-            .eq('clerk_user_id', clerkUserId)
+            .from("users")
+            .select("id")
+            .eq("clerk_user_id", clerkUserId)
             .single();
 
         // Add denial to gate history
-        const gateHistory = [...(assignment.gate_history || []), {
-            gate: assignment.current_gate,
-            action: 'denied',
-            timestamp: new Date().toISOString(),
-            reviewer_user_id: user?.id,
-            notes: reason,
-        }];
+        const gateHistory = [
+            ...(assignment.gate_history || []),
+            {
+                gate: assignment.current_gate,
+                action: "denied",
+                timestamp: new Date().toISOString(),
+                reviewer_user_id: user?.id,
+                notes: reason,
+            },
+        ];
 
         // Update assignment to rejected
         const { data: updated } = await this.supabase
-            .from('candidate_role_assignments')
+            .from("candidate_role_assignments")
             .update({
-                state: 'rejected',
-                current_gate: 'none',
+                state: "rejected",
+                current_gate: "none",
                 gate_history: gateHistory,
                 closed_at: new Date(),
                 updated_at: new Date(),
             })
-            .eq('id', assignmentId)
+            .eq("id", assignmentId)
             .select()
             .single();
 
         // Create feedback record
-        await this.supabase
-            .from('cra_gate_feedback')
-            .insert({
-                assignment_id: assignmentId,
-                gate_name: assignment.current_gate,
-                created_by_user_id: user?.id,
-                created_by_type: this.getReviewerType(assignment.current_gate),
-                feedback_type: 'denial_reason',
-                message_text: reason,
-            });
+        await this.supabase.from("cra_gate_feedback").insert({
+            assignment_id: assignmentId,
+            gate_name: assignment.current_gate,
+            created_by_user_id: user?.id,
+            created_by_type: this.getReviewerType(assignment.current_gate),
+            feedback_type: "denial_reason",
+            message_text: reason,
+        });
 
         // Publish event
-        await this.eventPublisher?.publish('cra.gate.denied', {
+        await this.eventPublisher?.publish("cra.gate.denied", {
             assignment_id: assignmentId,
             gate: assignment.current_gate,
             reviewer_user_id: user?.id,
@@ -636,7 +656,7 @@ export class GateActionsService {
                 gate: assignment.current_gate,
                 reason,
             },
-            'Gate denied'
+            "Gate denied",
         );
 
         return updated!;
@@ -649,66 +669,66 @@ export class GateActionsService {
     async requestInfo(
         clerkUserId: string,
         assignmentId: string,
-        request: string
+        request: string,
     ): Promise<CandidateRoleAssignment> {
         if (!request || request.trim().length === 0) {
-            throw new Error('Info request message is required');
+            throw new Error("Info request message is required");
         }
 
         // Get assignment
         const { data: assignment } = await this.supabase
-            .from('candidate_role_assignments')
-            .select('*')
-            .eq('id', assignmentId)
+            .from("candidate_role_assignments")
+            .select("*")
+            .eq("id", assignmentId)
             .single();
 
         if (!assignment) {
-            throw new Error('Assignment not found');
+            throw new Error("Assignment not found");
         }
 
         // Validate permission
         const hasPermission = await this.gateRouting.validateGatePermission(
             clerkUserId,
             assignmentId,
-            assignment.current_gate
+            assignment.current_gate,
         );
 
         if (!hasPermission) {
-            throw new Error('User does not have permission to review at this gate');
+            throw new Error(
+                "User does not have permission to review at this gate",
+            );
         }
 
         // Get user ID
         const { data: user } = await this.supabase
-            .from('users')
-            .select('id')
-            .eq('clerk_user_id', clerkUserId)
+            .from("users")
+            .select("id")
+            .eq("clerk_user_id", clerkUserId)
             .single();
 
         // Update assignment to info_requested
         const { data: updated } = await this.supabase
-            .from('candidate_role_assignments')
+            .from("candidate_role_assignments")
             .update({
-                state: 'info_requested',
+                state: "info_requested",
                 updated_at: new Date(),
             })
-            .eq('id', assignmentId)
+            .eq("id", assignmentId)
             .select()
             .single();
 
         // Create feedback record
-        await this.supabase
-            .from('cra_gate_feedback')
-            .insert({
-                assignment_id: assignmentId,
-                gate_name: assignment.current_gate,
-                created_by_user_id: user?.id,
-                created_by_type: this.getReviewerType(assignment.current_gate),
-                feedback_type: 'info_request',
-                message_text: request,
-            });
+        await this.supabase.from("cra_gate_feedback").insert({
+            assignment_id: assignmentId,
+            gate_name: assignment.current_gate,
+            created_by_user_id: user?.id,
+            created_by_type: this.getReviewerType(assignment.current_gate),
+            feedback_type: "info_request",
+            message_text: request,
+        });
 
         // Publish event
-        await this.eventPublisher?.publish('cra.gate.info_requested', {
+        await this.eventPublisher?.publish("cra.gate.info_requested", {
             assignment_id: assignmentId,
             gate: assignment.current_gate,
             reviewer_user_id: user?.id,
@@ -722,7 +742,7 @@ export class GateActionsService {
                 assignmentId,
                 gate: assignment.current_gate,
             },
-            'Info requested at gate'
+            "Info requested at gate",
         );
 
         return updated!;
@@ -736,61 +756,59 @@ export class GateActionsService {
         clerkUserId: string,
         assignmentId: string,
         response: string,
-        inResponseToId: string
+        inResponseToId: string,
     ): Promise<CandidateRoleAssignment> {
         if (!response || response.trim().length === 0) {
-            throw new Error('Response message is required');
+            throw new Error("Response message is required");
         }
 
         // Get assignment
         const { data: assignment } = await this.supabase
-            .from('candidate_role_assignments')
-            .select('*')
-            .eq('id', assignmentId)
+            .from("candidate_role_assignments")
+            .select("*")
+            .eq("id", assignmentId)
             .single();
 
         if (!assignment) {
-            throw new Error('Assignment not found');
+            throw new Error("Assignment not found");
         }
 
-        if (assignment.state !== 'info_requested') {
-            throw new Error('Assignment is not in info_requested state');
+        if (assignment.state !== "info_requested") {
+            throw new Error("Assignment is not in info_requested state");
         }
 
         // Get user ID
         const { data: user } = await this.supabase
-            .from('users')
-            .select('id')
-            .eq('clerk_user_id', clerkUserId)
+            .from("users")
+            .select("id")
+            .eq("clerk_user_id", clerkUserId)
             .single();
 
         // Return to awaiting gate state
         const awaitingState = `awaiting_${assignment.current_gate}`;
         const { data: updated } = await this.supabase
-            .from('candidate_role_assignments')
+            .from("candidate_role_assignments")
             .update({
                 state: awaitingState,
                 updated_at: new Date(),
             })
-            .eq('id', assignmentId)
+            .eq("id", assignmentId)
             .select()
             .single();
 
         // Create feedback record
-        await this.supabase
-            .from('cra_gate_feedback')
-            .insert({
-                assignment_id: assignmentId,
-                gate_name: assignment.current_gate,
-                created_by_user_id: user?.id,
-                created_by_type: 'candidate_recruiter', // Assuming response from candidate side
-                feedback_type: 'info_response',
-                message_text: response,
-                in_response_to_id: inResponseToId,
-            });
+        await this.supabase.from("cra_gate_feedback").insert({
+            assignment_id: assignmentId,
+            gate_name: assignment.current_gate,
+            created_by_user_id: user?.id,
+            created_by_type: "candidate_recruiter", // Assuming response from candidate side
+            feedback_type: "info_response",
+            message_text: response,
+            in_response_to_id: inResponseToId,
+        });
 
         // Publish event
-        await this.eventPublisher?.publish('cra.gate.info_provided', {
+        await this.eventPublisher?.publish("cra.gate.info_provided", {
             assignment_id: assignmentId,
             gate: assignment.current_gate,
             user_id: user?.id,
@@ -803,7 +821,7 @@ export class GateActionsService {
                 assignmentId,
                 gate: assignment.current_gate,
             },
-            'Info provided for gate review'
+            "Info provided for gate review",
         );
 
         return updated!;
@@ -811,14 +829,14 @@ export class GateActionsService {
 
     private getReviewerType(gateName: string): string {
         switch (gateName) {
-            case 'candidate_recruiter':
-                return 'candidate_recruiter';
-            case 'company_recruiter':
-                return 'company_recruiter';
-            case 'company':
-                return 'company_admin';
+            case "candidate_recruiter":
+                return "candidate_recruiter";
+            case "company_recruiter":
+                return "company_recruiter";
+            case "company":
+                return "company_admin";
             default:
-                return 'unknown';
+                return "unknown";
         }
     }
 }
@@ -924,20 +942,20 @@ async submitApplication(applicationId: string, clerkUserId: string, data?: any):
 
 // Approve at current gate
 app.post<{ Params: { id: string }; Body: { notes?: string } }>(
-    '/v2/candidate-role-assignments/:id/gate/approve',
+    "/api/v2/candidate-role-assignments/:id/gate/approve",
     {
         schema: {
             params: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    id: { type: 'string' },
+                    id: { type: "string" },
                 },
-                required: ['id'],
+                required: ["id"],
             },
             body: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    notes: { type: 'string' },
+                    notes: { type: "string" },
                 },
             },
         },
@@ -945,175 +963,178 @@ app.post<{ Params: { id: string }; Body: { notes?: string } }>(
     async (request, reply) => {
         const { id } = request.params;
         const { notes } = request.body;
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Authentication required' });
+            return reply.code(401).send({ error: "Authentication required" });
         }
 
         const assignment = await config.gateActionsService.approveGate(
             clerkUserId,
             id,
-            notes
+            notes,
         );
 
         return reply.send({ data: assignment });
-    }
+    },
 );
 
 // Deny at current gate
 app.post<{ Params: { id: string }; Body: { reason: string } }>(
-    '/v2/candidate-role-assignments/:id/gate/deny',
+    "/api/v2/candidate-role-assignments/:id/gate/deny",
     {
         schema: {
             params: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    id: { type: 'string' },
+                    id: { type: "string" },
                 },
-                required: ['id'],
+                required: ["id"],
             },
             body: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    reason: { type: 'string' },
+                    reason: { type: "string" },
                 },
-                required: ['reason'],
+                required: ["reason"],
             },
         },
     },
     async (request, reply) => {
         const { id } = request.params;
         const { reason } = request.body;
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Authentication required' });
+            return reply.code(401).send({ error: "Authentication required" });
         }
 
         const assignment = await config.gateActionsService.denyGate(
             clerkUserId,
             id,
-            reason
+            reason,
         );
 
         return reply.send({ data: assignment });
-    }
+    },
 );
 
 // Request info at current gate
 app.post<{ Params: { id: string }; Body: { request: string } }>(
-    '/v2/candidate-role-assignments/:id/gate/request-info',
+    "/api/v2/candidate-role-assignments/:id/gate/request-info",
     {
         schema: {
             params: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    id: { type: 'string' },
+                    id: { type: "string" },
                 },
-                required: ['id'],
+                required: ["id"],
             },
             body: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    request: { type: 'string' },
+                    request: { type: "string" },
                 },
-                required: ['request'],
+                required: ["request"],
             },
         },
     },
     async (request, reply) => {
         const { id } = request.params;
         const { request: infoRequest } = request.body;
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Authentication required' });
+            return reply.code(401).send({ error: "Authentication required" });
         }
 
         const assignment = await config.gateActionsService.requestInfo(
             clerkUserId,
             id,
-            infoRequest
+            infoRequest,
         );
 
         return reply.send({ data: assignment });
-    }
+    },
 );
 
 // Provide info in response to request
-app.post<{ Params: { id: string }; Body: { response: string; in_response_to_id: string } }>(
-    '/v2/candidate-role-assignments/:id/gate/provide-info',
+app.post<{
+    Params: { id: string };
+    Body: { response: string; in_response_to_id: string };
+}>(
+    "/api/v2/candidate-role-assignments/:id/gate/provide-info",
     {
         schema: {
             params: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    id: { type: 'string' },
+                    id: { type: "string" },
                 },
-                required: ['id'],
+                required: ["id"],
             },
             body: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    response: { type: 'string' },
-                    in_response_to_id: { type: 'string' },
+                    response: { type: "string" },
+                    in_response_to_id: { type: "string" },
                 },
-                required: ['response', 'in_response_to_id'],
+                required: ["response", "in_response_to_id"],
             },
         },
     },
     async (request, reply) => {
         const { id } = request.params;
         const { response, in_response_to_id } = request.body;
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Authentication required' });
+            return reply.code(401).send({ error: "Authentication required" });
         }
 
         const assignment = await config.gateActionsService.provideInfo(
             clerkUserId,
             id,
             response,
-            in_response_to_id
+            in_response_to_id,
         );
 
         return reply.send({ data: assignment });
-    }
+    },
 );
 
 // Get gate feedback for assignment
 app.get<{ Params: { id: string } }>(
-    '/v2/candidate-role-assignments/:id/gate/feedback',
+    "/api/v2/candidate-role-assignments/:id/gate/feedback",
     {
         schema: {
             params: {
-                type: 'object',
+                type: "object",
                 properties: {
-                    id: { type: 'string' },
+                    id: { type: "string" },
                 },
-                required: ['id'],
+                required: ["id"],
             },
         },
     },
     async (request, reply) => {
         const { id } = request.params;
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        const clerkUserId = request.headers["x-clerk-user-id"] as string;
 
         if (!clerkUserId) {
-            return reply.code(401).send({ error: 'Authentication required' });
+            return reply.code(401).send({ error: "Authentication required" });
         }
 
         // Fetch feedback records
         const { data: feedback } = await config.supabase
-            .from('cra_gate_feedback')
-            .select('*, users(name, email)')
-            .eq('assignment_id', id)
-            .order('created_at', { ascending: true });
+            .from("cra_gate_feedback")
+            .select("*, users(name, email)")
+            .eq("assignment_id", id)
+            .order("created_at", { ascending: true });
 
         return reply.send({ data: feedback || [] });
-    }
+    },
 );
 ```
 
@@ -1198,21 +1219,25 @@ Phase 2 is complete when:
 ## Implementation Timeline
 
 **Week 1:** Database + Backend Core
+
 - Days 1-2: Run migrations, add gate columns
 - Days 3-4: Implement gate routing service
 - Day 5: Implement gate actions service
 
 **Week 2:** API + Events
+
 - Days 1-2: Add API routes for gate actions
 - Days 3-4: Event publishing and testing
 - Day 5: Integration testing
 
 **Week 3:** Frontend
+
 - Days 1-2: Recruiter gate review UI
 - Days 3-4: Company gate review UI
 - Day 5: Candidate gate status UI
 
 **Week 4:** Testing + Polish
+
 - Days 1-3: E2E testing all gate scenarios
 - Days 4-5: Bug fixes and polish
 
@@ -1221,16 +1246,19 @@ Phase 2 is complete when:
 ## Next Steps After Phase 2
 
 **Phase 3:** Gate Actions UI Polish
+
 - Advanced gate review dashboards
 - Bulk actions for recruiters
 - Gate analytics and metrics
 
 **Phase 4:** Recruiter Proposals
+
 - Recruiter can propose jobs to candidates
 - Candidate accept/decline workflow
 - Auto-create draft on acceptance
 
 **Phase 5:** Full Hiring Pipeline
+
 - Interview scheduling
 - Offer management
 - Hire action → placement creation
@@ -1240,4 +1268,3 @@ Phase 2 is complete when:
 **Document Status:** 📋 READY FOR REVIEW  
 **Last Updated:** January 16, 2026  
 **Next Review:** After implementation begins
-

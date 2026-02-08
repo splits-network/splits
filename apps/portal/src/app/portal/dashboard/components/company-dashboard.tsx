@@ -16,6 +16,7 @@ import { AnalyticsChart } from "@/components/charts/analytics-chart";
 import { TrendBadge } from "@/components/ui";
 import RoleWizardModal from "../../roles/components/modals/role-wizard-modal";
 import RoleActionsToolbar from "../../roles/components/shared/actions-toolbar";
+import { CompanyBillingPrompt } from "../../billing/components/company-billing-prompt";
 
 interface CompanyStats {
     active_roles: number;
@@ -41,6 +42,7 @@ interface RoleBreakdown {
     applications_count: number;
     interview_count: number;
     offer_count: number;
+    hire_count: number;
     days_open: number;
 }
 
@@ -77,6 +79,7 @@ export default function CompanyDashboard() {
     const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
     const [billingProfile, setBillingProfile] =
         useState<BillingProfileSummary | null>(null);
+    const [billingStatus, setBillingStatus] = useState<"not_started" | "incomplete" | "ready">("ready");
 
     useEffect(() => {
         loadDashboardData();
@@ -128,6 +131,7 @@ export default function CompanyDashboard() {
                     let applicationsCount = 0;
                     let interviewCount = 0;
                     let offerCount = 0;
+                    let hireCount = 0;
 
                     try {
                         // Fetch all applications with pagination
@@ -175,6 +179,9 @@ export default function CompanyDashboard() {
                         offerCount = allApplications.filter(
                             (app: any) => app.stage === "offer",
                         ).length;
+                        hireCount = allApplications.filter(
+                            (app: any) => app.stage === "hired",
+                        ).length;
                     } catch (err) {
                         console.warn(
                             `Failed to fetch applications for job ${job.id}:`,
@@ -190,6 +197,7 @@ export default function CompanyDashboard() {
                         applications_count: applicationsCount,
                         interview_count: interviewCount,
                         offer_count: offerCount,
+                        hire_count: hireCount,
                         days_open: daysOpen,
                     };
                 }),
@@ -239,6 +247,14 @@ export default function CompanyDashboard() {
                             `/company-billing-profiles/${companyId}`,
                         );
                         setBillingProfile(billingResponse?.data || null);
+
+                        // Fetch billing readiness status
+                        const readinessResponse: any = await api.get(
+                            `/company-billing-profiles/${companyId}/billing-readiness`,
+                        );
+                        if (readinessResponse?.data?.status) {
+                            setBillingStatus(readinessResponse.data.status);
+                        }
                     }
                 } catch (billingError: any) {
                     // Billing data not available (likely insufficient permissions)
@@ -315,6 +331,9 @@ export default function CompanyDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Billing Setup Prompt */}
+            <CompanyBillingPrompt status={billingStatus} />
 
             {/* Key Stats Grid - Using new StatCard component */}
             <div className="card bg-base-200">
@@ -498,6 +517,9 @@ export default function CompanyDashboard() {
                                                 Offers
                                             </th>
                                             <th className="bg-transparent text-center">
+                                                Hires
+                                            </th>
+                                            <th className="bg-transparent text-center">
                                                 Days Open
                                             </th>
                                             <th className="bg-transparent text-center">
@@ -536,6 +558,11 @@ export default function CompanyDashboard() {
                                                 <td className="text-center">
                                                     <span className="badge badge-sm badge-success badge-outline">
                                                         {role.offer_count}
+                                                    </span>
+                                                </td>
+                                                <td className="text-center">
+                                                    <span className="badge badge-sm badge-primary badge-outline">
+                                                        {role.hire_count}
                                                     </span>
                                                 </td>
                                                 <td className="text-center">

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import ThreadPanel from "@/app/portal/messages/components/thread-panel";
+import ThreadPanel from "@/app/portal/messages/components/shared/thread-panel";
 
 interface MessageSidebarProps {
     conversationId: string | null;
@@ -103,8 +103,7 @@ export default function MessageSidebar({
                     <div className="flex-1 min-h-0 overflow-hidden">
                         <ThreadPanel
                             conversationId={conversationId}
-                            onClose={onClose}
-                            showHeader={false} // Hide the thread panel header since we have our own
+                            //onClose={onClose}// Hide the thread panel header since we have our own
                         />
                     </div>
                 </div>

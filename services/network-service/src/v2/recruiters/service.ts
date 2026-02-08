@@ -19,8 +19,11 @@ export class RecruiterServiceV2 {
     ): Promise<PaginationResponse<any>> {
         const result = await this.repository.findRecruiters(clerkUserId, filters);
 
+        // Flatten reputation data if included
+        const flattenedData = result.data.map(recruiter => this.flattenRecruiterData(recruiter));
+
         return buildPaginationResponse(
-            result.data,
+            flattenedData,
             result.total,
             filters.page || 1,
             filters.limit || 25
@@ -32,7 +35,7 @@ export class RecruiterServiceV2 {
         if (!recruiter) {
             throw { statusCode: 404, message: 'Recruiter not found' };
         }
-        return recruiter;
+        return this.flattenRecruiterData(recruiter);
     }
 
     async getRecruiterByClerkId(clerkUserId: string): Promise<any> {
@@ -123,6 +126,43 @@ export class RecruiterServiceV2 {
     }
 
     // Private helpers
+
+    /**
+     * Flatten nested reputation data into recruiter object for easier frontend consumption
+     */
+    private flattenRecruiterData(recruiter: any): any {
+        if (!recruiter) return recruiter;
+
+        const { recruiter_reputation, ...rest } = recruiter;
+
+        // Helper to extract reputation fields from a reputation record
+        const flattenReputation = (rep: any) => ({
+            ...rest,
+            reputation_score: rep.reputation_score,
+            total_submissions: rep.total_submissions,
+            total_hires: rep.total_hires,
+            hire_rate: rep.hire_rate,
+            completion_rate: rep.completion_rate,
+            total_placements: rep.total_placements,
+            completed_placements: rep.completed_placements,
+            failed_placements: rep.failed_placements,
+            total_collaborations: rep.total_collaborations,
+            collaboration_rate: rep.collaboration_rate,
+            avg_response_time_hours: rep.avg_response_time_hours,
+        });
+
+        // If reputation data exists, flatten it into the recruiter object
+        if (recruiter_reputation && Array.isArray(recruiter_reputation) && recruiter_reputation.length > 0) {
+            return flattenReputation(recruiter_reputation[0]);
+        }
+
+        // If reputation is a single object (not array)
+        if (recruiter_reputation && !Array.isArray(recruiter_reputation)) {
+            return flattenReputation(recruiter_reputation);
+        }
+
+        return rest;
+    }
 
     private isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

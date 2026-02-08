@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode, useCallback } from 'react';
+import { ReactNode, useCallback } from "react";
+import { TableAccordionProvider } from "./table-accordion-context";
 
 // ===== TYPES =====
 
@@ -14,7 +15,7 @@ export interface TableColumn<T = unknown> {
     /** Column width class (e.g., 'w-40', 'w-1/4') */
     width?: string;
     /** Text alignment */
-    align?: 'left' | 'center' | 'right';
+    align?: "left" | "center" | "right";
     /** Hide on mobile */
     hideOnMobile?: boolean;
     /** Custom header render */
@@ -29,7 +30,7 @@ export interface DataTableProps<T = unknown> {
     /** Current sort column key */
     sortBy?: string;
     /** Current sort direction */
-    sortOrder?: 'asc' | 'desc';
+    sortOrder?: "asc" | "desc";
     /** Callback when sort changes */
     onSort?: (key: string) => void;
     /** Whether to show expand toggle column */
@@ -51,7 +52,7 @@ export interface DataTableProps<T = unknown> {
     /** Whether to wrap in card */
     card?: boolean;
     /** Table size variant */
-    size?: 'xs' | 'sm' | 'md' | 'lg';
+    size?: "xs" | "sm" | "md" | "lg";
     /** Whether rows are zebra striped */
     zebra?: boolean;
     /** Pin headers when scrolling */
@@ -60,16 +61,23 @@ export interface DataTableProps<T = unknown> {
 
 // ===== HELPER FUNCTIONS =====
 
-function getSortIcon(columnKey: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): string {
-    if (sortBy !== columnKey) return 'fa-sort';
-    return sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+function getSortIcon(
+    columnKey: string,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc",
+): string {
+    if (sortBy !== columnKey) return "fa-sort";
+    return sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
 }
 
-function getAlignClass(align?: 'left' | 'center' | 'right'): string {
+function getAlignClass(align?: "left" | "center" | "right"): string {
     switch (align) {
-        case 'center': return 'text-center';
-        case 'right': return 'text-right';
-        default: return 'text-left';
+        case "center":
+            return "text-center";
+        case "right":
+            return "text-right";
+        default:
+            return "text-left";
     }
 }
 
@@ -88,17 +96,20 @@ export function DataTable<T = unknown>({
     loading = false,
     emptyState,
     isEmpty = false,
-    className = '',
+    className = "",
     card = true,
-    size = 'md',
+    size = "md",
     zebra = false,
     pinHeaders = false,
 }: DataTableProps<T>) {
-    const handleSort = useCallback((key: string) => {
-        if (onSort) {
-            onSort(key);
-        }
-    }, [onSort]);
+    const handleSort = useCallback(
+        (key: string) => {
+            if (onSort) {
+                onSort(key);
+            }
+        },
+        [onSort],
+    );
 
     const handleSelectAll = useCallback(() => {
         if (onSelectAll) {
@@ -108,14 +119,16 @@ export function DataTable<T = unknown>({
 
     // Build table classes
     const tableClasses = [
-        'table',
-        size === 'xs' && 'table-xs',
-        size === 'sm' && 'table-sm',
-        size === 'lg' && 'table-lg',
-        zebra && 'table-zebra',
-        pinHeaders && 'table-pin-rows',
+        "table",
+        size === "xs" && "table-xs",
+        size === "sm" && "table-sm",
+        size === "lg" && "table-lg",
+        zebra && "table-zebra",
+        pinHeaders && "table-pin-rows",
         className,
-    ].filter(Boolean).join(' ');
+    ]
+        .filter(Boolean)
+        .join(" ");
 
     const tableContent = (
         <div className="overflow-x-auto bg-base-200">
@@ -147,12 +160,16 @@ export function DataTable<T = unknown>({
                             <th
                                 key={column.key}
                                 className={`
-                                    ${column.sortable ? 'cursor-pointer hover:bg-base-200 select-none' : ''}
-                                    ${column.width || ''}
+                                    ${column.sortable ? "cursor-pointer hover:bg-base-200 select-none" : ""}
+                                    ${column.width || ""}
                                     ${getAlignClass(column.align)}
-                                    ${column.hideOnMobile ? 'hidden md:table-cell' : ''}
+                                    ${column.hideOnMobile ? "hidden md:table-cell" : ""}
                                 `}
-                                onClick={column.sortable ? () => handleSort(column.key) : undefined}
+                                onClick={
+                                    column.sortable
+                                        ? () => handleSort(column.key)
+                                        : undefined
+                                }
                             >
                                 {column.headerRender ? (
                                     column.headerRender()
@@ -160,7 +177,9 @@ export function DataTable<T = unknown>({
                                     <span className="inline-flex items-center gap-1">
                                         {column.label}
                                         {column.sortable && (
-                                            <i className={`fa-duotone fa-regular ${getSortIcon(column.key, sortBy, sortOrder)} ml-1 text-xs opacity-50`}></i>
+                                            <i
+                                                className={`fa-duotone fa-regular ${getSortIcon(column.key, sortBy, sortOrder)} ml-1 text-xs opacity-50`}
+                                            ></i>
                                         )}
                                     </span>
                                 )}
@@ -172,17 +191,27 @@ export function DataTable<T = unknown>({
                     {loading && isEmpty ? (
                         <tr>
                             <td
-                                colSpan={columns.length + (showSelectColumn ? 1 : 0) + (showExpandColumn ? 1 : 0)}
+                                colSpan={
+                                    columns.length +
+                                    (showSelectColumn ? 1 : 0) +
+                                    (showExpandColumn ? 1 : 0)
+                                }
                                 className="text-center py-12"
                             >
                                 <span className="loading loading-spinner loading-md"></span>
-                                <p className="text-base-content/60 mt-2">Loading...</p>
+                                <p className="text-base-content/60 mt-2">
+                                    Loading...
+                                </p>
                             </td>
                         </tr>
                     ) : isEmpty ? (
                         <tr>
                             <td
-                                colSpan={columns.length + (showSelectColumn ? 1 : 0) + (showExpandColumn ? 1 : 0)}
+                                colSpan={
+                                    columns.length +
+                                    (showSelectColumn ? 1 : 0) +
+                                    (showExpandColumn ? 1 : 0)
+                                }
                                 className="text-center py-12"
                             >
                                 {emptyState || (
@@ -194,7 +223,9 @@ export function DataTable<T = unknown>({
                             </td>
                         </tr>
                     ) : (
-                        children
+                        <TableAccordionProvider>
+                            {children}
+                        </TableAccordionProvider>
                     )}
                 </tbody>
             </table>
@@ -232,15 +263,15 @@ export function DataTableRow({
     onClick,
     selected = false,
     highlighted = false,
-    className = '',
+    className = "",
 }: DataTableRowProps) {
     return (
         <tr
             className={`
                 hover:bg-base-200/50 transition-colors
-                ${onClick ? 'cursor-pointer' : ''}
-                ${selected ? 'bg-primary/5' : ''}
-                ${highlighted ? 'bg-warning/5' : ''}
+                ${onClick ? "cursor-pointer" : ""}
+                ${selected ? "bg-primary/5" : ""}
+                ${highlighted ? "bg-warning/5" : ""}
                 ${className}
             `}
             onClick={onClick}
@@ -256,7 +287,7 @@ export interface DataTableCellProps {
     /** Cell content */
     children: ReactNode;
     /** Text alignment */
-    align?: 'left' | 'center' | 'right';
+    align?: "left" | "center" | "right";
     /** Additional classes */
     className?: string;
     /** Stop click propagation (for action buttons) */
@@ -266,7 +297,7 @@ export interface DataTableCellProps {
 export function DataTableCell({
     children,
     align,
-    className = '',
+    className = "",
     stopPropagation = false,
 }: DataTableCellProps) {
     return (
@@ -281,6 +312,6 @@ export function DataTableCell({
 
 // ===== EMPTY VALUE PLACEHOLDER =====
 
-export function EmptyValue({ text = '—' }: { text?: string }) {
+export function EmptyValue({ text = "—" }: { text?: string }) {
     return <span className="text-base-content/30">{text}</span>;
 }

@@ -43,8 +43,8 @@ Add subscription management functionality to the billing page (`/portal/billing`
 
 **Data Needed**:
 
-- Current subscription from `/v2/subscriptions/me`
-- All available plans from `/v2/plans`
+- Current subscription from `/api/v2/subscriptions/me`
+- All available plans from `/api/v2/plans`
 
 ### 2. `plan-change-modal.tsx`
 

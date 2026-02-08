@@ -28,6 +28,28 @@ export function stripeConnectRoutes(app: FastifyInstance, service: StripeConnect
         }
     });
 
+    // Create account session for embedded components
+    app.post(`${basePath}/account-session`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const session = await service.createAccountSession(clerkUserId);
+            return reply.send({ data: session });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    // Create Express Dashboard login link
+    app.post(`${basePath}/dashboard-link`, async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const link = await service.createDashboardLink(clerkUserId);
+            return reply.send({ data: link });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
     // Create onboarding link
     app.post(`${basePath}/onboarding-link`, async (request, reply) => {
         try {

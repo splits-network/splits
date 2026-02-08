@@ -77,6 +77,7 @@ export class ProposalsEventConsumer {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'Unknown Company',
+                roleId: job_id,
                 userId: recruiterContact.user_id || undefined,
             });
             
@@ -116,6 +117,7 @@ export class ProposalsEventConsumer {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
                 declineReason: decline_reason || 'No reason provided',
+                roleId: job_id,
                 userId: recruiterContact.user_id || undefined,
             });
             
@@ -154,6 +156,7 @@ export class ProposalsEventConsumer {
             await this.emailService.sendProposalTimeout(recruiterContact.email, {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
+                roleId: job_id,
                 userId: recruiterContact.user_id || undefined,
             });
             

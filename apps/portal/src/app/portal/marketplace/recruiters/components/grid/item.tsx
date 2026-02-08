@@ -1,6 +1,13 @@
 "use client";
 
 import UserAvatar from "@/components/common/UserAvatar";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
+import {
+    EntityCard,
+    DataRow,
+    DataList,
+    VerticalDataRow,
+} from "@/components/ui/cards";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 
@@ -12,83 +19,126 @@ interface ItemProps {
 export default function Item({ item, onViewDetails }: ItemProps) {
     const displayName = getDisplayName(item);
     const specialties = item.specialties || [];
-    const primarySpecialty = specialties[0] || null;
+    const industries = item.industries || [];
 
     return (
-        <div className="card bg-base-100 border border-base-200 shadow-sm group hover:shadow-lg transition-all duration-200">
-            <div className="card-body p-5">
-                {/* Header */}
-                <div className="flex items-start gap-3">
-                    <UserAvatar
-                        user={{
-                            name: displayName,
-                            profile_image_url: item.users?.profile_image_url,
-                        }}
-                        size="md"
-                        className="shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-sm truncate">
-                            {displayName}
-                        </h3>
-                        <p className="text-xs text-base-content/60 truncate">
-                            {item.tagline || item.location || "Recruiter"}
-                        </p>
+        <EntityCard className="group hover:shadow-lg transition-all duration-200">
+            <EntityCard.Header>
+                <div className="flex items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <UserAvatar
+                            user={{
+                                name: displayName,
+                                profile_image_url: item.users?.profile_image_url,
+                            }}
+                            size="md"
+                            className="shrink-0"
+                        />
+                        <div className="flex flex-col min-w-0">
+                            <h3 className="font-semibold text-md truncate">
+                                {displayName}
+                            </h3>
+                            <div className="text-sm text-base-content/70 truncate">
+                                {item.tagline || item.location || "Recruiter"}
+                            </div>
+                        </div>
                     </div>
+                    <RecruiterReputationBadge
+                        reputation={{
+                            total_submissions: (item as any).total_submissions || 0,
+                            total_hires: (item as any).total_hires || 0,
+                            hire_rate: (item as any).hire_rate || null,
+                            completion_rate: (item as any).completion_rate || null,
+                            reputation_score: item.reputation_score ?? null,
+                        }}
+                        compact
+                    />
                 </div>
+            </EntityCard.Header>
 
-                {/* Badges */}
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                    {primarySpecialty && (
-                        <span className="badge badge-xs badge-primary badge-soft border-0">
-                            <i className="fa-duotone fa-regular fa-briefcase text-[10px] mr-1"></i>
-                            {primarySpecialty}
-                        </span>
-                    )}
-                    {item.years_experience && (
-                        <span className="badge badge-xs badge-ghost border-0">
-                            <i className="fa-duotone fa-regular fa-calendar-clock text-[10px] mr-1"></i>
-                            {item.years_experience}+ yrs
-                        </span>
-                    )}
-                    {item.reputation_score !== undefined &&
-                        item.reputation_score >= 80 && (
-                            <span className="badge badge-xs badge-warning badge-soft border-0">
-                                <i className="fa-duotone fa-regular fa-star text-[10px] mr-1"></i>
-                                Top Rated
+            <EntityCard.Body>
+                <DataList compact>
+                    {item.bio && (
+                        <VerticalDataRow label="Bio" icon="fa-user-circle">
+                            <span className="w-full text-sm text-base-content/80 line-clamp-2">
+                                {item.bio.length > 80
+                                    ? item.bio.substring(0, 80) + "..."
+                                    : item.bio}
                             </span>
-                        )}
-                </div>
+                        </VerticalDataRow>
+                    )}
+                    <DataRow
+                        label="Location"
+                        icon="fa-location-dot"
+                        value={item.location || "Not provided"}
+                    />
+                    <DataRow
+                        label="Experience"
+                        icon="fa-hourglass-half"
+                        value={
+                            item.years_experience
+                                ? `${item.years_experience}+ years`
+                                : "Not specified"
+                        }
+                    />
+                    {specialties.length > 0 && (
+                        <VerticalDataRow label="Specialties" icon="fa-briefcase">
+                            <div className="flex flex-wrap gap-1">
+                                {specialties.slice(0, 3).map((specialty) => (
+                                    <span
+                                        key={specialty}
+                                        className="badge badge-sm badge-primary badge-soft border-0"
+                                    >
+                                        {specialty}
+                                    </span>
+                                ))}
+                                {specialties.length > 3 && (
+                                    <span className="badge badge-sm badge-ghost border-0">
+                                        +{specialties.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        </VerticalDataRow>
+                    )}
+                    {industries.length > 0 && (
+                        <VerticalDataRow label="Industries" icon="fa-industry">
+                            <div className="flex flex-wrap gap-1">
+                                {industries.slice(0, 3).map((industry) => (
+                                    <span
+                                        key={industry}
+                                        className="badge badge-sm badge-outline"
+                                    >
+                                        {industry}
+                                    </span>
+                                ))}
+                                {industries.length > 3 && (
+                                    <span className="badge badge-sm badge-ghost border-0">
+                                        +{industries.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        </VerticalDataRow>
+                    )}
+                </DataList>
+            </EntityCard.Body>
 
-                {/* Stats Row */}
-                <div className="flex items-center gap-4 mt-3 text-xs text-base-content/60">
-                    {item.total_placements !== undefined &&
-                        item.total_placements > 0 && (
-                            <div className="flex items-center gap-1">
-                                <i className="fa-duotone fa-regular fa-handshake text-success"></i>
-                                <span>
+            <EntityCard.Footer>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-sm text-base-content/60">
+                        {item.total_placements !== undefined &&
+                            item.total_placements > 0 && (
+                                <span className="flex items-center gap-1">
+                                    <i className="fa-duotone fa-regular fa-handshake text-success"></i>
                                     {item.total_placements} placements
                                 </span>
-                            </div>
+                            )}
+                        {item.success_rate !== undefined && (
+                            <span className="flex items-center gap-1">
+                                <i className="fa-duotone fa-regular fa-bullseye text-info"></i>
+                                {Math.round(item.success_rate)}%
+                            </span>
                         )}
-                    {item.success_rate !== undefined && (
-                        <div className="flex items-center gap-1">
-                            <i className="fa-duotone fa-regular fa-bullseye text-info"></i>
-                            <span>{Math.round(item.success_rate)}%</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-200">
-                    {item.location ? (
-                        <span className="text-xs text-base-content/50 flex items-center gap-1">
-                            <i className="fa-duotone fa-regular fa-location-dot"></i>
-                            {item.location}
-                        </span>
-                    ) : (
-                        <span />
-                    )}
+                    </div>
                     <RecruiterActionsToolbar
                         recruiter={item}
                         variant="icon-only"
@@ -98,7 +148,7 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                         onViewDetails={() => onViewDetails(item.id)}
                     />
                 </div>
-            </div>
-        </div>
+            </EntityCard.Footer>
+        </EntityCard>
     );
 }

@@ -284,7 +284,7 @@ DROP INDEX IF EXISTS idx_candidate_role_assignments_recruiter_id;
 **Code Cleanup:**
 
 1. **Network Service**:
-   - Remove CRA endpoints: `/v2/candidate-role-assignments/*`
+   - Remove CRA endpoints: `/api/v2/candidate-role-assignments/*`
    - Remove `CandidateRoleAssignmentRepository`
    - Remove `CandidateRoleAssignmentService`
    - Remove CRA-related route handlers

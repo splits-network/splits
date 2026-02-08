@@ -45,7 +45,8 @@ export default function AIReviewDisplay({ applicationId, isRecruiter, isCompanyU
         }
 
         fetchAIReview();
-    }, [applicationId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [applicationId]);
 
     if (loading) {
         return (

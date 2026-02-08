@@ -203,7 +203,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         fetchOnboardingStatus();
-    }, [user, getToken, profileLoading, isAdmin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, profileLoading, isAdmin]);
 
     // No auto-save on load - only save when user explicitly interacts with the wizard
     // The persistOnboardingState() function is called from the actions below when needed

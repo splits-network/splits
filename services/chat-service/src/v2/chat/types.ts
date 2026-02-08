@@ -2,6 +2,7 @@ export interface ChatContext {
     application_id?: string | null;
     job_id?: string | null;
     company_id?: string | null;
+    candidate_id?: string | null;
 }
 
 export interface ChatConversation {
@@ -11,6 +12,7 @@ export interface ChatConversation {
     application_id?: string | null;
     job_id?: string | null;
     company_id?: string | null;
+    candidate_id?: string | null;
     created_at: string;
     updated_at: string;
     last_message_at?: string | null;
@@ -106,6 +108,7 @@ export interface ParticipantDetails {
     name: string | null;
     email: string;
     profile_image_url?: string | null;
+    user_role?: string | null;
 }
 
 // NEW: Conversation with participant names included (prevents unauthorized user lookups)
@@ -116,6 +119,7 @@ export interface ChatConversationWithParticipants {
     application_id?: string | null;
     job_id?: string | null;
     company_id?: string | null;
+    candidate_id?: string | null;
     created_at: string;
     updated_at: string;
     last_message_at?: string | null;

@@ -25,12 +25,40 @@
             "path": "services/ats-service",
         },
         {
+            "name": "🤖 AI Service",
+            "path": "services/ai-service",
+        },
+        {
+            "name": "📊 Analytics Service",
+            "path": "services/analytics-service",
+        },
+        {
+            "name": "🧠 Automation Service",
+            "path": "services/automation-service",
+        },
+        {
             "name": "🌐 Network Service",
             "path": "services/network-service",
         },
         {
             "name": "💳 Billing Service",
             "path": "services/billing-service",
+        },
+        {
+            "name": "💬 Chat Service",
+            "path": "services/chat-service",
+        },
+        {
+            "name": "🗨️ Chat Gateway",
+            "path": "services/chat-gateway",
+        },
+        {
+            "name": "📄 Document Service",
+            "path": "services/document-service",
+        },
+        {
+            "name": "🧾 Document Processing Service",
+            "path": "services/document-processing-service",
         },
         {
             "name": "📧 Notification Service",
@@ -93,6 +121,8 @@
             ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
         ],
         "powershell.cwd": "🏠 Root",
+        "vitest.root": "services/ats-service",
+        "vitest.configFile": "services/ats-service/vitest.config.ts",
     },
     "extensions": {
         "recommendations": [

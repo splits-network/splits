@@ -16,6 +16,7 @@
     "@splits-network/shared-config": "workspace:*",
     "@splits-network/shared-types": "workspace:*",
     "@splits-network/shared-ui": "workspace:*",
+    "@stripe/connect-js": "^3.3.33",
     "@stripe/react-stripe-js": "^5.5.0",
     "@stripe/stripe-js": "^8.6.4",
     "@supabase/supabase-js": "^2.47.10",

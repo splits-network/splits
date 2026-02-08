@@ -7,6 +7,7 @@ import {
     ExpandedDetailSection,
 } from "@/components/ui/tables";
 import UserAvatar from "@/components/common/UserAvatar";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 
@@ -71,18 +72,16 @@ export default function Row({ item, onViewDetails }: RowProps) {
 
             {/* Reputation */}
             <td className="hidden md:table-cell">
-                {item.reputation_score !== undefined ? (
-                    <span
-                        className={`text-sm font-mono ${item.reputation_score >= 80 ? "text-warning" : ""}`}
-                    >
-                        {item.reputation_score}
-                        {item.reputation_score >= 80 && (
-                            <i className="fa-duotone fa-regular fa-star text-warning ml-1 text-xs" />
-                        )}
-                    </span>
-                ) : (
-                    <span className="text-base-content/40">—</span>
-                )}
+                <RecruiterReputationBadge
+                    reputation={{
+                        total_submissions: (item as any).total_submissions || 0,
+                        total_hires: (item as any).total_hires || 0,
+                        hire_rate: (item as any).hire_rate ?? null,
+                        completion_rate: (item as any).completion_rate ?? null,
+                        reputation_score: item.reputation_score ?? null,
+                    }}
+                    compact
+                />
             </td>
 
             {/* Experience */}

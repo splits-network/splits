@@ -83,7 +83,7 @@ export default function MarketplaceList({ initialData, initialPagination }: Mark
         syncToUrl: true,
         viewModeKey: 'marketplaceViewMode',
         autoFetch: true,
-        include: 'user',
+        include: 'user,reputation',
         requireAuth: false,
         initialData,
         initialPagination,

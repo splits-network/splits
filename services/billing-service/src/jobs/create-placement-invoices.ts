@@ -58,6 +58,7 @@ async function main() {
             isPlatformAdmin: true,
             error: '',
         }),
+        undefined,
         stripeSecretKey
     );
 

@@ -1,32 +1,44 @@
 "use client";
-import { Presence } from "@/components/presense";
-import { ConversationRow, UserSummary } from "./types";
 
-interface MessageListItemProps {
+import { Presence } from "@/components/presense";
+import {
+    type ConversationRow,
+    type ConversationContext,
+    getOtherParticipant,
+    formatMessageDate,
+} from "../../types";
+
+interface ListItemProps {
     row: ConversationRow;
-    otherUser?: UserSummary | null;
     isSelected: boolean;
+    currentUserId: string | null;
     presenceStatus?: "online" | "offline";
     onSelect: (id: string) => void;
+    context?: ConversationContext | null;
+    otherUserRole?: string | null;
 }
 
-export default function MessageListItem({
+export default function ListItem({
     row,
-    otherUser,
     isSelected,
+    currentUserId,
     presenceStatus,
     onSelect,
-}: MessageListItemProps) {
+    context,
+    otherUserRole,
+}: ListItemProps) {
     const convo = row.conversation;
-    const name = otherUser?.name || otherUser?.email || "Unknown user";
     const participant = row.participant;
-    if (!convo) {
-        return null;
-    }
 
-    if (!participant) {
-        return null;
-    }
+    if (!convo || !participant) return null;
+
+    const other = getOtherParticipant(convo, currentUserId);
+    const name = other?.name || other?.email || "Unknown user";
+
+    const contextLabel =
+        context?.jobTitle && context?.companyName
+            ? `${context.jobTitle} at ${context.companyName}`
+            : context?.jobTitle || context?.companyName || null;
 
     return (
         <button
@@ -43,10 +55,18 @@ export default function MessageListItem({
             `}
         >
             <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                    {/* Name + role + status badges */}
+                    <div className="flex items-center gap-2 justify-between mb-1">
                         <div className="flex items-center gap-2 min-w-0 text-left">
-                            <span className="font-semibold">{name}</span>
+                            <span className="font-semibold truncate">
+                                {name}
+                            </span>
+                            {otherUserRole && (
+                                <span className="badge badge-outline badge-xs">
+                                    {otherUserRole}
+                                </span>
+                            )}
                             {participant.request_state === "pending" && (
                                 <span className="badge badge-warning badge-sm">
                                     Request
@@ -57,18 +77,41 @@ export default function MessageListItem({
                                     Archived
                                 </span>
                             )}
+                            {participant.muted_at && (
+                                <span className="badge badge-ghost badge-sm">
+                                    <i className="fa-duotone fa-regular fa-volume-slash text-xs" />
+                                </span>
+                            )}
                         </div>
                         <Presence status={presenceStatus} variant="badge" />
                     </div>
+
+                    {/* Context line */}
+                    {contextLabel && (
+                        <div className="text-xs text-start text-base-content/50 truncate mb-1">
+                            <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                            {contextLabel}
+                        </div>
+                    )}
+
+                    {/* Candidate representation context */}
+                    {context?.candidateName && (
+                        <div className="text-xs text-start text-base-content/50 truncate mb-1">
+                            <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                            Re: {context.candidateName}
+                        </div>
+                    )}
+
+                    {/* Timestamp */}
                     <div className="text-xs text-start text-base-content/60">
-                        {convo.last_message_at
-                            ? new Date(convo.last_message_at).toLocaleString()
-                            : "No messages yet"}
+                        {formatMessageDate(convo.last_message_at)}
                     </div>
                 </div>
                 {participant.unread_count > 0 && (
                     <span className="badge badge-primary">
-                        {participant.unread_count}
+                        {participant.unread_count > 99
+                            ? "99+"
+                            : participant.unread_count}
                     </span>
                 )}
             </div>

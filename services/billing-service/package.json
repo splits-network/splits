@@ -12,7 +12,8 @@
         "job:escrow-releases": "node dist/jobs/process-escrow-releases.js",
         "job:create-placement-invoices": "node dist/jobs/create-placement-invoices.js",
         "job:finalize-invoices": "node dist/jobs/finalize-placement-invoices.js",
-        "job:process-eligible-payouts": "node dist/jobs/process-eligible-payouts.js"
+        "job:process-eligible-payouts": "node dist/jobs/process-eligible-payouts.js",
+        "test": "vitest"
     },
     "dependencies": {
         "@fastify/swagger": "^9.5.0",
@@ -31,7 +32,9 @@
     "devDependencies": {
         "@types/amqplib": "^0.10.5",
         "@types/node": "^24.10.1",
+        "@vitest/coverage-v8": "^2.1.9",
         "tsx": "^4.19.2",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vitest": "^2.1.9"
     }
 }

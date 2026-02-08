@@ -411,3 +411,14 @@ async function publishEphemeral(
 }
 
 main();
+
+export {
+    MAX_CHANNELS_PER_SOCKET,
+    PRESENCE_TTL_SECONDS,
+    verifyClerkToken,
+    fetchIdentityUserId,
+    setPresence,
+    handleClientMessage,
+    authorizeConversation,
+    publishEphemeral,
+};

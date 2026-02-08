@@ -203,7 +203,8 @@ export default function TeamsPage() {
 
             return { data, pagination };
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const {

@@ -169,44 +169,9 @@ export class DomainEventConsumer {
                 }
             );
 
-            // Phase 4: If stage changed to 'hired', create placement automatically
-            if (new_stage === 'hired' && old_stage !== 'hired') {
-                this.logger.info(
-                    {
-                        application_id,
-                        event_id: event.event_id,
-                    },
-                    'Application hired - creating placement automatically'
-                );
-
-                try {
-                    // Use injected placement service to create placement from application
-                    // This will gather all 5 role IDs from referential data
-                    const placement = await this.placementService.createPlacementFromApplication(application_id);
-
-                    this.logger.info(
-                        {
-                            application_id,
-                            placement_id: placement.id,
-                            event_id: event.event_id,
-                        },
-                        'Successfully created placement from hired application'
-                    );
-                } catch (placementError: any) {
-                    this.logger.error(
-                        {
-                            err: placementError,
-                            application_id,
-                            event_id: event.event_id,
-                            error_message: placementError.message,
-                        },
-                        'Failed to create placement for hired application'
-                    );
-
-                    // Don't re-throw - stage change succeeded even if placement creation failed
-                    // Placement can be created manually later if needed
-                }
-            }
+            // Note: Placement creation for hired applications is handled by the
+            // POST /applications/:id/hire route handler, not by the domain consumer.
+            // This avoids duplicate placement records.
 
             this.logger.info(
                 {

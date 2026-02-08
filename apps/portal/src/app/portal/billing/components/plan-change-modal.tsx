@@ -345,7 +345,8 @@ export default function PlanChangeModal({
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     /**
      * Check if user has a payment method set up
@@ -365,7 +366,8 @@ export default function PlanChangeModal({
             // Assume no payment method if check fails
             setHasPaymentMethod(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     /**
      * Create a SetupIntent for collecting payment
@@ -393,7 +395,8 @@ export default function PlanChangeModal({
                 setCreatingSetupIntent(false);
             }
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     /**

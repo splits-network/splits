@@ -10,6 +10,8 @@ import {
     InAppNotification,
 } from '@/lib/notifications';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
+import { useNotificationTabIndicator } from '@/hooks/use-notification-tab-indicator';
 
 interface NotificationBellProps {
     /** Position of the dropdown. Use 'right' when in a sidebar */
@@ -19,13 +21,20 @@ interface NotificationBellProps {
 export default function NotificationBell({ position = 'end' }: NotificationBellProps) {
     const router = useRouter();
     const { getToken } = useAuth();
+    const toast = useToast();
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
-    // Fetch unread count every 30 seconds
+    // Track previous count to detect new notifications (useRef to avoid re-render loops)
+    const previousUnreadCount = useRef<number | null>(null);
+
+    // Browser tab indicator
+    useNotificationTabIndicator(unreadCount);
+
+    // Fetch unread count every 15 seconds
     const loadUnreadCount = useCallback(async () => {
         try {
             const token = await getToken();
@@ -35,6 +44,17 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             const res = await client.get('/notifications/unread-count');
             const count = res?.data?.count ?? 0;
 
+            // Detect new notifications and show toast
+            if (previousUnreadCount.current !== null && count > previousUnreadCount.current) {
+                const newCount = count - previousUnreadCount.current;
+                toast.info(
+                    newCount === 1
+                        ? 'You have a new notification'
+                        : `You have ${newCount} new notifications`
+                );
+            }
+            previousUnreadCount.current = count;
+
             setUnreadCount(count);
             setError(false);
         } catch (err) {
@@ -42,7 +62,8 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             console.warn('Failed to fetch unread count:', err);
             setError(true);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toast]);
 
     // Fetch recent notifications when dropdown opens
     const loadNotifications = useCallback(async () => {
@@ -66,12 +87,13 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
         } finally {
             setLoading(false);
         }
-    }, [getToken]); // Remove 'loading' from dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Initial load and polling
     useEffect(() => {
         loadUnreadCount();
-        const interval = setInterval(loadUnreadCount, 30000); // Poll every 30 seconds
+        const interval = setInterval(loadUnreadCount, 15000); // Poll every 15 seconds
         return () => clearInterval(interval);
     }, [loadUnreadCount]);
 
@@ -93,6 +115,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 await client.patch(`/notifications/${notification.id}`, { read: true });
 
                 setUnreadCount((prev) => Math.max(0, prev - 1));
+                previousUnreadCount.current = Math.max(0, (previousUnreadCount.current ?? 1) - 1);
                 setNotifications((prev) =>
                     prev.map((n) =>
                         n.id === notification.id ? { ...n, read: true } : n
@@ -118,6 +141,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             const client = createAuthenticatedClient(token);
             await client.post('/notifications/mark-all-read', {});
             setUnreadCount(0);
+            previousUnreadCount.current = 0;
             setNotifications((prev) =>
                 prev.map((n) => ({ ...n, read: true }))
             );
@@ -176,9 +200,9 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 className="dropdown-content z-100 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-base-300">
-                    <h3 className="font-semibold text-lg">Notifications</h3>
-                    <div className="flex gap-2">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-base-300">
+                    <h3 className="font-semibold text-sm">Notifications</h3>
+                    <div className="flex gap-1">
                         {unreadCount > 0 && (
                             <button
                                 type="button"
@@ -202,20 +226,20 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 {/* Notification List */}
                 <div className="max-h-96 overflow-y-auto">
                     {loading ? (
-                        <div className="flex justify-center items-center py-8">
-                            <span className="loading loading-spinner loading-md"></span>
+                        <div className="flex justify-center items-center py-6">
+                            <span className="loading loading-spinner loading-sm"></span>
                         </div>
                     ) : notifications.length === 0 ? (
-                        <div className="text-center py-8 text-base-content/60">
-                            <i className="fa-duotone fa-regular fa-inbox text-4xl mb-2"></i>
-                            <p>No notifications</p>
+                        <div className="text-center py-6 text-base-content/60">
+                            <i className="fa-duotone fa-regular fa-inbox text-3xl mb-1"></i>
+                            <p className="text-sm">No notifications</p>
                         </div>
                     ) : (
                         notifications.map((notification) => (
                             <div
                                 key={notification.id}
                                 className={`
-                                        flex gap-3 p-4 border-b border-base-300 cursor-pointer
+                                        flex gap-2 px-3 py-2 border-b border-base-200 cursor-pointer
                                         hover:bg-base-200 transition-colors
                                         ${!notification.read ? 'bg-primary/5' : ''}
                                     `}
@@ -224,7 +248,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                                 {/* Icon */}
                                 <div className="shrink-0">
                                     <div className={`
-                                            w-10 h-10 rounded-full flex items-center justify-center
+                                            w-8 h-8 rounded-full flex items-center justify-center text-xs
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                                         `}>
                                         <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
@@ -233,33 +257,35 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <p className={`text-sm ${!notification.read ? 'font-semibold' : ''}`}>
+                                    <div className="flex items-start justify-between gap-1">
+                                        <p className={`text-xs leading-snug line-clamp-2 ${!notification.read ? 'font-semibold' : ''}`}>
                                             {notification.subject}
                                         </p>
                                         <button
                                             type="button"
-                                            className="btn btn-ghost btn-xs btn-circle"
+                                            className="btn btn-ghost btn-xs btn-circle shrink-0"
                                             onClick={(e) => handleDismiss(notification.id, e)}
                                             aria-label="Dismiss"
                                         >
-                                            <i className="fa-duotone fa-regular fa-times"></i>
+                                            <i className="fa-duotone fa-regular fa-times text-xs"></i>
                                         </button>
                                     </div>
-                                    <p className="text-xs text-base-content/60 mt-1">
-                                        {formatNotificationTime(notification.created_at)}
-                                    </p>
-                                    {notification.action_label && (
-                                        <span className="text-xs text-primary mt-1 inline-block">
-                                            {notification.action_label} →
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-[10px] text-base-content/50">
+                                            {formatNotificationTime(notification.created_at)}
                                         </span>
-                                    )}
+                                        {notification.action_label && (
+                                            <span className="text-[10px] text-primary">
+                                                {notification.action_label} →
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Unread indicator */}
                                 {!notification.read && (
-                                    <div className="shrink-0">
-                                        <div className="w-2 h-2 rounded-full bg-primary"></div>
+                                    <div className="shrink-0 mt-1">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                                     </div>
                                 )}
                             </div>
@@ -269,10 +295,10 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
 
                 {/* Footer */}
                 {notifications.length > 0 && (
-                    <div className="p-2 border-t border-base-300 text-center">
+                    <div className="px-2 py-1.5 border-t border-base-300 text-center">
                         <Link
                             href="/portal/notifications"
-                            className="btn btn-ghost btn-sm btn-block"
+                            className="btn btn-ghost btn-xs btn-block"
                             onMouseDown={(e) => e.preventDefault()}
                         >
                             View all notifications
