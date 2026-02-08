@@ -64,7 +64,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
 
     const listState = useStandardList<RecruiterWithUser, MarketplaceFilters>({
         endpoint: "/recruiters",
-        include: "user",
+        include: "user,reputation",
         defaultFilters,
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",

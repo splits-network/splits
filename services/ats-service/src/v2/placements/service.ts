@@ -103,27 +103,27 @@ export class PlacementServiceV2 {
         const jobOwnerRecruiterId = job.job_owner_recruiter_id || null;
 
         // 4: Get candidate sourcer (check if active)
+        let candidateSourcerRecruiterId: string | null = null;
         const candidateSourcer = await this.candidateSourcerRepo.getByCandidateId(candidateId);
-        const candidateSourcerActive = candidateSourcer
-            ? await this.candidateSourcerRepo.isSourcerActive(candidateId)
-            : false;
+        if (candidateSourcer) {
+            const isActive = await this.candidateSourcerRepo.isSourcerActive(candidateId);
+            candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
+        }
 
         // 5: Get company sourcer (check if active)
+        let companySourcerRecruiterId: string | null = null;
         const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
-        const companySourcerActive = companySourcer
-            ? await this.companySourcerRepo.isSourcerActive(job.company_id)
-            : false;
+        if (companySourcer) {
+            const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
+            companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+        }
 
         return {
             candidate_recruiter_id: candidateRecruiterId,
             company_recruiter_id: companyRecruiterId,
             job_owner_recruiter_id: jobOwnerRecruiterId,
-            candidate_sourcer_recruiter_id:
-                candidateSourcerActive && candidateSourcer
-                    ? candidateSourcer.sourcer_recruiter_id
-                    : null,
-            company_sourcer_recruiter_id:
-                companySourcerActive && companySourcer ? companySourcer.recruiter_id : null,
+            candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
+            company_sourcer_recruiter_id: companySourcerRecruiterId,
         };
     }
 
@@ -353,19 +353,19 @@ export class PlacementServiceV2 {
         const jobOwnerRecruiterId = job.job_owner_recruiter_id;           // From job
 
         // Get sourcer IDs from dedicated tables (all nullable)
+        let candidateSourcerRecruiterId: string | null = null;
         const candidateSourcer = await this.candidateSourcerRepo.getByCandidateId(application.candidate_id);
+        if (candidateSourcer) {
+            const isActive = await this.candidateSourcerRepo.isSourcerActive(application.candidate_id);
+            candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
+        }
+
+        let companySourcerRecruiterId: string | null = null;
         const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
-
-        // Only include active sourcers for commission
-        const candidateSourcerActive = candidateSourcer ?
-            await this.candidateSourcerRepo.isSourcerActive(application.candidate_id) : false;
-        const companySourcerActive = companySourcer ?
-            await this.companySourcerRepo.isSourcerActive(job.company_id) : false;
-
-        const candidateSourcerRecruiterId = candidateSourcerActive ?
-            candidateSourcer?.sourcer_recruiter_id : null;
-        const companySourcerRecruiterId = companySourcerActive ?
-            companySourcer?.recruiter_id : null;
+        if (companySourcer) {
+            const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
+            companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+        }
 
         // Calculate placement fee
         const salary = overrides?.salary ?? application.salary ?? 0;

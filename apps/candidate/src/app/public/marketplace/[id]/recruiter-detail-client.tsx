@@ -111,7 +111,7 @@ export default function RecruiterDetailClient({
             const client = token ? createAuthenticatedClient(token) : apiClient;
 
             const result = await client.get<any>(`/recruiters/${recruiterId}`, {
-                params: { include: 'user,marketplace_profile' },
+                params: { include: 'user,marketplace_profile,reputation' },
             });
             setRecruiter(result.data);
         } catch (err) {
@@ -285,20 +285,18 @@ export default function RecruiterDetailClient({
                 </div>
             </div>
 
-            {/* Reputation Section */}
-            {recruiter.reputation_score !== undefined && (
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-medal text-primary" />
-                        Recruiter Reputation
-                    </h2>
-                    <RecruiterReputation
-                        reputationScore={recruiter.reputation_score}
-                        totalPlacements={recruiter.total_placements}
-                        variant="full"
-                    />
-                </div>
-            )}
+            {/* Reputation Section - Always show */}
+            <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-medal text-primary" />
+                    Recruiter Reputation
+                </h2>
+                <RecruiterReputation
+                    reputationScore={recruiter.reputation_score ?? null}
+                    totalPlacements={recruiter.total_placements}
+                    variant="full"
+                />
+            </div>
 
             {/* Stats */}
             {recruiter.total_placements !== undefined && (

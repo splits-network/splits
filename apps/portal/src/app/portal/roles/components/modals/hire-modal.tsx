@@ -153,8 +153,8 @@ export default function HireModal({
                             onChange={(e) => setSalary(e.target.value)}
                             placeholder="150000"
                             required
-                            min="1"
-                            step="1000"
+                            min="0"
+                            step="any"
                             disabled={submitting}
                         />
                         <p className="fieldset-label">

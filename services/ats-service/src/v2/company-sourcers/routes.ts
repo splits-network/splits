@@ -15,10 +15,9 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
                     limit: { type: 'number', minimum: 1, maximum: 100, default: 25 },
                     search: { type: 'string' },
                     company_id: { type: 'string', format: 'uuid' },
-                    sourcer_recruiter_id: { type: 'string', format: 'uuid' },
-                    sourcer_type: { type: 'string', enum: ['recruiter', 'tsn'] },
-                    active_protection: { type: 'boolean' },
-                    sort_by: { type: 'string', default: 'sourced_at' },
+                    recruiter_id: { type: 'string', format: 'uuid' },
+                    status: { type: 'string', enum: ['pending', 'active', 'declined', 'terminated'] },
+                    sort_by: { type: 'string', default: 'relationship_start_date' },
                     sort_order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
                 },
             },
@@ -50,9 +49,8 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
             search: params.search,
             filters: {
                 company_id: params.company_id,
-                sourcer_recruiter_id: params.sourcer_recruiter_id,
-                sourcer_type: params.sourcer_type,
-                active_protection: params.active_protection,
+                recruiter_id: params.recruiter_id,
+                status: params.status,
             },
             sort_by: params.sort_by,
             sort_order: params.sort_order,
@@ -89,14 +87,11 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
             tags: ['company-sourcers'],
             body: {
                 type: 'object',
-                required: ['company_id', 'sourcer_recruiter_id', 'sourcer_type', 'protection_expires_at'],
+                required: ['company_id', 'recruiter_id'],
                 properties: {
                     company_id: { type: 'string', format: 'uuid' },
-                    sourcer_recruiter_id: { type: 'string', format: 'uuid' },
-                    sourcer_type: { type: 'string', enum: ['recruiter', 'tsn'] },
-                    sourced_at: { type: 'string', format: 'date-time' },
-                    protection_window_days: { type: 'number', minimum: 1, default: 365 },
-                    protection_expires_at: { type: 'string', format: 'date-time' },
+                    recruiter_id: { type: 'string', format: 'uuid' },
+                    relationship_start_date: { type: 'string', format: 'date-time' },
                     notes: { type: 'string' },
                 },
             },
@@ -107,11 +102,8 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
 
         const sourcer = await service.create(clerkUserId, {
             company_id: body.company_id,
-            sourcer_recruiter_id: body.sourcer_recruiter_id,
-            sourcer_type: body.sourcer_type,
-            sourced_at: body.sourced_at ? new Date(body.sourced_at) : undefined,
-            protection_window_days: body.protection_window_days,
-            protection_expires_at: new Date(body.protection_expires_at),
+            recruiter_id: body.recruiter_id,
+            relationship_start_date: body.relationship_start_date,
             notes: body.notes,
         });
 
@@ -133,9 +125,9 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
             body: {
                 type: 'object',
                 properties: {
-                    notes: { type: 'string' },
-                    protection_window_days: { type: 'number', minimum: 1 },
-                    protection_expires_at: { type: 'string', format: 'date-time' },
+                    status: { type: 'string', enum: ['pending', 'active', 'declined', 'terminated'] },
+                    relationship_end_date: { type: 'string', format: 'date-time' },
+                    termination_reason: { type: 'string' },
                 },
             },
         },
@@ -145,9 +137,9 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
         const body = request.body as any;
 
         const updated = await service.update(id, clerkUserId, {
-            notes: body.notes,
-            protection_window_days: body.protection_window_days,
-            protection_expires_at: body.protection_expires_at ? new Date(body.protection_expires_at) : undefined,
+            status: body.status,
+            relationship_end_date: body.relationship_end_date,
+            termination_reason: body.termination_reason,
         });
 
         return reply.send({ data: updated });

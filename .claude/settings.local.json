@@ -4,7 +4,9 @@
       "Bash(pnpm --filter @splits-network/api-gateway build:*)",
       "Bash(pnpm --filter @splits-network/notification-service build:*)",
       "Bash(pnpm --filter @splits-network/portal build:*)",
-      "Bash(pnpm --filter @splits-network/billing-service build:*)"
+      "Bash(pnpm --filter @splits-network/billing-service build:*)",
+      "Bash(docker ps:*)",
+      "Bash(pnpm --filter @splits-network/network-service build:*)"
     ]
   }
 }

@@ -217,7 +217,7 @@ export default function CompanySettingsContent({
                                         </div>
                                         <DataList compact>
                                             <DataRow
-                                                icon="fa-solid fa-calendar-days"
+                                                icon="fa-duotone fa-regular fa-calendar-days"
                                                 label="Billing Cycle"
                                                 value={
                                                     billingProfile?.billing_terms ||
@@ -225,7 +225,7 @@ export default function CompanySettingsContent({
                                                 }
                                             />
                                             <DataRow
-                                                icon="fa-solid fa-envelope"
+                                                icon="fa-duotone fa-regular fa-envelope"
                                                 label="Billing Email"
                                                 value={
                                                     billingProfile?.billing_email ||

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
 interface RecruiterReputationProps {
     reputationScore: number | null | undefined;
     totalPlacements?: number;
-    variant?: 'compact' | 'full';
+    variant?: "compact" | "full";
 }
 
 type ReputationTier = {
-    tier: 'Elite' | 'Pro' | 'Active' | 'New';
+    tier: "Elite" | "Pro" | "Active" | "New";
     color: string;
     icon: string;
     bgColor: string;
@@ -21,15 +21,35 @@ function getTierFromScore(score: number | null | undefined): ReputationTier {
     const safeScore = score ?? 50;
 
     if (safeScore >= 90) {
-        return { tier: 'Elite', color: 'text-success', icon: 'fa-crown', bgColor: 'bg-success/10' };
+        return {
+            tier: "Elite",
+            color: "text-success",
+            icon: "fa-crown",
+            bgColor: "bg-success/10",
+        };
     }
     if (safeScore >= 70) {
-        return { tier: 'Pro', color: 'text-primary', icon: 'fa-star', bgColor: 'bg-primary/10' };
+        return {
+            tier: "Pro",
+            color: "text-primary",
+            icon: "fa-star",
+            bgColor: "bg-primary/10",
+        };
     }
     if (safeScore >= 40) {
-        return { tier: 'Active', color: 'text-base-content/70', icon: 'fa-circle-check', bgColor: 'bg-base-300' };
+        return {
+            tier: "Active",
+            color: "text-base-content/70",
+            icon: "fa-circle-check",
+            bgColor: "bg-base-300",
+        };
     }
-    return { tier: 'New', color: 'text-base-content/50', icon: 'fa-seedling', bgColor: 'bg-base-200' };
+    return {
+        tier: "New",
+        color: "text-base-content/50",
+        icon: "fa-seedling",
+        bgColor: "bg-base-200",
+    };
 }
 
 /**
@@ -47,14 +67,14 @@ function scoreToStars(score: number | null | undefined): number {
 export default function RecruiterReputation({
     reputationScore,
     totalPlacements = 0,
-    variant = 'compact',
+    variant = "compact",
 }: RecruiterReputationProps) {
     const tier = getTierFromScore(reputationScore);
     const stars = scoreToStars(reputationScore);
     const fullStars = Math.floor(stars);
     const hasHalfStar = stars % 1 !== 0;
 
-    if (variant === 'compact') {
+    if (variant === "compact") {
         return (
             <div className="flex items-center gap-2">
                 {/* Star rating */}
@@ -64,7 +84,7 @@ export default function RecruiterReputation({
                             return (
                                 <i
                                     key={i}
-                                    className="fa-solid fa-star text-warning text-xs"
+                                    className="fa-duotone fa-regular fa-star text-warning text-xs"
                                 />
                             );
                         }
@@ -79,15 +99,19 @@ export default function RecruiterReputation({
                         return (
                             <i
                                 key={i}
-                                className="fa-regular fa-star text-base-300 text-xs"
+                                className="fa-duotone fa-regular fa-star text-base-300 text-xs"
                             />
                         );
                     })}
                 </div>
 
                 {/* Tier badge */}
-                <span className={`badge badge-xs gap-1 ${tier.bgColor} ${tier.color} border-0`}>
-                    <i className={`fa-duotone fa-regular ${tier.icon} text-[8px]`} />
+                <span
+                    className={`badge badge-xs gap-1 ${tier.bgColor} ${tier.color} border-0`}
+                >
+                    <i
+                        className={`fa-duotone fa-regular ${tier.icon} text-[8px]`}
+                    />
                     {tier.tier}
                 </span>
             </div>
@@ -100,15 +124,22 @@ export default function RecruiterReputation({
             <div className="card-body p-4">
                 {/* Tier header */}
                 <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-12 h-12 rounded-full ${tier.bgColor} flex items-center justify-center`}>
-                        <i className={`fa-duotone fa-regular ${tier.icon} ${tier.color} text-xl`} />
+                    <div
+                        className={`w-12 h-12 rounded-full ${tier.bgColor} flex items-center justify-center`}
+                    >
+                        <i
+                            className={`fa-duotone fa-regular ${tier.icon} ${tier.color} text-xl`}
+                        />
                     </div>
                     <div>
-                        <div className="font-bold text-lg">{tier.tier} Recruiter</div>
+                        <div className="font-bold text-lg">
+                            {tier.tier} Recruiter
+                        </div>
                         <div className="text-sm text-base-content/60">
-                            {reputationScore !== null && reputationScore !== undefined
+                            {reputationScore !== null &&
+                            reputationScore !== undefined
                                 ? `${reputationScore.toFixed(0)} reputation`
-                                : 'Building reputation'}
+                                : "Building reputation"}
                         </div>
                     </div>
                 </div>
@@ -121,7 +152,7 @@ export default function RecruiterReputation({
                                 return (
                                     <i
                                         key={i}
-                                        className="fa-solid fa-star text-warning text-lg"
+                                        className="fa-duotone fa-regular fa-star text-warning text-lg"
                                     />
                                 );
                             }
@@ -136,19 +167,22 @@ export default function RecruiterReputation({
                             return (
                                 <i
                                     key={i}
-                                    className="fa-regular fa-star text-base-300 text-lg"
+                                    className="fa-duotone fa-regular fa-star text-base-300 text-lg"
                                 />
                             );
                         })}
                     </div>
-                    <span className="text-lg font-semibold">{stars.toFixed(1)}</span>
+                    <span className="text-lg font-semibold">
+                        {stars.toFixed(1)}
+                    </span>
                 </div>
 
                 {/* Placement count */}
                 {totalPlacements > 0 && (
                     <div className="text-sm text-base-content/60">
                         <i className="fa-duotone fa-regular fa-handshake mr-1" />
-                        {totalPlacements} successful placement{totalPlacements !== 1 ? 's' : ''}
+                        {totalPlacements} successful placement
+                        {totalPlacements !== 1 ? "s" : ""}
                     </div>
                 )}
             </div>

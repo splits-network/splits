@@ -91,13 +91,11 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                 )}
             </td>
             <td>
-                {recruiter.reputation_score !== undefined && (
-                    <RecruiterReputation
-                        reputationScore={recruiter.reputation_score}
-                        totalPlacements={recruiter.total_placements}
-                        variant="compact"
-                    />
-                )}
+                <RecruiterReputation
+                    reputationScore={recruiter.reputation_score ?? null}
+                    totalPlacements={recruiter.total_placements}
+                    variant="compact"
+                />
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <button

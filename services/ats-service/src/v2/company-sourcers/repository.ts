@@ -11,17 +11,18 @@ export class CompanySourcerRepository {
         params: StandardListParams & CompanySourcerFilters
     ): Promise<StandardListResponse<RecruiterCompany>> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
-        const { page = 1, limit = 25, search, filters = {}, sort_by = 'sourced_at', sort_order = 'desc' } = params;
+        const { page = 1, limit = 25, search, filters = {}, sort_by = 'relationship_start_date', sort_order = 'desc' } = params;
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .from('company_sourcers')
-            .select('*', { count: 'exact' });
+            .from('recruiter_companies')
+            .select('*', { count: 'exact' })
+            .eq('relationship_type', 'sourcer');
 
         // Role-based filtering
         if (context.recruiterId) {
             // Recruiters see only companies they sourced
-            query = query.eq('sourcer_recruiter_id', context.recruiterId);
+            query = query.eq('recruiter_id', context.recruiterId);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Company users see sourcers for their own companies
             query = query.in('company_id', context.organizationIds);
@@ -32,19 +33,16 @@ export class CompanySourcerRepository {
         if (filters.company_id) {
             query = query.eq('company_id', filters.company_id);
         }
-        if (filters.sourcer_recruiter_id) {
-            query = query.eq('sourcer_recruiter_id', filters.sourcer_recruiter_id);
+        if (filters.recruiter_id) {
+            query = query.eq('recruiter_id', filters.recruiter_id);
         }
-        if (filters.sourcer_type) {
-            query = query.eq('sourcer_type', filters.sourcer_type);
-        }
-        if (filters.active_protection) {
-            query = query.gt('protection_expires_at', new Date().toISOString());
+        if (filters.status) {
+            query = query.eq('status', filters.status);
         }
 
         // Apply search
         if (search) {
-            query = query.ilike('notes', `%${search}%`);
+            query = query.ilike('termination_reason', `%${search}%`);
         }
 
         // Apply sorting
@@ -73,13 +71,12 @@ export class CompanySourcerRepository {
     async findById(id: string, clerkUserId: string): Promise<RecruiterCompany | null> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-        let query = this.supabase
-            .from('company_sourcers')
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
             .select('*')
             .eq('id', id)
+            .eq('relationship_type', 'sourcer')
             .single();
-
-        const { data, error } = await query;
 
         if (error) {
             if (error.code === 'PGRST116') return null; // Not found
@@ -87,10 +84,9 @@ export class CompanySourcerRepository {
         }
 
         // Apply role-based access check
-        if (context.recruiterId && data.sourcer_recruiter_id !== context.recruiterId) {
+        if (context.recruiterId && data.recruiter_id !== context.recruiterId) {
             return null; // Recruiter can only see their own sourcing
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
-            // Check if company is accessible
             if (!context.organizationIds.includes(data.company_id)) {
                 return null;
             }
@@ -101,9 +97,11 @@ export class CompanySourcerRepository {
 
     async findByCompany(company_id: string): Promise<RecruiterCompany | null> {
         const { data, error } = await this.supabase
-            .from('company_sourcers')
+            .from('recruiter_companies')
             .select('*')
             .eq('company_id', company_id)
+            .eq('relationship_type', 'sourcer')
+            .eq('status', 'active')
             .single();
 
         if (error) {
@@ -116,15 +114,13 @@ export class CompanySourcerRepository {
 
     async create(sourcerData: CompanySourcerCreate): Promise<RecruiterCompany> {
         const { data, error } = await this.supabase
-            .from('company_sourcers')
+            .from('recruiter_companies')
             .insert({
                 company_id: sourcerData.company_id,
-                sourcer_recruiter_id: sourcerData.sourcer_recruiter_id,
-                sourcer_type: sourcerData.sourcer_type,
-                sourced_at: sourcerData.sourced_at || new Date().toISOString(),
-                protection_window_days: sourcerData.protection_window_days || 365,
-                protection_expires_at: sourcerData.protection_expires_at.toISOString(),
-                notes: sourcerData.notes,
+                recruiter_id: sourcerData.recruiter_id,
+                relationship_type: 'sourcer',
+                status: 'active',
+                relationship_start_date: sourcerData.relationship_start_date || new Date().toISOString(),
             })
             .select()
             .single();
@@ -139,21 +135,20 @@ export class CompanySourcerRepository {
     async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<RecruiterCompany> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // Build update query with role-based filtering
         let query = this.supabase
-            .from('company_sourcers')
+            .from('recruiter_companies')
             .update({
-                notes: updates.notes,
-                protection_window_days: updates.protection_window_days,
-                protection_expires_at: updates.protection_expires_at?.toISOString(),
+                ...(updates.status && { status: updates.status }),
+                ...(updates.relationship_end_date && { relationship_end_date: updates.relationship_end_date }),
+                ...(updates.termination_reason && { termination_reason: updates.termination_reason }),
             })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('relationship_type', 'sourcer');
 
         // Apply role-based access control
         if (context.recruiterId) {
-            query = query.eq('sourcer_recruiter_id', context.recruiterId);
+            query = query.eq('recruiter_id', context.recruiterId);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
-            // Need to verify company is accessible
             const existing = await this.findById(id, clerkUserId);
             if (!existing) {
                 throw new Error('Company sourcer not found or access denied');
@@ -178,9 +173,10 @@ export class CompanySourcerRepository {
         }
 
         const { error } = await this.supabase
-            .from('company_sourcers')
+            .from('recruiter_companies')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('relationship_type', 'sourcer');
 
         if (error) {
             throw new Error(`Failed to delete company sourcer: ${error.message}`);
@@ -198,7 +194,7 @@ export class CompanySourcerRepository {
             return { has_protection: false };
         }
 
-        // Permanent attribution - always protected if sourcer exists
+        // Permanent attribution - always protected if active sourcer exists
         return {
             has_protection: true,
             sourcer_recruiter_id: sourcer.recruiter_id,
@@ -220,7 +216,8 @@ export class CompanySourcerRepository {
         const sourcer = await this.findByCompany(company_id);
         if (!sourcer) return false;
 
-        // Check if sourcer's recruiter account is active
+        // findByCompany already filters by status='active' on the relationship,
+        // now also check if the sourcer's recruiter account is active
         const { data: recruiter, error } = await this.supabase
             .from('recruiters')
             .select('status')

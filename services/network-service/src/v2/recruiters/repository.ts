@@ -108,7 +108,19 @@ export class RecruiterRepository {
         } else {
             const sortBy = params.sort_by || 'created_at';
             const sortOrder = params.sort_order?.toLowerCase() === 'asc' ? true : false;
-            query = query.order(sortBy, { ascending: sortOrder });
+
+            // Columns that live on recruiter_reputation (joined table), not recruiters
+            const reputationColumns = new Set([
+                'reputation_score', 'total_submissions', 'total_hires',
+                'hire_rate', 'completion_rate', 'quality_score',
+                'avg_time_to_hire_days', 'avg_response_time_hours',
+            ]);
+
+            if (reputationColumns.has(sortBy)) {
+                query = query.order(sortBy, { ascending: sortOrder, referencedTable: 'recruiter_reputation' });
+            } else {
+                query = query.order(sortBy, { ascending: sortOrder });
+            }
         }
 
         // Apply pagination
@@ -230,7 +242,7 @@ export class RecruiterRepository {
 
     /**
      * Build select clause with optional includes
-     * Supports: user (joins with identity.users table)
+     * Supports: user (joins with identity.users table), reputation (joins with recruiter_reputation table)
      */
     private buildSelectClause(include?: string): string {
         const baseFields = '*';
@@ -250,10 +262,10 @@ export class RecruiterRepository {
                     // Format: user:users!user_id(fields) where users is in identity schema
                     selectParts.push('users!user_id(id, name, email, created_at, profile_image_url)');
                     break;
-                // Future includes can be added here
-                // case 'stats':
-                //     selectParts.push('recruiter_stats(*)');
-                //     break;
+                case 'reputation':
+                    // JOIN with recruiter_reputation table via recruiter_id foreign key
+                    selectParts.push('recruiter_reputation!recruiter_id(recruiter_id, total_submissions, total_hires, hire_rate, total_placements, completed_placements, failed_placements, completion_rate, total_collaborations, collaboration_rate, avg_response_time_hours, reputation_score, last_calculated_at, created_at, updated_at)');
+                    break;
             }
         }
 

@@ -39,7 +39,7 @@ interface PageProps {
 const fetchRecruiter = cache(async (id: string): Promise<MarketplaceRecruiter | null> => {
     try {
         const response = await apiClient.get<{ data: MarketplaceRecruiter }>(`/recruiters/${id}`, {
-            params: { include: 'user,marketplace_profile' },
+            params: { include: 'user,marketplace_profile,reputation' },
         });
         return response.data ?? null;
     } catch (error) {

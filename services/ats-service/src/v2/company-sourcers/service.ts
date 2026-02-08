@@ -31,8 +31,8 @@ export class CompanySourcerServiceV2 {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Validate inputs
-        if (!data.company_id || !data.sourcer_recruiter_id) {
-            throw new Error('company_id and sourcer_recruiter_id are required');
+        if (!data.company_id || !data.recruiter_id) {
+            throw new Error('company_id and recruiter_id are required');
         }
 
         // Check if sourcer already exists
@@ -49,7 +49,7 @@ export class CompanySourcerServiceV2 {
         }
 
         // Recruiters can only assign themselves
-        if (isRecruiter && data.sourcer_recruiter_id !== context.recruiterId) {
+        if (isRecruiter && data.recruiter_id !== context.recruiterId) {
             throw new Error('Recruiters can only assign sourcer credit to themselves');
         }
 

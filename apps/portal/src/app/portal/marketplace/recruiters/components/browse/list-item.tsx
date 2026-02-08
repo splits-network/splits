@@ -65,18 +65,16 @@ export default function ListItem({ item, isSelected, onSelect }: ListItemProps) 
                                 </span>
                             )}
 
-                        {item.reputation_score !== undefined && (
-                            <RecruiterReputationBadge
-                                reputation={{
-                                    total_submissions: (item as any).total_submissions || 0,
-                                    total_hires: (item as any).total_hires || 0,
-                                    hire_rate: (item as any).hire_rate || 0,
-                                    completion_rate: (item as any).completion_rate || 0,
-                                    reputation_score: item.reputation_score,
-                                }}
-                                compact
-                            />
-                        )}
+                        <RecruiterReputationBadge
+                            reputation={{
+                                total_submissions: (item as any).total_submissions || 0,
+                                total_hires: (item as any).total_hires || 0,
+                                hire_rate: (item as any).hire_rate ?? null,
+                                completion_rate: (item as any).completion_rate ?? null,
+                                reputation_score: item.reputation_score ?? null,
+                            }}
+                            compact
+                        />
                     </div>
                 </div>
 

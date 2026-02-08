@@ -73,7 +73,7 @@ async function buildMarketplaceParams(searchParams: MarketplacePageProps['search
         limit,
         sort_by: sortBy,
         sort_order: sortOrder,
-        include: 'user',
+        include: 'user,reputation',
         ...(search ? { search } : {}),
         filters: mergedFilters,
     };

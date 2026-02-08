@@ -284,7 +284,7 @@ export class ContactLookupHelper {
     async getCompanyAdminContacts(organizationId: string): Promise<Contact[]> {
         try {
             const { data: memberships, error } = await this.supabase
-                .from('organization_memberships')
+                .from('memberships')
                 .select('user_id')
                 .eq('organization_id', organizationId)
                 .eq('role', 'company_admin');
