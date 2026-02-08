@@ -199,6 +199,7 @@ export class CandidatesEmailService {
             candidateName: string;
             sourceMethod: string;
             protectionPeriod: string;
+            candidateId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -216,7 +217,7 @@ export class CandidatesEmailService {
             eventType: 'candidate.sourced',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/candidates',
+            actionUrl: data.candidateId ? `/portal/candidates?candidateId=${data.candidateId}` : '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',
@@ -229,6 +230,7 @@ export class CandidatesEmailService {
             candidateName: string;
             sourceMethod: string;
             protectionPeriod: string;
+            candidateId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -246,7 +248,7 @@ export class CandidatesEmailService {
             eventType: 'candidate.sourced_confirmation',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/candidates',
+            actionUrl: data.candidateId ? `/portal/candidates?candidateId=${data.candidateId}` : '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',
@@ -286,6 +288,7 @@ export class CandidatesEmailService {
         data: {
             candidateName: string;
             attemptingRecruiterName: string;
+            candidateId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -302,7 +305,7 @@ export class CandidatesEmailService {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/candidates',
+            actionUrl: data.candidateId ? `/portal/candidates?candidateId=${data.candidateId}` : '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'high',
             category: 'candidate',
@@ -314,6 +317,7 @@ export class CandidatesEmailService {
         data: {
             candidateName: string;
             originalSourcerName: string;
+            candidateId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -330,7 +334,7 @@ export class CandidatesEmailService {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/candidates',
+            actionUrl: data.candidateId ? `/portal/candidates?candidateId=${data.candidateId}` : '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',

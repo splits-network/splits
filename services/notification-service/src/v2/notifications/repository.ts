@@ -220,4 +220,26 @@ export class NotificationRepositoryV2 {
 
         return count || 0;
     }
+
+    async countUnreadByCategory(recipientUserId: string): Promise<Record<string, number>> {
+        const { data, error } = await this.supabase
+            .from('notification_log')
+            .select('category')
+            .eq('recipient_user_id', recipientUserId)
+            .eq('read', false)
+            .eq('dismissed', false)
+            .in('channel', ['in_app', 'both'])
+            .not('category', 'is', null);
+
+        if (error) {
+            throw error;
+        }
+
+        const counts: Record<string, number> = {};
+        for (const row of data || []) {
+            const cat = row.category as string;
+            counts[cat] = (counts[cat] || 0) + 1;
+        }
+        return counts;
+    }
 }

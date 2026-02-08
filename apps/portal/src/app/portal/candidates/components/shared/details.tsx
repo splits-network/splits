@@ -146,10 +146,10 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     const allSkills = Array.from(new Set([...legacySkills, ...specialties]));
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="flex flex-col h-full min-h-0 p-6 gap-6">
             {/* Tabs */}
-            <div className="overflow-x-auto">
-                <div role="tablist" className="tabs tabs-lift min-w-max mb-4">
+            <div className="overflow-x-auto shrink-0">
+                <div role="tablist" className="tabs tabs-lift min-w-max">
                     <a
                         role="tab"
                         className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
@@ -183,29 +183,31 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tab Content */}
-            {activeTab === "overview" && (
-                <OverviewTab
-                    candidate={candidate}
-                    bioText={bioText}
-                    allSkills={allSkills}
-                    invitation={invitation}
-                    invitationLoading={invitationLoading}
-                    onInvitationUpdate={fetchInvitation}
-                />
-            )}
-            {activeTab === "applications" && (
-                <ApplicationsTab
-                    applications={applications}
-                    loading={appsLoading}
-                />
-            )}
-            {activeTab === "documents" && (
-                <DocumentsTab
-                    document={document}
-                    loading={docsLoading}
-                    isRecruiter={isRecruiter}
-                />
-            )}
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-6">
+                {activeTab === "overview" && (
+                    <OverviewTab
+                        candidate={candidate}
+                        bioText={bioText}
+                        allSkills={allSkills}
+                        invitation={invitation}
+                        invitationLoading={invitationLoading}
+                        onInvitationUpdate={fetchInvitation}
+                    />
+                )}
+                {activeTab === "applications" && (
+                    <ApplicationsTab
+                        applications={applications}
+                        loading={appsLoading}
+                    />
+                )}
+                {activeTab === "documents" && (
+                    <DocumentsTab
+                        document={document}
+                        loading={docsLoading}
+                        isRecruiter={isRecruiter}
+                    />
+                )}
+            </div>
         </div>
     );
 }

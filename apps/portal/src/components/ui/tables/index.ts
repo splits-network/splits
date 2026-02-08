@@ -23,3 +23,9 @@ export {
     type ExpandedDetailGridProps,
     type ExpandedDetailItemProps,
 } from './expandable-table-row';
+
+// Table Accordion Context
+export {
+    TableAccordionProvider,
+    useTableAccordion,
+} from './table-accordion-context';

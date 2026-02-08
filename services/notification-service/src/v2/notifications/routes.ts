@@ -29,7 +29,8 @@ export async function registerNotificationRoutes(
         config.eventPublisher
     );
 
-    app.get('/v2/notifications', async (request, reply) => {
+    // --- List route ---
+    app.get('/api/v2/notifications', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
@@ -69,7 +70,49 @@ export async function registerNotificationRoutes(
         }
     });
 
-    app.get('/v2/notifications/:id', async (request, reply) => {
+    // --- Static sub-routes (must be registered BEFORE /:id to avoid matching as param) ---
+
+    app.post('/api/v2/notifications/mark-all-read', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = (request.body as { recipient_user_id?: string }) || {};
+            await notificationService.markAllAsRead(clerkUserId, body.recipient_user_id);
+            return reply.code(204).send();
+        } catch (error: any) {
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to mark notifications as read' },
+            });
+        }
+    });
+
+    app.get('/api/v2/notifications/unread-count', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const query = request.query as { recipient_user_id?: string };
+            const count = await notificationService.getUnreadCount(clerkUserId, query?.recipient_user_id);
+            return reply.send(count);
+        } catch (error: any) {
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to fetch unread count' },
+            });
+        }
+    });
+
+    app.get('/api/v2/notifications/counts-by-category', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const counts = await notificationService.getUnreadCountsByCategory(clerkUserId);
+            return reply.send(counts);
+        } catch (error: any) {
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to fetch notification counts by category' },
+            });
+        }
+    });
+
+    // --- Parameterized routes (/:id) ---
+
+    app.get('/api/v2/notifications/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -82,7 +125,7 @@ export async function registerNotificationRoutes(
         }
     });
 
-    app.patch('/v2/notifications/:id', async (request, reply) => {
+    app.patch('/api/v2/notifications/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -96,7 +139,7 @@ export async function registerNotificationRoutes(
         }
     });
 
-    app.delete('/v2/notifications/:id', async (request, reply) => {
+    app.delete('/api/v2/notifications/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -105,32 +148,6 @@ export async function registerNotificationRoutes(
         } catch (error: any) {
             return reply.code(400).send({
                 error: { message: error.message || 'Failed to dismiss notification' },
-            });
-        }
-    });
-
-    app.post('/v2/notifications/mark-all-read', async (request, reply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const body = (request.body as { recipient_user_id?: string }) || {};
-            await notificationService.markAllAsRead(clerkUserId, body.recipient_user_id);
-            return reply.code(204).send();
-        } catch (error: any) {
-            return reply.code(400).send({
-                error: { message: error.message || 'Failed to mark notifications as read' },
-            });
-        }
-    });
-
-    app.get('/v2/notifications/unread-count', async (request, reply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const query = request.query as { recipient_user_id?: string };
-            const count = await notificationService.getUnreadCount(clerkUserId, query?.recipient_user_id);
-            return reply.send(count);
-        } catch (error: any) {
-            return reply.code(400).send({
-                error: { message: error.message || 'Failed to fetch unread count' },
             });
         }
     });

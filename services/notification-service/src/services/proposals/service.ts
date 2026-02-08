@@ -163,6 +163,7 @@ export class ProposalsEmailService {
             candidateName: string;
             jobTitle: string;
             companyName: string;
+            roleId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -180,7 +181,7 @@ export class ProposalsEmailService {
             eventType: 'proposal.accepted',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/roles',
+            actionUrl: data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'normal',
             category: 'proposal',
@@ -193,6 +194,7 @@ export class ProposalsEmailService {
             candidateName: string;
             jobTitle: string;
             declineReason: string;
+            roleId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -210,7 +212,7 @@ export class ProposalsEmailService {
             eventType: 'proposal.declined',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/roles',
+            actionUrl: data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'normal',
             category: 'proposal',
@@ -222,6 +224,7 @@ export class ProposalsEmailService {
         data: {
             candidateName: string;
             jobTitle: string;
+            roleId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -238,7 +241,7 @@ export class ProposalsEmailService {
             eventType: 'proposal.timeout',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/roles',
+            actionUrl: data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'low',
             category: 'proposal',

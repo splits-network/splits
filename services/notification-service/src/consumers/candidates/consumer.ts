@@ -61,6 +61,7 @@ export class CandidatesEventConsumer {
                 candidateName: candidateName,
                 sourceMethod: source_method || 'direct',
                 protectionPeriod: '365 days',
+                candidateId: candidate_id,
                 userId: recruiterContact.user_id || undefined,
             });
 
@@ -99,6 +100,7 @@ export class CandidatesEventConsumer {
             await this.emailService.sendOwnershipConflict(originalContact.email, {
                 candidateName: candidateContact.name,
                 attemptingRecruiterName: attemptingContact.name,
+                candidateId: candidate_id,
                 userId: originalContact.user_id || undefined,
             });
 
@@ -106,6 +108,7 @@ export class CandidatesEventConsumer {
             await this.emailService.sendOwnershipConflictRejection(attemptingContact.email, {
                 candidateName: candidateContact.name,
                 originalSourcerName: originalContact.name,
+                candidateId: candidate_id,
                 userId: attemptingContact.user_id || undefined,
             });
 

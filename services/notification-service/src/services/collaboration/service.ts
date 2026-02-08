@@ -167,7 +167,7 @@ export class CollaborationEmailService {
     ): Promise<void> {
         const subject = `Added to Placement Team: ${data.candidateName}`;
         const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements`;
-        const actionUrl = data.roleId ? `/portal/roles/${data.roleId}` : '/roles';
+        const actionUrl = data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles';
 
         const html = collaboratorAddedEmail({
             candidateName: data.candidateName,

@@ -7,7 +7,6 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
 import PlacementLifecycle from "@/components/placement-lifecycle";
 import PlacementCollaborators from "@/components/placement-collaborators";
-import { useFilter } from "../../contexts/filter-context";
 import type { Placement } from "../../types";
 import {
     formatPlacementDate,
@@ -22,7 +21,6 @@ interface DetailsProps {
 
 export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
-    const { refresh } = useFilter();
     const [placement, setPlacement] = useState<Placement | null>(null);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<
@@ -55,9 +53,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
     const handleUpdate = useCallback(() => {
         fetchDetail();
-        refresh();
         onRefresh?.();
-    }, [fetchDetail, refresh, onRefresh]);
+    }, [fetchDetail, onRefresh]);
 
     if (loading && !placement) {
         return (
@@ -76,17 +73,16 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     }
 
     const status = getStatusDisplay(placement);
-    const candidateName =
-        placement.candidate?.full_name || "Unknown Candidate";
+    const candidateName = placement.candidate?.full_name || "Unknown Candidate";
     const jobTitle = placement.job?.title || "Unknown Role";
     const companyName = placement.job?.company?.name || "Unknown Company";
     const hasCollaborators =
         placement.collaborators && placement.collaborators.length > 0;
 
     return (
-        <div className="p-4 md:p-6 space-y-6">
+        <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
             {/* Header */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between shrink-0">
                 <div>
                     <h3 className="text-2xl font-bold">{candidateName}</h3>
                     <p className="text-base-content/60 mt-1">
@@ -94,10 +90,10 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className={`badge ${status.badgeClass} badge-lg gap-1`}>
-                        <i
-                            className={`fa-duotone fa-regular ${status.icon}`}
-                        />
+                    <span
+                        className={`badge ${status.badgeClass} badge-lg gap-1`}
+                    >
+                        <i className={`fa-duotone fa-regular ${status.icon}`} />
                         {status.label}
                     </span>
                     <span className="badge badge-success badge-lg">
@@ -107,8 +103,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="overflow-x-auto">
-                <div role="tablist" className="tabs tabs-lift min-w-max mb-4">
+            <div className="overflow-x-auto shrink-0">
+                <div role="tablist" className="tabs tabs-lift min-w-max">
                     <a
                         role="tab"
                         className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
@@ -147,7 +143,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tab Content */}
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
                 {activeTab === "overview" && (
                     <OverviewTab placement={placement} />
                 )}
@@ -244,7 +240,9 @@ function OverviewTab({ placement }: { placement: Placement }) {
                     {placement.guarantee_expires_at && (
                         <p className="text-sm text-base-content/60 mt-1">
                             Expires:{" "}
-                            {formatPlacementDate(placement.guarantee_expires_at)}
+                            {formatPlacementDate(
+                                placement.guarantee_expires_at,
+                            )}
                         </p>
                     )}
                 </div>
