@@ -94,7 +94,7 @@ function getPermissionsByStage(
                 ...base,
                 canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
-                approveButtonText: 'Approve & Submit to Company',
+                approveButtonText: 'Approve & Move to Company Review',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is being screened.',
             };
@@ -229,7 +229,7 @@ export function getNextStageOnApprove(
 ): ApplicationStage {
     switch (currentStage) {
         case 'screen':
-            return 'submitted';
+            return 'company_review';
         case 'submitted':
             return 'company_review';
         case 'company_review':

@@ -19,7 +19,7 @@ import {
     getNextStageOnApprove,
     formatApplicationNote,
 } from "@/app/portal/applications/lib/permission-utils";
-import { useFilter } from "../../contexts/filter-context";
+import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
 import type { ApplicationStage } from "@splits-network/shared-types";
 
@@ -43,6 +43,8 @@ export interface ActionsToolbarProps {
         candidateUserId: string,
         context?: any,
     ) => void;
+    /** Called after any mutation. Falls back to FilterContext.refresh() when inside a FilterProvider. */
+    onRefresh?: () => void;
     className?: string;
 }
 
@@ -54,13 +56,15 @@ export default function ActionsToolbar({
     showActions = {},
     onViewDetails,
     onMessage,
+    onRefresh,
     className = "",
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const toast = useToast();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
-    const { refresh } = useFilter();
+    const filterContext = useFilterOptional();
+    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);

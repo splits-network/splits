@@ -79,3 +79,8 @@ export function useFilter() {
     }
     return context;
 }
+
+/** Safe variant – returns null when used outside a FilterProvider. */
+export function useFilterOptional() {
+    return useContext(FilterContext);
+}
