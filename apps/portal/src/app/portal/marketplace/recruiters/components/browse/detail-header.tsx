@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import UserAvatar from "@/components/common/UserAvatar";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { useRecruiterFilter } from "../../contexts/filter-context";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
@@ -72,6 +73,18 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                                             placements
                                         </span>
                                     )}
+                                {recruiter.reputation_score !== undefined && (
+                                    <RecruiterReputationBadge
+                                        reputation={{
+                                            total_submissions: (recruiter as any).total_submissions || 0,
+                                            total_hires: (recruiter as any).total_hires || 0,
+                                            hire_rate: (recruiter as any).hire_rate || 0,
+                                            completion_rate: (recruiter as any).completion_rate || 0,
+                                            reputation_score: recruiter.reputation_score,
+                                        }}
+                                        compact
+                                    />
+                                )}
                             </div>
 
                             {/* Actions Toolbar */}

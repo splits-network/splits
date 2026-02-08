@@ -1,6 +1,7 @@
 "use client";
 
 import UserAvatar from "@/components/common/UserAvatar";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 
@@ -51,13 +52,18 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                             {item.years_experience}+ yrs
                         </span>
                     )}
-                    {item.reputation_score !== undefined &&
-                        item.reputation_score >= 80 && (
-                            <span className="badge badge-xs badge-warning badge-soft border-0">
-                                <i className="fa-duotone fa-regular fa-star text-[10px] mr-1"></i>
-                                Top Rated
-                            </span>
-                        )}
+                    {item.reputation_score !== undefined && (
+                        <RecruiterReputationBadge
+                            reputation={{
+                                total_submissions: (item as any).total_submissions || 0,
+                                total_hires: (item as any).total_hires || 0,
+                                hire_rate: (item as any).hire_rate || 0,
+                                completion_rate: (item as any).completion_rate || 0,
+                                reputation_score: item.reputation_score,
+                            }}
+                            compact
+                        />
+                    )}
                 </div>
 
                 {/* Stats Row */}

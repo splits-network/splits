@@ -85,13 +85,15 @@ function getPermissionsByStage(
 
     switch (stage) {
         case 'screen':
+            // Company recruiters and company users can act on screening.
+            // Data access layer ensures recruiters only see applications for their jobs.
             return {
                 ...base,
-                canApprove: isCompanyUser || isPlatformAdmin,
-                canReject: isCompanyUser || isPlatformAdmin,
+                canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
+                canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
                 approveButtonText: 'Approve & Submit to Company',
                 rejectButtonText: 'Reject Application',
-                waitingMessage: 'Application is being screened by the hiring team.',
+                waitingMessage: 'Application is being screened.',
             };
 
         case 'submitted':

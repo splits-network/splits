@@ -1,0 +1,120 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reputation-recalculation
+  namespace: splits-network
+  labels:
+    app: automation-service
+    component: cron
+    feature: reputation
+    managed-by: splits-network
+spec:
+  # Run daily at 4 AM UTC
+  # This ensures all reputation scores are consistent and up-to-date
+  schedule: "0 4 * * *"
+
+  # Keep history of successful/failed jobs for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+
+  # Prevent overlapping runs - if previous job is still running, skip this execution
+  concurrencyPolicy: Forbid
+
+  # Suspend can be set to true to temporarily disable the cron job
+  suspend: false
+
+  jobTemplate:
+    metadata:
+      labels:
+        app: automation-service
+        component: cron-job
+        feature: reputation
+    spec:
+      # Retry failed jobs up to 2 times with exponential backoff
+      backoffLimit: 2
+
+      # Job must complete within 30 minutes or it will be terminated
+      # (longer than proposal-timeout since it processes all recruiters)
+      activeDeadlineSeconds: 1800
+
+      template:
+        metadata:
+          labels:
+            app: automation-service
+            component: cron-job
+            feature: reputation
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "9090"
+            prometheus.io/path: "/metrics"
+        spec:
+          restartPolicy: OnFailure
+
+          # Service account with permissions to access secrets
+          serviceAccountName: automation-service
+
+          containers:
+          - name: reputation-recalculator
+            image: splits-network/automation-service:latest
+            imagePullPolicy: Always
+
+            # Execute the reputation recalculation job
+            command: ["node"]
+            args: ["dist/jobs/reputation-recalculation.js"]
+
+            # Resource allocation (higher than proposal-timeout due to batch processing)
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
+
+            # Environment variables
+            env:
+              # Node environment
+              - name: NODE_ENV
+                value: "production"
+
+              # Supabase configuration
+              - name: SUPABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: url
+
+              - name: SUPABASE_SERVICE_ROLE_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: service-role-key
+
+              # RabbitMQ configuration
+              - name: RABBITMQ_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: rabbitmq-credentials
+                    key: url
+
+              # Service metadata
+              - name: SERVICE_NAME
+                value: "automation-service"
+
+              - name: SERVICE_VERSION
+                value: "1.0.0"
+
+            # Security context
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+
+          # Image pull secrets if using private registry
+          # imagePullSecrets:
+          #   - name: splits-network-registry

@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { EntityCard, DataRow, VerticalDataRow, InteractiveDataRow, DataList } from '@/components/ui/cards';
 import { MarketplaceProfile } from '@splits-network/shared-types';
+import RecruiterReputation from './recruiter-reputation';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -101,11 +102,12 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
                             </div>
                         </div>
                     </div>
-                    {profileBadge && (
-                        <span className={`badge ${profileBadge.color} badge-sm gap-1 whitespace-nowrap`}>
-                            <i className={`fa-duotone fa-regular ${profileBadge.icon} text-xs`}></i>
-                            <span className="hidden sm:inline">{profileBadge.label}</span>
-                        </span>
+                    {recruiter.reputation_score !== undefined && (
+                        <RecruiterReputation
+                            reputationScore={recruiter.reputation_score}
+                            totalPlacements={recruiter.total_placements}
+                            variant="compact"
+                        />
                     )}
                 </div>
             </EntityCard.Header>

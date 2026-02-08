@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import RecruiterReputationBadge from "@/components/recruiter-reputation-badge";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 
 interface DetailsProps {
@@ -96,6 +97,30 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 </div>
             </section>
 
+            {/* Reputation Section */}
+            {recruiter.reputation_score !== undefined && (
+                <section>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-medal text-primary"></i>
+                        Reputation
+                    </h3>
+                    <RecruiterReputationBadge
+                        reputation={{
+                            recruiter_id: recruiter.id,
+                            total_submissions: (recruiter as any).total_submissions || 0,
+                            total_hires: (recruiter as any).total_hires || 0,
+                            completed_placements: recruiter.total_placements || 0,
+                            failed_placements: 0,
+                            hire_rate: (recruiter as any).hire_rate || 0,
+                            completion_rate: (recruiter as any).completion_rate || 0,
+                            reputation_score: recruiter.reputation_score,
+                            avg_response_time_hours: (recruiter as any).avg_response_time_hours,
+                        }}
+                        showDetails
+                    />
+                </section>
+            )}
+
             {/* Performance Stats */}
             <section>
                 <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -119,12 +144,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                         icon="fa-bullseye"
                         colorClass="text-success"
                         suffix="%"
-                    />
-                    <StatCard
-                        title="Reputation"
-                        value={recruiter.reputation_score}
-                        icon="fa-star"
-                        colorClass="text-warning"
                     />
                     <StatCard
                         title="Avg. Time to Hire"

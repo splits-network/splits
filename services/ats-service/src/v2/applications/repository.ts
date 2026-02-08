@@ -113,7 +113,7 @@ export class ApplicationRepository {
                 query = query.in('job_id', jobIds);
 
                 // Company admins and hiring managers only see applications in company-relevant stages
-                query = query.in('stage', ['submitted', 'interview', 'offer', 'hired', 'rejected']);
+                query = query.in('stage', ['submitted', 'company_review', 'company_feedback', 'screen', 'interview', 'offer', 'hired', 'rejected']);
             } else {
                 return {
                     data: [],

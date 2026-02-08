@@ -15,6 +15,7 @@ import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submissi
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
 import { BillingEventConsumer } from './consumers/billing/consumer';
+import { ReputationEventConsumer } from './consumers/reputation/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -35,6 +36,7 @@ export class DomainEventConsumer {
     private supportConsumer: SupportEventConsumer;
     private chatConsumer: ChatEventConsumer;
     private billingConsumer: BillingEventConsumer;
+    private reputationConsumer: ReputationEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -126,6 +128,12 @@ export class DomainEventConsumer {
             portalUrl,
             contactLookup
         );
+        this.reputationConsumer = new ReputationEventConsumer(
+            notificationService.reputation,
+            logger,
+            portalUrl,
+            contactLookup
+        );
     }
 
     async connect(): Promise<void> {
@@ -188,6 +196,9 @@ export class DomainEventConsumer {
             // Phase 2 events - Collaboration
             await this.channel.bindQueue(this.queue, this.exchange, 'collaborator.added');
             await this.channel.bindQueue(this.queue, this.exchange, 'reputation.updated');
+
+            // Reputation tier change events
+            await this.channel.bindQueue(this.queue, this.exchange, 'reputation.tier_changed');
 
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
@@ -396,6 +407,11 @@ export class DomainEventConsumer {
                 break;
             case 'chat.message.created':
                 await this.chatConsumer.handleMessageCreated(event.payload as any);
+                break;
+
+            // Reputation tier changes
+            case 'reputation.tier_changed':
+                await this.reputationConsumer.handleTierChanged(event);
                 break;
 
             default:

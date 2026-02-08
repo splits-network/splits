@@ -29,6 +29,7 @@ const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
     // { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
     { key: "screen", label: "Screen", color: "badge-info" },
     { key: "submitted", label: "Submitted", color: "badge-neutral" },
+    { key: "company_review", label: "Company Review", color: "badge-accent" },
     { key: "interview", label: "Interview", color: "badge-primary" },
     { key: "offer", label: "Offer", color: "badge-warning" },
     { key: "hired", label: "Hired", color: "badge-success" },

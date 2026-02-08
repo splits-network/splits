@@ -9,11 +9,10 @@ import CompanyDocumentUpload, { StagedDocument } from '@/components/documents/co
 interface ApproveGateModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onApprove: (notes?: string, salary?: number) => Promise<void>;
+    onApprove: (notes?: string) => Promise<void>;
     candidateName: string;
     jobTitle: string;
     gateName: string;
-    isHireTransition?: boolean;
     applicationId?: string;
     currentStage?: string;
 }
@@ -25,12 +24,10 @@ export default function ApproveGateModal({
     candidateName,
     jobTitle,
     gateName,
-    isHireTransition = false,
     applicationId,
     currentStage,
 }: ApproveGateModalProps) {
     const [notes, setNotes] = useState('');
-    const [salary, setSalary] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showDocumentUpload, setShowDocumentUpload] = useState(false);
@@ -40,7 +37,7 @@ export default function ApproveGateModal({
     const { getToken } = useAuth();
 
     // Check if this is an offer transition (interview → offer)
-    const isOfferTransition = currentStage === 'interview' && !isHireTransition;
+    const isOfferTransition = currentStage === 'interview';
 
     // Modal title builder based on transition type
     const getTitleText = () => {
@@ -52,17 +49,13 @@ export default function ApproveGateModal({
             case 'company_review':
                 return 'Approve & Move Forward';
             case 'recruiter_review':
-                // "Recruiter reviewing before submission" → submit to company
                 return 'Approve & Submit to Company';
             case 'recruiter_proposed':
-                // "Recruiter proposed candidate to job" → company reviews proposal
                 return 'Approve Proposal for Company Review';
             case 'company_feedback':
                 return 'Approve & Continue';
             case 'interview':
                 return 'Extend Offer';
-            case 'offer':
-                return 'Mark as Hired';
             default:
                 return 'Approve';
         }
@@ -106,22 +99,10 @@ export default function ApproveGateModal({
                 await uploadStagedDocuments();
             }
 
-            // Validate salary for hire transitions
-            if (isHireTransition) {
-                const salaryValue = parseFloat(salary);
-                if (!salary || isNaN(salaryValue) || salaryValue <= 0) {
-                    setError('Please enter a valid salary amount');
-                    setSubmitting(false);
-                    return;
-                }
-                await onApprove(notes.trim() || undefined, salaryValue);
-            } else {
-                await onApprove(notes.trim() || undefined);
-            }
+            await onApprove(notes.trim() || undefined);
 
             // Reset all state
             setNotes('');
-            setSalary('');
             setStagedDocuments([]);
             onClose();
         } catch (err) {
@@ -135,7 +116,6 @@ export default function ApproveGateModal({
     const handleClose = () => {
         if (!submitting) {
             setNotes('');
-            setSalary('');
             setError(null);
             setShowDocumentUpload(false);
             setStagedDocuments([]);
@@ -155,18 +135,12 @@ export default function ApproveGateModal({
 
                 <div className="mb-4">
                     <p className="text-sm text-base-content/70 mb-2">
-                        You are {isHireTransition ? 'marking this candidate as hired' : `approving this application at the ${gateName} gate`}:
+                        You are approving this application at the {gateName} gate:
                     </p>
                     <div className="bg-base-200 p-3 rounded">
                         <p className="font-semibold">{candidateName}</p>
                         <p className="text-sm text-base-content/70">{jobTitle}</p>
                     </div>
-                    {isHireTransition && (
-                        <div className="alert alert-success mt-3">
-                            <i className="fa-duotone fa-regular fa-check-circle"></i>
-                            <span>This will create a placement record and calculate earnings.</span>
-                        </div>
-                    )}
                 </div>
 
                 {error && (
@@ -177,26 +151,6 @@ export default function ApproveGateModal({
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {isHireTransition && (
-                        <fieldset className="fieldset mb-4">
-                            <legend className="fieldset-legend">Annual Salary (USD) *</legend>
-                            <input
-                                type="number"
-                                className="input w-full"
-                                value={salary}
-                                onChange={(e) => setSalary(e.target.value)}
-                                placeholder="150000"
-                                required
-                                min="0"
-                                step="1000"
-                                disabled={submitting}
-                            />
-                            <p className="fieldset-label">
-                                The candidate's agreed annual salary amount
-                            </p>
-                        </fieldset>
-                    )}
-
                     {/* Document Upload Section for Offer Transitions */}
                     {isOfferTransition && applicationId && (
                         <div className="mb-4">
@@ -238,7 +192,7 @@ export default function ApproveGateModal({
                                             setError(error);
                                         }}
                                         compact={true}
-                                        maxSizeKB={5120} // 5MB limit for offer documents
+                                        maxSizeKB={5120}
                                     />
                                 </div>
                             )}
@@ -247,13 +201,11 @@ export default function ApproveGateModal({
 
                     <MarkdownEditor
                         className="fieldset mb-4"
-                        label={isHireTransition ? 'Notes (Optional)' : 'Approval Notes (Optional)'}
+                        label="Approval Notes (Optional)"
                         value={notes}
                         onChange={setNotes}
-                        placeholder={isHireTransition ? 'Add any notes about the hire...' : 'Add any notes or feedback for the next reviewer...'}
-                        helperText={isHireTransition
-                            ? 'These notes will be visible in the placement record.'
-                            : 'These notes will be visible to the next gate reviewer and the candidate.'}
+                        placeholder="Add any notes or feedback for the next reviewer..."
+                        helperText="These notes will be visible to the next gate reviewer and the candidate."
                         height={160}
                         preview="edit"
                         disabled={submitting}
@@ -276,14 +228,14 @@ export default function ApproveGateModal({
                             {submitting ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm"></span>
-                                    {uploadingDocuments ? `Uploading Documents...` : (isHireTransition ? 'Creating Placement...' : 'Approving...')}
+                                    {uploadingDocuments ? 'Uploading Documents...' : 'Approving...'}
                                 </>
                             ) : (
                                 <>
                                     <i className="fa-duotone fa-regular fa-check"></i>
                                     {isOfferTransition && stagedDocuments.length > 0
                                         ? `Extend Offer (${stagedDocuments.length} document${stagedDocuments.length !== 1 ? 's' : ''})`
-                                        : (isHireTransition ? 'Mark as Hired' : 'Approve Application')
+                                        : 'Approve Application'
                                     }
                                 </>
                             )}

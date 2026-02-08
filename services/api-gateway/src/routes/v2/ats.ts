@@ -720,8 +720,61 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
         }
     );
 
-    // Note: CRA gate endpoints removed - candidate_role_assignments table dropped during application flow consolidation
-    // Gate logic is now handled via application stage transitions
+    // Hire Candidate
+    app.post(
+        '/api/v2/applications/:id/hire',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/hire`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to hire candidate');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to hire candidate' });
+            }
+        }
+    );
+
+    // Request Pre-Screen
+    app.post(
+        '/api/v2/applications/:id/request-prescreen',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/request-prescreen`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to request pre-screen');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to request pre-screen' });
+            }
+        }
+    );
 }
 
 /**

@@ -317,7 +317,10 @@ export class PlacementServiceV2 {
      * Phase 4: Create placement from application using referential data approach
      * Gathers all 5 role IDs from referential sources instead of duplicating on placement
      */
-    async createPlacementFromApplication(applicationId: string): Promise<any> {
+    async createPlacementFromApplication(
+        applicationId: string,
+        overrides?: { start_date?: string; salary?: number }
+    ): Promise<any> {
         // Get application with related data
         const { data: application } = await this.supabase
             .from('applications')
@@ -365,12 +368,12 @@ export class PlacementServiceV2 {
             companySourcer?.recruiter_id : null;
 
         // Calculate placement fee
-        const salary = application.salary || 0;
+        const salary = overrides?.salary ?? application.salary ?? 0;
         const feePercentage = job.fee_percentage || 0;
         const placementFee = Math.round((salary * feePercentage) / 100);
 
         // Create placement with snapshot of all role IDs
-        const startDate = new Date();
+        const startDate = overrides?.start_date ? new Date(overrides.start_date) : new Date();
         const guaranteeDays = job.guarantee_days ?? 90;
         const guaranteeExpiresAt = this.computeGuaranteeExpiresAt(startDate, guaranteeDays);
 

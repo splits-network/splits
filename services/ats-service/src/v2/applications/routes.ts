@@ -1,10 +1,12 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ApplicationServiceV2 } from './service';
+import { PlacementServiceV2 } from '../placements/service';
 import { ApplicationUpdate } from './types';
 import { requireUserContext } from '../shared/helpers';
 
 interface RegisterApplicationRoutesConfig {
     applicationService: ApplicationServiceV2;
+    placementService?: PlacementServiceV2;
 }
 
 export function registerApplicationRoutes(
@@ -170,6 +172,57 @@ export function registerApplicationRoutes(
             return reply.send({ data: application });
         } catch (error: any) {
             request.log.error({ error: error.message, applicationId: request.params }, 'Failed to decline proposal');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/applications/:id/request-prescreen
+     * Company requests a recruiter pre-screen for a candidate's application
+     */
+    app.post('/api/v2/applications/:id/request-prescreen', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const body = request.body as { company_id: string; recruiter_id?: string; message?: string };
+
+            request.log.info({ applicationId: id, clerkUserId, autoAssign: !body.recruiter_id }, 'Requesting pre-screen');
+
+            const application = await config.applicationService.requestPrescreen(id, body, clerkUserId);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to request pre-screen');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/applications/:id/hire
+     * Hire a candidate — updates application to 'hired' and creates placement record
+     */
+    app.post('/api/v2/applications/:id/hire', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const body = request.body as { salary: number; start_date?: string; notes?: string };
+
+            request.log.info({ applicationId: id, clerkUserId, salary: body.salary }, 'Hiring candidate');
+
+            // Step 1: Update application to hired stage with salary
+            const application = await config.applicationService.hireCandidate(id, body, clerkUserId);
+
+            // Step 2: Create placement record via PlacementService
+            let placement = null;
+            if (config.placementService) {
+                placement = await config.placementService.createPlacementFromApplication(id, {
+                    start_date: body.start_date,
+                    salary: body.salary,
+                });
+            }
+
+            return reply.send({ data: { application, placement } });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to hire candidate');
             return reply.code(400).send({ error: { message: error.message } });
         }
     });

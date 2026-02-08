@@ -5,6 +5,7 @@
 
 import { ApplicationRepository } from './repository';
 import { ApplicationFilters, ApplicationUpdate } from './types';
+import { autoAssignRecruiter } from './recruiter-auto-assign';
 import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
@@ -12,11 +13,13 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 export class ApplicationServiceV2 {
     private accessResolver: AccessContextResolver;
+    private supabase: SupabaseClient;
     constructor(
         private repository: ApplicationRepository,
         supabase: SupabaseClient,
         private eventPublisher?: EventPublisher
     ) {
+        this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
@@ -784,6 +787,185 @@ export class ApplicationServiceV2 {
                 job_id: application.job_id,
                 candidate_recruiter_id: application.candidate_recruiter_id,
                 accepted_by: userContext.identityUserId,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Hire a candidate — transitions application to 'hired' stage and creates a placement record.
+     *
+     * This is the single entry point for hiring. It:
+     * 1. Validates the application is in 'offer' stage
+     * 2. Updates application with salary, start_date, notes, and stage='hired'
+     * 3. Returns the updated application (placement is created by the route handler via PlacementService)
+     */
+    async hireCandidate(
+        applicationId: string,
+        body: { salary: number; start_date?: string; notes?: string },
+        clerkUserId: string
+    ): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        if (application.stage !== 'offer') {
+            throw new Error(`Cannot hire from stage: ${application.stage}. Application must be in offer stage.`);
+        }
+
+        if (!body.salary || body.salary <= 0) {
+            throw new Error('Valid salary amount is required');
+        }
+
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Build update payload
+        const updateData: any = {
+            stage: 'hired',
+            salary: body.salary,
+        };
+
+        if (body.notes) {
+            const existingNotes = application.notes || '';
+            const timestamp = new Date().toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+            });
+            updateData.notes = existingNotes + `\n[${timestamp}] Company User: ${body.notes}`;
+        }
+
+        const updated = await this.repository.updateApplication(applicationId, updateData);
+
+        // Create audit log
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'hired',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'company',
+            old_value: { stage: application.stage },
+            new_value: {
+                stage: 'hired',
+                salary: body.salary,
+                start_date: body.start_date || new Date().toISOString().split('T')[0],
+            },
+        });
+
+        // Publish stage changed event
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.stage_changed', {
+                application_id: applicationId,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
+                old_stage: application.stage,
+                new_stage: 'hired',
+                changed_by: userContext.identityUserId,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Request pre-screen for an application
+     * Company requests a company recruiter to screen a candidate before proceeding.
+     *
+     * Selection logic (3-tier):
+     * 1. Job already has company_recruiter_id → use that recruiter
+     * 2. Job has no company recruiter but company has recruiters → pick from company pool
+     * 3. Company has no recruiters → pick from platform pool, create recruiter_companies relationship
+     *
+     * The recruiter is set as company_recruiter_id on the JOB (not candidate_recruiter_id
+     * on the application) to preserve correct split economics.
+     */
+    async requestPrescreen(
+        applicationId: string,
+        body: { company_id: string; recruiter_id?: string; message?: string },
+        clerkUserId: string
+    ): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Check if job already has a company recruiter assigned
+        const { data: job } = await this.supabase
+            .from('jobs')
+            .select('id, company_recruiter_id')
+            .eq('id', application.job_id)
+            .single();
+
+        if (!job) {
+            throw new Error('Job not found');
+        }
+
+        let assignedRecruiterId: string;
+        let autoAssign = false;
+        let createdCompanyRelationship = false;
+
+        if (job.company_recruiter_id) {
+            // Tier 1: Job already has a company recruiter
+            assignedRecruiterId = job.company_recruiter_id;
+        } else if (body.recruiter_id) {
+            // Tier 2: Company user explicitly picked a recruiter
+            assignedRecruiterId = body.recruiter_id;
+        } else {
+            // Auto-assign: try company recruiters first, then platform pool
+            autoAssign = true;
+            const result = await autoAssignRecruiter(this.supabase, body.company_id);
+            if (!result) {
+                throw new Error('No available recruiters for auto-assignment');
+            }
+            assignedRecruiterId = result.recruiterId;
+            createdCompanyRelationship = result.createdRelationship;
+        }
+
+        // Set company_recruiter_id on the JOB (not candidate_recruiter_id on application)
+        if (!job.company_recruiter_id) {
+            await this.supabase
+                .from('jobs')
+                .update({ company_recruiter_id: assignedRecruiterId, updated_at: new Date().toISOString() })
+                .eq('id', application.job_id);
+        }
+
+        // Move application to screen stage (do NOT set candidate_recruiter_id)
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'screen',
+        });
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'prescreen_requested',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'company',
+            new_value: {
+                stage: 'screen',
+                company_recruiter_id: assignedRecruiterId,
+                auto_assign: autoAssign,
+            },
+            metadata: {
+                company_id: body.company_id,
+                has_message: !!body.message,
+                created_company_relationship: createdCompanyRelationship,
+            },
+        });
+
+        // Publish event for notification system
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.prescreen_requested', {
+                application_id: applicationId,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                company_id: body.company_id,
+                recruiter_id: assignedRecruiterId,
+                requested_by_user_id: userContext.identityUserId,
+                message: body.message || null,
+                auto_assign: autoAssign,
             });
         }
 

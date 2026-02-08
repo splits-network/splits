@@ -92,7 +92,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerJobRoutes(app, { jobService });
     registerCompanyRoutes(app, { companyService });
     registerCandidateRoutes(app, { candidateService });
-    registerApplicationRoutes(app, { applicationService });
+    registerApplicationRoutes(app, { applicationService, placementService });
     registerPlacementRoutes(app, { placementService });
     candidateSourcerRoutes(app, candidateSourcerService);
     registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });

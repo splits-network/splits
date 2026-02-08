@@ -10,6 +10,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { EventPublisher } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
+import { ReputationRepository, ReputationService, ReputationEventConsumer } from "./v2/reputation";
 
 async function main() {
     const baseConfig = loadBaseConfig("automation-service");
@@ -18,6 +19,7 @@ async function main() {
 
     let v2EventPublisher: EventPublisher | null = null;
     let domainConsumer: DomainEventConsumer | null = null;
+    let reputationConsumer: ReputationEventConsumer | null = null;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -94,6 +96,26 @@ async function main() {
             "V2 domain event consumer connected - listening for automation triggers",
         );
 
+        // Initialize reputation event consumer for reputation recalculation
+        const reputationRepository = new ReputationRepository(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey!,
+        );
+        const reputationService = new ReputationService(
+            reputationRepository,
+            v2EventPublisher,
+            logger,
+        );
+        reputationConsumer = new ReputationEventConsumer(
+            rabbitConfig.url,
+            reputationService,
+            logger,
+        );
+        await reputationConsumer.connect();
+        logger.info(
+            "Reputation event consumer connected - listening for placement and hire events",
+        );
+
         // Register V2 routes only
         await registerV2Routes(app, {
             supabaseUrl: dbConfig.supabaseUrl,
@@ -112,6 +134,9 @@ async function main() {
                 }
                 if (domainConsumer) {
                     await domainConsumer.close();
+                }
+                if (reputationConsumer) {
+                    await reputationConsumer.close();
                 }
             } finally {
                 process.exit(0);
