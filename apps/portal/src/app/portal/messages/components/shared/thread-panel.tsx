@@ -31,6 +31,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
     );
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
+    const [candidateName, setCandidateName] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
     const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
@@ -66,6 +67,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
             applicationId?: string | null,
             jobId?: string | null,
             companyId?: string | null,
+            candidateId?: string | null,
         ) => {
             const token = await getToken();
             if (!token) return;
@@ -110,6 +112,18 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     );
                     const company = response?.data;
                     if (company?.name) setCompanyName(company.name);
+                } catch {
+                    // fallback handled in render
+                }
+            }
+
+            if (candidateId) {
+                try {
+                    const response: any = await client.get(
+                        `/candidates/${candidateId}`,
+                    );
+                    const candidate = response?.data;
+                    if (candidate?.full_name) setCandidateName(candidate.full_name);
                 } catch {
                     // fallback handled in render
                 }
@@ -177,12 +191,14 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                 data.conversation.application_id,
                 data.conversation.job_id,
                 data.conversation.company_id,
+                data.conversation.candidate_id,
             );
         }
     }, [
         data?.conversation?.application_id,
         data?.conversation?.job_id,
         data?.conversation?.company_id,
+        data?.conversation?.candidate_id,
         fetchContextDetails,
     ]);
 
@@ -384,10 +400,22 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                 {/* Context Links */}
                 {(data.conversation.application_id ||
                     data.conversation.job_id ||
-                    data.conversation.company_id) && (
+                    data.conversation.company_id ||
+                    data.conversation.candidate_id) && (
                     <div className="rounded-lg border border-base-200 bg-base-100 p-4 text-sm">
                         <div className="font-semibold mb-2">Context</div>
                         <div className="flex flex-wrap gap-3 text-base-content/70">
+                            {data.conversation.candidate_id && (
+                                <Link
+                                    className="link link-hover"
+                                    href={`/portal/candidates?candidateId=${data.conversation.candidate_id}`}
+                                >
+                                    <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                                    Regarding:{" "}
+                                    {candidateName ||
+                                        data.conversation.candidate_id}
+                                </Link>
+                            )}
                             {data.conversation.application_id && (
                                 <Link
                                     className="link link-hover"
@@ -441,6 +469,20 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                         </div>
                     ) : (
                         data.messages.map((msg) => {
+                            if (msg.kind === "system") {
+                                return (
+                                    <div
+                                        key={msg.id}
+                                        className="flex justify-center my-4"
+                                    >
+                                        <div className="bg-base-200 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
+                                            <i className="fa-duotone fa-regular fa-route mr-2" />
+                                            {msg.body || "System message"}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             const isOwnMessage =
                                 msg.sender_id === data.participant.user_id;
                             const senderLabel = isOwnMessage

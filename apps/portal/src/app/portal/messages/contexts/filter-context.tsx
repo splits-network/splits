@@ -18,7 +18,6 @@ import {
 } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { usePresence } from "@/hooks/use-presence";
-import { useUserProfile } from "@/contexts/user-profile-context";
 import type {
     ConversationRow,
     ConversationFilters,
@@ -48,8 +47,6 @@ interface FilterContextValue {
     presenceMap: Record<string, { status: "online" | "offline" }>;
     requestCount: number;
     contextMap: Record<string, ConversationContext>;
-    isRecruiter: boolean;
-    isCompanyUser: boolean;
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null);
@@ -77,10 +74,6 @@ function normalizeRows(data: any[]): ConversationRow[] {
 
 export function FilterProvider({ children }: { children: ReactNode }) {
     const { getToken } = useAuth();
-    const {
-        isRecruiter,
-        isCompanyUser,
-    } = useUserProfile();
 
     const [showStats, setShowStatsState] = useState(true);
     const [statsLoaded, setStatsLoaded] = useState(false);
@@ -243,11 +236,13 @@ export function FilterProvider({ children }: { children: ReactNode }) {
 
             const jobIds = new Set<string>();
             const companyIds = new Set<string>();
+            const candidateIds = new Set<string>();
 
             for (const row of rows) {
                 const c = row.conversation;
                 if (c.job_id) jobIds.add(c.job_id);
                 if (c.company_id) companyIds.add(c.company_id);
+                if (c.candidate_id) candidateIds.add(c.candidate_id);
             }
 
             const jobMap: Record<string, { title: string; companyName?: string }> = {};
@@ -295,6 +290,23 @@ export function FilterProvider({ children }: { children: ReactNode }) {
                 }),
             );
 
+            // Fetch candidate names for routed conversations
+            const candidateMap: Record<string, string> = {};
+            await Promise.all(
+                Array.from(candidateIds).map(async (candidateId) => {
+                    try {
+                        const res: any = await client.get(
+                            `/candidates/${candidateId}`,
+                        );
+                        if (res?.data?.full_name) {
+                            candidateMap[candidateId] = res.data.full_name;
+                        }
+                    } catch {
+                        // skip failed lookups
+                    }
+                }),
+            );
+
             if (cancelled) return;
 
             const map: Record<string, ConversationContext> = {};
@@ -308,6 +320,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
                 map[c.id] = {
                     jobTitle: job?.title || null,
                     companyName,
+                    candidateName: c.candidate_id
+                        ? candidateMap[c.candidate_id] || null
+                        : null,
                 };
             }
             setContextMap(map);
@@ -366,8 +381,6 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         presenceMap,
         requestCount,
         contextMap,
-        isRecruiter,
-        isCompanyUser,
     };
 
     return (

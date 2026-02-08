@@ -94,6 +94,14 @@ export default function ListItem({
                         </div>
                     )}
 
+                    {/* Candidate representation context */}
+                    {context?.candidateName && (
+                        <div className="text-xs text-start text-base-content/50 truncate mb-1">
+                            <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                            Re: {context.candidateName}
+                        </div>
+                    )}
+
                     {/* Timestamp */}
                     <div className="text-xs text-start text-base-content/60">
                         {formatMessageDate(convo.last_message_at)}

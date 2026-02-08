@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import Link from "next/link";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 // ===== ANIMATED COUNTER HOOK =====
 
@@ -13,18 +13,18 @@ interface UseAnimatedCounterOptions {
     /** Whether to trigger on visibility */
     triggerOnVisible?: boolean;
     /** Easing function */
-    easing?: 'linear' | 'easeOut' | 'easeInOut';
+    easing?: "linear" | "easeOut" | "easeInOut";
 }
 
 function useAnimatedCounter(
     targetValue: number,
-    options: UseAnimatedCounterOptions = {}
+    options: UseAnimatedCounterOptions = {},
 ): { count: number; ref: React.RefObject<HTMLDivElement | null> } {
     const {
         duration = 1000,
         delay = 300,
         triggerOnVisible = true,
-        easing = 'easeOut',
+        easing = "easeOut",
     } = options;
 
     const [count, setCount] = useState(0);
@@ -37,7 +37,8 @@ function useAnimatedCounter(
     const easingFunctions = {
         linear: (t: number) => t,
         easeOut: (t: number) => 1 - Math.pow(1 - t, 3),
-        easeInOut: (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+        easeInOut: (t: number) =>
+            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
     };
 
     const animate = useCallback(() => {
@@ -54,7 +55,9 @@ function useAnimatedCounter(
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const easedProgress = easeFn(progress);
-                const currentValue = Math.round(startValue + (targetValue - startValue) * easedProgress);
+                const currentValue = Math.round(
+                    startValue + (targetValue - startValue) * easedProgress,
+                );
 
                 setCount(currentValue);
 
@@ -85,7 +88,7 @@ function useAnimatedCounter(
                     }
                 });
             },
-            { threshold: 0.1 }
+            { threshold: 0.1 },
         );
 
         observer.observe(element);
@@ -123,7 +126,15 @@ export interface StatCardProps {
     /** FontAwesome icon class (e.g., 'fa-briefcase') */
     icon?: string;
     /** Icon color variant */
-    color?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'info';
+    color?:
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "success"
+        | "warning"
+        | "error"
+        | "info"
+        | "neutral";
     /** Trend percentage (positive = green, negative = red) */
     trend?: number;
     /** Trend comparison label (e.g., 'vs last month') */
@@ -143,30 +154,32 @@ export interface StatCardProps {
 }
 
 const statColorClasses = {
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
-    success: 'text-success',
-    warning: 'text-warning',
-    error: 'text-error',
-    info: 'text-info',
+    primary: "text-primary",
+    secondary: "text-secondary",
+    accent: "text-accent",
+    success: "text-success",
+    warning: "text-warning",
+    error: "text-error",
+    info: "text-info",
+    neutral: "text-neutral",
 };
 
 const iconColorClasses = {
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
-    success: 'text-success',
-    warning: 'text-warning',
-    error: 'text-error',
-    info: 'text-info',
+    primary: "text-primary",
+    secondary: "text-secondary",
+    accent: "text-accent",
+    success: "text-success",
+    warning: "text-warning",
+    error: "text-error",
+    info: "text-info",
+    neutral: "text-neutral",
 };
 
 /**
  * StatCard - Uses DaisyUI stat component
- * 
+ *
  * Based on: https://daisyui.com/components/stat/
- * 
+ *
  * Features:
  * - Large value display with title
  * - Optional icon with colored background
@@ -180,27 +193,33 @@ export function StatCard({
     title,
     description,
     icon,
-    color = 'primary',
+    color = "primary",
     trend,
     trendLabel,
     href,
     onClick,
-    className = '',
+    className = "",
     loading = false,
     animate = true,
     animationDuration = 1000,
 }: StatCardProps) {
     // Parse numeric value for animation
-    const numericValue = typeof value === 'number' ? value : parseFloat(String(value).replace(/[^0-9.-]/g, ''));
-    const isNumeric = !isNaN(numericValue) && typeof value === 'number';
+    const numericValue =
+        typeof value === "number"
+            ? value
+            : parseFloat(String(value).replace(/[^0-9.-]/g, ""));
+    const isNumeric = !isNaN(numericValue) && typeof value === "number";
     const shouldAnimate = animate && isNumeric;
 
     // Animated counter hook
-    const { count, ref } = useAnimatedCounter(shouldAnimate ? numericValue : 0, {
-        duration: animationDuration,
-        triggerOnVisible: true,
-        easing: 'easeOut',
-    });
+    const { count, ref } = useAnimatedCounter(
+        shouldAnimate ? numericValue : 0,
+        {
+            duration: animationDuration,
+            triggerOnVisible: true,
+            easing: "easeOut",
+        },
+    );
 
     // Display value - animated or static
     const displayValue = shouldAnimate ? count : value;
@@ -227,17 +246,21 @@ export function StatCard({
     }
 
     const trendIsPositive = trend !== undefined && trend >= 0;
-    const trendColor = trendIsPositive ? 'text-success' : 'text-error';
-    const trendArrow = trendIsPositive ? '↗︎' : '↘︎';
+    const trendColor = trendIsPositive ? "text-success" : "text-error";
+    const trendArrow = trendIsPositive ? "↗︎" : "↘︎";
 
     const statContent = (
         <>
             <div className="stat-title whitespace-normal">{title}</div>
             <div className="grid grid-cols-2 items-center">
-                <div className={`stat-value ${statColorClasses[color]}`}>{displayValue}</div>
+                <div className={`stat-value ${statColorClasses[color]}`}>
+                    {displayValue}
+                </div>
                 {icon && (
                     <div className={`stat-figure ${iconColorClasses[color]}`}>
-                        <i className={`fa-duotone fa-regular ${icon} text-3xl`}></i>
+                        <i
+                            className={`fa-duotone fa-regular ${icon} text-3xl`}
+                        ></i>
                     </div>
                 )}
             </div>
@@ -258,9 +281,10 @@ export function StatCard({
         </>
     );
 
-    const interactiveClasses = (href || onClick)
-        ? 'hover:bg-base-200 transition-colors cursor-pointer'
-        : '';
+    const interactiveClasses =
+        href || onClick
+            ? "hover:bg-base-200 transition-colors cursor-pointer"
+            : "";
 
     // If href is provided, wrap in a Link
     if (href) {
@@ -281,7 +305,7 @@ export function StatCard({
             ref={ref}
             className={`stat ${interactiveClasses} ${className}`}
             onClick={onClick}
-            role={onClick ? 'button' : undefined}
+            role={onClick ? "button" : undefined}
             tabIndex={onClick ? 0 : undefined}
         >
             {statContent}

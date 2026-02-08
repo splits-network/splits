@@ -5,6 +5,7 @@ export type ParticipantDetails = {
     name: string | null;
     email: string;
     profile_image_url?: string | null;
+    user_role?: string | null;
 };
 
 export type UserSummary = ParticipantDetails;
@@ -13,6 +14,8 @@ export type Message = {
     id: string;
     sender_id: string;
     body: string | null;
+    kind?: "user" | "system";
+    metadata?: Record<string, any> | null;
     created_at: string;
 };
 
@@ -24,6 +27,7 @@ export type ConversationRow = {
         application_id: string | null;
         job_id: string | null;
         company_id: string | null;
+        candidate_id: string | null;
         last_message_at: string | null;
         last_message_id: string | null;
         created_at: string;
@@ -51,6 +55,7 @@ export type ResyncData = {
         application_id: string | null;
         job_id: string | null;
         company_id: string | null;
+        candidate_id: string | null;
         last_message_at: string | null;
         participant_a: ParticipantDetails;
         participant_b: ParticipantDetails;
@@ -68,6 +73,7 @@ export type ResyncData = {
 export type ConversationContext = {
     jobTitle: string | null;
     companyName: string | null;
+    candidateName: string | null;
 };
 
 export type Mailbox = "inbox" | "requests" | "archived";

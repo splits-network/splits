@@ -1,5 +1,5 @@
-import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { ChatRepository } from './repository';
+import { AccessContextResolver } from "@splits-network/shared-access-context";
+import { ChatRepository } from "./repository";
 import {
     ChatAttachment,
     ChatConversation,
@@ -11,9 +11,9 @@ import {
     SendMessageInput,
     ChatConversationListItemWithParticipants,
     ResyncResponseWithParticipants,
-} from './types';
-import { ChatEventPublisher } from './events';
-import { EventPublisher } from '../shared/events';
+} from "./types";
+import { ChatEventPublisher } from "./events";
+import { EventPublisher } from "../shared/events";
 
 export class ChatServiceV2 {
     private accessResolver: AccessContextResolver;
@@ -21,78 +21,162 @@ export class ChatServiceV2 {
     constructor(
         private repository: ChatRepository,
         private eventPublisher?: ChatEventPublisher,
-        private domainPublisher?: EventPublisher
+        private domainPublisher?: EventPublisher,
     ) {
-        this.accessResolver = new AccessContextResolver(this.repository.getSupabase());
+        this.accessResolver = new AccessContextResolver(
+            this.repository.getSupabase(),
+        );
     }
 
     private async requireIdentity(clerkUserId: string) {
         const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.identityUserId) {
-            throw new Error('Unable to resolve identity user');
+            throw new Error("Unable to resolve identity user");
         }
         return {
             ...context,
             identityUserId: context.identityUserId,
-        } as Omit<typeof context, 'identityUserId'> & { identityUserId: string };
+        } as Omit<typeof context, "identityUserId"> & {
+            identityUserId: string;
+        };
     }
 
-    private normalizeParticipants(userA: string, userB: string): { a: string; b: string } {
+    private normalizeParticipants(
+        userA: string,
+        userB: string,
+    ): { a: string; b: string } {
         return userA < userB ? { a: userA, b: userB } : { a: userB, b: userA };
     }
 
-    async createOrFindConversation(clerkUserId: string, input: CreateConversationInput): Promise<ChatConversation> {
+    async createOrFindConversation(
+        clerkUserId: string,
+        input: CreateConversationInput,
+    ): Promise<ChatConversation> {
         const context = await this.requireIdentity(clerkUserId);
-        if (!input.participantUserId || input.participantUserId === context.identityUserId) {
-            throw new Error('Invalid participant user id');
+        if (
+            !input.participantUserId ||
+            input.participantUserId === context.identityUserId
+        ) {
+            throw new Error("Invalid participant user id");
         }
 
         await this.assertContextAccess(context, input.context);
 
-        const { a, b } = this.normalizeParticipants(context.identityUserId, input.participantUserId);
-        const existing = await this.repository.findConversation(a, b, {
+        // Representation routing: if the target participant is a candidate
+        // with an active representing recruiter, route to the recruiter instead.
+        let resolvedParticipantUserId = input.participantUserId;
+        let candidateId: string | null = null;
+        let routingOccurred = false;
+        let candidateName: string | null = null;
+        let recruiterName: string | null = null;
+
+        const routing = await this.repository.resolveRepresentation(
+            input.participantUserId,
+            context.identityUserId,
+        );
+
+        if (routing.routed && routing.recruiterUserId) {
+            resolvedParticipantUserId = routing.recruiterUserId;
+            candidateId = routing.candidateId;
+            candidateName = routing.candidateName;
+            recruiterName = routing.recruiterName;
+            routingOccurred = true;
+
+            if (resolvedParticipantUserId === context.identityUserId) {
+                throw new Error("Cannot start a conversation with yourself");
+            }
+        }
+
+        const conversationContext = {
             application_id: input.context?.application_id,
             job_id: input.context?.job_id,
             company_id: input.context?.company_id,
-        });
+            candidate_id: candidateId,
+        };
+
+        const { a, b } = this.normalizeParticipants(
+            context.identityUserId,
+            resolvedParticipantUserId,
+        );
+        const existing = await this.repository.findConversation(
+            a,
+            b,
+            conversationContext,
+        );
 
         if (existing) {
             return existing;
         }
 
-        const conversation = await this.repository.createConversation(a, b, {
-            application_id: input.context?.application_id,
-            job_id: input.context?.job_id,
-            company_id: input.context?.company_id,
-        });
+        const conversation = await this.repository.createConversation(
+            a,
+            b,
+            conversationContext,
+        );
 
         await this.repository.ensureParticipants(conversation.id, [
             {
                 user_id: context.identityUserId,
-                request_state: 'accepted',
+                request_state: "accepted",
             },
             {
-                user_id: input.participantUserId,
-                request_state: 'pending',
+                user_id: resolvedParticipantUserId,
+                request_state: "pending",
             },
         ]);
 
-        await this.publishToUser(input.participantUserId, 'conversation.requested', {
-            conversationId: conversation.id,
-            requestedBy: context.identityUserId,
-        });
+        await this.publishToUser(
+            resolvedParticipantUserId,
+            "conversation.requested",
+            {
+                conversationId: conversation.id,
+                requestedBy: context.identityUserId,
+            },
+        );
+
+        // Insert system message explaining the routing
+        if (routingOccurred) {
+            const systemBody = `This conversation was routed to ${recruiterName || "the representing recruiter"} who represents ${candidateName || "this candidate"}.`;
+
+            const systemMessage = await this.repository.insertMessage({
+                conversation_id: conversation.id,
+                sender_id: context.identityUserId,
+                body: systemBody,
+                kind: "system",
+            });
+
+            await this.repository.updateMessageMetadata(systemMessage.id, {
+                routing: {
+                    original_participant_user_id: input.participantUserId,
+                    resolved_participant_user_id: resolvedParticipantUserId,
+                    candidate_id: candidateId,
+                    candidate_name: candidateName,
+                    recruiter_name: recruiterName,
+                },
+            });
+
+            await this.repository.updateConversationLastMessage(
+                conversation.id,
+                systemMessage,
+            );
+        }
 
         return conversation;
     }
 
     async listConversations(
         clerkUserId: string,
-        filter: 'inbox' | 'requests' | 'archived',
+        filter: "inbox" | "requests" | "archived",
         limit: number,
-        cursor?: string
+        cursor?: string,
     ): Promise<{ data: ChatParticipantState[]; total: number }> {
         const context = await this.requireIdentity(clerkUserId);
-        return this.repository.listConversations(context.identityUserId, filter, limit, cursor);
+        return this.repository.listConversations(
+            context.identityUserId,
+            filter,
+            limit,
+            cursor,
+        );
     }
 
     /**
@@ -101,12 +185,20 @@ export class ChatServiceV2 {
      */
     async listConversationsWithParticipants(
         clerkUserId: string,
-        filter: 'inbox' | 'requests' | 'archived',
+        filter: "inbox" | "requests" | "archived",
         limit: number,
-        cursor?: string
-    ): Promise<{ data: ChatConversationListItemWithParticipants[]; total: number }> {
+        cursor?: string,
+    ): Promise<{
+        data: ChatConversationListItemWithParticipants[];
+        total: number;
+    }> {
         const context = await this.requireIdentity(clerkUserId);
-        return this.repository.listConversationsWithParticipants(context.identityUserId, filter, limit, cursor);
+        return this.repository.listConversationsWithParticipants(
+            context.identityUserId,
+            filter,
+            limit,
+            cursor,
+        );
     }
 
     async listMessages(
@@ -114,11 +206,16 @@ export class ChatServiceV2 {
         conversationId: string,
         after?: string,
         before?: string,
-        limit: number = 50
+        limit: number = 50,
     ): Promise<ChatMessage[]> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        return this.repository.listMessages(conversationId, after, before, limit);
+        return this.repository.listMessages(
+            conversationId,
+            after,
+            before,
+            limit,
+        );
     }
 
     async resyncConversation(
@@ -126,19 +223,28 @@ export class ChatServiceV2 {
         conversationId: string,
         after?: string,
         before?: string,
-        limit: number = 50
+        limit: number = 50,
     ): Promise<{
         conversation: ChatConversation;
         participant: ChatParticipantState;
         messages: ChatMessage[];
     }> {
         const context = await this.requireIdentity(clerkUserId);
-        const participant = await this.ensureParticipant(conversationId, context.identityUserId);
-        const conversation = await this.repository.getConversation(conversationId);
+        const participant = await this.ensureParticipant(
+            conversationId,
+            context.identityUserId,
+        );
+        const conversation =
+            await this.repository.getConversation(conversationId);
         if (!conversation) {
-            throw new Error('Conversation not found');
+            throw new Error("Conversation not found");
         }
-        const messages = await this.repository.listMessages(conversationId, after, before, limit);
+        const messages = await this.repository.listMessages(
+            conversationId,
+            after,
+            before,
+            limit,
+        );
 
         return {
             conversation,
@@ -156,15 +262,26 @@ export class ChatServiceV2 {
         conversationId: string,
         after?: string,
         before?: string,
-        limit: number = 50
+        limit: number = 50,
     ): Promise<ResyncResponseWithParticipants> {
         const context = await this.requireIdentity(clerkUserId);
-        const participant = await this.ensureParticipant(conversationId, context.identityUserId);
-        const conversation = await this.repository.getConversationWithParticipants(conversationId);
+        const participant = await this.ensureParticipant(
+            conversationId,
+            context.identityUserId,
+        );
+        const conversation =
+            await this.repository.getConversationWithParticipants(
+                conversationId,
+            );
         if (!conversation) {
-            throw new Error('Conversation not found');
+            throw new Error("Conversation not found");
         }
-        const messages = await this.repository.listMessages(conversationId, after, before, limit);
+        const messages = await this.repository.listMessages(
+            conversationId,
+            after,
+            before,
+            limit,
+        );
 
         return {
             conversation,
@@ -176,88 +293,121 @@ export class ChatServiceV2 {
     async sendMessage(
         clerkUserId: string,
         conversationId: string,
-        input: SendMessageInput
+        input: SendMessageInput,
     ): Promise<ChatMessage> {
         const context = await this.requireIdentity(clerkUserId);
         const senderId = context.identityUserId;
 
-        const participant = await this.ensureParticipant(conversationId, senderId);
-        if (participant.request_state === 'pending') {
-            throw new Error('Accept this request to reply');
+        const participant = await this.ensureParticipant(
+            conversationId,
+            senderId,
+        );
+        if (participant.request_state === "pending") {
+            throw new Error("Accept this request to reply");
         }
-        if (participant.request_state === 'declined') {
-            throw new Error('Conversation declined');
+        if (participant.request_state === "declined") {
+            throw new Error("Conversation declined");
         }
 
-        const otherParticipant = await this.findOtherParticipant(conversationId, senderId);
+        const otherParticipant = await this.findOtherParticipant(
+            conversationId,
+            senderId,
+        );
         if (!otherParticipant) {
-            throw new Error('Conversation participant missing');
+            throw new Error("Conversation participant missing");
         }
 
         if (otherParticipant.archived_at) {
-            throw new Error('Recipient archived this conversation');
+            throw new Error("Recipient archived this conversation");
         }
 
-        const blocked = await this.repository.isBlocked(senderId, otherParticipant.user_id);
+        const blocked = await this.repository.isBlocked(
+            senderId,
+            otherParticipant.user_id,
+        );
         if (blocked) {
-            throw new Error('Message could not be delivered');
+            throw new Error("Message could not be delivered");
         }
 
-        if (otherParticipant.request_state === 'pending') {
-            const existingMessages = await this.repository.listMessages(conversationId, undefined, undefined, 2);
+        if (otherParticipant.request_state === "pending") {
+            const existingMessages = await this.repository.listMessages(
+                conversationId,
+                undefined,
+                undefined,
+                2,
+            );
             if (existingMessages.length >= 1) {
-                throw new Error('Request pending; cannot send additional messages');
+                throw new Error(
+                    "Request pending; cannot send additional messages",
+                );
             }
         }
-        if (otherParticipant.request_state === 'declined') {
-            throw new Error('Conversation declined');
+        if (otherParticipant.request_state === "declined") {
+            throw new Error("Conversation declined");
         }
 
-        if (input.attachments && input.attachments.length > 0 && otherParticipant.request_state === 'pending') {
-            throw new Error('Attachments not allowed until request accepted');
+        if (
+            input.attachments &&
+            input.attachments.length > 0 &&
+            otherParticipant.request_state === "pending"
+        ) {
+            throw new Error("Attachments not allowed until request accepted");
         }
 
         try {
-            const { data, error } = await this.repository.getSupabase().rpc('chat_send_message', {
-                p_conversation_id: conversationId,
-                p_sender_id: senderId,
-                p_body: input.body ?? null,
-                p_client_message_id: input.clientMessageId ?? null,
-            });
+            const { data, error } = await this.repository
+                .getSupabase()
+                .rpc("chat_send_message", {
+                    p_conversation_id: conversationId,
+                    p_sender_id: senderId,
+                    p_body: input.body ?? null,
+                    p_client_message_id: input.clientMessageId ?? null,
+                });
 
             if (error) {
                 throw error;
             }
 
             const message = data as ChatMessage;
-            await this.publishToConversation(conversationId, 'message.created', {
+            await this.publishToConversation(
                 conversationId,
-                messageId: message.id,
-                senderId,
-                createdAt: message.created_at,
-            });
-            await this.publishToUser(otherParticipant.user_id, 'conversation.updated', {
-                conversationId,
-                lastMessageId: message.id,
-                lastMessageAt: message.created_at,
-            });
-            await this.publishDomainEvent('chat.message.created', {
+                "message.created",
+                {
+                    conversationId,
+                    messageId: message.id,
+                    senderId,
+                    createdAt: message.created_at,
+                },
+            );
+            await this.publishToUser(
+                otherParticipant.user_id,
+                "conversation.updated",
+                {
+                    conversationId,
+                    lastMessageId: message.id,
+                    lastMessageAt: message.created_at,
+                },
+            );
+            await this.publishDomainEvent("chat.message.created", {
                 conversation_id: conversationId,
                 message_id: message.id,
                 sender_user_id: senderId,
                 recipient_user_id: otherParticipant.user_id,
                 created_at: message.created_at,
-                body_preview: input.body ? String(input.body).slice(0, 140) : null,
+                body_preview: input.body
+                    ? String(input.body).slice(0, 140)
+                    : null,
             });
 
             return message;
         } catch (error: any) {
-            if (error?.code === '23505' && input.clientMessageId) {
-                const { data } = await this.repository.getSupabase()
-                    .from('chat_messages')
-                    .select('*')
-                    .eq('sender_id', senderId)
-                    .eq('client_message_id', input.clientMessageId)
+            if (error?.code === "23505" && input.clientMessageId) {
+                const { data } = await this.repository
+                    .getSupabase()
+                    .from("chat_messages")
+                    .select("*")
+                    .eq("sender_id", senderId)
+                    .eq("client_message_id", input.clientMessageId)
                     .maybeSingle();
                 if (data) {
                     return data as ChatMessage;
@@ -267,98 +417,158 @@ export class ChatServiceV2 {
         }
     }
 
-    async acceptConversation(clerkUserId: string, conversationId: string): Promise<void> {
+    async acceptConversation(
+        clerkUserId: string,
+        conversationId: string,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        await this.repository.updateParticipantState(conversationId, context.identityUserId, {
-            request_state: 'accepted',
-        });
-        const other = await this.findOtherParticipant(conversationId, context.identityUserId);
+        await this.repository.updateParticipantState(
+            conversationId,
+            context.identityUserId,
+            {
+                request_state: "accepted",
+            },
+        );
+        const other = await this.findOtherParticipant(
+            conversationId,
+            context.identityUserId,
+        );
         if (other) {
-            await this.publishToUser(other.user_id, 'conversation.accepted', {
+            await this.publishToUser(other.user_id, "conversation.accepted", {
                 conversationId,
                 acceptedBy: context.identityUserId,
             });
         }
     }
 
-    async declineConversation(clerkUserId: string, conversationId: string): Promise<void> {
+    async declineConversation(
+        clerkUserId: string,
+        conversationId: string,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        await this.repository.updateParticipantState(conversationId, context.identityUserId, {
-            request_state: 'declined',
-            archived_at: new Date().toISOString(),
-        });
-        const other = await this.findOtherParticipant(conversationId, context.identityUserId);
+        await this.repository.updateParticipantState(
+            conversationId,
+            context.identityUserId,
+            {
+                request_state: "declined",
+                archived_at: new Date().toISOString(),
+            },
+        );
+        const other = await this.findOtherParticipant(
+            conversationId,
+            context.identityUserId,
+        );
         if (other) {
-            await this.publishToUser(other.user_id, 'conversation.declined', {
+            await this.publishToUser(other.user_id, "conversation.declined", {
                 conversationId,
                 declinedBy: context.identityUserId,
             });
         }
     }
 
-    async muteConversation(clerkUserId: string, conversationId: string, muted: boolean): Promise<void> {
+    async muteConversation(
+        clerkUserId: string,
+        conversationId: string,
+        muted: boolean,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        await this.repository.updateParticipantState(conversationId, context.identityUserId, {
-            muted_at: muted ? new Date().toISOString() : null,
-        });
-        await this.publishToUser(context.identityUserId, 'conversation.updated', {
+        await this.repository.updateParticipantState(
             conversationId,
-            muted,
-        });
+            context.identityUserId,
+            {
+                muted_at: muted ? new Date().toISOString() : null,
+            },
+        );
+        await this.publishToUser(
+            context.identityUserId,
+            "conversation.updated",
+            {
+                conversationId,
+                muted,
+            },
+        );
     }
 
-    async archiveConversation(clerkUserId: string, conversationId: string, archived: boolean): Promise<void> {
+    async archiveConversation(
+        clerkUserId: string,
+        conversationId: string,
+        archived: boolean,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        await this.repository.updateParticipantState(conversationId, context.identityUserId, {
-            archived_at: archived ? new Date().toISOString() : null,
-        });
-        await this.publishToUser(context.identityUserId, 'conversation.updated', {
+        await this.repository.updateParticipantState(
             conversationId,
-            archived,
-        });
+            context.identityUserId,
+            {
+                archived_at: archived ? new Date().toISOString() : null,
+            },
+        );
+        await this.publishToUser(
+            context.identityUserId,
+            "conversation.updated",
+            {
+                conversationId,
+                archived,
+            },
+        );
     }
 
     async updateReadReceipt(
         clerkUserId: string,
         conversationId: string,
-        lastReadMessageId?: string | null
+        lastReadMessageId?: string | null,
     ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        const { error } = await this.repository.getSupabase().rpc('chat_mark_read', {
-            p_conversation_id: conversationId,
-            p_user_id: context.identityUserId,
-            p_last_read_message_id: lastReadMessageId ?? null,
-        });
+        const { error } = await this.repository
+            .getSupabase()
+            .rpc("chat_mark_read", {
+                p_conversation_id: conversationId,
+                p_user_id: context.identityUserId,
+                p_last_read_message_id: lastReadMessageId ?? null,
+            });
         if (error) {
             throw error;
         }
-        await this.publishToConversation(conversationId, 'read.receipt', {
+        await this.publishToConversation(conversationId, "read.receipt", {
             conversationId,
             userId: context.identityUserId,
             lastReadMessageId: lastReadMessageId ?? null,
         });
     }
 
-    async blockUser(clerkUserId: string, blockedUserId: string, reason?: string): Promise<void> {
+    async blockUser(
+        clerkUserId: string,
+        blockedUserId: string,
+        reason?: string,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         if (context.identityUserId === blockedUserId) {
-            throw new Error('Cannot block yourself');
+            throw new Error("Cannot block yourself");
         }
-        await this.repository.addBlock(context.identityUserId, blockedUserId, reason);
-        await this.publishToUser(context.identityUserId, 'block.created', {
+        await this.repository.addBlock(
+            context.identityUserId,
+            blockedUserId,
+            reason,
+        );
+        await this.publishToUser(context.identityUserId, "block.created", {
             blockedUserId,
         });
     }
 
-    async unblockUser(clerkUserId: string, blockedUserId: string): Promise<void> {
+    async unblockUser(
+        clerkUserId: string,
+        blockedUserId: string,
+    ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
-        await this.repository.removeBlock(context.identityUserId, blockedUserId);
-        await this.publishToUser(context.identityUserId, 'block.removed', {
+        await this.repository.removeBlock(
+            context.identityUserId,
+            blockedUserId,
+        );
+        await this.publishToUser(context.identityUserId, "block.removed", {
             blockedUserId,
         });
     }
@@ -368,12 +578,17 @@ export class ChatServiceV2 {
         conversationId: string,
         reportedUserId: string,
         category: string,
-        description?: string | null
+        description?: string | null,
     ): Promise<void> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
 
-        const evidenceMessages = await this.repository.listMessages(conversationId, undefined, undefined, 20);
+        const evidenceMessages = await this.repository.listMessages(
+            conversationId,
+            undefined,
+            undefined,
+            20,
+        );
         const evidencePointer = JSON.stringify({
             message_ids: evidenceMessages.map((m) => m.id),
         });
@@ -391,11 +606,11 @@ export class ChatServiceV2 {
     async listReports(
         clerkUserId: string,
         limit: number,
-        cursor?: string
+        cursor?: string,
     ): Promise<{ data: ChatReport[]; total: number }> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
         return this.repository.listReports(limit, cursor);
     }
@@ -404,19 +619,19 @@ export class ChatServiceV2 {
         clerkUserId: string,
         reportId: string,
         input: {
-            action: ChatModerationAudit['action'];
-            status?: ChatReport['status'];
+            action: ChatModerationAudit["action"];
+            status?: ChatReport["status"];
             details?: Record<string, any> | null;
-        }
+        },
     ): Promise<{ report: ChatReport; audit: ChatModerationAudit }> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
 
         const report = await this.repository.getReport(reportId);
         if (!report) {
-            throw new Error('Report not found');
+            throw new Error("Report not found");
         }
 
         const audit = await this.repository.createModerationAudit({
@@ -426,8 +641,11 @@ export class ChatServiceV2 {
             details: input.details ?? null,
         });
 
-        const status = input.status ?? 'resolved';
-        const updatedReport = await this.repository.updateReportStatus(reportId, status);
+        const status = input.status ?? "resolved";
+        const updatedReport = await this.repository.updateReportStatus(
+            reportId,
+            status,
+        );
 
         return {
             report: updatedReport,
@@ -438,16 +656,19 @@ export class ChatServiceV2 {
     async listModerationAudit(
         clerkUserId: string,
         limit: number,
-        cursor?: string
+        cursor?: string,
     ): Promise<{ data: ChatModerationAudit[]; total: number }> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
         return this.repository.listModerationAudit(limit, cursor);
     }
 
-    async getAdminMetrics(clerkUserId: string, rangeDays: number = 7): Promise<{
+    async getAdminMetrics(
+        clerkUserId: string,
+        rangeDays: number = 7,
+    ): Promise<{
         rangeDays: number;
         since: string;
         totals: {
@@ -474,24 +695,25 @@ export class ChatServiceV2 {
     }> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
-        const safeRange = Number.isFinite(rangeDays) && rangeDays > 0 ? rangeDays : 7;
+        const safeRange =
+            Number.isFinite(rangeDays) && rangeDays > 0 ? rangeDays : 7;
         return this.repository.getAdminMetrics(safeRange);
     }
 
     async getReportEvidence(
         clerkUserId: string,
-        reportId: string
+        reportId: string,
     ): Promise<{ report: ChatReport; messages: ChatMessage[] }> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
 
         const report = await this.repository.getReport(reportId);
         if (!report) {
-            throw new Error('Report not found');
+            throw new Error("Report not found");
         }
 
         let messageIds: string[] = [];
@@ -499,7 +721,9 @@ export class ChatServiceV2 {
             try {
                 const parsed = JSON.parse(report.evidence_pointer);
                 if (Array.isArray(parsed?.message_ids)) {
-                    messageIds = parsed.message_ids.filter((id: any) => typeof id === 'string');
+                    messageIds = parsed.message_ids.filter(
+                        (id: any) => typeof id === "string",
+                    );
                 }
             } catch {
                 messageIds = [];
@@ -522,15 +746,18 @@ export class ChatServiceV2 {
             content_type: string;
             size_bytes: number;
             storage_key: string;
-        }
+        },
     ): Promise<ChatAttachment> {
         const context = await this.requireIdentity(clerkUserId);
-        const participant = await this.ensureParticipant(conversationId, context.identityUserId);
-        if (participant.request_state === 'pending') {
-            throw new Error('Accept this request to reply');
+        const participant = await this.ensureParticipant(
+            conversationId,
+            context.identityUserId,
+        );
+        if (participant.request_state === "pending") {
+            throw new Error("Accept this request to reply");
         }
-        if (participant.request_state === 'declined') {
-            throw new Error('Conversation declined');
+        if (participant.request_state === "declined") {
+            throw new Error("Conversation declined");
         }
         return this.repository.createAttachment({
             conversation_id: conversationId,
@@ -544,35 +771,43 @@ export class ChatServiceV2 {
 
     async markAttachmentUploaded(
         clerkUserId: string,
-        attachmentId: string
+        attachmentId: string,
     ): Promise<ChatAttachment> {
         const context = await this.requireIdentity(clerkUserId);
         const attachment = await this.repository.findAttachment(attachmentId);
         if (!attachment || attachment.uploader_id !== context.identityUserId) {
-            throw new Error('Attachment not found or access denied');
+            throw new Error("Attachment not found or access denied");
         }
         const updated = await this.repository.updateAttachment(attachmentId, {
-            status: 'pending_scan',
+            status: "pending_scan",
         });
-        await this.publishToConversation(updated.conversation_id, 'attachment.updated', {
-            attachmentId: updated.id,
-            status: updated.status,
-        });
+        await this.publishToConversation(
+            updated.conversation_id,
+            "attachment.updated",
+            {
+                attachmentId: updated.id,
+                status: updated.status,
+            },
+        );
         return updated;
     }
 
     async updateMessageRedaction(
         clerkUserId: string,
         messageId: string,
-        updates: { redacted: boolean; reason?: string | null; editedBody?: string | null }
+        updates: {
+            redacted: boolean;
+            reason?: string | null;
+            editedBody?: string | null;
+        },
     ): Promise<ChatMessage> {
         const context = await this.requireIdentity(clerkUserId);
         if (!context.isPlatformAdmin) {
-            throw new Error('Admin privileges required');
+            throw new Error("Admin privileges required");
         }
 
         const payload: Record<string, any> = {};
-        if (typeof updates.editedBody !== 'undefined') {
+        if (typeof updates.editedBody !== "undefined") {
             payload.body = updates.editedBody;
             payload.edited_at = new Date().toISOString();
         }
@@ -581,10 +816,11 @@ export class ChatServiceV2 {
             payload.redaction_reason = updates.reason ?? null;
         }
 
-        const { data, error } = await this.repository.getSupabase()
-            .from('chat_messages')
+        const { data, error } = await this.repository
+            .getSupabase()
+            .from("chat_messages")
             .update(payload)
-            .eq('id', messageId)
+            .eq("id", messageId)
             .select()
             .single();
 
@@ -592,30 +828,41 @@ export class ChatServiceV2 {
             throw error;
         }
         const message = data as ChatMessage;
-        await this.publishToConversation(message.conversation_id, 'message.updated', {
-            messageId: message.id,
-            conversationId: message.conversation_id,
-        });
+        await this.publishToConversation(
+            message.conversation_id,
+            "message.updated",
+            {
+                messageId: message.id,
+                conversationId: message.conversation_id,
+            },
+        );
         return message;
     }
 
-    private async ensureParticipant(conversationId: string, userId: string): Promise<ChatParticipantState> {
-        const participant = await this.repository.getParticipantState(conversationId, userId);
+    private async ensureParticipant(
+        conversationId: string,
+        userId: string,
+    ): Promise<ChatParticipantState> {
+        const participant = await this.repository.getParticipantState(
+            conversationId,
+            userId,
+        );
         if (!participant) {
-            throw new Error('Conversation access denied');
+            throw new Error("Conversation access denied");
         }
         return participant;
     }
 
     private async findOtherParticipant(
         conversationId: string,
-        userId: string
+        userId: string,
     ): Promise<ChatParticipantState | null> {
-        const { data, error } = await this.repository.getSupabase()
-            .from('chat_conversation_participants')
-            .select('*')
-            .eq('conversation_id', conversationId)
-            .neq('user_id', userId)
+        const { data, error } = await this.repository
+            .getSupabase()
+            .from("chat_conversation_participants")
+            .select("*")
+            .eq("conversation_id", conversationId)
+            .neq("user_id", userId)
             .maybeSingle();
         if (error) {
             throw error;
@@ -623,7 +870,11 @@ export class ChatServiceV2 {
         return data as ChatParticipantState | null;
     }
 
-    private async publishToConversation(conversationId: string, type: string, data: Record<string, any>) {
+    private async publishToConversation(
+        conversationId: string,
+        type: string,
+        data: Record<string, any>,
+    ) {
         if (!this.eventPublisher) return;
         await this.eventPublisher.publishToConversation(conversationId, {
             type,
@@ -633,7 +884,11 @@ export class ChatServiceV2 {
         });
     }
 
-    private async publishToUser(userId: string, type: string, data: Record<string, any>) {
+    private async publishToUser(
+        userId: string,
+        type: string,
+        data: Record<string, any>,
+    ) {
         if (!this.eventPublisher) return;
         await this.eventPublisher.publishToUser(userId, {
             type,
@@ -643,18 +898,21 @@ export class ChatServiceV2 {
         });
     }
 
-    private async publishDomainEvent(eventType: string, payload: Record<string, any>) {
+    private async publishDomainEvent(
+        eventType: string,
+        payload: Record<string, any>,
+    ) {
         if (!this.domainPublisher) return;
         await this.domainPublisher.publish(eventType, payload);
     }
 
     private async assertContextAccess(
-        context: Awaited<ReturnType<ChatServiceV2['requireIdentity']>>,
+        context: Awaited<ReturnType<ChatServiceV2["requireIdentity"]>>,
         chatContext?: {
             application_id?: string | null;
             job_id?: string | null;
             company_id?: string | null;
-        }
+        },
     ): Promise<void> {
         if (!chatContext) {
             return;
@@ -664,124 +922,166 @@ export class ChatServiceV2 {
 
         if (chatContext.application_id) {
             const { data: application } = await supabase
-                .from('applications')
-                .select('candidate_id, recruiter_id, job_id')
-                .eq('id', chatContext.application_id)
+                .from("applications")
+                .select("candidate_id, recruiter_id, job_id")
+                .eq("id", chatContext.application_id)
                 .maybeSingle();
 
             if (!application) {
-                throw new Error('Application not found');
+                throw new Error("Application not found");
             }
 
-            if (context.candidateId && application.candidate_id === context.candidateId) {
+            if (
+                context.candidateId &&
+                application.candidate_id === context.candidateId
+            ) {
                 return;
             }
 
-            if (context.recruiterId && application.recruiter_id === context.recruiterId) {
+            if (
+                context.recruiterId &&
+                application.recruiter_id === context.recruiterId
+            ) {
                 return;
             }
 
             if (context.organizationIds.length > 0) {
                 const { data: job } = await supabase
-                    .from('jobs')
-                    .select('company_id')
-                    .eq('id', application.job_id)
+                    .from("jobs")
+                    .select("company_id")
+                    .eq("id", application.job_id)
                     .maybeSingle();
                 if (job?.company_id) {
                     const { data: company } = await supabase
-                        .from('companies')
-                        .select('identity_organization_id')
-                        .eq('id', job.company_id)
+                        .from("companies")
+                        .select("identity_organization_id")
+                        .eq("id", job.company_id)
                         .maybeSingle();
-                    if (company?.identity_organization_id && context.organizationIds.includes(company.identity_organization_id)) {
+                    if (
+                        company?.identity_organization_id &&
+                        context.organizationIds.includes(
+                            company.identity_organization_id,
+                        )
+                    ) {
                         return;
                     }
                 }
             }
 
-            throw new Error('Not authorized for application context');
+            throw new Error("Not authorized for application context");
         }
 
         if (chatContext.job_id) {
             const { data: job } = await supabase
-                .from('jobs')
-                .select('company_id')
-                .eq('id', chatContext.job_id)
+                .from("jobs")
+                .select("company_id")
+                .eq("id", chatContext.job_id)
                 .maybeSingle();
             if (!job) {
-                throw new Error('Job not found');
+                throw new Error("Job not found");
             }
 
             if (context.organizationIds.length > 0) {
                 const { data: company } = await supabase
-                    .from('companies')
-                    .select('identity_organization_id')
-                    .eq('id', job.company_id)
+                    .from("companies")
+                    .select("identity_organization_id")
+                    .eq("id", job.company_id)
                     .maybeSingle();
-                if (company?.identity_organization_id && context.organizationIds.includes(company.identity_organization_id)) {
+                if (
+                    company?.identity_organization_id &&
+                    context.organizationIds.includes(
+                        company.identity_organization_id,
+                    )
+                ) {
                     return;
                 }
             }
 
             if (context.recruiterId) {
-                const { data: assignment } = await supabase
-                    .from('role_assignments')
-                    .select('id')
-                    .eq('job_id', chatContext.job_id)
-                    .eq('recruiter_user_id', context.recruiterId)
-                    .eq('status', 'active')
+                // Check candidate_recruiter_id on applications
+                const { data: candidateSide } = await supabase
+                    .from("applications")
+                    .select("id")
+                    .eq("job_id", chatContext.job_id)
+                    .eq("candidate_recruiter_id", context.recruiterId)
+                    .limit(1)
                     .maybeSingle();
-                if (assignment) {
+
+                if (candidateSide) {
+                    return;
+                }
+
+                // Check company_recruiter_id and job_owner_recruiter_id on jobs
+                const { data: companySide } = await supabase
+                    .from("jobs")
+                    .select("id")
+                    .eq("id", chatContext.job_id)
+                    .or(
+                        `company_recruiter_id.eq.${context.recruiterId},job_owner_recruiter_id.eq.${context.recruiterId}`,
+                    )
+                    .maybeSingle();
+
+                if (companySide) {
                     return;
                 }
             }
 
             if (context.candidateId) {
                 const { data: application } = await supabase
-                    .from('applications')
-                    .select('id')
-                    .eq('job_id', chatContext.job_id)
-                    .eq('candidate_id', context.candidateId)
+                    .from("applications")
+                    .select("id")
+                    .eq("job_id", chatContext.job_id)
+                    .eq("candidate_id", context.candidateId)
                     .maybeSingle();
                 if (application) {
                     return;
                 }
             }
 
-            throw new Error('Not authorized for job context');
+            throw new Error("Not authorized for job context");
         }
 
         if (chatContext.company_id) {
             if (context.organizationIds.length > 0) {
                 const { data: company } = await supabase
-                    .from('companies')
-                    .select('identity_organization_id')
-                    .eq('id', chatContext.company_id)
+                    .from("companies")
+                    .select("identity_organization_id")
+                    .eq("id", chatContext.company_id)
                     .maybeSingle();
-                if (company?.identity_organization_id && context.organizationIds.includes(company.identity_organization_id)) {
+                if (
+                    company?.identity_organization_id &&
+                    context.organizationIds.includes(
+                        company.identity_organization_id,
+                    )
+                ) {
                     return;
                 }
             }
 
             if (context.recruiterId) {
                 const { data: assignments } = await supabase
-                    .from('role_assignments')
-                    .select('job_id')
-                    .eq('recruiter_user_id', context.recruiterId)
-                    .eq('status', 'active');
+                    .from("role_assignments")
+                    .select("job_id")
+                    .eq("recruiter_user_id", context.recruiterId)
+                    .eq("status", "active");
                 if (assignments && assignments.length > 0) {
                     const jobIds = assignments.map((row: any) => row.job_id);
                     const { data: jobs } = await supabase
-                        .from('jobs')
-                        .select('id, company_id')
-                        .in('id', jobIds);
-                    if (jobs?.some((row: any) => row.company_id === chatContext.company_id)) {
+                        .from("jobs")
+                        .select("id, company_id")
+                        .in("id", jobIds);
+                    if (
+                        jobs?.some(
+                            (row: any) =>
+                                row.company_id === chatContext.company_id,
+                        )
+                    ) {
                         return;
                     }
                 }
             }
 
-            throw new Error('Not authorized for company context');
+            throw new Error("Not authorized for company context");
         }
     }
 }

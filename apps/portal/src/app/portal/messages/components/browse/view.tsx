@@ -6,7 +6,7 @@ import { BrowseLayout } from "@splits-network/shared-ui";
 import { LoadingState } from "@splits-network/shared-ui";
 import { EmptyState } from "@/hooks/use-standard-list";
 import { useFilter } from "../../contexts/filter-context";
-import { getOtherUserId } from "../../types";
+import { getOtherUserId, getOtherParticipant } from "../../types";
 import ListItem from "./list-item";
 import DetailPanel from "./detail-panel";
 
@@ -17,8 +17,6 @@ export default function BrowseView() {
         currentUserId,
         presenceMap,
         contextMap,
-        isRecruiter,
-        isCompanyUser,
     } = useFilter();
 
     const router = useRouter();
@@ -84,12 +82,14 @@ export default function BrowseView() {
                                 ? presenceMap[otherId]?.status
                                 : undefined;
 
-                            // Infer other user's role from current user's role
-                            const otherUserRole = isRecruiter
-                                ? "Company"
-                                : isCompanyUser
-                                  ? "Recruiter"
-                                  : null;
+                            // Get other user's role from API data
+                            const other = getOtherParticipant(
+                                convo,
+                                currentUserId,
+                            );
+                            const otherUserRole = other?.user_role
+                                ? other.user_role.charAt(0).toUpperCase() + other.user_role.slice(1)
+                                : null;
 
                             return (
                                 <ListItem
