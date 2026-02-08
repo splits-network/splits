@@ -109,7 +109,8 @@ export default function PayoutSchedulesPage() {
             }
         }
         loadStats();
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     async function triggerSchedule(scheduleId: string) {
         if (!confirm('Manually trigger this schedule? This will process it immediately.')) return;

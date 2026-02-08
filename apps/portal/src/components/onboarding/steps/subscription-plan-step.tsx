@@ -82,7 +82,8 @@ export function SubscriptionPlanStep() {
         };
 
         fetchPlans();
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Handle plan selection
     const handlePlanSelect = async (plan: Plan) => {

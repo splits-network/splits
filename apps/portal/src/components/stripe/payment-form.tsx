@@ -103,7 +103,8 @@ export function PaymentForm({
                 setDiscountValidating(false);
             }
         },
-        [getToken, planId, billingPeriod, onDiscountApplied],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [planId, billingPeriod, onDiscountApplied],
     );
 
     // Debounced validation effect

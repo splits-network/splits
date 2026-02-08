@@ -40,7 +40,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     useEffect(() => {
         fetchDetail();

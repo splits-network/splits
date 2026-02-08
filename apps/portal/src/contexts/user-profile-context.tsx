@@ -185,7 +185,8 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [isAuthLoaded, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthLoaded]);
 
     useEffect(() => {
         fetchProfile();
@@ -209,7 +210,8 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         } finally {
             setIsSubscriptionLoading(false);
         }
-    }, [profile?.recruiter_id, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.recruiter_id]);
 
     // Load subscription when profile loads
     useEffect(() => {

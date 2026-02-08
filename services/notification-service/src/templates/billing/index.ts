@@ -1,6 +1,6 @@
 /**
  * Billing Email Templates
- * Templates for Stripe Connect onboarding notifications
+ * Templates for Stripe Connect onboarding and company billing notifications
  */
 
 import { baseEmailTemplate, EmailSource } from '../base';
@@ -59,6 +59,62 @@ export interface StripeConnectDisabledData {
     reason?: string;
     connectUrl: string;
     source?: EmailSource;
+}
+
+export interface CompanyBillingSetupCompleteData {
+    billingEmail: string;
+    billingTerms: string;
+    hasPaymentMethod: boolean;
+    billingUrl: string;
+    source?: EmailSource;
+}
+
+export function companyBillingSetupCompleteEmail(data: CompanyBillingSetupCompleteData): string {
+    const termsLabel: Record<string, string> = {
+        immediate: 'Immediate (Charge on completion)',
+        net_30: 'Net 30',
+        net_60: 'Net 60',
+        net_90: 'Net 90',
+    };
+
+    const content = `
+${heading({ level: 1, text: 'Company Billing Is Set Up' })}
+
+${alert({
+        type: 'success',
+        title: 'You\'re all set!',
+        message: 'Your company billing profile is configured and ready for placement invoicing.',
+    })}
+
+${infoCard({
+        title: 'Billing Details',
+        items: [
+            { label: 'Billing Email', value: data.billingEmail },
+            { label: 'Payment Terms', value: termsLabel[data.billingTerms] || data.billingTerms },
+            { label: 'Payment Method', value: data.hasPaymentMethod ? 'Card on file' : 'Pay via invoice link', highlight: data.hasPaymentMethod },
+        ],
+    })}
+
+${paragraph(
+        '<strong>How invoicing works:</strong> When a placement is confirmed, an invoice is generated and sent to your billing email. Payment is due within your billing terms. You can view all invoices on your billing page.'
+    )}
+
+${button({
+        href: data.billingUrl,
+        text: 'View Billing Dashboard →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('You can update your billing details, payment method, or billing terms from your billing settings at any time.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        content,
+        preheader: 'Your company billing is set up and ready for placement invoicing.',
+        source: data.source || 'portal',
+    });
 }
 
 export function stripeConnectDisabledEmail(data: StripeConnectDisabledData): string {

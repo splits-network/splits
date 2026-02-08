@@ -201,6 +201,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_onboarded');
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.stripe_connect_disabled');
 
+            // Billing events - Company billing setup
+            await this.channel.bindQueue(this.queue, this.exchange, 'company.billing_profile_completed');
+
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
@@ -381,6 +384,11 @@ export class DomainEventConsumer {
                 break;
             case 'recruiter.stripe_connect_disabled':
                 await this.billingConsumer.handleStripeConnectDisabled(event);
+                break;
+
+            // Billing domain - Company billing setup
+            case 'company.billing_profile_completed':
+                await this.billingConsumer.handleCompanyBillingProfileCompleted(event);
                 break;
 
             case 'status.contact_submitted':

@@ -22,40 +22,6 @@ export default function BillingContent() {
         );
     }
 
-    // Company users don't have subscriptions in this system
-    if (isCompanyUser && !isRecruiter) {
-        return (
-            <div className="container mx-auto py-6 px-4">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold">
-                        <i className="fa-duotone fa-regular fa-credit-card mr-3"></i>
-                        Billing & Subscriptions
-                    </h1>
-                    <p className="text-base-content/70 mt-2">
-                        Manage your subscriptions, payment methods, and billing
-                        history
-                    </p>
-                </div>
-
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="text-center py-8">
-                            <i className="fa-duotone fa-regular fa-building text-5xl text-base-content/30 mb-4 block"></i>
-                            <h2 className="text-xl font-semibold mb-2">
-                                Company Billing
-                            </h2>
-                            <p className="text-base-content/70 max-w-md mx-auto">
-                                Company billing is managed at the organization
-                                level. Contact your organization administrator
-                                for billing inquiries.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="container mx-auto py-6 px-4">
             <div className="mb-6">

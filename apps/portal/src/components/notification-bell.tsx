@@ -62,7 +62,8 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             console.warn('Failed to fetch unread count:', err);
             setError(true);
         }
-    }, [getToken, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toast]);
 
     // Fetch recent notifications when dropdown opens
     const loadNotifications = useCallback(async () => {
@@ -86,7 +87,8 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Initial load and polling
     useEffect(() => {

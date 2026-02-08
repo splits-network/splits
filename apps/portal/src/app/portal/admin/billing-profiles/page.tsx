@@ -119,7 +119,8 @@ export default function AdminBillingProfilesPage() {
 
             return response;
         },
-        [getToken, selectedProfile?.company_id]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [selectedProfile?.company_id]
     );
 
     const {

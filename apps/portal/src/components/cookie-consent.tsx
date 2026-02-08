@@ -53,7 +53,8 @@ export default function CookieConsent() {
         };
 
         syncConsentToDatabase();
-    }, [isSignedIn, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn]);
 
     const saveConsent = async (preferences: any) => {
         const consentData = {

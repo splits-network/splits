@@ -120,7 +120,8 @@ export default function EscrowHoldsPage() {
             }
         }
         loadStats();
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     async function releaseHold(notes: string = '') {
         if (!holdToRelease) return;

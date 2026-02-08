@@ -106,7 +106,8 @@ export default function PayoutsAdminPage() {
             }
         }
         loadBadgeCounts();
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     async function processPayout(payoutId: string) {
         const confirmed = await confirm({

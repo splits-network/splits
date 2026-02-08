@@ -59,7 +59,8 @@ export default function Details({ companyId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [companyId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [companyId]);
 
     const fetchJobs = useCallback(async () => {
         if (!companyId) return;
@@ -78,7 +79,8 @@ export default function Details({ companyId, onRefresh }: DetailsProps) {
         } finally {
             setJobsLoading(false);
         }
-    }, [companyId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [companyId]);
 
     useEffect(() => {
         fetchCompany();

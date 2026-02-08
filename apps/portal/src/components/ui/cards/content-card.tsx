@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { BaseCard } from './base-card';
+import { ReactNode } from "react";
+import { BaseCard } from "./base-card";
 
 export interface ContentCardProps {
     /** Card title */
@@ -17,9 +17,10 @@ export interface ContentCardProps {
     /** Footer content */
     footer?: ReactNode;
     /** Elevation level */
-    elevation?: 'none' | 'sm' | 'default' | 'lg';
+    elevation?: "none" | "sm" | "default" | "lg";
+    elevatedHeader?: boolean;
     /** Padding size */
-    padding?: 'none' | 'compact' | 'default' | 'spacious';
+    padding?: "none" | "compact" | "default" | "spacious";
     /** Additional CSS classes */
     className?: string;
     /** Whether the card is collapsible */
@@ -32,7 +33,7 @@ export interface ContentCardProps {
 
 /**
  * ContentCard - General purpose content container
- * 
+ *
  * Features:
  * - Optional title with icon
  * - Header action slot
@@ -47,9 +48,10 @@ export function ContentCard({
     headerActions,
     children,
     footer,
-    elevation = 'default',
-    padding = 'default',
-    className = '',
+    elevation = "default",
+    elevatedHeader = false,
+    padding = "default",
+    className = "",
     collapsible = false,
     defaultCollapsed = false,
     loading = false,
@@ -58,7 +60,11 @@ export function ContentCard({
 
     if (loading) {
         return (
-            <BaseCard elevation={elevation} padding={padding} className={className}>
+            <BaseCard
+                elevation={elevation}
+                padding={padding}
+                className={className}
+            >
                 <div className="animate-pulse space-y-4">
                     {hasHeader && (
                         <div className="flex items-center justify-between">
@@ -78,7 +84,11 @@ export function ContentCard({
 
     if (collapsible) {
         return (
-            <BaseCard elevation={elevation} padding="none" className={className}>
+            <BaseCard
+                elevation={elevation}
+                padding="none"
+                className={className}
+            >
                 <div className="collapse collapse-arrow">
                     <input type="checkbox" defaultChecked={!defaultCollapsed} />
                     <div className="collapse-title">
@@ -86,15 +96,21 @@ export function ContentCard({
                             <div className="flex items-center gap-3">
                                 {icon && (
                                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <i className={`fa-duotone fa-regular ${icon} text-primary`}></i>
+                                        <i
+                                            className={`fa-duotone fa-regular ${icon} text-primary`}
+                                        ></i>
                                     </div>
                                 )}
                                 <div>
                                     {title && (
-                                        <h3 className="font-semibold text-base-content">{title}</h3>
+                                        <h3 className="font-semibold text-base-content">
+                                            {title}
+                                        </h3>
                                     )}
                                     {subtitle && (
-                                        <p className="text-sm text-base-content/60">{subtitle}</p>
+                                        <p className="text-sm text-base-content/60">
+                                            {subtitle}
+                                        </p>
                                     )}
                                 </div>
                             </div>
@@ -106,7 +122,15 @@ export function ContentCard({
                         </div>
                     </div>
                     <div className="collapse-content">
-                        <div className={padding === 'compact' ? 'pt-2' : padding === 'spacious' ? 'pt-4' : 'pt-3'}>
+                        <div
+                            className={
+                                padding === "compact"
+                                    ? "pt-2"
+                                    : padding === "spacious"
+                                      ? "pt-4"
+                                      : "pt-3"
+                            }
+                        >
                             {children}
                         </div>
                         {footer && (
@@ -122,20 +146,56 @@ export function ContentCard({
 
     return (
         <BaseCard elevation={elevation} padding={padding} className={className}>
-            {hasHeader && (
+            {hasHeader && elevatedHeader && (
+                <div className="card bg-base-100 shadow-lg -mx-4 -mt-4 mb-4">
+                    <div className="card-body px-4 py-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                {icon && (
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <i
+                                            className={`fa-duotone fa-regular ${icon} text-primary`}
+                                        ></i>
+                                    </div>
+                                )}
+                                <div>
+                                    {title && (
+                                        <h3 className="font-semibold text-base-content">
+                                            {title}
+                                        </h3>
+                                    )}
+                                    {subtitle && (
+                                        <p className="text-sm text-base-content/60">
+                                            {subtitle}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            {headerActions}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {hasHeader && !elevatedHeader && (
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         {icon && (
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <i className={`fa-duotone fa-regular ${icon} text-primary`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${icon} text-primary`}
+                                ></i>
                             </div>
                         )}
                         <div>
                             {title && (
-                                <h3 className="font-semibold text-base-content">{title}</h3>
+                                <h3 className="font-semibold text-base-content">
+                                    {title}
+                                </h3>
                             )}
                             {subtitle && (
-                                <p className="text-sm text-base-content/60">{subtitle}</p>
+                                <p className="text-sm text-base-content/60">
+                                    {subtitle}
+                                </p>
                             )}
                         </div>
                     </div>

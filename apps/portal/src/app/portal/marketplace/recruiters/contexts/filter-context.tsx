@@ -100,7 +100,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         };
 
         loadCompanies();
-    }, [getToken, isCompanyUser, isAdmin, profile?.organization_ids]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isCompanyUser, isAdmin, profile?.organization_ids]);
 
     const canInvite = (isCompanyUser || isAdmin) && companies.length > 0;
 

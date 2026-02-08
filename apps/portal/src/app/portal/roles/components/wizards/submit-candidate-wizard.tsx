@@ -131,7 +131,8 @@ export default function SubmitCandidateWizard({
         }
 
         loadCandidates();
-    }, [currentStep, mode, page, debouncedSearch, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentStep, mode, page, debouncedSearch]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

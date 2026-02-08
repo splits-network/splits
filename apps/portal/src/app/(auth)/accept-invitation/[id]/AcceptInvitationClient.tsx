@@ -144,7 +144,8 @@ export default function AcceptInvitationClient({
         }
 
         fetchInvitationAndOrganization();
-    }, [invitationId, getToken, userEmail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [invitationId, userEmail]);
 
     function getRoleBasedRedirect(role: string): string {
         // All roles redirect to the main dashboard

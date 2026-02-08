@@ -16,6 +16,7 @@ import { AnalyticsChart } from "@/components/charts/analytics-chart";
 import { TrendBadge } from "@/components/ui";
 import RoleWizardModal from "../../roles/components/modals/role-wizard-modal";
 import RoleActionsToolbar from "../../roles/components/shared/actions-toolbar";
+import { CompanyBillingPrompt } from "../../billing/components/company-billing-prompt";
 
 interface CompanyStats {
     active_roles: number;
@@ -78,6 +79,7 @@ export default function CompanyDashboard() {
     const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
     const [billingProfile, setBillingProfile] =
         useState<BillingProfileSummary | null>(null);
+    const [billingStatus, setBillingStatus] = useState<"not_started" | "incomplete" | "ready">("ready");
 
     useEffect(() => {
         loadDashboardData();
@@ -245,6 +247,14 @@ export default function CompanyDashboard() {
                             `/company-billing-profiles/${companyId}`,
                         );
                         setBillingProfile(billingResponse?.data || null);
+
+                        // Fetch billing readiness status
+                        const readinessResponse: any = await api.get(
+                            `/company-billing-profiles/${companyId}/billing-readiness`,
+                        );
+                        if (readinessResponse?.data?.status) {
+                            setBillingStatus(readinessResponse.data.status);
+                        }
                     }
                 } catch (billingError: any) {
                     // Billing data not available (likely insufficient permissions)
@@ -321,6 +331,9 @@ export default function CompanyDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Billing Setup Prompt */}
+            <CompanyBillingPrompt status={billingStatus} />
 
             {/* Key Stats Grid - Using new StatCard component */}
             <div className="card bg-base-200">

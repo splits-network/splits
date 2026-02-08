@@ -217,7 +217,8 @@ export default function RecruiterSubscriptionSection() {
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         fetchSubscription();

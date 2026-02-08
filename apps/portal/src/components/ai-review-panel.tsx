@@ -115,7 +115,8 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
         }
 
         fetchAIReview();
-    }, [applicationId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [applicationId]);
 
     const handleRequestNewReview = async () => {
         setRequesting(true);

@@ -79,7 +79,8 @@ export function usePresence(
             cache.set(item.userId, entry);
         });
         setPresence((prev) => ({ ...prev, ...updates }));
-    }, [enabled, getToken, normalizedIds.join("|")]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enabled, normalizedIds.join("|")]);
 
     useEffect(() => {
         fetchPresence();

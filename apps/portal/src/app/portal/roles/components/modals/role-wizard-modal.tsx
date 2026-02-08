@@ -156,7 +156,8 @@ export default function RoleWizardModal({
         }
 
         loadJobData();
-    }, [isOpen, jobId, mode, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, jobId, mode]);
 
     // Load companies when modal opens
     useEffect(() => {
@@ -265,7 +266,7 @@ export default function RoleWizardModal({
         isRecruiter,
         isCompanyUser,
         profile,
-        getToken,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     ]);
 
     // Reset form when modal opens

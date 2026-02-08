@@ -42,7 +42,8 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
         } finally {
             setLoading(false);
         }
-    }, [id, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     useEffect(() => {
         if (!id) {

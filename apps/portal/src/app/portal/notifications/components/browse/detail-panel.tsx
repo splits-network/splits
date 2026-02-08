@@ -92,7 +92,8 @@ export default function NotificationDetailPanel({
         } finally {
             setLoading(false);
         }
-    }, [id, getToken, onUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, onUpdate]);
 
     useEffect(() => {
         loadNotification();
@@ -260,7 +261,8 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
         } finally {
             setLoading(false);
         }
-    }, [roleId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [roleId]);
 
     useEffect(() => {
         fetchJob();

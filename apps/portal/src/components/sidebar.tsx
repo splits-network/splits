@@ -191,14 +191,6 @@ const navItems: NavItem[] = [
                 section: "management",
                 mobileDock: false,
             },
-            {
-                href: "/portal/billing",
-                label: "Billing",
-                icon: "fa-credit-card",
-                roles: ["all"],
-                section: "management",
-                mobileDock: false,
-            },
         ],
     },
 ];
@@ -423,7 +415,8 @@ export function Sidebar() {
                 "/portal/messages": 0,
             }));
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Fetch notification counts by category for sidebar badges
     const fetchNotificationCounts = useCallback(async () => {
@@ -449,7 +442,8 @@ export function Sidebar() {
         } catch (error) {
             console.warn("Failed to fetch notification counts:", error);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -468,7 +462,8 @@ export function Sidebar() {
             mounted = false;
             clearInterval(interval);
         };
-    }, [fetchUnreadCount, fetchNotificationCounts, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchUnreadCount, fetchNotificationCounts]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchUnreadCount());

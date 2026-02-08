@@ -542,6 +542,106 @@ function registerCompanyBillingProfileRoutes(app: FastifyInstance, services: Ser
             }
         }
     );
+
+    app.post(
+        '/api/v2/company-billing-profiles/:companyId/setup-intent',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/company-billing-profiles/${companyId}/setup-intent`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create company setup intent');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create company setup intent' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/company-billing-profiles/:companyId/payment-method',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/company-billing-profiles/${companyId}/payment-method`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch company payment method');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch company payment method' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/company-billing-profiles/:companyId/payment-method',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/company-billing-profiles/${companyId}/payment-method`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update company payment method');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update company payment method' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/company-billing-profiles/:companyId/billing-readiness',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/company-billing-profiles/${companyId}/billing-readiness`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch company billing readiness');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch company billing readiness' } });
+            }
+        }
+    );
 }
 
 function registerStripeWebhookProxy(app: FastifyInstance, services: ServiceRegistry) {

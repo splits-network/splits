@@ -51,7 +51,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     const fetchInvitation = useCallback(async () => {
         if (!itemId) return;
@@ -73,7 +74,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setInvitationLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     const fetchApplications = useCallback(async () => {
         if (!itemId) return;
@@ -91,7 +93,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setAppsLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     const fetchDocuments = useCallback(async () => {
         if (!itemId) return;
@@ -109,7 +112,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setDocsLoading(false);
         }
-    }, [itemId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemId]);
 
     useEffect(() => {
         fetchCandidate();

@@ -117,7 +117,8 @@ export default function PaymentMethodSection() {
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         fetchPaymentMethod();

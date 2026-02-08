@@ -42,6 +42,38 @@ export class BillingEventConsumer {
         }
     }
 
+    async handleCompanyBillingProfileCompleted(event: DomainEvent): Promise<void> {
+        try {
+            const { company_id, billing_email, billing_terms, has_payment_method } = event.payload;
+
+            this.logger.info({ company_id }, 'Handling company billing profile completed notification');
+
+            if (!billing_email) {
+                this.logger.warn({ company_id }, 'No billing email found, skipping notification');
+                return;
+            }
+
+            await this.emailService.sendCompanyBillingSetupComplete(billing_email, {
+                billingEmail: billing_email,
+                billingTerms: billing_terms,
+                hasPaymentMethod: has_payment_method,
+                billingUrl: `${this.portalUrl}/portal/billing`,
+                companyId: company_id,
+            });
+
+            this.logger.info(
+                { company_id, recipient: billing_email },
+                'Company billing profile completed notification sent successfully'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send company billing profile completed notification'
+            );
+            throw error;
+        }
+    }
+
     async handleStripeConnectDisabled(event: DomainEvent): Promise<void> {
         try {
             const { recruiter_id, account_id, disabled_reason } = event.payload;

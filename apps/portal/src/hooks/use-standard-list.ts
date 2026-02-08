@@ -384,7 +384,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         } finally {
             setLoading(false);
         }
-    }, [getToken, endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include]);
 
     // Debounced search
     const setSearchInput = useCallback((value: string) => {

@@ -76,7 +76,8 @@ export default function DocumentViewerModal({
         };
 
         fetchSignedUrl();
-    }, [isOpen, document, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, document]);
 
     if (!isOpen || !document) return null;
 

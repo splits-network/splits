@@ -78,7 +78,8 @@ export default function Stats() {
         return () => {
             cancelled = true;
         };
-    }, [getToken, isLoaded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoaded]);
 
     return (
         <div className="card bg-base-200">

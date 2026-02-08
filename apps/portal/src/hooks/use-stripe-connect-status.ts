@@ -143,7 +143,8 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const createAccount = useCallback(async () => {
         try {
@@ -162,7 +163,8 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
             );
             setLoading(false);
         }
-    }, [getToken, fetchStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchStatus]);
 
     const openDashboard = useCallback(async () => {
         try {
@@ -182,7 +184,8 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
                 err?.message || "Failed to open Stripe dashboard"
             );
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         fetchStatus();

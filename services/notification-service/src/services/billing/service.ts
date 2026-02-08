@@ -6,6 +6,8 @@ import {
     StripeConnectOnboardedData,
     stripeConnectDisabledEmail,
     StripeConnectDisabledData,
+    companyBillingSetupCompleteEmail,
+    CompanyBillingSetupCompleteData,
 } from '../../templates/billing';
 
 export class BillingEmailService {
@@ -83,6 +85,18 @@ export class BillingEmailService {
             eventType: 'recruiter.stripe_connect_onboarded',
             userId: data.userId,
             payload: { recruiter_id: data.recruiterId },
+        });
+    }
+
+    async sendCompanyBillingSetupComplete(
+        email: string,
+        data: CompanyBillingSetupCompleteData & { companyId?: string }
+    ): Promise<void> {
+        const html = companyBillingSetupCompleteEmail(data);
+
+        await this.sendEmail(email, 'Your Company Billing Is Set Up', html, {
+            eventType: 'company.billing_profile_completed',
+            payload: { company_id: data.companyId },
         });
     }
 

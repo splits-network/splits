@@ -126,7 +126,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         });
         const data = response?.data || [];
         setRows(normalizeRows(data));
-    }, [filters.mailbox, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.mailbox]);
 
     const fetchRequestCount = useCallback(async () => {
         const token = await getToken();
@@ -145,7 +146,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             console.error("Failed to fetch request count:", err);
         }
-    }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const refresh = useCallback(() => {
         fetchConversations();
@@ -174,7 +176,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         return () => {
             mounted = false;
         };
-    }, [filters.mailbox, fetchConversations, fetchRequestCount, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.mailbox, fetchConversations, fetchRequestCount]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => {
@@ -332,7 +335,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         return () => {
             cancelled = true;
         };
-    }, [rows, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rows]);
 
     // Filter and sort: most recent conversation first
     const data = useMemo(() => {

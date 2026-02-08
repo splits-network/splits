@@ -69,7 +69,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
                 };
             };
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const listState = useStandardList<InAppNotification, NotificationFilters>({
@@ -97,7 +98,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         } finally {
             setMarkingAllRead(false);
         }
-    }, [getToken, listState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [listState]);
 
     const contextValue: FilterContextValue = {
         ...listState,

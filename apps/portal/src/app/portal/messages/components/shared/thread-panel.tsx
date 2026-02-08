@@ -60,7 +60,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
         if (lastMessageId) {
             await markRead(lastMessageId);
         }
-    }, [conversationId, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId]);
 
     const fetchContextDetails = useCallback(
         async (
@@ -129,7 +130,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                 }
             }
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const markRead = async (lastReadMessageId: string) => {
@@ -331,7 +333,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
         } finally {
             setIsLoadingMore(false);
         }
-    }, [conversationId, data?.messages, getToken, hasMore, isLoadingMore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId, data?.messages, hasMore, isLoadingMore]);
 
     const handleScroll = useCallback(() => {
         const container = messagesRef.current;

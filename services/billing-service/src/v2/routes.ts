@@ -81,7 +81,8 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     const companyBillingRepository = new CompanyBillingProfileRepository(accessClient);
     const companyBillingService = new CompanyBillingProfileService(
         companyBillingRepository,
-        accessResolver
+        accessResolver,
+        config.eventPublisher
     );
     const placementInvoiceRepository = new PlacementInvoiceRepository(accessClient);
     const placementInvoiceService = new PlacementInvoiceService(
