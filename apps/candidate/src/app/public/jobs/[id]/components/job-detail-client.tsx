@@ -60,7 +60,7 @@ export default function JobDetailClient({
                 text: "Get Started",
                 icon: "fa-rocket",
                 action: () => {
-                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`;
+                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/public/jobs-new/${job.id}`)}`;
                 },
             };
         }
@@ -87,7 +87,7 @@ export default function JobDetailClient({
         <>
             <div className="container mx-auto px-4 py-4">
                 {/* Back Button */}
-                <Link href="/public/jobs" className="btn btn-ghost mb-4">
+                <Link href="/public/jobs-new" className="btn btn-ghost mb-4">
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Jobs
                 </Link>
@@ -128,7 +128,9 @@ export default function JobDetailClient({
                                             <button
                                                 className={`btn ${buttonConfig.disabled ? "btn-disabled" : "btn-primary"} flex items-center gap-2`}
                                                 onClick={buttonConfig.action}
-                                                disabled={buttonConfig.disabled}
+                                                disabled={
+                                                    buttonConfig.disabled
+                                                }
                                             >
                                                 <i
                                                     className={`fa-duotone fa-regular ${buttonConfig.icon}`}
@@ -212,7 +214,8 @@ export default function JobDetailClient({
 
                                     <div className="space-y-3 flex space-y-2 space-x-2 nowrap">
                                         {/* Posted Date (relative) */}
-                                        {(job.updated_at || job.created_at) && (
+                                        {(job.updated_at ||
+                                            job.created_at) && (
                                             <div className="flex items-start gap-3">
                                                 <i className="fa-duotone fa-regular fa-calendar text-base-content/70 mt-1"></i>
                                                 <div>
@@ -421,14 +424,14 @@ export default function JobDetailClient({
                                 </p>
                                 <div className="flex gap-4 justify-center">
                                     <Link
-                                        href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
+                                        href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs-new/${job.id}`)}`}
                                         className="btn btn-lg bg-white text-primary hover:bg-gray-100"
                                     >
                                         <i className="fa-duotone fa-regular fa-user-plus"></i>
                                         Create Account
                                     </Link>
                                     <Link
-                                        href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
+                                        href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs-new/${job.id}`)}`}
                                         className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary"
                                     >
                                         <i className="fa-duotone fa-regular fa-right-to-bracket"></i>

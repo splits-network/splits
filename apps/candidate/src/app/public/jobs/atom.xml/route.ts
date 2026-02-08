@@ -32,7 +32,7 @@ function buildSummary(job: any) {
 }
 
 function getJobUrl(job: any) {
-    return `${baseUrl}/public/jobs/${job?.id}`;
+    return `${baseUrl}/public/jobs-new/${job?.id}`;
 }
 
 export async function GET() {
@@ -73,9 +73,9 @@ export async function GET() {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
         "<feed xmlns=\"http://www.w3.org/2005/Atom\">",
         "<title>Applicant Network Jobs</title>",
-        `<link href=\"${baseUrl}/public/jobs\" />`,
-        `<link href=\"${baseUrl}/public/jobs/atom.xml\" rel=\"self\" />`,
-        `<id>${baseUrl}/public/jobs</id>`,
+        `<link href=\"${baseUrl}/public/jobs-new\" />`,
+        `<link href=\"${baseUrl}/public/jobs-new/atom.xml\" rel=\"self\" />`,
+        `<id>${baseUrl}/public/jobs-new</id>`,
         `<updated>${updated}</updated>`,
         entries || "",
         "</feed>",

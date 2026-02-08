@@ -1,13 +1,13 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { auth } from '@clerk/nextjs/server';
-import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
-import JobDetailClient from './components/job-detail-client';
-import { cache } from 'react';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
+import JobDetailClient from "./components/job-detail-client";
+import { cache } from "react";
 
 interface JobRequirement {
     id: string;
-    requirement_type: 'mandatory' | 'preferred';
+    requirement_type: "mandatory" | "preferred";
     description: string;
     sort_order: number;
 }
@@ -43,29 +43,37 @@ interface PageProps {
 const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
         const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
-            params: { include: 'company,requirements' },
+            params: { include: "company,requirements" },
         });
         return response.data;
     } catch (error) {
-        console.error('Failed to fetch job:', error);
+        console.error("Failed to fetch job:", error);
         return null;
     }
 });
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+    params,
+}: PageProps): Promise<Metadata> {
     const { id } = await params;
     const job = await fetchJob(id);
 
     if (!job) {
         return {
-            title: 'Job Details',
-            description: 'Explore job details and requirements on Applicant Network.',
+            title: "Job Details",
+            description:
+                "Explore job details and requirements on Applicant Network.",
         };
     }
 
     return {
-        title: job.title ? `${job.title} at ${job.company?.name ?? 'Applicant Network'}` : 'Job Details',
-        description: job.candidate_description || job.description || 'View job responsibilities, requirements, and application details.',
+        title: job.title
+            ? `${job.title} at ${job.company?.name ?? "Applicant Network"}`
+            : "Job Details",
+        description:
+            job.candidate_description ||
+            job.description ||
+            "View job responsibilities, requirements, and application details.",
     };
 }
 
@@ -87,22 +95,31 @@ export default async function JobDetailPage({ params }: PageProps) {
             const token = await getToken();
             if (token) {
                 const authClient = createAuthenticatedClient(token);
-                const [recruitersResponse, applicationsResponse] = await Promise.all([
-                    authClient.get<{ data: any[] }>('/recruiter-candidates'),
-                    authClient.get<{ data: any[] }>('/applications'),
-                ]);
+                const [recruitersResponse, applicationsResponse] =
+                    await Promise.all([
+                        authClient.get<{ data: any[] }>(
+                            "/recruiter-candidates",
+                        ),
+                        authClient.get<{ data: any[] }>("/applications"),
+                    ]);
 
-                hasActiveRecruiter = recruitersResponse.data && recruitersResponse.data.length > 0;
+                hasActiveRecruiter =
+                    recruitersResponse.data &&
+                    recruitersResponse.data.length > 0;
 
                 // Check for existing application to this job
                 const applications = applicationsResponse.data || [];
                 existingApplication = applications.find(
-                    (app: any) => app.job_id === id && !['rejected', 'withdrawn'].includes(app.stage)
+                    (app: any) =>
+                        app.job_id === id &&
+                        !["rejected", "withdrawn"].includes(app.stage),
                 );
             }
         } catch (error) {
-            console.error('Failed to fetch recruiter relationships or applications:', error);
-            // Continue without recruiter/application info
+            console.error(
+                "Failed to fetch recruiter relationships or applications:",
+                error,
+            );
         }
     }
 
