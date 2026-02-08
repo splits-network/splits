@@ -27,9 +27,8 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
                         {/* Avatar */}
                         <div className="avatar avatar-placeholder shrink-0">
                             <div className="bg-primary/10 text-primary w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold">
-                                {(
-                                    item.candidate?.full_name || "U"
-                                )[0].toUpperCase()}
+                                {(item.candidate?.full_name ||
+                                    "U")[0].toUpperCase()}
                             </div>
                         </div>
                         <div className="min-w-0">
@@ -92,7 +91,7 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
                     <ActionsToolbar
                         application={item}
                         variant="icon-only"
-                        size="sm"
+                        size="xs"
                         showActions={{
                             viewDetails: false,
                             message: true,

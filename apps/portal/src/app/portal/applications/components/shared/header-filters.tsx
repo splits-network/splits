@@ -135,10 +135,7 @@ export default function HeaderFilters({
                             className="select select-sm w-full"
                             value={filters.stage || ""}
                             onChange={(e) =>
-                                setFilter(
-                                    "stage",
-                                    e.target.value || undefined,
-                                )
+                                setFilter("stage", e.target.value || undefined)
                             }
                         >
                             <option value="">All Stages</option>
@@ -173,15 +170,9 @@ export default function HeaderFilters({
                             }
                         >
                             <option value="">All Scores</option>
-                            <option value="high">
-                                High (80%+)
-                            </option>
-                            <option value="medium">
-                                Medium (50-79%)
-                            </option>
-                            <option value="low">
-                                Low (&lt;50%)
-                            </option>
+                            <option value="high">High (80%+)</option>
+                            <option value="medium">Medium (50-79%)</option>
+                            <option value="low">Low (&lt;50%)</option>
                             <option value="not_reviewed">Not Reviewed</option>
                         </select>
                     </fieldset>

@@ -60,7 +60,24 @@ export class ApplicationRepository {
         if (accessContext.candidateId) {
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
-            query = query.eq('candidate_recruiter_id', accessContext.recruiterId);
+            // Recruiters can access applications where they are:
+            // 1. candidate_recruiter_id on the application
+            // 2. company_recruiter_id on the related job (assigned via pre-screen)
+            // 3. job_owner_recruiter_id on the related job
+            const { data: recruiterJobs } = await this.supabase
+                .from('jobs')
+                .select('id')
+                .or(`company_recruiter_id.eq.${accessContext.recruiterId},job_owner_recruiter_id.eq.${accessContext.recruiterId}`);
+
+            const recruiterJobIds = recruiterJobs?.map(j => j.id) || [];
+
+            if (recruiterJobIds.length > 0) {
+                query = query.or(
+                    `candidate_recruiter_id.eq.${accessContext.recruiterId},job_id.in.(${recruiterJobIds.join(',')})`
+                );
+            } else {
+                query = query.eq('candidate_recruiter_id', accessContext.recruiterId);
+            }
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
                 // First, get all companies that belong to the user's organizations
@@ -205,6 +222,22 @@ export class ApplicationRepository {
 
         if (accessContext.recruiterId && (data as any).candidate_recruiter_id === accessContext.recruiterId) {
             return data;
+        }
+
+        // Check if recruiter is assigned to the job as company_recruiter or job_owner
+        if (accessContext.recruiterId && (data as any).job_id) {
+            const { data: job } = await this.supabase
+                .from('jobs')
+                .select('company_recruiter_id, job_owner_recruiter_id')
+                .eq('id', (data as any).job_id)
+                .single();
+
+            if (job && (
+                job.company_recruiter_id === accessContext.recruiterId ||
+                job.job_owner_recruiter_id === accessContext.recruiterId
+            )) {
+                return data;
+            }
         }
 
         const companyOrgId = (data as any).job?.company?.identity_organization_id;

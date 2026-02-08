@@ -7,7 +7,7 @@ import { useMessageSidebar } from "@/hooks/use-message-sidebar";
 import MessageSidebar from "@/components/sidebar/MessageSidebar";
 import { useFilter } from "../../contexts/filter-context";
 import { Application } from "../../types";
-import Item from "./item";
+import Item from "./card";
 import Sidebar from "../shared/sidebar";
 
 export default function GridView() {
