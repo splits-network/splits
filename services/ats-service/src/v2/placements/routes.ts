@@ -24,8 +24,9 @@ export function registerPlacementRoutes(
 
     app.get('/api/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
-            const placement = await config.placementService.getPlacement(id);
+            const placement = await config.placementService.getPlacement(id, clerkUserId);
             return reply.send({ data: placement });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });

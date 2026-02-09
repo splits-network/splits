@@ -48,8 +48,8 @@ export class PlacementServiceV2 {
         };
     }
 
-    async getPlacement(id: string): Promise<any> {
-        const placement = await this.repository.findPlacement(id);
+    async getPlacement(id: string, clerkUserId?: string): Promise<any> {
+        const placement = await this.repository.findPlacement(id, clerkUserId);
         if (!placement) {
             throw new Error(`Placement ${id} not found`);
         }

@@ -35,7 +35,7 @@ export class PlacementRepository {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const organizationIds = accessContext.organizationIds;
 
-        if (!accessContext.candidateId && !accessContext.isPlatformAdmin && organizationIds.length === 0) {
+        if (!accessContext.candidateId && !accessContext.recruiterId && !accessContext.isPlatformAdmin && organizationIds.length === 0) {
             return { data: [], total: 0 };
         }
 
@@ -54,9 +54,18 @@ export class PlacementRepository {
                 application:applications(id, stage)
             `, { count: 'exact' });
 
-        // Apply organization filter
+        // Apply access control filter
         if (accessContext.candidateId) {
             query = query.eq('candidate_id', accessContext.candidateId);
+        } else if (accessContext.recruiterId) {
+            // Recruiters see placements where they are any recruiter role
+            query = query.or(
+                `candidate_recruiter_id.eq.${accessContext.recruiterId},` +
+                `company_recruiter_id.eq.${accessContext.recruiterId},` +
+                `job_owner_recruiter_id.eq.${accessContext.recruiterId},` +
+                `candidate_sourcer_recruiter_id.eq.${accessContext.recruiterId},` +
+                `company_sourcer_recruiter_id.eq.${accessContext.recruiterId}`
+            );
         } else if (!accessContext.isPlatformAdmin && organizationIds.length > 0) {
             query = query.in('job.company.identity_organization_id', organizationIds);
         }
@@ -91,13 +100,39 @@ export class PlacementRepository {
 
         if (error) throw error;
 
+        const placements = data || [];
+
+        // Enrich with the current recruiter's split from placement_splits
+        if (accessContext.recruiterId && placements.length > 0) {
+            const placementIds = placements.map((p: any) => p.id);
+            const { data: splits } = await this.supabase
+                .from('placement_splits')
+                .select('placement_id, split_amount')
+                .eq('recruiter_id', accessContext.recruiterId)
+                .in('placement_id', placementIds);
+
+            if (splits && splits.length > 0) {
+                const splitMap = new Map<string, number>();
+                for (const s of splits) {
+                    // Sum all roles for this recruiter on each placement
+                    splitMap.set(s.placement_id, (splitMap.get(s.placement_id) || 0) + s.split_amount);
+                }
+                for (const p of placements) {
+                    const amount = splitMap.get(p.id);
+                    if (amount !== undefined) {
+                        p.recruiter_share = amount;
+                    }
+                }
+            }
+        }
+
         return {
-            data: data || [],
+            data: placements,
             total: count || 0,
         };
     }
 
-    async findPlacement(id: string): Promise<any | null> {
+    async findPlacement(id: string, clerkUserId?: string): Promise<any | null> {
         const { data, error } = await this.supabase
 
             .from('placements')
@@ -105,7 +140,7 @@ export class PlacementRepository {
                 *,
                 candidate:candidates(id, full_name, email, phone),
                 job:jobs(
-                    id, 
+                    id,
                     title,
                     company:companies(id, name)
                 ),
@@ -118,6 +153,23 @@ export class PlacementRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+
+        // Enrich with the current recruiter's split from placement_splits
+        if (clerkUserId && data) {
+            const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+            if (accessContext.recruiterId) {
+                const { data: splits } = await this.supabase
+                    .from('placement_splits')
+                    .select('split_amount')
+                    .eq('placement_id', id)
+                    .eq('recruiter_id', accessContext.recruiterId);
+
+                if (splits && splits.length > 0) {
+                    data.recruiter_share = splits.reduce((sum: number, s: any) => sum + s.split_amount, 0);
+                }
+            }
+        }
+
         return data;
     }
 
