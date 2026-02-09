@@ -1,12 +1,14 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ApplicationServiceV2 } from './service';
 import { PlacementServiceV2 } from '../placements/service';
+import { ApplicationNoteServiceV2 } from '../application-notes/service';
 import { ApplicationUpdate } from './types';
 import { requireUserContext } from '../shared/helpers';
 
 interface RegisterApplicationRoutesConfig {
     applicationService: ApplicationServiceV2;
     placementService?: PlacementServiceV2;
+    noteService?: ApplicationNoteServiceV2;
 }
 
 export function registerApplicationRoutes(
@@ -218,6 +220,23 @@ export function registerApplicationRoutes(
                     start_date: body.start_date,
                     salary: body.salary,
                 });
+            }
+
+            // Step 3: Create application note if notes provided
+            if (body.notes && body.notes.trim() && config.noteService) {
+                try {
+                    await config.noteService.create(clerkUserId, {
+                        application_id: id,
+                        created_by_user_id: clerkUserId, // Will be overwritten by service with actual user ID
+                        created_by_type: 'company_admin',
+                        note_type: 'stage_transition',
+                        visibility: 'shared',
+                        message_text: body.notes.trim(),
+                    });
+                } catch (noteError: any) {
+                    // Log but don't fail the hire if note creation fails
+                    request.log.warn({ error: noteError.message, applicationId: id }, 'Failed to create hire note');
+                }
             }
 
             return reply.send({ data: { application, placement } });

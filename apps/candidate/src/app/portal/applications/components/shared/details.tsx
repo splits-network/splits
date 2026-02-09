@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@/components/standard-lists/loading-state";
+import {
+    ApplicationNotesPanel,
+    type CreateNoteData,
+} from "@splits-network/shared-ui";
+import type { ApplicationNote } from "@splits-network/shared-types";
 import { formatDate } from "@/lib/utils";
 import ApplicationTimeline from "./application-timeline";
 import DocumentViewerModal from "../modals/document-viewer-modal";
@@ -23,19 +28,22 @@ interface DetailsProps {
 
 export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
+    const { user } = useUser();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<
-        "overview" | "job" | "documents" | "ai_review" | "timeline"
+        "overview" | "job" | "documents" | "ai_review" | "notes" | "timeline"
     >("overview");
 
     const fetchDetail = useCallback(async () => {
         if (!itemId) return;
         setLoading(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Not authenticated");
-            const client = createAuthenticatedClient(token);
+            const authToken = await getToken();
+            if (!authToken) throw new Error("Not authenticated");
+            setToken(authToken);
+            const client = createAuthenticatedClient(authToken);
             const response: any = await client.get(`/applications/${itemId}`, {
                 params: {
                     include:
@@ -85,7 +93,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                 <img
                                     src={application.job.company.logo_url}
                                     alt={`${application.job?.company.name} logo`}
-                                    className="w-full h-full object-cover rounded-full"
+                                    className="w-full h-full object-contain rounded"
                                 />
                             ) : (
                                 <span>
@@ -151,6 +159,17 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     >
                         <i className="fa-duotone fa-brain mr-2" />
                         AI Review
+                        {application.ai_review?.id && (
+                            <AIReviewPanel aiReviewId={application.ai_review.id} variant="badge" />
+                        )}
+                    </a>
+                    <a
+                        role="tab"
+                        className={`tab ${activeTab === "notes" ? "tab-active" : ""}`}
+                        onClick={() => setActiveTab("notes")}
+                    >
+                        <i className="fa-duotone fa-comments mr-2" />
+                        Notes
                     </a>
                     <a
                         role="tab"
@@ -175,8 +194,18 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {activeTab === "ai_review" && (
                     <AIReviewTab application={application} />
                 )}
+                {activeTab === "notes" && user && (
+                    <NotesTab
+                        application={application}
+                        getToken={getToken}
+                        userId={user.id}
+                    />
+                )}
                 {activeTab === "timeline" && (
-                    <TimelineTab auditLogs={auditLogs} />
+                    <TimelineTab
+                        auditLogs={auditLogs}
+                        currentStage={application.stage}
+                    />
                 )}
             </div>
         </div>
@@ -242,33 +271,8 @@ function OverviewTab({ application }: { application: Application }) {
                 })()}
             </div>
 
-            {(application.notes ||
-                application.candidate_notes ||
-                application.recruiter_notes) && (
-                <div className="card bg-base-200 p-4 md:col-span-2">
-                    <h4 className="font-semibold mb-2">Notes</h4>
-                    {(application.notes || application.candidate_notes) && (
-                        <div className="mb-2">
-                            <h5 className="text-sm font-medium text-base-content/60 mb-1">
-                                Your Notes
-                            </h5>
-                            <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                {application.notes ||
-                                    application.candidate_notes}
-                            </p>
-                        </div>
-                    )}
-                    {application.recruiter_notes && (
-                        <div>
-                            <h5 className="text-sm font-medium text-base-content/60 mb-1">
-                                Recruiter Notes
-                            </h5>
-                            <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                {application.recruiter_notes}
-                            </p>
-                        </div>
-                    )}
-                </div>
+            {application.ai_review?.id && (
+                <AIReviewPanel aiReviewId={application.ai_review.id} variant="mini-card" />
             )}
         </div>
     );
@@ -621,6 +625,78 @@ function AIReviewTab({ application }: { application: Application }) {
     );
 }
 
-function TimelineTab({ auditLogs }: { auditLogs: any[] }) {
-    return <ApplicationTimeline auditLogs={auditLogs} />;
+function NotesTab({
+    application,
+    getToken,
+    userId,
+}: {
+    application: Application;
+    getToken: () => Promise<string | null>;
+    userId: string;
+}) {
+    // API functions for notes - wrapped in useCallback to prevent infinite re-fetching
+    // getToken is stable from Clerk, so these callbacks are stable too
+    const fetchNotes = useCallback(async (
+        applicationId: string,
+    ): Promise<ApplicationNote[]> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        const response = await client.get(
+            `/applications/${applicationId}/notes`,
+        );
+        return response.data || [];
+    }, [getToken]);
+
+    const createNote = useCallback(async (
+        data: CreateNoteData,
+    ): Promise<ApplicationNote> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        const response = await client.post(
+            `/applications/${data.application_id}/notes`,
+            data,
+        );
+        return response.data;
+    }, [getToken]);
+
+    const deleteNote = useCallback(async (noteId: string): Promise<void> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        await client.delete(`/application-notes/${noteId}`);
+    }, [getToken]);
+
+    return (
+        <ApplicationNotesPanel
+            applicationId={application.id}
+            currentUserId={userId}
+            currentUserCreatorType="candidate"
+            fetchNotes={fetchNotes}
+            createNote={createNote}
+            deleteNote={deleteNote}
+            isOnCandidateSide={true}
+            isOnCompanySide={false}
+            allowAddNote={true}
+            allowDeleteNote={true}
+            emptyStateMessage="No notes yet. Add one to communicate with your recruiter."
+            maxHeight="500px"
+        />
+    );
+}
+
+function TimelineTab({
+    auditLogs,
+    currentStage,
+}: {
+    auditLogs: any[];
+    currentStage: string;
+}) {
+    return (
+        <ApplicationTimeline
+            auditLogs={auditLogs}
+            currentStage={currentStage}
+        />
+    );
 }

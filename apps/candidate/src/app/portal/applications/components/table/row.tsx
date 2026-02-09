@@ -2,11 +2,7 @@
 
 import { formatDate } from "@/lib/utils";
 import { DataTableRow } from "@/components/ui/tables";
-import {
-    type Application,
-    getStatusColor,
-    formatStage,
-} from "../../types";
+import { type Application, getStatusColor, formatStage } from "../../types";
 
 interface RowProps {
     item: Application;
@@ -38,13 +34,12 @@ export default function Row({ item, onViewDetails }: RowProps) {
                                 <img
                                     src={item.job.company.logo_url}
                                     alt=""
-                                    className="w-full h-full object-cover rounded-full"
+                                    className="w-full h-full object-contain rounded-full"
                                 />
                             ) : (
                                 <span>
-                                    {(
-                                        item.job?.company?.name || "C"
-                                    )[0].toUpperCase()}
+                                    {(item.job?.company?.name ||
+                                        "C")[0].toUpperCase()}
                                 </span>
                             )}
                         </div>

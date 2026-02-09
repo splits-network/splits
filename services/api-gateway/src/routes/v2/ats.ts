@@ -72,7 +72,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerCandidateRoutes(app, services);
 
     registerAiReviewRoutes(app, services);
-    registerApplicationFeedbackRoutes(app, services);
+    registerApplicationNoteRoutes(app, services);
     registerApplicationProposalRoutes(app, services);
 }
 
@@ -495,12 +495,12 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
     );
 }
 
-function registerApplicationFeedbackRoutes(app: FastifyInstance, services: ServiceRegistry) {
+function registerApplicationNoteRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const atsService = () => services.get('ats');
 
-    // LIST feedback for an application
+    // LIST notes for an application
     app.get(
-        '/api/v2/applications/:application_id/feedback',
+        '/api/v2/applications/:application_id/notes',
         {
             preHandler: requireAuth(),
         },
@@ -510,24 +510,24 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
             const authHeaders = buildAuthHeaders(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
             const path = queryString
-                ? `/api/v2/applications/${application_id}/feedback?${queryString}`
-                : `/api/v2/applications/${application_id}/feedback`;
+                ? `/api/v2/applications/${application_id}/notes?${queryString}`
+                : `/api/v2/applications/${application_id}/notes`;
 
             try {
                 const data = await atsService().get(path, undefined, correlationId, authHeaders);
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, application_id, correlationId }, 'Failed to fetch application feedback');
+                request.log.error({ error, application_id, correlationId }, 'Failed to fetch application notes');
                 return reply
                     .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to fetch application feedback' });
+                    .send(error.jsonBody || { error: 'Failed to fetch application notes' });
             }
         }
     );
 
-    // GET single feedback by ID
+    // GET single note by ID
     app.get(
-        '/api/v2/application-feedback/:id',
+        '/api/v2/application-notes/:id',
         {
             preHandler: requireAuth(),
         },
@@ -538,24 +538,24 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
 
             try {
                 const data = await atsService().get(
-                    `/api/v2/application-feedback/${id}`,
+                    `/api/v2/application-notes/${id}`,
                     undefined,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to fetch feedback');
+                request.log.error({ error, id, correlationId }, 'Failed to fetch note');
                 return reply
                     .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to fetch feedback' });
+                    .send(error.jsonBody || { error: 'Failed to fetch note' });
             }
         }
     );
 
-    // CREATE feedback
+    // CREATE note
     app.post(
-        '/api/v2/applications/:application_id/feedback',
+        '/api/v2/applications/:application_id/notes',
         {
             preHandler: requireAuth(),
         },
@@ -566,24 +566,24 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
 
             try {
                 const data = await atsService().post(
-                    `/api/v2/applications/${application_id}/feedback`,
+                    `/api/v2/applications/${application_id}/notes`,
                     request.body,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, application_id, correlationId }, 'Failed to create feedback');
+                request.log.error({ error, application_id, correlationId }, 'Failed to create note');
                 return reply
                     .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to create feedback' });
+                    .send(error.jsonBody || { error: 'Failed to create note' });
             }
         }
     );
 
-    // UPDATE feedback
+    // UPDATE note
     app.patch(
-        '/api/v2/application-feedback/:id',
+        '/api/v2/application-notes/:id',
         {
             preHandler: requireAuth(),
         },
@@ -594,24 +594,24 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
 
             try {
                 const data = await atsService().patch(
-                    `/api/v2/application-feedback/${id}`,
+                    `/api/v2/application-notes/${id}`,
                     request.body,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to update feedback');
+                request.log.error({ error, id, correlationId }, 'Failed to update note');
                 return reply
                     .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to update feedback' });
+                    .send(error.jsonBody || { error: 'Failed to update note' });
             }
         }
     );
 
-    // DELETE feedback
+    // DELETE note
     app.delete(
-        '/api/v2/application-feedback/:id',
+        '/api/v2/application-notes/:id',
         {
             preHandler: requireAuth(),
         },
@@ -622,14 +622,14 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
 
             try {
                 const data = await atsService().delete(
-                    `/api/v2/application-feedback/${id}`
+                    `/api/v2/application-notes/${id}`
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to delete feedback');
+                request.log.error({ error, id, correlationId }, 'Failed to delete note');
                 return reply
                     .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to delete feedback' });
+                    .send(error.jsonBody || { error: 'Failed to delete note' });
             }
         }
     );

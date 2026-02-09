@@ -16,10 +16,18 @@ export * from './commission';
 // Candidate role assignment business logic types (re-uses database type)
 export * from './candidate-role-assignments';
 
-// Application feedback types (enums and interfaces)
+// Application notes types (and legacy feedback aliases)
 export type {
+    // New application notes types
+    ApplicationNote,
+    ApplicationNoteType,
+    ApplicationNoteCreatorType,
+    ApplicationNoteVisibility,
+    // Legacy aliases for backwards compatibility
     ApplicationFeedbackType,
     ApplicationFeedbackCreatorType,
+    ApplicationFeedback,
+    // Other model types
     MarketplaceProfile,
     ApplicationStage,
     RecruiterCandidateWithCandidate,

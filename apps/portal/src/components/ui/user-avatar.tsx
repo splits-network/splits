@@ -52,16 +52,14 @@ export function UserAvatar({
 
     return (
         <div className={`avatar ${className}`}>
-            <div
-                className={`${sizeClasses[size]} rounded-full ${ringClass}`}
-            >
+            <div className={`${sizeClasses[size]} rounded-full ${ringClass}`}>
                 {imageUrl ? (
                     <Image
                         src={imageUrl}
                         alt={userName || "User"}
                         width={imageSizes[size]}
                         height={imageSizes[size]}
-                        className="rounded-full object-cover"
+                        className="rounded-full object-contain"
                         unoptimized={!imageUrl.includes("supabase")}
                     />
                 ) : (

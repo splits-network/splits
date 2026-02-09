@@ -885,6 +885,64 @@ export interface ApplicationProposalDeclinedData {
     source?: EmailSource;
 }
 
+// ============================================================================
+// Application Notes Templates
+// ============================================================================
+
+export interface ApplicationNoteCreatedData {
+    recipientName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    notePreview: string;
+    addedByName: string;
+    addedByRole: string;
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function applicationNoteCreatedEmail(data: ApplicationNoteCreatedData): string {
+    const content = `
+${heading({ level: 1, text: 'New Note on Application' })}
+
+${paragraph(`Hi <strong>${data.recipientName}</strong>,`)}
+
+${paragraph(
+    `<strong>${data.addedByName}</strong> (${data.addedByRole}) added a note to the application for <strong>${data.candidateName}</strong>.`
+)}
+
+${infoCard({
+    title: 'Application Details',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+    ],
+})}
+
+${heading({ level: 3, text: 'Note Preview' })}
+${paragraph(`<em>"${data.notePreview}"</em>`)}
+
+${button({
+    href: data.applicationUrl,
+    text: 'View Full Note →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    'You can reply to this note directly in the application portal.'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `New note from ${data.addedByName} on ${data.candidateName}'s application`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
 export function proposalDeclinedByApplicationEmail(data: ApplicationProposalDeclinedData): string {
     const content = `
 ${heading({ level: 1, text: 'Proposal Update' })}

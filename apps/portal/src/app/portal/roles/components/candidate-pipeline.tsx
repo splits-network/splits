@@ -187,7 +187,6 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                             <tr>
                                 <th>Candidate</th>
                                 <th>Stage</th>
-                                <th>Notes</th>
                                 <th>Submitted</th>
                                 <th>Actions</th>
                             </tr>
@@ -277,9 +276,6 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                         {stage?.label || application.stage}
                                                     </span>
                                                 )}
-                                            </td>
-                                            <td className="max-w-xs truncate">
-                                                {application.notes || "-"}
                                             </td>
                                             <td>
                                                 {application.created_at

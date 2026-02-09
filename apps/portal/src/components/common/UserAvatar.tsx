@@ -53,7 +53,7 @@ export default function UserAvatar({
                         alt={userName || "User"}
                         width={imageSizes[size]}
                         height={imageSizes[size]}
-                        className="rounded-full object-cover"
+                        className="rounded-full object-contain"
                         unoptimized={
                             imageUrl.includes("supabase") ? false : true
                         } // Optimize for Supabase CDN

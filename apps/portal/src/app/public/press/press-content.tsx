@@ -566,7 +566,7 @@ export function PressContent() {
                                                 alt="Dashboard Screenshot"
                                                 width={640}
                                                 height={360}
-                                                className="object-cover rounded-lg shadow-lg"
+                                                className="object-contain rounded-lg shadow-lg"
                                             />
                                         </div>
                                     </div>

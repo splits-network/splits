@@ -1,42 +1,47 @@
 /**
- * Application Feedback Routes - V2
- * HTTP endpoints for application feedback management
+ * Application Notes Routes - V2
+ * HTTP endpoints for application notes management
  */
 
 import { FastifyInstance } from 'fastify';
-import { ApplicationFeedbackServiceV2 } from './service';
-import { ApplicationFeedbackFilters, ApplicationFeedbackCreate, ApplicationFeedbackUpdate } from './types';
+import { ApplicationNoteServiceV2 } from './service';
+import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate } from './types';
 import { requireUserContext } from '../helpers';
 
-export async function registerApplicationFeedbackRoutes(
+export async function registerApplicationNoteRoutes(
     app: FastifyInstance,
-    service: ApplicationFeedbackServiceV2
+    service: ApplicationNoteServiceV2
 ) {
     /**
-     * GET /api/v2/applications/:application_id/feedback
-     * List feedback for an application (threaded conversation)
+     * GET /api/v2/applications/:application_id/notes
+     * List notes for an application (chronological order)
      */
     app.get<{
         Params: { application_id: string };
         Querystring: {
             page?: number;
             limit?: number;
-            feedback_type?: string;
+            note_type?: string;
+            visibility?: string;
             in_response_to_id?: string;
         };
-    }>('/applications/:application_id/feedback', async (request, reply) => {
+    }>('/api/v2/applications/:application_id/notes', async (request, reply) => {
         const context = requireUserContext(request);
         const { application_id } = request.params;
-        const { page = 1, limit = 50, feedback_type, in_response_to_id } = request.query;
+        const { page = 1, limit = 50, note_type, visibility, in_response_to_id } = request.query;
 
-        const filters: ApplicationFeedbackFilters = {
+        const filters: ApplicationNoteFilters = {
             application_id,
             page: Number(page),
             limit: Number(limit),
         };
 
-        if (feedback_type) {
-            filters.feedback_type = feedback_type as any;
+        if (note_type) {
+            filters.note_type = note_type as any;
+        }
+
+        if (visibility) {
+            filters.visibility = visibility as any;
         }
 
         if (in_response_to_id) {
@@ -48,51 +53,51 @@ export async function registerApplicationFeedbackRoutes(
     });
 
     /**
-     * GET /api/v2/application-feedback/:id
-     * Get single feedback by ID
+     * GET /api/v2/application-notes/:id
+     * Get single note by ID
      */
     app.get<{
         Params: { id: string };
-    }>('/application-feedback/:id', async (request, reply) => {
+    }>('/api/v2/application-notes/:id', async (request, reply) => {
         const context = requireUserContext(request);
         const { id } = request.params;
 
-        const feedback = await service.getById(id, context.clerkUserId);
+        const note = await service.getById(id, context.clerkUserId);
 
-        if (!feedback) {
+        if (!note) {
             return reply.code(404).send({
                 error: {
-                    code: 'FEEDBACK_NOT_FOUND',
-                    message: 'Feedback not found or access denied',
+                    code: 'NOTE_NOT_FOUND',
+                    message: 'Note not found or access denied',
                 },
             });
         }
 
-        return reply.send({ data: feedback });
+        return reply.send({ data: note });
     });
 
     /**
-     * POST /api/v2/applications/:application_id/feedback
-     * Create new feedback
+     * POST /api/v2/applications/:application_id/notes
+     * Create new note
      */
     app.post<{
         Params: { application_id: string };
-        Body: ApplicationFeedbackCreate;
-    }>('/applications/:application_id/feedback', async (request, reply) => {
+        Body: Omit<ApplicationNoteCreate, 'application_id'>;
+    }>('/api/v2/applications/:application_id/notes', async (request, reply) => {
         const context = requireUserContext(request);
         const { application_id } = request.params;
 
         // Merge application_id from route params
-        const data = {
+        const data: ApplicationNoteCreate = {
             ...request.body,
             application_id,
         };
 
         try {
-            const feedback = await service.create(context.clerkUserId, data);
-            return reply.code(201).send({ data: feedback });
+            const note = await service.create(context.clerkUserId, data);
+            return reply.code(201).send({ data: note });
         } catch (error: any) {
-            if (error.message.includes('required') || error.message.includes('too long')) {
+            if (error.message.includes('required') || error.message.includes('too long') || error.message.includes('Invalid')) {
                 return reply.code(400).send({
                     error: {
                         code: 'INVALID_INPUT',
@@ -105,29 +110,29 @@ export async function registerApplicationFeedbackRoutes(
     });
 
     /**
-     * PATCH /api/v2/application-feedback/:id
-     * Update feedback (message text only)
+     * PATCH /api/v2/application-notes/:id
+     * Update note (message text and visibility)
      */
     app.patch<{
         Params: { id: string };
-        Body: ApplicationFeedbackUpdate;
-    }>('/application-feedback/:id', async (request, reply) => {
+        Body: ApplicationNoteUpdate;
+    }>('/api/v2/application-notes/:id', async (request, reply) => {
         const context = requireUserContext(request);
         const { id } = request.params;
 
         try {
-            const feedback = await service.update(id, context.clerkUserId, request.body);
-            return reply.send({ data: feedback });
+            const note = await service.update(id, context.clerkUserId, request.body);
+            return reply.send({ data: note });
         } catch (error: any) {
             if (error.message.includes('not found') || error.message.includes('access denied')) {
                 return reply.code(404).send({
                     error: {
-                        code: 'FEEDBACK_NOT_FOUND',
+                        code: 'NOTE_NOT_FOUND',
                         message: error.message,
                     },
                 });
             }
-            if (error.message.includes('cannot be empty') || error.message.includes('too long')) {
+            if (error.message.includes('cannot be empty') || error.message.includes('too long') || error.message.includes('Invalid')) {
                 return reply.code(400).send({
                     error: {
                         code: 'INVALID_INPUT',
@@ -140,23 +145,23 @@ export async function registerApplicationFeedbackRoutes(
     });
 
     /**
-     * DELETE /api/v2/application-feedback/:id
-     * Delete feedback (soft delete)
+     * DELETE /api/v2/application-notes/:id
+     * Delete note
      */
     app.delete<{
         Params: { id: string };
-    }>('/application-feedback/:id', async (request, reply) => {
+    }>('/api/v2/application-notes/:id', async (request, reply) => {
         const context = requireUserContext(request);
         const { id } = request.params;
 
         try {
             await service.delete(id, context.clerkUserId);
-            return reply.send({ data: { message: 'Feedback deleted successfully' } });
+            return reply.send({ data: { message: 'Note deleted successfully' } });
         } catch (error: any) {
             if (error.message.includes('not found') || error.message.includes('access denied')) {
                 return reply.code(404).send({
                     error: {
-                        code: 'FEEDBACK_NOT_FOUND',
+                        code: 'NOTE_NOT_FOUND',
                         message: error.message,
                     },
                 });

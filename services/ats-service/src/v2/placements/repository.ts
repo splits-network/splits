@@ -109,7 +109,7 @@ export class PlacementRepository {
                     title,
                     company:companies(id, name)
                 ),
-                application:applications(id, stage, notes)
+                application:applications(id, stage)
             `)
             .eq('id', id)
             .single();

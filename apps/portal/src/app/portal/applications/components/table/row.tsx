@@ -116,16 +116,6 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                             Accepted by company
                         </div>
                     )}
-                    {item.notes && (
-                        <div className="text-sm">
-                            <span className="font-medium">Notes:</span>{" "}
-                            <span className="text-base-content/70">
-                                {item.notes.length > 100
-                                    ? `${item.notes.substring(0, 100)}...`
-                                    : item.notes}
-                            </span>
-                        </div>
-                    )}
                 </div>
             </ExpandedDetailSection>
 

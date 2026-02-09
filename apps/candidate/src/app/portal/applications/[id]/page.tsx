@@ -561,38 +561,6 @@ export default async function ApplicationDetailPage({
                         );
                     })()}
 
-                    {/* Application Notes */}
-                    {(application.notes || application.recruiter_notes) && (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title mb-4">
-                                    <i className="fa-duotone fa-regular fa-note-sticky"></i>
-                                    Notes
-                                </h2>
-
-                                {application.notes && (
-                                    <div className="mb-4">
-                                        <div className="text-sm text-base-content/60 mb-2">Your Notes</div>
-                                        <div className="alert">
-                                            <i className="fa-duotone fa-regular fa-user"></i>
-                                            <span>{application.notes}</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {application.recruiter_notes && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-2">Recruiter Notes</div>
-                                        <div className="alert alert-info">
-                                            <i className="fa-duotone fa-regular fa-circle-info"></i>
-                                            <span>{application.recruiter_notes}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
                     {/* Recruiter Info */}
                     {recruiter && (
                         <div className="card bg-base-100 shadow">

@@ -1,31 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import { AddNoteForm, type CreateNoteData } from '@splits-network/shared-ui';
+import type { ApplicationNoteCreatorType } from '@splits-network/shared-types';
 
 interface AddNoteModalProps {
     applicationId: string;
+    currentUserId: string;
+    creatorType: ApplicationNoteCreatorType;
     onClose: () => void;
-    onSave: (note: string) => Promise<void>;
-    loading: boolean;
+    onSave: (data: CreateNoteData) => Promise<void>;
+    loading?: boolean;
 }
 
 /**
- * Modal for adding recruiter notes to an application.
- * Allows recruiters to add context, observations, or follow-up actions.
+ * Modal for adding notes to an application.
+ * Supports note type and visibility selection based on user role.
  */
 export default function AddNoteModal({
     applicationId,
+    currentUserId,
+    creatorType,
     onClose,
     onSave,
-    loading,
+    loading = false,
 }: AddNoteModalProps) {
-    const [note, setNote] = useState('');
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!note.trim()) return;
-        await onSave(note);
+    const handleSubmit = async (data: CreateNoteData) => {
+        await onSave(data);
+        onClose();
     };
 
     return (
@@ -33,50 +34,18 @@ export default function AddNoteModal({
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-note-sticky mr-2"></i>
-                    Add Recruiter Note
+                    Add Note
                 </h3>
 
-                <form onSubmit={handleSubmit}>
-                    <MarkdownEditor
-                        className="fieldset"
-                        label="Note"
-                        value={note}
-                        onChange={setNote}
-                        placeholder="Add context, observations, or follow-up actions..."
-                        helperText="This note will be visible to other recruiters and company users"
-                        height={180}
-                        preview="edit"
-                        disabled={loading}
-                    />
-
-                    <div className="modal-action">
-                        <button
-                            type="button"
-                            className="btn btn-ghost"
-                            onClick={onClose}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={loading || !note.trim()}
-                        >
-                            {loading ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                    Save Note
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </form>
+                <AddNoteForm
+                    applicationId={applicationId}
+                    currentUserId={currentUserId}
+                    creatorType={creatorType}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                    showNoteTypeSelector={true}
+                    loading={loading}
+                />
             </div>
             <div className="modal-backdrop" onClick={onClose}></div>
         </div>

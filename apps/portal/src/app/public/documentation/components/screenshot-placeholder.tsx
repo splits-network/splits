@@ -56,7 +56,7 @@ export function ScreenshotPlaceholder({
                                             "https://placehold.co/600x1200?text=Mobile+Screenshot+Placeholder"
                                         }
                                         alt={`${title} placeholder`}
-                                        className="object-cover w-full h-full"
+                                        className="object-contain w-full h-full"
                                     />
                                 </div>
                                 <div className="mockup-browser-toolbar px-6 py-4 bg-base-100 m-0">

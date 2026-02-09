@@ -8,7 +8,7 @@ import { BillingService } from './service'; // V1 - Keep for webhook compatibili
 import { BillingRepository } from './repository'; // V1 - Keep for webhook compatibility until V2 migration
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
-import { PlacementEventConsumer } from './events/placement-consumer';
+import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
 import { PlacementSnapshotService } from './v2/placement-snapshot/service';
 import { createClient } from '@supabase/supabase-js';
@@ -143,10 +143,10 @@ async function main() {
         eventPublisher: v2EventPublisher,
     });
 
-    // Phase 6: Initialize placement event consumer with payout service
+    // Phase 6: Initialize billing event consumer with payout service
     // System user ID for automated operations (use a service account or system admin)
     const systemUserId = process.env.SYSTEM_USER_ID || 'system'; // TODO: Create proper system user
-    const placementConsumer = new PlacementEventConsumer(
+    const billingEventConsumer = new BillingEventConsumer(
         rabbitConfig.url,
         snapshotService,
         v2Services.payoutService,
@@ -156,15 +156,15 @@ async function main() {
     );
 
     // Track consumer connection status for health checks
-    let placementConsumerConnected = false;
+    let billingEventConsumerConnected = false;
 
     try {
-        await placementConsumer.connect();
-        placementConsumerConnected = true;
-        logger.info('Placement event consumer connected and listening');
+        await billingEventConsumer.connect();
+        billingEventConsumerConnected = true;
+        logger.info('Billing event consumer connected and listening');
     } catch (error) {
-        placementConsumerConnected = false;
-        logger.error({ err: error }, 'CRITICAL: Placement event consumer failed to connect - commission processing DISABLED');
+        billingEventConsumerConnected = false;
+        logger.error({ err: error }, 'CRITICAL: Billing event consumer failed to connect - commission processing DISABLED');
     }
 
     // Register webhook routes (V1 - TODO: migrate to V2)
@@ -176,10 +176,10 @@ async function main() {
             // Check database connectivity
             await repository.healthCheck();
             return reply.status(200).send({
-                status: placementConsumerConnected ? 'healthy' : 'degraded',
+                status: billingEventConsumerConnected ? 'healthy' : 'degraded',
                 service: 'billing-service',
                 timestamp: new Date().toISOString(),
-                event_consumer: placementConsumerConnected ? 'connected' : 'disconnected',
+                event_consumer: billingEventConsumerConnected ? 'connected' : 'disconnected',
             });
         } catch (error) {
             logger.error({ err: error }, 'Health check failed');
@@ -188,14 +188,14 @@ async function main() {
                 service: 'billing-service',
                 timestamp: new Date().toISOString(),
                 error: error instanceof Error ? error.message : 'Unknown error',
-                event_consumer: placementConsumerConnected ? 'connected' : 'disconnected',
+                event_consumer: billingEventConsumerConnected ? 'connected' : 'disconnected',
             });
         }
     });
 
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down billing service');
-        await placementConsumer.close();
+        await billingEventConsumer.close();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);

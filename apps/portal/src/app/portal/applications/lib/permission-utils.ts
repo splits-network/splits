@@ -250,35 +250,6 @@ export function getNextStageOnApprove(
 }
 
 /**
- * Formats a note with timestamp and user type prefix.
- */
-export function formatApplicationNote(
-    existingNotes: string | null,
-    newNote: string,
-    isRecruiter: boolean,
-    isCompanyUser: boolean,
-    isPlatformAdmin: boolean
-): string {
-    const userType = isRecruiter
-        ? 'Recruiter'
-        : isCompanyUser
-            ? 'Company User'
-            : isPlatformAdmin
-                ? 'Platform Admin'
-                : 'Unknown';
-
-    const timestamp = new Date().toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
-    return (existingNotes ?? '') + `\n[${timestamp}] ${userType}: ${newNote}`;
-}
-
-/**
  * Categorizes documents into candidate docs and company docs.
  */
 export function categorizeDocuments(documents: any[]) {

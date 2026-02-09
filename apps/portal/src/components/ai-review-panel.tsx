@@ -7,9 +7,13 @@ import { useUserProfile } from "@/contexts";
 import type { AIReview } from "@splits-network/shared-types";
 import { StatCard, StatCardGrid } from "./ui";
 
+type AIReviewVariant = "full" | "compact" | "badge" | "mini-card";
+
 interface AIReviewPanelProps {
     applicationId: string;
+    /** @deprecated Use variant="compact" instead */
     compact?: boolean;
+    variant?: AIReviewVariant;
 }
 
 const getRecommendationColor = (recommendation: string | null) => {
@@ -95,7 +99,9 @@ const getLocationLabel = (compatibility: string | null) => {
 export default function AIReviewPanel({
     applicationId,
     compact = false,
+    variant,
 }: AIReviewPanelProps) {
+    const resolvedVariant: AIReviewVariant = variant ?? (compact ? "compact" : "full");
     const { getToken } = useAuth();
     const { isAdmin } = useUserProfile();
     const [loading, setLoading] = useState(true);
@@ -200,6 +206,51 @@ export default function AIReviewPanel({
         }
     };
 
+    // Badge variant: inline span only, invisible during load/error/null
+    if (resolvedVariant === "badge") {
+        if (loading || error || !aiReview || aiReview.fit_score == null) return null;
+        return (
+            <span className={`badge badge-xs ${getRecommendationColor(aiReview.recommendation)} ml-1`}>
+                {Math.round(aiReview.fit_score)}%
+            </span>
+        );
+    }
+
+    // Mini-card variant: small overview card
+    if (resolvedVariant === "mini-card") {
+        if (loading) {
+            return (
+                <div className="card bg-base-200 p-4 animate-pulse">
+                    <div className="h-4 bg-base-300 rounded w-24 mb-2" />
+                    <div className="h-3 bg-base-300 rounded w-32" />
+                </div>
+            );
+        }
+        if (error || !aiReview || aiReview.fit_score == null) return null;
+        return (
+            <div className="card bg-base-200 p-4">
+                <h4 className="font-semibold mb-2">AI Fit Score</h4>
+                <div className="flex items-center gap-2">
+                    <progress
+                        className="progress progress-accent w-20"
+                        value={aiReview.fit_score}
+                        max="100"
+                    />
+                    <span className="font-bold">
+                        {Math.round(aiReview.fit_score)}%
+                    </span>
+                </div>
+                {aiReview.recommendation && (
+                    <span
+                        className={`badge badge-xs mt-1 ${getRecommendationColor(aiReview.recommendation)}`}
+                    >
+                        {getRecommendationLabel(aiReview.recommendation)}
+                    </span>
+                )}
+            </div>
+        );
+    }
+
     if (loading) {
         return (
             <div className="card bg-base-100 shadow">
@@ -282,7 +333,7 @@ export default function AIReviewPanel({
         );
     }
 
-    if (compact) {
+    if (resolvedVariant === "compact") {
         return (
             <div className="card bg-base-100 shadow">
                 <div className="card-body">

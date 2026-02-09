@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
-import { LoadingState } from "@splits-network/shared-ui";
+import { LoadingState, ApplicationNotesPanel, type CreateNoteData } from "@splits-network/shared-ui";
+import type { ApplicationNote, ApplicationNoteCreatorType } from "@splits-network/shared-types";
 import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
 import ApplicationTimeline from "./application-timeline";
 import AIReviewDisplay from "./ai-review-display";
@@ -31,6 +32,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         | "candidate"
         | "job"
         | "documents"
+        | "notes"
         | "ai_review"
         | "timeline"
     >("overview");
@@ -155,11 +157,15 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     >
                         <i className="fa-duotone fa-brain mr-2" />
                         AI Review
-                        {application.ai_review?.fit_score != null && (
-                            <span className="badge badge-xs badge-accent ml-1">
-                                {Math.round(application.ai_review.fit_score)}%
-                            </span>
-                        )}
+                        <AIReviewPanel applicationId={application.id} variant="badge" />
+                    </a>
+                    <a
+                        role="tab"
+                        className={`tab ${activeTab === "notes" ? "tab-active" : ""}`}
+                        onClick={() => setActiveTab("notes")}
+                    >
+                        <i className="fa-duotone fa-comments mr-2" />
+                        Notes
                     </a>
                     <a
                         role="tab"
@@ -187,8 +193,16 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {activeTab === "ai_review" && (
                     <AIReviewTab application={application} token={token} />
                 )}
+                {activeTab === "notes" && (
+                    <NotesTab
+                        application={application}
+                        getToken={getToken}
+                        isRecruiter={isRecruiter}
+                        isCompanyUser={isCompanyUser}
+                    />
+                )}
                 {activeTab === "timeline" && (
-                    <TimelineTab auditLogs={auditLogs} />
+                    <TimelineTab auditLogs={auditLogs} currentStage={application.stage || 'draft'} />
                 )}
             </div>
         </div>
@@ -244,63 +258,7 @@ function OverviewTab({ application }: { application: Application }) {
                 })()}
             </div>
 
-            {application.ai_review?.fit_score != null && (
-                <div className="card bg-base-200 p-4">
-                    <h4 className="font-semibold mb-2">AI Fit Score</h4>
-                    <div className="flex items-center gap-2">
-                        <progress
-                            className="progress progress-accent w-20"
-                            value={application.ai_review.fit_score}
-                            max="100"
-                        />
-                        <span className="font-bold">
-                            {Math.round(application.ai_review.fit_score)}%
-                        </span>
-                    </div>
-                    {application.ai_review.recommendation && (
-                        <span
-                            className={`badge badge-xs mt-1 ${
-                                application.ai_review.recommendation ===
-                                "strong_fit"
-                                    ? "badge-success"
-                                    : application.ai_review.recommendation ===
-                                        "good_fit"
-                                      ? "badge-info"
-                                      : application.ai_review.recommendation ===
-                                          "fair_fit"
-                                        ? "badge-warning"
-                                        : "badge-error"
-                            }`}
-                        >
-                            {application.ai_review.recommendation.replace(
-                                "_",
-                                " ",
-                            )}
-                        </span>
-                    )}
-                </div>
-            )}
-
-            {(application.notes || application.recruiter_notes) && (
-                <div className="card bg-base-200 p-4 md:col-span-2">
-                    <h4 className="font-semibold mb-2">Notes</h4>
-                    {application.notes && (
-                        <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                            {application.notes}
-                        </p>
-                    )}
-                    {application.recruiter_notes && (
-                        <div className="mt-2">
-                            <h5 className="text-sm font-medium">
-                                Recruiter Notes:
-                            </h5>
-                            <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                {application.recruiter_notes}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
+            <AIReviewPanel applicationId={application.id} variant="mini-card" />
         </div>
     );
 }
@@ -699,6 +657,83 @@ function DocumentsTab({ application }: { application: Application }) {
     );
 }
 
+function NotesTab({
+    application,
+    getToken,
+    isRecruiter,
+    isCompanyUser,
+}: {
+    application: Application;
+    getToken: () => Promise<string | null>;
+    isRecruiter: boolean;
+    isCompanyUser: boolean;
+}) {
+    const { profile } = useUserProfile();
+
+    // Determine user's creator type based on their role
+    const getCreatorType = (): ApplicationNoteCreatorType => {
+        if (profile?.is_platform_admin) return "platform_admin";
+        if (isRecruiter) return "candidate_recruiter";
+        if (isCompanyUser) {
+            // Could be hiring_manager or company_admin based on roles
+            if (profile?.roles.includes("hiring_manager")) return "hiring_manager";
+            return "company_admin";
+        }
+        return "candidate";
+    };
+
+    // API functions for notes - wrapped in useCallback to prevent infinite re-fetching
+    // getToken is stable from Clerk, so these callbacks are stable too
+    const fetchNotes = useCallback(async (applicationId: string): Promise<ApplicationNote[]> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        const response = await client.get(`/applications/${applicationId}/notes`);
+        return response.data || [];
+    }, [getToken]);
+
+    const createNote = useCallback(async (data: CreateNoteData): Promise<ApplicationNote> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        const response = await client.post(`/applications/${data.application_id}/notes`, data);
+        return response.data;
+    }, [getToken]);
+
+    const deleteNote = useCallback(async (noteId: string): Promise<void> => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+        const client = createAuthenticatedClient(token);
+        await client.delete(`/application-notes/${noteId}`);
+    }, [getToken]);
+
+    if (!profile) {
+        return (
+            <div className="text-center p-8 text-base-content/50">
+                <i className="fa-duotone fa-comments text-4xl mb-2" />
+                <p>Loading user profile...</p>
+            </div>
+        );
+    }
+
+    return (
+        <ApplicationNotesPanel
+            applicationId={application.id}
+            currentUserId={profile.id}
+            currentUserCreatorType={getCreatorType()}
+            fetchNotes={fetchNotes}
+            createNote={createNote}
+            deleteNote={deleteNote}
+            isOnCandidateSide={isRecruiter || !isCompanyUser}
+            isOnCompanySide={isCompanyUser}
+            allowAddNote={true}
+            allowDeleteNote={true}
+            emptyStateMessage="No notes yet. Add one to start the conversation about this application."
+            maxHeight="500px"
+        />
+    );
+}
+
 function AIReviewTab({
     application,
     token,
@@ -722,6 +757,6 @@ function AIReviewTab({
     );
 }
 
-function TimelineTab({ auditLogs }: { auditLogs: any[] }) {
-    return <ApplicationTimeline auditLogs={auditLogs} />;
+function TimelineTab({ auditLogs, currentStage }: { auditLogs: any[]; currentStage: string }) {
+    return <ApplicationTimeline auditLogs={auditLogs} currentStage={currentStage} />;
 }

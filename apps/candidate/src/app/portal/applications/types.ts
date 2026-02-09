@@ -41,9 +41,6 @@ export interface Application {
     updated_at: string;
     ai_reviewed?: boolean;
     job_id: string;
-    notes?: string;
-    candidate_notes?: string;
-    recruiter_notes?: string;
     candidate: {
         full_name: string;
         email: string;

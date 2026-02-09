@@ -1,7 +1,12 @@
 "use client";
 
 import { formatDate } from "@/lib/utils";
-import { EntityCard, DataList, DataRow, VerticalDataRow } from "@/components/ui";
+import {
+    EntityCard,
+    DataList,
+    DataRow,
+    VerticalDataRow,
+} from "@/components/ui";
 import {
     type Application,
     getStatusColor,
@@ -31,7 +36,7 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                                         <img
                                             src={item.job.company.logo_url}
                                             alt={`${item.job?.company.name} logo`}
-                                            className="w-full h-full object-cover rounded-full"
+                                            className="w-full h-full object-contain rounded-full"
                                         />
                                     ) : (
                                         <span>{companyInitial}</span>
@@ -84,13 +89,6 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                             icon="fa-user"
                             label="Recruiter"
                             value={item.recruiter.user.name}
-                        />
-                    )}
-                    {item.recruiter_notes && (
-                        <VerticalDataRow
-                            icon="fa-comment"
-                            label="Notes"
-                            value={item.recruiter_notes}
                         />
                     )}
                     <DataRow

@@ -96,8 +96,21 @@ export function ApplicationDetailClient({
                 stage: "rejected",
                 decline_reason: reason,
                 decline_details: details,
-                candidate_notes: details,
             });
+
+            // Create a note with the decline details if provided
+            if (details && details.trim()) {
+                try {
+                    await client.post(`/applications/${application.id}/notes`, {
+                        created_by_type: 'candidate',
+                        note_type: 'stage_transition',
+                        visibility: 'shared',
+                        message_text: details.trim(),
+                    });
+                } catch (noteError) {
+                    console.warn('Failed to create decline note:', noteError);
+                }
+            }
 
             // Refresh page to show updated state
             router.refresh();
@@ -186,8 +199,21 @@ export function ApplicationDetailClient({
                 stage: "ai_review",
                 document_ids: allDocumentIds,
                 primary_resume_id: primaryResumeId,
-                candidate_notes: wizardData.notes || undefined,
             });
+
+            // Step 4: Create application note if candidate added notes
+            if (wizardData.notes && wizardData.notes.trim()) {
+                try {
+                    await client.post(`/applications/${application.id}/notes`, {
+                        created_by_type: 'candidate',
+                        note_type: 'note',
+                        visibility: 'shared',
+                        message_text: wizardData.notes.trim(),
+                    });
+                } catch (noteError) {
+                    console.warn('Failed to create candidate note:', noteError);
+                }
+            }
 
             // Success - refresh page
             router.refresh();

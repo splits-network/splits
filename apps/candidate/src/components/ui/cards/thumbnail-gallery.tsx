@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export interface ThumbnailGalleryProps {
     /** Images to display */
@@ -11,7 +11,10 @@ export interface ThumbnailGalleryProps {
     maxItems?: number;
 }
 
-export function ThumbnailGallery({ images, maxItems = 4 }: ThumbnailGalleryProps) {
+export function ThumbnailGallery({
+    images,
+    maxItems = 4,
+}: ThumbnailGalleryProps) {
     const displayImages = images.slice(0, maxItems);
 
     return (
@@ -22,8 +25,8 @@ export function ThumbnailGallery({ images, maxItems = 4 }: ThumbnailGalleryProps
                         <div className="aspect-square rounded-lg overflow-hidden bg-base-200">
                             <img
                                 src={img.src}
-                                alt={img.alt || ''}
-                                className="w-full h-full object-cover"
+                                alt={img.alt || ""}
+                                className="w-full h-full object-contain"
                             />
                         </div>
                         {img.label && (

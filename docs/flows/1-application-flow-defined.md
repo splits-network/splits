@@ -32,6 +32,7 @@ Before an application can flow through the system, several entities must be set 
 A recruiter must have an active profile and (for payouts) a Stripe Connect account.
 
 **Stripe Connect Setup** (`services/billing-service/src/v2/connect/service.ts`):
+
 1. Recruiter calls `getOrCreateAccount()` — creates a Stripe Express account if none exists
 2. Recruiter completes Stripe onboarding via `createOnboardingLink()` (redirects to Stripe)
 3. System verifies: `charges_enabled`, `payouts_enabled`, `details_submitted`
@@ -42,6 +43,7 @@ A recruiter must have an active profile and (for payouts) a Stripe Connect accou
 ### 1.2 Company Onboarding
 
 A company must have:
+
 - A company profile (via identity-service)
 - A **billing profile** with a Stripe customer ID and billing terms
 
@@ -57,20 +59,21 @@ A company must have:
 
 A job must exist with these key fields for the application/payout flow:
 
-| Field | Purpose |
-|-------|---------|
-| `company_id` | Which company owns this job |
-| `fee_percentage` | Placement fee as % of salary (0-100) |
-| `company_recruiter_id` | Recruiter representing the company (nullable) |
+| Field                    | Purpose                                            |
+| ------------------------ | -------------------------------------------------- |
+| `company_id`             | Which company owns this job                        |
+| `fee_percentage`         | Placement fee as % of salary (0-100)               |
+| `company_recruiter_id`   | Recruiter representing the company (nullable)      |
 | `job_owner_recruiter_id` | Recruiter who created/owns the job spec (nullable) |
-| `guarantee_days` | Guarantee period in days (default: 90) |
-| `status` | Must be `active` for new applications |
+| `guarantee_days`         | Guarantee period in days (default: 90)             |
+| `status`                 | Must be `active` for new applications              |
 
 ### 1.4 Recruiter-Candidate Relationship
 
 Recruiters represent candidates via a formal relationship managed in the network service.
 
 **Invitation Flow** (`services/network-service/src/v2/recruiter-candidates/service.ts`):
+
 1. Recruiter creates relationship → generates invitation token (7-day expiry)
 2. `candidate.invited` event published → notification sent to candidate
 3. Candidate accepts invitation → relationship becomes `active`, consent recorded with IP/user agent
@@ -85,11 +88,13 @@ Only `active` relationships are used for auto-assigning recruiter to application
 Sourcers are the first recruiters to bring a candidate or company to the platform. Attribution is **permanent** while the sourcer's account remains active.
 
 **Candidate Sourcers** (`services/ats-service/src/v2/candidate-sourcers/`):
+
 - One sourcer per candidate (first recruiter wins)
 - Stored in `candidate_sourcers` table with `UNIQUE(candidate_id)`
 - Commission earned on every placement involving this candidate
 
 **Company Sourcers** (`services/ats-service/src/v2/company-sourcers/`):
+
 - One sourcer per company (first recruiter wins)
 - Stored in `company_sourcers` table with `UNIQUE(company_id)`
 - Commission earned on every placement at this company
@@ -107,15 +112,16 @@ Applications can be created through two paths.
 **Who**: Candidate applies to a job directly (via candidate portal or through their recruiter's portal).
 
 **Flow** (`ApplicationServiceV2.createApplication()`):
+
 1. `job_id` is required
 2. System resolves `candidate_id` from the authenticated user's access context
 3. System checks for an active recruiter-candidate relationship:
-   - If `candidate_recruiter_id` provided in request → use it
-   - Else if user has a `recruiterId` in access context → use it
-   - Else query `recruiter_candidates` for an active relationship → use that recruiter
+    - If `candidate_recruiter_id` provided in request → use it
+    - Else if user has a `recruiterId` in access context → use it
+    - Else query `recruiter_candidates` for an active relationship → use that recruiter
 4. **Initial stage determined** (unless explicitly provided in request):
-   - **Has recruiter** → `recruiter_proposed` (recruiter is notified, candidate proceeds to fill out application)
-   - **No recruiter** → `ai_review` (direct application, goes straight to AI analysis)
+    - **Has recruiter** → `recruiter_proposed` (recruiter is notified, candidate proceeds to fill out application)
+    - **No recruiter** → `ai_review` (direct application, goes straight to AI analysis)
 5. Application created in database
 6. Documents linked (if `document_ids` provided)
 7. Pre-screen answers saved (if `pre_screen_answers` provided)
@@ -129,6 +135,7 @@ Applications can be created through two paths.
 **Who**: Recruiter proposes a job opportunity to one of their candidates.
 
 **Flow** (`ApplicationServiceV2.proposeJobToCandidate()`):
+
 1. Validates recruiter is active, candidate exists, job is active
 2. Checks no existing active application for this candidate-job pair
 3. Creates application with stage `recruiter_proposed`
@@ -139,16 +146,16 @@ Applications can be created through two paths.
 **Candidate Response**:
 
 - **Accept** (`acceptProposal()`):
-  - Only the candidate who owns the application can accept
-  - Stage changes: `recruiter_proposed` → `draft`
-  - Candidate can now fill out the application
-  - `application.proposal_accepted` event published → recruiter notified
+    - Only the candidate who owns the application can accept
+    - Stage changes: `recruiter_proposed` → `draft`
+    - Candidate can now fill out the application
+    - `application.proposal_accepted` event published → recruiter notified
 
 - **Decline** (`declineProposal()`):
-  - Only the candidate who owns the application can decline
-  - Stage changes: `recruiter_proposed` → `rejected`
-  - Optional decline reason recorded
-  - `application.proposal_declined` event published → recruiter notified
+    - Only the candidate who owns the application can decline
+    - Stage changes: `recruiter_proposed` → `rejected`
+    - Optional decline reason recorded
+    - `application.proposal_declined` event published → recruiter notified
 
 ---
 
@@ -156,28 +163,29 @@ Applications can be created through two paths.
 
 ### 3.1 All Application Stages
 
-| Stage | Category | Description |
-|-------|----------|-------------|
-| `draft` | Preparation | Candidate building/editing application |
-| `ai_review` | Preparation | AI analyzing candidate-job fit (in progress) |
-| `ai_reviewed` | Preparation | AI complete, candidate reviewing feedback |
-| `recruiter_request` | Preparation | Recruiter requested changes from candidate |
-| `recruiter_proposed` | Preparation | Recruiter proposed this job to candidate |
-| `recruiter_review` | Review | Candidate's recruiter reviewing before company submission |
-| `screen` | Review | Screening stage (recruiter or initial screen) |
-| `submitted` | Company Pipeline | Submitted to company for review |
-| `company_review` | Company Pipeline | Company is actively reviewing |
-| `company_feedback` | Company Pipeline | Company has provided feedback |
-| `interview` | Company Pipeline | Candidate in interview process |
-| `offer` | Company Pipeline | Offer extended to candidate |
-| `hired` | Terminal | Candidate accepted, triggers placement |
-| `rejected` | Terminal | Rejected at any stage |
-| `withdrawn` | Terminal | Candidate self-withdrew |
-| `expired` | Terminal | Application timed out |
+| Stage                | Category         | Description                                               |
+| -------------------- | ---------------- | --------------------------------------------------------- |
+| `draft`              | Preparation      | Candidate building/editing application                    |
+| `ai_review`          | Preparation      | AI analyzing candidate-job fit (in progress)              |
+| `ai_reviewed`        | Preparation      | AI complete, candidate reviewing feedback                 |
+| `recruiter_request`  | Preparation      | Recruiter requested changes from candidate                |
+| `recruiter_proposed` | Preparation      | Recruiter proposed this job to candidate                  |
+| `recruiter_review`   | Review           | Candidate's recruiter reviewing before company submission |
+| `screen`             | Review           | Screening stage (recruiter or initial screen)             |
+| `submitted`          | Company Pipeline | Submitted to company for review                           |
+| `company_review`     | Company Pipeline | Company is actively reviewing                             |
+| `company_feedback`   | Company Pipeline | Company has provided feedback                             |
+| `interview`          | Company Pipeline | Candidate in interview process                            |
+| `offer`              | Company Pipeline | Offer extended to candidate                               |
+| `hired`              | Terminal         | Candidate accepted, triggers placement                    |
+| `rejected`           | Terminal         | Rejected at any stage                                     |
+| `withdrawn`          | Terminal         | Candidate self-withdrew                                   |
+| `expired`            | Terminal         | Application timed out                                     |
 
 ### 3.2 Stage Transition Rules
 
 **Special transitions** (always or broadly allowed):
+
 - `withdrawn` — allowed from **any** non-terminal stage (candidate self-service)
 - `draft` — allowed from any non-terminal stage except `hired`, `withdrawn`, `expired`
 - `recruiter_request` — allowed from any non-terminal stage (recruiter asks for changes)
@@ -285,14 +293,16 @@ The AI review loop ensures application quality before submission.
 **Method**: `handleAIReviewCompleted()` in `ApplicationServiceV2`
 
 When the AI service completes analysis:
+
 1. Application moves to `ai_reviewed` (NOT directly to submitted)
 2. `ai_reviewed` flag set to `true` on application
 3. `application.ai_reviewed` event published
 4. If recommendation is `poor_fit` or `fair_fit` with concerns:
-   - `application.needs_improvement` event published
-   - Candidate notified about suggested improvements
+    - `application.needs_improvement` event published
+    - Candidate notified about suggested improvements
 
 **AI Review Results** include:
+
 - `recommendation`: `strong_fit`, `good_fit`, `fair_fit`, `poor_fit`
 - `concerns`: array of identified issues
 - Fit score, matched skills, missing skills, experience analysis
@@ -302,16 +312,18 @@ When the AI service completes analysis:
 After AI review completes, candidate is in `ai_reviewed` stage and can:
 
 **Option A — Return to Draft** (`returnToDraft()`):
+
 - Allowed from `ai_reviewed`, `recruiter_request`, `screen`
 - Moves back to `draft`, resets `ai_reviewed = false`
 - Candidate can edit and trigger AI review again (unlimited retries)
 - `application.returned_to_draft` event published
 
 **Option B — Submit Application** (`submitApplication()`):
+
 - Allowed from `ai_reviewed` or `screen`
 - Next stage depends on recruiter presence:
-  - **Has recruiter** → `recruiter_review`
-  - **No recruiter** → `submitted` (straight to company)
+    - **Has recruiter** → `recruiter_review`
+    - **No recruiter** → `submitted` (straight to company)
 - `application.submitted` event published
 
 ---
@@ -323,6 +335,7 @@ When a candidate has an active recruiter relationship, the recruiter reviews bef
 ### 5.1 Recruiter Review Stage
 
 After candidate submits from `ai_reviewed`:
+
 - If `candidate_recruiter_id` exists → stage becomes `recruiter_review`
 - Recruiter is notified that an application is pending their review
 
@@ -330,16 +343,17 @@ After candidate submits from `ai_reviewed`:
 
 From `recruiter_review`, the recruiter can:
 
-| Action | Transition | Description |
-|--------|------------|-------------|
-| Approve | `recruiter_review` → `submitted` | Application forwarded to company |
-| Request changes | `recruiter_review` → `recruiter_request` → (candidate returns to `draft`) | Recruiter asks candidate to improve |
-| Send to screening | `recruiter_review` → `screen` | Additional screening before company |
-| Reject | `recruiter_review` → `rejected` | Recruiter rejects application |
+| Action            | Transition                                                                | Description                         |
+| ----------------- | ------------------------------------------------------------------------- | ----------------------------------- |
+| Approve           | `recruiter_review` → `submitted`                                          | Application forwarded to company    |
+| Request changes   | `recruiter_review` → `recruiter_request` → (candidate returns to `draft`) | Recruiter asks candidate to improve |
+| Send to screening | `recruiter_review` → `screen`                                             | Additional screening before company |
+| Reject            | `recruiter_review` → `rejected`                                           | Recruiter rejects application       |
 
 ### 5.3 Recruiter Request Loop
 
 When recruiter requests changes:
+
 1. Application moves to `recruiter_request`
 2. Candidate notified of requested changes
 3. Candidate returns application to `draft`
@@ -349,6 +363,7 @@ When recruiter requests changes:
 ### 5.4 Direct Candidate Submission (No Recruiter)
 
 If candidate has no active recruiter relationship:
+
 - Application goes directly from `ai_reviewed` → `submitted`
 - Company is notified of the new application
 - Candidate notified their application was submitted directly
@@ -368,18 +383,19 @@ submitted → company_review → company_feedback → interview → offer → hi
                                                               at any stage)
 ```
 
-| Stage | Who Acts | Description |
-|-------|----------|-------------|
-| `submitted` | Company admins notified | Application in company's queue |
-| `company_review` | Company reviews | Active review of candidate |
+| Stage              | Who Acts                  | Description                                       |
+| ------------------ | ------------------------- | ------------------------------------------------- |
+| `submitted`        | Company admins notified   | Application in company's queue                    |
+| `company_review`   | Company reviews           | Active review of candidate                        |
 | `company_feedback` | Company provides feedback | Feedback shared (can loop to `recruiter_request`) |
-| `interview` | Company schedules | Candidate in interview process |
-| `offer` | Company extends | Offer presented to candidate |
-| `hired` | Candidate accepts | Terminal — triggers placement creation |
+| `interview`        | Company schedules         | Candidate in interview process                    |
+| `offer`            | Company extends           | Offer presented to candidate                      |
+| `hired`            | Candidate accepts         | Terminal — triggers placement creation            |
 
 ### 6.2 Company Feedback Loop
 
 From `company_feedback`, the flow can:
+
 - Move forward to `interview` or `offer`
 - Loop back to `recruiter_request` (company asks recruiter to address something)
 - Result in `rejected`
@@ -387,6 +403,7 @@ From `company_feedback`, the flow can:
 ### 6.3 Hired — Trigger Point
 
 When application reaches `hired`:
+
 - `application.stage_changed` event published with `new_stage: 'hired'`
 - This is the trigger point for **placement creation**
 - Application becomes a reference record; the placement takes over
@@ -407,26 +424,28 @@ When an application reaches `hired`, a placement is created to track the deal an
 2. **Gather job data**: `company_id`, `company_recruiter_id`, `job_owner_recruiter_id`, `fee_percentage`, `guarantee_days`
 3. **Gather 5 attribution roles**:
 
-| # | Role | Source | Description |
-|---|------|--------|-------------|
-| 1 | `candidate_recruiter_id` | `applications.candidate_recruiter_id` | Recruiter representing the candidate ("Closer") |
-| 2 | `company_recruiter_id` | `jobs.company_recruiter_id` | Recruiter representing the company ("Client/Hiring Facilitator") |
-| 3 | `job_owner_recruiter_id` | `jobs.job_owner_recruiter_id` | Recruiter who created the job posting ("Specs Owner") |
-| 4 | `candidate_sourcer_recruiter_id` | `candidate_sourcers` table | First recruiter to bring candidate to platform ("Discovery") |
-| 5 | `company_sourcer_recruiter_id` | `company_sourcers` table | First recruiter to bring company to platform ("BD") |
+| #   | Role                             | Source                                | Description                                                      |
+| --- | -------------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
+| 1   | `candidate_recruiter_id`         | `applications.candidate_recruiter_id` | Recruiter representing the candidate ("Closer")                  |
+| 2   | `company_recruiter_id`           | `jobs.company_recruiter_id`           | Recruiter representing the company ("Client/Hiring Facilitator") |
+| 3   | `job_owner_recruiter_id`         | `jobs.job_owner_recruiter_id`         | Recruiter who created the job posting ("Specs Owner")            |
+| 4   | `candidate_sourcer_recruiter_id` | `candidate_sourcers` table            | First recruiter to bring candidate to platform ("Discovery")     |
+| 5   | `company_sourcer_recruiter_id`   | `company_sourcers` table              | First recruiter to bring company to platform ("BD")              |
 
 All five roles are **nullable**. Sourcer roles are only included if the sourcer's account is currently active.
 
 4. **Calculate placement fee**:
-   ```
-   placement_fee = salary * fee_percentage / 100
-   ```
+
+    ```
+    placement_fee = salary * fee_percentage / 100
+    ```
 
 5. **Set guarantee period**:
-   ```
-   guarantee_days = job.guarantee_days ?? 90
-   guarantee_expires_at = start_date + guarantee_days
-   ```
+
+    ```
+    guarantee_days = job.guarantee_days ?? 90
+    guarantee_expires_at = start_date + guarantee_days
+    ```
 
 6. **Create placement record** with state `active`
 7. **Link application**: Update `applications.placement_id` and `applications.hired_at`
@@ -434,15 +453,16 @@ All five roles are **nullable**. Sourcer roles are only included if the sourcer'
 
 ### 7.2 Placement Statuses
 
-| Status | Description |
-|--------|-------------|
-| `pending` | Placement just created, awaiting confirmation |
-| `confirmed` | Placement confirmed by admin |
-| `active` | Candidate has started working, guarantee period running |
-| `completed` | Guarantee period passed, placement successful |
+| Status      | Description                                             |
+| ----------- | ------------------------------------------------------- |
+| `pending`   | Placement just created, awaiting confirmation           |
+| `confirmed` | Placement confirmed by admin                            |
+| `active`    | Candidate has started working, guarantee period running |
+| `completed` | Guarantee period passed, placement successful           |
 | `cancelled` | Placement cancelled (candidate left, deal fell through) |
 
 **Transitions**:
+
 ```
 pending → confirmed, cancelled
 confirmed → active, cancelled
@@ -451,11 +471,12 @@ completed → (terminal)
 cancelled → (terminal)
 ```
 
-Note: Only admins can mark placements as `completed` (not hiring managers).
+Note: Company users (`company_admin` and `hiring_manager`) can mark placements as `completed`.
 
 ### 7.3 Direct Placement Creation
 
 Placements can also be created directly (not from an application) via `createPlacement()`, which requires:
+
 - `job_id`, `candidate_id`, `application_id`, `start_date`, `salary`, `fee_percentage`
 - Uses the same `gatherAttribution()` method to collect all 5 role IDs
 
@@ -476,11 +497,11 @@ After placement creation, the hiring company is invoiced for the placement fee.
 5. **Map billing terms** to Stripe collection method:
 
 | Billing Terms | Stripe Collection Method | Days Until Due |
-|---------------|--------------------------|----------------|
-| `immediate` | `charge_automatically` | — |
-| `net_30` | `send_invoice` | 30 |
-| `net_60` | `send_invoice` | 60 |
-| `net_90` | `send_invoice` | 90 |
+| ------------- | ------------------------ | -------------- |
+| `immediate`   | `charge_automatically`   | —              |
+| `net_30`      | `send_invoice`           | 30             |
+| `net_60`      | `send_invoice`           | 60             |
+| `net_90`      | `send_invoice`           | 90             |
 
 6. **Create Stripe invoice item**: Amount = `total_placement_fee * 100` (cents)
 7. **Create Stripe invoice**: With collection method and metadata
@@ -490,13 +511,13 @@ After placement creation, the hiring company is invoiced for the placement fee.
 
 ### 8.2 Invoice Statuses
 
-| Status | Description |
-|--------|-------------|
-| `draft` | Invoice created but not finalized |
-| `open` | Invoice finalized and sent/charged |
-| `paid` | Company has paid the invoice |
-| `void` | Invoice voided |
-| `uncollectible` | Invoice marked uncollectible |
+| Status          | Description                        |
+| --------------- | ---------------------------------- |
+| `draft`         | Invoice created but not finalized  |
+| `open`          | Invoice finalized and sent/charged |
+| `paid`          | Company has paid the invoice       |
+| `void`          | Invoice voided                     |
+| `uncollectible` | Invoice marked uncollectible       |
 
 ---
 
@@ -509,6 +530,7 @@ An immutable snapshot captures all attribution and rates at placement time.
 **Method**: `PlacementSnapshotService.createSnapshot()` (`services/billing-service/src/v2/placement-snapshot/service.ts`)
 
 The snapshot records:
+
 - All 5 role IDs (from placement attribution)
 - Each role's subscription tier (`free`, `paid`, `premium`)
 - Calculated commission rate for each role (based on tier)
@@ -518,16 +540,17 @@ The snapshot records:
 
 **Source**: `COMMISSION_RATES` in `packages/shared-types/src/commission.ts`
 
-| Role | Premium ($249/mo) | Paid ($99/mo) | Free ($0/mo) |
-|------|-------------------|---------------|--------------|
-| Candidate Recruiter ("Closer") | 40% | 30% | 20% |
-| Job Owner ("Specs Owner") | 20% | 15% | 10% |
-| Company Recruiter ("Client/Hiring Facilitator") | 20% | 15% | 10% |
-| Candidate Sourcer ("Discovery") | 10% (6% base + 4% bonus) | 8% (6% base + 2% bonus) | 6% (base only) |
-| Company Sourcer ("BD") | 10% (6% base + 4% bonus) | 8% (6% base + 2% bonus) | 6% (base only) |
-| **Platform Remainder** | **0%** | **24%** | **48%** |
+| Role                                            | Premium ($249/mo)        | Paid ($99/mo)           | Free ($0/mo)   |
+| ----------------------------------------------- | ------------------------ | ----------------------- | -------------- |
+| Candidate Recruiter ("Closer")                  | 40%                      | 30%                     | 20%            |
+| Job Owner ("Specs Owner")                       | 20%                      | 15%                     | 10%            |
+| Company Recruiter ("Client/Hiring Facilitator") | 20%                      | 15%                     | 10%            |
+| Candidate Sourcer ("Discovery")                 | 10% (6% base + 4% bonus) | 8% (6% base + 2% bonus) | 6% (base only) |
+| Company Sourcer ("BD")                          | 10% (6% base + 4% bonus) | 8% (6% base + 2% bonus) | 6% (base only) |
+| **Platform Remainder**                          | **0%**                   | **24%**                 | **48%**        |
 
 **Key rules**:
+
 - All roles are nullable — when a role is `null`, that percentage goes to platform
 - Each role's rate is determined by that individual recruiter's subscription tier
 - Sourcer rates are based on 6% base + tier bonus
@@ -536,18 +559,19 @@ The snapshot records:
 ### 9.3 Example Calculation
 
 For a $100,000 salary, 20% fee ($20,000 placement fee), where:
+
 - Candidate recruiter on Paid plan, Company recruiter on Free plan
 - No job owner, No sourcers
 
-| Role | Rate | Amount |
-|------|------|--------|
-| Candidate Recruiter (paid) | 30% | $6,000 |
-| Company Recruiter (free) | 10% | $2,000 |
-| Job Owner | null → platform | $0 |
-| Candidate Sourcer | null → platform | $0 |
-| Company Sourcer | null → platform | $0 |
-| Platform remainder | 60% | $12,000 |
-| **Total** | **100%** | **$20,000** |
+| Role                       | Rate            | Amount      |
+| -------------------------- | --------------- | ----------- |
+| Candidate Recruiter (paid) | 30%             | $6,000      |
+| Company Recruiter (free)   | 10%             | $2,000      |
+| Job Owner                  | null → platform | $0          |
+| Candidate Sourcer          | null → platform | $0          |
+| Company Sourcer            | null → platform | $0          |
+| Platform remainder         | 60%             | $12,000     |
+| **Total**                  | **100%**        | **$20,000** |
 
 ---
 
@@ -562,11 +586,13 @@ After the snapshot is created, splits and transactions are generated.
 **Data flow**: `placement → placement_snapshot → placement_splits → placement_payout_transactions`
 
 **Step 1 — Create Placement Splits** (attribution layer):
+
 - One `placement_split` record per active role
 - Each records: `placement_id`, `recruiter_id`, `role`, `split_percentage`, `split_amount`
 - `split_amount = total_placement_fee * split_percentage / 100`
 
 **Step 2 — Create Payout Transactions** (execution layer):
+
 - One `placement_payout_transaction` per split (1-to-1)
 - Each records: `placement_split_id`, `recruiter_id`, `amount`, `status: 'pending'`
 - These are the actual Stripe transfer records
@@ -591,6 +617,7 @@ Payouts are held in escrow during the placement guarantee period.
 **Service**: `EscrowHoldServiceV2` (`services/billing-service/src/v2/escrow-holds/service.ts`)
 
 Escrow holds are created with:
+
 - `placement_id` — which placement this hold is for
 - `hold_amount` — amount held
 - `hold_reason` — why the hold exists
@@ -604,14 +631,15 @@ Escrow holds are created with:
 
 1. Finds all holds where `release_scheduled_date <= now()` and `status = 'active'`
 2. Releases each hold:
-   - Updates status to `released`
-   - Logs to audit trail
-   - Publishes `escrow_hold.auto_released` event
+    - Updates status to `released`
+    - Logs to audit trail
+    - Publishes `escrow_hold.auto_released` event
 3. Reports results: processed count, failed count, errors
 
 ### 11.3 Manual Actions
 
 Admins can:
+
 - **Release** an active hold manually (`release()`)
 - **Cancel** an active hold (`cancel()`)
 
@@ -628,6 +656,7 @@ Once escrow holds are released and invoices are collectible, payouts are process
 **Service**: `PayoutScheduleServiceV2` (`services/billing-service/src/v2/payout-schedules/service.ts`)
 
 Payout schedules automate when transactions are processed:
+
 - `placement_id` — which placement
 - `scheduled_date` — when to process
 - `trigger_event` — what event triggered this schedule
@@ -642,9 +671,9 @@ For each due schedule:
 
 1. **Mark as processing**
 2. **Check invoice collectibility**:
-   - Invoice status `paid` → collectible
-   - Invoice status `open` AND `collectible_at <= now()` → collectible
-   - Otherwise → **fail** (invoice not collectible yet)
+    - Invoice status `paid` → collectible
+    - Invoice status `open` AND `collectible_at <= now()` → collectible
+    - Otherwise → **fail** (invoice not collectible yet)
 3. **Execute Stripe transfers**: Calls `processPlacementTransactions()` for the placement
 4. **Mark as processed** with payout reference
 
@@ -658,18 +687,18 @@ For each pending transaction:
 
 1. **Validate**: Status must be `pending` or `failed`, amount must be positive
 2. **Check recruiter Stripe Connect**:
-   - Recruiter must have `stripe_connect_account_id`
-   - Recruiter must have `stripe_connect_onboarded = true`
+    - Recruiter must have `stripe_connect_account_id`
+    - Recruiter must have `stripe_connect_onboarded = true`
 3. **Mark as processing**
 4. **Create Stripe transfer**:
-   ```
-   stripe.transfers.create({
-     amount: amountCents,
-     currency: 'usd',
-     destination: stripe_connect_account_id,
-     idempotencyKey: `placement_payout_transaction_${transaction.id}`
-   })
-   ```
+    ```
+    stripe.transfers.create({
+      amount: amountCents,
+      currency: 'usd',
+      destination: stripe_connect_account_id,
+      idempotencyKey: `placement_payout_transaction_${transaction.id}`
+    })
+    ```
 5. **On success**: Update status to `paid`, record `stripe_transfer_id`
 6. **On failure**: Update status to `failed`, record `failure_reason`, increment `retry_count`
 
@@ -692,55 +721,55 @@ Email notifications are sent via the notification service (Resend) at each major
 
 **Consumer**: `ApplicationsEventConsumer` (`services/notification-service/src/consumers/applications/consumer.ts`)
 
-| Stage Transition | Candidate Email | Recruiter Email | Company Email |
-|------------------|-----------------|-----------------|---------------|
-| → `recruiter_proposed` | Job proposal from recruiter | Stage change notification | — |
-| → `ai_review` | AI review started | Application pending | — |
-| → `ai_reviewed` | AI review complete + feedback | Stage change notification | — |
-| → `recruiter_request` | Recruiter requests changes | — | — |
-| → `recruiter_review` | Sent to recruiter for review | Stage change notification | — |
-| → `screen` | Application with recruiter | Stage change notification | — |
-| → `submitted` | Confirmation (direct or with recruiter) | Stage change notification | New application received |
-| → `company_review` | Company is reviewing | Stage change notification | — |
-| → `company_feedback` | Company feedback received | Stage change notification | — |
-| → `interview` | Interview invitation | Stage change notification | — |
-| → `offer` | Offer received | Stage change notification | — |
-| → `hired` | Congratulations, hired! | Stage change notification | Stage change notification |
-| → `rejected` | Application rejected | Stage change notification | — |
-| → `withdrawn` | — | Stage change notification | Stage change (if previously submitted+) |
-| → `expired` | Application expired | Stage change notification | — |
+| Stage Transition       | Candidate Email                         | Recruiter Email           | Company Email                           |
+| ---------------------- | --------------------------------------- | ------------------------- | --------------------------------------- |
+| → `recruiter_proposed` | Job proposal from recruiter             | Stage change notification | —                                       |
+| → `ai_review`          | AI review started                       | Application pending       | —                                       |
+| → `ai_reviewed`        | AI review complete + feedback           | Stage change notification | —                                       |
+| → `recruiter_request`  | Recruiter requests changes              | —                         | —                                       |
+| → `recruiter_review`   | Sent to recruiter for review            | Stage change notification | —                                       |
+| → `screen`             | Application with recruiter              | Stage change notification | —                                       |
+| → `submitted`          | Confirmation (direct or with recruiter) | Stage change notification | New application received                |
+| → `company_review`     | Company is reviewing                    | Stage change notification | —                                       |
+| → `company_feedback`   | Company feedback received               | Stage change notification | —                                       |
+| → `interview`          | Interview invitation                    | Stage change notification | —                                       |
+| → `offer`              | Offer received                          | Stage change notification | —                                       |
+| → `hired`              | Congratulations, hired!                 | Stage change notification | Stage change notification               |
+| → `rejected`           | Application rejected                    | Stage change notification | —                                       |
+| → `withdrawn`          | —                                       | Stage change notification | Stage change (if previously submitted+) |
+| → `expired`            | Application expired                     | Stage change notification | —                                       |
 
 ### 13.2 Recruiter Proposal Notifications
 
 **Consumer**: `RecruiterSubmissionEventConsumer` (`services/notification-service/src/consumers/recruiter-submission/consumer.ts`)
 
-| Event | Recipient | Description |
-|-------|-----------|-------------|
+| Event                  | Recipient | Description                                                     |
+| ---------------------- | --------- | --------------------------------------------------------------- |
 | Recruiter proposes job | Candidate | New opportunity with job details, recruiter pitch, 7-day expiry |
-| Candidate accepts | Recruiter | Candidate approved, with application URL |
-| Candidate declines | Recruiter | Candidate declined, with reason if provided |
-| Opportunity expired | Candidate | Reminder that opportunity has expired |
+| Candidate accepts      | Recruiter | Candidate approved, with application URL                        |
+| Candidate declines     | Recruiter | Candidate declined, with reason if provided                     |
+| Opportunity expired    | Candidate | Reminder that opportunity has expired                           |
 
 ### 13.3 Submission Notifications
 
-| Scenario | Candidate Email | Recruiter Email | Company Email |
-|----------|----------------|-----------------|---------------|
-| Direct candidate submission | Direct application confirmation | — | New application received |
-| Candidate submits with recruiter | Application with recruiter confirmation | Application pending review | — |
-| Recruiter submits to company | Submitted by recruiter notification | Submission confirmation | New application received |
-| AI review stage | AI review in progress | Application pending | — |
+| Scenario                         | Candidate Email                         | Recruiter Email            | Company Email            |
+| -------------------------------- | --------------------------------------- | -------------------------- | ------------------------ |
+| Direct candidate submission      | Direct application confirmation         | —                          | New application received |
+| Candidate submits with recruiter | Application with recruiter confirmation | Application pending review | —                        |
+| Recruiter submits to company     | Submitted by recruiter notification     | Submission confirmation    | New application received |
+| AI review stage                  | AI review in progress                   | Application pending        | —                        |
 
 ### 13.4 Placement Notifications
 
 **Consumer**: `PlacementsEventConsumer` (`services/notification-service/src/consumers/placements/consumer.ts`)
 
-| Event | Recipients | Description |
-|-------|------------|-------------|
-| Placement created | Recruiter(s) | Salary, commission details |
+| Event               | Recipients        | Description                               |
+| ------------------- | ----------------- | ----------------------------------------- |
+| Placement created   | Recruiter(s)      | Salary, commission details                |
 | Placement activated | All collaborators | Start date, guarantee days, role, split % |
-| Placement completed | All collaborators | Final payout amount |
-| Placement failed | All collaborators | Failure reason |
-| Guarantee expiring | All collaborators | Days remaining, guarantee end date |
+| Placement completed | All collaborators | Final payout amount                       |
+| Placement failed    | All collaborators | Failure reason                            |
+| Guarantee expiring  | All collaborators | Days remaining, guarantee end date        |
 
 ---
 
@@ -750,57 +779,57 @@ All domain events published during the application lifecycle.
 
 ### 14.1 Application Events
 
-| Event | Published When | Key Payload |
-|-------|----------------|-------------|
-| `application.created` | New application created | application_id, job_id, candidate_id, recruiter_id, stage |
-| `application.updated` | Any application update | application_id, updated_fields |
-| `application.stage_changed` | Stage transition | application_id, old_stage, new_stage, changed_by |
-| `application.submitted` | Candidate submits | application_id, candidate_id, job_id, has_assignment |
-| `application.deleted` | Application deleted | applicationId, deletedBy |
-| `application.ai_review.triggered` | AI review started | application_id, candidate_id, job_id |
-| `application.ai_reviewed` | AI review complete | application_id, review_id, recommendation |
-| `application.needs_improvement` | AI found concerns | application_id, concerns |
-| `application.returned_to_draft` | Back to draft | applicationId, from_stage |
-| `application.recruiter_proposed` | Recruiter proposes job | application_id, candidate_id, job_id, pitch |
-| `application.proposal_accepted` | Candidate accepts proposal | application_id, candidate_recruiter_id |
-| `application.proposal_declined` | Candidate declines proposal | application_id, reason |
+| Event                             | Published When              | Key Payload                                               |
+| --------------------------------- | --------------------------- | --------------------------------------------------------- |
+| `application.created`             | New application created     | application_id, job_id, candidate_id, recruiter_id, stage |
+| `application.updated`             | Any application update      | application_id, updated_fields                            |
+| `application.stage_changed`       | Stage transition            | application_id, old_stage, new_stage, changed_by          |
+| `application.submitted`           | Candidate submits           | application_id, candidate_id, job_id, has_assignment      |
+| `application.deleted`             | Application deleted         | applicationId, deletedBy                                  |
+| `application.ai_review.triggered` | AI review started           | application_id, candidate_id, job_id                      |
+| `application.ai_reviewed`         | AI review complete          | application_id, review_id, recommendation                 |
+| `application.needs_improvement`   | AI found concerns           | application_id, concerns                                  |
+| `application.returned_to_draft`   | Back to draft               | applicationId, from_stage                                 |
+| `application.recruiter_proposed`  | Recruiter proposes job      | application_id, candidate_id, job_id, pitch               |
+| `application.proposal_accepted`   | Candidate accepts proposal  | application_id, candidate_recruiter_id                    |
+| `application.proposal_declined`   | Candidate declines proposal | application_id, reason                                    |
 
 ### 14.2 Placement Events
 
-| Event | Published When | Key Payload |
-|-------|----------------|-------------|
-| `placement.created` | Placement created | placement_id, all 5 role IDs, salary, fee_percentage |
-| `placement.updated` | Placement updated | placement_id, updated_fields |
-| `placement.status_changed` | Status transition | placement_id, previous_status, new_status |
-| `placement.deleted` | Placement deleted | placement_id, deleted_by |
+| Event                      | Published When    | Key Payload                                          |
+| -------------------------- | ----------------- | ---------------------------------------------------- |
+| `placement.created`        | Placement created | placement_id, all 5 role IDs, salary, fee_percentage |
+| `placement.updated`        | Placement updated | placement_id, updated_fields                         |
+| `placement.status_changed` | Status transition | placement_id, previous_status, new_status            |
+| `placement.deleted`        | Placement deleted | placement_id, deleted_by                             |
 
 ### 14.3 Billing Events
 
-| Event | Published When | Key Payload |
-|-------|----------------|-------------|
-| `placement.splits_created` | Splits calculated | placementId, splitCount, totalPaidOut, platformRemainder |
-| `payout.created` | Payout record created | payout data |
-| `payout.updated` | Payout updated | id, changes |
-| `payout_schedule.created` | Schedule created | scheduleId, scheduledDate, triggerEvent |
-| `payout_schedule.processed` | Schedule processed | scheduleId, payoutId |
-| `payout_schedule.failed` | Max retries exhausted | scheduleId, reason, retryCount |
-| `payout_schedule.cancelled` | Schedule cancelled | scheduleId, reason |
-| `escrow_hold.created` | Hold created | holdId, placementId, holdAmount |
-| `escrow_hold.released` | Hold manually released | holdId, holdAmount |
-| `escrow_hold.auto_released` | Hold auto-released on schedule | holdId, holdAmount |
-| `escrow_hold.cancelled` | Hold cancelled | holdId |
+| Event                       | Published When                 | Key Payload                                              |
+| --------------------------- | ------------------------------ | -------------------------------------------------------- |
+| `placement.splits_created`  | Splits calculated              | placementId, splitCount, totalPaidOut, platformRemainder |
+| `payout.created`            | Payout record created          | payout data                                              |
+| `payout.updated`            | Payout updated                 | id, changes                                              |
+| `payout_schedule.created`   | Schedule created               | scheduleId, scheduledDate, triggerEvent                  |
+| `payout_schedule.processed` | Schedule processed             | scheduleId, payoutId                                     |
+| `payout_schedule.failed`    | Max retries exhausted          | scheduleId, reason, retryCount                           |
+| `payout_schedule.cancelled` | Schedule cancelled             | scheduleId, reason                                       |
+| `escrow_hold.created`       | Hold created                   | holdId, placementId, holdAmount                          |
+| `escrow_hold.released`      | Hold manually released         | holdId, holdAmount                                       |
+| `escrow_hold.auto_released` | Hold auto-released on schedule | holdId, holdAmount                                       |
+| `escrow_hold.cancelled`     | Hold cancelled                 | holdId                                                   |
 
 ### 14.4 Network Events
 
-| Event | Published When | Key Payload |
-|-------|----------------|-------------|
-| `recruiter_candidate.created` | Relationship created | relationship_id, recruiter_id, candidate_id |
-| `candidate.invited` | Invitation sent | relationship_id, invitation_token |
-| `candidate.consent_given` | Invitation accepted | relationship_id, consent_given_at |
-| `candidate.consent_declined` | Invitation declined | relationship_id, declined_reason |
-| `candidate.sourcer_assignment_requested` | Sourcer attribution | candidate_id, recruiter_id |
-| `proposal.created` | Network proposal created | proposal_id, job_id, candidate_id |
-| `assignment.created` | Assignment created | assignmentId, recruiterId, jobId |
+| Event                                    | Published When           | Key Payload                                 |
+| ---------------------------------------- | ------------------------ | ------------------------------------------- |
+| `recruiter_candidate.created`            | Relationship created     | relationship_id, recruiter_id, candidate_id |
+| `candidate.invited`                      | Invitation sent          | relationship_id, invitation_token           |
+| `candidate.consent_given`                | Invitation accepted      | relationship_id, consent_given_at           |
+| `candidate.consent_declined`             | Invitation declined      | relationship_id, declined_reason            |
+| `candidate.sourcer_assignment_requested` | Sourcer attribution      | candidate_id, recruiter_id                  |
+| `proposal.created`                       | Network proposal created | proposal_id, job_id, candidate_id           |
+| `assignment.created`                     | Assignment created       | assignmentId, recruiterId, jobId            |
 
 ---
 
