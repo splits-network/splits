@@ -11,6 +11,12 @@ export interface Collaborator {
     created_at: string;
 }
 
+export interface YourSplit {
+    role: string;
+    split_percentage: number;
+    split_amount: number;
+}
+
 // Extend BasePlacement with enriched fields returned by the API
 export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at" | "updated_at" | "start_date" | "end_date" | "guarantee_expires_at" | "failed_at"> {
     hired_at: string;
@@ -37,6 +43,7 @@ export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at"
         };
     };
     collaborators?: Collaborator[];
+    your_splits?: YourSplit[];
 }
 
 export interface PlacementFilters {

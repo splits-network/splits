@@ -102,25 +102,28 @@ export class PlacementRepository {
 
         const placements = data || [];
 
-        // Enrich with the current recruiter's split from placement_splits
+        // Enrich with the current recruiter's splits from placement_splits
         if (accessContext.recruiterId && placements.length > 0) {
             const placementIds = placements.map((p: any) => p.id);
             const { data: splits } = await this.supabase
                 .from('placement_splits')
-                .select('placement_id, split_amount')
+                .select('placement_id, role, split_percentage, split_amount')
                 .eq('recruiter_id', accessContext.recruiterId)
                 .in('placement_id', placementIds);
 
             if (splits && splits.length > 0) {
-                const splitMap = new Map<string, number>();
+                const splitMap = new Map<string, { total: number; details: any[] }>();
                 for (const s of splits) {
-                    // Sum all roles for this recruiter on each placement
-                    splitMap.set(s.placement_id, (splitMap.get(s.placement_id) || 0) + s.split_amount);
+                    const existing = splitMap.get(s.placement_id) || { total: 0, details: [] };
+                    existing.total += s.split_amount;
+                    existing.details.push({ role: s.role, split_percentage: s.split_percentage, split_amount: s.split_amount });
+                    splitMap.set(s.placement_id, existing);
                 }
                 for (const p of placements) {
-                    const amount = splitMap.get(p.id);
-                    if (amount !== undefined) {
-                        p.recruiter_share = amount;
+                    const entry = splitMap.get(p.id);
+                    if (entry) {
+                        p.recruiter_share = entry.total;
+                        p.your_splits = entry.details;
                     }
                 }
             }
@@ -154,18 +157,21 @@ export class PlacementRepository {
             throw error;
         }
 
-        // Enrich with the current recruiter's split from placement_splits
+        // Enrich with the current recruiter's splits from placement_splits
         if (clerkUserId && data) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
             if (accessContext.recruiterId) {
                 const { data: splits } = await this.supabase
                     .from('placement_splits')
-                    .select('split_amount')
+                    .select('role, split_percentage, split_amount')
                     .eq('placement_id', id)
                     .eq('recruiter_id', accessContext.recruiterId);
 
                 if (splits && splits.length > 0) {
                     data.recruiter_share = splits.reduce((sum: number, s: any) => sum + s.split_amount, 0);
+                    data.your_splits = splits.map((s: any) => ({
+                        role: s.role, split_percentage: s.split_percentage, split_amount: s.split_amount
+                    }));
                 }
             }
         }

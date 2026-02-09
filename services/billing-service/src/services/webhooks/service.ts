@@ -242,7 +242,7 @@ export class WebhookService {
             let startingAfter: string | undefined = undefined;
 
             while (true) {
-                const response = await this.stripe.balanceTransactions.list({
+                const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
                     payout: payout.id,
                     limit: 100,
                     expand: ['data.source'],
@@ -252,7 +252,7 @@ export class WebhookService {
                 for (const transaction of response.data) {
                     // Look for charge transactions (customer payments) that are now settled
                     if (transaction.type === 'charge' && transaction.source) {
-                        const charge = transaction.source as Stripe.Charge;
+                        const charge = transaction.source as any; // Use any to access invoice property
                         if (charge.invoice) {
                             // Mark this invoice as funds available for immediate transfer
                             const { error } = await this.supabase
@@ -388,288 +388,287 @@ export class WebhookService {
             this.logger.error({ err: error }, 'Failed to process balance.available event');
         }
     }
-}
 
-    private async getTransferIdsForPayout(payoutId: string): Promise < string[] > {
-    const transferIds: string[] = [];
-    let startingAfter: string | undefined = undefined;
+    private async getTransferIdsForPayout(payoutId: string): Promise<string[]> {
+        const transferIds: string[] = [];
+        let startingAfter: string | undefined = undefined;
 
-    try {
-        while(true) {
-            const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
-                payout: payoutId,
-                limit: 100,
-                ...(startingAfter ? { starting_after: startingAfter } : {}),
-            });
+        try {
+            while (true) {
+                const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
+                    payout: payoutId,
+                    limit: 100,
+                    ...(startingAfter ? { starting_after: startingAfter } : {}),
+                });
 
-            for (const balanceTx of response.data) {
-                const source = balanceTx.source;
-                if (typeof source === 'string' && source.startsWith('tr_')) {
-                    transferIds.push(source);
+                for (const balanceTx of response.data) {
+                    const source = balanceTx.source;
+                    if (typeof source === 'string' && source.startsWith('tr_')) {
+                        transferIds.push(source);
+                    }
+                }
+
+                if (!response.has_more) {
+                    break;
+                }
+
+                startingAfter = response.data[response.data.length - 1]?.id;
+                if (!startingAfter) {
+                    break;
                 }
             }
-
-            if (!response.has_more) {
-                break;
-            }
-
-            startingAfter = response.data[response.data.length - 1]?.id;
-            if (!startingAfter) {
-                break;
-            }
+        } catch (error) {
+            this.logger.error({ err: error, payout_id: payoutId }, 'Failed to load payout balance transactions');
         }
-    } catch(error) {
-        this.logger.error({ err: error, payout_id: payoutId }, 'Failed to load payout balance transactions');
-    }
 
         return Array.from(new Set(transferIds));
-}
+    }
 
-    private async handleInvoicePaid(invoice: Stripe.Invoice): Promise < void> {
-    if(!invoice.id) return;
+    private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
 
-    // Calculate settlement date: 7 business days after payment for maximum safety
-    // This accounts for credit card (2 business days) and ACH (3-5 business days) settlement delays
-    const paidDate = invoice.status_transitions?.paid_at
-        ? new Date(invoice.status_transitions.paid_at * 1000)
-        : new Date();
+        // Calculate settlement date: 7 business days after payment for maximum safety
+        // This accounts for credit card (2 business days) and ACH (3-5 business days) settlement delays
+        const paidDate = invoice.status_transitions?.paid_at
+            ? new Date(invoice.status_transitions.paid_at * 1000)
+            : new Date();
 
-    const settlementDate = new Date(paidDate);
-    settlementDate.setDate(settlementDate.getDate() + 7); // 7-day buffer for all payment methods
+        const settlementDate = new Date(paidDate);
+        settlementDate.setDate(settlementDate.getDate() + 7); // 7-day buffer for all payment methods
 
-    const updates: Record<string, any> = {
-    invoice_status: 'paid',
-        amount_paid: (invoice.amount_paid ?? 0) / 100,
+        const updates: Record<string, any> = {
+            invoice_status: 'paid',
+            amount_paid: (invoice.amount_paid ?? 0) / 100,
             paid_at: paidDate.toISOString(),
-                collectible_at: settlementDate.toISOString(), // Set collectible after settlement delay
-                    updated_at: new Date().toISOString(),
+            collectible_at: settlementDate.toISOString(), // Set collectible after settlement delay
+            updated_at: new Date().toISOString(),
         };
 
-const { error } = await this.supabase
-    .from('placement_invoices')
-    .update(updates)
-    .eq('stripe_invoice_id', invoice.id);
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
 
-if (error) {
-    this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to paid');
-    return;
-}
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to paid');
+            return;
+        }
 
-this.logger.info({
-    invoice_id: invoice.id,
-    paid_at: paidDate.toISOString(),
-    collectible_at: settlementDate.toISOString()
-}, 'Invoice marked as paid with settlement buffer (may be overridden by payout.paid event)');
+        this.logger.info({
+            invoice_id: invoice.id,
+            paid_at: paidDate.toISOString(),
+            collectible_at: settlementDate.toISOString()
+        }, 'Invoice marked as paid with settlement buffer (may be overridden by payout.paid event)');
 
-// Trigger immediate payout processing for paid invoice (instead of waiting for scheduled job)
-if (this.eventPublisher) {
-    try {
-        await this.eventPublisher.publish('invoice.paid', {
-            stripe_invoice_id: invoice.id,
-            amount_paid: (invoice.amount_paid ?? 0) / 100,
-            paid_at: updates.paid_at,
-        });
-        this.logger.info({ invoice_id: invoice.id }, 'Published invoice.paid event for immediate payout processing');
-    } catch (eventError) {
-        this.logger.error({ err: eventError, invoice_id: invoice.id }, 'Failed to publish invoice.paid event');
-    }
-}
-    }
-    private async handlePayoutPaid(payout: Stripe.Payout): Promise < void> {
-    if(!payout.id) return;
-
-    this.logger.info({ payout_id: payout.id, amount: payout.amount / 100 }, 'Processing payout.paid webhook - funds now available in balance');
-
-    try {
-        // Get all balance transactions included in this payout
-        const balanceTransactions = await this.stripe.balanceTransactions.list({
-            payout: payout.id,
-            limit: 100,
-            expand: ['data.source']
-        });
-
-        for(const transaction of balanceTransactions.data) {
-    if (transaction.type === 'charge' && transaction.source) {
-        const charge = transaction.source as Stripe.Charge;
-        if (charge.invoice) {
-            // Mark this invoice as funds available immediately
-            const { error } = await this.supabase
-                .from('placement_invoices')
-                .update({
-                    funds_available: true,
-                    funds_available_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('stripe_invoice_id', charge.invoice);
-
-            if (error) {
-                this.logger.error({
-                    err: error,
-                    invoice_id: charge.invoice,
-                    payout_id: payout.id
-                }, 'Failed to mark invoice funds as available');
-                continue;
-            }
-
-            this.logger.info({
-                invoice_id: charge.invoice,
-                payout_id: payout.id
-            }, 'Invoice funds now available - triggering immediate payout processing');
-
-            // Trigger immediate payout processing now that funds are definitely available
-            if (this.eventPublisher) {
-                try {
-                    await this.eventPublisher.publish('invoice.funds_available', {
-                        stripe_invoice_id: charge.invoice,
-                        payout_id: payout.id,
-                        funds_available_at: new Date().toISOString()
-                    });
-                } catch (eventError) {
-                    this.logger.error({ err: eventError, invoice_id: charge.invoice }, 'Failed to publish invoice.funds_available event');
-                }
+        // Trigger immediate payout processing for paid invoice (instead of waiting for scheduled job)
+        if (this.eventPublisher) {
+            try {
+                await this.eventPublisher.publish('invoice.paid', {
+                    stripe_invoice_id: invoice.id,
+                    amount_paid: (invoice.amount_paid ?? 0) / 100,
+                    paid_at: updates.paid_at,
+                });
+                this.logger.info({ invoice_id: invoice.id }, 'Published invoice.paid event for immediate payout processing');
+            } catch (eventError) {
+                this.logger.error({ err: eventError, invoice_id: invoice.id }, 'Failed to publish invoice.paid event');
             }
         }
     }
-}
+    private async handlePayoutPaid(payout: Stripe.Payout): Promise<void> {
+        if (!payout.id) return;
+
+        this.logger.info({ payout_id: payout.id, amount: payout.amount / 100 }, 'Processing payout.paid webhook - funds now available in balance');
+
+        try {
+            // Get all balance transactions included in this payout
+            const balanceTransactions = await this.stripe.balanceTransactions.list({
+                payout: payout.id,
+                limit: 100,
+                expand: ['data.source']
+            });
+
+            for (const transaction of balanceTransactions.data) {
+                if (transaction.type === 'charge' && transaction.source) {
+                    const charge = transaction.source as any; // Use any to access invoice property
+                    if (charge.invoice) {
+                        // Mark this invoice as funds available immediately
+                        const { error } = await this.supabase
+                            .from('placement_invoices')
+                            .update({
+                                funds_available: true,
+                                funds_available_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('stripe_invoice_id', charge.invoice as string);
+
+                        if (error) {
+                            this.logger.error({
+                                err: error,
+                                invoice_id: charge.invoice as string,
+                                payout_id: payout.id
+                            }, 'Failed to mark invoice funds as available');
+                            continue;
+                        }
+
+                        this.logger.info({
+                            invoice_id: charge.invoice as string,
+                            payout_id: payout.id
+                        }, 'Invoice funds now available - triggering immediate payout processing');
+
+                        // Trigger immediate payout processing now that funds are definitely available
+                        if (this.eventPublisher) {
+                            try {
+                                await this.eventPublisher.publish('invoice.funds_available', {
+                                    stripe_invoice_id: charge.invoice as string,
+                                    payout_id: payout.id,
+                                    funds_available_at: new Date().toISOString()
+                                });
+                            } catch (eventError) {
+                                this.logger.error({ err: eventError, invoice_id: charge.invoice as string }, 'Failed to publish invoice.funds_available event');
+                            }
+                        }
+                    }
+                }
+            }
         } catch (error) {
-    this.logger.error({ err: error, payout_id: payout.id }, 'Failed to process payout.paid webhook');
-}
+            this.logger.error({ err: error, payout_id: payout.id }, 'Failed to process payout.paid webhook');
+        }
     }
-    private async handleInvoiceFailed(invoice: Stripe.Invoice): Promise < void> {
-    if(!invoice.id) return;
+    private async handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
 
-    const updates: Record<string, any> = {
-    invoice_status: invoice.status === 'uncollectible' ? 'uncollectible' : 'open',
-        failure_reason: invoice.last_finalization_error?.message || 'Invoice payment failed',
+        const updates: Record<string, any> = {
+            invoice_status: 'failed',
+            failure_reason: invoice.last_finalization_error?.message || 'Unknown error',
             updated_at: new Date().toISOString(),
         };
 
-const { error } = await this.supabase
-    .from('placement_invoices')
-    .update(updates)
-    .eq('stripe_invoice_id', invoice.id);
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
 
-if (error) {
-    this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice on failure');
-}
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice on failure');
+        }
     }
 
-    private async handleInvoiceFinalized(invoice: Stripe.Invoice): Promise < void> {
-    if(!invoice.id) return;
+    private async handleInvoiceFinalized(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
 
-    const updates: Record<string, any> = {
-    invoice_status: invoice.status || 'open',
-        amount_due: (invoice.amount_due ?? 0) / 100,
+        const updates: Record<string, any> = {
+            invoice_status: invoice.status || 'open',
+            amount_due: (invoice.amount_due ?? 0) / 100,
             amount_paid: (invoice.amount_paid ?? 0) / 100,
-                hosted_invoice_url: invoice.hosted_invoice_url || null,
-                    invoice_pdf_url: invoice.invoice_pdf || null,
-                        finalized_at: invoice.status_transitions?.finalized_at
-                            ? new Date(invoice.status_transitions.finalized_at * 1000).toISOString()
-                            : new Date().toISOString(),
-                            due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString().slice(0, 10) : null,
-                                collectible_at: invoice.due_date
-                                    ? new Date(invoice.due_date * 1000).toISOString()
-                                    : new Date().toISOString(),
-                                    updated_at: new Date().toISOString(),
-        };
-
-const { error } = await this.supabase
-    .from('placement_invoices')
-    .update(updates)
-    .eq('stripe_invoice_id', invoice.id);
-
-if (error) {
-    this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice on finalize');
-}
-    }
-
-    private async handleInvoiceMarkedUncollectible(invoice: Stripe.Invoice): Promise < void> {
-    if(!invoice.id) return;
-
-    const updates: Record<string, any> = {
-    invoice_status: 'uncollectible',
-        failure_reason: 'Invoice marked uncollectible',
+            hosted_invoice_url: invoice.hosted_invoice_url || null,
+            invoice_pdf_url: invoice.invoice_pdf || null,
+            finalized_at: invoice.status_transitions?.finalized_at
+                ? new Date(invoice.status_transitions.finalized_at * 1000).toISOString()
+                : new Date().toISOString(),
+            due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString().slice(0, 10) : null,
+            collectible_at: invoice.due_date
+                ? new Date(invoice.due_date * 1000).toISOString()
+                : new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };
 
-const { error } = await this.supabase
-    .from('placement_invoices')
-    .update(updates)
-    .eq('stripe_invoice_id', invoice.id);
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
 
-if (error) {
-    this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to uncollectible');
-}
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice on finalize');
+        }
     }
 
-    private async handleInvoiceVoided(invoice: Stripe.Invoice): Promise < void> {
-    if(!invoice.id) return;
+    private async handleInvoiceMarkedUncollectible(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
 
-    const updates: Record<string, any> = {
-    invoice_status: 'void',
-        voided_at: invoice.status_transitions?.voided_at
-            ? new Date(invoice.status_transitions.voided_at * 1000).toISOString()
-            : new Date().toISOString(),
+        const updates: Record<string, any> = {
+            invoice_status: 'uncollectible',
+            failure_reason: 'Invoice marked uncollectible',
             updated_at: new Date().toISOString(),
         };
 
-const { error } = await this.supabase
-    .from('placement_invoices')
-    .update(updates)
-    .eq('stripe_invoice_id', invoice.id);
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
 
-if (error) {
-    this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to voided');
-}
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice on uncollectible');
+        }
     }
 
-    private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise < void> {
-    if(!subscription.id) return;
+    private async handleInvoiceVoided(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
 
-    const updates: Record<string, any> = {
-    status: subscription.status,
-        updated_at: new Date().toISOString(),
+        const updates: Record<string, any> = {
+            invoice_status: 'void',
+            voided_at: invoice.status_transitions?.voided_at
+                ? new Date(invoice.status_transitions.voided_at * 1000).toISOString()
+                : new Date().toISOString(),
+            updated_at: new Date().toISOString(),
         };
 
-const itemPeriods = subscription.items?.data || [];
-const periodStarts = itemPeriods
-    .map((item) => item.current_period_start)
-    .filter((value): value is number => typeof value === 'number');
-const periodEnds = itemPeriods
-    .map((item) => item.current_period_end)
-    .filter((value): value is number => typeof value === 'number');
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
 
-if (periodStarts.length > 0) {
-    updates.current_period_start = new Date(Math.min(...periodStarts) * 1000).toISOString();
-}
-if (periodEnds.length > 0) {
-    updates.current_period_end = new Date(Math.max(...periodEnds) * 1000).toISOString();
-}
-
-const { error } = await this.supabase
-    .from('subscriptions')
-    .update(updates)
-    .eq('stripe_subscription_id', subscription.id);
-
-if (error) {
-    this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to update subscription from webhook');
-}
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to voided');
+        }
     }
 
-    private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise < void> {
-    if(!subscription.id) return;
+    private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+        if (!subscription.id) return;
 
-    const { error } = await this.supabase
-        .from('subscriptions')
-        .update({
-            status: 'canceled',
-            canceled_at: new Date().toISOString(),
+        const updates: Record<string, any> = {
+            status: subscription.status,
             updated_at: new Date().toISOString(),
-        })
-        .eq('stripe_subscription_id', subscription.id);
+        };
 
-    if(error) {
-        this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to cancel subscription from webhook');
+        const itemPeriods = subscription.items?.data || [];
+        const periodStarts = itemPeriods
+            .map((item) => item.current_period_start)
+            .filter((value): value is number => typeof value === 'number');
+        const periodEnds = itemPeriods
+            .map((item) => item.current_period_end)
+            .filter((value): value is number => typeof value === 'number');
+
+        if (periodStarts.length > 0) {
+            updates.current_period_start = new Date(Math.min(...periodStarts) * 1000).toISOString();
+        }
+        if (periodEnds.length > 0) {
+            updates.current_period_end = new Date(Math.max(...periodEnds) * 1000).toISOString();
+        }
+
+        const { error } = await this.supabase
+            .from('subscriptions')
+            .update(updates)
+            .eq('stripe_subscription_id', subscription.id);
+
+        if (error) {
+            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to update subscription from webhook');
+        }
     }
-}
+
+    private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+        if (!subscription.id) return;
+
+        const { error } = await this.supabase
+            .from('subscriptions')
+            .update({
+                status: 'canceled',
+                canceled_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', subscription.id);
+
+        if (error) {
+            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to cancel subscription from webhook');
+        }
+    }
 }
