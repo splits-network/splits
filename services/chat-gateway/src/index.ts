@@ -410,7 +410,9 @@ async function publishEphemeral(
     await redisData.publish(channel, JSON.stringify(payload));
 }
 
-main();
+if (process.env.VITEST !== "true" && process.env.NODE_ENV !== "test") {
+    main();
+}
 
 export {
     MAX_CHANNELS_PER_SOCKET,

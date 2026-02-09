@@ -13,6 +13,7 @@ import DocumentViewerModal from "../modals/document-viewer-modal";
 import { categorizeDocuments } from "@/app/portal/applications/lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
+import AIReviewPanel from "@/components/ai-review-panel";
 
 interface DetailsProps {
     itemId: string;
@@ -54,7 +55,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     useEffect(() => {
@@ -715,12 +716,9 @@ function AIReviewTab({
     }
 
     return (
-        <AIReviewDisplay
-            applicationId={application.id}
-            isRecruiter={false}
-            isCompanyUser={false}
-            token={token}
-        />
+        <>
+            <AIReviewPanel applicationId={application.id} />
+        </>
     );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, ReactNode } from "react";
 
 // ===== ANIMATED COUNTER HOOK =====
 
@@ -122,7 +122,7 @@ export interface StatCardProps {
     /** Title/label describing the stat */
     title: string;
     /** Optional description/subtitle */
-    description?: string;
+    description?: ReactNode;
     /** FontAwesome icon class (e.g., 'fa-briefcase') */
     icon?: string;
     /** Icon color variant */
