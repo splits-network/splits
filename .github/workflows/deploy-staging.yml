@@ -274,6 +274,21 @@ jobs:
                     mv "${file}.tmp" "$file"
                   done
 
+                  # 🔧 FIX: Also process cronjobs and jobs files
+                  for file in infra/k8s/*/cronjobs/*.yaml; do
+                    if [ -f "$file" ]; then
+                      envsubst < "$file" > "${file}.tmp"
+                      mv "${file}.tmp" "$file"
+                    fi
+                  done
+
+                  for file in infra/k8s/*/jobs/*.yaml; do
+                    if [ -f "$file" ]; then
+                      envsubst < "$file" > "${file}.tmp"
+                      mv "${file}.tmp" "$file"
+                    fi
+                  done
+
             - name: Deploy infrastructure (Redis, RabbitMQ)
               run: |
                   kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }}
