@@ -9,14 +9,13 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { StatCard, StatCardGrid } from "@/components/ui/cards";
-import { DataTable, type TableColumn } from "@/components/ui/tables";
+import { type TableColumn } from "@/components/ui/tables";
 import { RoleCard } from "./card";
-import { TableRow } from "../table/table-row";
 import {
     RolesTrendsChart,
     TIME_PERIODS,
     calculateStatTrends,
-} from "../../../../../components/charts/roles-trends-chart";
+} from "@/components/charts/roles-trends-chart";
 import RoleWizardModal from "../modals/role-wizard-modal";
 import DetailSidebar from "../detail-sidebar";
 import PipelineSidebar from "../pipeline-sidebar";

@@ -28,7 +28,7 @@ export default function Row({ item, onViewDetails }: RowProps) {
                                 <img
                                     src={item.candidate.profile_picture}
                                     alt={item.candidate.full_name}
-                                    className="w-full h-full object-cover rounded-full"
+                                    className="w-full h-full object-contain rounded-full"
                                     onError={(e) => {
                                         e.currentTarget.style.display = "none";
                                     }}

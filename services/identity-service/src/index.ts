@@ -1,6 +1,6 @@
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
@@ -11,7 +11,7 @@ async function main() {
     const baseConfig = loadBaseConfig('identity-service');
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
-    
+
     // Check Clerk configuration for syncing user data back to Clerk
     if (process.env.CLERK_SECRET_KEY) {
         console.log('✅ Clerk configuration available - user sync to Clerk enabled');
@@ -107,25 +107,36 @@ async function main() {
         logger,
     });
 
-    // Health check endpoint
-    app.get('/health', async (request, reply) => {
-        try {
-            return reply.status(200).send({
-                status: 'healthy',
-                service: 'identity-service',
-                version: '2.0.0',
-                timestamp: new Date().toISOString(),
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'identity-service',
-                version: '2.0.0',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
+    // Create Supabase client for health checks
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
+    // Register standardized health check with dependency monitoring
+    registerHealthCheck(app, {
+        serviceName: 'identity-service',
+        logger,
+        checkers: {
+            database: HealthCheckers.database(supabaseClient),
+            ...(eventPublisher && {
+                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
+            }),
+            clerk: HealthCheckers.custom('clerk', async () => {
+                // Test Clerk API connectivity if secret key is available
+                if (process.env.CLERK_SECRET_KEY) {
+                    const response = await fetch('https://api.clerk.dev/v1/users', {
+                        headers: {
+                            'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    return response.ok;
+                }
+                return true; // If no key, consider healthy (sync disabled)
+            }, { provider: 'clerk' }),
+        },
     });
 
     // Start server

@@ -72,7 +72,7 @@ This document provides a comprehensive UI/UX evaluation of the Candidate Portal 
         playsInline
         preload="metadata"
         poster="/hero-poster.webp"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-contain opacity-20"
     >
         <source src="/hero-video.webm" type="video/webm" />
         <source src="/hero-video.mp4" type="video/mp4" />

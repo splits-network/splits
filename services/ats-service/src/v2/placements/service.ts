@@ -48,8 +48,8 @@ export class PlacementServiceV2 {
         };
     }
 
-    async getPlacement(id: string): Promise<any> {
-        const placement = await this.repository.findPlacement(id);
+    async getPlacement(id: string, clerkUserId?: string): Promise<any> {
+        const placement = await this.repository.findPlacement(id, clerkUserId);
         if (!placement) {
             throw new Error(`Placement ${id} not found`);
         }
@@ -246,22 +246,27 @@ export class PlacementServiceV2 {
             ...(guaranteeExpiresAt ? { guarantee_expires_at: guaranteeExpiresAt } : {}),
         });
 
-        // Emit events based on what changed
+        // Emit events based on what changed (non-blocking)
         if (this.eventPublisher) {
-            if (updates.status && updates.status !== currentPlacement.status) {
-                await this.eventPublisher.publish('placement.status_changed', {
-                    placement_id: id,
-                    previous_status: currentPlacement.status,
-                    new_status: updates.status,
-                    changed_by: userContext.identityUserId,
-                });
-            }
+            try {
+                if (updates.status && updates.status !== currentPlacement.status) {
+                    await this.eventPublisher.publish('placement.status_changed', {
+                        placement_id: id,
+                        previous_status: currentPlacement.status,
+                        new_status: updates.status,
+                        changed_by: userContext.identityUserId,
+                    });
+                }
 
-            await this.eventPublisher.publish('placement.updated', {
-                placement_id: id,
-                updated_fields: Object.keys(updates),
-                updated_by: userContext.identityUserId,
-            });
+                await this.eventPublisher.publish('placement.updated', {
+                    placement_id: id,
+                    updated_fields: Object.keys(updates),
+                    updated_by: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent placement update
+                console.error('Failed to publish placement update events:', error);
+            }
         }
 
         return updatedPlacement;
@@ -277,10 +282,15 @@ export class PlacementServiceV2 {
         await this.repository.deletePlacement(id);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('placement.deleted', {
-                placement_id: id,
-                deleted_by: userContext.identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('placement.deleted', {
+                    placement_id: id,
+                    deleted_by: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent placement deletion
+                console.error('Failed to publish placement.deleted event:', error);
+            }
         }
     }
 

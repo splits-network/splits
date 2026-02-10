@@ -31,7 +31,8 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                 <div className="flex items-center gap-3">
                     <div className="avatar avatar-placeholder shrink-0">
                         <div className="bg-primary/10 text-base-content/70 w-10 rounded-full flex items-center justify-center text-sm font-semibold">
-                            {(item.candidate?.full_name || "C")[0].toUpperCase()}
+                            {(item.candidate?.full_name ||
+                                "C")[0].toUpperCase()}
                         </div>
                     </div>
                     <div className="text-sm min-w-0">
@@ -78,9 +79,7 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
             </td>
             {/* Stage */}
             <td>
-                <span
-                    className={`badge ${status.badgeClass} badge-sm gap-1.5`}
-                >
+                <span className={`badge ${status.badgeClass} badge-sm gap-1.5`}>
                     <i className={`fa-duotone fa-regular ${status.icon}`} />
                     {status.label}
                 </span>
@@ -114,16 +113,6 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                         <div className="text-sm text-success">
                             <i className="fa-duotone fa-regular fa-circle-check mr-2" />
                             Accepted by company
-                        </div>
-                    )}
-                    {item.notes && (
-                        <div className="text-sm">
-                            <span className="font-medium">Notes:</span>{" "}
-                            <span className="text-base-content/70">
-                                {item.notes.length > 100
-                                    ? `${item.notes.substring(0, 100)}...`
-                                    : item.notes}
-                            </span>
                         </div>
                     )}
                 </div>

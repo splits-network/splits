@@ -330,8 +330,24 @@ export class PayoutScheduleServiceV2 {
     private isInvoiceCollectible(invoice: PlacementInvoice | null): boolean {
         if (!invoice) return false;
 
-        if (invoice.invoice_status === 'paid') return true;
+        // For paid invoices, check if funds are available in our Stripe balance
+        if (invoice.invoice_status === 'paid') {
+            // If we have funds_available flag, respect that (from payout.paid webhook)
+            if (invoice.funds_available === true) {
+                return true;
+            }
 
+            // If no funds_available data yet, fall back to settlement delay 
+            // (7-day buffer set in webhook should account for worst-case settlement time)
+            if (invoice.collectible_at && new Date() >= new Date(invoice.collectible_at)) {
+                return true;
+            }
+
+            // Paid but funds not confirmed available yet
+            return false;
+        }
+
+        // For open invoices, check collectible_at (net terms)
         if (invoice.invoice_status === 'open' && invoice.collectible_at) {
             return new Date(invoice.collectible_at) <= new Date();
         }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -17,11 +17,12 @@ import PreScreenRequestModal from "@/app/portal/roles/components/modals/pre-scre
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
-    formatApplicationNote,
 } from "@/app/portal/applications/lib/permission-utils";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
-import type { ApplicationStage } from "@splits-network/shared-types";
+import type { ApplicationStage, ApplicationNoteCreatorType } from "@splits-network/shared-types";
+import type { CreateNoteData } from "@splits-network/shared-ui";
 
 export interface ActionsToolbarProps {
     application: Application;
@@ -60,11 +61,23 @@ export default function ActionsToolbar({
     className = "",
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
+    const { user } = useUser();
     const router = useRouter();
     const toast = useToast();
-    const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const { profile, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
     const filterContext = useFilterOptional();
     const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
+
+    // Determine creator type for notes
+    const getCreatorType = (): ApplicationNoteCreatorType => {
+        if (isAdmin) return "platform_admin";
+        if (isRecruiter) return "candidate_recruiter";
+        if (isCompanyUser) {
+            if (profile?.roles?.includes("hiring_manager")) return "hiring_manager";
+            return "company_admin";
+        }
+        return "candidate";
+    };
 
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
@@ -166,15 +179,6 @@ export default function ActionsToolbar({
 
             const updateData: any = {
                 stage: targetStage,
-                ...(note && {
-                    notes: formatApplicationNote(
-                        application.notes,
-                        note,
-                        isRecruiter || false,
-                        isCompanyUser || false,
-                        isAdmin || false,
-                    ),
-                }),
                 ...(isAcceptingApplication && {
                     accepted_by_company: true,
                     accepted_at: new Date().toISOString(),
@@ -182,6 +186,21 @@ export default function ActionsToolbar({
             };
 
             await client.patch(`/applications/${application.id}`, updateData);
+
+            // Create a stage transition note if a note was provided
+            if (note && note.trim()) {
+                try {
+                    await client.post(`/applications/${application.id}/notes`, {
+                        created_by_type: getCreatorType(),
+                        note_type: 'stage_transition',
+                        visibility: 'shared',
+                        message_text: note.trim(),
+                    });
+                } catch (noteError: any) {
+                    // Log but don't fail the stage transition if note creation fails
+                    console.warn("Failed to create stage transition note:", noteError);
+                }
+            }
 
             if (isAcceptingApplication) {
                 toast.success(
@@ -212,14 +231,22 @@ export default function ActionsToolbar({
             await client.patch(`/applications/${application.id}`, {
                 stage: "rejected" as ApplicationStage,
                 decline_reason: reason,
-                notes: formatApplicationNote(
-                    application.notes,
-                    reason,
-                    isRecruiter || false,
-                    isCompanyUser || false,
-                    isAdmin || false,
-                ),
             });
+
+            // Create a stage transition note for the rejection reason
+            if (reason && reason.trim()) {
+                try {
+                    await client.post(`/applications/${application.id}/notes`, {
+                        created_by_type: getCreatorType(),
+                        note_type: 'stage_transition',
+                        visibility: 'shared',
+                        message_text: `Rejection reason: ${reason.trim()}`,
+                    });
+                } catch (noteError: any) {
+                    // Log but don't fail the rejection if note creation fails
+                    console.warn("Failed to create rejection note:", noteError);
+                }
+            }
 
             toast.success("Application rejected");
             setShowDenyModal(false);
@@ -232,21 +259,19 @@ export default function ActionsToolbar({
         }
     };
 
-    const handleSaveNote = async (note: string) => {
+    const handleSaveNote = async (data: CreateNoteData) => {
         setActionLoading(true);
         try {
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/applications/${application.id}`, {
-                notes: formatApplicationNote(
-                    application.notes,
-                    note,
-                    isRecruiter || false,
-                    isCompanyUser || false,
-                    isAdmin || false,
-                ),
+            await client.post(`/applications/${application.id}/notes`, {
+                created_by_type: data.created_by_type,
+                note_type: data.note_type,
+                visibility: data.visibility,
+                message_text: data.message_text,
+                in_response_to_id: data.in_response_to_id,
             });
 
             toast.success("Note added successfully");
@@ -276,7 +301,7 @@ export default function ActionsToolbar({
     const layoutClass = layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
     const modals = (
-        <>
+        <ModalPortal>
             <ApproveGateModal
                 isOpen={showApproveModal}
                 onClose={() => setShowApproveModal(false)}
@@ -295,9 +320,11 @@ export default function ActionsToolbar({
                 jobTitle={application.job?.title || "Unknown"}
                 gateName={permissions.stageLabel}
             />
-            {showNoteModal && (
+            {showNoteModal && user?.id && (
                 <AddNoteModal
                     applicationId={application.id}
+                    currentUserId={user.id}
+                    creatorType={getCreatorType()}
                     onClose={() => setShowNoteModal(false)}
                     onSave={handleSaveNote}
                     loading={actionLoading}
@@ -327,7 +354,7 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
-        </>
+        </ModalPortal>
     );
 
     if (variant === "icon-only") {

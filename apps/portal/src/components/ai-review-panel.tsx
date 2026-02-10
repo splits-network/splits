@@ -1,74 +1,107 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useUserProfile } from '@/contexts';
-import type { AIReview } from '@splits-network/shared-types';
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
+import type { AIReview } from "@splits-network/shared-types";
+import { StatCard, StatCardGrid } from "./ui";
 
+type AIReviewVariant = "full" | "compact" | "badge" | "mini-card";
 
 interface AIReviewPanelProps {
     applicationId: string;
+    /** @deprecated Use variant="compact" instead */
     compact?: boolean;
+    variant?: AIReviewVariant;
 }
 
 const getRecommendationColor = (recommendation: string | null) => {
-    if (!recommendation) return 'badge-ghost';
+    if (!recommendation) return "badge-ghost";
     switch (recommendation) {
-        case 'strong_fit':
-            return 'badge-success';
-        case 'good_fit':
-            return 'badge-info';
-        case 'fair_fit':
-            return 'badge-warning';
-        case 'poor_fit':
-            return 'badge-error';
+        case "strong_fit":
+            return "badge-success";
+        case "good_fit":
+            return "badge-info";
+        case "fair_fit":
+            return "badge-warning";
+        case "poor_fit":
+            return "badge-error";
         default:
-            return 'badge-ghost';
+            return "badge-ghost";
     }
 };
 
 const getRecommendationLabel = (recommendation: string | null) => {
-    if (!recommendation) return 'N/A';
+    if (!recommendation) return "N/A";
     switch (recommendation) {
-        case 'strong_fit':
-            return 'Strong Match';
-        case 'good_fit':
-            return 'Good Match';
-        case 'fair_fit':
-            return 'Fair Match';
-        case 'poor_fit':
-            return 'Poor Match';
+        case "strong_fit":
+            return "Strong Match";
+        case "good_fit":
+            return "Good Match";
+        case "fair_fit":
+            return "Fair Match";
+        case "poor_fit":
+            return "Poor Match";
         default:
             return recommendation;
     }
 };
 
+const getFitScoreIcon = (score: number | null) => {
+    if (!score) return "fa-duotone fa-regular fa-question";
+    if (score >= 90) return "fa-duotone fa-regular fa-trophy";
+    if (score >= 70) return "fa-duotone fa-regular fa-chart-line";
+    if (score >= 50) return "fa-duotone fa-regular fa-chart-simple";
+    return "fa-duotone fa-regular fa-triangle-exclamation";
+};
+
 const getFitScoreColor = (score: number | null) => {
-    if (!score) return 'text-base-content';
-    if (score >= 90) return 'text-success';
-    if (score >= 70) return 'text-info';
-    if (score >= 50) return 'text-warning';
-    return 'text-error';
+    if (!score) return "neutral";
+    if (score >= 90) return "success";
+    if (score >= 70) return "info";
+    if (score >= 50) return "warning";
+    return "error";
+};
+
+const getConfidenceIcon = (confidence: number | null) => {
+    if (!confidence) return "fa-duotone fa-regular fa-question";
+    if (confidence >= 90) return "fa-duotone fa-regular fa-shield-check";
+    if (confidence >= 70) return "fa-duotone fa-regular fa-shield-halved";
+    if (confidence >= 50) return "fa-duotone fa-regular fa-shield";
+    return "fa-duotone fa-regular fa-shield-exclamation";
+};
+
+const getConfidenceColor = (confidence: number | null) => {
+    if (!confidence) return "neutral";
+    if (confidence >= 90) return "success";
+    if (confidence >= 70) return "info";
+    if (confidence >= 50) return "warning";
+    return "error";
 };
 
 const getLocationLabel = (compatibility: string | null) => {
-    if (!compatibility) return 'Unknown';
+    if (!compatibility) return "Unknown";
     switch (compatibility) {
-        case 'perfect':
-            return 'Perfect Match';
-        case 'good':
-            return 'Good Match';
-        case 'challenging':
-            return 'Challenging';
-        case 'mismatch':
-            return 'Location Mismatch';
+        case "perfect":
+            return "Perfect Match";
+        case "good":
+            return "Good Match";
+        case "challenging":
+            return "Challenging";
+        case "mismatch":
+            return "Location Mismatch";
         default:
             return compatibility;
     }
 };
 
-export default function AIReviewPanel({ applicationId, compact = false }: AIReviewPanelProps) {
+export default function AIReviewPanel({
+    applicationId,
+    compact = false,
+    variant,
+}: AIReviewPanelProps) {
+    const resolvedVariant: AIReviewVariant = variant ?? (compact ? "compact" : "full");
     const { getToken } = useAuth();
     const { isAdmin } = useUserProfile();
     const [loading, setLoading] = useState(true);
@@ -83,9 +116,12 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: AIReview[] }>('/ai-reviews', {
-                    params: { application_id: applicationId }
-                });
+                const response = await client.get<{ data: AIReview[] }>(
+                    "/ai-reviews",
+                    {
+                        params: { application_id: applicationId },
+                    },
+                );
 
                 // V2 API returns { data: [...] } envelope, get first review
                 const reviews = response.data;
@@ -95,15 +131,24 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     setAIReview(null);
                 }
             } catch (err) {
-                console.error('Error fetching AI review:', err);
-                if (err instanceof Error && err.message.includes('404')) {
+                console.error("Error fetching AI review:", err);
+                if (err instanceof Error && err.message.includes("404")) {
                     setAIReview(null);
                 } else {
                     // AI service may be temporarily unavailable - show friendly message instead of error
-                    const errorMsg = err instanceof Error ? err.message : 'Failed to load AI review';
-                    if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
+                    const errorMsg =
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load AI review";
+                    if (
+                        errorMsg.includes("500") ||
+                        errorMsg.includes("fetch failed") ||
+                        errorMsg.includes("Service call failed")
+                    ) {
                         // Service unavailable - silently set to null to hide the panel
-                        console.warn('AI review service temporarily unavailable');
+                        console.warn(
+                            "AI review service temporarily unavailable",
+                        );
                         setAIReview(null);
                     } else {
                         setError(errorMsg);
@@ -115,7 +160,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
         }
 
         fetchAIReview();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [applicationId]);
 
     const handleRequestNewReview = async () => {
@@ -124,23 +169,35 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
         try {
             const token = await getToken();
             if (!token) {
-                setError('Authentication required');
+                setError("Authentication required");
                 return;
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.post<{ data: AIReview }>('/ai-reviews', {
-                application_id: applicationId
-            });
+            const response = await client.post<{ data: AIReview }>(
+                "/ai-reviews",
+                {
+                    application_id: applicationId,
+                },
+            );
 
             // V2 API returns { data: {...} } envelope
             setAIReview(response.data);
         } catch (err) {
-            console.error('Error requesting new AI review:', err);
-            const errorMsg = err instanceof Error ? err.message : 'Failed to request new review';
+            console.error("Error requesting new AI review:", err);
+            const errorMsg =
+                err instanceof Error
+                    ? err.message
+                    : "Failed to request new review";
             // Check if it's a service unavailability error
-            if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
-                setError('AI review service is temporarily unavailable. Please try again later.');
+            if (
+                errorMsg.includes("500") ||
+                errorMsg.includes("fetch failed") ||
+                errorMsg.includes("Service call failed")
+            ) {
+                setError(
+                    "AI review service is temporarily unavailable. Please try again later.",
+                );
             } else {
                 setError(errorMsg);
             }
@@ -148,6 +205,51 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
             setRequesting(false);
         }
     };
+
+    // Badge variant: inline span only, invisible during load/error/null
+    if (resolvedVariant === "badge") {
+        if (loading || error || !aiReview || aiReview.fit_score == null) return null;
+        return (
+            <span className={`badge badge-xs ${getRecommendationColor(aiReview.recommendation)} ml-1`}>
+                {Math.round(aiReview.fit_score)}%
+            </span>
+        );
+    }
+
+    // Mini-card variant: small overview card
+    if (resolvedVariant === "mini-card") {
+        if (loading) {
+            return (
+                <div className="card bg-base-200 p-4 animate-pulse">
+                    <div className="h-4 bg-base-300 rounded w-24 mb-2" />
+                    <div className="h-3 bg-base-300 rounded w-32" />
+                </div>
+            );
+        }
+        if (error || !aiReview || aiReview.fit_score == null) return null;
+        return (
+            <div className="card bg-base-200 p-4">
+                <h4 className="font-semibold mb-2">AI Fit Score</h4>
+                <div className="flex items-center gap-2">
+                    <progress
+                        className="progress progress-accent w-20"
+                        value={aiReview.fit_score}
+                        max="100"
+                    />
+                    <span className="font-bold">
+                        {Math.round(aiReview.fit_score)}%
+                    </span>
+                </div>
+                {aiReview.recommendation && (
+                    <span
+                        className={`badge badge-xs mt-1 ${getRecommendationColor(aiReview.recommendation)}`}
+                    >
+                        {getRecommendationLabel(aiReview.recommendation)}
+                    </span>
+                )}
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -169,7 +271,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
         return (
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
-                    <div className='flex justify-between'>
+                    <div className="flex justify-between">
                         <h3 className="card-title text-lg">
                             <i className="fa-duotone fa-regular fa-robot"></i>
                             AI Analysis
@@ -197,9 +299,13 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     <div className="alert alert-error">
                         <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <div>
-                            <div className="font-semibold">Unable to Load AI Review</div>
+                            <div className="font-semibold">
+                                Unable to Load AI Review
+                            </div>
                             <div className="text-sm mt-1">{error}</div>
-                            <div className="text-sm mt-2">Please try again or check back later.</div>
+                            <div className="text-sm mt-2">
+                                Please try again or check back later.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,18 +323,21 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     </h3>
                     <div className="alert alert-info">
                         <i className="fa-duotone fa-regular fa-circle-info"></i>
-                        <span>AI analysis is in progress or not available for this application.</span>
+                        <span>
+                            AI analysis is in progress or not available for this
+                            application.
+                        </span>
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (compact) {
+    if (resolvedVariant === "compact") {
         return (
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
-                    <div className='flex justify-between'>
+                    <div className="flex justify-between">
                         <h3 className="card-title text-lg mb-4">
                             <i className="fa-duotone fa-regular fa-robot"></i>
                             AI Analysis
@@ -253,16 +362,21 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                                 )}
                             </button>
                         )}
-
                     </div>
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <div className="text-sm text-base-content/60">Match Score</div>
-                            <div className={`text-3xl font-bold ${getFitScoreColor(aiReview.fit_score)}`}>
+                            <div className="text-sm text-base-content/60">
+                                Match Score
+                            </div>
+                            <div
+                                className={`text-3xl font-bold ${getFitScoreColor(aiReview.fit_score)}`}
+                            >
                                 {aiReview.fit_score}/100
                             </div>
                         </div>
-                        <span className={`badge ${getRecommendationColor(aiReview.recommendation)} badge-lg`}>
+                        <span
+                            className={`badge ${getRecommendationColor(aiReview.recommendation)} badge-lg`}
+                        >
                             {getRecommendationLabel(aiReview.recommendation)}
                         </span>
                     </div>
@@ -270,7 +384,9 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     <div className="space-y-3">
                         {aiReview.fit_score !== null && (
                             <div>
-                                <div className="text-sm font-medium mb-1">Skills Match: {aiReview.fit_score}%</div>
+                                <div className="text-sm font-medium mb-1">
+                                    Skills Match: {aiReview.fit_score}%
+                                </div>
                                 <progress
                                     className="progress progress-success w-full"
                                     value={aiReview.fit_score ?? 0}
@@ -279,19 +395,27 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                             </div>
                         )}
 
-                        {aiReview.strengths && aiReview.strengths.length > 0 && (
-                            <div>
-                                <div className="text-sm font-medium mb-1">
-                                    <i className="fa-duotone fa-regular fa-circle-check text-success mr-1"></i>
-                                    Top Strengths
+                        {aiReview.strengths &&
+                            aiReview.strengths.length > 0 && (
+                                <div>
+                                    <div className="text-sm font-medium mb-1">
+                                        <i className="fa-duotone fa-regular fa-circle-check text-success mr-1"></i>
+                                        Top Strengths
+                                    </div>
+                                    <ul className="text-sm space-y-1">
+                                        {aiReview.strengths
+                                            .slice(0, 3)
+                                            .map((strength, index) => (
+                                                <li
+                                                    key={index}
+                                                    className="text-base-content/80"
+                                                >
+                                                    • {strength}
+                                                </li>
+                                            ))}
+                                    </ul>
                                 </div>
-                                <ul className="text-sm space-y-1">
-                                    {aiReview.strengths.slice(0, 3).map((strength, index) => (
-                                        <li key={index} className="text-base-content/80">• {strength}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                            )}
 
                         {aiReview.concerns && aiReview.concerns.length > 0 && (
                             <div>
@@ -300,9 +424,16 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                                     Areas to Address
                                 </div>
                                 <ul className="text-sm space-y-1">
-                                    {aiReview.concerns.slice(0, 2).map((concern, index) => (
-                                        <li key={index} className="text-base-content/80">• {concern}</li>
-                                    ))}
+                                    {aiReview.concerns
+                                        .slice(0, 2)
+                                        .map((concern, index) => (
+                                            <li
+                                                key={index}
+                                                className="text-base-content/80"
+                                            >
+                                                • {concern}
+                                            </li>
+                                        ))}
                                 </ul>
                             </div>
                         )}
@@ -315,7 +446,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
     return (
         <div className="card bg-base-100 shadow">
             <div className="card-body">
-                <div className='flex justify-between'>
+                <div className="flex justify-between">
                     <h3 className="card-title text-lg mb-4">
                         <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
@@ -342,31 +473,70 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     )}
                 </div>
 
-                {/* Fit Score & Recommendation */}
-                <div className="stats shadow mb-4">
-                    <div className="stat">
-                        <div className="stat-title">Match Score</div>
-                        <div className={`stat-value ${getFitScoreColor(aiReview.fit_score)}`}>
-                            {aiReview.fit_score ?? 'N/A'}/100
-                        </div>
-                        <div className="stat-desc">
-                            <span className={`badge ${getRecommendationColor(aiReview.recommendation)}`}>
-                                {getRecommendationLabel(aiReview.recommendation)}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="stat">
-                        <div className="stat-title">Confidence</div>
-                        <div className="stat-value text-primary">{aiReview.confidence_level ?? 'N/A'}%</div>
-                        <div className="stat-desc">AI confidence level</div>
-                    </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                    <StatCardGrid
+                        direction="responsive"
+                        className="shadow-lg bg-base-200/50 w-full"
+                    >
+                        <StatCard
+                            title="Match Score"
+                            value={
+                                aiReview.fit_score != null
+                                    ? `${Math.round(aiReview.fit_score)}%`
+                                    : "Not reviewed"
+                            }
+                            icon={getFitScoreIcon(aiReview.fit_score)}
+                            color={getFitScoreColor(aiReview.fit_score)}
+                            description={
+                                <span
+                                    className={`badge ${getRecommendationColor(
+                                        aiReview.recommendation,
+                                    )} badge-sm gap-1.5`}
+                                >
+                                    {getRecommendationLabel(
+                                        aiReview.recommendation,
+                                    )}
+                                </span>
+                            }
+                        />
+                        <StatCard
+                            title="Confidence Level"
+                            value={
+                                aiReview.confidence_level != null
+                                    ? `${aiReview.confidence_level}%`
+                                    : "N/A"
+                            }
+                            icon={getConfidenceIcon(aiReview.confidence_level)}
+                            color={getConfidenceColor(
+                                aiReview.confidence_level,
+                            )}
+                            description="AI confidence in analysis"
+                        />
+                        <StatCard
+                            title="Skills Match"
+                            value={
+                                aiReview.skills_match_percentage != null
+                                    ? `${aiReview.skills_match_percentage}%`
+                                    : "N/A"
+                            }
+                            icon="fa-duotone fa-regular fa-list-check"
+                            color={getFitScoreColor(
+                                aiReview.skills_match_percentage,
+                            )}
+                            description="Job skills match percentage"
+                        />
+                    </StatCardGrid>
                 </div>
 
                 {/* Overall Summary */}
                 {aiReview.overall_summary && (
                     <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2">Summary</h4>
-                        <p className="text-sm text-base-content/80">{aiReview.overall_summary}</p>
+                        <h4 className="font-semibold text-base mb-2">
+                            Summary
+                        </h4>
+                        <p className="text-sm text-base-content/80">
+                            {aiReview.overall_summary}
+                        </p>
                     </div>
                 )}
 
@@ -379,7 +549,12 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         </h4>
                         <ul className="list-disc list-inside space-y-1">
                             {aiReview.strengths.map((strength, index) => (
-                                <li key={index} className="text-sm text-base-content/80">{strength}</li>
+                                <li
+                                    key={index}
+                                    className="text-sm text-base-content/80"
+                                >
+                                    {strength}
+                                </li>
                             ))}
                         </ul>
                     </div>
@@ -394,7 +569,12 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         </h4>
                         <ul className="list-disc list-inside space-y-1">
                             {aiReview.concerns.map((concern, index) => (
-                                <li key={index} className="text-sm text-base-content/80">{concern}</li>
+                                <li
+                                    key={index}
+                                    className="text-sm text-base-content/80"
+                                >
+                                    {concern}
+                                </li>
                             ))}
                         </ul>
                     </div>
@@ -403,74 +583,110 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 {/* Skills Match - Using flat structure */}
                 {aiReview.skills_match_percentage !== null && (
                     <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2">Skills Analysis</h4>
+                        <h4 className="font-semibold text-base mb-2">
+                            Skills Analysis
+                        </h4>
 
                         <div className="flex items-center gap-2 mb-3">
                             <span className="text-sm">Match Rate:</span>
                             <div className="flex-1">
                                 <progress
                                     className="progress progress-success w-full"
-                                    value={aiReview.skills_match_percentage ?? 0}
+                                    value={
+                                        aiReview.skills_match_percentage ?? 0
+                                    }
                                     max="100"
                                 ></progress>
                             </div>
-                            <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
+                            <span className="text-sm font-semibold">
+                                {aiReview.skills_match_percentage}%
+                            </span>
                         </div>
 
-                        {aiReview.matched_skills && aiReview.matched_skills.length > 0 && (
-                            <div className="mb-2">
-                                <span className="text-sm font-medium">Matched Skills:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.matched_skills.map((skill, index) => (
-                                        <span key={index} className="badge badge-success badge-sm">{skill}</span>
-                                    ))}
+                        {aiReview.matched_skills &&
+                            aiReview.matched_skills.length > 0 && (
+                                <div className="mb-2">
+                                    <span className="text-sm font-medium">
+                                        Matched Skills:
+                                    </span>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {aiReview.matched_skills.map(
+                                            (skill, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="badge badge-success badge-sm"
+                                                >
+                                                    {skill}
+                                                </span>
+                                            ),
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {aiReview.missing_skills && aiReview.missing_skills.length > 0 && (
-                            <div>
-                                <span className="text-sm font-medium">Missing Skills:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.missing_skills.map((skill, index) => (
-                                        <span key={index} className="badge badge-warning badge-sm">{skill}</span>
-                                    ))}
+                        {aiReview.missing_skills &&
+                            aiReview.missing_skills.length > 0 && (
+                                <div>
+                                    <span className="text-sm font-medium">
+                                        Missing Skills:
+                                    </span>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {aiReview.missing_skills.map(
+                                            (skill, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="badge badge-warning badge-sm"
+                                                >
+                                                    {skill}
+                                                </span>
+                                            ),
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 )}
 
                 {/* Experience & Location */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    {aiReview.candidate_years !== null && aiReview.required_years !== null && (
-                        <div>
-                            <h4 className="font-medium text-sm mb-1">Experience</h4>
-                            <div className="flex items-center gap-2">
-                                {aiReview.meets_experience_requirement ? (
-                                    <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
-                                )}
-                                <span className="text-sm">
-                                    {aiReview.candidate_years} yrs (Req: {aiReview.required_years})
-                                </span>
+                    {aiReview.candidate_years !== null &&
+                        aiReview.required_years !== null && (
+                            <div>
+                                <h4 className="font-medium text-sm mb-1">
+                                    Experience
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                    {aiReview.meets_experience_requirement ? (
+                                        <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
+                                    ) : (
+                                        <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
+                                    )}
+                                    <span className="text-sm">
+                                        {aiReview.candidate_years} yrs (Req:{" "}
+                                        {aiReview.required_years})
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
                     <div>
                         <h4 className="font-medium text-sm mb-1">Location</h4>
-                        <span className="text-sm">{getLocationLabel(aiReview.location_compatibility)}</span>
+                        <span className="text-sm">
+                            {getLocationLabel(aiReview.location_compatibility)}
+                        </span>
                     </div>
                 </div>
 
                 {/* Analysis Metadata */}
                 <div className="text-xs text-base-content/60 border-t pt-2">
-                    <p>Analyzed by {aiReview.model_version ?? 'AI'} on {aiReview.analyzed_at ? new Date(aiReview.analyzed_at).toLocaleString() : 'N/A'}</p>
+                    <p>
+                        Analyzed by {aiReview.model_version ?? "AI"} on{" "}
+                        {aiReview.analyzed_at
+                            ? new Date(aiReview.analyzed_at).toLocaleString()
+                            : "N/A"}
+                    </p>
                 </div>
             </div>
         </div>
     );
 }
-

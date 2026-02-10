@@ -31,7 +31,7 @@ interface ApplicationStatusChartProps {
 }
 
 const STATUS_GROUPS = {
-    active: ['submitted', 'screen', 'interviewing', 'final_interview'],
+    active: ['submitted', 'screen', 'interview', 'final_interview'],
     review: ['ai_review', 'recruiter_request'],
     offers: ['offer'],
     archived: ['rejected', 'withdrawn'],

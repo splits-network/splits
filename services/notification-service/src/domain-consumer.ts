@@ -186,6 +186,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'application.proposal_accepted');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.proposal_declined');
 
+            // Application Notes events
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.note.created');
+
             // Phase 2 events - Placements
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.activated');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.completed');
@@ -349,6 +352,9 @@ export class DomainEventConsumer {
                 break;
             case 'application.proposal_declined':
                 await this.applicationsConsumer.handleApplicationProposalDeclined(event);
+                break;
+            case 'application.note.created':
+                await this.applicationsConsumer.handleNoteCreated(event);
                 break;
 
             // Candidates domain

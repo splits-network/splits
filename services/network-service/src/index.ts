@@ -1,6 +1,6 @@
 import { loadBaseConfig, loadDatabaseConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisherV2 } from './v2/shared/events';
@@ -103,13 +103,23 @@ async function main() {
         eventPublisher: v2EventPublisher,
     });
 
-    // Health check endpoint
-    app.get('/health', async (request, reply) => {
-        return reply.status(200).send({
-            status: 'healthy',
-            service: 'network-service',
-            timestamp: new Date().toISOString(),
-        });
+    // Create Supabase client for health checks
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
+    // Register standardized health check with dependency monitoring
+    registerHealthCheck(app, {
+        serviceName: 'network-service',
+        logger,
+        checkers: {
+            database: HealthCheckers.database(supabaseClient),
+            ...(v2EventPublisher && {
+                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
+            }),
+        },
     });
 
     // Start server

@@ -275,36 +275,58 @@ export type ApplicationStage =
     | 'expired'            // Timed out without action
     ;
 
-export type ApplicationFeedbackType =
+// ===== Application Notes (formerly Application Feedback) =====
+
+export type ApplicationNoteType =
     | 'info_request'       // Someone requested more info
     | 'info_response'      // Response to info request
     | 'note'               // General comment/guidance
-    | 'improvement_request'; // Specific change requested
+    | 'improvement_request' // Specific change requested
+    | 'stage_transition'   // Notes during stage changes
+    | 'interview_feedback' // Company interview notes
+    | 'general';           // Catch-all type
 
-export type ApplicationFeedbackCreatorType =
+export type ApplicationNoteCreatorType =
     | 'candidate'
     | 'candidate_recruiter'
+    | 'company_recruiter'
+    | 'hiring_manager'
+    | 'company_admin'
     | 'platform_admin';
 
-export interface ApplicationFeedback {
+export type ApplicationNoteVisibility =
+    | 'shared'        // Visible to all parties
+    | 'company_only'  // Only visible to company-side users
+    | 'candidate_only'; // Only visible to candidate-side users
+
+export interface ApplicationNote {
     id: string;
     application_id: string;
     created_by_user_id: string;
-    created_by_type: ApplicationFeedbackCreatorType;
-    feedback_type: ApplicationFeedbackType;
+    created_by_type: ApplicationNoteCreatorType;
+    note_type: ApplicationNoteType;
+    visibility: ApplicationNoteVisibility;
     message_text: string;
     in_response_to_id?: string;
     created_at: Date;
     updated_at: Date;
     // Enriched data from service layer
     created_by?: { id: string; name: string; email: string };
-    in_response_to?: ApplicationFeedback;
+    in_response_to?: ApplicationNote;
 }
+
+// Legacy aliases for backwards compatibility during migration
+/** @deprecated Use ApplicationNoteType instead */
+export type ApplicationFeedbackType = ApplicationNoteType;
+/** @deprecated Use ApplicationNoteCreatorType instead */
+export type ApplicationFeedbackCreatorType = ApplicationNoteCreatorType;
+/** @deprecated Use ApplicationNote instead */
+export type ApplicationFeedback = ApplicationNote;
 // Audit log for tracking application actions
 export interface ApplicationAuditLog {
     id: string;
     application_id: string;
-    action: 'accepted' | 'rejected' | 'stage_changed' | 'viewed' | 'created' | 'draft_saved' | 'recruiter_request' | 'submitted_to_recruiter' | 'recruiter_reviewed' | 'submitted_to_company' | 'withdrawn' | 'prescreen_requested' | 'note_added' | 'ai_review_started' | 'ai_review_completed' | 'ai_review_failed' | 'recruiter_proposed_job' | 'candidate_approved_opportunity' | 'candidate_declined_opportunity';
+    action: 'accepted' | 'rejected' | 'stage_changed' | 'viewed' | 'created' | 'draft_saved' | 'recruiter_request' | 'submitted_to_recruiter' | 'recruiter_reviewed' | 'submitted_to_company' | 'withdrawn' | 'prescreen_requested' | 'note_added' | 'ai_review_started' | 'ai_review_completed' | 'ai_review_failed' | 'recruiter_proposed_job' | 'candidate_approved_opportunity' | 'candidate_declined_opportunity' | 'returned_to_draft' | 'submitted' | 'recruiter_proposed' | 'proposal_accepted' | 'proposal_declined' | 'hired';
     performed_by_user_id?: string;
     performed_by_role?: string;
     company_id?: string;

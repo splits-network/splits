@@ -32,7 +32,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                     aria-label="Close sidebar"
                 />
 
-                <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
+                <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 flex flex-col">
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4">
                         <div className="flex items-center justify-between">
@@ -43,7 +43,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
                                     item={item}
-                                    onWithdraw={() => {
+                                    onStageChange={() => {
                                         refresh();
                                         onClose();
                                     }}

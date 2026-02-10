@@ -17,6 +17,8 @@ export interface PlacementInvoice {
     billing_terms: 'immediate' | 'net_30' | 'net_60' | 'net_90';
     due_date: string | null;
     collectible_at: string | null;
+    funds_available: boolean; // NEW: Indicates Stripe has settled funds in our available balance
+    funds_available_at: string | null; // NEW: When funds became available for transfer
     finalized_at: string | null;
     paid_at: string | null;
     voided_at: string | null;

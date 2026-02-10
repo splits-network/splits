@@ -30,6 +30,7 @@ export default function TableView() {
         page,
         goToPage,
         setLimit,
+        refresh,
     } = useFilter();
 
     const [sidebarItem, setSidebarItem] = useState<Application | null>(null);
@@ -60,6 +61,7 @@ export default function TableView() {
                             key={item.id}
                             item={item}
                             onViewDetails={() => setSidebarItem(item)}
+                            onStageChange={refresh}
                         />
                     ))}
                 </DataTable>

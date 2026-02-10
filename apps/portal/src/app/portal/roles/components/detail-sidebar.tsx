@@ -181,7 +181,7 @@ export default function DetailSidebar({
                                 {/* Actions Toolbar */}
                                 <RoleActionsToolbar
                                     job={job}
-                                    variant="descriptive"
+                                    variant="icon-only"
                                     layout="horizontal"
                                     size="sm"
                                     onRefresh={handleRefresh}

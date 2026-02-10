@@ -15,6 +15,7 @@ import {
     aiReviewCompletedRecruiterEmail,
     proposalAcceptedByApplicationEmail,
     proposalDeclinedByApplicationEmail,
+    applicationNoteCreatedEmail,
 } from '../../templates/applications';
 import {
     candidateApplicationWithRecruiterEmail,
@@ -1339,6 +1340,48 @@ export class ApplicationsEmailService {
             actionUrl: `/applications/${data.applicationId}`,
             actionLabel: 'View History',
             priority: 'low',
+            category: 'application',
+        });
+    }
+
+    /**
+     * Send notification when a note is created on an application
+     */
+    async sendNoteCreated(
+        recipientEmail: string,
+        data: {
+            recipientName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            notePreview: string;
+            addedByName: string;
+            addedByRole: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `New Note: ${data.candidateName} - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = applicationNoteCreatedEmail({
+            recipientName: data.recipientName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            notePreview: data.notePreview,
+            addedByName: data.addedByName,
+            addedByRole: data.addedByRole,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.note_created',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'View Note',
+            priority: 'normal',
             category: 'application',
         });
     }

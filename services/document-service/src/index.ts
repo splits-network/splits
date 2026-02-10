@@ -1,4 +1,4 @@
-import { buildServer, errorHandler } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from "@splits-network/shared-fastify";
 import { createLogger } from "@splits-network/shared-logging";
 import {
     loadBaseConfig,
@@ -58,21 +58,11 @@ async function start() {
             if (request.url === "/health") {
                 request.log = {
                     ...request.log,
-                    info: () => {},
-                    debug: () => {},
-                    trace: () => {},
+                    info: () => { },
+                    debug: () => { },
+                    trace: () => { },
                 } as any;
             }
-        });
-
-        // Add health check route
-        fastify.get("/health", async (_request, reply) => {
-            reply.send({
-                status: "healthy",
-                service: "document-service",
-                version: "v2-only",
-                timestamp: new Date().toISOString(),
-            });
         });
 
         // Register V2 routes
@@ -82,6 +72,28 @@ async function start() {
                 dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
             storage,
             eventPublisher,
+        });
+
+        // Create Supabase client for health check
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseClient = createClient(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        );
+
+        // Register standardized health check
+        registerHealthCheck(fastify, {
+            serviceName: 'document-service',
+            logger,
+            checkers: {
+                database: HealthCheckers.database(supabaseClient),
+                ...(eventPublisher && {
+                    rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
+                }),
+                storage: HealthCheckers.custom('storage', async () => {
+                    return await storage.healthCheck();
+                }, { provider: 'supabase-storage' }),
+            },
         });
 
         process.on("SIGTERM", async () => {

@@ -28,9 +28,9 @@ import { registerJobPreScreenAnswerRoutes } from './job-pre-screen-answers/route
 import { JobRequirementRepository } from './job-requirements/repository';
 import { JobRequirementService } from './job-requirements/service';
 import { registerJobRequirementRoutes } from './job-requirements/routes';
-import { ApplicationFeedbackRepository } from './application-feedback/repository';
-import { ApplicationFeedbackServiceV2 } from './application-feedback/service';
-import { registerApplicationFeedbackRoutes } from './application-feedback/routes';
+import { ApplicationNoteRepository } from './application-notes/repository';
+import { ApplicationNoteServiceV2 } from './application-notes/service';
+import { registerApplicationNoteRoutes } from './application-notes/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -82,9 +82,9 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const preScreenAnswerService = new JobPreScreenAnswerService(preScreenAnswerRepository, applicationRepository);
     const jobRequirementRepository = new JobRequirementRepository(config.supabaseUrl, config.supabaseKey);
     const jobRequirementService = new JobRequirementService(jobRequirementRepository);
-    const feedbackRepository = new ApplicationFeedbackRepository(applicationRepository.getSupabase());
-    const feedbackService = new ApplicationFeedbackServiceV2(
-        feedbackRepository,
+    const noteRepository = new ApplicationNoteRepository(applicationRepository.getSupabase());
+    const noteService = new ApplicationNoteServiceV2(
+        noteRepository,
         applicationRepository.getSupabase(),
         config.eventPublisher
     );
@@ -92,11 +92,11 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerJobRoutes(app, { jobService });
     registerCompanyRoutes(app, { companyService });
     registerCandidateRoutes(app, { candidateService });
-    registerApplicationRoutes(app, { applicationService, placementService });
+    registerApplicationRoutes(app, { applicationService, placementService, noteService });
     registerPlacementRoutes(app, { placementService });
     candidateSourcerRoutes(app, candidateSourcerService);
     registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });
     registerJobPreScreenAnswerRoutes(app, { service: preScreenAnswerService });
     registerJobRequirementRoutes(app, { service: jobRequirementService });
-    registerApplicationFeedbackRoutes(app, feedbackService);
+    registerApplicationNoteRoutes(app, noteService);
 }

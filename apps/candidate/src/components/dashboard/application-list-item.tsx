@@ -28,7 +28,7 @@ function getStageProgress(stage: string): number {
         draft: 0,
         submitted: 40,
         screen: 50,
-        interviewing: 60,
+        interview: 60,
         final_interview: 75,
         offer: 80,
         hired: 100,
@@ -40,7 +40,7 @@ function getStageProgress(stage: string): number {
 
 // Get status indicator color
 function getStatusColor(stage: string): string {
-    if (['interviewing', 'final_interview', 'offer'].includes(stage)) {
+    if (['interview', 'final_interview', 'offer'].includes(stage)) {
         return 'bg-success';
     }
     if (['submitted', 'screen'].includes(stage)) {
@@ -54,7 +54,7 @@ function getStatusColor(stage: string): string {
 
 // Get status badge color
 function getStatusBadgeClass(stage: string): string {
-    if (['interviewing', 'final_interview'].includes(stage)) {
+    if (['interview', 'final_interview'].includes(stage)) {
         return 'badge-info';
     }
     if (stage === 'offer') {
@@ -126,7 +126,7 @@ export default function ApplicationListItem({
     const canChat = Boolean(application.recruiter_user_id);
 
     return (
-        <Link href={`/portal/applications/${application.id}`}>
+        <Link href={`/portal/applications?applicationId=${application.id}`}>
             <div className="group relative p-2.5 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-lg hover:border-primary/50 border border-transparent transition-all cursor-pointer">
                 {/* Header row with title and status dot */}
                 <div className="flex items-start justify-between gap-2 mb-1">

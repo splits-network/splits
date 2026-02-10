@@ -94,7 +94,7 @@ The landing page (`/app/page.tsx`) is comprehensive but very long (~780 lines) w
         playsInline
         preload="metadata"
         poster="/hero-poster.webp"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-contain opacity-20"
     >
         <source src="/ads.webm" type="video/webm" />
         <source src="/ads.mp4" type="video/mp4" />

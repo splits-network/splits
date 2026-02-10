@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -21,8 +21,45 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
     const { isRecruiter } = useUserProfile();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+
     const [candidate, setCandidate] = useState<Candidate | null>(null);
     const [loading, setLoading] = useState(false);
+
+    // Tab scroll arrow buttons
+    const tabScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 0);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    }, []);
+
+    useEffect(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        updateScrollButtons();
+        el.addEventListener("scroll", updateScrollButtons);
+        const observer = new ResizeObserver(updateScrollButtons);
+        observer.observe(el);
+        return () => {
+            el.removeEventListener("scroll", updateScrollButtons);
+            observer.disconnect();
+        };
+        // Re-run when candidate loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!candidate]);
+
+    const scrollTabs = useCallback((direction: "left" | "right") => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        el.scrollBy({
+            left: direction === "left" ? -120 : 120,
+            behavior: "smooth",
+        });
+    }, []);
 
     // Applications state
     const [applications, setApplications] = useState<any[]>([]);
@@ -51,7 +88,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     const fetchInvitation = useCallback(async () => {
@@ -74,7 +111,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setInvitationLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     const fetchApplications = useCallback(async () => {
@@ -93,7 +130,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setAppsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     const fetchDocuments = useCallback(async () => {
@@ -112,7 +149,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setDocsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     useEffect(() => {
@@ -152,38 +189,64 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     return (
         <div className="flex flex-col h-full min-h-0 p-6 gap-6">
             {/* Tabs */}
-            <div className="overflow-x-auto shrink-0">
-                <div role="tablist" className="tabs tabs-lift min-w-max">
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("overview")}
+            <div className="relative shrink-0">
+                {canScrollLeft && (
+                    <button
+                        onClick={() => scrollTabs("left")}
+                        className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs left"
                     >
-                        <i className="fa-duotone fa-regular fa-user mr-2" />
-                        Overview
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "applications" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("applications")}
-                    >
-                        <i className="fa-duotone fa-regular fa-briefcase mr-2" />
-                        Applications
-                        {applications.length > 0 && (
-                            <span className="badge badge-xs badge-primary ml-1">
-                                {applications.length}
-                            </span>
-                        )}
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "documents" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("documents")}
-                    >
-                        <i className="fa-duotone fa-regular fa-file-lines mr-2" />
-                        Documents
-                    </a>
+                        <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content/60" />
+                    </button>
+                )}
+                <div
+                    ref={tabScrollRef}
+                    className="overflow-x-auto"
+                    style={{ scrollbarWidth: "none" }}
+                    data-tab-scroll
+                >
+                    <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
+                    <div role="tablist" className="tabs tabs-lift min-w-max">
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("overview")}
+                        >
+                            <i className="fa-duotone fa-regular fa-user mr-2" />
+                            Overview
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "applications" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("applications")}
+                        >
+                            <i className="fa-duotone fa-regular fa-briefcase mr-2" />
+                            Applications
+                            {applications.length > 0 && (
+                                <span className="badge badge-xs badge-primary ml-1">
+                                    {applications.length}
+                                </span>
+                            )}
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "documents" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("documents")}
+                        >
+                            <i className="fa-duotone fa-regular fa-file-lines mr-2" />
+                            Documents
+                        </a>
+                    </div>
                 </div>
+                {canScrollRight && (
+                    <button
+                        onClick={() => scrollTabs("right")}
+                        className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs right"
+                    >
+                        <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/60" />
+                    </button>
+                )}
             </div>
 
             {/* Tab Content */}

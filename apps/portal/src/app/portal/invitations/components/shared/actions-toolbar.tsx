@@ -107,8 +107,7 @@ export default function ActionsToolbar({
     };
 
     const sizeClass = `btn-${size}`;
-    const layoutClass =
-        layout === "horizontal" ? "gap-1" : "flex-col gap-2";
+    const layoutClass = layout === "horizontal" ? "gap-1" : "flex-col gap-2";
     const isLoading = resending || cancelling;
 
     if (variant === "icon-only") {
@@ -118,7 +117,7 @@ export default function ActionsToolbar({
                     {actions.viewCandidate && (
                         <Link
                             href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                            className={`btn ${sizeClass} btn-circle btn-ghost`}
                             title="View Candidate"
                         >
                             <i className="fa-duotone fa-regular fa-user" />
@@ -128,7 +127,7 @@ export default function ActionsToolbar({
                     {actions.resend && (
                         <button
                             onClick={handleResend}
-                            className={`btn ${sizeClass} btn-square btn-primary`}
+                            className={`btn ${sizeClass} btn-circle btn-primary`}
                             title="Resend Invitation"
                             disabled={isLoading}
                         >
@@ -143,7 +142,7 @@ export default function ActionsToolbar({
                     {actions.cancel && (
                         <button
                             onClick={() => setConfirmDialog(true)}
-                            className={`btn ${sizeClass} btn-square btn-error`}
+                            className={`btn ${sizeClass} btn-circle btn-error`}
                             title="Cancel Invitation"
                             disabled={isLoading}
                         >
@@ -158,7 +157,7 @@ export default function ActionsToolbar({
                     {actions.viewDeclineReason && (
                         <button
                             onClick={handleViewDeclineReason}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                            className={`btn ${sizeClass} btn-circle btn-ghost`}
                             title="View Decline Reason"
                         >
                             <i className="fa-duotone fa-regular fa-comment" />

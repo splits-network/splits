@@ -5,7 +5,7 @@ import {
     loadResendConfig,
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
 import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
@@ -114,30 +114,33 @@ async function main() {
         eventPublisher: v2EventPublisher,
     });
 
-    // Health check endpoint
-    app.get('/health', async (request, reply) => {
-        try {
-            // Check database connectivity
-            await repository.healthCheck();
-            // Check RabbitMQ connectivity
-            const rabbitHealthy = consumer.isConnected();
-            if (!rabbitHealthy) {
-                throw new Error('RabbitMQ not connected');
-            }
-            return reply.status(200).send({
-                status: 'healthy',
-                service: 'notification-service',
-                timestamp: new Date().toISOString(),
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'notification-service',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
+    // Create Supabase client for health checks
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
+    // Register standardized health check
+    registerHealthCheck(app, {
+        serviceName: 'notification-service',
+        logger,
+        checkers: {
+            database: HealthCheckers.database(supabaseClient),
+            ...(v2EventPublisher && {
+                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
+            }),
+            ...(consumer && {
+                rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(consumer)
+            }),
+            resend: HealthCheckers.custom('resend', async () => {
+                // Test Resend API connectivity
+                const response = await fetch('https://api.resend.com/domains', {
+                    headers: { 'Authorization': `Bearer ${resendConfig.apiKey}` }
+                });
+                return response.ok;
+            }, { provider: 'resend' }),
+        },
     });
 
     // Graceful shutdown

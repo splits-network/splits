@@ -4,7 +4,7 @@ import {
     loadRabbitMQConfig,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
@@ -54,27 +54,6 @@ async function main() {
         routePrefix: "/docs",
     });
 
-    // Skip request logging for health checks to reduce noise
-    app.addHook("onRequest", async (request, reply) => {
-        if (request.url === "/health") {
-            request.log = {
-                ...request.log,
-                info: () => {},
-                debug: () => {},
-                trace: () => {},
-            } as any;
-        }
-    });
-
-    // Health check
-    app.get("/health", async () => {
-        return {
-            status: "healthy",
-            service: "automation-service",
-            timestamp: new Date().toISOString(),
-        };
-    });
-
     try {
         v2EventPublisher = new EventPublisher(
             rabbitConfig.url,
@@ -121,6 +100,31 @@ async function main() {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey: dbConfig.supabaseServiceRoleKey!,
             eventPublisher: v2EventPublisher,
+        });
+
+        // Create Supabase client for health check
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseClient = createClient(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        );
+
+        // Register standardized health check
+        registerHealthCheck(app, {
+            serviceName: 'automation-service',
+            logger,
+            checkers: {
+                database: HealthCheckers.database(supabaseClient),
+                ...(v2EventPublisher && {
+                    rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
+                }),
+                ...(domainConsumer && {
+                    rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer)
+                }),
+                ...(reputationConsumer && {
+                    reputation_consumer: HealthCheckers.rabbitMqConsumer(reputationConsumer)
+                }),
+            },
         });
 
         process.on("SIGTERM", async () => {

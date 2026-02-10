@@ -15,7 +15,7 @@ export class CompanyInvitationsConsumer {
         private portalUrl: string,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper
-    ) {}
+    ) { }
 
     /**
      * Handle company_invitation.created event
@@ -51,6 +51,15 @@ export class CompanyInvitationsConsumer {
         );
 
         try {
+            // Fetch recruiter bio if recruiter_id is available
+            let recruiterBio: string | undefined = undefined;
+            if (recruiter_id) {
+                const recruiter = await this.dataLookup.getRecruiterWithBio(recruiter_id);
+                if (recruiter && recruiter.bio) {
+                    recruiterBio = recruiter.bio;
+                }
+            }
+
             const invitationLink = `${this.portalUrl}/join/${invite_link_token}`;
             const expiresDate = new Date(expires_at).toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -63,6 +72,7 @@ export class CompanyInvitationsConsumer {
                 invitation_id,
                 email: invited_email,
                 recruiter_name: recruiter_name || 'A recruiter',
+                recruiter_bio: recruiterBio,
                 personal_message,
                 company_name_hint,
                 invite_code,

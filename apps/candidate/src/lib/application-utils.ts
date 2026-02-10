@@ -4,6 +4,8 @@ export const getStatusColor = (stage: string) => {
             return 'badge-ghost';
         case 'ai_review':
             return 'badge-warning';
+        case 'ai_reviewed':
+            return 'badge-success badge-soft';
         case 'screen':
         case 'submitted':
             return 'badge-info';
@@ -11,7 +13,13 @@ export const getStatusColor = (stage: string) => {
             return 'badge-secondary';
         case 'recruiter_request':
             return 'badge-info';
-        case 'interviewing':
+        case 'recruiter_review':
+            return 'badge-info';
+        case 'company_review':
+            return 'badge-accent';
+        case 'company_feedback':
+            return 'badge-accent badge-soft';
+        case 'interview':
             return 'badge-primary';
         case 'offer':
             return 'badge-success badge-soft';
@@ -21,6 +29,8 @@ export const getStatusColor = (stage: string) => {
             return 'badge-error';
         case 'withdrawn':
             return 'badge-error badge-soft';
+        case 'expired':
+            return 'badge-ghost';
         default:
             return 'badge-ghost';
     }
@@ -32,22 +42,34 @@ export const formatStage = (stage: string) => {
             return 'Draft';
         case 'ai_review':
             return 'AI Review';
+        case 'ai_reviewed':
+            return 'AI Reviewed';
         case 'screen':
-            return 'Recruiter Review';
+            return 'Screening';
         case 'recruiter_proposed':
             return 'Recruiter Proposed';
         case 'recruiter_request':
             return 'Recruiter Request';
+        case 'recruiter_review':
+            return 'Recruiter Review';
         case 'submitted':
             return 'Submitted';
-        case 'interviewing':
-            return 'Interviewing';
+        case 'company_review':
+            return 'Company Review';
+        case 'company_feedback':
+            return 'Company Feedback';
+        case 'interview':
+            return 'Interview';
         case 'offer':
             return 'Offer';
+        case 'hired':
+            return 'Hired';
         case 'rejected':
             return 'Rejected';
         case 'withdrawn':
             return 'Withdrawn';
+        case 'expired':
+            return 'Expired';
         default:
             return stage;
     }

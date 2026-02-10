@@ -24,6 +24,7 @@ import {
     getCachedSubscription,
     clearCachedCurrentUserProfile,
 } from "@/lib/current-user-profile";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 /**
  * Plan tier types
@@ -143,6 +144,8 @@ interface UserProfileContextValue {
     isSubscriptionLoading: boolean;
     /** Refresh the subscription data */
     refreshSubscription: () => Promise<void>;
+    /** Company IDs the recruiter can manage (can_manage_company_jobs=true) */
+    manageableCompanyIds: string[];
 }
 
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
@@ -159,6 +162,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
     const [error, setError] = useState<string | null>(null);
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
+    const [manageableCompanyIds, setManageableCompanyIds] = useState<string[]>([]);
 
     const fetchProfile = useCallback(async () => {
         if (!isAuthLoaded) return;
@@ -219,6 +223,35 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
             fetchSubscription();
         }
     }, [profile, fetchSubscription]);
+
+    const fetchManageableCompanies = useCallback(async () => {
+        if (!profile?.recruiter_id) {
+            setManageableCompanyIds([]);
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get<{ data: string[] }>(
+                "/recruiter-companies/manageable-companies",
+            );
+            setManageableCompanyIds(response.data || []);
+        } catch (err) {
+            console.error("Failed to fetch manageable companies:", err);
+            setManageableCompanyIds([]);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.recruiter_id]);
+
+    // Load manageable companies when profile loads (recruiters only)
+    useEffect(() => {
+        if (profile) {
+            fetchManageableCompanies();
+        }
+    }, [profile, fetchManageableCompanies]);
 
     // Derived role checks
     const roles = profile?.roles || [];
@@ -298,6 +331,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         isSubscriptionActive,
         isSubscriptionLoading,
         refreshSubscription: () => fetchSubscription(),
+        manageableCompanyIds,
     };
 
     return (

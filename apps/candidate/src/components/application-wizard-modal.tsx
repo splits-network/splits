@@ -178,7 +178,6 @@ export default function ApplicationWizardModal({
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
-                        notes: formData.notes,
                         stage: "ai_review",
                     },
                 );
@@ -191,7 +190,6 @@ export default function ApplicationWizardModal({
                         job_id: jobId,
                         document_ids: formData.documents.selected,
                         pre_screen_answers: formData.pre_screen_answers,
-                        notes: formData.notes,
                         stage: "ai_review",
                     },
                 );
@@ -199,11 +197,25 @@ export default function ApplicationWizardModal({
                 applicationId = result.data.id;
             }
 
+            // Create application note if candidate added notes
+            if (formData.notes && formData.notes.trim()) {
+                try {
+                    await authClient.post(`/applications/${applicationId}/notes`, {
+                        created_by_type: 'candidate',
+                        note_type: 'note',
+                        visibility: 'shared',
+                        message_text: formData.notes.trim(),
+                    });
+                } catch (noteError) {
+                    console.warn('Failed to create candidate note:', noteError);
+                }
+            }
+
             // Close modal and navigate
             // Note: onSuccess callback is NOT called here to avoid double toasts
             // The applications page will show a success toast based on URL param
             onClose();
-            router.push(`/portal/applications/${applicationId}?success=true&`);
+            router.push(`/portal/applications?applicationId=${applicationId}`);
         } catch (err: any) {
             console.error("Failed to submit application:", err);
             setError(err.message || "Failed to submit application");
@@ -230,7 +242,6 @@ export default function ApplicationWizardModal({
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
-                        notes: formData.notes,
                         stage: "draft",
                     },
                 );
@@ -243,12 +254,25 @@ export default function ApplicationWizardModal({
                         job_id: jobId,
                         document_ids: formData.documents.selected,
                         pre_screen_answers: formData.pre_screen_answers,
-                        notes: formData.notes,
                         stage: "draft",
                     },
                 );
                 // V2 API returns { data: <application> } directly
                 applicationId = result.data.id;
+            }
+
+            // Create application note if candidate added notes
+            if (formData.notes && formData.notes.trim()) {
+                try {
+                    await authClient.post(`/applications/${applicationId}/notes`, {
+                        created_by_type: 'candidate',
+                        note_type: 'note',
+                        visibility: 'shared',
+                        message_text: formData.notes.trim(),
+                    });
+                } catch (noteError) {
+                    console.warn('Failed to create candidate note:', noteError);
+                }
             }
 
             // Close modal and navigate

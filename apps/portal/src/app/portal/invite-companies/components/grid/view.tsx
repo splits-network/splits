@@ -34,7 +34,7 @@ export default function GridView() {
                         description="Create your first invitation to start bringing companies to Splits Network"
                     />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {invitations.map((invitation) => (
                             <Item
                                 key={invitation.id}

@@ -52,3 +52,38 @@ export {
     type SpinnerType,
     type LoadingColor,
 } from './loading';
+
+// Application Timeline components
+export {
+    ApplicationTimelinePanel,
+    PipelineProgress,
+    ActivityFeed,
+    interpretAuditLog,
+    STAGE_DISPLAY_NAMES,
+    ROLE_DISPLAY_NAMES,
+    DIRECT_PIPELINE_STAGES,
+    RECRUITER_PIPELINE_STAGES,
+    type ApplicationTimelinePanelProps,
+    type AuditLogEntry,
+    type TimelineEvent,
+    type ViewerRole,
+} from './application-timeline';
+
+// Portal components
+export { ModalPortal } from './portal/modal-portal';
+
+// Application Notes components
+export {
+    ApplicationNotesPanel,
+    ApplicationNoteItem,
+    AddNoteForm,
+    NOTE_TYPE_CONFIG,
+    CREATOR_TYPE_CONFIG,
+    VISIBILITY_CONFIG,
+    type ApplicationNotesPanelProps,
+    type ApplicationNoteItemProps,
+    type AddNoteFormProps,
+    type ApplicationNotesConfig,
+    type CreateNoteData,
+    type UpdateNoteData,
+} from './application-notes';

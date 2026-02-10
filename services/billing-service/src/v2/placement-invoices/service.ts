@@ -126,6 +126,8 @@ export class PlacementInvoiceService {
             billing_terms: ensuredProfile.billing_terms,
             due_date: finalized.due_date ? new Date(finalized.due_date * 1000).toISOString().slice(0, 10) : null,
             collectible_at: this.computeCollectibleAt(ensuredProfile.billing_terms, finalized),
+            funds_available: false, // Initially false until payout.paid webhook confirms funds are available
+            funds_available_at: null, // Will be set when payout.paid webhook is received
             finalized_at: finalized.status_transitions?.finalized_at
                 ? new Date(finalized.status_transitions.finalized_at * 1000).toISOString()
                 : null,

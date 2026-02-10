@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { JobRequirementService } from './service';
 import { requireUserContext } from '../shared/helpers';
+import { BulkReplaceRequirementsRequest } from '../types';
 
 interface RegisterJobRequirementRoutesConfig {
     service: JobRequirementService;
@@ -71,6 +72,31 @@ export function registerJobRequirementRoutes(
             return reply
                 .code(error.statusCode || 400)
                 .send({ error: { message: error.message || 'Failed to delete requirement' } });
+        }
+    });
+
+    // Bulk replace endpoint for performance optimization during job editing
+    app.put('/api/v2/job-requirements/job/:jobId/bulk-replace', async (request: FastifyRequest<{
+        Params: { jobId: string },
+        Body: BulkReplaceRequirementsRequest
+    }>, reply: FastifyReply) => {
+        try {
+            requireUserContext(request);
+            const { jobId } = request.params;
+            const { requirements } = request.body;
+
+            if (!requirements) {
+                return reply
+                    .code(400)
+                    .send({ error: { message: 'requirements array is required' } });
+            }
+
+            const data = await config.service.bulkReplaceByJob(jobId, requirements);
+            return reply.send({ data });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: { message: error.message || 'Failed to bulk replace requirements' } });
         }
     });
 }

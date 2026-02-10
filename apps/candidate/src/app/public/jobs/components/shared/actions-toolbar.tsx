@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { ModalPortal } from "@splits-network/shared-ui";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
 import type { Job } from "../../types";
 import { getCompanyName } from "../../types";
@@ -121,18 +122,20 @@ export default function ActionsToolbar({
                     </button>
                 </div>
 
-                {showWizard && (
-                    <ApplicationWizardModal
-                        jobId={item.id}
-                        jobTitle={item.title}
-                        companyName={companyName}
-                        onClose={() => setShowWizard(false)}
-                        onSuccess={() => {
-                            setShowWizard(false);
-                            fetchAuthData();
-                        }}
-                    />
-                )}
+                <ModalPortal>
+                    {showWizard && (
+                        <ApplicationWizardModal
+                            jobId={item.id}
+                            jobTitle={item.title}
+                            companyName={companyName}
+                            onClose={() => setShowWizard(false)}
+                            onSuccess={() => {
+                                setShowWizard(false);
+                                fetchAuthData();
+                            }}
+                        />
+                    )}
+                </ModalPortal>
             </>
         );
     }
@@ -166,18 +169,20 @@ export default function ActionsToolbar({
                 </button>
             </div>
 
-            {showWizard && (
-                <ApplicationWizardModal
-                    jobId={item.id}
-                    jobTitle={item.title}
-                    companyName={companyName}
-                    onClose={() => setShowWizard(false)}
-                    onSuccess={() => {
-                        setShowWizard(false);
-                        fetchAuthData();
-                    }}
-                />
-            )}
+            <ModalPortal>
+                {showWizard && (
+                    <ApplicationWizardModal
+                        jobId={item.id}
+                        jobTitle={item.title}
+                        companyName={companyName}
+                        onClose={() => setShowWizard(false)}
+                        onSuccess={() => {
+                            setShowWizard(false);
+                            fetchAuthData();
+                        }}
+                    />
+                )}
+            </ModalPortal>
         </>
     );
 }

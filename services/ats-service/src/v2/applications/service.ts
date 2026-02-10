@@ -198,17 +198,22 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Emit event
+        // Emit event (non-blocking)
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('application.created', {
-                application_id: application.id,
-                job_id: application.job_id,
-                candidate_id: candidateId,
-                recruiter_id: recruiterId || null,
-                has_recruiter: hasRecruiter,
-                stage: application.stage,
-                created_by: identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('application.created', {
+                    application_id: application.id,
+                    job_id: application.job_id,
+                    candidate_id: candidateId,
+                    recruiter_id: recruiterId || null,
+                    has_recruiter: hasRecruiter,
+                    stage: application.stage,
+                    created_by: identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent application creation
+                console.error('Failed to publish application.created event:', error);
+            }
         }
 
         // Note: Application created with referential recruiter data
@@ -311,7 +316,7 @@ export class ApplicationServiceV2 {
                 application_id: id,
                 action: 'stage_changed',
                 performed_by_user_id: userContext.identityUserId || 'system',
-                performed_by_role: userRole || 'unknown',
+                performed_by_role: userRole || this.resolveRole(userContext),
                 old_value: { stage: currentApplication.stage },
                 new_value: { stage: updates.stage },
                 metadata: {
@@ -324,29 +329,34 @@ export class ApplicationServiceV2 {
             });
         }
 
-        // Publish events
+        // Publish events (non-blocking)
         if (this.eventPublisher) {
-            // Stage changed event - other services listen and react to stages they care about
-            if (updates.stage) {
-                await this.eventPublisher.publish('application.stage_changed', {
+            try {
+                // Stage changed event - other services listen and react to stages they care about
+                if (updates.stage) {
+                    await this.eventPublisher.publish('application.stage_changed', {
+                        application_id: id,
+                        job_id: updatedApplication.job_id,
+                        candidate_id: updatedApplication.candidate_id,
+                        candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
+                        old_stage: currentApplication.stage,
+                        new_stage: updates.stage,
+                        changed_by: userContext.identityUserId,
+                    });
+                }
+
+                // Generic update event
+                await this.eventPublisher.publish('application.updated', {
                     application_id: id,
                     job_id: updatedApplication.job_id,
                     candidate_id: updatedApplication.candidate_id,
-                    candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
-                    old_stage: currentApplication.stage,
-                    new_stage: updates.stage,
-                    changed_by: userContext.identityUserId,
+                    updated_fields: Object.keys(persistedUpdates),
+                    updated_by: userContext.identityUserId,
                 });
+            } catch (error) {
+                // Log the error but don't prevent application update
+                console.error('Failed to publish application update events:', error);
             }
-
-            // Generic update event
-            await this.eventPublisher.publish('application.updated', {
-                application_id: id,
-                job_id: updatedApplication.job_id,
-                candidate_id: updatedApplication.candidate_id,
-                updated_fields: Object.keys(persistedUpdates),
-                updated_by: userContext.identityUserId,
-            });
         }
 
         // Note: Application updated with referential recruiter data
@@ -379,10 +389,15 @@ export class ApplicationServiceV2 {
         await this.repository.deleteApplication(id);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('application.deleted', {
-                applicationId: id,
-                deletedBy: identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('application.deleted', {
+                    applicationId: id,
+                    deletedBy: identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent application deletion
+                console.error('Failed to publish application.deleted event:', error);
+            }
         }
     }
 
@@ -473,6 +488,17 @@ export class ApplicationServiceV2 {
     }
 
     /**
+     * Derive performed_by_role from access context
+     */
+    private resolveRole(context: { isPlatformAdmin: boolean; companyIds: string[]; recruiterId: string | null; candidateId: string | null }): string {
+        if (context.isPlatformAdmin) return 'admin';
+        if (context.companyIds.length > 0) return 'company';
+        if (context.recruiterId) return 'recruiter';
+        if (context.candidateId) return 'candidate';
+        return 'system';
+    }
+
+    /**
      * Handle AI review completion event
      * Transitions application from 'ai_review' to 'ai_reviewed'
      * Candidate must review feedback before submission
@@ -487,6 +513,21 @@ export class ApplicationServiceV2 {
         await this.repository.updateApplication(data.application_id, {
             stage: 'ai_reviewed',
             ai_reviewed: true,
+        });
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: data.application_id,
+            action: 'ai_review_completed',
+            performed_by_user_id: 'system',
+            performed_by_role: 'system',
+            old_value: { stage: 'ai_review' },
+            new_value: { stage: 'ai_reviewed' },
+            metadata: {
+                review_id: data.review_id,
+                recommendation: data.recommendation,
+                concern_count: data.concerns.length,
+            },
         });
 
         // Publish event for notification
@@ -531,9 +572,22 @@ export class ApplicationServiceV2 {
             ai_reviewed: false, // Reset AI review flag
         });
 
+        // Create audit log entry
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'returned_to_draft',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: userContext.recruiterId ? 'recruiter' : 'candidate',
+            old_value: { stage: application.stage },
+            new_value: { stage: 'draft' },
+            metadata: {
+                from_stage: application.stage,
+            },
+        });
+
         // Publish event
         if (this.eventPublisher) {
-            const userContext = await this.accessResolver.resolve(clerkUserId);
             await this.eventPublisher.publish('application.returned_to_draft', {
                 applicationId,
                 from_stage: application.stage,
@@ -565,15 +619,34 @@ export class ApplicationServiceV2 {
             stage: 'ai_review',
         });
 
-        // Publish event for AI service to process
-        if (this.eventPublisher) {
-            const userContext = await this.accessResolver.resolve(clerkUserId);
-            await this.eventPublisher.publish('application.ai_review.triggered', {
-                application_id: applicationId,
-                candidate_id: application.candidate_id,
+        // Create audit log entry
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'ai_review_started',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: userContext.recruiterId ? 'recruiter' : 'candidate',
+            old_value: { stage: application.stage },
+            new_value: { stage: 'ai_review' },
+            metadata: {
                 job_id: application.job_id,
-                triggeredBy: userContext.identityUserId,
-            });
+                candidate_id: application.candidate_id,
+            },
+        });
+
+        // Publish event for AI service to process (non-blocking)
+        if (this.eventPublisher) {
+            try {
+                await this.eventPublisher.publish('application.ai_review.triggered', {
+                    application_id: applicationId,
+                    candidate_id: application.candidate_id,
+                    job_id: application.job_id,
+                    triggeredBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent AI review trigger
+                console.error('Failed to publish application.ai_review.triggered event:', error);
+            }
         }
     }
 
@@ -610,6 +683,21 @@ export class ApplicationServiceV2 {
 
         // Resolve user context early (needed for proposed_by UUID)
         const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Create audit log entry for submission
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'submitted',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'candidate',
+            old_value: { stage: application.stage },
+            new_value: { stage: nextStage },
+            metadata: {
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                has_recruiter: !!application.candidate_recruiter_id,
+            },
+        });
 
         // Note: Gate routing now handled directly in application workflow
         // No separate assignment service needed - using referential data approach
@@ -821,20 +909,11 @@ export class ApplicationServiceV2 {
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
-        // Build update payload
+        // Build update payload (notes are now created via application_notes table)
         const updateData: any = {
             stage: 'hired',
             salary: body.salary,
         };
-
-        if (body.notes) {
-            const existingNotes = application.notes || '';
-            const timestamp = new Date().toLocaleString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-            });
-            updateData.notes = existingNotes + `\n[${timestamp}] Company User: ${body.notes}`;
-        }
 
         const updated = await this.repository.updateApplication(applicationId, updateData);
 

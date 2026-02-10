@@ -59,8 +59,9 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                         <ActionsToolbar
                             item={item}
                             variant="descriptive"
-                            onWithdraw={() => {
+                            onStageChange={() => {
                                 refresh();
+                                fetchItem();
                             }}
                         />
                     )}

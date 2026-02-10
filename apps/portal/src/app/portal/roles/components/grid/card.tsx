@@ -188,7 +188,7 @@ export function RoleCard({
             </MetricCard.Body>
             <MetricCard.Footer>
                 <div className="flex items-center justify-between w-full">
-                    <span className=" text-base-content/50">
+                    <span className="text-xs text-base-content/50">
                         Posted {formatRelativeTime(job.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
@@ -201,6 +201,7 @@ export function RoleCard({
                             onViewPipeline={onViewPipeline}
                             showActions={{
                                 viewPipeline: true,
+                                edit: canManageRole,
                             }}
                         />
                     </div>

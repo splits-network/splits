@@ -1225,4 +1225,137 @@ export class ApplicationsEventConsumer {
             throw error;
         }
     }
+
+    /**
+     * Handle application note created event
+     * Notifies relevant parties based on note visibility:
+     * - shared: all parties (candidate, recruiter, company)
+     * - company_only: only company users
+     * - candidate_only: only candidate-side users (candidate + recruiter)
+     */
+    async handleNoteCreated(event: DomainEvent): Promise<void> {
+        try {
+            const {
+                noteId,
+                application_id,
+                note_type,
+                visibility,
+                created_by_type,
+                created_by_user_id,
+                message_text,
+            } = event.payload;
+
+            this.logger.info(
+                { noteId, application_id, visibility, created_by_type },
+                'Processing note created notification'
+            );
+
+            // Get application context
+            const context = await this.dataLookup.getApplicationContext(application_id);
+            if (!context) {
+                this.logger.error({ application_id }, 'Could not load application context');
+                throw new Error(`Application context not found for ${application_id}`);
+            }
+
+            const { application, job, candidate } = context;
+
+            // Get creator contact info
+            const creatorContact = await this.contactLookup.getContactByUserId(created_by_user_id);
+            const creatorName = creatorContact?.name || 'A team member';
+
+            // Map creator type to human-readable role
+            const roleLabels: Record<string, string> = {
+                candidate: 'Candidate',
+                candidate_recruiter: 'Recruiter',
+                company_recruiter: 'Recruiter',
+                hiring_manager: 'Hiring Manager',
+                company_admin: 'Company Admin',
+                platform_admin: 'Platform Admin',
+            };
+            const creatorRole = roleLabels[created_by_type] || 'Team Member';
+
+            // Create note preview (first 200 chars)
+            const notePreview = message_text && message_text.length > 200
+                ? message_text.substring(0, 200) + '...'
+                : message_text || 'No content';
+
+            const notificationData = {
+                candidateName: candidate.full_name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'Unknown Company',
+                notePreview,
+                addedByName: creatorName,
+                addedByRole: creatorRole,
+                applicationId: application_id,
+            };
+
+            // Collect recipients based on visibility
+            const recipients: Array<{ email: string; name: string; userId?: string }> = [];
+
+            // Candidate-side recipients (candidate + their recruiter)
+            const shouldNotifyCandidateSide = visibility === 'shared' || visibility === 'candidate_only';
+
+            // Company-side recipients
+            const shouldNotifyCompanySide = visibility === 'shared' || visibility === 'company_only';
+
+            // Add candidate (if visibility allows and they're not the creator)
+            if (shouldNotifyCandidateSide && candidate.email && candidate.user_id !== created_by_user_id) {
+                recipients.push({
+                    email: candidate.email,
+                    name: candidate.full_name,
+                    userId: candidate.user_id || undefined,
+                });
+            }
+
+            // Add recruiter (if visibility allows and they're not the creator)
+            if (shouldNotifyCandidateSide && application.recruiter_id) {
+                const recruiterContact = await this.contactLookup.getRecruiterContact(application.recruiter_id);
+                if (recruiterContact && recruiterContact.user_id !== created_by_user_id) {
+                    recipients.push({
+                        email: recruiterContact.email,
+                        name: recruiterContact.name,
+                        userId: recruiterContact.user_id || undefined,
+                    });
+                }
+            }
+
+            // Add company admins (if visibility allows)
+            if (shouldNotifyCompanySide && job.company_id) {
+                const company = await this.dataLookup.getCompany(job.company_id);
+                if (company?.identity_organization_id) {
+                    const companyAdmins = await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id);
+                    for (const admin of companyAdmins) {
+                        // Don't notify the creator
+                        if (admin.user_id !== created_by_user_id) {
+                            recipients.push({
+                                email: admin.email,
+                                name: admin.name,
+                                userId: admin.user_id || undefined,
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Send notifications to all recipients
+            for (const recipient of recipients) {
+                await this.emailService.sendNoteCreated(recipient.email, {
+                    recipientName: recipient.name,
+                    ...notificationData,
+                    userId: recipient.userId,
+                });
+            }
+
+            this.logger.info(
+                { noteId, application_id, recipientCount: recipients.length },
+                'Note created notifications sent'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send note created notification'
+            );
+            throw error;
+        }
+    }
 }

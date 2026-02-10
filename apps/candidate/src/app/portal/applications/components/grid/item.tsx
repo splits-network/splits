@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDate } from "@/lib/utils";
-import { EntityCard, DataList, DataRow, VerticalDataRow } from "@/components/ui";
+import { EntityCard, DataList, DataRow } from "@/components/ui";
 import {
     type Application,
     getStatusColor,
@@ -9,13 +9,19 @@ import {
     getRecommendationLabel,
     getRecommendationColor,
 } from "../../types";
+import ActionsToolbar from "../shared/actions-toolbar";
 
 interface ItemProps {
     item: Application;
     onViewDetails: (id: string) => void;
+    onStageChange?: () => void;
 }
 
-export default function Item({ item, onViewDetails }: ItemProps) {
+export default function Item({
+    item,
+    onViewDetails,
+    onStageChange,
+}: ItemProps) {
     const companyInitial = (item.job?.company?.name || "C")[0].toUpperCase();
 
     return (
@@ -31,7 +37,7 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                                         <img
                                             src={item.job.company.logo_url}
                                             alt={`${item.job?.company.name} logo`}
-                                            className="w-full h-full object-cover rounded-full"
+                                            className="w-full h-full object-contain rounded-full"
                                         />
                                     ) : (
                                         <span>{companyInitial}</span>
@@ -86,13 +92,6 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                             value={item.recruiter.user.name}
                         />
                     )}
-                    {item.recruiter_notes && (
-                        <VerticalDataRow
-                            icon="fa-comment"
-                            label="Notes"
-                            value={item.recruiter_notes}
-                        />
-                    )}
                     <DataRow
                         icon="fa-calendar"
                         label="Applied"
@@ -136,13 +135,21 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(item.updated_at)}
                     </span>
-                    <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => onViewDetails(item.id)}
-                    >
-                        View Details
-                        <i className="fa-duotone fa-regular fa-arrow-right ml-1.5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <ActionsToolbar
+                            item={item}
+                            variant="icon-only"
+                            size="xs"
+                            onStageChange={onStageChange}
+                        />
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => onViewDetails(item.id)}
+                        >
+                            View
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
+                        </button>
+                    </div>
                 </div>
             </EntityCard.Footer>
         </EntityCard>

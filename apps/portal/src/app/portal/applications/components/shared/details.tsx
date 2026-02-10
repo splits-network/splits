@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
-import { LoadingState } from "@splits-network/shared-ui";
+import {
+    LoadingState,
+    ApplicationNotesPanel,
+    type CreateNoteData,
+} from "@splits-network/shared-ui";
+import type {
+    ApplicationNote,
+    ApplicationNoteCreatorType,
+} from "@splits-network/shared-types";
 import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
 import ApplicationTimeline from "./application-timeline";
 import AIReviewDisplay from "./ai-review-display";
 import DocumentViewerModal from "../modals/document-viewer-modal";
+import CompanyContacts from "@/components/company-contacts";
 import { categorizeDocuments } from "@/app/portal/applications/lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
+import AIReviewPanel from "@/components/ai-review-panel";
 
 interface DetailsProps {
     itemId: string;
@@ -30,9 +40,46 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         | "candidate"
         | "job"
         | "documents"
+        | "notes"
         | "ai_review"
         | "timeline"
     >("overview");
+
+    // Tab scroll arrow buttons
+    const tabScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 0);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    }, []);
+
+    useEffect(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        updateScrollButtons();
+        el.addEventListener("scroll", updateScrollButtons);
+        const observer = new ResizeObserver(updateScrollButtons);
+        observer.observe(el);
+        return () => {
+            el.removeEventListener("scroll", updateScrollButtons);
+            observer.disconnect();
+        };
+        // Re-run when application loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!application]);
+
+    const scrollTabs = useCallback((direction: "left" | "right") => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        el.scrollBy({
+            left: direction === "left" ? -120 : 120,
+            behavior: "smooth",
+        });
+    }, []);
 
     const fetchDetail = useCallback(async () => {
         if (!itemId) return;
@@ -54,7 +101,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     useEffect(() => {
@@ -108,67 +155,100 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="overflow-x-auto shrink-0">
-                <div role="tablist" className="tabs tabs-lift min-w-max">
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("overview")}
+            <div className="relative shrink-0">
+                {canScrollLeft && (
+                    <button
+                        onClick={() => scrollTabs("left")}
+                        className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs left"
                     >
-                        <i className="fa-duotone fa-clipboard mr-2" />
-                        Overview
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "candidate" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("candidate")}
-                    >
-                        <i className="fa-duotone fa-user mr-2" />
-                        Candidate
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "job" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("job")}
-                    >
-                        <i className="fa-duotone fa-briefcase mr-2" />
-                        Job Details
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "documents" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("documents")}
-                    >
-                        <i className="fa-duotone fa-file mr-2" />
-                        Documents
-                        {documents.length > 0 && (
-                            <span className="badge badge-xs badge-primary ml-1">
-                                {documents.length}
-                            </span>
-                        )}
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "ai_review" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("ai_review")}
-                    >
-                        <i className="fa-duotone fa-brain mr-2" />
-                        AI Review
-                        {application.ai_review?.fit_score != null && (
-                            <span className="badge badge-xs badge-accent ml-1">
-                                {Math.round(application.ai_review.fit_score)}%
-                            </span>
-                        )}
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "timeline" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("timeline")}
-                    >
-                        <i className="fa-duotone fa-timeline mr-2" />
-                        Timeline
-                    </a>
+                        <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content/60" />
+                    </button>
+                )}
+                <div
+                    ref={tabScrollRef}
+                    className="overflow-x-auto"
+                    style={{ scrollbarWidth: "none" }}
+                    data-tab-scroll
+                >
+                    <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
+                    <div role="tablist" className="tabs tabs-lift min-w-max">
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("overview")}
+                        >
+                            <i className="fa-duotone fa-clipboard mr-2" />
+                            Overview
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "candidate" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("candidate")}
+                        >
+                            <i className="fa-duotone fa-user mr-2" />
+                            Candidate
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "job" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("job")}
+                        >
+                            <i className="fa-duotone fa-briefcase mr-2" />
+                            Job Details
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "documents" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("documents")}
+                        >
+                            <i className="fa-duotone fa-file mr-2" />
+                            Documents
+                            {documents.length > 0 && (
+                                <span className="badge badge-xs badge-primary ml-1">
+                                    {documents.length}
+                                </span>
+                            )}
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "ai_review" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("ai_review")}
+                        >
+                            <i className="fa-duotone fa-brain mr-2" />
+                            AI Review
+                            <AIReviewPanel
+                                applicationId={application.id}
+                                variant="badge"
+                            />
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "notes" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("notes")}
+                        >
+                            <i className="fa-duotone fa-comments mr-2" />
+                            Notes
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "timeline" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("timeline")}
+                        >
+                            <i className="fa-duotone fa-timeline mr-2" />
+                            Timeline
+                        </a>
+                    </div>
                 </div>
+                {canScrollRight && (
+                    <button
+                        onClick={() => scrollTabs("right")}
+                        className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs right"
+                    >
+                        <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/60" />
+                    </button>
+                )}
             </div>
 
             {/* Tab Content */}
@@ -186,8 +266,19 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {activeTab === "ai_review" && (
                     <AIReviewTab application={application} token={token} />
                 )}
+                {activeTab === "notes" && (
+                    <NotesTab
+                        application={application}
+                        getToken={getToken}
+                        isRecruiter={isRecruiter}
+                        isCompanyUser={isCompanyUser}
+                    />
+                )}
                 {activeTab === "timeline" && (
-                    <TimelineTab auditLogs={auditLogs} />
+                    <TimelineTab
+                        auditLogs={auditLogs}
+                        currentStage={application.stage || "draft"}
+                    />
                 )}
             </div>
         </div>
@@ -243,63 +334,7 @@ function OverviewTab({ application }: { application: Application }) {
                 })()}
             </div>
 
-            {application.ai_review?.fit_score != null && (
-                <div className="card bg-base-200 p-4">
-                    <h4 className="font-semibold mb-2">AI Fit Score</h4>
-                    <div className="flex items-center gap-2">
-                        <progress
-                            className="progress progress-accent w-20"
-                            value={application.ai_review.fit_score}
-                            max="100"
-                        />
-                        <span className="font-bold">
-                            {Math.round(application.ai_review.fit_score)}%
-                        </span>
-                    </div>
-                    {application.ai_review.recommendation && (
-                        <span
-                            className={`badge badge-xs mt-1 ${
-                                application.ai_review.recommendation ===
-                                "strong_fit"
-                                    ? "badge-success"
-                                    : application.ai_review.recommendation ===
-                                        "good_fit"
-                                      ? "badge-info"
-                                      : application.ai_review.recommendation ===
-                                          "fair_fit"
-                                        ? "badge-warning"
-                                        : "badge-error"
-                            }`}
-                        >
-                            {application.ai_review.recommendation.replace(
-                                "_",
-                                " ",
-                            )}
-                        </span>
-                    )}
-                </div>
-            )}
-
-            {(application.notes || application.recruiter_notes) && (
-                <div className="card bg-base-200 p-4 md:col-span-2">
-                    <h4 className="font-semibold mb-2">Notes</h4>
-                    {application.notes && (
-                        <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                            {application.notes}
-                        </p>
-                    )}
-                    {application.recruiter_notes && (
-                        <div className="mt-2">
-                            <h5 className="text-sm font-medium">
-                                Recruiter Notes:
-                            </h5>
-                            <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                {application.recruiter_notes}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
+            <AIReviewPanel applicationId={application.id} variant="mini-card" />
         </div>
     );
 }
@@ -504,6 +539,17 @@ function JobTab({ application }: { application: Application }) {
                 </div>
             </div>
 
+            {/* Company Contacts */}
+            {(job.company?.id || job.company_id) && (
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">
+                        <i className="fa-duotone fa-users mr-2" />
+                        Company Contacts
+                    </h4>
+                    <CompanyContacts companyId={(job.company?.id || job.company_id) as string} />
+                </div>
+            )}
+
             {(job.recruiter_description || job.description) && (
                 <div className="card bg-base-200 p-4">
                     <h4 className="font-semibold mb-2">Description</h4>
@@ -698,6 +744,98 @@ function DocumentsTab({ application }: { application: Application }) {
     );
 }
 
+function NotesTab({
+    application,
+    getToken,
+    isRecruiter,
+    isCompanyUser,
+}: {
+    application: Application;
+    getToken: () => Promise<string | null>;
+    isRecruiter: boolean;
+    isCompanyUser: boolean;
+}) {
+    const { profile } = useUserProfile();
+
+    // Determine user's creator type based on their role
+    const getCreatorType = (): ApplicationNoteCreatorType => {
+        if (profile?.is_platform_admin) return "platform_admin";
+        if (isRecruiter) return "candidate_recruiter";
+        if (isCompanyUser) {
+            // Could be hiring_manager or company_admin based on roles
+            if (profile?.roles.includes("hiring_manager"))
+                return "hiring_manager";
+            return "company_admin";
+        }
+        return "candidate";
+    };
+
+    // API functions for notes - wrapped in useCallback to prevent infinite re-fetching
+    // getToken is stable from Clerk, so these callbacks are stable too
+    const fetchNotes = useCallback(
+        async (applicationId: string): Promise<ApplicationNote[]> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(
+                `/applications/${applicationId}/notes`,
+            );
+            return response.data || [];
+        },
+        [getToken],
+    );
+
+    const createNote = useCallback(
+        async (data: CreateNoteData): Promise<ApplicationNote> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            const response = await client.post(
+                `/applications/${data.application_id}/notes`,
+                data,
+            );
+            return response.data;
+        },
+        [getToken],
+    );
+
+    const deleteNote = useCallback(
+        async (noteId: string): Promise<void> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/application-notes/${noteId}`);
+        },
+        [getToken],
+    );
+
+    if (!profile) {
+        return (
+            <div className="text-center p-8 text-base-content/50">
+                <i className="fa-duotone fa-comments text-4xl mb-2" />
+                <p>Loading user profile...</p>
+            </div>
+        );
+    }
+
+    return (
+        <ApplicationNotesPanel
+            applicationId={application.id}
+            currentUserId={profile.id}
+            currentUserCreatorType={getCreatorType()}
+            fetchNotes={fetchNotes}
+            createNote={createNote}
+            deleteNote={deleteNote}
+            isOnCandidateSide={isRecruiter || !isCompanyUser}
+            isOnCompanySide={isCompanyUser}
+            allowAddNote={true}
+            allowDeleteNote={true}
+            emptyStateMessage="No notes yet. Add one to start the conversation about this application."
+            maxHeight="500px"
+        />
+    );
+}
+
 function AIReviewTab({
     application,
     token,
@@ -715,15 +853,23 @@ function AIReviewTab({
     }
 
     return (
-        <AIReviewDisplay
-            applicationId={application.id}
-            isRecruiter={false}
-            isCompanyUser={false}
-            token={token}
-        />
+        <>
+            <AIReviewPanel applicationId={application.id} />
+        </>
     );
 }
 
-function TimelineTab({ auditLogs }: { auditLogs: any[] }) {
-    return <ApplicationTimeline auditLogs={auditLogs} />;
+function TimelineTab({
+    auditLogs,
+    currentStage,
+}: {
+    auditLogs: any[];
+    currentStage: string;
+}) {
+    return (
+        <ApplicationTimeline
+            auditLogs={auditLogs}
+            currentStage={currentStage}
+        />
+    );
 }

@@ -20,10 +20,10 @@ type ClientMessage =
     | { type: "typing.stopped"; conversationId: string }
     | { type: "presence.ping" }
     | {
-          type: "read.receipt";
-          conversationId: string;
-          lastReadMessageId?: string;
-      };
+        type: "read.receipt";
+        conversationId: string;
+        lastReadMessageId?: string;
+    };
 
 const MAX_CHANNELS_PER_SOCKET = 200;
 const PRESENCE_TTL_SECONDS = 90;
@@ -188,9 +188,6 @@ async function main() {
             );
 
             socket.on("message", async (data) => {
-                console.log("[chat-gateway] Received message from client", {
-                    data: data.toString(),
-                });
                 try {
                     const parsed = JSON.parse(data.toString()) as ClientMessage;
                     await handleClientMessage(
@@ -410,7 +407,9 @@ async function publishEphemeral(
     await redisData.publish(channel, JSON.stringify(payload));
 }
 
-main();
+if (process.env.VITEST !== "true" && process.env.NODE_ENV !== "test") {
+    main();
+}
 
 export {
     MAX_CHANNELS_PER_SOCKET,

@@ -1,34 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { usePresence } from "@/hooks/use-presence";
+import {
+    useApplicationActions,
+    type WizardData,
+} from "@/hooks/use-application-actions";
 import { Presence } from "@/components/presense";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { ModalPortal } from "@splits-network/shared-ui";
+import ApplicationWizardModal from "@/components/application-wizard-modal";
+import { ProposalResponseWizard } from "./proposal-response-wizard";
+import { DeclineModal } from "./decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
+
+// Stages where "Move to Draft" is available
+const BACK_TO_DRAFT_STAGES = [
+    "ai_reviewed",
+    "ai_review",
+    "screen",
+    "recruiter_request",
+    "rejected",
+];
+
+// Stages where "Submit" is available
+const SUBMITTABLE_STAGES = ["draft", "ai_reviewed"];
 
 interface ActionsToolbarProps {
     item: Application;
+    size?: "xs" | "sm" | "md";
     variant?: "icon-only" | "descriptive";
-    onWithdraw?: () => void;
+    onStageChange?: () => void;
 }
 
 export default function ActionsToolbar({
     item,
+    size = "md",
     variant = "icon-only",
-    onWithdraw,
+    onStageChange,
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const toast = useToast();
-    const [startingChat, setStartingChat] = useState(false);
-    const [withdrawing, setWithdrawing] = useState(false);
 
+    // Chat state
+    const [startingChat, setStartingChat] = useState(false);
+
+    // Confirmation state
+    const [confirmAction, setConfirmAction] = useState<string | null>(null);
+    const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Edit wizard state
+    const [showEditWizard, setShowEditWizard] = useState(false);
+
+    // Proposal wizard state
+    const [showProposalWizard, setShowProposalWizard] = useState(false);
+    const [preScreenQuestions, setPreScreenQuestions] = useState<any[] | null>(
+        null,
+    );
+    const [showDeclineModal, setShowDeclineModal] = useState(false);
+
+    // Application actions hook
+    const actions = useApplicationActions({ onSuccess: onStageChange });
+
+    // Derived state
     const recruiterUserId = item.recruiter?.user?.id;
+    const canEdit = item.stage === "draft";
+    const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(item.stage);
+    const canSubmit = SUBMITTABLE_STAGES.includes(item.stage);
     const canWithdraw = WITHDRAWABLE_STAGES.includes(item.stage);
+    const isProposal = item.stage === "recruiter_proposed";
+    const isJobClosed = ["closed", "filled", "cancelled"].includes(
+        item.job?.status || "",
+    );
     const chatDisabledReason = recruiterUserId
         ? null
         : "Your recruiter isn't linked to a user yet.";
@@ -40,6 +88,36 @@ export default function ActionsToolbar({
         ? presence[recruiterUserId]?.status
         : undefined;
 
+    // Clear confirm timer on unmount
+    useEffect(() => {
+        return () => {
+            if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+        };
+    }, []);
+
+    // Start confirmation countdown
+    const startConfirm = (action: string) => {
+        setConfirmAction(action);
+        if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+        confirmTimerRef.current = setTimeout(() => {
+            setConfirmAction(null);
+        }, 3000);
+    };
+
+    const handleConfirmClick = async (
+        action: string,
+        handler: () => Promise<void>,
+    ) => {
+        if (confirmAction === action) {
+            setConfirmAction(null);
+            if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+            await handler();
+        } else {
+            startConfirm(action);
+        }
+    };
+
+    // Chat handler
     const handleMessageRecruiter = async () => {
         if (!recruiterUserId) return;
         try {
@@ -50,12 +128,11 @@ export default function ActionsToolbar({
                 {
                     application_id: item.id,
                     job_id: item.job?.id ?? item.job_id,
-                    company_id: item.job?.company?.id ?? item.company?.id ?? null,
+                    company_id:
+                        item.job?.company?.id ?? item.company?.id ?? null,
                 },
             );
-            router.push(
-                `/portal/messages?conversationId=${conversationId}`,
-            );
+            router.push(`/portal/messages?conversationId=${conversationId}`);
         } catch (err: any) {
             console.error("Failed to start chat:", err);
             toast.error(err?.message || "Failed to start chat");
@@ -64,117 +141,454 @@ export default function ActionsToolbar({
         }
     };
 
-    const handleWithdraw = async () => {
-        if (!canWithdraw) return;
-        try {
-            setWithdrawing(true);
-            const token = await getToken();
-            if (!token) throw new Error("Not authenticated");
-            const { createAuthenticatedClient } = await import(
-                "@/lib/api-client"
-            );
-            const client = createAuthenticatedClient(token);
-            await client.patch(`/applications/${item.id}`, {
-                stage: "withdrawn",
-            });
-            toast.success("Application withdrawn successfully");
-            onWithdraw?.();
-        } catch (err: any) {
-            console.error("Failed to withdraw application:", err);
-            toast.error(err?.message || "Failed to withdraw application");
-        } finally {
-            setWithdrawing(false);
+    // Submit handler (context-aware: draft → AI review, ai_reviewed → submit)
+    const handleSubmit = async () => {
+        if (item.stage === "draft") {
+            await actions.submitToAiReview(item.id);
+        } else if (item.stage === "ai_reviewed") {
+            await actions.submitApplication(item.id);
         }
     };
 
+    // Back to draft handler (context-aware: ai_reviewed uses return-to-draft endpoint)
+    const handleBackToDraft = async () => {
+        if (item.stage === "ai_reviewed") {
+            await actions.returnToDraft(item.id);
+        } else {
+            await actions.backToDraft(item.id);
+        }
+    };
+
+    // Withdraw handler
+    const handleWithdraw = async () => {
+        await actions.withdraw(item.id);
+    };
+
+    // Accept proposal handler
+    const handleAcceptProposal = async () => {
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            const response = await client.get("/job-pre-screen-questions", {
+                params: { job_id: item.job_id },
+            });
+            const questions = response.data || response;
+            setPreScreenQuestions(Array.isArray(questions) ? questions : []);
+            setShowProposalWizard(true);
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to load application wizard");
+        }
+    };
+
+    // Complete proposal application handler
+    const handleCompleteProposal = async (wizardData: WizardData) => {
+        const candidateId = (item as any).candidate_id;
+        if (!candidateId) {
+            toast.error("Missing candidate profile");
+            return;
+        }
+        await actions.completeProposalApplication(
+            item.id,
+            candidateId,
+            wizardData,
+        );
+    };
+
+    // Decline proposal handler
+    const handleDeclineProposal = async (reason: string, details?: string) => {
+        await actions.declineProposal(item.id, reason, details);
+    };
+
+    // Get submit button label based on stage
+    const getSubmitLabel = () => {
+        if (item.stage === "draft") return "Submit for Review";
+        if (item.stage === "ai_reviewed") return "Submit Application";
+        return "Submit";
+    };
+
+    const getSizeClass = () => {
+        switch (size) {
+            case "xs":
+                return "btn-xs";
+            case "sm":
+                return "btn-sm";
+            case "md":
+            default:
+                return "btn-3";
+        }
+    };
+
+    const isLoading = actions.loading !== null;
+
+    // ========== DESCRIPTIVE VARIANT ==========
     if (variant === "descriptive") {
         return (
-            <div className="flex items-center gap-2">
-                <Link
-                    href={`/portal/applications/${item.id}`}
-                    className="btn btn-primary btn-sm"
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-right mr-1" />
-                    View Full Application
-                </Link>
-                <span title={chatDisabledReason || undefined}>
-                    <button
-                        className="btn btn-outline btn-sm"
-                        disabled={!recruiterUserId || startingChat}
-                        onClick={handleMessageRecruiter}
-                    >
-                        {startingChat ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <>
-                                <Presence status={presenceStatus} />
-                                Message Recruiter
-                            </>
-                        )}
-                    </button>
-                </span>
-                {canWithdraw && (
-                    <button
-                        className="btn btn-outline btn-error btn-sm"
-                        disabled={withdrawing}
-                        onClick={handleWithdraw}
-                    >
-                        {withdrawing ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <>
+            <>
+                <div className="flex items-center gap-2 flex-wrap">
+                    {/* Edit — only in draft */}
+                    {canEdit && (
+                        <button
+                            className={`btn btn-primary ${getSizeClass()}`}
+                            disabled={isLoading}
+                            onClick={() => setShowEditWizard(true)}
+                            title="Edit your application"
+                        >
+                            {actions.loading === "edit" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-pen-to-square mr-1" />
+                            )}
+                            Edit
+                        </button>
+                    )}
+
+                    {/* Move to Draft — available in several stages */}
+                    {canBackToDraft && (
+                        <button
+                            className={`btn btn-outline ${getSizeClass()}`}
+                            disabled={isLoading}
+                            onClick={() =>
+                                handleConfirmClick(
+                                    "back-to-draft",
+                                    handleBackToDraft,
+                                )
+                            }
+                            title="Move back to draft for editing"
+                        >
+                            {actions.loading === "back-to-draft" ||
+                            actions.loading === "return-to-draft" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-rotate-left mr-1" />
+                            )}
+                            {confirmAction === "back-to-draft"
+                                ? "Confirm?"
+                                : "Move to Draft"}
+                        </button>
+                    )}
+
+                    {/* Submit — draft or ai_reviewed */}
+                    {canSubmit && (
+                        <button
+                            className={`btn btn-success ${getSizeClass()}`}
+                            disabled={isLoading}
+                            onClick={() =>
+                                handleConfirmClick("submit", handleSubmit)
+                            }
+                            title={getSubmitLabel()}
+                        >
+                            {actions.loading === "submit" ||
+                            actions.loading === "submit-ai" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-paper-plane mr-1" />
+                            )}
+                            {confirmAction === "submit"
+                                ? "Confirm?"
+                                : getSubmitLabel()}
+                        </button>
+                    )}
+
+                    {/* Withdraw */}
+                    {canWithdraw && (
+                        <button
+                            className={`btn btn-outline ${getSizeClass()}`}
+                            disabled={isLoading}
+                            onClick={() =>
+                                handleConfirmClick("withdraw", handleWithdraw)
+                            }
+                            title="Withdraw application"
+                        >
+                            {actions.loading === "withdraw" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
                                 <i className="fa-duotone fa-regular fa-ban mr-1" />
-                                Withdraw
-                            </>
-                        )}
-                    </button>
-                )}
-            </div>
+                            )}
+                            {confirmAction === "withdraw"
+                                ? "Confirm?"
+                                : "Withdraw"}
+                        </button>
+                    )}
+
+                    {/* Divider — only show if there are action buttons before message */}
+                    {(canEdit ||
+                        canBackToDraft ||
+                        canSubmit ||
+                        canWithdraw) && (
+                        <div className="divider divider-horizontal mx-0" />
+                    )}
+
+                    {/* Message Recruiter — always visible */}
+                    <span title={chatDisabledReason || undefined}>
+                        <button
+                            className={`btn btn-outline ${getSizeClass()}`}
+                            disabled={!recruiterUserId || startingChat}
+                            onClick={handleMessageRecruiter}
+                        >
+                            {startingChat ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <>
+                                    <Presence status={presenceStatus} />
+                                    Message
+                                </>
+                            )}
+                        </button>
+                    </span>
+
+                    {/* Proposal actions — contextual */}
+                    {isProposal && (
+                        <>
+                            <div className="divider divider-horizontal mx-0" />
+                            <button
+                                className={`btn btn-primary ${getSizeClass()}`}
+                                disabled={isJobClosed || isLoading}
+                                onClick={handleAcceptProposal}
+                                title={
+                                    isJobClosed
+                                        ? "Position is no longer available"
+                                        : "Accept and apply"
+                                }
+                            >
+                                <i className="fa-duotone fa-regular fa-check mr-1" />
+                                Accept & Apply
+                            </button>
+                            <button
+                                className={`btn btn-outline ${getSizeClass()}`}
+                                disabled={isJobClosed || isLoading}
+                                onClick={() => setShowDeclineModal(true)}
+                                title="Decline this proposal"
+                            >
+                                <i className="fa-duotone fa-regular fa-times mr-1" />
+                                Decline
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {/* Modals - portaled to body to escape drawer stacking context */}
+                <ModalPortal>
+                    {showEditWizard && item.job && (
+                        <ApplicationWizardModal
+                            jobId={item.job.id || item.job_id}
+                            jobTitle={item.job.title}
+                            companyName={item.job.company?.name || "Company"}
+                            onClose={() => setShowEditWizard(false)}
+                            onSuccess={() => {
+                                setShowEditWizard(false);
+                                onStageChange?.();
+                            }}
+                            existingApplication={item}
+                        />
+                    )}
+
+                    {showProposalWizard && (
+                        <ProposalResponseWizard
+                            isOpen={showProposalWizard}
+                            onClose={() => setShowProposalWizard(false)}
+                            applicationId={item.id}
+                            jobTitle={item.job?.title || "this position"}
+                            preScreenQuestions={preScreenQuestions || []}
+                            onComplete={handleCompleteProposal}
+                        />
+                    )}
+
+                    <DeclineModal
+                        isOpen={showDeclineModal}
+                        onClose={() => setShowDeclineModal(false)}
+                        onSubmit={handleDeclineProposal}
+                        jobTitle={item.job?.title || "this position"}
+                    />
+                </ModalPortal>
+            </>
         );
     }
 
-    // Icon-only variant for sidebar header
+    // ========== ICON-ONLY VARIANT ==========
     return (
-        <div className="flex items-center gap-1">
-            <Link
-                href={`/portal/applications/${item.id}`}
-                className="btn btn-sm btn-ghost"
-                title="View full application"
-            >
-                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-            </Link>
-            <span title={chatDisabledReason || undefined}>
-                <button
-                    className="btn btn-sm btn-ghost relative"
-                    disabled={!recruiterUserId || startingChat}
-                    onClick={handleMessageRecruiter}
-                    title="Message recruiter"
-                >
-                    <Presence
-                        status={presenceStatus}
-                        className="absolute -top-1 -right-1"
+        <>
+            <div className="flex items-center gap-1">
+                {/* Edit — only shown in draft */}
+                {canEdit && (
+                    <button
+                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        disabled={isLoading}
+                        onClick={() => setShowEditWizard(true)}
+                        title="Edit draft"
+                    >
+                        {actions.loading === "edit" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-pen-to-square" />
+                        )}
+                    </button>
+                )}
+
+                {/* Move to Draft — only shown when applicable */}
+                {canBackToDraft && (
+                    <button
+                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        disabled={isLoading}
+                        onClick={() =>
+                            handleConfirmClick(
+                                "back-to-draft",
+                                handleBackToDraft,
+                            )
+                        }
+                        title={
+                            confirmAction === "back-to-draft"
+                                ? "Click to confirm"
+                                : "Move to draft"
+                        }
+                    >
+                        {actions.loading === "back-to-draft" ||
+                        actions.loading === "return-to-draft" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : confirmAction === "back-to-draft" ? (
+                            <i className="fa-duotone fa-regular fa-check text-success" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-rotate-left" />
+                        )}
+                    </button>
+                )}
+
+                {/* Submit — only shown when applicable */}
+                {canSubmit && (
+                    <button
+                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        disabled={isLoading}
+                        onClick={() =>
+                            handleConfirmClick("submit", handleSubmit)
+                        }
+                        title={
+                            confirmAction === "submit"
+                                ? "Click to confirm"
+                                : getSubmitLabel()
+                        }
+                    >
+                        {actions.loading === "submit" ||
+                        actions.loading === "submit-ai" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : confirmAction === "submit" ? (
+                            <i className="fa-duotone fa-regular fa-check text-success" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-paper-plane" />
+                        )}
+                    </button>
+                )}
+
+                {/* Withdraw — only shown when applicable */}
+                {canWithdraw && (
+                    <button
+                        className={`btn btn-ghost text-error btn-circle ${getSizeClass()}`}
+                        disabled={isLoading}
+                        onClick={() =>
+                            handleConfirmClick("withdraw", handleWithdraw)
+                        }
+                        title={
+                            confirmAction === "withdraw"
+                                ? "Click to confirm withdrawal"
+                                : "Withdraw"
+                        }
+                    >
+                        {actions.loading === "withdraw" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : confirmAction === "withdraw" ? (
+                            <i className="fa-duotone fa-regular fa-check" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-ban" />
+                        )}
+                    </button>
+                )}
+
+                {/* Divider — only if there are action buttons before message */}
+                {(canEdit || canBackToDraft || canSubmit || canWithdraw) && (
+                    <div className="w-px h-4 bg-base-300 mx-0.5" />
+                )}
+
+                {/* Message — always visible */}
+                <span title={chatDisabledReason || undefined}>
+                    <button
+                        className={`btn btn-ghost btn-circle relative ${getSizeClass()}`}
+                        disabled={!recruiterUserId || startingChat}
+                        onClick={handleMessageRecruiter}
+                        title="Message recruiter"
+                    >
+                        <Presence
+                            status={presenceStatus}
+                            className="absolute -top-1 -right-1"
+                        />
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-messages" />
+                        )}
+                    </button>
+                </span>
+
+                {/* Proposal actions — contextual */}
+                {isProposal && (
+                    <>
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                        <button
+                            className={`btn btn-success btn-circle ${getSizeClass()}`}
+                            disabled={isJobClosed || isLoading}
+                            onClick={handleAcceptProposal}
+                            title={
+                                isJobClosed
+                                    ? "Position closed"
+                                    : "Accept & Apply"
+                            }
+                        >
+                            <i className="fa-duotone fa-regular fa-handshake" />
+                        </button>
+                        <button
+                            className={`btn btn-error btn-circle ${getSizeClass()}`}
+                            disabled={isJobClosed || isLoading}
+                            onClick={() => setShowDeclineModal(true)}
+                            title="Decline proposal"
+                        >
+                            <i className="fa-duotone fa-regular fa-times" />
+                        </button>
+                    </>
+                )}
+            </div>
+
+            {/* Modals - portaled to body to escape drawer stacking context */}
+            <ModalPortal>
+                {showEditWizard && item.job && (
+                    <ApplicationWizardModal
+                        jobId={item.job.id || item.job_id}
+                        jobTitle={item.job.title}
+                        companyName={item.job.company?.name || "Company"}
+                        onClose={() => setShowEditWizard(false)}
+                        onSuccess={() => {
+                            setShowEditWizard(false);
+                            onStageChange?.();
+                        }}
+                        existingApplication={item}
                     />
-                    {startingChat ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-messages" />
-                    )}
-                </button>
-            </span>
-            {canWithdraw && (
-                <button
-                    className="btn btn-sm btn-ghost text-error"
-                    disabled={withdrawing}
-                    onClick={handleWithdraw}
-                    title="Withdraw application"
-                >
-                    {withdrawing ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-ban" />
-                    )}
-                </button>
-            )}
-        </div>
+                )}
+
+                {showProposalWizard && (
+                    <ProposalResponseWizard
+                        isOpen={showProposalWizard}
+                        onClose={() => setShowProposalWizard(false)}
+                        applicationId={item.id}
+                        jobTitle={item.job?.title || "this position"}
+                        preScreenQuestions={preScreenQuestions || []}
+                        onComplete={handleCompleteProposal}
+                    />
+                )}
+
+                <DeclineModal
+                    isOpen={showDeclineModal}
+                    onClose={() => setShowDeclineModal(false)}
+                    onSubmit={handleDeclineProposal}
+                    jobTitle={item.job?.title || "this position"}
+                />
+            </ModalPortal>
+        </>
     );
 }

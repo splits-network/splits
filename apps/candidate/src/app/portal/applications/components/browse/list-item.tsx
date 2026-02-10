@@ -9,7 +9,11 @@ interface ListItemProps {
     onSelect: (id: string) => void;
 }
 
-export default function ListItem({ item, isSelected, onSelect }: ListItemProps) {
+export default function ListItem({
+    item,
+    isSelected,
+    onSelect,
+}: ListItemProps) {
     const companyInitial = (item.job?.company?.name || "C")[0].toUpperCase();
 
     return (
@@ -26,7 +30,7 @@ export default function ListItem({ item, isSelected, onSelect }: ListItemProps) 
                         <img
                             src={item.job.company.logo_url}
                             alt={`${item.job?.company.name} logo`}
-                            className="w-full h-full object-cover rounded-full"
+                            className="w-full h-full object-contain rounded-full"
                         />
                     ) : (
                         <span>{companyInitial}</span>

@@ -58,7 +58,7 @@ export default function Stats() {
                                 a.job?.status !== "filled",
                         ).length,
                         interviewing: items.filter(
-                            (a: any) => a.stage === "interviewing",
+                            (a: any) => a.stage === "interview",
                         ).length,
                         offers: items.filter(
                             (a: any) => a.stage === "offer",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { Company, CompanyRelationship } from "../../types";
 import RequestConnectionModal from "../modals/request-connection-modal";
 
@@ -90,17 +91,19 @@ export default function ActionsToolbar({
                     )}
                 </div>
 
-                {showRequestModal && (
-                    <RequestConnectionModal
-                        isOpen={showRequestModal}
-                        onClose={() => setShowRequestModal(false)}
-                        company={company}
-                        onSuccess={() => {
-                            setShowRequestModal(false);
-                            onRefresh?.();
-                        }}
-                    />
-                )}
+                <ModalPortal>
+                    {showRequestModal && (
+                        <RequestConnectionModal
+                            isOpen={showRequestModal}
+                            onClose={() => setShowRequestModal(false)}
+                            company={company}
+                            onSuccess={() => {
+                                setShowRequestModal(false);
+                                onRefresh?.();
+                            }}
+                        />
+                    )}
+                </ModalPortal>
             </>
         );
     }
@@ -162,17 +165,19 @@ export default function ActionsToolbar({
                 )}
             </div>
 
-            {showRequestModal && (
-                <RequestConnectionModal
-                    isOpen={showRequestModal}
-                    onClose={() => setShowRequestModal(false)}
-                    company={company}
-                    onSuccess={() => {
-                        setShowRequestModal(false);
-                        onRefresh?.();
-                    }}
-                />
-            )}
+            <ModalPortal>
+                {showRequestModal && (
+                    <RequestConnectionModal
+                        isOpen={showRequestModal}
+                        onClose={() => setShowRequestModal(false)}
+                        company={company}
+                        onSuccess={() => {
+                            setShowRequestModal(false);
+                            onRefresh?.();
+                        }}
+                    />
+                )}
+            </ModalPortal>
         </>
     );
 }

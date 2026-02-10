@@ -95,7 +95,7 @@ export function RolesFilterProvider({ children }: RolesFilterProviderProps) {
                     : profile?.roles?.[0] || null;
 
     // Check if user can manage roles
-    const canManageRole = isAdmin || profile?.roles?.includes("company_admin");
+    const canManageRole = isAdmin || profile?.roles?.includes("company_admin") || (isRecruiter && hasManageableCompanies);
 
     // Check if job assignment filter should be shown
     const showJobAssignmentFilter =

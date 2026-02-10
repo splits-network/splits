@@ -232,7 +232,6 @@ export default function SubmitCandidateWizard({
                     candidate_id: candidateId,
                     stage: 'recruiter_proposed',
                     application_source: 'recruiter',
-                    recruiter_notes: pitch.trim(),
                 });
 
                 applicationId =
@@ -242,6 +241,21 @@ export default function SubmitCandidateWizard({
 
             if (!applicationId) {
                 throw new Error('Could not create application for this proposal');
+            }
+
+            // Step 3: Create application note with recruiter pitch if provided
+            if (pitch.trim()) {
+                try {
+                    await client.post(`/applications/${applicationId}/notes`, {
+                        created_by_type: 'candidate_recruiter',
+                        note_type: 'note',
+                        visibility: 'shared',
+                        message_text: pitch.trim(),
+                    });
+                } catch (noteError: any) {
+                    // Log but don't fail the submission if note creation fails
+                    console.warn('Failed to create pitch note:', noteError);
+                }
             }
 
             // Upload resume if provided

@@ -4,7 +4,12 @@ import {
     loadRabbitMQConfig,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler } from "@splits-network/shared-fastify";
+import {
+    buildServer,
+    errorHandler,
+    registerHealthCheck,
+    HealthCheckers
+} from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { EventPublisher } from "./v2/shared/events";
@@ -110,6 +115,13 @@ async function main() {
         logger,
     );
 
+    // Create Supabase client for health check
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
     // Register V2 routes (passing the same service instance)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
@@ -134,13 +146,19 @@ async function main() {
         logger.error({ err: error }, "Failed to connect domain event consumer");
     }
 
-    // Health check
-    app.get("/health", async (request, reply) => {
-        return reply.send({
-            status: "healthy",
-            service: "ai-service",
-            timestamp: new Date().toISOString(),
-        });
+    // Register standardized health check with dependency monitoring
+    registerHealthCheck(app, {
+        serviceName: 'ai-service',
+        logger,
+        checkers: {
+            database: HealthCheckers.database(supabaseClient),
+            ...(eventPublisher && {
+                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
+            }),
+            ...(domainConsumer && {
+                rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer)
+            }),
+        },
     });
 
     // Start server

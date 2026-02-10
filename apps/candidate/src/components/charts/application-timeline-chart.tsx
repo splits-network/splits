@@ -94,7 +94,7 @@ export default function ApplicationTimelineChart({
                 const index = months - 1 - monthDiff;
                 totalApps[index]++;
 
-                if (app.stage === 'interviewing' || app.stage === 'final_interview') {
+                if (app.stage === 'interview' || app.stage === 'final_interview') {
                     interviewingApps[index]++;
                 }
                 if (app.stage === 'offer') {

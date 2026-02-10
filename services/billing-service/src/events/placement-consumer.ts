@@ -25,6 +25,12 @@ interface PlacementCreatedEvent {
     created_by?: string;
 }
 
+interface InvoicePaidEvent {
+    stripe_invoice_id: string;
+    amount_paid: number;
+    paid_at: string;
+}
+
 type SubscriptionTier = 'free' | 'paid' | 'premium';
 type RoleTierMap = {
     candidate_recruiter_tier: SubscriptionTier | null;
@@ -34,11 +40,11 @@ type RoleTierMap = {
     company_sourcer_tier: SubscriptionTier | null;
 };
 
-export class PlacementEventConsumer {
+export class BillingEventConsumer {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
     private readonly exchange = 'splits-network-events';
-    private readonly queue = 'billing-placement-queue';
+    private readonly queue = 'billing-events-queue';
 
     constructor(
         private rabbitMqUrl: string,
@@ -66,6 +72,9 @@ export class PlacementEventConsumer {
             // Bind to placement.created events
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.created');
 
+            // Bind to invoice.paid events for immediate payout processing
+            await this.channel.bindQueue(this.queue, this.exchange, 'invoice.paid');
+
             // Start consuming
             await this.channel.consume(
                 this.queue,
@@ -73,9 +82,9 @@ export class PlacementEventConsumer {
                 { noAck: false }
             );
 
-            this.logger.info('Placement event consumer connected and listening');
+            this.logger.info('Billing event consumer connected and listening for placement and invoice events');
         } catch (error) {
-            this.logger.error({ err: error }, 'Failed to connect placement event consumer');
+            this.logger.error({ err: error }, 'Failed to connect billing event consumer');
             throw error;
         }
     }
@@ -95,6 +104,8 @@ export class PlacementEventConsumer {
             // Route to appropriate handler
             if (routingKey === 'placement.created') {
                 await this.handlePlacementCreated(content.payload);
+            } else if (routingKey === 'invoice.paid') {
+                await this.handleInvoicePaid(content.payload);
             }
 
             // Acknowledge message
@@ -256,6 +267,49 @@ export class PlacementEventConsumer {
     }
 
     /**
+     * Handle invoice.paid event - trigger immediate payout processing
+     */
+    private async handleInvoicePaid(event: InvoicePaidEvent): Promise<void> {
+        this.logger.info({ stripe_invoice_id: event.stripe_invoice_id }, 'Processing invoice.paid event');
+
+        try {
+            // Find placement invoice
+            const { data: placementInvoice, error: queryError } = await this.supabase
+                .from('placement_invoices')
+                .select('placement_id')
+                .eq('stripe_invoice_id', event.stripe_invoice_id)
+                .single();
+
+            if (queryError || !placementInvoice) {
+                this.logger.error(
+                    { err: queryError, stripe_invoice_id: event.stripe_invoice_id },
+                    'Failed to find placement invoice for paid invoice'
+                );
+                return;
+            }
+
+            // Trigger immediate payout processing for this placement
+            // TODO: Create PayoutScheduleServiceV2 instance for immediate processing
+            // For now, this enables faster processing via existing scheduled jobs
+            this.logger.info(
+                {
+                    placement_id: placementInvoice.placement_id,
+                    stripe_invoice_id: event.stripe_invoice_id,
+                    amount_paid: event.amount_paid,
+                },
+                'Invoice paid - placement eligible for immediate payout processing'
+            );
+
+        } catch (error) {
+            this.logger.error(
+                { err: error, stripe_invoice_id: event.stripe_invoice_id },
+                'Failed to process invoice.paid event'
+            );
+            throw error; // Re-throw to trigger message requeue
+        }
+    }
+
+    /**
      * Close RabbitMQ connection
      */
     async close(): Promise<void> {
@@ -266,9 +320,9 @@ export class PlacementEventConsumer {
             if (this.connection) {
                 await (this.connection as any).close();
             }
-            this.logger.info('Placement event consumer closed');
+            this.logger.info('Billing event consumer closed');
         } catch (error) {
-            this.logger.error({ err: error }, 'Error closing placement event consumer');
+            this.logger.error({ err: error }, 'Error closing billing event consumer');
         }
     }
 }

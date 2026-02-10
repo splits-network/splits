@@ -90,7 +90,7 @@ export function UserDropdown() {
                     <img
                         src={user.imageUrl}
                         alt={userName}
-                        className="w-9 h-9 rounded-full object-cover"
+                        className="w-9 h-9 rounded-full object-contain"
                     />
                 ) : (
                     <div className="w-9 h-9 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">

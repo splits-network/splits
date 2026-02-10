@@ -9,8 +9,7 @@ import Item from "./item";
 import Sidebar from "../shared/sidebar";
 
 export default function GridView() {
-    const { data, loading, pagination, page, goToPage } =
-        useRecruiterFilter();
+    const { data, loading, pagination, page, goToPage } = useRecruiterFilter();
     const [sidebarItem, setSidebarItem] = useState<RecruiterWithUser | null>(
         null,
     );
@@ -28,7 +27,7 @@ export default function GridView() {
                         description="Try adjusting your search or filters"
                     />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {data.map((item) => (
                             <Item
                                 key={item.id}
@@ -48,10 +47,7 @@ export default function GridView() {
                 )}
             </div>
 
-            <Sidebar
-                item={sidebarItem}
-                onClose={() => setSidebarItem(null)}
-            />
+            <Sidebar item={sidebarItem} onClose={() => setSidebarItem(null)} />
         </>
     );
 }

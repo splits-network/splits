@@ -43,6 +43,15 @@ export interface CompanyRelationship {
     };
 }
 
+export interface CompanyContact {
+    id: string;
+    role: 'hiring_manager' | 'company_admin';
+    user_id: string;
+    name: string | null;
+    email: string | null;
+    profile_image_url: string | null;
+}
+
 export interface CompanyFilters {
     status?: string;
     industry?: string;
