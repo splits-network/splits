@@ -316,14 +316,7 @@ export class RecruiterCompanyServiceV2 {
      * Get all companies a recruiter can manage jobs for
      */
     async getManageableCompanies(recruiterId: string): Promise<string[]> {
-        const { data } = await this.repository.list('system', {
-            recruiter_id: recruiterId,
-            status: 'active',
-            can_manage_company_jobs: true,
-            limit: 1000
-        });
-        
-        return data.map(rel => rel.company_id);
+        return await this.repository.getManageableCompanyIds(recruiterId);
     }
 
     /**

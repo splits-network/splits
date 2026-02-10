@@ -80,14 +80,19 @@ export class JobServiceV2 {
             updated_at: new Date().toISOString(),
         }, clerkUserId);
 
-        // Emit event
+        // Emit event (non-blocking - don't fail job creation if event publishing fails)
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('job.created', {
-                jobId: job.id,
-                companyId: job.company_id,
-                status: job.status,
-                createdBy: userContext.identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('job.created', {
+                    jobId: job.id,
+                    companyId: job.company_id,
+                    status: job.status,
+                    createdBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent job creation
+                console.error('Failed to publish job.created event:', error);
+            }
         }
 
         return job;
@@ -149,23 +154,28 @@ export class JobServiceV2 {
         // 3. Apply updates
         const updatedJob = await this.repository.updateJob(id, clerkUserId, updates);
 
-        // 4. Emit events based on what changed
+        // 4. Emit events based on what changed (non-blocking)
         if (this.eventPublisher) {
-            if (updates.status && updates.status !== currentJob.status) {
-                await this.eventPublisher.publish('job.status_changed', {
-                    jobId: id,
-                    previousStatus: currentJob.status,
-                    newStatus: updates.status,
-                    changedBy: userContext.identityUserId,
-                });
-            }
+            try {
+                if (updates.status && updates.status !== currentJob.status) {
+                    await this.eventPublisher.publish('job.status_changed', {
+                        jobId: id,
+                        previousStatus: currentJob.status,
+                        newStatus: updates.status,
+                        changedBy: userContext.identityUserId,
+                    });
+                }
 
-            // Generic update event
-            await this.eventPublisher.publish('job.updated', {
-                jobId: id,
-                updatedFields: Object.keys(updates),
-                updatedBy: userContext.identityUserId,
-            });
+                // Generic update event
+                await this.eventPublisher.publish('job.updated', {
+                    jobId: id,
+                    updatedFields: Object.keys(updates),
+                    updatedBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent job update
+                console.error('Failed to publish job update events:', error);
+            }
         }
 
         return updatedJob;
@@ -184,10 +194,15 @@ export class JobServiceV2 {
         await this.repository.deleteJob(id, clerkUserId);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('job.deleted', {
-                jobId: id,
-                deletedBy: userContext.identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('job.deleted', {
+                    jobId: id,
+                    deletedBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent job deletion
+                console.error('Failed to publish job.deleted event:', error);
+            }
         }
     }
 

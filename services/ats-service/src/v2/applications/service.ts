@@ -198,17 +198,22 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Emit event
+        // Emit event (non-blocking)
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('application.created', {
-                application_id: application.id,
-                job_id: application.job_id,
-                candidate_id: candidateId,
-                recruiter_id: recruiterId || null,
-                has_recruiter: hasRecruiter,
-                stage: application.stage,
-                created_by: identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('application.created', {
+                    application_id: application.id,
+                    job_id: application.job_id,
+                    candidate_id: candidateId,
+                    recruiter_id: recruiterId || null,
+                    has_recruiter: hasRecruiter,
+                    stage: application.stage,
+                    created_by: identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent application creation
+                console.error('Failed to publish application.created event:', error);
+            }
         }
 
         // Note: Application created with referential recruiter data
@@ -324,29 +329,34 @@ export class ApplicationServiceV2 {
             });
         }
 
-        // Publish events
+        // Publish events (non-blocking)
         if (this.eventPublisher) {
-            // Stage changed event - other services listen and react to stages they care about
-            if (updates.stage) {
-                await this.eventPublisher.publish('application.stage_changed', {
+            try {
+                // Stage changed event - other services listen and react to stages they care about
+                if (updates.stage) {
+                    await this.eventPublisher.publish('application.stage_changed', {
+                        application_id: id,
+                        job_id: updatedApplication.job_id,
+                        candidate_id: updatedApplication.candidate_id,
+                        candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
+                        old_stage: currentApplication.stage,
+                        new_stage: updates.stage,
+                        changed_by: userContext.identityUserId,
+                    });
+                }
+
+                // Generic update event
+                await this.eventPublisher.publish('application.updated', {
                     application_id: id,
                     job_id: updatedApplication.job_id,
                     candidate_id: updatedApplication.candidate_id,
-                    candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
-                    old_stage: currentApplication.stage,
-                    new_stage: updates.stage,
-                    changed_by: userContext.identityUserId,
+                    updated_fields: Object.keys(persistedUpdates),
+                    updated_by: userContext.identityUserId,
                 });
+            } catch (error) {
+                // Log the error but don't prevent application update
+                console.error('Failed to publish application update events:', error);
             }
-
-            // Generic update event
-            await this.eventPublisher.publish('application.updated', {
-                application_id: id,
-                job_id: updatedApplication.job_id,
-                candidate_id: updatedApplication.candidate_id,
-                updated_fields: Object.keys(persistedUpdates),
-                updated_by: userContext.identityUserId,
-            });
         }
 
         // Note: Application updated with referential recruiter data
@@ -379,10 +389,15 @@ export class ApplicationServiceV2 {
         await this.repository.deleteApplication(id);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('application.deleted', {
-                applicationId: id,
-                deletedBy: identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('application.deleted', {
+                    applicationId: id,
+                    deletedBy: identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent application deletion
+                console.error('Failed to publish application.deleted event:', error);
+            }
         }
     }
 
@@ -619,14 +634,19 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Publish event for AI service to process
+        // Publish event for AI service to process (non-blocking)
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('application.ai_review.triggered', {
-                application_id: applicationId,
-                candidate_id: application.candidate_id,
-                job_id: application.job_id,
-                triggeredBy: userContext.identityUserId,
-            });
+            try {
+                await this.eventPublisher.publish('application.ai_review.triggered', {
+                    application_id: applicationId,
+                    candidate_id: application.candidate_id,
+                    job_id: application.job_id,
+                    triggeredBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent AI review trigger
+                console.error('Failed to publish application.ai_review.triggered event:', error);
+            }
         }
     }
 

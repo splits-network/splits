@@ -156,7 +156,7 @@ export default function RoleWizardModal({
         }
 
         loadJobData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, jobId, mode]);
 
     // Load companies when modal opens
@@ -430,7 +430,33 @@ export default function RoleWizardModal({
             if (onSuccess) onSuccess();
         } catch (err: any) {
             console.error("Failed to create role:", err);
-            setError(err.message || "Failed to create role. Please try again.");
+
+            // Provide more specific error messages
+            let errorMessage = "Failed to create role. Please try again.";
+
+            if (err.response?.status === 500) {
+                errorMessage =
+                    "Server error occurred. The role may have been created successfully, please check your roles list and refresh the page.";
+            } else if (err.response?.status === 400) {
+                errorMessage =
+                    err.response?.data?.error?.message ||
+                    "Invalid role data. Please check your inputs and try again.";
+            } else if (
+                err.message?.includes("Network Error") ||
+                err.code === "NETWORK_ERROR"
+            ) {
+                errorMessage =
+                    "Network connection failed. Please check your connection and try again.";
+            } else if (
+                err.message?.includes("timeout") ||
+                err.code === "TIMEOUT"
+            ) {
+                errorMessage = "Request timed out. Please try again.";
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setError(errorMessage);
         } finally {
             setSubmitting(false);
         }

@@ -120,14 +120,19 @@ export class ApplicationNoteServiceV2 {
 
         await this.repository.delete(id, clerkUserId);
 
-        // Publish event
+        // Publish event (non-blocking)
         if (this.eventPublisher) {
-            const userContext = await this.accessResolver.resolve(clerkUserId);
-            await this.eventPublisher.publish('application.note.deleted', {
-                noteId: id,
-                application_id: note.application_id,
-                deletedBy: userContext.identityUserId,
-            });
+            try {
+                const userContext = await this.accessResolver.resolve(clerkUserId);
+                await this.eventPublisher.publish('application.note.deleted', {
+                    noteId: id,
+                    application_id: note.application_id,
+                    deletedBy: userContext.identityUserId,
+                });
+            } catch (error) {
+                // Log the error but don't prevent note deletion
+                console.error('Failed to publish application.note.deleted event:', error);
+            }
         }
     }
 }

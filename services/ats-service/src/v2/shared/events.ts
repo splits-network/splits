@@ -24,16 +24,19 @@ export class EventPublisher {
         private rabbitMqUrl: string,
         private logger: Logger,
         private sourceService = 'ats-service'
-    ) {}
+    ) { }
 
     async connect(): Promise<void> {
         try {
-            this.connection = (await amqp.connect(this.rabbitMqUrl)) as any;
-            this.channel = await (this.connection as any).createChannel();
+            this.connection = await amqp.connect(this.rabbitMqUrl);
+            if (!this.connection) {
+                throw new Error('Failed to establish RabbitMQ connection');
+            }
+            this.channel = await this.connection.createChannel();
             if (!this.channel) throw new Error('Failed to create channel');
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
             this.logger.info('Connected to RabbitMQ for event publishing');
-        } catch (error) {
+        } catch (error: any) {
             this.logger.error({ err: error }, 'Failed to connect to RabbitMQ');
             throw error;
         }
@@ -48,28 +51,51 @@ export class EventPublisher {
             return;
         }
 
-        const event: DomainEvent = {
-            event_id: randomUUID(),
-            event_type: eventType,
-            timestamp: new Date().toISOString(),
-            source_service: this.sourceService,
-            payload,
-        };
+        try {
+            const event: DomainEvent = {
+                event_id: randomUUID(),
+                event_type: eventType,
+                timestamp: new Date().toISOString(),
+                source_service: this.sourceService,
+                payload,
+            };
 
-        const routingKey = eventType;
+            const routingKey = eventType;
 
-        this.channel.publish(
-            this.exchange,
-            routingKey,
-            Buffer.from(JSON.stringify(event)),
-            { persistent: true }
-        );
+            this.channel.publish(
+                this.exchange,
+                routingKey,
+                Buffer.from(JSON.stringify(event)),
+                { persistent: true }
+            );
 
-        this.logger.info({ event_type: eventType, event_id: event.event_id }, 'Event published');
+            this.logger.info({ event_type: eventType, event_id: event.event_id }, 'Event published');
+        } catch (error: any) {
+            this.logger.error(
+                { err: error, event_type: eventType, payload },
+                '❌ FAILED to publish event - RabbitMQ channel may be closed'
+            );
+
+            // Clear the channel reference if it's closed to force reconnection next time
+            if (error && error.message?.includes('Channel closed')) {
+                this.channel = null;
+                this.connection = null;
+            }
+
+            throw error;
+        }
     }
 
-    isConnected(): boolean {
-        return this.channel !== null && this.connection !== null;
+    async ensureConnection(): Promise<void> {
+        if (!this.channel || !this.connection) {
+            this.logger.info('RabbitMQ connection lost, attempting to reconnect...');
+            try {
+                await this.connect();
+            } catch (error: any) {
+                this.logger.error({ err: error }, 'Failed to reconnect to RabbitMQ');
+                throw error;
+            }
+        }
     }
 
     async close(): Promise<void> {

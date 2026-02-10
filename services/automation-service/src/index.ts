@@ -4,7 +4,7 @@ import {
     loadRabbitMQConfig,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
@@ -59,9 +59,9 @@ async function main() {
         if (request.url === "/health") {
             request.log = {
                 ...request.log,
-                info: () => {},
-                debug: () => {},
-                trace: () => {},
+                info: () => { },
+                debug: () => { },
+                trace: () => { },
             } as any;
         }
     });
@@ -121,6 +121,24 @@ async function main() {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey: dbConfig.supabaseServiceRoleKey!,
             eventPublisher: v2EventPublisher,
+        });
+
+        // Register standardized health check
+        registerHealthCheck(app, {
+            serviceName: 'automation-service',
+            logger,
+            checkers: {
+                database: HealthCheckers.database(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey),
+                ...(v2EventPublisher && {
+                    rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
+                }),
+                ...(domainConsumer && {
+                    rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer)
+                }),
+                ...(reputationConsumer && {
+                    reputation_consumer: HealthCheckers.rabbitMqConsumer(reputationConsumer)
+                }),
+            },
         });
 
         process.on("SIGTERM", async () => {

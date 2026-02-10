@@ -59,7 +59,7 @@ export default function RoleActionsToolbar({
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter } = useUserProfile();
+    const { profile, isAdmin, isRecruiter, manageableCompanyIds } = useUserProfile();
 
     // Modal states
     const [showEditModal, setShowEditModal] = useState(false);
@@ -75,14 +75,17 @@ export default function RoleActionsToolbar({
     const canManageRole = useMemo(() => {
         if (isAdmin) return true;
 
+        // Company admin can manage roles
         const isCompanyAdmin = profile?.roles?.includes("company_admin");
-        if (!isCompanyAdmin) return false;
+        if (isCompanyAdmin) return true;
 
-        // TODO: Enhance with strict org matching
-        // For now, allow company_admin to manage all roles
-        // Future: Verify job.company.identity_organization_id matches profile.organization_ids
-        return true;
-    }, [isAdmin, profile]);
+        // Recruiter with can_manage_company_jobs for this job's company
+        if (isRecruiter && job.company_id && manageableCompanyIds.includes(job.company_id)) {
+            return true;
+        }
+
+        return false;
+    }, [isAdmin, profile, isRecruiter, job.company_id, manageableCompanyIds]);
 
     const canSubmitCandidate = useMemo(() => {
         return isRecruiter || isAdmin;

@@ -243,6 +243,20 @@ export class StorageClient {
 
         logger.info(`Profile image deleted successfully: ${path}`);
     }
+
+    /**
+     * Health check method for storage connectivity
+     */
+    async healthCheck(): Promise<boolean> {
+        try {
+            // Test storage connectivity by listing buckets
+            const { data, error } = await this.supabase.storage.listBuckets();
+            return !error;
+        } catch (error) {
+            logger.error({ error }, "Storage health check failed");
+            return false;
+        }
+    }
 }
 
 // Export the class, not an instance

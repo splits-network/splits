@@ -92,7 +92,14 @@ async function main() {
         logger,
         baseConfig.serviceName
     );
-    await v2EventPublisher.connect();
+
+    try {
+        await v2EventPublisher.connect();
+        logger.info('🐰 RabbitMQ EventPublisher connected successfully');
+    } catch (error) {
+        logger.error({ err: error }, '❌ Failed to connect RabbitMQ EventPublisher on startup');
+        throw error;
+    }
 
     // Initialize V2 domain event consumer to sync events from other services
     const applicationRepository = new ApplicationRepository(
@@ -134,7 +141,16 @@ async function main() {
         v2EventPublisher,
         logger
     );
-    await domainConsumer.connect();
+
+    try {
+        await domainConsumer.connect();
+        logger.info('🐰 RabbitMQ DomainConsumer connected successfully');
+    } catch (error) {
+        logger.error({ err: error }, '❌ Failed to connect RabbitMQ DomainConsumer on startup');
+        throw error;
+    }
+
+    logger.info('✅ RabbitMQ initialization complete - EventPublisher and DomainConsumer ready');
 
     // Register V2 routes (V2-only architecture)
     registerV2Routes(app, {
@@ -155,16 +171,24 @@ async function main() {
             // Test database connectivity by doing a simple query
             await healthRepo.findApplications('internal-service', { limit: 1 });
 
-            // Check RabbitMQ connectivity
-            const rabbitHealthy = v2EventPublisher.isConnected();
-            if (!rabbitHealthy) {
-                logger.warn('RabbitMQ not connected');
+            // Check RabbitMQ connectivity by attempting to ensure connection
+            let rabbitHealthy = true;
+            try {
+                await v2EventPublisher.ensureConnection();
+            } catch (error) {
+                rabbitHealthy = false;
+                logger.warn('RabbitMQ not connected during health check');
             }
+
             return reply.status(200).send({
                 status: 'healthy',
                 service: 'ats-service',
                 version: 'v2-only',
                 timestamp: new Date().toISOString(),
+                rabbitmq: {
+                    connected: rabbitHealthy,
+                    status: rabbitHealthy ? 'connected' : 'disconnected'
+                }
             });
         } catch (error) {
             logger.error({ err: error }, 'Health check failed');
