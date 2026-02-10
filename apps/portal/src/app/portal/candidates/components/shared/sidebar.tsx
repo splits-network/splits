@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import { Candidate } from "../../types";
 import Details from "./details";
 import ActionsToolbar from "./actions-toolbar";
 import EditCandidateModal from "../modals/edit-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
-import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import { useFilter } from "../../contexts/filter-context";
 
 interface SidebarProps {
@@ -17,37 +14,15 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ item, onClose }: SidebarProps) {
-    const { getToken } = useAuth();
     const { refresh } = useFilter();
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
-    const [showSubmitWizard, setShowSubmitWizard] = useState(false);
 
     if (!item) return null;
 
     const handleRefresh = () => {
         refresh();
-    };
-
-    const handleSubmitToJob = async (
-        jobId: string,
-        notes: string,
-        documentIds: string[],
-    ) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const client = createAuthenticatedClient(token);
-        await client.post("/proposals", {
-            candidate_id: item.id,
-            job_id: jobId,
-            recruiter_pitch: notes,
-            document_ids: documentIds,
-        });
-
-        setShowSubmitWizard(false);
-        handleRefresh();
     };
 
     return (
@@ -85,9 +60,6 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                         onEdit={() => setShowEditModal(true)}
                                         onVerify={() =>
                                             setShowVerifyModal(true)
-                                        }
-                                        onSendJobOpportunity={() =>
-                                            setShowSubmitWizard(true)
                                         }
                                         showActions={{
                                             viewDetails: false,
@@ -137,15 +109,6 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                         setShowVerifyModal(false);
                         handleRefresh();
                     }}
-                />
-            )}
-
-            {showSubmitWizard && (
-                <SubmitToJobWizard
-                    candidateId={item.id}
-                    candidateName={item.full_name || "Unknown"}
-                    onClose={() => setShowSubmitWizard(false)}
-                    onSubmit={handleSubmitToJob}
                 />
             )}
         </>

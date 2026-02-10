@@ -17,7 +17,7 @@ export class CompanyInvitationsEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification
@@ -85,6 +85,7 @@ export class CompanyInvitationsEmailService {
         invitation_id: string;
         email: string;
         recruiter_name: string;
+        recruiter_bio?: string;
         personal_message?: string;
         company_name_hint?: string;
         invite_code: string;
@@ -95,6 +96,7 @@ export class CompanyInvitationsEmailService {
             invitation_id,
             email,
             recruiter_name,
+            recruiter_bio,
             personal_message,
             company_name_hint,
             invite_code,
@@ -110,6 +112,7 @@ export class CompanyInvitationsEmailService {
         const subject = `${recruiter_name} invited you to join Splits Network`;
         const html = companyPlatformInvitationEmail({
             recruiterName: recruiter_name,
+            recruiterBio: recruiter_bio,
             personalMessage: personal_message,
             companyNameHint: company_name_hint,
             inviteCode: invite_code,

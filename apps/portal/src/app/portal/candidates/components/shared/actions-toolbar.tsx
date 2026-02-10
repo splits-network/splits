@@ -4,12 +4,14 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { Candidate } from "../../types";
+import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 
 export interface ActionsToolbarProps {
     candidate: Candidate;
@@ -27,7 +29,6 @@ export interface ActionsToolbarProps {
     onViewDetails?: (candidateId: string) => void;
     onEdit?: (candidateId: string) => void;
     onVerify?: (candidate: Candidate) => void;
-    onSendJobOpportunity?: (candidateId: string, candidateName: string) => void;
     onMessage?: (
         conversationId: string,
         candidateName: string,
@@ -43,10 +44,10 @@ export default function ActionsToolbar({
     layout = "horizontal",
     size = "sm",
     showActions = {},
+    onRefresh,
     onViewDetails,
     onEdit,
     onVerify,
-    onSendJobOpportunity,
     onMessage,
     className = "",
 }: ActionsToolbarProps) {
@@ -56,6 +57,7 @@ export default function ActionsToolbar({
     const { isAdmin, isRecruiter } = useUserProfile();
 
     const [startingChat, setStartingChat] = useState(false);
+    const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const canChat = Boolean(candidate.user_id);
     const chatDisabledReason = canChat
         ? null
@@ -108,6 +110,26 @@ export default function ActionsToolbar({
         }
     };
 
+    const handleSubmitToJob = async (
+        jobId: string,
+        notes: string,
+        documentIds: string[],
+    ) => {
+        const token = await getToken();
+        if (!token) throw new Error("Not authenticated");
+
+        const client = createAuthenticatedClient(token);
+        await client.post("/proposals", {
+            candidate_id: candidate.id,
+            job_id: jobId,
+            recruiter_pitch: notes,
+            document_ids: documentIds,
+        });
+
+        setShowSubmitWizard(false);
+        onRefresh?.();
+    };
+
     const actions = {
         viewDetails: showActions.viewDetails !== false,
         message: showActions.message !== false,
@@ -123,6 +145,7 @@ export default function ActionsToolbar({
 
     if (variant === "icon-only") {
         return (
+            <>
             <div className={`flex ${layoutClass} ${className}`}>
                 {actions.viewDetails && (
                     <>
@@ -169,12 +192,7 @@ export default function ActionsToolbar({
 
                 {actions.sendJobOpportunity && (
                     <button
-                        onClick={() =>
-                            onSendJobOpportunity?.(
-                                candidate.id,
-                                candidate.full_name || "Unknown",
-                            )
-                        }
+                        onClick={() => setShowSubmitWizard(true)}
                         className={`btn ${sizeClass} btn-square btn-primary`}
                         title="Send Job Opportunity"
                     >
@@ -203,11 +221,22 @@ export default function ActionsToolbar({
                         </button>
                     )}
             </div>
+
+            {showSubmitWizard && (
+                <SubmitToJobWizard
+                    candidateId={candidate.id}
+                    candidateName={candidate.full_name || "Unknown"}
+                    onClose={() => setShowSubmitWizard(false)}
+                    onSubmit={handleSubmitToJob}
+                />
+            )}
+        </>
         );
     }
 
     // Descriptive variant
     return (
+        <>
         <div className={`flex ${layoutClass} ${className}`}>
             {actions.viewDetails && (
                 <>
@@ -251,12 +280,7 @@ export default function ActionsToolbar({
 
             {actions.sendJobOpportunity && (
                 <button
-                    onClick={() =>
-                        onSendJobOpportunity?.(
-                            candidate.id,
-                            candidate.full_name || "Unknown",
-                        )
-                    }
+                    onClick={() => setShowSubmitWizard(true)}
                     className={`btn ${sizeClass} btn-primary gap-2`}
                 >
                     <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -285,5 +309,15 @@ export default function ActionsToolbar({
                     </button>
                 )}
         </div>
+
+        {showSubmitWizard && (
+            <SubmitToJobWizard
+                candidateId={candidate.id}
+                candidateName={candidate.full_name || "Unknown"}
+                onClose={() => setShowSubmitWizard(false)}
+                onSubmit={handleSubmitToJob}
+            />
+        )}
+        </>
     );
 }

@@ -4,10 +4,11 @@
  */
 
 import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider, list } from '../components';
+import { heading, paragraph, button, infoCard, alert, divider, list, markdownToHtml } from '../components';
 
 export interface CompanyPlatformInvitationData {
     recruiterName: string;
+    recruiterBio?: string;
     personalMessage?: string;
     companyNameHint?: string;
     inviteCode: string;
@@ -31,6 +32,18 @@ ${paragraph(`"${data.personalMessage}"`)}
         `.trim()
         : '';
 
+    const recruiterBioSection = data.recruiterBio
+        ? `
+${divider()}
+
+${heading({ level: 3, text: 'About ' + data.recruiterName })}
+
+<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
+${markdownToHtml(data.recruiterBio)}
+</div>
+        `.trim()
+        : '';
+
     const content = `
 ${heading({ level: 1, text: 'Join Splits Network' })}
 
@@ -38,46 +51,48 @@ ${paragraph(`${greeting} <strong>Splits Network</strong> — the marketplace for
 
 ${personalMessageSection}
 
+${recruiterBioSection}
+
 ${divider()}
 
 ${heading({ level: 2, text: 'Why Join Splits Network?' })}
 
 ${list([
-    { text: 'Access a network of vetted recruiters ready to help fill your open roles', bold: false },
-    { text: 'Reduce time-to-hire with split-fee recruiting partnerships', bold: false },
-    { text: 'Pay only for successful placements — no upfront costs', bold: false },
-    { text: 'Transparent, market-driven fee structures', bold: false },
-])}
+        { text: 'Access a network of vetted recruiters ready to help fill your open roles', bold: false },
+        { text: 'Reduce time-to-hire with split-fee recruiting partnerships', bold: false },
+        { text: 'Pay only for successful placements — no upfront costs', bold: false },
+        { text: 'Transparent, market-driven fee structures', bold: false },
+    ])}
 
 ${divider()}
 
 ${paragraph('Click the button below to create your company account:')}
 
 ${button({
-    href: data.invitationLink,
-    text: 'Join Splits Network',
-    variant: 'primary',
-})}
+        href: data.invitationLink,
+        text: 'Join Splits Network',
+        variant: 'primary',
+    })}
 
 ${divider({ text: 'or use this code' })}
 
 ${infoCard({
-    title: 'Your Invitation Code',
-    items: [
-        { label: 'Code', value: data.inviteCode, highlight: true },
-        { label: 'Invited by', value: data.recruiterName },
-        { label: 'Expires', value: data.expiresDate },
-    ],
-})}
+        title: 'Your Invitation Code',
+        items: [
+            { label: 'Code', value: data.inviteCode, highlight: true },
+            { label: 'Invited by', value: data.recruiterName },
+            { label: 'Expires', value: data.expiresDate },
+        ],
+    })}
 
 ${paragraph(`Visit <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/join" style="color: #233876; text-decoration: none; font-weight: 600;">splits.network/join</a> and enter the code above to join.`)}
 
 ${divider()}
 
 ${alert({
-    type: 'info',
-    message: `This invitation expires on ${data.expiresDate}. If you don't recognize the sender or weren't expecting this invitation, you can safely ignore this email.`,
-})}
+        type: 'info',
+        message: `This invitation expires on ${data.expiresDate}. If you don't recognize the sender or weren't expecting this invitation, you can safely ignore this email.`,
+    })}
     `.trim();
 
     return baseEmailTemplate({
@@ -99,19 +114,19 @@ export function companyInvitationAcceptedEmail(data: CompanyInvitationAcceptedDa
 ${heading({ level: 1, text: 'Invitation Accepted!' })}
 
 ${alert({
-    type: 'success',
-    title: 'Great news!',
-    message: `${data.companyName} has joined Splits Network using your invitation.`,
-})}
+        type: 'success',
+        title: 'Great news!',
+        message: `${data.companyName} has joined Splits Network using your invitation.`,
+    })}
 
 ${infoCard({
-    title: 'New Company Details',
-    items: [
-        { label: 'Company', value: data.companyName, highlight: true },
-        { label: 'Admin', value: data.companyAdminName },
-        { label: 'Your Role', value: 'Sourcer (platform attribution)' },
-    ],
-})}
+        title: 'New Company Details',
+        items: [
+            { label: 'Company', value: data.companyName, highlight: true },
+            { label: 'Admin', value: data.companyAdminName },
+            { label: 'Your Role', value: 'Sourcer (platform attribution)' },
+        ],
+    })}
 
 ${paragraph(`As the recruiter who brought ${data.companyName} to Splits Network, you've been automatically connected as their <strong>sourcer</strong>. This means you'll be recognized for helping grow the platform.`)}
 
@@ -120,16 +135,16 @@ ${divider()}
 ${heading({ level: 2, text: 'What\'s Next?' })}
 
 ${list([
-    { text: 'The company will set up their profile and post open roles', bold: false },
-    { text: 'You can reach out to discuss potential recruiting partnerships', bold: false },
-    { text: 'Build your network by inviting more companies', bold: false },
-])}
+        { text: 'The company will set up their profile and post open roles', bold: false },
+        { text: 'You can reach out to discuss potential recruiting partnerships', bold: false },
+        { text: 'Build your network by inviting more companies', bold: false },
+    ])}
 
 ${button({
-    href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/dashboard`,
-    text: 'View Dashboard',
-    variant: 'secondary',
-})}
+        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/dashboard`,
+        text: 'View Dashboard',
+        variant: 'secondary',
+    })}
 
 ${divider()}
 

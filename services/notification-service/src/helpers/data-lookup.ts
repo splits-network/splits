@@ -46,6 +46,9 @@ export interface RecruiterData {
     id: string;
     user_id: string;
     status: string;
+    bio?: string;
+    name?: string;
+    email?: string;
 }
 
 export interface AIReviewData {
@@ -193,6 +196,35 @@ export class DataLookupHelper {
         }
 
         return data;
+    }
+
+    /**
+     * Get recruiter with bio by ID (for email templates)
+     */
+    async getRecruiterWithBio(recruiterId: string): Promise<RecruiterData | null> {
+        const { data, error } = await this.supabase
+            .from('recruiters')
+            .select(`
+                id,
+                user_id,
+                status,
+                bio,
+                users(name, email)
+            `)
+            .eq('id', recruiterId)
+            .single();
+
+        if (error) {
+            this.logger.error({ error, recruiterId }, 'Failed to fetch recruiter with bio');
+            return null;
+        }
+
+        // Flatten the response structure
+        return {
+            ...data,
+            name: data.users?.name,
+            email: data.users?.email,
+        };
     }
 
     /**
