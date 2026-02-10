@@ -87,29 +87,21 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
             </MetricCard.Body>
 
             <MetricCard.Footer>
-                <div className="flex items-center justify-between w-full gap-2">
+                <div className="flex items-center justify-end w-full gap-2">
                     <ActionsToolbar
                         application={item}
                         variant="icon-only"
                         size="xs"
                         showActions={{
-                            viewDetails: false,
+                            viewDetails: true,
                             message: true,
                             addNote: true,
                             advanceStage: true,
                             reject: true,
                         }}
                         onMessage={onMessage}
+                        onViewDetails={onViewDetails}
                     />
-                    <button
-                        type="button"
-                        className="btn btn-ghost btn-sm gap-2"
-                        onClick={onViewDetails}
-                        title="View details"
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        Details
-                    </button>
                 </div>
             </MetricCard.Footer>
         </MetricCard>

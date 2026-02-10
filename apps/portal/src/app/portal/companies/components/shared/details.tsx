@@ -10,6 +10,7 @@ import {
     getRelationshipStatusBadgeClass,
     formatDate,
 } from "../../types";
+import CompanyContacts from "@/components/company-contacts";
 
 interface DetailsProps {
     companyId: string;
@@ -21,6 +22,12 @@ type TabType = "overview" | "jobs" | "relationship";
 export default function Details({ companyId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+    const [company, setCompany] = useState<Company | null>(null);
+    const [jobs, setJobs] = useState<any[]>([]);
+    const [relationship, setRelationship] =
+        useState<CompanyRelationship | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [jobsLoading, setJobsLoading] = useState(false);
 
     // Tab scroll arrow buttons
     const tabScrollRef = useRef<HTMLDivElement>(null);
@@ -45,7 +52,9 @@ export default function Details({ companyId, onRefresh }: DetailsProps) {
             el.removeEventListener("scroll", updateScrollButtons);
             observer.disconnect();
         };
-    }, [updateScrollButtons]);
+        // Re-run when company loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!company]);
 
     const scrollTabs = useCallback((direction: "left" | "right") => {
         const el = tabScrollRef.current;
@@ -55,13 +64,6 @@ export default function Details({ companyId, onRefresh }: DetailsProps) {
             behavior: "smooth",
         });
     }, []);
-
-    const [company, setCompany] = useState<Company | null>(null);
-    const [jobs, setJobs] = useState<any[]>([]);
-    const [relationship, setRelationship] =
-        useState<CompanyRelationship | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [jobsLoading, setJobsLoading] = useState(false);
 
     const fetchCompany = useCallback(async () => {
         if (!companyId) return;
@@ -319,6 +321,14 @@ function OverviewTab({ company }: { company: Company }) {
                         </p>
                     )}
                 </div>
+            </div>
+
+            {/* Team Contacts */}
+            <div>
+                <h4 className="text-sm font-semibold text-base-content/60 mb-2">
+                    Team Contacts
+                </h4>
+                <CompanyContacts companyId={company.id} />
             </div>
         </div>
     );

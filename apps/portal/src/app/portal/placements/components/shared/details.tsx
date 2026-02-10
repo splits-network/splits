@@ -50,7 +50,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             el.removeEventListener("scroll", updateScrollButtons);
             observer.disconnect();
         };
-    }, [updateScrollButtons]);
+        // Re-run when placement loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!placement]);
 
     const scrollTabs = useCallback((direction: "left" | "right") => {
         const el = tabScrollRef.current;

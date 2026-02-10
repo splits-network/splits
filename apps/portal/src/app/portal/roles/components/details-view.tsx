@@ -10,6 +10,7 @@ import { RoleSelector } from "@/components/calculator/role-selector";
 import { TierComparison } from "@/components/calculator/tier-comparison";
 import { TIER_INFO } from "@/components/calculator/commission-rates";
 import type { RecruiterRole, Tier } from "@/components/calculator/types";
+import CompanyContacts from "@/components/company-contacts";
 
 // ===== TYPES =====
 
@@ -1266,6 +1267,19 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
                     )}
                 </div>
             </div>
+
+            {/* Team Contacts */}
+            {job.company?.id && (
+                <div className="card bg-base-100 shadow-sm border border-base-300">
+                    <div className="card-body p-4">
+                        <h4 className="card-title text-sm mb-2">
+                            <i className="fa-duotone fa-users text-primary mr-1" />
+                            Team Contacts
+                        </h4>
+                        <CompanyContacts companyId={job.company.id} compact={compact} />
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

@@ -120,6 +120,15 @@ export class CompanyServiceV2 {
         return updatedCompany;
     }
 
+    async getCompanyContacts(companyId: string, clerkUserId: string): Promise<any[]> {
+        const company = await this.repository.findCompany(companyId);
+        if (!company) {
+            throw new Error(`Company ${companyId} not found`);
+        }
+
+        return this.repository.findCompanyContacts(companyId);
+    }
+
     async deleteCompany(id: string, clerkUserId?: string): Promise<void> {
         const company = await this.repository.findCompany(id);
         if (!company) {

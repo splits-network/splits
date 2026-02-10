@@ -139,4 +139,31 @@ console.log('Query result:', { data, count });
 
         if (error) throw error;
     }
+
+    async findCompanyContacts(companyId: string): Promise<any[]> {
+        // Look up the company's identity_organization_id
+        const company = await this.findCompany(companyId);
+        if (!company || !company.identity_organization_id) {
+            return [];
+        }
+
+        // Cross-schema JOIN: memberships + users for hiring managers and company admins
+        const { data, error } = await this.supabase
+            .from('memberships')
+            .select('id, role, user_id, users(id, name, email, profile_image_url)')
+            .eq('organization_id', company.identity_organization_id)
+            .in('role', ['hiring_manager', 'company_admin'])
+            .is('deleted_at', null);
+
+        if (error) throw error;
+
+        return (data || []).map((membership: any) => ({
+            id: membership.id,
+            role: membership.role,
+            user_id: membership.user_id,
+            name: membership.users?.name || null,
+            email: membership.users?.email || null,
+            profile_image_url: membership.users?.profile_image_url || null,
+        }));
+    }
 }

@@ -62,6 +62,9 @@ const ATS_RESOURCES: ResourceDefinition[] = [
 ];
 
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    // Register custom sub-resource routes BEFORE generic CRUD to avoid path conflicts
+    registerCompanyContactRoutes(app, services);
+
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
     ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
         registerResourceRoutes(app, services, resource)
@@ -74,6 +77,35 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerAiReviewRoutes(app, services);
     registerApplicationNoteRoutes(app, services);
     registerApplicationProposalRoutes(app, services);
+}
+
+function registerCompanyContactRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    app.get(
+        '/api/v2/companies/:id/contacts',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().get(
+                    `/api/v2/companies/${id}/contacts`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to fetch company contacts');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch company contacts' });
+            }
+        }
+    );
 }
 
 function registerJobRoutes(app: FastifyInstance, services: ServiceRegistry) {

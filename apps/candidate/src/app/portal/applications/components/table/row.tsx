@@ -3,13 +3,15 @@
 import { formatDate } from "@/lib/utils";
 import { DataTableRow } from "@/components/ui/tables";
 import { type Application, getStatusColor, formatStage } from "../../types";
+import ActionsToolbar from "../shared/actions-toolbar";
 
 interface RowProps {
     item: Application;
     onViewDetails: (id: string) => void;
+    onStageChange?: () => void;
 }
 
-export default function Row({ item, onViewDetails }: RowProps) {
+export default function Row({ item, onViewDetails, onStageChange }: RowProps) {
     return (
         <DataTableRow onClick={() => onViewDetails(item.id)}>
             {/* Expand column spacer */}
@@ -93,16 +95,13 @@ export default function Row({ item, onViewDetails }: RowProps) {
             </td>
 
             {/* Actions */}
-            <td className="text-right">
-                <button
-                    className="btn btn-ghost btn-xs"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onViewDetails(item.id);
-                    }}
-                >
-                    <i className="fa-duotone fa-regular fa-eye" />
-                </button>
+            <td className="text-right" onClick={(e) => e.stopPropagation()}>
+                <ActionsToolbar
+                    item={item}
+                    variant="icon-only"
+                    size="sm"
+                    onStageChange={onStageChange}
+                />
             </td>
         </DataTableRow>
     );

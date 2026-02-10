@@ -10,7 +10,7 @@ import Item from "./item";
 import Sidebar from "../shared/sidebar";
 
 export default function GridView() {
-    const { data, loading, pagination, page, goToPage, setLimit } =
+    const { data, loading, pagination, page, goToPage, setLimit, refresh } =
         useFilter();
     const [sidebarItem, setSidebarItem] = useState<Application | null>(null);
 
@@ -34,6 +34,7 @@ export default function GridView() {
                                 key={item.id}
                                 item={item}
                                 onViewDetails={() => setSidebarItem(item)}
+                                onStageChange={refresh}
                             />
                         ))}
                     </div>

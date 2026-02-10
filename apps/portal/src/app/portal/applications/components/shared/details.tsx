@@ -18,6 +18,7 @@ import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
 import ApplicationTimeline from "./application-timeline";
 import AIReviewDisplay from "./ai-review-display";
 import DocumentViewerModal from "../modals/document-viewer-modal";
+import CompanyContacts from "@/components/company-contacts";
 import { categorizeDocuments } from "@/app/portal/applications/lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
@@ -67,7 +68,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             el.removeEventListener("scroll", updateScrollButtons);
             observer.disconnect();
         };
-    }, [updateScrollButtons]);
+        // Re-run when application loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!application]);
 
     const scrollTabs = useCallback((direction: "left" | "right") => {
         const el = tabScrollRef.current;
@@ -535,6 +538,17 @@ function JobTab({ application }: { application: Application }) {
                     </div>
                 </div>
             </div>
+
+            {/* Company Contacts */}
+            {(job.company?.id || job.company_id) && (
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">
+                        <i className="fa-duotone fa-users mr-2" />
+                        Company Contacts
+                    </h4>
+                    <CompanyContacts companyId={(job.company?.id || job.company_id) as string} />
+                </div>
+            )}
 
             {(job.recruiter_description || job.description) && (
                 <div className="card bg-base-200 p-4">

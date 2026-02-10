@@ -38,6 +38,18 @@ export function registerCompanyRoutes(
         }
     });
 
+    app.get('/api/v2/companies/:id/contacts', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const contacts = await config.companyService.getCompanyContacts(id, clerkUserId);
+            return reply.send({ data: contacts });
+        } catch (error: any) {
+            const status = error.message?.includes('not found') ? 404 : 400;
+            return reply.code(status).send({ error: { message: error.message } });
+        }
+    });
+
     app.get('/api/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;

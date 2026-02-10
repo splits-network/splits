@@ -1,12 +1,7 @@
 "use client";
 
 import { formatDate } from "@/lib/utils";
-import {
-    EntityCard,
-    DataList,
-    DataRow,
-    VerticalDataRow,
-} from "@/components/ui";
+import { EntityCard, DataList, DataRow } from "@/components/ui";
 import {
     type Application,
     getStatusColor,
@@ -14,13 +9,19 @@ import {
     getRecommendationLabel,
     getRecommendationColor,
 } from "../../types";
+import ActionsToolbar from "../shared/actions-toolbar";
 
 interface ItemProps {
     item: Application;
     onViewDetails: (id: string) => void;
+    onStageChange?: () => void;
 }
 
-export default function Item({ item, onViewDetails }: ItemProps) {
+export default function Item({
+    item,
+    onViewDetails,
+    onStageChange,
+}: ItemProps) {
     const companyInitial = (item.job?.company?.name || "C")[0].toUpperCase();
 
     return (
@@ -134,13 +135,21 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(item.updated_at)}
                     </span>
-                    <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => onViewDetails(item.id)}
-                    >
-                        View Details
-                        <i className="fa-duotone fa-regular fa-arrow-right ml-1.5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <ActionsToolbar
+                            item={item}
+                            variant="icon-only"
+                            size="xs"
+                            onStageChange={onStageChange}
+                        />
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => onViewDetails(item.id)}
+                        >
+                            View
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
+                        </button>
+                    </div>
                 </div>
             </EntityCard.Footer>
         </EntityCard>

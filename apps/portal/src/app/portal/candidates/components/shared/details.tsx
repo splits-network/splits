@@ -22,6 +22,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { isRecruiter } = useUserProfile();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
 
+    const [candidate, setCandidate] = useState<Candidate | null>(null);
+    const [loading, setLoading] = useState(false);
+
     // Tab scroll arrow buttons
     const tabScrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -45,7 +48,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             el.removeEventListener("scroll", updateScrollButtons);
             observer.disconnect();
         };
-    }, [updateScrollButtons]);
+        // Re-run when candidate loads so ref is attached
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateScrollButtons, !!candidate]);
 
     const scrollTabs = useCallback((direction: "left" | "right") => {
         const el = tabScrollRef.current;
@@ -55,9 +60,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             behavior: "smooth",
         });
     }, []);
-
-    const [candidate, setCandidate] = useState<Candidate | null>(null);
-    const [loading, setLoading] = useState(false);
 
     // Applications state
     const [applications, setApplications] = useState<any[]>([]);

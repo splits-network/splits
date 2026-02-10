@@ -110,7 +110,7 @@ export default function InvitationActionsToolbar({
         } finally {
             setResending(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
     const handleRevoke = useCallback(async () => {
@@ -133,7 +133,7 @@ export default function InvitationActionsToolbar({
         } finally {
             setRevoking(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast, onRefresh]);
 
     const handleViewDetails = useCallback(() => {
@@ -150,7 +150,7 @@ export default function InvitationActionsToolbar({
                 {onViewDetails && (
                     <button
                         onClick={handleViewDetails}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
                         title="View Details"
                     >
                         <i className="fa-duotone fa-regular fa-eye" />
@@ -159,7 +159,7 @@ export default function InvitationActionsToolbar({
                 {actions.copyCode && (
                     <button
                         onClick={handleCopyCode}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
                         title="Copy code"
                     >
                         <i className="fa-duotone fa-regular fa-copy" />
@@ -168,7 +168,7 @@ export default function InvitationActionsToolbar({
                 {actions.copyLink && (
                     <button
                         onClick={handleCopyLink}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
                         title="Copy link"
                     >
                         <i className="fa-duotone fa-regular fa-link" />
@@ -177,7 +177,7 @@ export default function InvitationActionsToolbar({
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
                         title="Share"
                     >
                         <i className="fa-duotone fa-regular fa-share" />
@@ -186,7 +186,7 @@ export default function InvitationActionsToolbar({
                 {actions.resend && (
                     <button
                         onClick={handleResend}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
                         disabled={resending}
                         title="Resend email"
                     >
@@ -200,7 +200,7 @@ export default function InvitationActionsToolbar({
                 {actions.revoke && (
                     <button
                         onClick={handleRevoke}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
+                        className={`btn ${getSizeClass()} btn-circle btn-ghost text-error`}
                         disabled={revoking}
                         title="Revoke"
                     >
@@ -250,10 +250,9 @@ export default function InvitationActionsToolbar({
             {actions.share && (
                 <button
                     onClick={handleShare}
-                    className={`btn ${getSizeClass()} btn-primary gap-2`}
+                    className={`btn ${getSizeClass()} btn-primary btn-circle gap-2`}
                 >
                     <i className="fa-duotone fa-regular fa-share" />
-                    Share
                 </button>
             )}
             {actions.resend && (

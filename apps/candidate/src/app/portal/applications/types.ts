@@ -41,6 +41,8 @@ export interface Application {
     updated_at: string;
     ai_reviewed?: boolean;
     job_id: string;
+    candidate_id?: string;
+    recruiter_notes?: string;
     candidate: {
         full_name: string;
         email: string;
@@ -124,25 +126,34 @@ export interface ApplicationFilters {
 
 export const APPLICATION_STAGES = [
     { value: "draft", label: "Draft" },
+    { value: "ai_review", label: "AI Review" },
+    { value: "ai_reviewed", label: "AI Reviewed" },
     { value: "recruiter_proposed", label: "Recruiter Proposed" },
     { value: "recruiter_request", label: "Recruiter Request" },
-    { value: "ai_review", label: "AI Review" },
-    { value: "screen", label: "Recruiter Review" },
+    { value: "recruiter_review", label: "Recruiter Review" },
+    { value: "screen", label: "Screening" },
     { value: "submitted", label: "Submitted" },
-    { value: "interviewing", label: "Interviewing" },
+    { value: "company_review", label: "Company Review" },
+    { value: "company_feedback", label: "Company Feedback" },
+    { value: "interview", label: "Interview" },
     { value: "offer", label: "Offer" },
+    { value: "hired", label: "Hired" },
     { value: "rejected", label: "Rejected" },
     { value: "withdrawn", label: "Withdrawn" },
+    { value: "expired", label: "Expired" },
 ] as const;
 
 // Stages where a candidate can withdraw
 export const WITHDRAWABLE_STAGES = [
     "submitted",
     "screen",
-    "interviewing",
+    "interview",
+    "company_review",
+    "company_feedback",
     "recruiter_proposed",
     "recruiter_request",
     "ai_review",
+    "ai_reviewed",
 ];
 
 // ===== HELPERS =====

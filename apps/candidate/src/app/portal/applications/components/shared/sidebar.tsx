@@ -43,7 +43,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
                                     item={item}
-                                    onWithdraw={() => {
+                                    onStageChange={() => {
                                         refresh();
                                         onClose();
                                     }}

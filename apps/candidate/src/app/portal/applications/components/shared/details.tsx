@@ -19,7 +19,7 @@ import {
     getStatusColor,
     formatStage,
 } from "../../types";
-import AIReviewPanel from "../../[id]/components/ai-review-panel";
+import AIReviewPanel from "./ai-review-panel";
 
 interface DetailsProps {
     itemId: string;
@@ -84,6 +84,36 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
     return (
         <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
+            {/* Job Closed Warning */}
+            {application.job?.status && ["closed", "filled", "cancelled"].includes(application.job.status) && (
+                <div className="alert alert-warning shrink-0">
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation" />
+                    <div>
+                        <h3 className="font-bold">This position is no longer available</h3>
+                        <p className="text-sm mt-1">The company has closed this position and is not accepting new applications.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Proposal Info Banner */}
+            {application.stage === "recruiter_proposed" && (
+                <div className="alert alert-info alert-outline shrink-0">
+                    <i className="fa-duotone fa-regular fa-handshake text-2xl" />
+                    <div className="w-full">
+                        <h3 className="font-bold text-lg mb-1">
+                            {application.recruiter?.user?.name || application.recruiter?.name || "A recruiter"} thinks you'd be a great fit for this role!
+                        </h3>
+                        {application.recruiter_notes && (
+                            <div className="mt-2 p-3 bg-base-100 rounded-lg w-full">
+                                <div className="text-sm text-base-content/60 mb-1">Recruiter's Message:</div>
+                                <div className="whitespace-pre-wrap text-sm">{application.recruiter_notes}</div>
+                            </div>
+                        )}
+                        <p className="text-sm text-base-content/60 mt-2">Use the toolbar buttons above to accept or decline this proposal.</p>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-start justify-between shrink-0">
                 <div className="flex items-start gap-3 min-w-0">
@@ -237,7 +267,10 @@ function OverviewTab({ application }: { application: Application }) {
             </div>
 
             <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Recruiter</h4>
+                <h4 className="font-semibold mb-2">
+                    <i className="fa-duotone fa-regular fa-user-tie mr-2 text-primary" />
+                    Your Recruiter
+                </h4>
                 {(() => {
                     const recruiterName =
                         application.recruiter?.name ||
@@ -248,19 +281,39 @@ function OverviewTab({ application }: { application: Application }) {
 
                     if (recruiterName || recruiterEmail) {
                         return (
-                            <>
-                                {recruiterName && <p>{recruiterName}</p>}
-                                {recruiterEmail && (
-                                    <p className="text-sm text-base-content/60">
-                                        {recruiterEmail}
-                                    </p>
-                                )}
+                            <div className="space-y-2">
+                                {recruiterName && <p className="font-medium">{recruiterName}</p>}
                                 {application.recruiter?.tagline && (
-                                    <p className="text-sm text-base-content/60 mt-1">
+                                    <p className="text-sm text-base-content/70 italic">
                                         {application.recruiter.tagline}
                                     </p>
                                 )}
-                            </>
+                                {application.recruiter?.bio && (
+                                    <p className="text-sm text-base-content/70">
+                                        {application.recruiter.bio}
+                                    </p>
+                                )}
+                                {application.recruiter?.years_experience && (
+                                    <p className="text-sm text-base-content/60">
+                                        <i className="fa-duotone fa-regular fa-clock mr-1" />
+                                        {application.recruiter.years_experience} years experience
+                                    </p>
+                                )}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {recruiterEmail && (
+                                        <a href={`mailto:${recruiterEmail}`} className="badge badge-outline badge-sm gap-1">
+                                            <i className="fa-duotone fa-regular fa-envelope" />
+                                            {recruiterEmail}
+                                        </a>
+                                    )}
+                                    {application.recruiter?.phone && (
+                                        <a href={`tel:${application.recruiter.phone}`} className="badge badge-outline badge-sm gap-1">
+                                            <i className="fa-duotone fa-regular fa-phone" />
+                                            {application.recruiter.phone}
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
                         );
                     }
                     return (
@@ -333,12 +386,26 @@ function JobTab({ application }: { application: Application }) {
                                             Salary Range
                                         </div>
                                         <div className="text-sm font-medium">
-                                            $
+                                            {job.salary_currency && job.salary_currency !== "USD" ? `${job.salary_currency} ` : "$"}
                                             {job.salary_min?.toLocaleString() ||
                                                 "..."}{" "}
-                                            - $
+                                            - {job.salary_currency && job.salary_currency !== "USD" ? `${job.salary_currency} ` : "$"}
                                             {job.salary_max?.toLocaleString() ||
                                                 "..."}
+                                        </div>
+                                    </div>
+                                )}
+                                {job.open_to_relocation !== undefined && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">
+                                            Relocation
+                                        </div>
+                                        <div className="text-sm font-medium">
+                                            {job.open_to_relocation ? (
+                                                <><i className="fa-duotone fa-regular fa-check text-success mr-1" />Open to relocation</>
+                                            ) : (
+                                                <><i className="fa-duotone fa-regular fa-xmark text-error mr-1" />No relocation</>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -379,6 +446,41 @@ function JobTab({ application }: { application: Application }) {
                     </div>
                 </div>
             </div>
+
+            {/* Company Info */}
+            {job.company && (job.company.description || job.company.company_size || job.company.headquarters_location) && (
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-3">
+                        <i className="fa-duotone fa-regular fa-building mr-2 text-primary" />
+                        About {job.company.name || "the Company"}
+                    </h4>
+                    <div className="space-y-2">
+                        {job.company.description && (
+                            <p className="text-sm text-base-content/80">{job.company.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
+                            {job.company.company_size && (
+                                <span>
+                                    <i className="fa-duotone fa-regular fa-users mr-1" />
+                                    {job.company.company_size}
+                                </span>
+                            )}
+                            {job.company.headquarters_location && (
+                                <span>
+                                    <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                                    {job.company.headquarters_location}
+                                </span>
+                            )}
+                            {job.company.industry && (
+                                <span>
+                                    <i className="fa-duotone fa-regular fa-industry mr-1" />
+                                    {job.company.industry}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Description */}
             {(job.candidate_description ||
@@ -524,9 +626,22 @@ function DocumentsTab({ application }: { application: Application }) {
         companyDocTypes.includes(doc.document_type || ""),
     );
 
-    const renderDocumentList = (docs: ApplicationDocument[], title: string) => (
-        <div className="card bg-base-200 p-4">
-            <h4 className="font-semibold mb-4">{title}</h4>
+    const isOfferStage = application.stage === "offer";
+
+    const renderDocumentList = (docs: ApplicationDocument[], title: string, isCompanyDocs = false) => (
+        <div className={`card bg-base-200 p-4 ${isCompanyDocs && isOfferStage ? "border-2 border-success" : ""}`}>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+                {title}
+                {isCompanyDocs && isOfferStage && (
+                    <span className="badge badge-success badge-sm">Action Required</span>
+                )}
+            </h4>
+            {isCompanyDocs && isOfferStage && (
+                <div className="alert alert-success mb-4">
+                    <i className="fa-duotone fa-regular fa-party-horn" />
+                    <span>You have documents from the company to review!</span>
+                </div>
+            )}
             <div className="space-y-2">
                 {docs.map((doc) => (
                     <div
@@ -593,7 +708,7 @@ function DocumentsTab({ application }: { application: Application }) {
                 {candidateDocuments.length > 0 &&
                     renderDocumentList(candidateDocuments, "Your Documents")}
                 {companyDocuments.length > 0 &&
-                    renderDocumentList(companyDocuments, "Company Documents")}
+                    renderDocumentList(companyDocuments, "Company Documents", true)}
             </div>
 
             <DocumentViewerModal
