@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { formatRelativeTime } from "@/lib/utils/date-formatting";
 import { LoadingState } from "@splits-network/shared-ui";
 import { useUserProfile, PlanTier } from "@/contexts/user-profile-context";
@@ -124,7 +124,10 @@ function formatQuestionType(type: string): string {
         number: "Number",
         date: "Date",
     };
-    return labelMap[type] || type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    return (
+        labelMap[type] ||
+        type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    );
 }
 
 // ===== MAIN COMPONENT =====
@@ -143,6 +146,40 @@ export default function DetailsView({
     const [activeTab, setActiveTab] = useState<
         "overview" | "requirements" | "prescreen" | "financials" | "company"
     >("overview");
+
+    // Tab scroll arrow buttons
+    const tabScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 0);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    }, []);
+
+    useEffect(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        updateScrollButtons();
+        el.addEventListener("scroll", updateScrollButtons);
+        const observer = new ResizeObserver(updateScrollButtons);
+        observer.observe(el);
+        return () => {
+            el.removeEventListener("scroll", updateScrollButtons);
+            observer.disconnect();
+        };
+    }, [updateScrollButtons]);
+
+    const scrollTabs = useCallback((direction: "left" | "right") => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        el.scrollBy({
+            left: direction === "left" ? -120 : 120,
+            behavior: "smooth",
+        });
+    }, []);
 
     // Section visibility logic
     const sections = {
@@ -165,21 +202,96 @@ export default function DetailsView({
     if (tabbed) {
         return (
             <div className="flex flex-col h-full min-h-0">
-                <div className="overflow-x-auto shrink-0">
-                    {/* Tabs */}
-                    <div
-                        role="tablist"
-                        className="tabs tabs-lift min-w-max mb-4"
-                    >
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("overview")}
+                <div className="flex-1 min-w-0 pb-4">
+                    <div className="flex items-center gap-3 mb-2">
+                        {job.company?.logo_url && (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-base-200 flex-shrink-0">
+                                <img
+                                    src={job.company.logo_url}
+                                    alt={`${job.company.name} logo`}
+                                    className="w-full h-full object-contain"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        <h1 className="text-xl sm:text-2xl font-bold text-base-content line-clamp-1">
+                            {job.title}
+                        </h1>
+
+                        <span
+                            className={`badge badge-sm ${
+                                job.status === "active"
+                                    ? "badge-success"
+                                    : job.status === "paused"
+                                      ? "badge-warning"
+                                      : job.status === "closed"
+                                        ? "badge-error"
+                                        : "badge-neutral"
+                            }`}
                         >
-                            <i className="fa-duotone fa-clipboard mr-2" />
-                            Overview
-                        </a>
-                        {sections.requirements && (
+                            {job.status
+                                ? job.status.charAt(0).toUpperCase() +
+                                  job.status.slice(1)
+                                : "Active"}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-base-content/60 text-sm ml-12 md:ml-0">
+                        <i className="fa-duotone fa-building" />
+                        <span className="font-medium">
+                            {job.company?.name || "Confidential Company"}
+                        </span>
+                        {job.location && (
+                            <>
+                                <span className="mx-1">•</span>
+                                <i className="fa-duotone fa-location-dot" />
+                                <span>{job.location}</span>
+                            </>
+                        )}
+                        {job.department && (
+                            <>
+                                <span className="mx-1">•</span>
+                                <i className="fa-duotone fa-sitemap" />
+                                <span>{job.department}</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+                <div className="relative shrink-0 mb-4">
+                    {/* Left scroll arrow */}
+                    {canScrollLeft && (
+                        <button
+                            onClick={() => scrollTabs("left")}
+                            className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
+                            aria-label="Scroll tabs left"
+                        >
+                            <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content" />
+                        </button>
+                    )}
+                    {/* Scrollable tab container */}
+                    <div
+                        ref={tabScrollRef}
+                        className="overflow-x-auto"
+                        style={{ scrollbarWidth: "none" }}
+                        data-tab-scroll
+                    >
+                        <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
+                        <div
+                            role="tablist"
+                            className="tabs tabs-lift min-w-max"
+                        >
+                            <a
+                                role="tab"
+                                className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
+                                onClick={() => setActiveTab("overview")}
+                            >
+                                <i className="fa-duotone fa-clipboard mr-2" />
+                                Overview
+                            </a>
+                            {sections.requirements && (
                                 <a
                                     role="tab"
                                     className={`tab ${activeTab === "requirements" ? "tab-active" : ""}`}
@@ -187,14 +299,15 @@ export default function DetailsView({
                                 >
                                     <i className="fa-duotone fa-list-check mr-2" />
                                     Requirements
-                                    {job.requirements && job.requirements.length > 0 && (
-                                        <span className="badge badge-xs badge-primary ml-1">
-                                            {job.requirements.length}
-                                        </span>
-                                    )}
+                                    {job.requirements &&
+                                        job.requirements.length > 0 && (
+                                            <span className="badge badge-xs badge-primary ml-1">
+                                                {job.requirements.length}
+                                            </span>
+                                        )}
                                 </a>
                             )}
-                        {sections.preScreen && (
+                            {sections.preScreen && (
                                 <a
                                     role="tab"
                                     className={`tab ${activeTab === "prescreen" ? "tab-active" : ""}`}
@@ -202,34 +315,49 @@ export default function DetailsView({
                                 >
                                     <i className="fa-duotone fa-clipboard-question mr-2" />
                                     Pre-Screen
-                                    {job.pre_screen_questions && job.pre_screen_questions.length > 0 && (
-                                        <span className="badge badge-xs badge-secondary ml-1">
-                                            {job.pre_screen_questions.length}
-                                        </span>
-                                    )}
+                                    {job.pre_screen_questions &&
+                                        job.pre_screen_questions.length > 0 && (
+                                            <span className="badge badge-xs badge-secondary ml-1">
+                                                {
+                                                    job.pre_screen_questions
+                                                        .length
+                                                }
+                                            </span>
+                                        )}
                                 </a>
                             )}
-                        {sections.financials && (
-                            <a
-                                role="tab"
-                                className={`tab ${activeTab === "financials" ? "tab-active" : ""}`}
-                                onClick={() => setActiveTab("financials")}
-                            >
-                                <i className="fa-duotone fa-dollar-sign mr-2" />
-                                Financials
-                            </a>
-                        )}
-                        {sections.company && (
-                            <a
-                                role="tab"
-                                className={`tab ${activeTab === "company" ? "tab-active" : ""}`}
-                                onClick={() => setActiveTab("company")}
-                            >
-                                <i className="fa-duotone fa-building mr-2" />
-                                Company
-                            </a>
-                        )}
+                            {sections.financials && (
+                                <a
+                                    role="tab"
+                                    className={`tab ${activeTab === "financials" ? "tab-active" : ""}`}
+                                    onClick={() => setActiveTab("financials")}
+                                >
+                                    <i className="fa-duotone fa-dollar-sign mr-2" />
+                                    Financials
+                                </a>
+                            )}
+                            {sections.company && (
+                                <a
+                                    role="tab"
+                                    className={`tab ${activeTab === "company" ? "tab-active" : ""}`}
+                                    onClick={() => setActiveTab("company")}
+                                >
+                                    <i className="fa-duotone fa-building mr-2" />
+                                    Company
+                                </a>
+                            )}
+                        </div>
                     </div>
+                    {/* Right scroll arrow */}
+                    {canScrollRight && (
+                        <button
+                            onClick={() => scrollTabs("right")}
+                            className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
+                            aria-label="Scroll tabs right"
+                        >
+                            <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Tab Content */}
@@ -307,9 +435,7 @@ export default function DetailsView({
             )}
 
             {/* Company Section */}
-            {sections.company && (
-                <CompanySection job={job} compact={compact} />
-            )}
+            {sections.company && <CompanySection job={job} compact={compact} />}
         </div>
     );
 }
@@ -530,7 +656,8 @@ function RequirementsSection({ job, compact }: { job: Job; compact: boolean }) {
     const preferredReqs =
         job.requirements?.filter((r) => r.requirement_type === "preferred") ||
         [];
-    const hasRequirements = mandatoryReqs.length > 0 || preferredReqs.length > 0;
+    const hasRequirements =
+        mandatoryReqs.length > 0 || preferredReqs.length > 0;
 
     if (!hasRequirements) {
         return (
@@ -541,7 +668,9 @@ function RequirementsSection({ job, compact }: { job: Job; compact: boolean }) {
                 </h3>
                 <div className="p-8 text-center text-base-content/60">
                     <i className="fa-duotone fa-list-check text-3xl mb-3 block opacity-50" />
-                    <p className="text-sm">No requirements have been added for this role</p>
+                    <p className="text-sm">
+                        No requirements have been added for this role
+                    </p>
                 </div>
             </section>
         );
@@ -619,7 +748,8 @@ function RequirementsSection({ job, compact }: { job: Job; compact: boolean }) {
 
 // 4. Pre-Screen Questions Section
 function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
-    const hasQuestions = job.pre_screen_questions && job.pre_screen_questions.length > 0;
+    const hasQuestions =
+        job.pre_screen_questions && job.pre_screen_questions.length > 0;
 
     if (!hasQuestions) {
         return (
@@ -630,7 +760,9 @@ function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
                 </h3>
                 <div className="p-8 text-center text-base-content/60">
                     <i className="fa-duotone fa-clipboard-question text-3xl mb-3 block opacity-50" />
-                    <p className="text-sm">No pre-screen questions have been added for this role</p>
+                    <p className="text-sm">
+                        No pre-screen questions have been added for this role
+                    </p>
                 </div>
             </section>
         );
@@ -673,10 +805,7 @@ function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
             {/* Questions List */}
             <div className="space-y-3">
                 {job.pre_screen_questions
-                    ?.sort(
-                        (a, b) =>
-                            (a.sort_order || 0) - (b.sort_order || 0),
-                    )
+                    ?.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
                     .map((question, index) => (
                         <div
                             key={question.id}
@@ -993,7 +1122,9 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
                 </h3>
                 <div className="p-8 text-center text-base-content/60">
                     <i className="fa-duotone fa-building text-3xl mb-3 block opacity-50" />
-                    <p className="text-sm">Company information is not available for this role</p>
+                    <p className="text-sm">
+                        Company information is not available for this role
+                    </p>
                 </div>
             </section>
         );

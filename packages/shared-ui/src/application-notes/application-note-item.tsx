@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import type { ApplicationNote } from "./types";
-import { NOTE_TYPE_CONFIG, CREATOR_TYPE_CONFIG, VISIBILITY_CONFIG } from "./types";
+import {
+    NOTE_TYPE_CONFIG,
+    CREATOR_TYPE_CONFIG,
+    VISIBILITY_CONFIG,
+} from "./types";
 import { MarkdownRenderer } from "../markdown/markdown-renderer";
 
 export interface ApplicationNoteItemProps {
@@ -42,9 +46,13 @@ export function ApplicationNoteItem({
     const [showActions, setShowActions] = useState(false);
 
     const isOwnNote = note.created_by_user_id === currentUserId;
-    const noteTypeConfig = NOTE_TYPE_CONFIG[note.note_type] || NOTE_TYPE_CONFIG.general;
-    const creatorConfig = CREATOR_TYPE_CONFIG[note.created_by_type] || CREATOR_TYPE_CONFIG.platform_admin;
-    const visibilityConfig = VISIBILITY_CONFIG[note.visibility] || VISIBILITY_CONFIG.shared;
+    const noteTypeConfig =
+        NOTE_TYPE_CONFIG[note.note_type] || NOTE_TYPE_CONFIG.general;
+    const creatorConfig =
+        CREATOR_TYPE_CONFIG[note.created_by_type] ||
+        CREATOR_TYPE_CONFIG.platform_admin;
+    const visibilityConfig =
+        VISIBILITY_CONFIG[note.visibility] || VISIBILITY_CONFIG.shared;
 
     const creatorName = note.created_by?.name || "Unknown User";
 
@@ -69,8 +77,12 @@ export function ApplicationNoteItem({
                     </span>
 
                     {/* Note type badge */}
-                    <span className={`badge ${noteTypeConfig.color} badge-xs gap-1`}>
-                        <i className={`fa-duotone fa-regular ${noteTypeConfig.icon} text-xs`} />
+                    <span
+                        className={`badge ${noteTypeConfig.color} badge-xs gap-1`}
+                    >
+                        <i
+                            className={`fa-duotone fa-regular ${noteTypeConfig.icon} text-xs`}
+                        />
                         {noteTypeConfig.label}
                     </span>
 
@@ -80,7 +92,9 @@ export function ApplicationNoteItem({
                             className="badge badge-outline badge-xs gap-1"
                             title={visibilityConfig.description}
                         >
-                            <i className={`fa-duotone fa-regular ${visibilityConfig.icon} text-xs`} />
+                            <i
+                                className={`fa-duotone fa-regular ${visibilityConfig.icon} text-xs`}
+                            />
                             {visibilityConfig.label}
                         </span>
                     )}
@@ -99,7 +113,7 @@ export function ApplicationNoteItem({
                                 tabIndex={0}
                                 className="btn btn-ghost btn-xs btn-circle"
                             >
-                                <i className="fa-solid fa-ellipsis-vertical" />
+                                <i className="fa-duotone fa-regular fa-ellipsis-vertical" />
                             </button>
                             <ul
                                 tabIndex={0}
@@ -107,7 +121,9 @@ export function ApplicationNoteItem({
                             >
                                 {onReply && (
                                     <li>
-                                        <button onClick={() => onReply(note.id)}>
+                                        <button
+                                            onClick={() => onReply(note.id)}
+                                        >
                                             <i className="fa-duotone fa-regular fa-reply" />
                                             Reply
                                         </button>
@@ -151,12 +167,20 @@ export function ApplicationNoteItem({
                         className="text-xs text-base-content/50 hover:text-primary flex items-center gap-1"
                         onClick={(e) => {
                             e.preventDefault();
-                            const element = document.getElementById(`note-${note.in_response_to_id}`);
+                            const element = document.getElementById(
+                                `note-${note.in_response_to_id}`,
+                            );
                             if (element) {
-                                element.scrollIntoView({ behavior: "smooth", block: "center" });
+                                element.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                });
                                 element.classList.add("ring-2", "ring-primary");
                                 setTimeout(() => {
-                                    element.classList.remove("ring-2", "ring-primary");
+                                    element.classList.remove(
+                                        "ring-2",
+                                        "ring-primary",
+                                    );
                                 }, 2000);
                             }
                         }}

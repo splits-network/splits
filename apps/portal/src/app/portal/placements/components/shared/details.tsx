@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -27,6 +27,40 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         "overview" | "financial" | "lifecycle" | "collaborators"
     >("overview");
 
+    // Tab scroll arrow buttons
+    const tabScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 0);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    }, []);
+
+    useEffect(() => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        updateScrollButtons();
+        el.addEventListener("scroll", updateScrollButtons);
+        const observer = new ResizeObserver(updateScrollButtons);
+        observer.observe(el);
+        return () => {
+            el.removeEventListener("scroll", updateScrollButtons);
+            observer.disconnect();
+        };
+    }, [updateScrollButtons]);
+
+    const scrollTabs = useCallback((direction: "left" | "right") => {
+        const el = tabScrollRef.current;
+        if (!el) return;
+        el.scrollBy({
+            left: direction === "left" ? -120 : 120,
+            behavior: "smooth",
+        });
+    }, []);
+
     const fetchDetail = useCallback(async () => {
         if (!itemId) return;
         setLoading(true);
@@ -45,7 +79,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     useEffect(() => {
@@ -104,43 +138,69 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="overflow-x-auto shrink-0">
-                <div role="tablist" className="tabs tabs-lift min-w-max">
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("overview")}
+            <div className="relative shrink-0">
+                {canScrollLeft && (
+                    <button
+                        onClick={() => scrollTabs("left")}
+                        className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs left"
                     >
-                        <i className="fa-duotone fa-clipboard mr-2" />
-                        Overview
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "financial" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("financial")}
-                    >
-                        <i className="fa-duotone fa-sack-dollar mr-2" />
-                        Financial
-                    </a>
-                    <a
-                        role="tab"
-                        className={`tab ${activeTab === "lifecycle" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("lifecycle")}
-                    >
-                        <i className="fa-duotone fa-timeline mr-2" />
-                        Lifecycle
-                    </a>
-                    {hasCollaborators && (
+                        <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content/60" />
+                    </button>
+                )}
+                <div
+                    ref={tabScrollRef}
+                    className="overflow-x-auto"
+                    style={{ scrollbarWidth: "none" }}
+                    data-tab-scroll
+                >
+                    <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
+                    <div role="tablist" className="tabs tabs-lift min-w-max">
                         <a
                             role="tab"
-                            className={`tab ${activeTab === "collaborators" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("collaborators")}
+                            className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("overview")}
                         >
-                            <i className="fa-duotone fa-users mr-2" />
-                            Collaborators
+                            <i className="fa-duotone fa-clipboard mr-2" />
+                            Overview
                         </a>
-                    )}
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "financial" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("financial")}
+                        >
+                            <i className="fa-duotone fa-sack-dollar mr-2" />
+                            Financial
+                        </a>
+                        <a
+                            role="tab"
+                            className={`tab ${activeTab === "lifecycle" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("lifecycle")}
+                        >
+                            <i className="fa-duotone fa-timeline mr-2" />
+                            Lifecycle
+                        </a>
+                        {hasCollaborators && (
+                            <a
+                                role="tab"
+                                className={`tab ${activeTab === "collaborators" ? "tab-active" : ""}`}
+                                onClick={() => setActiveTab("collaborators")}
+                            >
+                                <i className="fa-duotone fa-users mr-2" />
+                                Collaborators
+                            </a>
+                        )}
+                    </div>
                 </div>
+                {canScrollRight && (
+                    <button
+                        onClick={() => scrollTabs("right")}
+                        className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
+                        aria-label="Scroll tabs right"
+                    >
+                        <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/60" />
+                    </button>
+                )}
             </div>
 
             {/* Tab Content */}
@@ -219,28 +279,44 @@ function OverviewTab({ placement }: { placement: Placement }) {
             <div className="bg-success/10 border border-success/20 rounded-xl p-5">
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="text-sm text-base-content/60 mb-1">Your Earnings</div>
+                        <div className="text-sm text-base-content/60 mb-1">
+                            Your Earnings
+                        </div>
                         <div className="text-3xl font-bold tabular-nums text-success">
                             {formatCurrency(placement.recruiter_share || 0)}
                         </div>
-                        {placement.your_splits && placement.your_splits.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-2">
-                                {placement.your_splits.map((split) => (
-                                    <span key={split.role} className="badge badge-sm badge-primary gap-1">
-                                        <i className={`fa-duotone fa-regular ${getRoleIcon(split.role)} text-[10px]`} />
-                                        {getRoleFriendlyName(split.role)}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
+                        {placement.your_splits &&
+                            placement.your_splits.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {placement.your_splits.map((split) => (
+                                        <span
+                                            key={split.role}
+                                            className="badge badge-sm badge-primary gap-1"
+                                        >
+                                            <i
+                                                className={`fa-duotone fa-regular ${getRoleIcon(split.role)} text-[10px]`}
+                                            />
+                                            {getRoleFriendlyName(split.role)}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                     </div>
                     {guarantee && (
                         <div
                             className="radial-progress text-success"
-                            style={{ "--value": guarantee.percent, "--size": "3.5rem", "--thickness": "4px" } as React.CSSProperties}
+                            style={
+                                {
+                                    "--value": guarantee.percent,
+                                    "--size": "3.5rem",
+                                    "--thickness": "4px",
+                                } as React.CSSProperties
+                            }
                             role="progressbar"
                         >
-                            <span className="text-xs font-semibold">{guarantee.percent}%</span>
+                            <span className="text-xs font-semibold">
+                                {guarantee.percent}%
+                            </span>
                         </div>
                     )}
                 </div>
@@ -269,28 +345,36 @@ function OverviewTab({ placement }: { placement: Placement }) {
                                 <i className="fa-duotone fa-regular fa-user text-xs" />
                                 Candidate
                             </span>
-                            <span className="font-medium text-sm">{placement.candidate?.full_name || "Unknown"}</span>
+                            <span className="font-medium text-sm">
+                                {placement.candidate?.full_name || "Unknown"}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                             <span className="text-sm text-base-content/70 flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-briefcase text-xs" />
                                 Position
                             </span>
-                            <span className="font-medium text-sm">{placement.job?.title || "Unknown"}</span>
+                            <span className="font-medium text-sm">
+                                {placement.job?.title || "Unknown"}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                             <span className="text-sm text-base-content/70 flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-building text-xs" />
                                 Company
                             </span>
-                            <span className="font-medium text-sm">{placement.job?.company?.name || "Unknown"}</span>
+                            <span className="font-medium text-sm">
+                                {placement.job?.company?.name || "Unknown"}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                             <span className="text-sm text-base-content/70 flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-dollar-sign text-xs" />
                                 Salary
                             </span>
-                            <span className="font-medium tabular-nums text-sm">{formatCurrency(placement.salary || 0)}</span>
+                            <span className="font-medium tabular-nums text-sm">
+                                {formatCurrency(placement.salary || 0)}
+                            </span>
                         </div>
                         {placement.start_date && (
                             <div className="flex items-center justify-between py-2">
@@ -298,7 +382,9 @@ function OverviewTab({ placement }: { placement: Placement }) {
                                     <i className="fa-duotone fa-regular fa-calendar-check text-xs" />
                                     Start Date
                                 </span>
-                                <span className="font-medium text-sm">{formatPlacementDate(placement.start_date)}</span>
+                                <span className="font-medium text-sm">
+                                    {formatPlacementDate(placement.start_date)}
+                                </span>
                             </div>
                         )}
                         {placement.guarantee_days && (
@@ -310,7 +396,14 @@ function OverviewTab({ placement }: { placement: Placement }) {
                                 <span className="font-medium text-sm">
                                     {placement.guarantee_days} days
                                     {placement.guarantee_expires_at && (
-                                        <span className="text-base-content/50"> (expires {formatPlacementDate(placement.guarantee_expires_at)})</span>
+                                        <span className="text-base-content/50">
+                                            {" "}
+                                            (expires{" "}
+                                            {formatPlacementDate(
+                                                placement.guarantee_expires_at,
+                                            )}
+                                            )
+                                        </span>
                                     )}
                                 </span>
                             </div>
@@ -325,7 +418,8 @@ function OverviewTab({ placement }: { placement: Placement }) {
 function FinancialTab({ placement }: { placement: Placement }) {
     const totalFee = placement.fee_amount || placement.placement_fee || 0;
     const yourShare = placement.recruiter_share || 0;
-    const yourPercent = totalFee > 0 ? Math.round((yourShare / totalFee) * 100) : 0;
+    const yourPercent =
+        totalFee > 0 ? Math.round((yourShare / totalFee) * 100) : 0;
     const remainderAmount = totalFee - yourShare;
     const remainderPercent = 100 - yourPercent;
 
@@ -343,14 +437,18 @@ function FinancialTab({ placement }: { placement: Placement }) {
                                 <i className="fa-duotone fa-regular fa-dollar-sign text-xs w-4" />
                                 Base Salary
                             </span>
-                            <span className="font-medium tabular-nums">{formatCurrency(placement.salary || 0)}</span>
+                            <span className="font-medium tabular-nums">
+                                {formatCurrency(placement.salary || 0)}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between py-1">
                             <span className="text-sm text-base-content/70 flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-percent text-xs w-4" />
                                 Fee Rate
                             </span>
-                            <span className="font-medium tabular-nums">{placement.fee_percentage || 0}%</span>
+                            <span className="font-medium tabular-nums">
+                                {placement.fee_percentage || 0}%
+                            </span>
                         </div>
                         <div className="border-t-2 border-base-300 my-1" />
                         <div className="flex items-center justify-between py-1">
@@ -358,7 +456,9 @@ function FinancialTab({ placement }: { placement: Placement }) {
                                 <i className="fa-duotone fa-regular fa-receipt text-xs w-4" />
                                 Total Placement Fee
                             </span>
-                            <span className="font-bold text-lg tabular-nums">{formatCurrency(totalFee)}</span>
+                            <span className="font-bold text-lg tabular-nums">
+                                {formatCurrency(totalFee)}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -370,38 +470,67 @@ function FinancialTab({ placement }: { placement: Placement }) {
                     Your Commission
                 </h4>
                 <div className="bg-success/10 border border-success/20 rounded-xl p-4">
-                    {placement.your_splits && placement.your_splits.length > 1 ? (
+                    {placement.your_splits &&
+                    placement.your_splits.length > 1 ? (
                         /* Multiple roles */
                         <div className="space-y-3">
                             {placement.your_splits.map((split) => (
-                                <div key={split.role} className="flex items-center justify-between">
+                                <div
+                                    key={split.role}
+                                    className="flex items-center justify-between"
+                                >
                                     <div className="flex items-center gap-2">
-                                        <i className={`fa-duotone fa-regular ${getRoleIcon(split.role)} text-success text-sm`} />
-                                        <span className="text-sm">{getRoleFriendlyName(split.role)}</span>
+                                        <i
+                                            className={`fa-duotone fa-regular ${getRoleIcon(split.role)} text-success text-sm`}
+                                        />
+                                        <span className="text-sm">
+                                            {getRoleFriendlyName(split.role)}
+                                        </span>
                                     </div>
                                     <div className="text-right">
-                                        <span className="font-bold text-success tabular-nums">{formatCurrency(split.split_amount)}</span>
-                                        <span className="text-xs text-base-content/50 ml-1.5">({split.split_percentage}%)</span>
+                                        <span className="font-bold text-success tabular-nums">
+                                            {formatCurrency(split.split_amount)}
+                                        </span>
+                                        <span className="text-xs text-base-content/50 ml-1.5">
+                                            ({split.split_percentage}%)
+                                        </span>
                                     </div>
                                 </div>
                             ))}
                             <div className="border-t border-success/20 pt-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-semibold">Total</span>
-                                    <span className="text-2xl font-bold text-success tabular-nums">{formatCurrency(yourShare)}</span>
+                                    <span className="text-sm font-semibold">
+                                        Total
+                                    </span>
+                                    <span className="text-2xl font-bold text-success tabular-nums">
+                                        {formatCurrency(yourShare)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     ) : (
                         /* Single role or no split detail */
                         <div>
-                            <div className="text-3xl font-bold text-success tabular-nums">{formatCurrency(yourShare)}</div>
-                            {placement.your_splits && placement.your_splits.length === 1 && (
-                                <div className="text-sm text-base-content/60 mt-1 flex items-center gap-1.5">
-                                    <i className={`fa-duotone fa-regular ${getRoleIcon(placement.your_splits[0].role)} text-xs`} />
-                                    {getRoleFriendlyName(placement.your_splits[0].role)} &middot; {placement.your_splits[0].split_percentage}% of placement fee
-                                </div>
-                            )}
+                            <div className="text-3xl font-bold text-success tabular-nums">
+                                {formatCurrency(yourShare)}
+                            </div>
+                            {placement.your_splits &&
+                                placement.your_splits.length === 1 && (
+                                    <div className="text-sm text-base-content/60 mt-1 flex items-center gap-1.5">
+                                        <i
+                                            className={`fa-duotone fa-regular ${getRoleIcon(placement.your_splits[0].role)} text-xs`}
+                                        />
+                                        {getRoleFriendlyName(
+                                            placement.your_splits[0].role,
+                                        )}{" "}
+                                        &middot;{" "}
+                                        {
+                                            placement.your_splits[0]
+                                                .split_percentage
+                                        }
+                                        % of placement fee
+                                    </div>
+                                )}
                         </div>
                     )}
                 </div>
@@ -430,10 +559,12 @@ function FinancialTab({ placement }: { placement: Placement }) {
                         </div>
                         <div className="flex justify-between mt-2 text-xs">
                             <span className="text-success font-medium">
-                                You: {formatCurrency(yourShare)} ({yourPercent}%)
+                                You: {formatCurrency(yourShare)} ({yourPercent}
+                                %)
                             </span>
                             <span className="text-base-content/50">
-                                Other: {formatCurrency(remainderAmount)} ({remainderPercent}%)
+                                Other: {formatCurrency(remainderAmount)} (
+                                {remainderPercent}%)
                             </span>
                         </div>
                     </div>
@@ -448,7 +579,9 @@ function FinancialTab({ placement }: { placement: Placement }) {
                 >
                     <i className="fa-duotone fa-regular fa-circle-info fa-lg text-info" />
                 </div>
-                <span>Rates locked at time of hire based on subscription tier.</span>
+                <span>
+                    Rates locked at time of hire based on subscription tier.
+                </span>
             </div>
         </div>
     );
@@ -488,7 +621,10 @@ function getGuaranteeProgress(placement: Placement): GuaranteeProgress | null {
     if (!placement.start_date || !placement.guarantee_days) return null;
     const start = new Date(placement.start_date);
     const now = new Date();
-    const daysElapsed = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysElapsed = Math.max(
+        0,
+        Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)),
+    );
     const totalDays = placement.guarantee_days;
     const percent = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
     return { daysElapsed, totalDays, percent };
@@ -496,14 +632,24 @@ function getGuaranteeProgress(placement: Placement): GuaranteeProgress | null {
 
 // ===== OVERVIEW SUB-COMPONENTS =====
 
-function PayoutStepper({ placement, guarantee }: { placement: Placement; guarantee: GuaranteeProgress | null }) {
+function PayoutStepper({
+    placement,
+    guarantee,
+}: {
+    placement: Placement;
+    guarantee: GuaranteeProgress | null;
+}) {
     const state = placement.state || "hired";
     const hasStarted = !!placement.start_date;
     const guaranteeComplete = guarantee ? guarantee.percent >= 100 : false;
     const isFailed = state === "failed";
     const isCompleted = state === "completed";
 
-    const steps: { label: string; detail?: string; status: "done" | "current" | "upcoming" | "error" }[] = [];
+    const steps: {
+        label: string;
+        detail?: string;
+        status: "done" | "current" | "upcoming" | "error";
+    }[] = [];
 
     // Step 1: Hired
     steps.push({
@@ -516,9 +662,17 @@ function PayoutStepper({ placement, guarantee }: { placement: Placement; guarant
     if (isFailed && !hasStarted) {
         steps.push({ label: "Candidate Started", status: "error" });
     } else if (hasStarted) {
-        steps.push({ label: "Candidate Started", detail: formatPlacementDate(placement.start_date!), status: "done" });
+        steps.push({
+            label: "Candidate Started",
+            detail: formatPlacementDate(placement.start_date!),
+            status: "done",
+        });
     } else {
-        steps.push({ label: "Candidate Started", detail: "Awaiting start date", status: "current" });
+        steps.push({
+            label: "Candidate Started",
+            detail: "Awaiting start date",
+            status: "current",
+        });
     }
 
     // Step 3: Guarantee Period
@@ -531,7 +685,11 @@ function PayoutStepper({ placement, guarantee }: { placement: Placement; guarant
     } else if (!hasStarted) {
         steps.push({ label: "Guarantee Period", status: "upcoming" });
     } else if (guaranteeComplete || isCompleted) {
-        steps.push({ label: "Guarantee Period", detail: `${placement.guarantee_days} days completed`, status: "done" });
+        steps.push({
+            label: "Guarantee Period",
+            detail: `${placement.guarantee_days} days completed`,
+            status: "done",
+        });
     } else if (guarantee) {
         steps.push({
             label: "Guarantee Period",
@@ -546,14 +704,22 @@ function PayoutStepper({ placement, guarantee }: { placement: Placement; guarant
     if (isCompleted) {
         steps.push({ label: "Payout Eligible", status: "done" });
     } else if (guaranteeComplete && !isFailed) {
-        steps.push({ label: "Payout Eligible", detail: "Ready for processing", status: "current" });
+        steps.push({
+            label: "Payout Eligible",
+            detail: "Ready for processing",
+            status: "current",
+        });
     } else {
         steps.push({ label: "Payout Eligible", status: "upcoming" });
     }
 
     // Step 5: Paid
     if (isCompleted) {
-        steps.push({ label: "Completed", detail: formatPlacementDate(placement.end_date), status: "done" });
+        steps.push({
+            label: "Completed",
+            detail: formatPlacementDate(placement.end_date),
+            status: "done",
+        });
     } else {
         steps.push({ label: "Paid", status: "upcoming" });
     }
@@ -583,35 +749,54 @@ function PayoutStepper({ placement, guarantee }: { placement: Placement; guarant
                 <div key={i} className="flex gap-3">
                     {/* Icon column */}
                     <div className="flex flex-col items-center">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${colorMap[step.status]}`}>
-                            <i className={`fa-duotone fa-regular ${iconMap[step.status]} text-xs`} />
+                        <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${colorMap[step.status]}`}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular ${iconMap[step.status]} text-xs`}
+                            />
                         </div>
                         {i < steps.length - 1 && (
-                            <div className={`w-0.5 flex-1 min-h-5 ${lineColorMap[step.status]}`} />
+                            <div
+                                className={`w-0.5 flex-1 min-h-5 ${lineColorMap[step.status]}`}
+                            />
                         )}
                     </div>
                     {/* Content */}
-                    <div className={`pb-4 ${step.status === "upcoming" ? "opacity-40" : ""}`}>
-                        <div className={`text-sm font-medium ${step.status === "error" ? "text-error" : ""}`}>
+                    <div
+                        className={`pb-4 ${step.status === "upcoming" ? "opacity-40" : ""}`}
+                    >
+                        <div
+                            className={`text-sm font-medium ${step.status === "error" ? "text-error" : ""}`}
+                        >
                             {step.label}
                         </div>
                         {step.detail && (
-                            <div className="text-xs text-base-content/60 mt-0.5">{step.detail}</div>
-                        )}
-                        {/* Inline progress bar for current guarantee step */}
-                        {step.status === "current" && guarantee && step.label === "Guarantee Period" && (
-                            <div className="mt-2 w-full max-w-48">
-                                <div className="w-full h-1.5 rounded-full bg-base-300 overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full bg-primary transition-all duration-500"
-                                        style={{ width: `${guarantee.percent}%` }}
-                                    />
-                                </div>
-                                <div className="text-[10px] text-base-content/50 mt-0.5 tabular-nums">
-                                    {guarantee.percent}% &middot; Expires {formatPlacementDate(placement.guarantee_expires_at)}
-                                </div>
+                            <div className="text-xs text-base-content/60 mt-0.5">
+                                {step.detail}
                             </div>
                         )}
+                        {/* Inline progress bar for current guarantee step */}
+                        {step.status === "current" &&
+                            guarantee &&
+                            step.label === "Guarantee Period" && (
+                                <div className="mt-2 w-full max-w-48">
+                                    <div className="w-full h-1.5 rounded-full bg-base-300 overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full bg-primary transition-all duration-500"
+                                            style={{
+                                                width: `${guarantee.percent}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="text-[10px] text-base-content/50 mt-0.5 tabular-nums">
+                                        {guarantee.percent}% &middot; Expires{" "}
+                                        {formatPlacementDate(
+                                            placement.guarantee_expires_at,
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 </div>
             ))}
@@ -619,7 +804,13 @@ function PayoutStepper({ placement, guarantee }: { placement: Placement; guarant
     );
 }
 
-function ContextualAlert({ placement, guarantee }: { placement: Placement; guarantee: GuaranteeProgress | null }) {
+function ContextualAlert({
+    placement,
+    guarantee,
+}: {
+    placement: Placement;
+    guarantee: GuaranteeProgress | null;
+}) {
     const state = placement.state || "hired";
     const hasStarted = !!placement.start_date;
     const guaranteeComplete = guarantee ? guarantee.percent >= 100 : false;
@@ -629,7 +820,11 @@ function ContextualAlert({ placement, guarantee }: { placement: Placement; guara
             <div className="alert alert-error text-sm">
                 <i className="fa-duotone fa-regular fa-triangle-exclamation" />
                 <span>
-                    Placement failed{placement.failure_reason ? `: ${placement.failure_reason}` : ""}. Contact support if you have questions.
+                    Placement failed
+                    {placement.failure_reason
+                        ? `: ${placement.failure_reason}`
+                        : ""}
+                    . Contact support if you have questions.
                 </span>
             </div>
         );
@@ -639,7 +834,9 @@ function ContextualAlert({ placement, guarantee }: { placement: Placement; guara
         return (
             <div className="alert alert-success text-sm">
                 <i className="fa-duotone fa-regular fa-circle-check" />
-                <span>Placement completed successfully. Payout has been processed.</span>
+                <span>
+                    Placement completed successfully. Payout has been processed.
+                </span>
             </div>
         );
     }
@@ -648,7 +845,10 @@ function ContextualAlert({ placement, guarantee }: { placement: Placement; guara
         return (
             <div className="alert alert-info text-sm">
                 <i className="fa-duotone fa-regular fa-clock" />
-                <span>Waiting for candidate start date confirmation. The guarantee period begins on the start date.</span>
+                <span>
+                    Waiting for candidate start date confirmation. The guarantee
+                    period begins on the start date.
+                </span>
             </div>
         );
     }
@@ -657,7 +857,9 @@ function ContextualAlert({ placement, guarantee }: { placement: Placement; guara
         return (
             <div className="alert alert-success text-sm">
                 <i className="fa-duotone fa-regular fa-circle-check" />
-                <span>Guarantee period complete! Your payout is being processed.</span>
+                <span>
+                    Guarantee period complete! Your payout is being processed.
+                </span>
             </div>
         );
     }
@@ -667,9 +869,20 @@ function ContextualAlert({ placement, guarantee }: { placement: Placement; guara
         <div className="alert alert-warning text-sm">
             <i className="fa-duotone fa-regular fa-shield-check" />
             <div>
-                <span>Guarantee period in progress. Payouts are processed after the guarantee completes</span>
+                <span>
+                    Guarantee period in progress. Payouts are processed after
+                    the guarantee completes
+                </span>
                 {placement.guarantee_expires_at && (
-                    <span> on <strong>{formatPlacementDate(placement.guarantee_expires_at)}</strong></span>
+                    <span>
+                        {" "}
+                        on{" "}
+                        <strong>
+                            {formatPlacementDate(
+                                placement.guarantee_expires_at,
+                            )}
+                        </strong>
+                    </span>
                 )}
                 <span>.</span>
             </div>
