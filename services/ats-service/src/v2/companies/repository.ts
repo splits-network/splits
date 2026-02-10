@@ -82,7 +82,7 @@ export class CompanyRepository {
         const { data, error, count } = await query;
 
         if (error) throw error;
-console.log('Query result:', { data, count });
+
         return {
             data: data || [],
             total: count || 0,

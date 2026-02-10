@@ -25,17 +25,16 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(
-                `/recruiters/${itemId}`,
-                { params: { include: "user,reputation" } },
-            );
+            const response: any = await client.get(`/recruiters/${itemId}`, {
+                params: { include: "user,reputation" },
+            });
             setRecruiter(response.data);
         } catch (err) {
             console.error("Failed to fetch recruiter detail:", err);
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId]);
 
     useEffect(() => {
@@ -106,15 +105,20 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 <RecruiterReputationBadge
                     reputation={{
                         recruiter_id: recruiter.id,
-                        total_submissions: (recruiter as any).total_submissions || 0,
+                        total_submissions:
+                            (recruiter as any).total_submissions || 0,
                         total_hires: (recruiter as any).total_hires || 0,
                         completed_placements: recruiter.total_placements || 0,
-                        failed_placements: (recruiter as any).total_failures || 0,
+                        failed_placements:
+                            (recruiter as any).total_failures || 0,
                         hire_rate: (recruiter as any).hire_rate ?? null,
-                        completion_rate: (recruiter as any).completion_rate ?? null,
+                        completion_rate:
+                            (recruiter as any).completion_rate ?? null,
                         reputation_score: recruiter.reputation_score ?? null,
-                        avg_time_to_hire_days: (recruiter as any).avg_time_to_hire_days,
-                        avg_response_time_hours: (recruiter as any).avg_response_time_hours,
+                        avg_time_to_hire_days: (recruiter as any)
+                            .avg_time_to_hire_days,
+                        avg_response_time_hours: (recruiter as any)
+                            .avg_response_time_hours,
                     }}
                     showDetails
                 />
@@ -126,7 +130,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     <i className="fa-duotone fa-regular fa-chart-simple text-primary"></i>
                     Performance Metrics
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <StatCard
                         title="Placements"
                         value={recruiter.total_placements}
@@ -235,9 +239,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                 className="flex items-center gap-3 text-base-content/80 hover:text-primary transition-colors"
                             >
                                 <i className="fa-duotone fa-regular fa-envelope text-base-content/50 w-5"></i>
-                                <span className="truncate">
-                                    {displayEmail}
-                                </span>
+                                <span className="truncate">{displayEmail}</span>
                             </a>
                         )}
                         {recruiter.phone && (
@@ -280,9 +282,7 @@ function StatCard({
         <div className="card bg-base-200 shadow-sm border border-base-300">
             <div className="card-body p-4">
                 <div className="flex items-center gap-2 text-base-content/60 mb-1">
-                    <i
-                        className={`fa-duotone fa-regular ${icon} text-sm`}
-                    ></i>
+                    <i className={`fa-duotone fa-regular ${icon} text-sm`}></i>
                     <h4 className="text-xs font-medium uppercase tracking-wide">
                         {title}
                     </h4>

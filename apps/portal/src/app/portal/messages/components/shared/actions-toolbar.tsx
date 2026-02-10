@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { ModalPortal } from "@splits-network/shared-ui";
 import ConfirmDialog from "@/components/confirm-dialog";
 import { useFilter } from "../../contexts/filter-context";
 import type { ConversationRow } from "../../types";
@@ -158,7 +159,7 @@ export default function ActionsToolbar({
     const isLoading = muting || archiving || blocking;
 
     const reportModal = (
-        <>
+        <ModalPortal>
             <ConfirmDialog
                 isOpen={confirmBlock}
                 title="Block User"
@@ -261,7 +262,7 @@ export default function ActionsToolbar({
                     </form>
                 </div>
             )}
-        </>
+        </ModalPortal>
     );
 
     if (variant === "icon-only") {

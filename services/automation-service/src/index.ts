@@ -54,27 +54,6 @@ async function main() {
         routePrefix: "/docs",
     });
 
-    // Skip request logging for health checks to reduce noise
-    app.addHook("onRequest", async (request, reply) => {
-        if (request.url === "/health") {
-            request.log = {
-                ...request.log,
-                info: () => { },
-                debug: () => { },
-                trace: () => { },
-            } as any;
-        }
-    });
-
-    // Health check
-    app.get("/health", async () => {
-        return {
-            status: "healthy",
-            service: "automation-service",
-            timestamp: new Date().toISOString(),
-        };
-    });
-
     try {
         v2EventPublisher = new EventPublisher(
             rabbitConfig.url,

@@ -12,6 +12,7 @@ import {
 } from "@/hooks/use-application-actions";
 import { Presence } from "@/components/presense";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { ModalPortal } from "@splits-network/shared-ui";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { ProposalResponseWizard } from "./proposal-response-wizard";
 import { DeclineModal } from "./decline-modal";
@@ -366,38 +367,40 @@ export default function ActionsToolbar({
                     )}
                 </div>
 
-                {/* Modals */}
-                {showEditWizard && item.job && (
-                    <ApplicationWizardModal
-                        jobId={item.job.id || item.job_id}
-                        jobTitle={item.job.title}
-                        companyName={item.job.company?.name || "Company"}
-                        onClose={() => setShowEditWizard(false)}
-                        onSuccess={() => {
-                            setShowEditWizard(false);
-                            onStageChange?.();
-                        }}
-                        existingApplication={item}
-                    />
-                )}
+                {/* Modals - portaled to body to escape drawer stacking context */}
+                <ModalPortal>
+                    {showEditWizard && item.job && (
+                        <ApplicationWizardModal
+                            jobId={item.job.id || item.job_id}
+                            jobTitle={item.job.title}
+                            companyName={item.job.company?.name || "Company"}
+                            onClose={() => setShowEditWizard(false)}
+                            onSuccess={() => {
+                                setShowEditWizard(false);
+                                onStageChange?.();
+                            }}
+                            existingApplication={item}
+                        />
+                    )}
 
-                {showProposalWizard && (
-                    <ProposalResponseWizard
-                        isOpen={showProposalWizard}
-                        onClose={() => setShowProposalWizard(false)}
-                        applicationId={item.id}
+                    {showProposalWizard && (
+                        <ProposalResponseWizard
+                            isOpen={showProposalWizard}
+                            onClose={() => setShowProposalWizard(false)}
+                            applicationId={item.id}
+                            jobTitle={item.job?.title || "this position"}
+                            preScreenQuestions={preScreenQuestions || []}
+                            onComplete={handleCompleteProposal}
+                        />
+                    )}
+
+                    <DeclineModal
+                        isOpen={showDeclineModal}
+                        onClose={() => setShowDeclineModal(false)}
+                        onSubmit={handleDeclineProposal}
                         jobTitle={item.job?.title || "this position"}
-                        preScreenQuestions={preScreenQuestions || []}
-                        onComplete={handleCompleteProposal}
                     />
-                )}
-
-                <DeclineModal
-                    isOpen={showDeclineModal}
-                    onClose={() => setShowDeclineModal(false)}
-                    onSubmit={handleDeclineProposal}
-                    jobTitle={item.job?.title || "this position"}
-                />
+                </ModalPortal>
             </>
         );
     }
@@ -552,38 +555,40 @@ export default function ActionsToolbar({
                 )}
             </div>
 
-            {/* Modals */}
-            {showEditWizard && item.job && (
-                <ApplicationWizardModal
-                    jobId={item.job.id || item.job_id}
-                    jobTitle={item.job.title}
-                    companyName={item.job.company?.name || "Company"}
-                    onClose={() => setShowEditWizard(false)}
-                    onSuccess={() => {
-                        setShowEditWizard(false);
-                        onStageChange?.();
-                    }}
-                    existingApplication={item}
-                />
-            )}
+            {/* Modals - portaled to body to escape drawer stacking context */}
+            <ModalPortal>
+                {showEditWizard && item.job && (
+                    <ApplicationWizardModal
+                        jobId={item.job.id || item.job_id}
+                        jobTitle={item.job.title}
+                        companyName={item.job.company?.name || "Company"}
+                        onClose={() => setShowEditWizard(false)}
+                        onSuccess={() => {
+                            setShowEditWizard(false);
+                            onStageChange?.();
+                        }}
+                        existingApplication={item}
+                    />
+                )}
 
-            {showProposalWizard && (
-                <ProposalResponseWizard
-                    isOpen={showProposalWizard}
-                    onClose={() => setShowProposalWizard(false)}
-                    applicationId={item.id}
+                {showProposalWizard && (
+                    <ProposalResponseWizard
+                        isOpen={showProposalWizard}
+                        onClose={() => setShowProposalWizard(false)}
+                        applicationId={item.id}
+                        jobTitle={item.job?.title || "this position"}
+                        preScreenQuestions={preScreenQuestions || []}
+                        onComplete={handleCompleteProposal}
+                    />
+                )}
+
+                <DeclineModal
+                    isOpen={showDeclineModal}
+                    onClose={() => setShowDeclineModal(false)}
+                    onSubmit={handleDeclineProposal}
                     jobTitle={item.job?.title || "this position"}
-                    preScreenQuestions={preScreenQuestions || []}
-                    onComplete={handleCompleteProposal}
                 />
-            )}
-
-            <DeclineModal
-                isOpen={showDeclineModal}
-                onClose={() => setShowDeclineModal(false)}
-                onSubmit={handleDeclineProposal}
-                jobTitle={item.job?.title || "this position"}
-            />
+            </ModalPortal>
         </>
     );
 }

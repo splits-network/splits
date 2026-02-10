@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
-import { ButtonLoading } from "@splits-network/shared-ui";
+import { ButtonLoading, ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "../modals/role-wizard-modal";
 import SubmitCandidateWizard from "../wizards/submit-candidate-wizard";
 
@@ -435,27 +435,29 @@ export default function RoleActionsToolbar({
                     {renderQuickStatusButton()}
                 </div>
 
-                {/* Modals */}
-                {showEditModal && (
-                    <RoleWizardModal
-                        isOpen={showEditModal}
-                        jobId={job.id}
-                        mode="edit"
-                        onClose={() => setShowEditModal(false)}
-                        onSuccess={handleEditSuccess}
-                    />
-                )}
+                {/* Modals - portaled to body to escape drawer stacking context */}
+                <ModalPortal>
+                    {showEditModal && (
+                        <RoleWizardModal
+                            isOpen={showEditModal}
+                            jobId={job.id}
+                            mode="edit"
+                            onClose={() => setShowEditModal(false)}
+                            onSuccess={handleEditSuccess}
+                        />
+                    )}
 
-                {showSubmitModal && (
-                    <SubmitCandidateWizard
-                        roleId={job.id}
-                        roleTitle={job.title || "Untitled Role"}
-                        companyName={
-                            job.company?.name || job.company_id || undefined
-                        }
-                        onClose={() => setShowSubmitModal(false)}
-                    />
-                )}
+                    {showSubmitModal && (
+                        <SubmitCandidateWizard
+                            roleId={job.id}
+                            roleTitle={job.title || "Untitled Role"}
+                            companyName={
+                                job.company?.name || job.company_id || undefined
+                            }
+                            onClose={() => setShowSubmitModal(false)}
+                        />
+                    )}
+                </ModalPortal>
             </>
         );
     }
@@ -540,27 +542,29 @@ export default function RoleActionsToolbar({
                 {renderStatusButtons()}
             </div>
 
-            {/* Modals */}
-            {showEditModal && (
-                <RoleWizardModal
-                    isOpen={showEditModal}
-                    jobId={job.id}
-                    mode="edit"
-                    onClose={() => setShowEditModal(false)}
-                    onSuccess={handleEditSuccess}
-                />
-            )}
+            {/* Modals - portaled to body to escape drawer stacking context */}
+            <ModalPortal>
+                {showEditModal && (
+                    <RoleWizardModal
+                        isOpen={showEditModal}
+                        jobId={job.id}
+                        mode="edit"
+                        onClose={() => setShowEditModal(false)}
+                        onSuccess={handleEditSuccess}
+                    />
+                )}
 
-            {showSubmitModal && (
-                <SubmitCandidateWizard
-                    roleId={job.id}
-                    roleTitle={job.title || "Untitled Role"}
-                    companyName={
-                        job.company?.name || job.company_id || undefined
-                    }
-                    onClose={() => setShowSubmitModal(false)}
-                />
-            )}
+                {showSubmitModal && (
+                    <SubmitCandidateWizard
+                        roleId={job.id}
+                        roleTitle={job.title || "Untitled Role"}
+                        companyName={
+                            job.company?.name || job.company_id || undefined
+                        }
+                        onClose={() => setShowSubmitModal(false)}
+                    />
+                )}
+            </ModalPortal>
         </>
     );
 }

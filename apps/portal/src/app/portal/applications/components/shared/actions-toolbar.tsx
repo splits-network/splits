@@ -18,6 +18,7 @@ import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
 } from "@/app/portal/applications/lib/permission-utils";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
 import type { ApplicationStage, ApplicationNoteCreatorType } from "@splits-network/shared-types";
@@ -300,7 +301,7 @@ export default function ActionsToolbar({
     const layoutClass = layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
     const modals = (
-        <>
+        <ModalPortal>
             <ApproveGateModal
                 isOpen={showApproveModal}
                 onClose={() => setShowApproveModal(false)}
@@ -353,7 +354,7 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
-        </>
+        </ModalPortal>
     );
 
     if (variant === "icon-only") {

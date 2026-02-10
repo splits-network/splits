@@ -69,6 +69,9 @@ export {
     type ViewerRole,
 } from './application-timeline';
 
+// Portal components
+export { ModalPortal } from './portal/modal-portal';
+
 // Application Notes components
 export {
     ApplicationNotesPanel,

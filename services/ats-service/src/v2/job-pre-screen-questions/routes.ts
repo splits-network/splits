@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { JobPreScreenQuestionService } from './service';
 import { requireUserContext } from '../shared/helpers';
+import { BulkReplaceQuestionsRequest } from '../types';
 
 interface RegisterQuestionRoutesConfig {
     service: JobPreScreenQuestionService;
@@ -71,6 +72,31 @@ export function registerJobPreScreenQuestionRoutes(
             return reply
                 .code(error.statusCode || 400)
                 .send({ error: { message: error.message || 'Failed to delete question' } });
+        }
+    });
+
+    // Bulk replace endpoint for performance optimization during job editing
+    app.put('/api/v2/job-pre-screen-questions/job/:jobId/bulk-replace', async (request: FastifyRequest<{
+        Params: { jobId: string },
+        Body: BulkReplaceQuestionsRequest
+    }>, reply: FastifyReply) => {
+        try {
+            requireUserContext(request);
+            const { jobId } = request.params;
+            const { questions } = request.body;
+
+            if (!questions) {
+                return reply
+                    .code(400)
+                    .send({ error: { message: 'questions array is required' } });
+            }
+
+            const data = await config.service.bulkReplaceByJob(jobId, questions);
+            return reply.send({ data });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: { message: error.message || 'Failed to bulk replace questions' } });
         }
     });
 }

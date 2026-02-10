@@ -1,10 +1,6 @@
 "use client";
 
-import {
-    DataRow,
-    DataList,
-    MetricCard,
-} from "@/components/ui/cards";
+import { DataRow, DataList, MetricCard } from "@/components/ui/cards";
 import { formatRelativeTime } from "@/lib/utils";
 import {
     CompanyTab,
@@ -25,9 +21,7 @@ export default function Item({ item, activeTab, onViewDetails }: ItemProps) {
     const company = isMarketplace
         ? (item as Company)
         : (item as CompanyRelationship).company;
-    const relationship = isMarketplace
-        ? null
-        : (item as CompanyRelationship);
+    const relationship = isMarketplace ? null : (item as CompanyRelationship);
 
     return (
         <MetricCard className="group hover:shadow-lg transition-all duration-200">
@@ -73,7 +67,9 @@ export default function Item({ item, activeTab, onViewDetails }: ItemProps) {
                         <DataRow
                             icon="fa-users"
                             label="Size"
-                            value={(item as Company).company_size || "Not provided"}
+                            value={
+                                (item as Company).company_size || "Not provided"
+                            }
                         />
                     )}
                     {!isMarketplace && relationship && (
@@ -86,7 +82,11 @@ export default function Item({ item, activeTab, onViewDetails }: ItemProps) {
                             <DataRow
                                 icon="fa-shield-check"
                                 label="Manage Jobs"
-                                value={relationship.can_manage_company_jobs ? "Yes" : "No"}
+                                value={
+                                    relationship.can_manage_company_jobs
+                                        ? "Yes"
+                                        : "No"
+                                }
                             />
                         </>
                     )}
@@ -94,7 +94,7 @@ export default function Item({ item, activeTab, onViewDetails }: ItemProps) {
             </MetricCard.Body>
             <MetricCard.Footer>
                 <div className="flex items-center justify-between w-full">
-                    <span className="text-base-content/50">
+                    <span className="text-base-content/50 text-sm">
                         Added {formatRelativeTime(item.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
