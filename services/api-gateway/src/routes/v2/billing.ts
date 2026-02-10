@@ -669,7 +669,6 @@ function registerStripeWebhookProxy(app: FastifyInstance, services: ServiceRegis
                     correlationId,
                     {
                         'stripe-signature': stripeSignature as string,
-                        'content-type': 'application/json',
                     }
                 );
                 return reply.send(data);
