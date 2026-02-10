@@ -651,7 +651,7 @@ function registerStripeWebhookProxy(app: FastifyInstance, services: ServiceRegis
     // No auth required - verified by Stripe signature
     // Pass raw body for signature verification
     app.post(
-        '/webhooks/stripe',
+        '/api/billing/webhooks/stripe',
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const stripeSignature = request.headers['stripe-signature'];
@@ -669,7 +669,6 @@ function registerStripeWebhookProxy(app: FastifyInstance, services: ServiceRegis
                     correlationId,
                     {
                         'stripe-signature': stripeSignature as string,
-                        'content-type': 'application/json',
                     }
                 );
                 return reply.send(data);
