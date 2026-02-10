@@ -4,7 +4,9 @@ metadata:
     name: notification-service
     namespace: splits-network
 spec:
-    replicas: 2
+    # IMPORTANT: Keep at 1 replica to avoid Resend API rate limiting conflicts
+    # Multiple replicas consume the same RabbitMQ events and send duplicate emails
+    replicas: 1
     selector:
         matchLabels:
             app: notification-service
