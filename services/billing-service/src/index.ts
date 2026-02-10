@@ -12,6 +12,7 @@ import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
 import { PlacementSnapshotService } from './v2/placement-snapshot/service';
 import { createClient } from '@supabase/supabase-js';
+import { WebhookEventRepository } from './v2/webhook-events/repository';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -167,8 +168,9 @@ async function main() {
         logger.error({ err: error }, 'CRITICAL: Billing event consumer failed to connect - commission processing DISABLED');
     }
 
-    // Register webhook routes (V1 - TODO: migrate to V2)
-    registerWebhookRoutes(app, service, stripeConfig.webhookSecret);
+    // Register webhook routes with event storage
+    const webhookEventRepository = new WebhookEventRepository(supabase);
+    registerWebhookRoutes(app, service, stripeConfig.webhookSecret, webhookEventRepository);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
