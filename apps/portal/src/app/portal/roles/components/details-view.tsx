@@ -956,6 +956,12 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
         );
     }
 
+    const websiteUrl = job.company.website
+        ? job.company.website.startsWith("http")
+            ? job.company.website
+            : `https://${job.company.website}`
+        : null;
+
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
             <h3 className="text-base font-bold flex items-center gap-2">
@@ -963,111 +969,128 @@ function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
                 Company
             </h3>
 
-            {/* Company Header */}
-            <div className="flex items-start gap-3">
-                {/* Logo - always show */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden bg-base-200 flex-shrink-0 flex items-center justify-center">
-                    {job.company.logo_url ? (
-                        <img
-                            src={job.company.logo_url}
-                            alt={`${job.company.name} logo`}
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                const parent = e.currentTarget.parentElement;
-                                if (parent) {
-                                    parent.innerHTML =
-                                        '<i class="fa-duotone fa-building text-base-content/30"></i>';
-                                }
-                            }}
-                        />
-                    ) : (
-                        <i className="fa-duotone fa-building text-base-content/30" />
-                    )}
+            {/* Company Identity Card */}
+            <div className="card bg-base-200 shadow-sm border border-base-300">
+                <div className="card-body p-4">
+                    <div className="flex items-center gap-4">
+                        {/* Logo */}
+                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-base-100 flex-shrink-0 flex items-center justify-center border border-base-300">
+                            {job.company.logo_url ? (
+                                <img
+                                    src={job.company.logo_url}
+                                    alt={`${job.company.name} logo`}
+                                    className="w-full h-full object-contain p-1"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                        const parent =
+                                            e.currentTarget.parentElement;
+                                        if (parent) {
+                                            parent.innerHTML =
+                                                '<i class="fa-duotone fa-building text-2xl text-base-content/30"></i>';
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <i className="fa-duotone fa-building text-2xl text-base-content/30" />
+                            )}
+                        </div>
+
+                        {/* Name + Website */}
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-lg font-bold truncate">
+                                {job.company.name}
+                            </h4>
+                            {websiteUrl ? (
+                                <a
+                                    href={websiteUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="link link-primary text-sm inline-flex items-center gap-1"
+                                >
+                                    <i className="fa-duotone fa-external-link text-xs" />
+                                    {job.company.website?.replace(
+                                        /^https?:\/\/(www\.)?/,
+                                        "",
+                                    )}
+                                </a>
+                            ) : (
+                                <span className="text-sm text-base-content/40">
+                                    No website listed
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Company Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Industry */}
+                <div className="bg-base-200/50 p-3 rounded-lg">
+                    <div className="text-base-content/60 mb-1">
+                        <i className="fa-duotone fa-industry mr-1" />
+                        Industry
+                    </div>
+                    <div className="font-medium text-sm">
+                        {job.company.industry || (
+                            <span className="text-base-content/40">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex-1">
-                    <h4 className="text-lg font-bold mb-2">
-                        {job.company.name}
-                    </h4>
-
-                    {/* Company Info Badges - always show all */}
-                    <div className="flex flex-wrap gap-2 mb-2">
-                        {/* Industry */}
-                        <span
-                            className={
-                                job.company.industry
-                                    ? "badge badge-primary"
-                                    : "badge badge-ghost"
-                            }
-                        >
-                            <i className="fa-duotone fa-industry mr-1" />
-                            {job.company.industry || "Not provided"}
-                        </span>
-
-                        {/* Company Size */}
-                        <span
-                            className={
-                                job.company.company_size
-                                    ? "badge badge-secondary"
-                                    : "badge badge-ghost"
-                            }
-                        >
-                            <i className="fa-duotone fa-users mr-1" />
-                            {job.company.company_size || "Not provided"}
-                        </span>
-
-                        {/* Location */}
-                        <span
-                            className={
-                                job.company.headquarters_location
-                                    ? "badge badge-accent"
-                                    : "badge badge-ghost"
-                            }
-                        >
-                            <i className="fa-duotone fa-location-dot mr-1" />
-                            {job.company.headquarters_location ||
-                                "Not provided"}
-                        </span>
+                {/* Company Size */}
+                <div className="bg-base-200/50 p-3 rounded-lg">
+                    <div className="text-base-content/60 mb-1">
+                        <i className="fa-duotone fa-users mr-1" />
+                        Company Size
                     </div>
+                    <div className="font-medium text-sm">
+                        {job.company.company_size || (
+                            <span className="text-base-content/40">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
+                </div>
 
-                    {/* Website - always show */}
-                    <div className="mt-2">
-                        {job.company.website ? (
-                            <a
-                                href={
-                                    job.company.website.startsWith("http")
-                                        ? job.company.website
-                                        : `https://${job.company.website}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="link link-primary text-sm"
-                            >
-                                <i className="fa-duotone fa-external-link mr-1" />
-                                Visit Website
-                            </a>
-                        ) : (
-                            <span className="text-sm text-base-content/50">
-                                <i className="fa-duotone fa-external-link mr-1" />
-                                Website not provided
+                {/* Headquarters */}
+                <div className="bg-base-200/50 p-3 rounded-lg">
+                    <div className="text-base-content/60 mb-1">
+                        <i className="fa-duotone fa-location-dot mr-1" />
+                        Headquarters
+                    </div>
+                    <div className="font-medium text-sm">
+                        {job.company.headquarters_location || (
+                            <span className="text-base-content/40">
+                                Not provided
                             </span>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Company Description - always show */}
-            <div className="bg-base-100 p-4 rounded-lg border border-base-300">
-                {job.company.description ? (
-                    <p className="text-sm text-base-content/80 whitespace-pre-wrap">
-                        {job.company.description}
-                    </p>
-                ) : (
-                    <p className="text-sm text-base-content/50 text-center italic">
-                        Company description not provided
-                    </p>
-                )}
+            {/* About Section */}
+            <div className="card bg-base-100 shadow-sm border border-base-300">
+                <div className="card-body p-4">
+                    <h4 className="card-title text-sm mb-2">
+                        <i className="fa-duotone fa-memo text-primary mr-1" />
+                        About
+                    </h4>
+                    {job.company.description ? (
+                        <p className="text-sm text-base-content/80 whitespace-pre-wrap leading-relaxed">
+                            {job.company.description}
+                        </p>
+                    ) : (
+                        <div className="p-4 text-center text-base-content/40">
+                            <i className="fa-duotone fa-memo-circle-info text-2xl mb-2 block opacity-50" />
+                            <p className="text-sm">
+                                No company description available
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </section>
     );
