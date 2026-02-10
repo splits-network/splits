@@ -220,10 +220,12 @@ export class DataLookupHelper {
         }
 
         // Flatten the response structure
+        // users is an array from the join, so we need to access the first element
+        const userInfo = Array.isArray(data.users) ? data.users[0] : data.users;
         return {
             ...data,
-            name: data.users?.name,
-            email: data.users?.email,
+            name: userInfo?.name,
+            email: userInfo?.email,
         };
     }
 

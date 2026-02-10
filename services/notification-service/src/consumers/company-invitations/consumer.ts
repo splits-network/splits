@@ -52,7 +52,7 @@ export class CompanyInvitationsConsumer {
 
         try {
             // Fetch recruiter bio if recruiter_id is available
-            let recruiterBio = null;
+            let recruiterBio: string | undefined = undefined;
             if (recruiter_id) {
                 const recruiter = await this.dataLookup.getRecruiterWithBio(recruiter_id);
                 if (recruiter && recruiter.bio) {

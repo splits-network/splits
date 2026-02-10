@@ -1,130 +1,112 @@
 # Analytics Service
 
-**Status**: ✅ V2 ONLY SERVICE - Event-driven analytics and metrics
+**Status**: ✅ V2 only
 
-## Service Overview
+Event-driven analytics, chart data, and marketplace health metrics. Exposes REST endpoints for stats, charts, marketplace metrics, and proposal summaries, and consumes domain events to update aggregates and invalidate cache.
 
-The Analytics Service provides event-driven metrics aggregation, chart data endpoints, and marketplace health statistics using **V2-only architecture**. Replaces expensive real-time aggregations from data services.
+## Responsibilities
 
-## Architecture Guidelines
+- **Stats API**: Recruiter, candidate, company, and platform metrics.
+- **Charts API**: Chart.js-ready time series datasets.
+- **Marketplace metrics**: Admin CRUD for daily health snapshots.
+- **Proposal stats**: Recruiter-facing proposal summary counts.
+- **Event processing**: Consume domain events, store raw analytics events, update aggregates, and invalidate cache.
+- **Background rollups**: Hourly/daily/monthly aggregation and daily marketplace health computation.
 
-### ✅ V2 Patterns ONLY
+## Architecture
 
-- All implementations use V2 standardized patterns
-- Domain-based folder structure under `src/v2/`
-- Event-driven aggregation via RabbitMQ consumers
-- Redis caching with smart invalidation
-- Pre-computed metrics in plain Postgres tables
+- V2 domain structure under `src/v2/`
+- Fastify API with Swagger at `/docs`
+- Supabase for analytics tables and RPCs
+- Redis cache with event-driven invalidation
+- RabbitMQ consumer for domain events
 
-## Core Responsibilities
+## Environment Variables
 
-### Event Processing
+Required:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RABBITMQ_URL`
+- `REDIS_HOST`
+- `REDIS_PORT`
 
-- **RabbitMQ Consumers**: Listen to application._, placement._, job._, candidate._ events
-- **Incremental Updates**: Update metrics tables on every relevant event
-- **Event Replay**: Dead-letter queue + manual backfill for missed events
+Optional:
+- `REDIS_PASSWORD`
+- `PORT` (default `3010`)
 
-### Metrics Aggregation
+## Authentication
 
-- **Real-time Stats**: User-scoped metrics (replaces ATS `/api/v2/stats`)
-- **Hourly Rollups**: Background job aggregates events into hourly metrics
-- **Daily Rollups**: Aggregates hourly metrics into daily snapshots
-- **Monthly Rollups**: Aggregates daily metrics for long-term trends
+All API endpoints require `x-clerk-user-id`. Marketplace metrics endpoints additionally require platform-admin access.
 
-### Chart Data
+## API
 
-- **Pre-computed Datasets**: Return chart-ready JSON (labels + datasets)
-- **Multiple Periods**: Support 3M, 6M, 12M, 24M period filters
-- **Chart Types**: Recruiter activity, application trends, placement trends, role trends, candidate trends
+- `GET /api/v2/stats`
+  - Query: `scope` (`recruiter|candidate|company|platform`), `range` (`7d|30d|90d|ytd|mtd|all` or `Nd|Nw|Nm`)
+- `GET /api/v2/charts/:type`
+  - Types: `recruiter-activity`, `application-trends`, `placement-trends`, `role-trends`, `candidate-trends`, `time-to-hire-trends`
+  - Query: `months`, `start_date`, `end_date`, `recruiter_id`, `company_id`, `scope`
+- `GET /api/v2/marketplace-metrics`
+- `GET /api/v2/marketplace-metrics/:id`
+- `POST /api/v2/marketplace-metrics`
+- `PATCH /api/v2/marketplace-metrics/:id`
+- `DELETE /api/v2/marketplace-metrics/:id`
+- `GET /api/v2/proposal-stats/summary`
 
-### Marketplace Health
+Other:
+- `GET /health`
+- `GET /docs`
 
-- **Daily Snapshots**: Platform-wide health metrics (admin dashboard)
-- **Computed Fields**: hire_rate, avg_time_to_hire, placement_completion_rate
-- **Trend Analysis**: Compare current vs previous period
+## Events
 
-## Current Domains
+Consumed from RabbitMQ exchange `splits-network-events` (queue `analytics-service-queue`):
+- `application.*`
+- `placement.*`
+- `job.*`
+- `candidate.*`
+- `recruiter.*`
+- `proposal.*`
 
-### Events (`src/v2/events/`)
+The consumer expects events shaped like:
+```json
+{ "eventType": "application.created", "data": { ... }, "timestamp": "..." }
+```
 
-- **Repository**: Raw event ingestion to `analytics.events` table
-- **Service**: Event validation and enrichment
-- **Routes**: POST /v2/analytics/events (internal only, not exposed to API gateway)
+## Data Storage
 
-### Metrics (`src/v2/metrics/`)
+- `analytics.events` (raw event log)
+- `analytics.metrics_hourly`, `analytics.metrics_daily`, `analytics.metrics_monthly`
+- `analytics.marketplace_health_daily`
+- `marketplace_metrics_daily` (public schema) is used for platform stats
+- `analytics.get_chart_metrics` RPC is used for chart datasets
 
-- **Repository**: Read from `analytics.metrics_*` tables with access context
-- **Service**: Migrated stats logic from ATS service
-- **Routes**: GET /v2/analytics/stats (replaces ATS /v2/stats)
+Note: company stats currently fall back to real-time queries against ATS tables if pre-aggregated metrics are not available.
 
-### Charts (`src/v2/charts/`)
+## Background Jobs
 
-- **Repository**: Query metrics_monthly for trend data
-- **Service**: Format data for Chart.js consumption
-- **Routes**: GET /v2/analytics/charts/:type (recruiter-activity, application-trends, etc.)
+- Hourly rollup (every hour at :05)
+- Daily rollup (01:00 UTC, clears analytics cache)
+- Monthly rollup (02:00 UTC on the 1st)
+- Marketplace health computation (03:00 UTC daily)
 
-### Marketplace Health (`src/v2/marketplace-health/`)
+## Development
 
-- **Repository**: Daily marketplace metrics (migrated from automation service)
-- **Service**: Compute platform-wide health indicators
-- **Routes**: GET /v2/analytics/marketplace-health (admin-only)
+```bash
+# Install dependencies (from repo root)
+pnpm install
 
-## Database Schema
+# Run in dev mode
+pnpm --filter @splits-network/analytics-service dev
 
-### Analytics Schema (`analytics.*`)
+# Build
+pnpm --filter @splits-network/analytics-service build
 
-- `events` - Raw event stream with BRIN indexes on timestamp
-- `metrics_hourly` - Hourly aggregated metrics
-- `metrics_daily` - Daily aggregated metrics
-- `metrics_monthly` - Monthly aggregated metrics
-- `marketplace_health_daily` - Platform-wide daily snapshots
+# Run production
+pnpm --filter @splits-network/analytics-service start
+```
 
-## Development Guidelines
+## Docker
 
-### Adding New Metrics
-
-1. Define metric type in `src/v2/metrics/types.ts`
-2. Add consumer logic in `src/consumers/<domain>/` to update metrics on events
-3. Add aggregation logic in `src/jobs/<period>-rollup.ts` for background jobs
-4. Expose via `/api/v2/analytics/stats` or `/api/v2/analytics/charts/:type` endpoints
-
-### Cache Strategy
-
-- **1-minute TTL**: Real-time stats (dashboard widgets)
-- **5-minute TTL**: Chart data endpoints
-- **1-hour TTL**: Historical reports and exports
-- **Invalidation**: Clear relevant cache keys on domain events
-
-### Background Jobs
-
-- **Hourly Rollup**: Every hour at :05 (aggregate last hour's events)
-- **Daily Rollup**: Every day at 1:00 AM UTC (aggregate yesterday's hourly metrics)
-- **Monthly Rollup**: Every 1st day of month at 2:00 AM UTC
-- **Marketplace Health**: Every day at 3:00 AM UTC (compute platform metrics)
-
-## Testing & Debugging
-
-### Local Development
-
-- Service runs on port 3007 by default
-- Requires RabbitMQ connection for event consumers
-- Requires Redis connection for caching
-- Swagger docs available at `/docs` endpoint
-
-### Event Testing
-
-- Monitor RabbitMQ for domain events
-- Check `analytics.events` table for raw event storage
-- Verify metrics tables update incrementally
-- Test cache invalidation on new events
-
-### Database Testing
-
-- Test role-based filtering with different user contexts
-- Verify aggregation accuracy (sum events = aggregated metric)
-- Test chart data format matches Chart.js expectations
-
----
-
-**Last Updated**: January 13, 2026  
-**Version**: 1.0.0 - Initial implementation
+```bash
+docker-compose build analytics-service
+docker-compose up -d analytics-service
+```

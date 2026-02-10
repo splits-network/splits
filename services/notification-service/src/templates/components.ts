@@ -3,7 +3,7 @@
  * Pre-built UI elements matching Splits Network brand
  */
 
-import { marked } from 'marked';
+import { renderMarkdownToHTMLSync } from '../utils/markdown-renderer';
 
 export interface ButtonProps {
     href: string;
@@ -213,38 +213,33 @@ export function badge({ text, variant = 'neutral' }: BadgeProps): string {
 
 /**
  * Convert markdown to HTML for email templates
- * Renders markdown content safely for email display
+ * Uses the same renderer as the frontend for consistency
  */
 export function markdownToHtml(content: string): string {
     if (!content) return '';
 
-    // Configure marked for email-safe HTML
-    marked.setOptions({
-        breaks: true,    // Convert line breaks to <br>
-        gfm: true,       // GitHub Flavored Markdown
-        sanitize: false, // We're not in a browser environment
-        silent: true,    // Don't throw on errors
-    });
-
     try {
-        const html = marked(content);
+        // Use the existing markdown renderer with email-safe styling
+        let html = renderMarkdownToHTMLSync(content);
 
-        // Apply email-safe styling to common elements
-        return html
+        // Apply additional email-specific styling
+        html = html
             .replace(/<p>/g, '<p style="margin: 8px 0; line-height: 1.5;">')
             .replace(/<h1>/g, '<h1 style="margin: 16px 0 8px 0; font-size: 24px; font-weight: 600; color: #233876;">')
             .replace(/<h2>/g, '<h2 style="margin: 12px 0 6px 0; font-size: 20px; font-weight: 600; color: #233876;">')
             .replace(/<h3>/g, '<h3 style="margin: 8px 0 4px 0; font-size: 18px; font-weight: 600; color: #233876;">')
+            .replace(/<a\s/g, '<a style="color: #233876; text-decoration: none; font-weight: 600;" ')
+            .replace(/<strong>/g, '<strong style="font-weight: 600;">')
+            .replace(/<em>/g, '<em style="font-style: italic;">')
+            .replace(/<code>/g, '<code style="background: #f1f5f9; padding: 2px 4px; border-radius: 3px; font-family: monospace; font-size: 14px;">')
             .replace(/<ul>/g, '<ul style="margin: 8px 0; padding-left: 20px; line-height: 1.5;">')
             .replace(/<ol>/g, '<ol style="margin: 8px 0; padding-left: 20px; line-height: 1.5;">')
             .replace(/<li>/g, '<li style="margin: 4px 0;">')
-            .replace(/<strong>/g, '<strong style="font-weight: 600;">')
-            .replace(/<em>/g, '<em style="font-style: italic;">')
-            .replace(/<a/g, '<a style="color: #233876; text-decoration: none; font-weight: 600;"')
-            .replace(/<code>/g, '<code style="background: #f1f5f9; padding: 2px 4px; border-radius: 3px; font-family: monospace; font-size: 14px;">')
             .replace(/<blockquote>/g, '<blockquote style="margin: 16px 0; padding: 8px 16px; border-left: 4px solid #233876; background: #f8fafc; font-style: italic;">');
+
+        return html;
     } catch (error) {
-        // Fallback to plain text if markdown parsing fails
+        console.warn('Failed to render markdown content:', error);
         return content.replace(/\n/g, '<br>');
     }
 }

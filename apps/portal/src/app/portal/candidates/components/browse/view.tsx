@@ -17,6 +17,7 @@ export default function BrowseView() {
     const searchParams = useSearchParams();
 
     const selectedId = searchParams.get("candidateId");
+    const selectedItem = selectedId ? data.find((c) => c.id === selectedId) || null : null;
     const totalPages = pagination?.total_pages || 1;
 
     const handleSelect = useCallback(
@@ -101,7 +102,7 @@ export default function BrowseView() {
                 }`}
             >
                 {selectedId ? (
-                    <DetailPanel id={selectedId} onClose={handleClose} />
+                    <DetailPanel id={selectedId} item={selectedItem} onClose={handleClose} />
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-base-content/60">
                         <div className="text-center">

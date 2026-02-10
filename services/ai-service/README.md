@@ -1,75 +1,72 @@
 # AI Service
 
-**Status**: ✅ V2 ONLY - All legacy V1 implementations removed
+**Status**: ✅ V2 only
 
-Centralized AI service for all OpenAI integrations and AI-powered features.
+AI-powered service for candidate-job fit reviews. It exposes REST endpoints for AI reviews and listens to domain events to auto-trigger reviews when applications enter the `ai_review` stage.
 
 ## Responsibilities
 
-- **AI Reviews**: Analyzes candidate-job fit using OpenAI  
-- **Candidate Matching**: AI-powered job matching (future)
-- **Fraud Detection**: AI-assisted anomaly detection (future)  
-- **Content Generation**: Job descriptions, candidate summaries (future)
+- **AI reviews**: Analyze candidate-job fit using OpenAI and persist results.
+- **Event-driven automation**: Trigger reviews on `application.created` or `application.stage_changed`.
+- **Future expansion**: Candidate matching, fraud detection, content generation (not implemented yet).
 
-## V2 Architecture ✅
+## Architecture
 
-This service uses **V2 patterns exclusively**:
-- Domain-based folder structure (`src/v2/`)
-- Repository pattern with Supabase
-- Service layer with business logic
-- Event publishing to RabbitMQ
-- 5-route CRUD pattern where applicable
-- **No legacy V1 code remains**
+- V2 domain structure under `src/v2/`
+- Repository + service layers backed by Supabase
+- Fastify API with Swagger at `/docs`
+- RabbitMQ publisher + consumer for domain events
 
 ## Environment Variables
 
 Required:
-- `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_KEY`: Supabase service role key
-- `RABBITMQ_URL`: RabbitMQ connection string
-- `OPENAI_API_KEY`: OpenAI API key
-- `PORT`: Service port (default: 3009)
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY` (service role key is preferred; see below)
+- `RABBITMQ_URL`
+- `OPENAI_API_KEY`
 
-## API Endpoints
+Recommended:
+- `SUPABASE_SERVICE_ROLE_KEY` (used if present, falls back to `SUPABASE_ANON_KEY`)
+- `INTERNAL_SERVICE_KEY` (enables internal service auth via `x-internal-service-key`)
+- `ATS_SERVICE_URL` (defaults to `http://ats-service:3003`)
+- `OPENAI_MODEL` (defaults to `gpt-4o-mini`)
+- `PORT` (defaults to `3009`)
+- `NODE_ENV`
 
-### V2 AI Review
-- `POST /api/v2/ai-reviews` - Create new AI review for application
-- `GET /api/v2/ai-reviews/:id` - Get AI review by ID
-- `GET /api/v2/ai-reviews` - List AI reviews with filters
+Optional:
+- `SENTRY_DSN`
+- `SENTRY_RELEASE`
+
+## API
+
+All endpoints require `x-clerk-user-id` unless the caller is an internal service using `x-internal-service-key`.
+
+- `POST /api/v2/ai-reviews`
+  - Creates a new AI review. You can pass minimal data (just `application_id`), and the service will fetch full application context from ATS.
+  - Optional inputs include `resume_text`, `job_description`, `job_title`, `required_skills`, `preferred_skills`, and `auto_transition`.
+- `GET /api/v2/ai-reviews/:id`
+  - Fetch a review by ID.
+- `GET /api/v2/ai-reviews`
+  - List reviews with filters: `application_id`, `job_id`, `fit_score_min`, `fit_score_max`, `recommendation`, `page`, `limit`.
+- `GET /api/v2/ai-reviews/stats/:jobId`
+  - Aggregate review stats for a job.
 
 ## Events
 
-### Consumed Events (Listens For)
+Consumed:
+- `application.created` (triggers review only when created in `ai_review` stage)
+- `application.stage_changed` (triggers review when transitioning to `ai_review`)
 
-| Event | Exchange | Routing Key | Description |
-|-------|----------|-------------|-------------|
-| `application.created` | `splits-network-events` | `application.created` | Triggers AI review when new application is submitted |
+Published:
+- `ai_review.started`
+- `ai_review.completed`
+- `ai_review.failed`
 
-### Published Events (Publishes)
+## Data Storage
 
-| Event | Exchange | Routing Key | Description |
-|-------|----------|-------------|-------------|
-| `ai_review.completed` | `splits-network-events` | `ai_review.completed` | Published when AI review analysis is complete |
-| `ai_review.failed` | `splits-network-events` | `ai_review.failed` | Published when AI review analysis fails |
-
-**Event Payload** (`ai_review.completed`):
-```typescript
-{
-  review_id: string;
-  application_id: string;
-  candidate_id: string;
-  job_id: string;
-  fit_score: number;
-  recommendation: 'good_fit' | 'poor_fit' | 'review_recommended';
-  analysis_completed_at: string;
-}
-```
-
-## Database Schema
-
-Uses `ai.*` schema in Supabase:
-- `ai.reviews` - AI review results (fit score, analysis)
-- Future: `ai.matches`, `ai.fraud_signals`, etc.
+Reviews are stored in the `ai_reviews` table (Supabase). Responses are shaped to include:
+- `skills_match: { match_percentage, matched_skills, missing_skills }`
+- `experience_analysis: { candidate_years, required_years, meets_requirement }`
 
 ## Development
 
