@@ -103,13 +103,28 @@ function getQuestionTypeIcon(type: string): string {
         checkbox: "fa-square-check",
         file: "fa-file",
         multi_select: "fa-list-check",
+        yes_no: "fa-toggle-on",
+        number: "fa-hashtag",
+        date: "fa-calendar",
     };
     return iconMap[type] || "fa-question";
 }
 
 function formatQuestionType(type: string): string {
     if (!type) return "Text";
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    const labelMap: Record<string, string> = {
+        text: "Short Text",
+        textarea: "Long Text",
+        select: "Dropdown",
+        radio: "Single Choice",
+        checkbox: "Checkbox",
+        file: "File Upload",
+        multi_select: "Multi-Select",
+        yes_no: "Yes / No",
+        number: "Number",
+        date: "Date",
+    };
+    return labelMap[type] || type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ===== MAIN COMPONENT =====
@@ -621,54 +636,79 @@ function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
         );
     }
 
+    const requiredCount =
+        job.pre_screen_questions?.filter((q) => q.is_required).length || 0;
+    const optionalCount =
+        (job.pre_screen_questions?.length || 0) - requiredCount;
+
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold flex items-center gap-2">
-                    <i className="fa-duotone fa-clipboard-question text-primary" />
-                    Pre-Screen Questions
-                </h3>
-                <span className="badge badge-secondary">
-                    {job.pre_screen_questions?.length} question
-                    {job.pre_screen_questions?.length !== 1 ? "s" : ""}
-                </span>
+            <h3 className="text-base font-bold flex items-center gap-2">
+                <i className="fa-duotone fa-clipboard-question text-primary" />
+                Pre-Screen Questions
+            </h3>
+
+            {/* Summary Stats */}
+            <div className="grid grid-cols-3 gap-3">
+                <div className="bg-base-200/50 p-3 rounded-lg text-center">
+                    <div className="text-xl font-bold">
+                        {job.pre_screen_questions?.length}
+                    </div>
+                    <div className="text-xs text-base-content/60">Total</div>
+                </div>
+                <div className="bg-base-200/50 p-3 rounded-lg text-center">
+                    <div className="text-xl font-bold text-error">
+                        {requiredCount}
+                    </div>
+                    <div className="text-xs text-base-content/60">Required</div>
+                </div>
+                <div className="bg-base-200/50 p-3 rounded-lg text-center">
+                    <div className="text-xl font-bold text-base-content/60">
+                        {optionalCount}
+                    </div>
+                    <div className="text-xs text-base-content/60">Optional</div>
+                </div>
             </div>
 
+            {/* Questions List */}
             <div className="space-y-3">
                 {job.pre_screen_questions
-                    ?.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+                    ?.sort(
+                        (a, b) =>
+                            (a.sort_order || 0) - (b.sort_order || 0),
+                    )
                     .map((question, index) => (
                         <div
                             key={question.id}
-                            className="flex items-start gap-3 p-4 bg-base-100 border border-base-300 rounded-lg"
+                            className="card bg-base-100 shadow-sm border border-base-300"
                         >
-                            {/* Question Number */}
-                            <span className="badge badge-secondary badge-lg font-bold flex-shrink-0">
-                                {index + 1}
-                            </span>
-
-                            {/* Question Content */}
-                            <div className="flex-1 min-w-0">
-                                {/* Badges Row */}
-                                <div className="flex items-center gap-2 flex-wrap mb-2">
-                                    {question.is_required && (
-                                        <span className="badge badge-error badge-sm">
-                                            <i className="fa-duotone fa-asterisk mr-1" />
-                                            Required
-                                        </span>
-                                    )}
-                                    <span className="badge badge-soft badge-info badge-sm">
+                            <div className="card-body p-4">
+                                {/* Header Row: Number + Badges */}
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="w-7 h-7 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                        {index + 1}
+                                    </span>
+                                    <span className="badge badge-ghost badge-sm gap-1">
                                         <i
-                                            className={`fa-duotone ${getQuestionTypeIcon(question.question_type || "text")} mr-1`}
+                                            className={`fa-duotone ${getQuestionTypeIcon(question.question_type || "text")} text-xs`}
                                         />
                                         {formatQuestionType(
                                             question.question_type || "text",
                                         )}
                                     </span>
+                                    {question.is_required ? (
+                                        <span className="badge badge-error badge-sm">
+                                            Required
+                                        </span>
+                                    ) : (
+                                        <span className="badge badge-ghost badge-sm">
+                                            Optional
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* Question Text */}
-                                <p className="font-medium text-base mb-3">
+                                <p className="font-medium text-sm">
                                     {question.question}
                                 </p>
 
@@ -676,26 +716,29 @@ function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
                                 {question.options &&
                                     Array.isArray(question.options) &&
                                     question.options.length > 0 && (
-                                        <div>
-                                            <div className="text-sm font-semibold text-base-content/70 mb-2">
-                                                Available Options:
+                                        <div className="mt-3 pt-3 border-t border-base-200">
+                                            <div className="text-xs font-medium text-base-content/50 mb-2">
+                                                <i className="fa-duotone fa-list-radio mr-1" />
+                                                {question.options.length} option
+                                                {question.options.length !== 1
+                                                    ? "s"
+                                                    : ""}
                                             </div>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-1.5">
                                                 {question.options.map(
-                                                    (option, idx) => (
+                                                    (
+                                                        option: any,
+                                                        idx: number,
+                                                    ) => (
                                                         <span
                                                             key={idx}
-                                                            className="badge badge-outline badge-info"
+                                                            className="badge badge-sm bg-base-200 border-base-300"
                                                         >
                                                             {typeof option ===
                                                             "string"
                                                                 ? option
-                                                                : (
-                                                                      option as any
-                                                                  )?.label ||
-                                                                  (
-                                                                      option as any
-                                                                  )?.value ||
+                                                                : option?.label ||
+                                                                  option?.value ||
                                                                   String(
                                                                       option,
                                                                   )}
