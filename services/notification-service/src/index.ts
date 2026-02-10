@@ -114,12 +114,19 @@ async function main() {
         eventPublisher: v2EventPublisher,
     });
 
+    // Create Supabase client for health checks
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
     // Register standardized health check
     registerHealthCheck(app, {
         serviceName: 'notification-service',
         logger,
         checkers: {
-            database: HealthCheckers.database(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey),
+            database: HealthCheckers.database(supabaseClient),
             ...(v2EventPublisher && {
                 rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
             }),

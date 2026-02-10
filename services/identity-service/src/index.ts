@@ -107,12 +107,19 @@ async function main() {
         logger,
     });
 
+    // Create Supabase client for health checks
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
     // Register standardized health check with dependency monitoring
     registerHealthCheck(app, {
         serviceName: 'identity-service',
         logger,
         checkers: {
-            database: HealthCheckers.database(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey),
+            database: HealthCheckers.database(supabaseClient),
             ...(eventPublisher && {
                 rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
             }),

@@ -115,6 +115,13 @@ async function main() {
         logger,
     );
 
+    // Create Supabase client for health check
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
     // Register V2 routes (passing the same service instance)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
@@ -144,7 +151,7 @@ async function main() {
         serviceName: 'ai-service',
         logger,
         checkers: {
-            database: HealthCheckers.database(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey),
+            database: HealthCheckers.database(supabaseClient),
             ...(eventPublisher && {
                 rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
             }),

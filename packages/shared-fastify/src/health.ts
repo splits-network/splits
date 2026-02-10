@@ -53,16 +53,22 @@ export interface HealthCheckOptions {
  */
 export class HealthCheckers {
     /**
-     * Create a Supabase database health checker
+     * Create a Supabase database health checker  
+     * NOTE: Pass the actual Supabase client instance instead of trying to create one
      */
-    static database(supabaseUrl: string, supabaseKey: string): HealthChecker {
+    static database(supabaseClient: any): HealthChecker {
         return async (): Promise<HealthCheckResult> => {
             try {
-                const { createClient } = require('@supabase/supabase-js');
-                const supabase = createClient(supabaseUrl, supabaseKey);
+                if (!supabaseClient) {
+                    return {
+                        status: 'unhealthy',
+                        name: 'database',
+                        error: 'Supabase client not provided'
+                    };
+                }
 
                 // Simple query to test connectivity
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('users')
                     .select('id')
                     .limit(1);
@@ -93,10 +99,19 @@ export class HealthCheckers {
     static rabbitMqPublisher(eventPublisher: any): HealthChecker {
         return async (): Promise<HealthCheckResult> => {
             try {
-                const isConnected = eventPublisher?.isConnected() ?? false;
-                const hasChannel = eventPublisher?.channel && !eventPublisher.channel.closed;
+                if (!eventPublisher) {
+                    return {
+                        status: 'unhealthy',
+                        name: 'rabbitmq_publisher',
+                        error: 'Event publisher not provided'
+                    };
+                }
 
-                if (isConnected && hasChannel) {
+                // Check if connection and channel exist and are not closed
+                const hasConnection = eventPublisher.connection && !eventPublisher.connection.connection?.closed;
+                const hasChannel = eventPublisher.channel && !eventPublisher.channel.closed;
+
+                if (hasConnection && hasChannel) {
                     return {
                         status: 'healthy',
                         name: 'rabbitmq_publisher',
@@ -105,7 +120,7 @@ export class HealthCheckers {
                             channel_open: true
                         }
                     };
-                } else if (isConnected) {
+                } else if (hasConnection) {
                     return {
                         status: 'degraded',
                         name: 'rabbitmq_publisher',
@@ -140,10 +155,19 @@ export class HealthCheckers {
     static rabbitMqConsumer(eventConsumer: any): HealthChecker {
         return async (): Promise<HealthCheckResult> => {
             try {
-                const isConnected = eventConsumer?.isConnected() ?? false;
-                const hasChannel = eventConsumer?.channel && !eventConsumer.channel.closed;
+                if (!eventConsumer) {
+                    return {
+                        status: 'unhealthy',
+                        name: 'rabbitmq_consumer',
+                        error: 'Event consumer not provided'
+                    };
+                }
 
-                if (isConnected && hasChannel) {
+                // Check if connection and channel exist and are not closed
+                const hasConnection = eventConsumer.connection && !eventConsumer.connection.closed;
+                const hasChannel = eventConsumer.channel && !eventConsumer.channel.closed;
+
+                if (hasConnection && hasChannel) {
                     return {
                         status: 'healthy',
                         name: 'rabbitmq_consumer',
@@ -152,7 +176,7 @@ export class HealthCheckers {
                             channel_open: true
                         }
                     };
-                } else if (isConnected) {
+                } else if (hasConnection) {
                     return {
                         status: 'degraded',
                         name: 'rabbitmq_consumer',
