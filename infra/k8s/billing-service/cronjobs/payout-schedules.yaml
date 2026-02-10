@@ -1,91 +1,94 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: billing-service-payout-schedules
-  namespace: splits-network
-  labels:
-    app: billing-service
-    component: cron
-    job-type: payout-schedules
-spec:
-  # Run hourly by default; change to "0 2 * * *" for daily runs
-  # Examples: "0 * * * *" (hourly), "0 2 * * *" (daily)
-  schedule: "0 * * * *"
-  
-  # Keep last 3 successful and 3 failed jobs for debugging
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
-  
-  # Job template
-  jobTemplate:
-    metadata:
-      labels:
+    name: billing-service-payout-schedules
+    namespace: splits-network
+    labels:
         app: billing-service
         component: cron
         job-type: payout-schedules
-    spec:
-      # Give the job 10 minutes to complete
-      activeDeadlineSeconds: 600
-      
-      # Don't retry failed jobs automatically
-      backoffLimit: 0
-      
-      template:
+spec:
+    # Run hourly by default; change to "0 2 * * *" for daily runs
+    # Examples: "0 * * * *" (hourly), "0 2 * * *" (daily)
+    schedule: "0 * * * *"
+
+    # Keep last 3 successful and 3 failed jobs for debugging
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+
+    # Job template
+    jobTemplate:
         metadata:
-          labels:
-            app: billing-service
-            component: cron
-            job-type: payout-schedules
+            labels:
+                app: billing-service
+                component: cron
+                job-type: payout-schedules
         spec:
-          restartPolicy: Never
-          
-          containers:
-          - name: payout-schedules-processor
-            image: ${ACR_SERVER}/billing-service:${IMAGE_TAG}
-            imagePullPolicy: Always
-            
-            # Run the job script
-            command: ["node"]
-            args: ["dist/jobs/process-payout-schedules.js"]
-            
-            env:
-            # Supabase configuration
-            - name: SUPABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-url
-            - name: SUPABASE_SERVICE_ROLE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-service-role-key
-            
-            # RabbitMQ configuration
-            - name: RABBITMQ_URL
-              value: "amqp://splits:splits_production@rabbitmq:5672"
-            
-            # Stripe configuration
-            - name: STRIPE_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: stripe-secrets
-                  key: stripe-secret-key
-            
-            # Monitoring
-            - name: SENTRY_DSN
-              value: "https://6b530a49b41da476e4665d4ee35fbf71@o4510570789732352.ingest.us.sentry.io/4510570905403393"
-            
-            # Job configuration
-            - name: NODE_ENV
-              value: "production"
-            - name: LOG_LEVEL
-              value: "info"
-            
-            resources:
-              requests:
-                memory: "256Mi"
-                cpu: "250m"
-              limits:
-                memory: "512Mi"
-                cpu: "500m"
+            # Give the job 10 minutes to complete
+            activeDeadlineSeconds: 600
+
+            # Don't retry failed jobs automatically
+            backoffLimit: 0
+
+            template:
+                metadata:
+                    labels:
+                        app: billing-service
+                        component: cron
+                        job-type: payout-schedules
+                spec:
+                    restartPolicy: Never
+
+                    containers:
+                        - name: payout-schedules-processor
+                          image: ${ACR_SERVER}/billing-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+
+                          # Run the job script
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/billing-service/dist/jobs/process-payout-schedules.js",
+                              ]
+
+                          env:
+                              # Supabase configuration
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+
+                              # RabbitMQ configuration
+                              - name: RABBITMQ_URL
+                                value: "amqp://splits:splits_production@rabbitmq:5672"
+
+                              # Stripe configuration
+                              - name: STRIPE_SECRET_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: stripe-secrets
+                                        key: stripe-secret-key
+
+                              # Monitoring
+                              - name: SENTRY_DSN
+                                value: "https://6b530a49b41da476e4665d4ee35fbf71@o4510570789732352.ingest.us.sentry.io/4510570905403393"
+
+                              # Job configuration
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"
+
+                          resources:
+                              requests:
+                                  memory: "256Mi"
+                                  cpu: "250m"
+                              limits:
+                                  memory: "512Mi"
+                                  cpu: "500m"

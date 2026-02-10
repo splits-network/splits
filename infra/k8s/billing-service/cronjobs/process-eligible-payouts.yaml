@@ -1,56 +1,59 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: billing-process-eligible-payouts
-  namespace: splits-network
-  labels:
-    app: billing-service
-    component: cron
+    name: billing-process-eligible-payouts
+    namespace: splits-network
+    labels:
+        app: billing-service
+        component: cron
 spec:
-  # Run hourly by default; change to "0 2 * * *" for daily runs
-  # Examples: "0 * * * *" (hourly), "0 2 * * *" (daily)
-  schedule: "15 * * * *"
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
-  concurrencyPolicy: Forbid
-  jobTemplate:
-    spec:
-      activeDeadlineSeconds: 600
-      backoffLimit: 0
-      template:
-        metadata:
-          labels:
-            app: billing-service
-            component: cron-job
+    # Run hourly by default; change to "0 2 * * *" for daily runs
+    # Examples: "0 * * * *" (hourly), "0 2 * * *" (daily)
+    schedule: "15 * * * *"
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    jobTemplate:
         spec:
-          restartPolicy: Never
-          containers:
-            - name: billing-process-eligible-payouts
-              image: ${ACR_SERVER}/billing-service:${IMAGE_TAG}
-              imagePullPolicy: Always
-              command: ["node"]
-              args: ["dist/jobs/process-eligible-payouts.js"]
-              env:
-                - name: SUPABASE_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: supabase-secrets
-                      key: supabase-url
-                - name: SUPABASE_SERVICE_ROLE_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: supabase-secrets
-                      key: supabase-service-role-key
-                - name: RABBITMQ_URL
-                  value: "amqp://splits:splits_production@rabbitmq:5672"
-                - name: STRIPE_SECRET_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: stripe-secrets
-                      key: stripe-secret-key
-                - name: SENTRY_DSN
-                  value: "https://6b530a49b41da476e4665d4ee35fbf71@o4510570789732352.ingest.us.sentry.io/4510570905403393"
-                - name: NODE_ENV
-                  value: "production"
-                - name: LOG_LEVEL
-                  value: "info"
+            activeDeadlineSeconds: 600
+            backoffLimit: 0
+            template:
+                metadata:
+                    labels:
+                        app: billing-service
+                        component: cron-job
+                spec:
+                    restartPolicy: Never
+                    containers:
+                        - name: billing-process-eligible-payouts
+                          image: ${ACR_SERVER}/billing-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/billing-service/dist/jobs/process-eligible-payouts.js",
+                              ]
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: RABBITMQ_URL
+                                value: "amqp://splits:splits_production@rabbitmq:5672"
+                              - name: STRIPE_SECRET_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: stripe-secrets
+                                        key: stripe-secret-key
+                              - name: SENTRY_DSN
+                                value: "https://6b530a49b41da476e4665d4ee35fbf71@o4510570789732352.ingest.us.sentry.io/4510570905403393"
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"
