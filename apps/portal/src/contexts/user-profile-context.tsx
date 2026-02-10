@@ -155,7 +155,7 @@ interface UserProfileProviderProps {
 }
 
 export function UserProfileProvider({ children }: UserProfileProviderProps) {
-    const { getToken, isLoaded: isAuthLoaded } = useAuth();
+    const { getToken, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
     const { signOut } = useClerk();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -166,6 +166,12 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
 
     const fetchProfile = useCallback(async () => {
         if (!isAuthLoaded) return;
+
+        if (!isSignedIn) {
+            setProfile(null);
+            setIsLoading(false);
+            return;
+        }
 
         try {
             setIsLoading(true);
@@ -190,7 +196,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
             setIsLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthLoaded]);
+    }, [isAuthLoaded, isSignedIn]);
 
     useEffect(() => {
         fetchProfile();
