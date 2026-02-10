@@ -375,55 +375,101 @@ export default function RoleWizardModal({
                 toast.success("Role created successfully!");
             }
 
-            // Note: Requirements and pre-screen questions management for edit mode
-            // would require additional logic to handle updates/deletes
-            // For now, only handle creation mode for these
-            if (mode === "create") {
-                // Build requirements array
-                const requirements = [
-                    ...formData.mandatory_requirements
-                        .filter((r) => r.trim())
-                        .map((description) => ({
-                            type: "mandatory" as const,
-                            description,
-                        })),
-                    ...formData.preferred_requirements
-                        .filter((r) => r.trim())
-                        .map((description) => ({
-                            type: "preferred" as const,
-                            description,
-                        })),
-                ];
+            // Handle requirements and pre-screen questions for both create and edit modes
 
-                // Add requirements if any
-                if (requirements.length > 0) {
-                    await Promise.all(
-                        requirements.map((req) =>
-                            client.post("/job-requirements", {
+            // Build requirements array
+            const requirements = [
+                ...formData.mandatory_requirements
+                    .filter((r) => r.trim())
+                    .map((description) => ({
+                        type: "mandatory" as const,
+                        description,
+                    })),
+                ...formData.preferred_requirements
+                    .filter((r) => r.trim())
+                    .map((description) => ({
+                        type: "preferred" as const,
+                        description,
+                    })),
+            ];
+
+            // For edit mode, delete existing requirements and pre-screen questions first
+            if (mode === "edit") {
+                // Get existing requirements and delete them
+                try {
+                    const existingRequirementsResponse = await client.get<{
+                        data: any[];
+                    }>(`/job-requirements?job_id=${targetJobId}`);
+                    const existingRequirements =
+                        existingRequirementsResponse.data || [];
+
+                    if (existingRequirements.length > 0) {
+                        await Promise.all(
+                            existingRequirements.map((req) =>
+                                client.delete(`/job-requirements/${req.id}`),
+                            ),
+                        );
+                    }
+                } catch (err) {
+                    console.warn(
+                        "Failed to delete existing requirements:",
+                        err,
+                    );
+                }
+
+                // Get existing pre-screen questions and delete them
+                try {
+                    const existingQuestionsResponse = await client.get<{
+                        data: any[];
+                    }>(`/job-pre-screen-questions?job_id=${targetJobId}`);
+                    const existingQuestions =
+                        existingQuestionsResponse.data || [];
+
+                    if (existingQuestions.length > 0) {
+                        await Promise.all(
+                            existingQuestions.map((q) =>
+                                client.delete(
+                                    `/job-pre-screen-questions/${q.id}`,
+                                ),
+                            ),
+                        );
+                    }
+                } catch (err) {
+                    console.warn(
+                        "Failed to delete existing pre-screen questions:",
+                        err,
+                    );
+                }
+            }
+
+            // Add new requirements if any
+            if (requirements.length > 0) {
+                await Promise.all(
+                    requirements.map((req) =>
+                        client.post("/job-requirements", {
+                            job_id: targetJobId,
+                            requirement_type: req.type,
+                            description: req.description,
+                        }),
+                    ),
+                );
+            }
+
+            // Add new pre-screen questions if any
+            if (formData.pre_screen_questions.length > 0) {
+                await Promise.all(
+                    formData.pre_screen_questions
+                        .filter((q) => q.question.trim())
+                        .map((q) =>
+                            client.post("/job-pre-screen-questions", {
                                 job_id: targetJobId,
-                                requirement_type: req.type,
-                                description: req.description,
+                                question: q.question,
+                                question_type: q.question_type,
+                                is_required: q.is_required,
+                                options: q.options || null,
                             }),
                         ),
-                    );
-                }
-
-                // Add pre-screen questions if any
-                if (formData.pre_screen_questions.length > 0) {
-                    await Promise.all(
-                        formData.pre_screen_questions
-                            .filter((q) => q.question.trim())
-                            .map((q) =>
-                                client.post("/job-pre-screen-questions", {
-                                    job_id: targetJobId,
-                                    question: q.question,
-                                    question_type: q.question_type,
-                                    is_required: q.is_required,
-                                    options: q.options || null,
-                                }),
-                            ),
-                    );
-                }
+                );
             }
 
             onClose();

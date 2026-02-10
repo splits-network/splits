@@ -8,6 +8,8 @@ interface FeeInputProps {
   effectiveFee: number;
   onSalaryChange: (salary: number) => void;
   onFeePercentageChange: (percentage: number) => void;
+  /** Lock the fee percentage input (e.g. when it's set by the role) */
+  feeReadOnly?: boolean;
 }
 
 export function FeeInput({
@@ -16,6 +18,7 @@ export function FeeInput({
   effectiveFee,
   onSalaryChange,
   onFeePercentageChange,
+  feeReadOnly = false,
 }: FeeInputProps) {
   const salaryId = useId();
   const percentageId = useId();
@@ -55,14 +58,16 @@ export function FeeInput({
           <label htmlFor={percentageId} className="label">
             <span className="label-text font-medium">Fee %</span>
           </label>
-          <label className="input input-bordered flex items-center gap-2">
+          <label className={`input input-bordered flex items-center gap-2 ${feeReadOnly ? 'bg-base-200 cursor-not-allowed' : ''}`}>
             <input
               id={percentageId}
               type="number"
-              className="grow"
+              className={`grow ${feeReadOnly ? 'cursor-not-allowed' : ''}`}
               placeholder="20"
               value={feePercentage || ''}
-              onChange={(e) => onFeePercentageChange(Number(e.target.value))}
+              onChange={(e) => !feeReadOnly && onFeePercentageChange(Number(e.target.value))}
+              readOnly={feeReadOnly}
+              tabIndex={feeReadOnly ? -1 : undefined}
               min={0}
               max={100}
               step={1}

@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { formatRelativeTime } from "@/lib/utils/date-formatting";
 import { LoadingState } from "@splits-network/shared-ui";
+import { useUserProfile, PlanTier } from "@/contexts/user-profile-context";
+import { useCalculator } from "@/components/calculator/use-calculator";
+import { FeeInput } from "@/components/calculator/fee-input";
+import { RoleSelector } from "@/components/calculator/role-selector";
+import { TierComparison } from "@/components/calculator/tier-comparison";
+import { TIER_INFO } from "@/components/calculator/commission-rates";
+import type { RecruiterRole, Tier } from "@/components/calculator/types";
 
 // ===== TYPES =====
 
@@ -36,8 +43,13 @@ interface Job {
     show_salary_range?: boolean | null;
     open_to_relocation?: boolean | null;
     fee_percentage: number | null;
-    splits_fee_percentage?: number | null;
     status: "active" | "paused" | "filled" | "closed" | string | null;
+    // Role assignment fields (for payout calculator auto-detection)
+    job_owner_recruiter_id?: string | null;
+    company_recruiter_id?: string | null;
+    candidate_recruiter_id?: string | null;
+    candidate_sourcer_id?: string | null;
+    company_sourcer_id?: string | null;
     guarantee_days?: number | null;
     recruiter_description?: string | null;
     candidate_description?: string | null;
@@ -152,9 +164,7 @@ export default function DetailsView({
                             <i className="fa-duotone fa-clipboard mr-2" />
                             Overview
                         </a>
-                        {sections.requirements &&
-                            job.requirements &&
-                            job.requirements.length > 0 && (
+                        {sections.requirements && (
                                 <a
                                     role="tab"
                                     className={`tab ${activeTab === "requirements" ? "tab-active" : ""}`}
@@ -162,14 +172,14 @@ export default function DetailsView({
                                 >
                                     <i className="fa-duotone fa-list-check mr-2" />
                                     Requirements
-                                    <span className="badge badge-xs badge-primary ml-1">
-                                        {job.requirements.length}
-                                    </span>
+                                    {job.requirements && job.requirements.length > 0 && (
+                                        <span className="badge badge-xs badge-primary ml-1">
+                                            {job.requirements.length}
+                                        </span>
+                                    )}
                                 </a>
                             )}
-                        {sections.preScreen &&
-                            job.pre_screen_questions &&
-                            job.pre_screen_questions.length > 0 && (
+                        {sections.preScreen && (
                                 <a
                                     role="tab"
                                     className={`tab ${activeTab === "prescreen" ? "tab-active" : ""}`}
@@ -177,9 +187,11 @@ export default function DetailsView({
                                 >
                                     <i className="fa-duotone fa-clipboard-question mr-2" />
                                     Pre-Screen
-                                    <span className="badge badge-xs badge-secondary ml-1">
-                                        {job.pre_screen_questions.length}
-                                    </span>
+                                    {job.pre_screen_questions && job.pre_screen_questions.length > 0 && (
+                                        <span className="badge badge-xs badge-secondary ml-1">
+                                            {job.pre_screen_questions.length}
+                                        </span>
+                                    )}
                                 </a>
                             )}
                         {sections.financials && (
@@ -192,7 +204,7 @@ export default function DetailsView({
                                 Financials
                             </a>
                         )}
-                        {sections.company && job.company && (
+                        {sections.company && (
                             <a
                                 role="tab"
                                 className={`tab ${activeTab === "company" ? "tab-active" : ""}`}
@@ -226,29 +238,21 @@ export default function DetailsView({
                         </>
                     )}
 
-                    {activeTab === "requirements" &&
-                        sections.requirements &&
-                        job.requirements &&
-                        job.requirements.length > 0 && (
-                            <RequirementsSection job={job} compact={compact} />
-                        )}
+                    {activeTab === "requirements" && sections.requirements && (
+                        <RequirementsSection job={job} compact={compact} />
+                    )}
 
-                    {activeTab === "prescreen" &&
-                        sections.preScreen &&
-                        job.pre_screen_questions &&
-                        job.pre_screen_questions.length > 0 && (
-                            <PreScreenSection job={job} compact={compact} />
-                        )}
+                    {activeTab === "prescreen" && sections.preScreen && (
+                        <PreScreenSection job={job} compact={compact} />
+                    )}
 
                     {activeTab === "financials" && sections.financials && (
                         <FinancialsSection job={job} compact={compact} />
                     )}
 
-                    {activeTab === "company" &&
-                        sections.company &&
-                        job.company && (
-                            <CompanySection job={job} compact={compact} />
-                        )}
+                    {activeTab === "company" && sections.company && (
+                        <CompanySection job={job} compact={compact} />
+                    )}
                 </div>
             </div>
         );
@@ -273,18 +277,14 @@ export default function DetailsView({
             )}
 
             {/* Requirements Section */}
-            {sections.requirements &&
-                job.requirements &&
-                job.requirements.length > 0 && (
-                    <RequirementsSection job={job} compact={compact} />
-                )}
+            {sections.requirements && (
+                <RequirementsSection job={job} compact={compact} />
+            )}
 
             {/* Pre-Screen Questions Section */}
-            {sections.preScreen &&
-                job.pre_screen_questions &&
-                job.pre_screen_questions.length > 0 && (
-                    <PreScreenSection job={job} compact={compact} />
-                )}
+            {sections.preScreen && (
+                <PreScreenSection job={job} compact={compact} />
+            )}
 
             {/* Financials Section */}
             {sections.financials && (
@@ -292,7 +292,7 @@ export default function DetailsView({
             )}
 
             {/* Company Section */}
-            {sections.company && job.company && (
+            {sections.company && (
                 <CompanySection job={job} compact={compact} />
             )}
         </div>
@@ -515,6 +515,22 @@ function RequirementsSection({ job, compact }: { job: Job; compact: boolean }) {
     const preferredReqs =
         job.requirements?.filter((r) => r.requirement_type === "preferred") ||
         [];
+    const hasRequirements = mandatoryReqs.length > 0 || preferredReqs.length > 0;
+
+    if (!hasRequirements) {
+        return (
+            <section className={compact ? "space-y-3" : "space-y-4"}>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                    <i className="fa-duotone fa-list-check text-primary" />
+                    Requirements
+                </h3>
+                <div className="p-8 text-center text-base-content/60">
+                    <i className="fa-duotone fa-list-check text-3xl mb-3 block opacity-50" />
+                    <p className="text-sm">No requirements have been added for this role</p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
@@ -588,6 +604,23 @@ function RequirementsSection({ job, compact }: { job: Job; compact: boolean }) {
 
 // 4. Pre-Screen Questions Section
 function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
+    const hasQuestions = job.pre_screen_questions && job.pre_screen_questions.length > 0;
+
+    if (!hasQuestions) {
+        return (
+            <section className={compact ? "space-y-3" : "space-y-4"}>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                    <i className="fa-duotone fa-clipboard-question text-primary" />
+                    Pre-Screen Questions
+                </h3>
+                <div className="p-8 text-center text-base-content/60">
+                    <i className="fa-duotone fa-clipboard-question text-3xl mb-3 block opacity-50" />
+                    <p className="text-sm">No pre-screen questions have been added for this role</p>
+                </div>
+            </section>
+        );
+    }
+
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
             <div className="flex items-center justify-between mb-4">
@@ -680,8 +713,91 @@ function PreScreenSection({ job, compact }: { job: Job; compact: boolean }) {
     );
 }
 
+// ===== HELPERS =====
+
+/** Map PlanTier (user profile) to calculator Tier */
+function planTierToCalculatorTier(planTier: PlanTier): Tier {
+    const map: Record<PlanTier, Tier> = {
+        starter: "free",
+        pro: "paid",
+        partner: "premium",
+    };
+    return map[planTier] || "free";
+}
+
+/** Auto-detect recruiter's roles on this job by matching recruiter_id */
+function detectRolesForJob(
+    job: Job,
+    recruiterId: string | null,
+): RecruiterRole[] {
+    if (!recruiterId) return [];
+    const roles: RecruiterRole[] = [];
+    if (job.job_owner_recruiter_id === recruiterId) roles.push("job_owner");
+    if (job.company_recruiter_id === recruiterId)
+        roles.push("company_recruiter");
+    if (job.candidate_recruiter_id === recruiterId)
+        roles.push("candidate_recruiter");
+    if (job.candidate_sourcer_id === recruiterId)
+        roles.push("candidate_sourcer");
+    if (job.company_sourcer_id === recruiterId) roles.push("company_sourcer");
+    return roles;
+}
+
 // 5. Financials Section
 function FinancialsSection({ job, compact }: { job: Job; compact: boolean }) {
+    const { profile, planTier, isRecruiter } = useUserProfile();
+
+    // Calculate initial values from job data
+    const initialSalary = useMemo(() => {
+        if (job.salary_min && job.salary_max)
+            return Math.round((job.salary_min + job.salary_max) / 2);
+        if (job.salary_max) return job.salary_max;
+        if (job.salary_min) return job.salary_min;
+        return 100000;
+    }, [job.salary_min, job.salary_max]);
+
+    const initialFee = job.fee_percentage || 20;
+
+    // Auto-detect roles
+    const detectedRoles = useMemo(
+        () => detectRolesForJob(job, profile?.recruiter_id ?? null),
+        [job, profile?.recruiter_id],
+    );
+
+    const initialRoles: RecruiterRole[] =
+        detectedRoles.length > 0 ? detectedRoles : ["candidate_recruiter"];
+
+    const calculatorTier = planTierToCalculatorTier(planTier);
+
+    const {
+        state,
+        effectiveFee,
+        payouts,
+        upgradeValue,
+        setSalary,
+        setFeePercentage,
+        toggleRole,
+    } = useCalculator({
+        salary: initialSalary,
+        feePercentage: initialFee,
+        selectedRoles: initialRoles,
+    });
+
+    // Determine next tier for upgrade CTA
+    const nextTierInfo = useMemo(() => {
+        if (calculatorTier === "premium") return null;
+        const nextTier: Tier = calculatorTier === "free" ? "paid" : "premium";
+        const currentPayout =
+            payouts.find((p) => p.tier === calculatorTier)?.payout ?? 0;
+        const nextPayout =
+            payouts.find((p) => p.tier === nextTier)?.payout ?? 0;
+        return {
+            tier: nextTier,
+            name: TIER_INFO[nextTier].name,
+            extraPayout: nextPayout - currentPayout,
+        };
+    }, [calculatorTier, payouts]);
+
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
             <h3 className="text-base font-bold flex items-center gap-2">
@@ -722,23 +838,123 @@ function FinancialsSection({ job, compact }: { job: Job; compact: boolean }) {
             </div>
 
             {/* Guarantee Info */}
-            <div className="alert alert-info ">
+            <div className="alert alert-info">
                 <i className="fa-duotone fa-shield-check fa-lg" />
                 <div>
                     <h5 className="font-bold text-sm">Placement Guarantee</h5>
-                    <p className="">
+                    <p>
                         This role has a {job.guarantee_days || 90} day guarantee
                         period.
                     </p>
                 </div>
             </div>
+
+            {/* Payout Calculator */}
+            {isRecruiter && (
+                <>
+                    <div className="divider">
+                        <span className="text-sm text-base-content/60">
+                            <i className="fa-duotone fa-calculator mr-2" />
+                            Your Estimated Payout
+                        </span>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Input Section */}
+                        <div className="card bg-base-100 shadow-sm border border-base-300">
+                            <div className="card-body p-4">
+                                <h4 className="card-title text-sm mb-3">
+                                    <i className="fa-duotone fa-sliders text-primary mr-1" />
+                                    Placement Details
+                                </h4>
+                                <FeeInput
+                                    salary={state.salary}
+                                    feePercentage={state.feePercentage}
+                                    effectiveFee={effectiveFee}
+                                    onSalaryChange={setSalary}
+                                    onFeePercentageChange={setFeePercentage}
+                                    feeReadOnly
+                                />
+                                <div className="divider my-2"></div>
+                                <RoleSelector
+                                    selectedRoles={state.selectedRoles}
+                                    onToggleRole={toggleRole}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Results Section */}
+                        <div className="card bg-base-100 shadow-sm border border-base-300">
+                            <div className="card-body p-4">
+                                <h4 className="card-title text-sm mb-3">
+                                    <i className="fa-duotone fa-chart-column text-secondary mr-1" />
+                                    Your Payout by Tier
+                                </h4>
+                                <TierComparison
+                                    payouts={payouts}
+                                    upgradeValue={upgradeValue}
+                                    effectiveFee={effectiveFee}
+                                    currentTier={calculatorTier}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Upgrade CTA */}
+                    {nextTierInfo && nextTierInfo.extraPayout > 0 && (
+                        <a
+                            href="/portal/billing"
+                            className="alert bg-primary/10 border-primary/30 cursor-pointer hover:bg-primary/20 transition-colors"
+                        >
+                            <i className="fa-duotone fa-rocket text-primary text-xl" />
+                            <div className="flex-1">
+                                <div className="font-semibold">
+                                    Upgrade to {nextTierInfo.name} to earn{" "}
+                                    <span className="text-success">
+                                        +$
+                                        {nextTierInfo.extraPayout.toLocaleString(
+                                            "en-US",
+                                            { maximumFractionDigits: 0 },
+                                        )}
+                                    </span>{" "}
+                                    more on this placement
+                                </div>
+                                <div className="text-sm text-base-content/70">
+                                    View plans and upgrade your subscription
+                                </div>
+                            </div>
+                            <i className="fa-duotone fa-arrow-right text-primary" />
+                        </a>
+                    )}
+
+                    {/* Disclaimer */}
+                    <div className="text-center text-xs text-base-content/50">
+                        <i className="fa-duotone fa-info-circle mr-1" />
+                        Payouts are illustrative and based on current commission
+                        rates. Actual payouts are finalized at hire time.
+                    </div>
+                </>
+            )}
         </section>
     );
 }
 
 // 6. Company Section
 function CompanySection({ job, compact }: { job: Job; compact: boolean }) {
-    if (!job.company) return null;
+    if (!job.company) {
+        return (
+            <section className={compact ? "space-y-3" : "space-y-4"}>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                    <i className="fa-duotone fa-building text-primary" />
+                    Company
+                </h3>
+                <div className="p-8 text-center text-base-content/60">
+                    <i className="fa-duotone fa-building text-3xl mb-3 block opacity-50" />
+                    <p className="text-sm">Company information is not available for this role</p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className={compact ? "space-y-3" : "space-y-4"}>
