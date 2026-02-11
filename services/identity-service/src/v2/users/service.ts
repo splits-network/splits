@@ -90,7 +90,7 @@ export class UserServiceV2 {
             this.logger.error({
                 clerkUserId,
                 email,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error ? error.message : JSON.stringify(error)
             }, 'Failed to sync Clerk user');
             throw error;
         }

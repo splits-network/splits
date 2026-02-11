@@ -27,7 +27,9 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     ensureUserAndCandidateInDatabase,
     type CandidateData,
+    type UserData,
 } from "@/lib/user-registration";
+import { getCachedCurrentUserProfile } from "@/lib/current-user-profile";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -93,6 +95,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 const apiClient = createAuthenticatedClient(token);
                 let candidateData: CandidateData | null = null;
+                let userData: UserData | null = null;
 
                 // Step 1: Try /candidates/me endpoint first (most direct)
                 try {
@@ -126,6 +129,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                     if (result.success && result.candidate) {
                         candidateData = result.candidate;
+                        userData = result.user;
                     } else if (result.success && !result.candidate) {
                         // User exists but candidate doesn't - try creating candidate again
                         throw new Error(
@@ -144,11 +148,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     );
                 }
 
+                // Step 3: If we don't have user data yet, fetch it
+                if (!userData) {
+                    userData = await getCachedCurrentUserProfile(async () => token) as UserData | null;
+                }
+
                 setCandidateId(candidateData.id);
 
-                // Check onboarding status and show modal if needed
-                const shouldShowModal =
-                    candidateData.onboarding_status === "pending";
+                // Check onboarding status from the USER record (not candidate)
+                const onboardingStatus = userData?.onboarding_status || "pending";
+                const shouldShowModal = onboardingStatus === "pending";
 
                 // Pre-fill profile data from existing candidate data
                 const profileData: CandidateProfileData = {
@@ -180,8 +189,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     ...prev,
                     currentStep: 1,
                     status:
-                        (candidateData!
-                            .onboarding_status as CandidateOnboardingState["status"]) ||
+                        (onboardingStatus as CandidateOnboardingState["status"]) ||
                         "pending",
                     isModalOpen: shouldShowModal,
                     profileData,
@@ -203,7 +211,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         fetchOnboardingStatus();
-    }, [user, getToken, isInvitationRoute, pathname]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, isInvitationRoute, pathname]);
 
     const handleRetry = () => {
         window.location.reload();
@@ -261,8 +270,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
             const apiClient = createAuthenticatedClient(token);
 
-            // Update candidate's onboarding status to 'skipped'
-            await apiClient.patch(`/candidates/${candidateId}`, {
+            // Update user's onboarding status to 'skipped'
+            await apiClient.patch("/users/me", {
                 onboarding_status: "skipped",
             });
 
@@ -300,69 +309,74 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             const apiClient = createAuthenticatedClient(token);
             const { profileData } = state;
 
-            // Build update payload with only non-empty values
-            const updatePayload: Record<string, any> = {
-                onboarding_status: "completed",
-            };
+            // Build candidate profile update payload with only non-empty values
+            const candidatePayload: Record<string, any> = {};
 
             // Basic info
             if (profileData.full_name) {
-                updatePayload.full_name = profileData.full_name;
+                candidatePayload.full_name = profileData.full_name;
             }
             if (profileData.phone) {
-                updatePayload.phone = profileData.phone;
+                candidatePayload.phone = profileData.phone;
             }
             if (profileData.location) {
-                updatePayload.location = profileData.location;
+                candidatePayload.location = profileData.location;
             }
 
             // Professional background
             if (profileData.current_title) {
-                updatePayload.current_title = profileData.current_title;
+                candidatePayload.current_title = profileData.current_title;
             }
             if (profileData.current_company) {
-                updatePayload.current_company = profileData.current_company;
+                candidatePayload.current_company = profileData.current_company;
             }
             if (profileData.bio) {
-                updatePayload.bio = profileData.bio;
+                candidatePayload.bio = profileData.bio;
             }
 
             // Online presence
             if (profileData.linkedin_url) {
-                updatePayload.linkedin_url = profileData.linkedin_url;
+                candidatePayload.linkedin_url = profileData.linkedin_url;
             }
             if (profileData.github_url) {
-                updatePayload.github_url = profileData.github_url;
+                candidatePayload.github_url = profileData.github_url;
             }
             if (profileData.portfolio_url) {
-                updatePayload.portfolio_url = profileData.portfolio_url;
+                candidatePayload.portfolio_url = profileData.portfolio_url;
             }
 
             // Job preferences
             if (profileData.desired_job_type) {
-                updatePayload.desired_job_type = profileData.desired_job_type;
+                candidatePayload.desired_job_type = profileData.desired_job_type;
             }
             if (profileData.availability) {
-                updatePayload.availability = profileData.availability;
+                candidatePayload.availability = profileData.availability;
             }
             if (profileData.open_to_remote !== undefined) {
-                updatePayload.open_to_remote = profileData.open_to_remote;
+                candidatePayload.open_to_remote = profileData.open_to_remote;
             }
             if (profileData.open_to_relocation !== undefined) {
-                updatePayload.open_to_relocation =
+                candidatePayload.open_to_relocation =
                     profileData.open_to_relocation;
             }
             if (profileData.desired_salary_min !== undefined) {
-                updatePayload.desired_salary_min =
+                candidatePayload.desired_salary_min =
                     profileData.desired_salary_min;
             }
             if (profileData.desired_salary_max !== undefined) {
-                updatePayload.desired_salary_max =
+                candidatePayload.desired_salary_max =
                     profileData.desired_salary_max;
             }
 
-            // Update candidate profile
-            await apiClient.patch(`/candidates/${candidateId}`, updatePayload);
+            // Update candidate profile fields and user onboarding status in parallel
+            await Promise.all([
+                Object.keys(candidatePayload).length > 0
+                    ? apiClient.patch(`/candidates/${candidateId}`, candidatePayload)
+                    : Promise.resolve(),
+                apiClient.patch("/users/me", {
+                    onboarding_status: "completed",
+                }),
+            ]);
 
             setState((prev) => ({
                 ...prev,

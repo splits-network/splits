@@ -66,7 +66,7 @@ packages/                 # Shared code (NOT directly deployable)
 
 1. **No backend logic in `apps/`** - all APIs go in `services/*`
 2. **No HTTP calls between services** - use direct database queries or RabbitMQ events
-3. **Single Supabase Postgres database** - schema-per-service pattern with cross-schema JOINs allowed
+3. **Single Supabase Postgres database** - only 'public' and 'analytics' schemas, no separate DBs per service
 4. **Frontend calls `api-gateway` only** - never individual domain services
 5. **Server-side pagination/filtering** - client-side filtering does NOT scale
 
@@ -85,6 +85,7 @@ services/<service>/src/v2/
 ```
 
 **5-Route Pattern per Resource:**
+
 - `GET /v2/:resource` - LIST with pagination
 - `GET /v2/:resource/:id` - GET single
 - `POST /v2/:resource` - CREATE
@@ -92,6 +93,7 @@ services/<service>/src/v2/
 - `DELETE /v2/:resource/:id` - Soft delete
 
 **V2 Authorization (Access Context):**
+
 ```typescript
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 
@@ -111,6 +113,7 @@ async list(clerkUserId: string, filters: Filters) {
 ## Guidance Documents
 
 Key standards in `docs/guidance/`:
+
 - `api-response-format.md` - All responses use `{ data: <payload> }` envelope
 - `form-controls.md` - Use `fieldset` wrapper, no `-bordered` suffixes
 - `pagination.md` - StandardListParams/StandardListResponse
@@ -127,20 +130,24 @@ Key standards in `docs/guidance/`:
 ## Critical Patterns
 
 ### Frontend Data Loading (Progressive)
+
 ```tsx
 // Load primary data immediately
-useEffect(() => { loadCandidate(); }, [id]);
+useEffect(() => {
+    loadCandidate();
+}, [id]);
 
 // Load secondary data in parallel after primary
 useEffect(() => {
-  if (candidate) {
-    loadApplications();  // Independent state
-    loadRecruiters();    // Independent state
-  }
+    if (candidate) {
+        loadApplications(); // Independent state
+        loadRecruiters(); // Independent state
+    }
 }, [candidate]);
 ```
 
 ### API Response Format
+
 ```typescript
 // Backend - ALWAYS wrap in data envelope
 reply.send({ data: payload });
@@ -150,6 +157,7 @@ reply.send({ data: items, pagination: { total, page, limit, total_pages } });
 ```
 
 ### User Identification
+
 - Frontend: Send only Authorization Bearer token (Clerk JWT)
 - API Gateway: Extract from JWT, set `x-clerk-user-id` header
 - Backend: Read `request.headers['x-clerk-user-id']`
@@ -160,13 +168,13 @@ reply.send({ data: items, pagination: { total, page, limit, total_pages } });
 
 ```tsx
 import {
-    LoadingState,           // Full page/section loading
-    LoadingSpinner,         // Core spinner component
-    SkeletonLoader,         // Content placeholders
-    ButtonLoading,          // Button loading states
-    ModalLoadingOverlay,    // Modal loading
-    ChartLoadingState,      // Chart/analytics loading
-} from '@splits-network/shared-ui';
+    LoadingState, // Full page/section loading
+    LoadingSpinner, // Core spinner component
+    SkeletonLoader, // Content placeholders
+    ButtonLoading, // Button loading states
+    ModalLoadingOverlay, // Modal loading
+    ChartLoadingState, // Chart/analytics loading
+} from "@splits-network/shared-ui";
 ```
 
 **Common Patterns:**
@@ -203,6 +211,7 @@ if (loading) {
 ```
 
 **Size Guidelines:**
+
 - `xs` - Inline actions, icon buttons
 - `sm` - Form buttons, submissions
 - `md` - Charts, content areas, modals
