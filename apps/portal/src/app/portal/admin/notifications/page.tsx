@@ -51,6 +51,10 @@ const SEVERITY_LEVELS = [
     { value: "warning", label: "Warning", badge: "badge-warning" },
     { value: "error", label: "Error", badge: "badge-error" },
     { value: "critical", label: "Critical", badge: "badge-error" },
+    { value: "primary", label: "Primary", badge: "badge-primary" },
+    { value: "secondary", label: "Secondary", badge: "badge-secondary" },
+    { value: "accent", label: "Accent", badge: "badge-accent" },
+    { value: "neutral", label: "Neutral", badge: "badge-neutral" },
 ];
 
 function getTypeBadge(type: string) {
@@ -362,7 +366,7 @@ export default function NotificationsAdminPage() {
                         })
                     }
                 >
-                    <option value="">All Severities</option>
+                    <option value="">All Styles</option>
                     {SEVERITY_LEVELS.map((s) => (
                         <option key={s.value} value={s.value}>
                             {s.label}
@@ -424,7 +428,7 @@ export default function NotificationsAdminPage() {
                                     <tr>
                                         <th>Title</th>
                                         <th>Type</th>
-                                        <th>Severity</th>
+                                        <th>Banner Style</th>
                                         <th>Source</th>
                                         <th>Status</th>
                                         <th>Created</th>
@@ -600,7 +604,7 @@ export default function NotificationsAdminPage() {
                             </fieldset>
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">
-                                    Severity
+                                    Banner Style
                                 </legend>
                                 <select
                                     className="select w-full"
