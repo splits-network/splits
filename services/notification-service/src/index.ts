@@ -233,7 +233,7 @@ async function main() {
             ...(consumer && {
                 rabbitmq_consumer: createEnhancedChecker('rabbitmq_consumer', HealthCheckers.rabbitMqConsumer(consumer), logger)
             }),
-            resend: createEnhancedChecker('resend', createResendChecker(), logger),
+            // Resend removed from critical health checks - monitored separately every hour to avoid rate limiting
         },
     });
 
@@ -259,10 +259,34 @@ async function main() {
         }
     }, 30000); // Every 30 seconds
 
+    // Setup hourly Resend API monitoring (less critical, avoid rate limiting)
+    const resendChecker = createResendChecker();
+
+    // Check Resend at startup
+    setTimeout(async () => {
+        try {
+            await resendChecker();
+            logger.info('Resend API startup check completed successfully');
+        } catch (error) {
+            logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Resend API startup check failed - will retry hourly');
+        }
+    }, 5000); // 5 seconds after startup
+
+    // Check Resend every hour
+    const resendMonitorInterval = setInterval(async () => {
+        try {
+            await resendChecker();
+            logger.info('Resend API hourly check completed successfully');
+        } catch (error) {
+            logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Resend API hourly check failed');
+        }
+    }, 60 * 60 * 1000); // Every 60 minutes
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
         clearInterval(healthMonitorInterval);
+        clearInterval(resendMonitorInterval);
 
         try {
             await consumer.close();
