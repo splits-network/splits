@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("core-workflows/create-and-publish-a-role");
 export default function CreateAndPublishRolePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/create-and-publish-a-role")} id="docs-core-workflows-create-and-publish-a-role-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Create And Publish A Role"
                 description="Set up a role with compensation, requirements, and visibility so recruiters can submit candidates."
@@ -145,7 +148,7 @@ export default function CreateAndPublishRolePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

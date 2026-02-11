@@ -12,6 +12,12 @@ export const metadata: Metadata = {
     title: "Browse Jobs",
     description:
         "Search thousands of open roles and apply with one click on Applicant Network.",
+    openGraph: {
+        title: "Browse Jobs",
+        description:
+            "Search thousands of open roles and apply with one click on Applicant Network.",
+        url: "https://applicant.network/public/jobs",
+    },
     alternates: {
         canonical: canonicalUrl,
         types: {

@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { apiClient } from "@/lib/api-client";
+import { existsSync, statSync } from "node:fs";
+import { join } from "node:path";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network";
 
@@ -30,8 +32,23 @@ const staticRoutes = [
     { path: "/public/terms-of-service", changeFrequency: "yearly", priority: 0.3 },
 ];
 
-async function fetchJobIds(): Promise<string[]> {
-    const ids: string[] = [];
+const appRoot = join(process.cwd(), "apps", "candidate", "src", "app");
+
+function getLastModifiedForPath(path: string) {
+    const relative = path === "" ? "page.tsx" : `${path.slice(1)}/page.tsx`;
+    const filePath = join(appRoot, relative);
+    if (existsSync(filePath)) {
+        return statSync(filePath).mtime;
+    }
+    return new Date();
+}
+
+function toDate(value?: string) {
+    return value ? new Date(value) : new Date();
+}
+
+async function fetchJobs(): Promise<{ id: string; updated_at?: string; created_at?: string }[]> {
+    const jobs: { id: string; updated_at?: string; created_at?: string }[] = [];
     let page = 1;
     const limit = 50;
 
@@ -40,8 +57,14 @@ async function fetchJobIds(): Promise<string[]> {
             params: { page, limit, sort_by: "updated_at", sort_order: "desc" },
         });
         const data = response?.data ?? response ?? [];
-        ids.push(
-            ...data.map((job: any) => job?.id).filter(Boolean),
+        jobs.push(
+            ...data
+                .filter((job: any) => job?.id)
+                .map((job: any) => ({
+                    id: job.id,
+                    updated_at: job.updated_at,
+                    created_at: job.created_at,
+                })),
         );
 
         const totalPages = response?.pagination?.total_pages ?? 1;
@@ -49,11 +72,11 @@ async function fetchJobIds(): Promise<string[]> {
         page += 1;
     }
 
-    return ids;
+    return jobs;
 }
 
-async function fetchRecruiterIds(): Promise<string[]> {
-    const ids: string[] = [];
+async function fetchRecruiters(): Promise<{ id: string; updated_at?: string; created_at?: string }[]> {
+    const recruiters: { id: string; updated_at?: string; created_at?: string }[] = [];
     let page = 1;
     const limit = 50;
 
@@ -67,8 +90,14 @@ async function fetchRecruiterIds(): Promise<string[]> {
             },
         });
         const data = response?.data ?? response ?? [];
-        ids.push(
-            ...data.map((recruiter: any) => recruiter?.id).filter(Boolean),
+        recruiters.push(
+            ...data
+                .filter((recruiter: any) => recruiter?.id)
+                .map((recruiter: any) => ({
+                    id: recruiter.id,
+                    updated_at: recruiter.updated_at,
+                    created_at: recruiter.created_at,
+                })),
         );
 
         const totalPages = response?.pagination?.total_pages ?? 1;
@@ -76,24 +105,23 @@ async function fetchRecruiterIds(): Promise<string[]> {
         page += 1;
     }
 
-    return ids;
+    return recruiters;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const lastModified = new Date();
     const entries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
         url: `${baseUrl}${route.path}`,
-        lastModified,
+        lastModified: getLastModifiedForPath(route.path),
         changeFrequency: route.changeFrequency as MetadataRoute.Sitemap[number]["changeFrequency"],
         priority: route.priority,
     }));
 
     try {
-        const jobIds = await fetchJobIds();
+        const jobs = await fetchJobs();
         entries.push(
-            ...jobIds.map((id) => ({
-                url: `${baseUrl}/public/jobs/${id}`,
-                lastModified,
+            ...jobs.map((job) => ({
+                url: `${baseUrl}/public/jobs/${job.id}`,
+                lastModified: toDate(job.updated_at ?? job.created_at),
                 changeFrequency: "daily" as MetadataRoute.Sitemap[number]["changeFrequency"],
                 priority: 0.8,
             })),
@@ -103,11 +131,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     try {
-        const recruiterIds = await fetchRecruiterIds();
+        const recruiters = await fetchRecruiters();
         entries.push(
-            ...recruiterIds.map((id) => ({
-                url: `${baseUrl}/public/marketplace/${id}`,
-                lastModified,
+            ...recruiters.map((recruiter) => ({
+                url: `${baseUrl}/public/marketplace/${recruiter.id}`,
+                lastModified: toDate(recruiter.updated_at ?? recruiter.created_at),
                 changeFrequency: "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
                 priority: 0.7,
             })),

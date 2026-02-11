@@ -7,7 +7,13 @@ import { buildCanonical } from "@/lib/seo";
 export const metadata: Metadata = {
     title: "Pricing",
     description:
-        "Choose the plan that fits your recruiting business on Splits Network.",
+        "Choose the plan that fits your recruiting business on Splits Network, with clear tiers and transparent earnings for every placement.",
+    openGraph: {
+        title: "Pricing",
+        description:
+            "Choose the plan that fits your recruiting business on Splits Network, with clear tiers and transparent earnings for every placement.",
+        url: "https://splits.network/public/pricing",
+    },
     ...buildCanonical("/public/pricing"),
 };
 
@@ -24,10 +30,30 @@ export default function PricingPage() {
             },
         })),
     };
+    const productJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: "Splits Network Pricing",
+        description:
+            "Pricing plans for recruiters using Splits Network, including Starter, Pro, and Partner tiers.",
+        brand: {
+            "@type": "Organization",
+            name: "Splits Network",
+        },
+        offers: {
+            "@type": "AggregateOffer",
+            lowPrice: "0",
+            highPrice: "249",
+            priceCurrency: "USD",
+            offerCount: "3",
+        },
+        url: "https://splits.network/public/pricing",
+    };
 
     return (
         <>
             <JsonLd data={faqJsonLd} id="portal-pricing-faq-jsonld" />
+            <JsonLd data={productJsonLd} id="portal-pricing-product-jsonld" />
             <PricingContent />
         </>
     );

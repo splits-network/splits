@@ -47,14 +47,14 @@ export default function ListItem({
                     {/* Status + Earnings Badges */}
                     <div className="flex flex-wrap gap-1.5">
                         <span
-                            className={`badge badge-xs ${status.badgeClass} badge-soft gap-1 border-0`}
+                            className={`badge badge-sm ${status.badgeClass} badge-soft gap-1 border-0`}
                         >
                             <i
                                 className={`fa-duotone fa-regular ${status.icon} text-[10px]`}
                             />
                             {status.label}
                         </span>
-                        <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
+                        <span className="badge badge-sm badge-success badge-soft gap-1 border-0">
                             <i className="fa-duotone fa-regular fa-dollar-sign text-[10px]" />
                             {formatCurrency(item.recruiter_share || 0)}
                         </span>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getDocMetadata } from "../seo";
+import { getDocMetadata, getDocJsonLd } from "../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 const workflows = [
     {
@@ -43,7 +44,9 @@ const workflows = [
 export const metadata = getDocMetadata("core-workflows");
 export default function CoreWorkflowsIndexPage() {
     return (
-        <div className="space-y-8">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows")} id="docs-core-workflows-jsonld" />
+            <div className="space-y-8">
             <div className="space-y-3">
                 <nav className="text-sm breadcrumbs">
                     <ul>
@@ -76,6 +79,7 @@ export default function CoreWorkflowsIndexPage() {
                     </Link>
                 ))}
             </div>
-        </div>
+            </div>
+        </>
     );
 }

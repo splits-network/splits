@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { buildCanonical } from "@/lib/seo";
+import { buildCanonical, PORTAL_BASE_URL } from "@/lib/seo";
 
 type DocMeta = {
     title: string;
@@ -226,4 +226,88 @@ export function getDocMetadata(slug: string): Metadata {
         description: entry.description,
         ...buildCanonical(entry.canonicalPath),
     };
+}
+
+function buildBreadcrumbJsonLd(slug: string) {
+    const crumbs: { label: string; path: string }[] = [
+        { label: "Documentation", path: "/public/documentation" },
+    ];
+
+    if (slug !== "index") {
+        const [section, page] = slug.split("/");
+        const sectionMeta = DOCS_METADATA[section];
+        if (sectionMeta) {
+            crumbs.push({ label: sectionMeta.title, path: sectionMeta.canonicalPath });
+        }
+        if (page) {
+            const pageMeta = DOCS_METADATA[slug];
+            if (pageMeta) {
+                crumbs.push({ label: pageMeta.title, path: pageMeta.canonicalPath });
+            }
+        }
+    }
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs.map((crumb, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: crumb.label,
+            item: `${PORTAL_BASE_URL}${crumb.path}`,
+        })),
+    };
+}
+
+function buildDocArticleJsonLd(slug: string) {
+    if (!slug.includes("/")) {
+        return null;
+    }
+
+    const entry = DOCS_METADATA[slug];
+    if (!entry) {
+        return null;
+    }
+
+    const url = `${PORTAL_BASE_URL}${entry.canonicalPath}`;
+    const isHowTo = slug.startsWith("core-workflows/");
+
+    if (isHowTo) {
+        return {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            name: entry.title,
+            description: entry.description,
+            url,
+            publisher: {
+                "@type": "Organization",
+                name: "Splits Network",
+                url: "https://splits.network",
+            },
+        };
+    }
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: entry.title,
+        description: entry.description,
+        url,
+        mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": url,
+        },
+        publisher: {
+            "@type": "Organization",
+            name: "Splits Network",
+            url: "https://splits.network",
+        },
+    };
+}
+
+export function getDocJsonLd(slug: string) {
+    const breadcrumbJsonLd = buildBreadcrumbJsonLd(slug);
+    const articleJsonLd = buildDocArticleJsonLd(slug);
+
+    return articleJsonLd ? [breadcrumbJsonLd, articleJsonLd] : breadcrumbJsonLd;
 }

@@ -5,6 +5,11 @@ import { buildCanonical } from "@/lib/seo";
 export const metadata: Metadata = {
     title: 'Terms of Service - Applicant Network | User Agreement',
     description: 'Read the Terms of Service for Applicant Network. Understand your rights and responsibilities when using our job search and recruiting platform.',
+    openGraph: {
+        title: "Terms of Service - Applicant Network | User Agreement",
+        description: "Read the Terms of Service for Applicant Network. Understand your rights and responsibilities when using our job search and recruiting platform.",
+        url: "https://applicant.network/public/terms-of-service",
+    },
     robots: 'index, follow',
     ...buildCanonical("/public/terms-of-service"),
 };

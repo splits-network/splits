@@ -69,6 +69,7 @@ export default function RootLayout({
         description:
             "Browse thousands of job opportunities and manage your job search. Track applications, verify credentials, and connect with recruiters.",
         operatingSystem: "Web",
+        sameAs: ["https://employment-networks.com", "https://splits.network"],
         offers: {
             "@type": "Offer",
             price: "0",
@@ -79,6 +80,7 @@ export default function RootLayout({
             name: "Employment Networks",
             url: "https://employment-networks.com",
             logo: `${appUrl}/logo.png`,
+            sameAs: ["https://employment-networks.com", "https://splits.network"],
         },
         featureList: [
             "Job search",
@@ -130,6 +132,11 @@ export default function RootLayout({
                     <JsonLd data={webAppJsonLd} id="applicant-webapp-jsonld" />
                     <JsonLd data={websiteJsonLd} id="applicant-website-jsonld" />
 
+                    <link
+                        rel="preload"
+                        as="style"
+                        href="https://kit.fontawesome.com/728c8ddec8.css"
+                    />
                     <link
                         rel="stylesheet"
                         href="https://kit.fontawesome.com/728c8ddec8.css"

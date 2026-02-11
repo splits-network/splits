@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
-import { buildCanonical } from "@/lib/seo";
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'Personal Branding Essentials',
     description: 'Build and promote your professional brand across multiple platforms.',
+    openGraph: {
+        title: "Personal Branding Essentials",
+        description: "Build and promote your professional brand across multiple platforms.",
+        url: "https://applicant.network/public/resources/career-guides/personal-branding",
+    },
     ...buildCanonical("/public/resources/career-guides/personal-branding"),
 };
 
@@ -164,7 +170,14 @@ export default function PersonalBrandingGuidePage() {
         { type: 'Personal Stories', icon: 'book', example: 'Your career journey and pivotal moments' },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "Personal Branding Essentials",
+        description: "Build and promote your professional brand across multiple platforms.",
+        path: "/public/resources/career-guides/personal-branding",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="badge-check"
@@ -403,5 +416,6 @@ export default function PersonalBrandingGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

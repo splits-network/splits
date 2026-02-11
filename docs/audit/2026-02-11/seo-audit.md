@@ -460,3 +460,9 @@ The candidate app provides RSS and Atom feeds for jobs at:
 ---
 
 *End of audit. Total issues identified: 41. Critical: 12, High: 10, Medium: 11, Low: 8.*
+
+---
+
+## Implementation Note (2026-02-11)
+
+All critical, high, medium, and low SEO items from this audit have been implemented across the Portal, Candidate, and Corporate apps. The only remaining observation is the intentionally small Corporate sitemap surface area (home + legal + status). If we want to expand corporate organic surface area, we can add additional public content pages in a future pass.

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { JsonLd } from "@splits-network/shared-ui";
-import { getDocMetadata } from "./seo";
+import { getDocMetadata, getDocJsonLd } from "./seo";
 
 
 export const metadata = getDocMetadata("index");
@@ -22,7 +22,9 @@ export default function DocumentationIndexPage() {
     };
 
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("index")} id="docs-index-breadcrumbs-jsonld" />
+            <div className="space-y-10">
             <JsonLd data={docsIndexJsonLd} id="docs-index-jsonld" />
             <section className="space-y-3">
                 <h1 className="text-3xl font-semibold">Documentation</h1>
@@ -231,7 +233,7 @@ export default function DocumentationIndexPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

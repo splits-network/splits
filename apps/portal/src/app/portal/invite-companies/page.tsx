@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
@@ -30,6 +30,7 @@ function InviteCompaniesContent() {
     );
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     // Get filter state from context to pass to header filters
     const {
@@ -44,13 +45,18 @@ function InviteCompaniesContent() {
         setShowStats,
     } = useInvitationFilter();
 
-    // Clear URL params when switching views to prevent stale selection
+    // Preserve search parameters when changing views
     const handleViewChange = useCallback(
         (newView: ViewMode) => {
-            router.replace(pathname);
+            // Preserve search parameters when changing views
+            const params = new URLSearchParams(searchParams);
+            const url = params.toString()
+                ? `${pathname}?${params.toString()}`
+                : pathname;
+            router.replace(url);
             setViewMode(newView);
         },
-        [router, pathname, setViewMode],
+        [router, pathname, searchParams, setViewMode],
     );
 
     if (!isLoaded) {

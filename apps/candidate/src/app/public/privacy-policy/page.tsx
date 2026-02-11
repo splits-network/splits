@@ -5,6 +5,11 @@ import { buildCanonical } from "@/lib/seo";
 export const metadata: Metadata = {
     title: 'Privacy Policy | Applicant Network',
     description: 'Learn how Applicant Network collects, uses, and protects your personal information. GDPR and CCPA compliant.',
+    openGraph: {
+        title: "Privacy Policy | Applicant Network",
+        description: "Learn how Applicant Network collects, uses, and protects your personal information. GDPR and CCPA compliant.",
+        url: "https://applicant.network/public/privacy-policy",
+    },
     ...buildCanonical("/public/privacy-policy"),
 };
 

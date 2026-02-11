@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("core-workflows/add-or-import-candidates");
 export default function AddOrImportCandidatesPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/add-or-import-candidates")} id="docs-core-workflows-add-or-import-candidates-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Add Or Import Candidates"
                 description="Create candidate profiles and capture sourcing details so submissions stay organized."
@@ -139,7 +142,7 @@ export default function AddOrImportCandidatesPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

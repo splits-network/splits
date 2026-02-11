@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("feature-guides/roles");
 export default function RolesGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/roles")} id="docs-feature-guides-roles-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Roles"
                 description="Create, manage, and track role status and ownership."
@@ -132,7 +135,7 @@ export default function RolesGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

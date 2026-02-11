@@ -8,7 +8,11 @@ interface ListItemProps {
     onSelect: (id: string) => void;
 }
 
-export default function ListItem({ item, isSelected, onSelect }: ListItemProps) {
+export default function ListItem({
+    item,
+    isSelected,
+    onSelect,
+}: ListItemProps) {
     const isNew = item.is_new;
 
     return (
@@ -32,7 +36,7 @@ export default function ListItem({ item, isSelected, onSelect }: ListItemProps) 
 
                         {item.verification_status === "verified" && (
                             <span className="text-secondary" title="Verified">
-                                <i className="fa-duotone fa-regular fa-badge-check text-xs" />
+                                <i className="fa-duotone fa-regular fa-badge-check text-sm" />
                             </span>
                         )}
 
@@ -57,33 +61,33 @@ export default function ListItem({ item, isSelected, onSelect }: ListItemProps) 
                     {/* Badges Row */}
                     <div className="flex flex-wrap gap-1.5">
                         {item.has_active_relationship && (
-                            <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
+                            <span className="badge badge-sm badge-success badge-soft gap-1 border-0">
                                 <i className="fa-duotone fa-regular fa-user-check text-[10px]" />
                                 Representing
                             </span>
                         )}
                         {item.has_pending_invitation && (
-                            <span className="badge badge-xs badge-info badge-soft gap-1 border-0">
+                            <span className="badge badge-sm badge-info badge-soft gap-1 border-0">
                                 <i className="fa-duotone fa-regular fa-envelope-open-text text-[10px]" />
                                 Invited
                             </span>
                         )}
                         {!item.has_active_relationship &&
                             !item.has_other_active_recruiters && (
-                                <span className="badge badge-xs badge-accent badge-soft gap-1 border-0">
+                                <span className="badge badge-sm badge-accent badge-soft gap-1 border-0">
                                     <i className="fa-duotone fa-regular fa-user-plus text-[10px]" />
                                     Available
                                 </span>
                             )}
                         {item.is_sourcer && (
-                            <span className="badge badge-xs badge-info badge-soft gap-1 border-0">
+                            <span className="badge badge-sm badge-info badge-soft gap-1 border-0">
                                 <i className="fa-duotone fa-regular fa-magnifying-glass text-[10px]" />
                                 Sourcer
                             </span>
                         )}
                         {item.has_other_active_recruiters && (
                             <span
-                                className="badge badge-xs badge-warning badge-soft gap-1 border-0"
+                                className="badge badge-sm badge-warning badge-soft gap-1 border-0"
                                 title={`${item.other_active_recruiters_count} other recruiter(s)`}
                             >
                                 <i className="fa-duotone fa-regular fa-users text-[10px]" />

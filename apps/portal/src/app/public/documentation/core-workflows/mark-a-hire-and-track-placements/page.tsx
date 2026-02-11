@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("core-workflows/mark-a-hire-and-track-placements");
 export default function MarkHireAndTrackPlacementsPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/mark-a-hire-and-track-placements")} id="docs-core-workflows-mark-a-hire-and-track-placements-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Mark A Hire And Track Placements"
                 description="Finalize a hire and ensure placements capture fee and earnings details."
@@ -140,7 +143,7 @@ export default function MarkHireAndTrackPlacementsPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

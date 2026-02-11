@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("core-workflows/submit-a-candidate");
 export default function SubmitCandidatePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/submit-a-candidate")} id="docs-core-workflows-submit-a-candidate-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Submit A Candidate"
                 description="Submit a candidate to a role and track the application through review stages."
@@ -139,7 +142,7 @@ export default function SubmitCandidatePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("core-workflows/review-applications-and-move-stages");
 export default function ReviewApplicationsAndMoveStagesPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/review-applications-and-move-stages")} id="docs-core-workflows-review-applications-and-move-stages-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Review Applications And Move Stages"
                 description="Review applications, add notes, and move candidates through the hiring stages."
@@ -141,7 +144,7 @@ export default function ReviewApplicationsAndMoveStagesPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

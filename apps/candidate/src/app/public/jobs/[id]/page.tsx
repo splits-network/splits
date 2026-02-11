@@ -42,6 +42,15 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
+function stripHtml(value: string) {
+    return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function truncateText(value: string, maxLength = 155) {
+    if (value.length <= maxLength) return value;
+    return value.slice(0, maxLength - 1).trimEnd() + "…";
+}
+
 const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
         const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
@@ -70,14 +79,17 @@ export async function generateMetadata({
         };
     }
 
+    const rawDescription =
+        job.candidate_description ||
+        job.description ||
+        "View job responsibilities, requirements, and application details.";
+    const description = truncateText(stripHtml(rawDescription));
+
     return {
         title: job.title
             ? `${job.title} at ${job.company?.name ?? "Applicant Network"}`
             : "Job Details",
-        description:
-            job.candidate_description ||
-            job.description ||
-            "View job responsibilities, requirements, and application details.",
+        description,
         ...buildCanonical(canonicalPath),
     };
 }

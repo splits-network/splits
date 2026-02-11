@@ -5,6 +5,11 @@ import { buildCanonical } from "@/lib/seo";
 export const metadata: Metadata = {
     title: 'Cookie Policy | Applicant Network',
     description: 'Learn about how Applicant Network uses cookies and similar tracking technologies to improve your experience and analyze platform usage.',
+    openGraph: {
+        title: "Cookie Policy | Applicant Network",
+        description: "Learn about how Applicant Network uses cookies and similar tracking technologies to improve your experience and analyze platform usage.",
+        url: "https://applicant.network/public/cookie-policy",
+    },
     ...buildCanonical("/public/cookie-policy"),
 };
 

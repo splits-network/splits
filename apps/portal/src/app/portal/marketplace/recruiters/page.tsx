@@ -1,15 +1,12 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
 import { LoadingState } from "@splits-network/shared-ui";
-import {
-    FilterProvider,
-    useRecruiterFilter,
-} from "./contexts/filter-context";
+import { FilterProvider, useRecruiterFilter } from "./contexts/filter-context";
 import HeaderFilters from "./components/shared/header-filters";
 import Stats from "./components/shared/stats";
 import BrowseView from "./components/browse/view";
@@ -30,6 +27,7 @@ function RecruiterMarketplaceContent() {
     );
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const {
         searchInput,
@@ -45,10 +43,15 @@ function RecruiterMarketplaceContent() {
 
     const handleViewChange = useCallback(
         (newView: ViewMode) => {
-            router.replace(pathname);
+            // Preserve search parameters when changing views
+            const params = new URLSearchParams(searchParams);
+            const url = params.toString()
+                ? `${pathname}?${params.toString()}`
+                : pathname;
+            router.replace(url);
             setViewMode(newView);
         },
-        [router, pathname, setViewMode],
+        [router, pathname, searchParams, setViewMode],
     );
 
     if (!isLoaded) {

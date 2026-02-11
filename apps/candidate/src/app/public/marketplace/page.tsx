@@ -8,6 +8,11 @@ import { buildCanonical } from "@/lib/seo";
 export const metadata: Metadata = {
     title: 'Recruiter Marketplace',
     description: 'Discover expert recruiters by industry, specialty, and location.',
+    openGraph: {
+        title: "Recruiter Marketplace",
+        description: "Discover expert recruiters by industry, specialty, and location.",
+        url: "https://applicant.network/public/marketplace",
+    },
     ...buildCanonical("/public/marketplace"),
 };
 

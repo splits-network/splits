@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("feature-guides/placements");
 export default function PlacementsGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/placements")} id="docs-feature-guides-placements-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Placements"
                 description="Track hires, fees, and recruiter earnings."
@@ -131,7 +134,7 @@ export default function PlacementsGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

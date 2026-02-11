@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
-import { buildCanonical } from "@/lib/seo";
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'Remote Work Best Practices',
     description: 'Tips for staying productive and maintaining work-life balance while remote.',
+    openGraph: {
+        title: "Remote Work Best Practices",
+        description: "Tips for staying productive and maintaining work-life balance while remote.",
+        url: "https://applicant.network/public/resources/career-guides/remote-work",
+    },
     ...buildCanonical("/public/resources/career-guides/remote-work"),
 };
 
@@ -86,7 +92,14 @@ export default function RemoteWorkGuidePage() {
         { category: 'Time Management', tools: ['Toggl', 'RescueTime', 'Clockify', 'Focus@Will'], icon: 'clock' },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "Remote Work Best Practices",
+        description: "Tips for staying productive and maintaining work-life balance while remote.",
+        path: "/public/resources/career-guides/remote-work",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="house-laptop"
@@ -254,5 +267,6 @@ export default function RemoteWorkGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

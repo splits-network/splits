@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { DataTable, type TableColumn } from "@/components/ui";
 import { PaginationControls, EmptyState } from "@/hooks/use-standard-list";
 import { useInvitationFilter } from "../../contexts/filter-context";
@@ -35,8 +36,42 @@ export default function TableView() {
         goToPage,
     } = useInvitationFilter();
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const selectedId = searchParams.get("invitationId");
     const [sidebarInvitation, setSidebarInvitation] =
         useState<CompanyInvitation | null>(null);
+
+    // Sync sidebar invitation with URL parameter
+    useEffect(() => {
+        if (selectedId) {
+            const invitation = invitations.find(
+                (invitation) => invitation.id === selectedId,
+            );
+            if (invitation) {
+                setSidebarInvitation(invitation);
+            }
+        } else {
+            setSidebarInvitation(null);
+        }
+    }, [selectedId, invitations]);
+
+    const handleViewDetails = useCallback(
+        (invitation: CompanyInvitation) => {
+            const params = new URLSearchParams(searchParams);
+            params.set("invitationId", invitation.id);
+            router.push(`${pathname}?${params.toString()}`);
+        },
+        [pathname, router, searchParams],
+    );
+
+    const handleCloseSidebar = useCallback(() => {
+        const params = new URLSearchParams(searchParams);
+        params.delete("invitationId");
+        router.push(`${pathname}?${params.toString()}`);
+    }, [pathname, router, searchParams]);
 
     return (
         <>
@@ -63,9 +98,7 @@ export default function TableView() {
                         <Row
                             key={invitation.id}
                             invitation={invitation}
-                            onViewDetails={(id) =>
-                                setSidebarInvitation(invitation)
-                            }
+                            onViewDetails={() => handleViewDetails(invitation)}
                         />
                     ))}
                 </DataTable>
@@ -83,7 +116,7 @@ export default function TableView() {
             {/* Sidebar */}
             <Sidebar
                 invitation={sidebarInvitation}
-                onClose={() => setSidebarInvitation(null)}
+                onClose={handleCloseSidebar}
             />
         </>
     );

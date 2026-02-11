@@ -71,6 +71,7 @@ export default async function RootLayout({
         description:
             "Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.",
         operatingSystem: "Web",
+        sameAs: ["https://employment-networks.com", "https://applicant.network"],
         offers: {
             "@type": "Offer",
             price: "0",
@@ -81,7 +82,7 @@ export default async function RootLayout({
             name: "Employment Networks",
             url: "https://employment-networks.com",
             logo: "https://splits.network/logo.png",
-            sameAs: ["https://employment-networks.com"],
+            sameAs: ["https://employment-networks.com", "https://applicant.network"],
         },
         featureList: [
             "Split-fee recruiting",
@@ -119,6 +120,11 @@ export default async function RootLayout({
                     />
                     <JsonLd data={webAppJsonLd} id="splits-webapp-jsonld" />
 
+                    <link
+                        rel="preload"
+                        as="style"
+                        href="https://kit.fontawesome.com/728c8ddec8.css"
+                    />
                     <link
                         rel="stylesheet"
                         href="https://kit.fontawesome.com/728c8ddec8.css"

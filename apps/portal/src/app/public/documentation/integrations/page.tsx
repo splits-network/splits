@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { getDocMetadata } from "../seo";
+import { getDocMetadata, getDocJsonLd } from "../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("integrations");
 export default function IntegrationsPage() {
     return (
-        <div className="space-y-6">
+        <>
+            <JsonLd data={getDocJsonLd("integrations")} id="docs-integrations-jsonld" />
+            <div className="space-y-6">
             <nav className="text-sm breadcrumbs">
                 <ul>
                     <li>
@@ -28,7 +31,7 @@ export default function IntegrationsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 }
-

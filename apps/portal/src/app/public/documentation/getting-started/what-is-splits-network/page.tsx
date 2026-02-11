@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("getting-started/what-is-splits-network");
 export default function WhatIsSplitsNetworkPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("getting-started/what-is-splits-network")} id="docs-getting-started-what-is-splits-network-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="What Is Splits Network"
                 description="A collaborative recruiting platform that keeps recruiters, hiring managers, and company admins aligned on roles, candidates, and placements."
@@ -172,8 +175,8 @@ export default function WhatIsSplitsNetworkPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-
 

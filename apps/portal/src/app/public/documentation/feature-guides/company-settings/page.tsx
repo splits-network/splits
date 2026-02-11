@@ -1,12 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
-import { getDocMetadata } from "../../seo";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 
 export const metadata = getDocMetadata("feature-guides/company-settings");
 export default function CompanySettingsGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/company-settings")} id="docs-feature-guides-company-settings-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Company Settings"
                 description="Manage organization profile, settings, and shared preferences."
@@ -131,7 +134,7 @@ export default function CompanySettingsGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-
