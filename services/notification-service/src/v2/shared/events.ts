@@ -34,14 +34,14 @@ export class EventPublisher {
         this.isConnecting = true;
 
         try {
-            this.logger.info({ attempt: this.reconnectAttempts + 1 }, 'Attempting to connect event publisher to RabbitMQ');
+            this.logger.info('Attempting to connect event publisher to RabbitMQ');
 
             this.connection = await amqp.connect(this.rabbitMqUrl);
             if (!this.connection) {
                 throw new Error('Failed to establish RabbitMQ connection');
             }
 
-            // Setup connection event listeners for monitoring
+            // Setup connection event listeners
             this.connection.on('error', (err) => {
                 this.logger.error({ err }, 'RabbitMQ event publisher connection error');
                 this.connectionHealthy = false;
@@ -82,7 +82,7 @@ export class EventPublisher {
         } catch (error) {
             this.isConnecting = false;
             this.connectionHealthy = false;
-            this.logger.error({ err: error, attempt: this.reconnectAttempts + 1 }, 'Failed to connect event publisher to RabbitMQ');
+            this.logger.error({ err: error }, 'Failed to connect event publisher to RabbitMQ');
 
             if (!this.isClosing) {
                 this.scheduleReconnect();
@@ -100,20 +100,11 @@ export class EventPublisher {
         this.reconnectAttempts++;
 
         if (this.reconnectAttempts > this.maxReconnectAttempts) {
-            this.logger.error({
-                attempts: this.reconnectAttempts,
-                maxAttempts: this.maxReconnectAttempts
-            }, 'Event publisher max reconnection attempts reached, giving up');
+            this.logger.error('Event publisher max reconnection attempts reached, giving up');
             return;
         }
 
         const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000); // Exponential backoff, max 30s
-
-        this.logger.info({
-            attempt: this.reconnectAttempts,
-            delay,
-            maxAttempts: this.maxReconnectAttempts
-        }, 'Scheduling event publisher RabbitMQ reconnection');
 
         this.reconnectTimeout = setTimeout(async () => {
             this.reconnectTimeout = null;
@@ -199,8 +190,6 @@ export class EventPublisher {
                 Buffer.from(JSON.stringify(event)),
                 { persistent: true }
             );
-
-            this.logger.info({ event_type: eventType, event_id: event.event_id }, 'Event published');
         } catch (error) {
             this.logger.error(
                 { err: error, event_type: eventType, event_id: event.event_id },

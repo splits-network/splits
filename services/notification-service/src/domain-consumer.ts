@@ -151,14 +151,14 @@ export class DomainEventConsumer {
         this.isConnecting = true;
 
         try {
-            this.logger.info({ attempt: this.reconnectAttempts + 1 }, 'Attempting to connect to RabbitMQ');
+            this.logger.info('Attempting to connect to RabbitMQ');
 
             this.connection = await amqp.connect(this.rabbitMqUrl) as any;
             this.channel = await (this.connection as any).createChannel();
 
             if (!this.channel) throw new Error('Failed to create channel');
 
-            // Setup connection event listeners for monitoring
+            // Setup connection event listeners
             this.connection?.on('error', (err) => {
                 this.logger.error({ err }, 'RabbitMQ connection error');
                 this.connectionHealthy = false;
@@ -302,11 +302,7 @@ export class DomainEventConsumer {
 
         const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000); // Exponential backoff, max 30s
 
-        this.logger.info({
-            attempt: this.reconnectAttempts,
-            delay,
-            maxAttempts: this.maxReconnectAttempts
-        }, 'Scheduling RabbitMQ reconnection');
+        this.logger.info({ attempt: this.reconnectAttempts, delay }, 'Scheduling RabbitMQ reconnection');
 
         this.reconnectTimeout = setTimeout(async () => {
             this.reconnectTimeout = null;
