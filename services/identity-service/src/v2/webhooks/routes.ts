@@ -156,7 +156,7 @@ export async function webhooksRoutesV2(
             }
 
             logger.error({
-                error: error instanceof Error ? error.message : 'Unknown error',
+                error: error instanceof Error ? error.message : JSON.stringify(error),
                 body: request.body
             }, 'Failed to process webhook');
 

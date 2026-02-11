@@ -61,13 +61,21 @@ function registerUserMeRoute(app: FastifyInstance, services: ServiceRegistry) {
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
-            const data = await identityService().get(
-                '/api/v2/users/me',
-                undefined,
-                correlationId,
-                authHeaders
-            );
-            return reply.send(data);
+            try {
+                const data = await identityService().get(
+                    '/api/v2/users/me',
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                // Pass through 404 so frontend can handle user-not-found gracefully
+                if (error.statusCode === 404) {
+                    return reply.code(404).send(error.jsonBody || { error: { message: 'User not found' } });
+                }
+                throw error;
+            }
         }
     );
 

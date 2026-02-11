@@ -40,7 +40,8 @@ export class WebhooksServiceV2 {
                     break;
 
                 case 'user.deleted':
-                    await this.handleUserDeleted(event.data);
+                    // User deletion is not currently supported - ignore the event
+                    this.logger.info({ clerkUserId: event.data.id }, 'Ignoring user.deleted webhook event');
                     break;
 
                 default:
@@ -50,7 +51,7 @@ export class WebhooksServiceV2 {
             this.logger.error({
                 type: event.type,
                 userId: event.data.id,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error ? error.message : JSON.stringify(error)
             }, 'Failed to process webhook event');
             throw error;
         }
@@ -103,7 +104,6 @@ export class WebhooksServiceV2 {
                     clerk_user_id: clerkUserId,
                     email,
                     name: name || email, // Use email as fallback if no name
-                    status: 'active' as const,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 } as any; // Type assertion needed for webhook-created users
@@ -127,7 +127,7 @@ export class WebhooksServiceV2 {
             this.logger.error({
                 clerkUserId,
                 email,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error ? error.message : JSON.stringify(error)
             }, 'Failed to sync Clerk user');
             throw error;
         }

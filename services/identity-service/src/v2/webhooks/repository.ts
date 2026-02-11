@@ -62,15 +62,12 @@ export class WebhookRepositoryV2 {
     }
 
     /**
-     * Soft delete user (set status to deleted)
+     * Delete user by Clerk user ID
      */
     async deleteUser(clerkUserId: string): Promise<void> {
         const { error } = await this.supabase
             .from('users')
-            .update({ 
-                status: 'deleted',
-                updated_at: new Date().toISOString()
-            })
+            .delete()
             .eq('clerk_user_id', clerkUserId);
 
         if (error) throw error;

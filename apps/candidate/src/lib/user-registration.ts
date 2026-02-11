@@ -85,11 +85,7 @@ export interface CandidateData {
     verification_metadata?: Record<string, any>;
     verified_at?: string | null;
     verified_by_user_id?: string | null;
-    
-    // Onboarding (newly added)
-    onboarding_status?: string;
-    onboarding_step?: number;
-    
+
     // Relationships
     recruiter_id?: string | null;
     created_by_user_id?: string | null;
