@@ -43,6 +43,8 @@ jobs:
                       path: services/chat-gateway
                     - name: chat-service
                       path: services/chat-service
+                    - name: health-monitor
+                      path: services/health-monitor
                     - name: portal
                       path: apps/portal
                     - name: candidate
@@ -301,7 +303,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway chat-service"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway chat-service health-monitor"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
@@ -328,6 +330,7 @@ jobs:
                   kubectl rollout status deployment/analytics-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/chat-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/health-monitor --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
               run: |

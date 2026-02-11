@@ -2,9 +2,10 @@
 
 import {
     useServiceHealth,
+    getGatewayBaseUrl,
     type ServiceHealth,
-} from "@/hooks/use-service-health";
-import { FormEvent, useMemo, useState } from "react";
+} from "@splits-network/shared-ui";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const portalFormDefaults = {
     name: "",
@@ -37,6 +38,15 @@ export default function StatusPageClient({
         initialStatuses,
         initialCheckedAt,
     });
+
+    const [incidents, setIncidents] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch(`${getGatewayBaseUrl()}/api/v2/system-health/incidents?limit=10`)
+            .then((r) => r.json())
+            .then((json) => setIncidents(json.data || []))
+            .catch(() => {});
+    }, []);
 
     const [formData, setFormData] = useState(portalFormDefaults);
     const [formFeedback, setFormFeedback] = useState<{
@@ -310,6 +320,59 @@ export default function StatusPageClient({
                                 </p>
                             </div>
                         </div>
+
+                        {incidents.length > 0 && (
+                            <div className="card bg-base-100 shadow">
+                                <div className="card-body">
+                                    <h2 className="card-title">
+                                        <i className="fa-duotone fa-regular fa-clock-rotate-left" />
+                                        Past incidents
+                                    </h2>
+                                    <div className="mt-4 space-y-3">
+                                        {incidents
+                                            .filter((i: any) => i.resolved_at)
+                                            .map((incident: any) => (
+                                                <div
+                                                    key={incident.id}
+                                                    className="flex flex-col gap-2 rounded-xl border border-base-200 p-4 md:flex-row md:items-center md:justify-between"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold">
+                                                            {incident.service_name}
+                                                        </p>
+                                                        <p className="text-xs text-base-content/60">
+                                                            {incident.severity ===
+                                                            "unhealthy"
+                                                                ? "Service outage"
+                                                                : "Degraded performance"}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-xs text-base-content/60 text-right">
+                                                        <p suppressHydrationWarning>
+                                                            {new Date(
+                                                                incident.started_at,
+                                                            ).toLocaleString()}
+                                                        </p>
+                                                        <p>
+                                                            Duration:{" "}
+                                                            {incident.duration_seconds !=
+                                                            null
+                                                                ? incident.duration_seconds <
+                                                                  60
+                                                                    ? `${incident.duration_seconds}s`
+                                                                    : `${Math.round(incident.duration_seconds / 60)}m`
+                                                                : "N/A"}
+                                                        </p>
+                                                        <span className="badge badge-success badge-sm mt-1">
+                                                            Resolved
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <aside className="space-y-6">

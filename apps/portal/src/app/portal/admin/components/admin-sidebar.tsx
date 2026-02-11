@@ -61,6 +61,11 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
                 label: "Applications",
                 icon: "fa-file-lines",
             },
+            {
+                href: "/portal/admin/notifications",
+                label: "Notifications",
+                icon: "fa-megaphone",
+            },
         ],
     },
     {
@@ -374,15 +379,17 @@ export function AdminSidebar() {
                 "/portal/admin/fraud": "loading",
                 "/portal/admin/payouts": "loading",
                 "/portal/admin/payouts/escrow": "loading",
+                "/portal/admin/notifications": "loading",
             }));
 
             // Fetch counts in parallel
-            const [recruitersRes, fraudRes, payoutsRes, escrowRes] =
+            const [recruitersRes, fraudRes, payoutsRes, escrowRes, notificationsRes] =
                 await Promise.allSettled([
                     client.get("/recruiters?status=pending&limit=1"),
                     client.get("/fraud-signals?status=active&limit=1"),
                     client.get("/payouts?status=pending&limit=1"),
                     client.get("/escrow-holds?status=active&limit=1"),
+                    client.get("/site-notifications/all?is_active=true&limit=1"),
                 ]);
 
             setBadges({
@@ -401,6 +408,10 @@ export function AdminSidebar() {
                 "/portal/admin/payouts/escrow":
                     escrowRes.status === "fulfilled"
                         ? (escrowRes.value?.pagination?.total ?? 0)
+                        : 0,
+                "/portal/admin/notifications":
+                    notificationsRes.status === "fulfilled"
+                        ? (notificationsRes.value?.pagination?.total ?? 0)
                         : 0,
             });
         } catch (error) {

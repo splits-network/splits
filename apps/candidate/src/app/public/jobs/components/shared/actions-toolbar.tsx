@@ -145,7 +145,7 @@ export default function ActionsToolbar({
         <>
             <div className="flex items-center gap-1">
                 <button
-                    className={`btn btn-sm ${buttonConfig.disabled ? "btn-disabled" : "btn-ghost"}`}
+                    className={`btn ${buttonConfig.disabled ? "btn-disabled" : "btn-primary"}`}
                     onClick={buttonConfig.action}
                     disabled={buttonConfig.disabled}
                     title={buttonConfig.text}
@@ -153,11 +153,9 @@ export default function ActionsToolbar({
                     <i
                         className={`fa-duotone fa-regular ${buttonConfig.icon}`}
                     />
+                    {buttonConfig.text}
                 </button>
-                <button
-                    className="btn btn-sm btn-ghost"
-                    title="Save"
-                >
+                <button className="btn btn-sm btn-ghost" title="Save">
                     <i className="fa-duotone fa-regular fa-bookmark" />
                 </button>
                 <button
