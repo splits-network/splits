@@ -32,10 +32,16 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
                             </div>
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-semibold text-base-content group-hover:text-primary transition-colors truncate">
+                            <h3
+                                className="font-semibold text-base-content group-hover:text-primary transition-colors truncate"
+                                title={item.candidate?.full_name || "Unknown"}
+                            >
                                 {item.candidate?.full_name || "Unknown"}
                             </h3>
-                            <p className="text-sm text-base-content/60 truncate">
+                            <p
+                                className="text-sm text-base-content/60 truncate"
+                                title={item.candidate?.email || "N/A"}
+                            >
                                 {item.candidate?.email || "N/A"}
                             </p>
                         </div>

@@ -21,7 +21,10 @@ import {
 import { ModalPortal } from "@splits-network/shared-ui";
 import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
-import type { ApplicationStage, ApplicationNoteCreatorType } from "@splits-network/shared-types";
+import type {
+    ApplicationStage,
+    ApplicationNoteCreatorType,
+} from "@splits-network/shared-types";
 import type { CreateNoteData } from "@splits-network/shared-ui";
 
 export interface ActionsToolbarProps {
@@ -73,7 +76,8 @@ export default function ActionsToolbar({
         if (isAdmin) return "platform_admin";
         if (isRecruiter) return "candidate_recruiter";
         if (isCompanyUser) {
-            if (profile?.roles?.includes("hiring_manager")) return "hiring_manager";
+            if (profile?.roles?.includes("hiring_manager"))
+                return "hiring_manager";
             return "company_admin";
         }
         return "candidate";
@@ -192,13 +196,16 @@ export default function ActionsToolbar({
                 try {
                     await client.post(`/applications/${application.id}/notes`, {
                         created_by_type: getCreatorType(),
-                        note_type: 'stage_transition',
-                        visibility: 'shared',
+                        note_type: "stage_transition",
+                        visibility: "shared",
                         message_text: note.trim(),
                     });
                 } catch (noteError: any) {
                     // Log but don't fail the stage transition if note creation fails
-                    console.warn("Failed to create stage transition note:", noteError);
+                    console.warn(
+                        "Failed to create stage transition note:",
+                        noteError,
+                    );
                 }
             }
 
@@ -238,8 +245,8 @@ export default function ActionsToolbar({
                 try {
                     await client.post(`/applications/${application.id}/notes`, {
                         created_by_type: getCreatorType(),
-                        note_type: 'stage_transition',
-                        visibility: 'shared',
+                        note_type: "stage_transition",
+                        visibility: "shared",
                         message_text: `Rejection reason: ${reason.trim()}`,
                     });
                 } catch (noteError: any) {
@@ -293,7 +300,8 @@ export default function ActionsToolbar({
             showActions.advanceStage !== false && permissions.canApprove,
         reject: showActions.reject !== false && permissions.canReject,
         requestPrescreen:
-            showActions.requestPrescreen !== false && permissions.canRequestPrescreen,
+            showActions.requestPrescreen !== false &&
+            permissions.canRequestPrescreen,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -341,19 +349,21 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
-            {showPreScreenModal && application.job_id && application.job?.company?.id && (
-                <PreScreenRequestModal
-                    application={application}
-                    jobId={application.job_id}
-                    companyId={application.job.company.id}
-                    onClose={() => setShowPreScreenModal(false)}
-                    onSuccess={() => {
-                        setShowPreScreenModal(false);
-                        toast.success("Pre-screen requested successfully!");
-                        refresh();
-                    }}
-                />
-            )}
+            {showPreScreenModal &&
+                application.job_id &&
+                application.job?.company?.id && (
+                    <PreScreenRequestModal
+                        application={application}
+                        jobId={application.job_id}
+                        companyId={application.job.company.id}
+                        onClose={() => setShowPreScreenModal(false)}
+                        onSuccess={() => {
+                            setShowPreScreenModal(false);
+                            toast.success("Pre-screen requested successfully!");
+                            refresh();
+                        }}
+                    />
+                )}
         </ModalPortal>
     );
 
@@ -364,7 +374,7 @@ export default function ActionsToolbar({
                     {actions.viewDetails && onViewDetails && (
                         <button
                             onClick={() => onViewDetails(application.id)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                            className={`btn ${sizeClass} btn-circle btn-ghost`}
                             title="View Details"
                         >
                             <i className="fa-duotone fa-regular fa-eye" />
@@ -374,7 +384,7 @@ export default function ActionsToolbar({
                         <span title={chatDisabledReason || undefined}>
                             <button
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-square btn-outline relative`}
+                                className={`btn ${sizeClass} btn-circle btn-outline relative`}
                                 title="Message Candidate"
                                 disabled={!canChat || startingChat}
                             >
@@ -393,7 +403,7 @@ export default function ActionsToolbar({
                     {actions.addNote && (
                         <button
                             onClick={() => setShowNoteModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                            className={`btn ${sizeClass} btn-circle btn-ghost`}
                             title="Add Note"
                             disabled={actionLoading}
                         >
@@ -403,7 +413,7 @@ export default function ActionsToolbar({
                     {actions.requestPrescreen && (
                         <button
                             onClick={() => setShowPreScreenModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-warning`}
+                            className={`btn ${sizeClass} btn-circle btn-warning`}
                             title="Request Pre-Screen"
                             disabled={actionLoading}
                         >
@@ -413,21 +423,24 @@ export default function ActionsToolbar({
                     {actions.advanceStage && (
                         <button
                             onClick={() => handleApprove(false)}
-                            className={`btn ${sizeClass} btn-square btn-success`}
+                            className={`btn ${sizeClass} btn-success`}
                             title={permissions.approveButtonText}
                             disabled={actionLoading}
                         >
                             {actionLoading ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
+                                <>
+                                    <i className="fa-duotone fa-regular fa-check" />
+                                    Approve
+                                </>
                             )}
                         </button>
                     )}
                     {actions.reject && (
                         <button
                             onClick={() => setShowDenyModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-error`}
+                            className={`btn ${sizeClass} btn-circle btn-error`}
                             title={permissions.rejectButtonText}
                             disabled={actionLoading}
                         >

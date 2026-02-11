@@ -88,7 +88,7 @@ async function main() {
         logger
     );
 
-    // Initialize domain event consumer
+    // Initialize domain event consumer with connection monitoring
     const consumer = new DomainEventConsumer(
         rabbitConfig.url,
         notificationService,
@@ -98,14 +98,28 @@ async function main() {
         portalUrl,
         candidateWebsiteUrl
     );
-    await consumer.connect();
+
+    try {
+        await consumer.connect();
+        logger.info('Domain event consumer connected successfully');
+    } catch (error) {
+        logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Failed to connect domain event consumer');
+        throw error;
+    }
 
     const v2EventPublisher = new V2EventPublisher(
         rabbitConfig.url,
         logger,
         baseConfig.serviceName
     );
-    await v2EventPublisher.connect();
+
+    try {
+        await v2EventPublisher.connect();
+        logger.info('V2 event publisher connected successfully');
+    } catch (error) {
+        logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Failed to connect V2 event publisher');
+        throw error;
+    }
 
     // Register V2 HTTP routes only
     await registerV2Routes(app, {
@@ -121,35 +135,161 @@ async function main() {
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
 
-    // Register standardized health check
+    // Enhanced health checkers with detailed logging
+    const createEnhancedChecker = (name: string, originalChecker: () => Promise<any>, logger: any) => {
+        return async () => {
+            const startTime = Date.now();
+            try {
+                logger.debug({ dependency: name }, 'Starting health check');
+                const result = await originalChecker();
+                const duration = Date.now() - startTime;
+
+                if (result.status !== 'healthy') {
+                    logger.warn({
+                        dependency: name,
+                        status: result.status,
+                        error: result.error,
+                        details: result.details,
+                        duration
+                    }, 'Health check failed or degraded');
+                } else {
+                    logger.debug({
+                        dependency: name,
+                        status: result.status,
+                        duration
+                    }, 'Health check passed');
+                }
+
+                return result;
+            } catch (error) {
+                const duration = Date.now() - startTime;
+                logger.error({
+                    dependency: name,
+                    error: error instanceof Error ? error.message : String(error),
+                    duration
+                }, 'Health check threw exception');
+                throw error;
+            }
+        };
+    };
+
+    // Create enhanced Resend checker with retry logic
+    const createResendChecker = () => {
+        return HealthCheckers.custom('resend', async () => {
+            let lastError;
+            const maxRetries = 2;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
+                    const response = await fetch('https://api.resend.com/domains', {
+                        headers: { 'Authorization': `Bearer ${resendConfig.apiKey}` },
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        if (attempt > 0) {
+                            logger.info({ attempt: attempt + 1 }, 'Resend API recovered after retry');
+                        }
+                        return true;
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < maxRetries - 1) {
+                        logger.warn({
+                            attempt: attempt + 1,
+                            error: error instanceof Error ? error.message : String(error)
+                        }, 'Resend API check failed, retrying');
+                        await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1))); // Exponential backoff
+                    }
+                }
+            }
+
+            logger.error({
+                attempts: maxRetries,
+                lastError: lastError instanceof Error ? lastError.message : String(lastError)
+            }, 'Resend API check failed after all retries');
+
+            return false;
+        }, { provider: 'resend' });
+    };
+
+    // Register standardized health check with enhanced monitoring
     registerHealthCheck(app, {
         serviceName: 'notification-service',
         logger,
+        timeout: 8000, // Increase timeout to 8s for better reliability
         checkers: {
-            database: HealthCheckers.database(supabaseClient),
+            database: createEnhancedChecker('database', HealthCheckers.database(supabaseClient), logger),
             ...(v2EventPublisher && {
-                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
+                rabbitmq_publisher: createEnhancedChecker('rabbitmq_publisher', HealthCheckers.rabbitMqPublisher(v2EventPublisher), logger)
             }),
             ...(consumer && {
-                rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(consumer)
+                rabbitmq_consumer: createEnhancedChecker('rabbitmq_consumer', HealthCheckers.rabbitMqConsumer(consumer), logger)
             }),
-            resend: HealthCheckers.custom('resend', async () => {
-                // Test Resend API connectivity
-                const response = await fetch('https://api.resend.com/domains', {
-                    headers: { 'Authorization': `Bearer ${resendConfig.apiKey}` }
-                });
-                return response.ok;
-            }, { provider: 'resend' }),
+            resend: createEnhancedChecker('resend', createResendChecker(), logger),
         },
     });
+
+    // Setup periodic health monitoring (every 30 seconds)
+    const healthMonitorInterval = setInterval(async () => {
+        try {
+            // Test database connectivity
+            const { error } = await supabaseClient.from('users').select('id').limit(1);
+            if (error && !error.message.includes('permission denied')) {
+                logger.warn({ error: error.message }, 'Database health check warning during monitoring');
+            }
+
+            // Test RabbitMQ connections
+            if (consumer.connection && !consumer.isConnected()) {
+                logger.warn('RabbitMQ consumer connection unhealthy during monitoring');
+            }
+            if (v2EventPublisher.connection && !v2EventPublisher.isConnected()) {
+                logger.warn('RabbitMQ publisher connection unhealthy during monitoring');
+            }
+
+        } catch (error) {
+            logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Health monitoring check failed');
+        }
+    }, 30000); // Every 30 seconds
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
-        await consumer.close();
-        await v2EventPublisher.close();
+        clearInterval(healthMonitorInterval);
+
+        try {
+            await consumer.close();
+            logger.info('Domain event consumer closed');
+        } catch (error) {
+            logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error closing consumer');
+        }
+
+        try {
+            await v2EventPublisher.close();
+            logger.info('V2 event publisher closed');
+        } catch (error) {
+            logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error closing event publisher');
+        }
+
         await app.close();
         process.exit(0);
+    });
+
+    // Handle uncaught errors
+    process.on('unhandledRejection', (reason, promise) => {
+        logger.error({ reason, promise }, 'Unhandled promise rejection');
+    });
+
+    process.on('uncaughtException', (error) => {
+        logger.error({ error }, 'Uncaught exception');
+        process.exit(1);
     });
 
     // Start server

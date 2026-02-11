@@ -59,8 +59,7 @@ export class MonitorLoop {
             );
 
             // Step 3: Evaluate sliding windows and write aggregated status
-            const aggregated =
-                await this.slidingWindow.evaluateAndAggregate();
+            const aggregated = await this.slidingWindow.evaluateAndAggregate();
 
             // Steps 4-7 are skipped in dry-run mode (no DB/event writes)
             if (this.dryRun) {
@@ -125,10 +124,17 @@ export class MonitorLoop {
     private async persistHealthChecks(
         results: import("./types").ServiceCheckResult[],
     ): Promise<void> {
+        if (!this.supabase) {
+            this.logger.debug(
+                "Skipping health check persistence (dry run mode)",
+            );
+            return;
+        }
+
         const rows = results.map((r) => ({
             service_name: r.service,
             status: r.status,
-            response_time_ms: r.responseTime,
+            response_time_ms: r.responseTime || 0,
             error_message: r.error || null,
             checked_at: r.timestamp,
             check_details: r.checks || null,

@@ -12,20 +12,26 @@ export function getApplicationStageBadge(stage: string | null | undefined): { cl
     if (!stage) {
         return { className: 'badge-ghost', label: 'Unknown' };
     }
-    
+
     const styles: Record<string, { className: string; label: string }> = {
         draft: { className: 'badge-neutral', label: 'Draft' },
-        recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },
-        recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
         ai_review: { className: 'badge-warning', label: 'AI Review' },
+        ai_reviewed: { className: 'badge-warning', label: 'AI Reviewed' },
+        recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
+        recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },
+        recruiter_review: { className: 'badge-info', label: 'Recruiter Review' },
         screen: { className: 'badge-info', label: 'Screening' },
         submitted: { className: 'badge-primary', label: 'Submitted' },
+        company_review: { className: 'badge-info', label: 'Company Review' },
+        company_feedback: { className: 'badge-info', label: 'Company Feedback' },
         interview: { className: 'badge-warning', label: 'Interview' },
         offer: { className: 'badge-success', label: 'Offer' },
         hired: { className: 'badge-success', label: 'Hired' },
         rejected: { className: 'badge-error', label: 'Rejected' },
+        withdrawn: { className: 'badge-error badge-soft badge-outline', label: 'Withdrawn' },
+        expired: { className: 'badge-error', label: 'Expired' },
     };
-    
+
     return styles[stage] || { className: 'badge-ghost', label: stage };
 }
 
