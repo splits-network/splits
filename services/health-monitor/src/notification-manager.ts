@@ -112,4 +112,78 @@ export class NotificationManager {
             "Disruption notification deactivated",
         );
     }
+
+    /**
+     * DB-level cleanup: deactivate ALL active health-monitor notifications
+     * for services that are currently healthy. Catches orphaned notifications
+     * that the in-memory map missed (restarts, duplicates, race conditions).
+     */
+    async cleanupHealthyServices(
+        healthyServiceNames: string[],
+    ): Promise<void> {
+        if (healthyServiceNames.length === 0) return;
+
+        const healthySet = new Set(healthyServiceNames);
+
+        // Query all active health-monitor disruption notifications
+        const { data, error } = await this.supabase
+            .from("site_notifications")
+            .select("id, metadata")
+            .eq("source", "health-monitor")
+            .eq("type", "service_disruption")
+            .eq("is_active", true);
+
+        if (error) {
+            this.logger.error(
+                { err: error },
+                "Failed to query health notifications for cleanup",
+            );
+            return;
+        }
+
+        // Find notifications for services that are now healthy
+        const orphanedIds = (data || [])
+            .filter((n: any) => {
+                const svc = n.metadata?.service_name;
+                return svc && healthySet.has(svc);
+            })
+            .map((n: any) => n.id);
+
+        if (orphanedIds.length === 0) return;
+
+        // Deactivate them all
+        const { error: updateError } = await this.supabase
+            .from("site_notifications")
+            .update({
+                is_active: false,
+                updated_at: new Date().toISOString(),
+            })
+            .in("id", orphanedIds);
+
+        if (updateError) {
+            this.logger.error(
+                { err: updateError },
+                "Failed to cleanup orphaned health notifications",
+            );
+            return;
+        }
+
+        // Sync in-memory map
+        for (const n of data || []) {
+            const svc = n.metadata?.service_name;
+            if (svc && healthySet.has(svc)) {
+                this.activeNotifications.delete(svc);
+            }
+        }
+
+        this.logger.warn(
+            {
+                cleaned: orphanedIds.length,
+                services: (data || [])
+                    .filter((n: any) => healthySet.has(n.metadata?.service_name))
+                    .map((n: any) => n.metadata?.service_name),
+            },
+            "Cleaned up orphaned health-monitor notifications",
+        );
+    }
 }

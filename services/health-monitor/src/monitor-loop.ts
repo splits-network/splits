@@ -91,6 +91,14 @@ export class MonitorLoop {
                 }
             }
 
+            // Step 6b: DB-level cleanup of orphaned notifications for healthy services
+            const healthyServices = aggregated
+                .filter((s) => s.status === "healthy")
+                .map((s) => s.service);
+            await this.notificationManager!.cleanupHealthyServices(
+                healthyServices,
+            );
+
             // Step 7: Publish events for status transitions
             if (this.eventPublisher && transitions.length > 0) {
                 for (const t of transitions) {
