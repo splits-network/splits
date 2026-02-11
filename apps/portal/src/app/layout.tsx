@@ -140,10 +140,10 @@ export default async function RootLayout({
 
                     {/* HelpNinja widget loaded after page becomes interactive */}
                     {/** Commented out temporarily */}
-                    <Script
+                    {/* <Script
                         src="https://helpninja.app/api/widget?t=hn_pk_sGLps5fACfWmzntqum9f6dmR&s=45c1a756-0984-41c2-9b84-17ea5b558938&k=b49754f5-9bd5-4f3d-895d-1ef14b050375&voice=friendly"
                         strategy="afterInteractive"
-                    />
+                    /> */}
 
                     {/* Analytics scripts loaded after page becomes interactive */}
                     <Script
