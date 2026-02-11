@@ -97,6 +97,10 @@ export class NotificationManager {
                     severity: status.status,
                     error: status.error || null,
                     notification_id: data.id,
+                    environment:
+                        process.env.NODE_ENV === "production"
+                            ? "production"
+                            : "staging",
                 },
             );
         }
@@ -140,6 +144,10 @@ export class NotificationManager {
                     service_name: serviceName,
                     display_name: displayName,
                     notification_id: notificationId,
+                    environment:
+                        process.env.NODE_ENV === "production"
+                            ? "production"
+                            : "staging",
                 },
             );
         }

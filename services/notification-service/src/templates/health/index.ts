@@ -12,6 +12,7 @@ export interface ServiceAlertData {
     severity: string;
     status: 'unhealthy' | 'degraded' | 'recovered';
     error?: string;
+    environment?: string;
     statusPageUrl: string;
     timestamp: string;
 }
@@ -34,6 +35,7 @@ ${infoCard({
     items: [
         { label: 'Service', value: data.serviceDisplayName, highlight: true },
         { label: 'Status', value: severityLabel },
+        { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
         { label: 'Internal Name', value: data.serviceName },
         { label: 'Detected At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
         ...(data.error ? [{ label: 'Error', value: data.error }] : []),
@@ -69,6 +71,7 @@ ${infoCard({
     items: [
         { label: 'Service', value: data.serviceDisplayName, highlight: true },
         { label: 'Status', value: 'Healthy' },
+        { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
         { label: 'Internal Name', value: data.serviceName },
         { label: 'Resolved At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
     ],

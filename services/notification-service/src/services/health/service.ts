@@ -67,7 +67,8 @@ export class HealthEmailService {
     }
 
     async sendServiceUnhealthy(recipient: string, data: ServiceAlertData): Promise<void> {
-        const subject = `[ALERT] ${data.serviceDisplayName} is ${data.severity === 'unhealthy' ? 'Down' : 'Degraded'}`;
+        const envTag = data.environment ? `[${data.environment.toUpperCase()}] ` : '';
+        const subject = `${envTag}[ALERT] ${data.serviceDisplayName} is ${data.severity === 'unhealthy' ? 'Down' : 'Degraded'}`;
         const html = serviceUnhealthyEmail(data);
 
         await this.sendEmail(recipient, subject, html, {
@@ -82,7 +83,8 @@ export class HealthEmailService {
     }
 
     async sendServiceRecovered(recipient: string, data: ServiceAlertData): Promise<void> {
-        const subject = `[RESOLVED] ${data.serviceDisplayName} has recovered`;
+        const envTag = data.environment ? `[${data.environment.toUpperCase()}] ` : '';
+        const subject = `${envTag}[RESOLVED] ${data.serviceDisplayName} has recovered`;
         const html = serviceRecoveredEmail(data);
 
         await this.sendEmail(recipient, subject, html, {

@@ -38,6 +38,7 @@ export class HealthEventConsumer {
             severity: (payload.severity as string) || 'unhealthy',
             status: 'unhealthy',
             error: (payload.error as string) || undefined,
+            environment: (payload.environment as string) || undefined,
             statusPageUrl: this.statusPageUrl,
             timestamp: event.timestamp || new Date().toISOString(),
         };
@@ -72,6 +73,7 @@ export class HealthEventConsumer {
             serviceDisplayName: (payload.display_name as string) || (payload.service_name as string) || 'Unknown Service',
             severity: 'unhealthy',
             status: 'recovered',
+            environment: (payload.environment as string) || undefined,
             statusPageUrl: this.statusPageUrl,
             timestamp: event.timestamp || new Date().toISOString(),
         };
