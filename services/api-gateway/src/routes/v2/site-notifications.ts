@@ -260,13 +260,69 @@ export function registerSiteNotificationRoutes(
         },
     );
 
-    // DELETE /api/v2/site-notifications/:id - deactivate notification (admin, auth required)
+    // POST /api/v2/site-notifications/bulk-delete - delete multiple notifications (admin, auth required)
+    app.post(
+        "/api/v2/site-notifications/bulk-delete",
+        {
+            preHandler: requireAuth(),
+            schema: {
+                summary: "Delete multiple site notifications",
+                tags: ["admin"],
+                body: {
+                    type: "object",
+                    required: ["ids"],
+                    properties: {
+                        ids: {
+                            type: "array",
+                            items: { type: "string" },
+                            minItems: 1,
+                            maxItems: 100,
+                        },
+                    },
+                },
+            },
+        },
+        async (request, reply) => {
+            try {
+                const { ids } = request.body as { ids: string[] };
+
+                const { error } = await supabase
+                    .from("site_notifications")
+                    .delete()
+                    .in("id", ids);
+
+                if (error) {
+                    request.log.error(
+                        { err: error },
+                        "Failed to bulk delete notifications",
+                    );
+                    return reply
+                        .status(500)
+                        .send({ error: "Failed to delete notifications" });
+                }
+
+                return reply.send({
+                    data: { success: true, deleted: ids.length },
+                });
+            } catch (error) {
+                request.log.error(
+                    { err: error },
+                    "Failed to bulk delete notifications",
+                );
+                return reply
+                    .status(500)
+                    .send({ error: "Failed to delete notifications" });
+            }
+        },
+    );
+
+    // DELETE /api/v2/site-notifications/:id - delete notification (admin, auth required)
     app.delete(
         "/api/v2/site-notifications/:id",
         {
             preHandler: requireAuth(),
             schema: {
-                summary: "Deactivate a site notification",
+                summary: "Delete a site notification",
                 tags: ["admin"],
             },
         },
@@ -276,31 +332,28 @@ export function registerSiteNotificationRoutes(
 
                 const { error } = await supabase
                     .from("site_notifications")
-                    .update({
-                        is_active: false,
-                        updated_at: new Date().toISOString(),
-                    })
+                    .delete()
                     .eq("id", id);
 
                 if (error) {
                     request.log.error(
                         { err: error },
-                        "Failed to deactivate notification",
+                        "Failed to delete notification",
                     );
                     return reply
                         .status(500)
-                        .send({ error: "Failed to deactivate notification" });
+                        .send({ error: "Failed to delete notification" });
                 }
 
                 return reply.send({ data: { success: true } });
             } catch (error) {
                 request.log.error(
                     { err: error },
-                    "Failed to deactivate notification",
+                    "Failed to delete notification",
                 );
                 return reply
                     .status(500)
-                    .send({ error: "Failed to deactivate notification" });
+                    .send({ error: "Failed to delete notification" });
             }
         },
     );

@@ -79,6 +79,8 @@ spec:
                         value: "redis"
                       - name: REDIS_PORT
                         value: "6379"
+                      - name: RABBITMQ_URL
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
                       - name: IDENTITY_SERVICE_URL
                         value: "http://identity-service:3001"
                       - name: ATS_SERVICE_URL

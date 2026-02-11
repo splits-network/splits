@@ -51,6 +51,10 @@ const SEVERITY_LEVELS = [
     { value: "warning", label: "Warning", badge: "badge-warning" },
     { value: "error", label: "Error", badge: "badge-error" },
     { value: "critical", label: "Critical", badge: "badge-error" },
+    { value: "primary", label: "Primary", badge: "badge-primary" },
+    { value: "secondary", label: "Secondary", badge: "badge-secondary" },
+    { value: "accent", label: "Accent", badge: "badge-accent" },
+    { value: "neutral", label: "Neutral", badge: "badge-neutral" },
 ];
 
 function getTypeBadge(type: string) {
@@ -102,6 +106,8 @@ export default function NotificationsAdminPage() {
     const toast = useToast();
     const confirm = useAdminConfirm();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkDeleting, setBulkDeleting] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [editingNotification, setEditingNotification] =
         useState<SiteNotification | null>(null);
@@ -255,7 +261,7 @@ export default function NotificationsAdminPage() {
     async function deleteNotification(notification: SiteNotification) {
         const confirmed = await confirm({
             title: "Delete Notification",
-            message: `Are you sure you want to delete "${notification.title}"? This will deactivate and remove it from the active list.`,
+            message: `Are you sure you want to permanently delete "${notification.title}"?`,
             confirmText: "Delete",
             type: "warning",
         });
@@ -269,12 +275,65 @@ export default function NotificationsAdminPage() {
 
             await apiClient.delete(`/site-notifications/${notification.id}`);
             toast.success("Notification deleted");
+            setSelectedIds((prev) => {
+                const next = new Set(prev);
+                next.delete(notification.id);
+                return next;
+            });
             refresh();
         } catch (err) {
             console.error("Failed to delete notification:", err);
             toast.error("Failed to delete notification");
         } finally {
             setUpdatingId(null);
+        }
+    }
+
+    function toggleSelect(id: string) {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    }
+
+    function toggleSelectAll() {
+        if (selectedIds.size === notifications.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(notifications.map((n) => n.id)));
+        }
+    }
+
+    async function bulkDelete() {
+        if (selectedIds.size === 0) return;
+
+        const confirmed = await confirm({
+            title: "Delete Selected Notifications",
+            message: `Are you sure you want to permanently delete ${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""}?`,
+            confirmText: `Delete ${selectedIds.size}`,
+            type: "warning",
+        });
+        if (!confirmed) return;
+
+        setBulkDeleting(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+
+            await apiClient.post("/site-notifications/bulk-delete", {
+                ids: Array.from(selectedIds),
+            });
+            toast.success(`${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""} deleted`);
+            setSelectedIds(new Set());
+            refresh();
+        } catch (err) {
+            console.error("Failed to bulk delete notifications:", err);
+            toast.error("Failed to delete notifications");
+        } finally {
+            setBulkDeleting(false);
         }
     }
 
@@ -362,7 +421,7 @@ export default function NotificationsAdminPage() {
                         })
                     }
                 >
-                    <option value="">All Severities</option>
+                    <option value="">All Styles</option>
                     {SEVERITY_LEVELS.map((s) => (
                         <option key={s.value} value={s.value}>
                             {s.label}
@@ -416,15 +475,49 @@ export default function NotificationsAdminPage() {
                     }
                 />
             ) : (
+                <>
+                {selectedIds.size > 0 && (
+                    <div className="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                        <span className="text-sm font-medium">
+                            {selectedIds.size} selected
+                        </span>
+                        <button
+                            className="btn btn-error btn-sm"
+                            onClick={bulkDelete}
+                            disabled={bulkDeleting}
+                        >
+                            {bulkDeleting ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-trash mr-1"></i>
+                            )}
+                            Delete Selected
+                        </button>
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setSelectedIds(new Set())}
+                        >
+                            Clear Selection
+                        </button>
+                    </div>
+                )}
                 <div className="card bg-base-100 shadow">
                     <div className="card-body p-0">
                         <div className="overflow-x-auto">
                             <table className="table">
                                 <thead>
                                     <tr>
+                                        <th>
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox checkbox-sm"
+                                                checked={selectedIds.size === notifications.length && notifications.length > 0}
+                                                onChange={toggleSelectAll}
+                                            />
+                                        </th>
                                         <th>Title</th>
                                         <th>Type</th>
-                                        <th>Severity</th>
+                                        <th>Banner Style</th>
                                         <th>Source</th>
                                         <th>Status</th>
                                         <th>Created</th>
@@ -436,7 +529,15 @@ export default function NotificationsAdminPage() {
                                         const status =
                                             getStatusLabel(notification);
                                         return (
-                                            <tr key={notification.id}>
+                                            <tr key={notification.id} className={selectedIds.has(notification.id) ? "bg-base-200" : ""}>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="checkbox checkbox-sm"
+                                                        checked={selectedIds.has(notification.id)}
+                                                        onChange={() => toggleSelect(notification.id)}
+                                                    />
+                                                </td>
                                                 <td>
                                                     <div>
                                                         <div className="font-semibold">
@@ -559,6 +660,7 @@ export default function NotificationsAdminPage() {
                         </div>
                     </div>
                 </div>
+                </>
             )}
 
             {!loading && !error && notifications.length > 0 && (
@@ -600,7 +702,7 @@ export default function NotificationsAdminPage() {
                             </fieldset>
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">
-                                    Severity
+                                    Banner Style
                                 </legend>
                                 <select
                                     className="select w-full"

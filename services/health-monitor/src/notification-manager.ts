@@ -58,7 +58,7 @@ export class NotificationManager {
                 type: "service_disruption",
                 severity: severityMap[status.status] || "error",
                 source: "health-monitor",
-                title: "Service Degradation Detected",
+                title: status.displayName,
                 message: `${status.displayName} is currently experiencing issues.`,
                 is_active: true,
                 dismissible: true,

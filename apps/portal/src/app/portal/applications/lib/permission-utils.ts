@@ -104,7 +104,7 @@ function getPermissionsByStage(
                 ...base,
                 canApprove: isCompanyUser || isPlatformAdmin,
                 canReject: isCompanyUser || isPlatformAdmin,
-                canRequestPrescreen: isCompanyUser || isPlatformAdmin,
+                canRequestPrescreen: !candidateRecruiterId && (isCompanyUser || isPlatformAdmin),
                 approveButtonText: 'Accept & Move to Company Review',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is awaiting company acceptance.',

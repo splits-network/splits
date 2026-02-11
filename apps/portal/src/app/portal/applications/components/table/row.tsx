@@ -50,16 +50,17 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
             </td>
             {/* Job */}
             <td>
-                <span className="text-sm font-medium">
-                    {item.job?.title || "Unknown"}
-                </span>
+                <div className="flex flex-col justify-start">
+                    <span className="text-sm font-medium">
+                        {item.job?.title || "Unknown"}
+                    </span>
+                    <span className="text-sm text-base-content/60">
+                        {item.job?.company?.name || "N/A"}
+                    </span>
+                </div>
             </td>
             {/* Company */}
-            <td>
-                <span className="text-sm text-base-content/60">
-                    {item.job?.company?.name || "N/A"}
-                </span>
-            </td>
+            <td></td>
             {/* AI Score */}
             <td>
                 {item.ai_review?.fit_score != null ? (
@@ -86,21 +87,25 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
             </td>
             {/* Submitted */}
             <td>
-                <span className="text-sm text-base-content/60">
+                <span className="text-xs text-base-content/60">
                     {item.created_at ? formatDate(item.created_at) : "N/A"}
                 </span>
             </td>
             {/* Actions */}
             <td onClick={(e) => e.stopPropagation()}>
-                <div className="flex gap-1 justify-end">
-                    <button
-                        className="btn btn-ghost btn-sm btn-square"
-                        onClick={onViewDetails}
-                        title="View details"
-                    >
-                        <i className="fa-duotone fa-regular fa-eye fa-fw" />
-                    </button>
-                </div>
+                <ActionsToolbar
+                    application={item}
+                    variant="icon-only"
+                    size="xs"
+                    showActions={{
+                        viewDetails: true,
+                        message: false,
+                        addNote: false,
+                        advanceStage: true,
+                        reject: true,
+                    }}
+                    onMessage={onMessage}
+                />
             </td>
         </>
     );
@@ -159,7 +164,13 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                     application={item}
                     variant="descriptive"
                     size="sm"
-                    showActions={{ viewDetails: false, message: true }}
+                    showActions={{
+                        viewDetails: true,
+                        message: true,
+                        addNote: true,
+                        advanceStage: true,
+                        reject: true,
+                    }}
                     onMessage={onMessage}
                 />
             </div>

@@ -20,10 +20,16 @@ import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
 export class DomainEventConsumer {
-    private connection: Connection | null = null;
+    public connection: Connection | null = null;
     private channel: Channel | null = null;
     private readonly exchange = 'splits-network-events';
     private readonly queue = 'notification-service-queue';
+    private reconnectAttempts = 0;
+    private readonly maxReconnectAttempts = 10;
+    private reconnectTimeout: NodeJS.Timeout | null = null;
+    private isConnecting = false;
+    private isClosing = false;
+    private connectionHealthy = false;
 
     private applicationsConsumer: ApplicationsEventConsumer;
     private placementsConsumer: PlacementsEventConsumer;
@@ -137,11 +143,46 @@ export class DomainEventConsumer {
     }
 
     async connect(): Promise<void> {
+        if (this.isConnecting) {
+            this.logger.debug('Connection attempt already in progress, skipping');
+            return;
+        }
+
+        this.isConnecting = true;
+
         try {
+            this.logger.info({ attempt: this.reconnectAttempts + 1 }, 'Attempting to connect to RabbitMQ');
+
             this.connection = await amqp.connect(this.rabbitMqUrl) as any;
             this.channel = await (this.connection as any).createChannel();
 
             if (!this.channel) throw new Error('Failed to create channel');
+
+            // Setup connection event listeners for monitoring
+            this.connection?.on('error', (err) => {
+                this.logger.error({ err }, 'RabbitMQ connection error');
+                this.connectionHealthy = false;
+                this.scheduleReconnect();
+            });
+
+            this.connection?.on('close', () => {
+                this.logger.warn('RabbitMQ connection closed');
+                this.connectionHealthy = false;
+                if (!this.isClosing) {
+                    this.scheduleReconnect();
+                }
+            });
+
+            // Setup channel event listeners
+            this.channel.on('error', (err) => {
+                this.logger.error({ err }, 'RabbitMQ channel error');
+                this.connectionHealthy = false;
+            });
+
+            this.channel.on('close', () => {
+                this.logger.warn('RabbitMQ channel closed');
+                this.connectionHealthy = false;
+            });
 
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
             await this.channel.assertQueue(this.queue, { durable: true });
@@ -224,11 +265,81 @@ export class DomainEventConsumer {
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
+            // Mark connection as healthy after successful setup
+            this.connectionHealthy = true;
+
+            // Reset reconnect attempts on successful connection
+            this.reconnectAttempts = 0;
+            this.isConnecting = false;
+
             await this.startConsuming();
         } catch (error) {
-            this.logger.error({ err: error }, 'Failed to connect to RabbitMQ');
-            throw error;
+            this.isConnecting = false;
+            this.logger.error({ err: error, attempt: this.reconnectAttempts + 1 }, 'Failed to connect to RabbitMQ');
+
+            if (!this.isClosing) {
+                this.scheduleReconnect();
+            } else {
+                throw error;
+            }
         }
+    }
+
+    private scheduleReconnect(): void {
+        if (this.isClosing || this.reconnectTimeout) {
+            return;
+        }
+
+        this.reconnectAttempts++;
+
+        if (this.reconnectAttempts > this.maxReconnectAttempts) {
+            this.logger.error({
+                attempts: this.reconnectAttempts,
+                maxAttempts: this.maxReconnectAttempts
+            }, 'Max reconnection attempts reached, giving up');
+            return;
+        }
+
+        const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000); // Exponential backoff, max 30s
+
+        this.logger.info({
+            attempt: this.reconnectAttempts,
+            delay,
+            maxAttempts: this.maxReconnectAttempts
+        }, 'Scheduling RabbitMQ reconnection');
+
+        this.reconnectTimeout = setTimeout(async () => {
+            this.reconnectTimeout = null;
+
+            // Clean up existing connections
+            await this.cleanup();
+
+            try {
+                await this.connect();
+            } catch (error) {
+                this.logger.error({ err: error }, 'Reconnection attempt failed');
+            }
+        }, delay);
+    }
+
+    private async cleanup(): Promise<void> {
+        try {
+            if (this.channel) {
+                await this.channel.close();
+            }
+        } catch (error) {
+            this.logger.debug({ err: error }, 'Error closing channel during cleanup');
+        }
+
+        try {
+            if (this.connection) {
+            }
+        } catch (error) {
+            this.logger.debug({ err: error }, 'Error closing connection during cleanup');
+        }
+
+        this.connection = null;
+        this.channel = null;
     }
 
     private async startConsuming(): Promise<void> {
@@ -426,12 +537,21 @@ export class DomainEventConsumer {
     }
 
     isConnected(): boolean {
-        return this.connection !== null && this.channel !== null;
+        return this.connection !== null &&
+            this.channel !== null &&
+            this.connectionHealthy;
     }
 
     async close(): Promise<void> {
-        if (this.channel) await this.channel.close();
-        if (this.connection) await (this.connection as any).close();
+        this.isClosing = true;
+
+        // Clear any pending reconnect attempts
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
+
+        await this.cleanup();
         this.logger.info('Disconnected from RabbitMQ');
     }
 }
