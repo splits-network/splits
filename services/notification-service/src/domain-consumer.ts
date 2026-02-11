@@ -265,6 +265,9 @@ export class DomainEventConsumer {
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
+            // Mark connection as healthy after successful setup
+            this.connectionHealthy = true;
+
             // Reset reconnect attempts on successful connection
             this.reconnectAttempts = 0;
             this.isConnecting = false;
