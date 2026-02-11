@@ -1,5 +1,6 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata } from "../../seo";
 
 const accessMatrix = [
     {
@@ -60,6 +61,8 @@ const accessMatrix = [
     },
 ];
 
+
+export const metadata = getDocMetadata("roles-and-permissions/role-based-access");
 export default function RoleBasedAccessPage() {
     return (
         <div className="space-y-10">

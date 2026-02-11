@@ -17,6 +17,7 @@ interface StepReviewProps {
     job: any;
     documents: any[];
     selectedDocuments: string[];
+    coverLetter?: string;
     questions: PreScreenQuestion[];
     answers: Answer[];
     additionalNotes: string;
@@ -29,6 +30,7 @@ export default function StepReview({
     job,
     documents,
     selectedDocuments,
+    coverLetter,
     questions,
     answers,
     additionalNotes,
@@ -150,6 +152,70 @@ export default function StepReview({
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+
+            {/* Cover Letter */}
+            <div className="card bg-base-200">
+                <div className="card-body">
+                    <h3 className="card-title text-lg">Cover Letter</h3>
+
+                    {/* Show uploaded cover letter files */}
+                    {selectedDocs.filter(
+                        (doc) => doc.document_type === "cover_letter",
+                    ).length > 0 && (
+                        <div className="mb-4">
+                            <div className="text-sm font-medium mb-2">
+                                Uploaded Cover Letter Files:
+                            </div>
+                            <div className="space-y-2">
+                                {selectedDocs
+                                    .filter(
+                                        (doc) =>
+                                            doc.document_type ===
+                                            "cover_letter",
+                                    )
+                                    .map((doc) => (
+                                        <div
+                                            key={doc.id}
+                                            className="flex items-center gap-2 p-2 rounded bg-base-100"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
+                                            <span className="font-medium">
+                                                {doc.file_name}
+                                            </span>
+                                            <span className="text-sm text-base-content/60">
+                                                (
+                                                {(doc.file_size / 1024).toFixed(
+                                                    1,
+                                                )}{" "}
+                                                KB)
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Show cover letter text */}
+                    {coverLetter ? (
+                        <div className="bg-base-100 p-3 rounded-lg">
+                            <div className="text-sm font-medium mb-2">
+                                Cover Letter Text:
+                            </div>
+                            <div className="text-base-content/70 whitespace-pre-wrap">
+                                {coverLetter}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-base-content/50 p-3 rounded-lg bg-base-100 text-center italic">
+                            {selectedDocs.filter(
+                                (doc) => doc.document_type === "cover_letter",
+                            ).length > 0
+                                ? "Using uploaded cover letter file only"
+                                : "No cover letter provided"}
+                        </div>
+                    )}
                 </div>
             </div>
 

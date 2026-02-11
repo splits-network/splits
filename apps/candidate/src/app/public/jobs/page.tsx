@@ -4,15 +4,19 @@ import { Suspense } from "react";
 import { apiClient } from "@/lib/api-client";
 import { JsonLd } from "@splits-network/shared-ui";
 import JobsContent from "./components/jobs-content";
+import { buildCanonical } from "@/lib/seo";
+
+const canonicalUrl = buildCanonical("/public/jobs").alternates.canonical;
 
 export const metadata: Metadata = {
     title: "Browse Jobs",
     description:
         "Search thousands of open roles and apply with one click on Applicant Network.",
     alternates: {
+        canonical: canonicalUrl,
         types: {
-            "application/rss+xml": "/public/jobs-new/rss.xml",
-            "application/atom+xml": "/public/jobs-new/atom.xml",
+            "application/rss+xml": "/public/jobs/rss.xml",
+            "application/atom+xml": "/public/jobs/atom.xml",
         },
     },
 };
@@ -111,11 +115,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         "@context": "https://schema.org",
         "@type": "ItemList",
         name: "Applicant Network Jobs",
-        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/public/jobs-new`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/public/jobs`,
         itemListElement: (initialData || []).slice(0, 20).map((job, index) => ({
             "@type": "ListItem",
             position: index + 1,
-            url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/public/jobs-new/${job?.id}`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/public/jobs/${job?.id}`,
             item: {
                 "@type": "JobPosting",
                 title: job?.title || "Untitled role",

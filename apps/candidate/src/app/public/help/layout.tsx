@@ -1,11 +1,17 @@
-import type { Metadata } from 'next';
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: 'Help Center',
-    description: 'Find answers to common questions about Applicant Network, applications, recruiters, and profiles.',
+    title: "Help Center | Applicant Network",
+    description:
+        "Find answers to common questions about accounts, applications, and job searches on Applicant Network.",
+    ...buildCanonical("/public/help"),
 };
 
-export default function HelpLayout({ children }: { children: ReactNode }) {
+export default function HelpLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return children;
 }

@@ -1,6 +1,9 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata } from "../../seo";
 
+
+export const metadata = getDocMetadata("core-workflows/invite-recruiters-or-teammates");
 export default function InviteRecruitersOrTeammatesPage() {
     return (
         <div className="space-y-10">

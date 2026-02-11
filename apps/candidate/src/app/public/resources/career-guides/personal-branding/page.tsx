@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Personal Branding Essentials',
     description: 'Build and promote your professional brand across multiple platforms.',
+    ...buildCanonical("/public/resources/career-guides/personal-branding"),
 };
 
 export default function PersonalBrandingGuidePage() {

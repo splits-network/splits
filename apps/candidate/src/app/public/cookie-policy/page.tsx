@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: 'Cookie Policy | Splits Network',
-    description: 'Learn about how Splits Network uses cookies and similar tracking technologies to improve your experience and analyze platform usage.',
+    title: 'Cookie Policy | Applicant Network',
+    description: 'Learn about how Applicant Network uses cookies and similar tracking technologies to improve your experience and analyze platform usage.',
+    ...buildCanonical("/public/cookie-policy"),
 };
 
 export default function CookiePolicyPage() {

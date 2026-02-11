@@ -466,3 +466,13 @@ apps/candidate/src/components/onboarding/onboarding-wizard-modal.tsx
 
 **Report generated:** 2026-02-11
 **Next audit recommended:** 2026-03-11
+
+---
+
+## Resolution Note
+
+As of 2026-02-11, the P1 audit fixes have been implemented:
+
+- All legacy `<div className="modal modal-open">` modals were migrated to `<dialog>` with DaisyUI backdrops.
+- Deprecated `*-bordered` input/select/textarea/file-input classes were removed in favor of plain classes with `w-full`.
+- Unused global utilities (`shadow-elevation-*`, `hover-lift`, `focus-ring`) were removed and the lone usage was replaced with a Tailwind shadow.

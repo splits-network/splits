@@ -119,7 +119,7 @@ export default function HeaderFilters({
 
             {/* RSS Feed Link */}
             <a
-                href="/public/jobs-new/rss.xml"
+                href="/public/jobs/rss.xml"
                 className="btn btn-sm btn-ghost"
                 title="RSS Feed"
                 target="_blank"
@@ -130,3 +130,4 @@ export default function HeaderFilters({
         </div>
     );
 }
+

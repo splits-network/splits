@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { getDocMetadata } from "../seo";
 
+
+export const metadata = getDocMetadata("integrations");
 export default function IntegrationsPage() {
     return (
         <div className="space-y-6">

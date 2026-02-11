@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Cookie Policy | Employment Networks',
     description: 'Information about cookies and tracking technologies used on Employment Networks platforms.',
+    ...buildCanonical("/cookie-policy"),
 };
 
 export default function CookiePolicyPage() {

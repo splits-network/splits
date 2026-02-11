@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Cookie Policy - Applicant Network | How We Use Cookies',
     description: 'Learn about how Applicant Network uses cookies and similar technologies to improve your experience and provide our services.',
     robots: 'index, follow',
+    ...buildCanonical("/public/cookie-policy"),
 };
 
 export default function CookiePolicyPage() {

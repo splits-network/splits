@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { getDocMetadata } from "../seo";
 
+
+export const metadata = getDocMetadata("roles-and-permissions");
 export default function RolesAndPermissionsIndexPage() {
     return (
         <div className="space-y-8">

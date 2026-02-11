@@ -3,6 +3,7 @@ import type { MarketplaceProfile } from '@splits-network/shared-types';
 import { apiClient } from '@/lib/api-client';
 import { cache } from 'react';
 import RecruiterDetailClient from './recruiter-detail-client';
+import { buildCanonical } from "@/lib/seo";
 
 interface MarketplaceRecruiter {
     id: string;
@@ -51,11 +52,13 @@ const fetchRecruiter = cache(async (id: string): Promise<MarketplaceRecruiter | 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { id } = await params;
     const recruiter = await fetchRecruiter(id);
+    const canonicalPath = `/public/marketplace/${id}`;
 
     if (!recruiter) {
         return {
             title: 'Recruiter Profile',
             description: 'Explore recruiter profiles and marketplace availability.',
+            ...buildCanonical(canonicalPath),
         };
     }
 
@@ -63,6 +66,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
         title: recruiterName,
         description: recruiter.tagline || 'Explore recruiter specialties, experience, and marketplace availability.',
+        ...buildCanonical(canonicalPath),
     };
 }
 

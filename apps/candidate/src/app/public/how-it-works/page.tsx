@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HowItWorksContent } from "./how-it-works-content";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: "How It Works - Applicant Network | Simple 3-Step Job Search Process",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
         description: "Land your dream job in 3 simple steps with expert recruiters by your side.",
         type: "website",
     },
+    ...buildCanonical("/public/how-it-works"),
 };
 
 export default function HowItWorksPage() {

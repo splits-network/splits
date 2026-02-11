@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AboutContent } from "./about-content";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: "About Us - Applicant Network | Connecting Talent with Opportunity",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
         description: "Connecting talented candidates with amazing opportunities through expert recruiters.",
         type: "website",
     },
+    ...buildCanonical("/public/about"),
 };
 
 export default function AboutPage() {

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { getDocMetadata } from "../seo";
 
+
+export const metadata = getDocMetadata("getting-started");
 export default function GettingStartedIndexPage() {
     return (
         <div className="space-y-8">

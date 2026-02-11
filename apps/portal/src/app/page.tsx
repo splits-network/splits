@@ -14,11 +14,20 @@ import { ProblemSection } from "@/components/landing/sections/problem-section";
 import { SolutionBridgeSection } from "@/components/landing/sections/solution-bridge-section";
 import type { Metadata } from "next";
 import { JsonLd } from "@splits-network/shared-ui";
+import { buildCanonical } from "@/lib/seo";
+import { portalFaqs } from "@/components/landing/sections/faq-data";
 
 export const metadata: Metadata = {
     title: "Recruiting Marketplace for Split Placements",
     description:
         "Collaborate with recruiters, share roles, and split fees on Splits Network.",
+    openGraph: {
+        title: "Recruiting Marketplace for Split Placements",
+        description:
+            "Collaborate with recruiters, share roles, and split fees on Splits Network.",
+        url: "https://splits.network",
+    },
+    ...buildCanonical(""),
 };
 
 export default async function HomePage() {
@@ -35,10 +44,23 @@ export default async function HomePage() {
             url: "https://splits.network",
         },
     };
+    const faqJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: portalFaqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+            },
+        })),
+    };
 
     return (
         <>
             <JsonLd data={homeJsonLd} id="splits-home-jsonld" />
+            <JsonLd data={faqJsonLd} id="splits-home-faq-jsonld" />
             <Header />
             <HeroSection />
             <ProblemSection />

@@ -3,10 +3,12 @@ import type { StandardListParams, StandardListResponse } from '@splits-network/s
 import { Suspense } from 'react';
 import MarketplaceList from './components/marketplace-list';
 import { apiClient } from '@/lib/api-client';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Recruiter Marketplace',
     description: 'Discover expert recruiters by industry, specialty, and location.',
+    ...buildCanonical("/public/marketplace"),
 };
 
 export const revalidate = 60;

@@ -6,6 +6,7 @@ import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import { ToastProvider } from "@/lib/toast-context";
+import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Applicant Network - Find Your Next Career Opportunity",
         description:
-            "Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.",
+            "Browse thousands of job opportunities and manage your job search on Applicant. Track applications, verify credentials, and connect with recruiters.",
         url: process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network",
         siteName: "Applicant Network",
         images: [
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Applicant Network - Find Your Next Career Opportunity",
         description:
-            "Browse thousands of job opportunities and manage your job search on Applicant ",
+            "Browse thousands of job opportunities and manage your job search on Applicant.",
         images: [
             `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/og-image.png`,
         ],
@@ -59,6 +60,49 @@ export default function RootLayout({
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     const appUrl =
         process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network";
+    const webAppJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "Applicant Network",
+        url: appUrl,
+        applicationCategory: "BusinessApplication",
+        description:
+            "Browse thousands of job opportunities and manage your job search. Track applications, verify credentials, and connect with recruiters.",
+        operatingSystem: "Web",
+        offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+        },
+        provider: {
+            "@type": "Organization",
+            name: "Employment Networks",
+            url: "https://employment-networks.com",
+            logo: `${appUrl}/logo.png`,
+        },
+        featureList: [
+            "Job search",
+            "Application tracking",
+            "Resume management",
+            "Recruiter connections",
+            "Career opportunities",
+            "Profile management",
+        ],
+    };
+    const websiteJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Applicant Network",
+        url: appUrl,
+        potentialAction: {
+            "@type": "SearchAction",
+            target: {
+                "@type": "EntryPoint",
+                urlTemplate: `${appUrl}/public/jobs?search={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+        },
+    };
 
     if (!publishableKey) {
         throw new Error(
@@ -83,60 +127,8 @@ export default function RootLayout({
                             `,
                         }}
                     />
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{
-                            __html: JSON.stringify({
-                                "@context": "https://schema.org",
-                                "@type": "WebApplication",
-                                name: "Applicant Network",
-                                url: appUrl,
-                                applicationCategory: "BusinessApplication",
-                                description:
-                                    "Browse thousands of job opportunities and manage your job search. Track applications, verify credentials, and connect with recruiters.",
-                                operatingSystem: "Web",
-                                offers: {
-                                    "@type": "Offer",
-                                    price: "0",
-                                    priceCurrency: "USD",
-                                },
-                                provider: {
-                                    "@type": "Organization",
-                                    name: "Employment Networks",
-                                    url: "https://employment-networks.com",
-                                    logo: `${appUrl}/logo.png`,
-                                },
-                                featureList: [
-                                    "Job search",
-                                    "Application tracking",
-                                    "Resume management",
-                                    "Recruiter connections",
-                                    "Career opportunities",
-                                    "Profile management",
-                                ],
-                            }),
-                        }}
-                    />
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{
-                            __html: JSON.stringify({
-                                "@context": "https://schema.org",
-                                "@type": "WebSite",
-                                name: "Applicant Network",
-                                url: appUrl,
-                                potentialAction: {
-                                    "@type": "SearchAction",
-                                    target: {
-                                        "@type": "EntryPoint",
-                                        urlTemplate: `${appUrl}/jobs?search={search_term_string}`,
-                                    },
-                                    "query-input":
-                                        "required name=search_term_string",
-                                },
-                            }),
-                        }}
-                    />
+                    <JsonLd data={webAppJsonLd} id="applicant-webapp-jsonld" />
+                    <JsonLd data={websiteJsonLd} id="applicant-website-jsonld" />
 
                     <link
                         rel="stylesheet"

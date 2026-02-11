@@ -16,6 +16,7 @@ export interface ApplicationPermissions {
     canReject: boolean;
     canAddNote: boolean;
     canRequestPrescreen: boolean;
+    canRequestChanges: boolean;
     approveButtonText: string;
     rejectButtonText: string;
     stageLabel: string;
@@ -42,6 +43,7 @@ export function canTakeActionOnApplication(
         canReject: false,
         canAddNote: false,
         canRequestPrescreen: false,
+        canRequestChanges: false,
         approveButtonText: '',
         rejectButtonText: '',
         stageLabel: 'Application',
@@ -80,6 +82,7 @@ function getPermissionsByStage(
         canReject: false,
         canAddNote: false,
         canRequestPrescreen: false,
+        canRequestChanges: false,
         approveButtonText: 'Approve',
         rejectButtonText: 'Reject',
         stageLabel: getStageLabel(stage),
@@ -94,6 +97,7 @@ function getPermissionsByStage(
                 ...base,
                 canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
+                canRequestChanges: isRecruiter || isPlatformAdmin,
                 approveButtonText: 'Approve & Move to Company Review',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is being screened.',
@@ -126,6 +130,7 @@ function getPermissionsByStage(
                 ...base,
                 canApprove: isRecruiter || isPlatformAdmin,
                 canReject: isRecruiter || isPlatformAdmin,
+                canRequestChanges: isRecruiter || isPlatformAdmin,
                 approveButtonText: 'Approve & Submit to Company',
                 rejectButtonText: 'Decline to Represent',
                 waitingMessage: 'Waiting for recruiter to review this application.',

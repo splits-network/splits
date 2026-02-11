@@ -1,6 +1,9 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata } from "../../seo";
 
+
+export const metadata = getDocMetadata("feature-guides/candidates");
 export default function CandidatesGuidePage() {
     return (
         <div className="space-y-10">

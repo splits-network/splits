@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Negotiating Your Job Offer',
     description: 'Master the art of salary and benefits negotiation with confidence.',
+    ...buildCanonical("/public/resources/career-guides/negotiating-offers"),
 };
 
 export default function NegotiatingOffersGuidePage() {

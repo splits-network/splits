@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Terms of Service | Splits Network',
     description: 'Read our comprehensive terms of service for using the Splits Network platform. Understand your rights and obligations as a user.',
+    ...buildCanonical("/public/terms-of-service"),
 };
 
 export default function TermsOfServicePage() {

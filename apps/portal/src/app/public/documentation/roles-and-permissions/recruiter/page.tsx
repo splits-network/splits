@@ -1,6 +1,9 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata } from "../../seo";
 
+
+export const metadata = getDocMetadata("roles-and-permissions/recruiter");
 export default function RecruiterCapabilitiesPage() {
     return (
         <div className="space-y-10">

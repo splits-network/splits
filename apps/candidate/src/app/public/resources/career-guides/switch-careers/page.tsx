@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'How to Switch Careers Successfully',
     description: 'A step-by-step guide to transitioning into a new career path with confidence.',
+    ...buildCanonical("/public/resources/career-guides/switch-careers"),
 };
 
 export default function SwitchCareersGuidePage() {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ForRecruitersContent } from "./for-recruiters-content";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: "For Recruiters - Applicant Network | Build Your Recruiting Practice",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
         description: "Build your recruiting practice with access to top talent and powerful tools.",
         type: "website",
     },
+    ...buildCanonical("/public/for-recruiters"),
 };
 
 export default function ForRecruitersPage() {

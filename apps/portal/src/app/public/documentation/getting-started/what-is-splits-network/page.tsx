@@ -1,6 +1,9 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata } from "../../seo";
 
+
+export const metadata = getDocMetadata("getting-started/what-is-splits-network");
 export default function WhatIsSplitsNetworkPage() {
     return (
         <div className="space-y-10">

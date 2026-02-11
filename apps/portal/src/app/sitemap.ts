@@ -61,11 +61,35 @@ const documentationRoutes = [
 export default function sitemap(): MetadataRoute.Sitemap {
     const lastModified = new Date();
     const routes = [...publicRoutes, ...documentationRoutes];
+    const corePages = new Set([
+        "/public/features",
+        "/public/pricing",
+        "/public/how-it-works",
+        "/public/for-recruiters",
+        "/public/for-companies",
+        "/public/about",
+    ]);
+    const legalPages = new Set([
+        "/public/cookie-policy",
+        "/public/privacy-policy",
+        "/public/terms-of-service",
+    ]);
 
     return routes.map((path) => ({
         url: `${baseUrl}${path}`,
         lastModified,
         changeFrequency: path === '' ? 'weekly' : 'monthly',
-        priority: path === '' ? 1 : 0.7,
+        priority:
+            path === ''
+                ? 1
+                : legalPages.has(path)
+                  ? 0.3
+                  : path === "/public/status"
+                    ? 0.4
+                    : corePages.has(path)
+                      ? 0.9
+                      : path.startsWith("/public/documentation")
+                        ? 0.7
+                        : 0.7,
     }));
 }

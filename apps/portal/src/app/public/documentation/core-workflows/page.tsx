@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDocMetadata } from "../seo";
 
 const workflows = [
     {
@@ -38,6 +39,8 @@ const workflows = [
     },
 ];
 
+
+export const metadata = getDocMetadata("core-workflows");
 export default function CoreWorkflowsIndexPage() {
     return (
         <div className="space-y-8">

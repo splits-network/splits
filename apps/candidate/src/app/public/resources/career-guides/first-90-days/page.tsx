@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'First 90 Days in a New Role',
     description: 'Set yourself up for success in your new position from day one.',
+    ...buildCanonical("/public/resources/career-guides/first-90-days"),
 };
 
 export default function First90DaysGuidePage() {

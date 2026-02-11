@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import { useState, FormEvent } from "react";
 import { MarkdownEditor } from "@splits-network/shared-ui";
 

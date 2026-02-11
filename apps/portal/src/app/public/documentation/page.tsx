@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { JsonLd } from "@splits-network/shared-ui";
+import { getDocMetadata } from "./seo";
 
+
+export const metadata = getDocMetadata("index");
 export default function DocumentationIndexPage() {
     const docsIndexJsonLd = {
         "@context": "https://schema.org",

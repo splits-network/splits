@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDocMetadata } from "../seo";
 
 const guides = [
     {
@@ -63,6 +64,8 @@ const guides = [
     },
 ];
 
+
+export const metadata = getDocMetadata("feature-guides");
 export default function FeatureGuidesIndexPage() {
     return (
         <div className="space-y-8">

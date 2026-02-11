@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import type { WizardData } from '../proposal-response-wizard';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import type { WizardData } from "../proposal-response-wizard";
 
 interface ReviewSubmitStepProps {
     wizardData: WizardData;
     questions: Array<{
         id: string;
         question: string;
-        question_type: 'text' | 'yes_no' | 'multiple_choice';
+        question_type: "text" | "yes_no" | "multiple_choice";
         required: boolean;
         options?: string[];
     }>;
@@ -43,39 +43,45 @@ export function ReviewSubmitStep({
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/documents');
+            const response = await client.get("/documents");
             const docs = response.data || response;
             setExistingDocs(docs);
         } catch (err) {
-            console.error('Failed to load existing documents:', err);
+            console.error("Failed to load existing documents:", err);
         } finally {
             setLoadingDocs(false);
         }
     };
 
     const selectedExistingDocs = existingDocs.filter((doc) =>
-        wizardData.existingDocumentIds.includes(doc.id)
+        wizardData.existingDocumentIds.includes(doc.id),
     );
 
     const primaryDocument = wizardData.primaryExistingDocId
-        ? selectedExistingDocs.find((doc) => doc.id === wizardData.primaryExistingDocId)
+        ? selectedExistingDocs.find(
+              (doc) => doc.id === wizardData.primaryExistingDocId,
+          )
         : wizardData.primaryResumeIndex !== null
-            ? wizardData.documents[wizardData.primaryResumeIndex]
-            : null;
+          ? wizardData.documents[wizardData.primaryResumeIndex]
+          : null;
 
-    const answeredQuestions = questions.filter((q) => wizardData.preScreenAnswers[q.id]);
+    const answeredQuestions = questions.filter(
+        (q) => wizardData.preScreenAnswers[q.id],
+    );
 
-    const totalDocCount = wizardData.documents.length + selectedExistingDocs.length;
+    const totalDocCount =
+        wizardData.documents.length + selectedExistingDocs.length;
 
     return (
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-check-circle"></i>
-                    {' '}Review Your Application
+                    <i className="fa-duotone fa-regular fa-check-circle"></i>{" "}
+                    Review Your Application
                 </h4>
                 <p className="text-base-content/70 text-sm">
-                    Please review all information before submitting. You can go back to make changes.
+                    Please review all information before submitting. You can go
+                    back to make changes.
                 </p>
             </div>
 
@@ -99,13 +105,15 @@ export function ReviewSubmitStep({
                                     <i className="fa-duotone fa-regular fa-star text-primary"></i>
                                     <div className="flex-1">
                                         <div className="font-medium">
-                                            {'name' in primaryDocument
+                                            {"name" in primaryDocument
                                                 ? primaryDocument.name
                                                 : primaryDocument.file_name}
                                         </div>
                                         <div className="text-sm text-base-content/60">
                                             Primary Resume
-                                            {wizardData.primaryExistingDocId ? ' (Existing)' : ' (New Upload)'}
+                                            {wizardData.primaryExistingDocId
+                                                ? " (Existing)"
+                                                : " (New Upload)"}
                                         </div>
                                     </div>
                                 </div>
@@ -113,7 +121,8 @@ export function ReviewSubmitStep({
 
                             {/* Existing Selected Documents (not primary) */}
                             {selectedExistingDocs.map((doc) => {
-                                if (doc.id === wizardData.primaryExistingDocId) return null;
+                                if (doc.id === wizardData.primaryExistingDocId)
+                                    return null;
                                 return (
                                     <div
                                         key={doc.id}
@@ -121,10 +130,16 @@ export function ReviewSubmitStep({
                                     >
                                         <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
                                         <div className="flex-1">
-                                            <div className="font-medium">{doc.file_name}</div>
+                                            <div className="font-medium">
+                                                {doc.file_name}
+                                            </div>
                                             <div className="text-sm text-base-content/60">
-                                                {doc.document_type} • {(doc.file_size / 1024).toFixed(1)} KB
-                                                {' • Existing'}
+                                                {doc.document_type} •{" "}
+                                                {(doc.file_size / 1024).toFixed(
+                                                    1,
+                                                )}{" "}
+                                                KB
+                                                {" • Existing"}
                                             </div>
                                         </div>
                                     </div>
@@ -133,7 +148,8 @@ export function ReviewSubmitStep({
 
                             {/* New Uploaded Documents (not primary) */}
                             {wizardData.documents.map((doc, index) => {
-                                if (index === wizardData.primaryResumeIndex) return null;
+                                if (index === wizardData.primaryResumeIndex)
+                                    return null;
                                 return (
                                     <div
                                         key={index}
@@ -141,14 +157,79 @@ export function ReviewSubmitStep({
                                     >
                                         <i className="fa-duotone fa-regular fa-file-arrow-up text-success"></i>
                                         <div className="flex-1">
-                                            <div className="font-medium">{doc.name}</div>
+                                            <div className="font-medium">
+                                                {doc.name}
+                                            </div>
                                             <div className="text-sm text-base-content/60">
-                                                {(doc.size / 1024).toFixed(1)} KB • New Upload
+                                                {(doc.size / 1024).toFixed(1)}{" "}
+                                                KB • New Upload
                                             </div>
                                         </div>
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Cover Letter Summary */}
+            <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                    <h5 className="font-semibold flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
+                        Cover Letter
+                    </h5>
+
+                    {/* Show uploaded cover letter files */}
+                    {selectedExistingDocs.filter(
+                        (doc) => doc.document_type === "cover_letter",
+                    ).length > 0 && (
+                        <div className="mb-4">
+                            <div className="text-sm font-medium mb-2">
+                                Uploaded Cover Letter Files:
+                            </div>
+                            <div className="space-y-2">
+                                {selectedExistingDocs
+                                    .filter(
+                                        (doc) =>
+                                            doc.document_type ===
+                                            "cover_letter",
+                                    )
+                                    .map((doc) => (
+                                        <div
+                                            key={doc.id}
+                                            className="flex items-center gap-2 p-2 rounded bg-base-200"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
+                                            <span className="font-medium">
+                                                {doc.file_name}
+                                            </span>
+                                            <span className="text-sm text-base-content/60">
+                                                (
+                                                {(doc.file_size / 1024).toFixed(
+                                                    1,
+                                                )}{" "}
+                                                KB)
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Show cover letter text */}
+                    {wizardData.coverLetter ? (
+                        <div className="text-base-content/70 p-3 rounded-lg bg-base-200 whitespace-pre-wrap">
+                            {wizardData.coverLetter}
+                        </div>
+                    ) : (
+                        <div className="text-base-content/50 p-3 rounded-lg bg-base-200 text-center italic">
+                            {selectedExistingDocs.filter(
+                                (doc) => doc.document_type === "cover_letter",
+                            ).length > 0
+                                ? "Using uploaded cover letter file only"
+                                : "No cover letter provided"}
                         </div>
                     )}
                 </div>
@@ -165,9 +246,15 @@ export function ReviewSubmitStep({
                         <div className="space-y-4">
                             {answeredQuestions.map((question) => (
                                 <div key={question.id}>
-                                    <div className="font-medium text-sm mb-1">{question.question}</div>
+                                    <div className="font-medium text-sm mb-1">
+                                        {question.question}
+                                    </div>
                                     <div className="text-base-content/70 p-3 rounded-lg bg-base-200">
-                                        {wizardData.preScreenAnswers[question.id]}
+                                        {
+                                            wizardData.preScreenAnswers[
+                                                question.id
+                                            ]
+                                        }
                                     </div>
                                 </div>
                             ))}
@@ -197,8 +284,9 @@ export function ReviewSubmitStep({
                 <div>
                     <div className="font-semibold">Before you submit</div>
                     <div className="text-sm">
-                        Once submitted, your application will be reviewed by AI and forwarded to the employer.
-                        Make sure all information is accurate and complete.
+                        Once submitted, your application will be reviewed by AI
+                        and forwarded to the employer. Make sure all information
+                        is accurate and complete.
                     </div>
                 </div>
             </div>

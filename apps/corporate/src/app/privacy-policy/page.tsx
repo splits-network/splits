@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Privacy Policy | Employment Networks',
     description: 'Learn how Employment Networks protects your privacy and handles your personal data in compliance with GDPR and CCPA.',
+    ...buildCanonical("/privacy-policy"),
 };
 
 export default function PrivacyPolicyPage() {

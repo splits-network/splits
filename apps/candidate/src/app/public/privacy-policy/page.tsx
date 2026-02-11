@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy | Splits Network',
-    description: 'Learn how Splits Network collects, uses, and protects your personal information. GDPR and CCPA compliant.',
+    title: 'Privacy Policy | Applicant Network',
+    description: 'Learn how Applicant Network collects, uses, and protects your personal information. GDPR and CCPA compliant.',
+    ...buildCanonical("/public/privacy-policy"),
 };
 
 export default function PrivacyPolicyPage() {

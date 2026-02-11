@@ -1,11 +1,16 @@
-import type { Metadata } from 'next';
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: 'Status',
-    description: 'Employment Networks service status and uptime reporting.',
+    title: "Status | Employment Networks",
+    description: "Live platform status for Employment Networks services.",
+    ...buildCanonical("/status"),
 };
 
-export default function StatusLayout({ children }: { children: ReactNode }) {
+export default function StatusLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return children;
 }

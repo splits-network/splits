@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import StepIndicator from "@/components/application-wizard/step-indicator";
 import StepDocuments from "@/components/application-wizard/step-documents";
+import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
 import StepReview from "@/components/application-wizard/step-review";
 
@@ -40,6 +41,7 @@ export default function ApplicationWizardModal({
                 existingApplication?.documents?.map((d: any) => d.id) ||
                 ([] as string[]),
         },
+        cover_letter: existingApplication?.cover_letter || "",
         pre_screen_answers:
             existingApplication?.pre_screen_answers ||
             ([] as Array<{
@@ -55,14 +57,19 @@ export default function ApplicationWizardModal({
     const [error, setError] = useState<string | null>(null);
 
     const hasQuestions = questions.length > 0;
-    const totalSteps = hasQuestions ? 3 : 2;
+    const totalSteps = hasQuestions ? 4 : 3;
 
     const steps = [
         { number: 1, title: "Documents", description: "Select your resume" },
+        {
+            number: 2,
+            title: "Cover Letter",
+            description: "Add cover letter (optional)",
+        },
         ...(hasQuestions
             ? [
                   {
-                      number: 2,
+                      number: 3,
                       title: "Questions",
                       description: "Answer pre-screening questions",
                   },
@@ -178,6 +185,7 @@ export default function ApplicationWizardModal({
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
                         stage: "ai_review",
                     },
                 );
@@ -189,6 +197,7 @@ export default function ApplicationWizardModal({
                     {
                         job_id: jobId,
                         document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
                         pre_screen_answers: formData.pre_screen_answers,
                         stage: "ai_review",
                     },
@@ -200,14 +209,17 @@ export default function ApplicationWizardModal({
             // Create application note if candidate added notes
             if (formData.notes && formData.notes.trim()) {
                 try {
-                    await authClient.post(`/applications/${applicationId}/notes`, {
-                        created_by_type: 'candidate',
-                        note_type: 'note',
-                        visibility: 'shared',
-                        message_text: formData.notes.trim(),
-                    });
+                    await authClient.post(
+                        `/applications/${applicationId}/notes`,
+                        {
+                            created_by_type: "candidate",
+                            note_type: "note",
+                            visibility: "shared",
+                            message_text: formData.notes.trim(),
+                        },
+                    );
                 } catch (noteError) {
-                    console.warn('Failed to create candidate note:', noteError);
+                    console.warn("Failed to create candidate note:", noteError);
                 }
             }
 
@@ -242,6 +254,7 @@ export default function ApplicationWizardModal({
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
                         stage: "draft",
                     },
                 );
@@ -253,6 +266,7 @@ export default function ApplicationWizardModal({
                     {
                         job_id: jobId,
                         document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
                         pre_screen_answers: formData.pre_screen_answers,
                         stage: "draft",
                     },
@@ -264,14 +278,17 @@ export default function ApplicationWizardModal({
             // Create application note if candidate added notes
             if (formData.notes && formData.notes.trim()) {
                 try {
-                    await authClient.post(`/applications/${applicationId}/notes`, {
-                        created_by_type: 'candidate',
-                        note_type: 'note',
-                        visibility: 'shared',
-                        message_text: formData.notes.trim(),
-                    });
+                    await authClient.post(
+                        `/applications/${applicationId}/notes`,
+                        {
+                            created_by_type: "candidate",
+                            note_type: "note",
+                            visibility: "shared",
+                            message_text: formData.notes.trim(),
+                        },
+                    );
                 } catch (noteError) {
-                    console.warn('Failed to create candidate note:', noteError);
+                    console.warn("Failed to create candidate note:", noteError);
                 }
             }
 
@@ -306,6 +323,28 @@ export default function ApplicationWizardModal({
                     />
                 );
             case 2:
+                // Cover Letter step
+                const uploadedCoverLetterDocs = localDocuments.filter(
+                    (doc: any) =>
+                        doc.document_type === "cover_letter" &&
+                        formData.documents.selected.includes(doc.id),
+                );
+
+                return (
+                    <StepCoverLetter
+                        coverLetter={formData.cover_letter}
+                        onChange={(coverLetter: string) =>
+                            setFormData({
+                                ...formData,
+                                cover_letter: coverLetter,
+                            })
+                        }
+                        onNext={handleNext}
+                        onBack={handleBack}
+                        uploadedCoverLetterDocs={uploadedCoverLetterDocs}
+                    />
+                );
+            case 3:
                 if (hasQuestions) {
                     return (
                         <StepQuestions
@@ -327,6 +366,7 @@ export default function ApplicationWizardModal({
                             job={job}
                             documents={documents}
                             selectedDocuments={formData.documents.selected}
+                            coverLetter={formData.cover_letter}
                             questions={questions}
                             answers={formData.pre_screen_answers}
                             additionalNotes={formData.notes}
@@ -336,12 +376,13 @@ export default function ApplicationWizardModal({
                         />
                     );
                 }
-            case 3:
+            case 4:
                 return (
                     <StepReview
                         job={job}
                         documents={documents}
                         selectedDocuments={formData.documents.selected}
+                        coverLetter={formData.cover_letter}
                         questions={questions}
                         answers={formData.pre_screen_answers}
                         additionalNotes={formData.notes}

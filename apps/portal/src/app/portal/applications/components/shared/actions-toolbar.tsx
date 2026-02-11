@@ -12,6 +12,7 @@ import { Presence } from "@/components/presense";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
+import RequestChangesModal from "../modals/request-changes-modal";
 import HireModal from "@/app/portal/roles/components/modals/hire-modal";
 import PreScreenRequestModal from "@/app/portal/roles/components/modals/pre-screen-request-modal";
 import {
@@ -39,6 +40,7 @@ export interface ActionsToolbarProps {
         advanceStage?: boolean;
         reject?: boolean;
         requestPrescreen?: boolean;
+        requestChanges?: boolean;
     };
     onViewDetails?: (applicationId: string) => void;
     onMessage?: (
@@ -88,6 +90,8 @@ export default function ActionsToolbar({
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [showHireModal, setShowHireModal] = useState(false);
     const [showPreScreenModal, setShowPreScreenModal] = useState(false);
+    const [showRequestChangesModal, setShowRequestChangesModal] =
+        useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -292,6 +296,47 @@ export default function ActionsToolbar({
         }
     };
 
+    const handleRequestChanges = async (notes: string) => {
+        setActionLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+
+            const client = createAuthenticatedClient(token);
+            await client.patch(`/applications/${application.id}`, {
+                stage: "recruiter_request" as ApplicationStage,
+                application_notes: notes,
+            });
+
+            // Create a stage transition note for the request
+            try {
+                await client.post(`/applications/${application.id}/notes`, {
+                    created_by_type: getCreatorType(),
+                    note_type: "stage_transition",
+                    visibility: "shared",
+                    message_text: `Requested changes: ${notes}`,
+                });
+            } catch (noteError: any) {
+                // Log but don't fail the request if note creation fails
+                console.warn(
+                    "Failed to create request changes note:",
+                    noteError,
+                );
+            }
+
+            toast.success(
+                "Changes requested successfully. The candidate will be notified.",
+            );
+            setShowRequestChangesModal(false);
+            refresh();
+        } catch (error: any) {
+            console.error("Failed to request changes:", error);
+            toast.error(error.message || "Failed to request changes");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const actions = {
         viewDetails: showActions.viewDetails !== false,
         message: showActions.message !== false,
@@ -302,6 +347,9 @@ export default function ActionsToolbar({
         requestPrescreen:
             showActions.requestPrescreen !== false &&
             permissions.canRequestPrescreen,
+        requestChanges:
+            showActions.requestChanges !== false &&
+            permissions.canRequestChanges,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -364,6 +412,13 @@ export default function ActionsToolbar({
                         }}
                     />
                 )}
+            <RequestChangesModal
+                isOpen={showRequestChangesModal}
+                onClose={() => setShowRequestChangesModal(false)}
+                onRequestChanges={handleRequestChanges}
+                candidateName={application.candidate?.full_name || "Unknown"}
+                jobTitle={application.job?.title || "Unknown"}
+            />
         </ModalPortal>
     );
 
@@ -418,6 +473,16 @@ export default function ActionsToolbar({
                             disabled={actionLoading}
                         >
                             <i className="fa-duotone fa-regular fa-user-check" />
+                        </button>
+                    )}
+                    {actions.requestChanges && (
+                        <button
+                            onClick={() => setShowRequestChangesModal(true)}
+                            className={`btn ${sizeClass} btn-circle btn-warning`}
+                            title="Request Changes"
+                            disabled={actionLoading}
+                        >
+                            <i className="fa-duotone fa-regular fa-comment-edit" />
                         </button>
                     )}
                     {actions.advanceStage && (
@@ -501,6 +566,16 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-user-check" />
                         Request Pre-Screen
+                    </button>
+                )}
+                {actions.requestChanges && (
+                    <button
+                        onClick={() => setShowRequestChangesModal(true)}
+                        className={`btn ${sizeClass} btn-warning btn-outline gap-2`}
+                        disabled={actionLoading}
+                    >
+                        <i className="fa-duotone fa-regular fa-comment-edit" />
+                        Request Changes
                     </button>
                 )}
                 {actions.advanceStage && (

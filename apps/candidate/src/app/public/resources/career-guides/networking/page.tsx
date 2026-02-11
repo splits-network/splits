@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Building Your Professional Network',
     description: 'Learn strategies to grow and maintain meaningful professional connections.',
+    ...buildCanonical("/public/resources/career-guides/networking"),
 };
 
 export default function NetworkingGuidePage() {
