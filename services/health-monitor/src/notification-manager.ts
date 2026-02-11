@@ -1,6 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Logger } from "@splits-network/shared-logging";
 import { AggregatedServiceStatus } from "./types";
+import { EventPublisher } from "./event-publisher";
 
 export class NotificationManager {
     private supabase: SupabaseClient;
@@ -11,6 +12,7 @@ export class NotificationManager {
         supabaseUrl: string,
         supabaseKey: string,
         private logger: Logger,
+        private eventPublisher: EventPublisher | null = null,
     ) {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
@@ -84,6 +86,20 @@ export class NotificationManager {
             { service: status.service, notificationId: data.id },
             "Disruption notification created",
         );
+
+        // Publish event for email alerting
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish(
+                "system.health.service_unhealthy",
+                {
+                    service_name: status.service,
+                    display_name: status.displayName,
+                    severity: status.status,
+                    error: status.error || null,
+                    notification_id: data.id,
+                },
+            );
+        }
     }
 
     async onServiceRecovered(serviceName: string): Promise<void> {
@@ -111,6 +127,22 @@ export class NotificationManager {
             { service: serviceName, notificationId },
             "Disruption notification deactivated",
         );
+
+        // Publish recovery event for email alerting
+        if (this.eventPublisher) {
+            // Look up display name from service definitions
+            const displayName = serviceName
+                .replace(/-/g, " ")
+                .replace(/\b\w/g, (c) => c.toUpperCase());
+            await this.eventPublisher.publish(
+                "system.health.service_recovered",
+                {
+                    service_name: serviceName,
+                    display_name: displayName,
+                    notification_id: notificationId,
+                },
+            );
+        }
     }
 
     /**

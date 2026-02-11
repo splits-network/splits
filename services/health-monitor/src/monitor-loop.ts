@@ -99,18 +99,8 @@ export class MonitorLoop {
                 healthyServices,
             );
 
-            // Step 7: Publish events for status transitions
-            if (this.eventPublisher && transitions.length > 0) {
-                for (const t of transitions) {
-                    const eventType = t.transition.includes("healthy")
-                        ? "system.health.service_recovered"
-                        : "system.health.service_unhealthy";
-                    await this.eventPublisher.publish(eventType, {
-                        service: t.service,
-                        transition: t.transition,
-                    });
-                }
-            }
+            // Note: RabbitMQ events are now published directly by NotificationManager
+            // when creating/clearing notifications (with full service details for email alerts)
 
             // Log summary
             const unhealthyCount = aggregated.filter(

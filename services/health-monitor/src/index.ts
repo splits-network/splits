@@ -67,26 +67,6 @@ async function main() {
         logger,
     );
 
-    // In dry-run mode, skip DB-dependent managers (no reads or writes to staging)
-    let incidentManager: IncidentManager | null = null;
-    let notificationManager: NotificationManager | null = null;
-
-    if (!dryRun) {
-        incidentManager = new IncidentManager(
-            dbConfig.supabaseUrl,
-            supabaseKey,
-            logger,
-        );
-        await incidentManager.initialize();
-
-        notificationManager = new NotificationManager(
-            dbConfig.supabaseUrl,
-            supabaseKey,
-            logger,
-        );
-        await notificationManager.initialize();
-    }
-
     // Initialize optional event publisher (also skip in dry-run)
     let eventPublisher: EventPublisher | null = null;
     if (!dryRun) {
@@ -104,6 +84,27 @@ async function main() {
             );
             eventPublisher = null;
         }
+    }
+
+    // In dry-run mode, skip DB-dependent managers (no reads or writes to staging)
+    let incidentManager: IncidentManager | null = null;
+    let notificationManager: NotificationManager | null = null;
+
+    if (!dryRun) {
+        incidentManager = new IncidentManager(
+            dbConfig.supabaseUrl,
+            supabaseKey,
+            logger,
+        );
+        await incidentManager.initialize();
+
+        notificationManager = new NotificationManager(
+            dbConfig.supabaseUrl,
+            supabaseKey,
+            logger,
+            eventPublisher,
+        );
+        await notificationManager.initialize();
     }
 
     // Start the monitoring loop
