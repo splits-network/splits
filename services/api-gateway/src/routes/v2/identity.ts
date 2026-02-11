@@ -38,6 +38,7 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
     registerProfileImageRoute(app, services); // Add profile image route
     registerDeleteProfileImageRoute(app, services); // Add delete profile image route
     registerInvitationAcceptRoute(app, services);
+    registerClerkWebhookProxy(app, services);
 
     // Register generic CRUD routes for users
     IDENTITY_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
@@ -213,6 +214,47 @@ function registerDeleteProfileImageRoute(app: FastifyInstance, services: Service
                 authHeaders
             );
             return reply.send(data);
+        }
+    );
+}
+
+/**
+ * POST /api/v2/webhooks/clerk - Proxy Clerk webhook to identity service
+ * No auth required - verified by Svix signature in identity service
+ * Passes raw body to preserve signature integrity
+ */
+function registerClerkWebhookProxy(app: FastifyInstance, services: ServiceRegistry) {
+    const identityService = () => services.get('identity');
+
+    app.post(
+        '/api/v2/webhooks/clerk',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const rawBody = (request as any).rawBody as Buffer;
+
+            if (!rawBody) {
+                request.log.error({ correlationId }, 'Missing raw body for Clerk webhook');
+                return reply.status(400).send({ error: { message: 'Missing raw body' } });
+            }
+
+            try {
+                const data = await identityService().post(
+                    '/api/v2/webhooks/clerk',
+                    rawBody,
+                    correlationId,
+                    {
+                        'svix-id': request.headers['svix-id'] as string,
+                        'svix-timestamp': request.headers['svix-timestamp'] as string,
+                        'svix-signature': request.headers['svix-signature'] as string,
+                    }
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Clerk webhook proxy failed');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Webhook processing failed' } });
+            }
         }
     );
 }

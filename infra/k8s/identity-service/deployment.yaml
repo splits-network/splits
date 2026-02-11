@@ -49,6 +49,17 @@ spec:
                             secretKeyRef:
                                 name: clerk-secrets
                                 key: splits-clerk-secret-key
+                      # Webhook secrets for Svix signature verification (one per Clerk instance)
+                      - name: SPLITS_CLERK_WEBHOOK_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: splits-clerk-webhook-secret
+                      - name: APP_CLERK_WEBHOOK_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: app-clerk-webhook-secret
                   resources:
                       requests:
                           cpu: 100m
