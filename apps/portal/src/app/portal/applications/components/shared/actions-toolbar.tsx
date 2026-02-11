@@ -305,7 +305,6 @@ export default function ActionsToolbar({
             const client = createAuthenticatedClient(token);
             await client.patch(`/applications/${application.id}`, {
                 stage: "recruiter_request" as ApplicationStage,
-                application_notes: notes,
             });
 
             // Create a stage transition note for the request

@@ -45,16 +45,16 @@ export interface MarketplaceProfile {
     industries?: string[];
     job_levels?: string[];
     skills_expertise?: string[];
-    
+
     // Rates and fees
     placement_fee_type?: 'percentage' | 'flat';
     placement_fee_amount?: number;
-    
+
     // Professional profile
     bio?: string;
     linkedin_url?: string;
     website_url?: string;
-    
+
     // Service settings
     available_for_work?: boolean;
     max_concurrent_roles?: number;
@@ -79,7 +79,7 @@ export interface OnboardingMetadata {
     current_step?: number;
     completed_steps?: number[];
     last_active_step?: number;
-    
+
     // Form data by step
     personal_info?: PersonalInfo;
     company_info?: CompanyInfo;
@@ -87,14 +87,14 @@ export interface OnboardingMetadata {
     marketplace_profile?: MarketplaceProfile;
     selected_plan?: SelectedPlan;
     stripe_payment_info?: StripePaymentInfo;
-    
+
     // Step completion tracking
     personal_info_completed?: boolean;
     company_info_completed?: boolean;
     job_info_completed?: boolean;
     marketplace_profile_completed?: boolean;
     payment_completed?: boolean;
-    
+
     // Session metadata
     started_at?: string; // ISO date string
     last_updated_at?: string; // ISO date string
@@ -389,11 +389,7 @@ export interface Application {
     candidate_recruiter_id?: string | null;  // Renamed from recruiter_id for clarity - represents candidate (Closer role)
     stage: ApplicationStage;
 
-    // Application content and notes
-    notes?: string;
-    recruiter_notes?: string;  // Recruiter's notes/pitch added during review
-    candidate_notes?: string;
-    internal_notes?: string;   // Internal company notes
+    // Application content
     cover_letter?: string;     // Candidate's cover letter
     salary?: number;           // Candidate's requested salary
 

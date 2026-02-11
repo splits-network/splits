@@ -14,10 +14,6 @@ export interface ApplicationFilters extends PaginationParams, SortParams {
 
 export interface ApplicationUpdate {
     stage?: string;
-    notes?: string;
-    candidate_notes?: string;
-    recruiter_notes?: string;
-    internal_notes?: string;
     cover_letter?: string;
     salary?: number;
     submitted_at?: Date | string;
