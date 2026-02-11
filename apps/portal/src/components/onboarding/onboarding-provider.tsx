@@ -72,10 +72,21 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 if (!token) throw new Error("No authentication token");
 
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.get("/users/me");
-                let data = response?.data ?? null;
 
-                // Step 3: If still no user, create via fallback
+                // Try to fetch existing user - 404 is expected for new SSO users
+                let data = null;
+                try {
+                    const response: any = await client.get("/users/me");
+                    data = response?.data ?? null;
+                } catch (fetchError: any) {
+                    // 404 means user doesn't exist yet (new SSO sign-up)
+                    // Any other error is unexpected and should be re-thrown
+                    if (fetchError?.status !== 404) {
+                        throw fetchError;
+                    }
+                }
+
+                // If no user found, create via fallback (handles SSO sign-up race condition)
                 if (!data) {
                     setInitStatus("creating_account");
                     setInitMessage("Setting up your account...");
