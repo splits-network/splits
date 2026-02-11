@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("roles-and-permissions/company-admin");
 export default function CompanyAdminCapabilitiesPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("roles-and-permissions/company-admin")} id="docs-roles-and-permissions-company-admin-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Company Admin Capabilities"
                 description="What company admins can see and manage across organization settings, team access, and billing."
@@ -131,7 +137,7 @@ export default function CompanyAdminCapabilitiesPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

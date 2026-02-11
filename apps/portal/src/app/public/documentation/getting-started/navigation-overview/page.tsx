@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("getting-started/navigation-overview");
 export default function NavigationOverviewPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("getting-started/navigation-overview")} id="docs-getting-started-navigation-overview-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Navigation Overview"
                 description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
@@ -145,8 +151,8 @@ export default function NavigationOverviewPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-
 

@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'How to Switch Careers Successfully',
     description: 'A step-by-step guide to transitioning into a new career path with confidence.',
+    openGraph: {
+        title: "How to Switch Careers Successfully",
+        description: "A step-by-step guide to transitioning into a new career path with confidence.",
+        url: "https://applicant.network/public/resources/career-guides/switch-careers",
+    },
+    ...buildCanonical("/public/resources/career-guides/switch-careers"),
 };
 
 export default function SwitchCareersGuidePage() {
@@ -96,7 +104,14 @@ export default function SwitchCareersGuidePage() {
         },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "How to Switch Careers Successfully",
+        description: "A step-by-step guide to transitioning into a new career path with confidence.",
+        path: "/public/resources/career-guides/switch-careers",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="arrows-turn-right"
@@ -230,5 +245,6 @@ export default function SwitchCareersGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

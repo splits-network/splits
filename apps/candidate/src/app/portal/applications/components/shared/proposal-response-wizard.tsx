@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { UploadDocumentsStep } from './wizard-steps/upload-documents-step';
-import { AnswerQuestionsStep } from './wizard-steps/answer-questions-step';
-import { AddNotesStep } from './wizard-steps/add-notes-step';
-import { ReviewSubmitStep } from './wizard-steps/review-submit-step';
+import React, { useState } from "react";
+import { UploadDocumentsStep } from "./wizard-steps/upload-documents-step";
+import { CoverLetterStep } from "./wizard-steps/cover-letter-step";
+import { AnswerQuestionsStep } from "./wizard-steps/answer-questions-step";
+import { AddNotesStep } from "./wizard-steps/add-notes-step";
+import { ReviewSubmitStep } from "./wizard-steps/review-submit-step";
 
 export interface WizardData {
     documents: File[];
     existingDocumentIds: string[];
     primaryResumeIndex: number | null;
     primaryExistingDocId: string | null;
+    coverLetter: string;
     preScreenAnswers: { [questionId: string]: string };
     notes: string;
 }
@@ -23,7 +25,7 @@ interface ProposalResponseWizardProps {
     preScreenQuestions?: Array<{
         id: string;
         question: string;
-        question_type: 'text' | 'yes_no' | 'multiple_choice';
+        question_type: "text" | "yes_no" | "multiple_choice";
         required: boolean;
         options?: string[];
     }>;
@@ -31,10 +33,11 @@ interface ProposalResponseWizardProps {
 }
 
 const STEPS = [
-    { id: 1, title: 'Upload Documents', icon: 'fa-file-upload' },
-    { id: 2, title: 'Answer Questions', icon: 'fa-clipboard-question' },
-    { id: 3, title: 'Add Notes', icon: 'fa-note-sticky' },
-    { id: 4, title: 'Review & Submit', icon: 'fa-check-circle' },
+    { id: 1, title: "Upload Documents", icon: "fa-file-upload" },
+    { id: 2, title: "Cover Letter", icon: "fa-file-lines" },
+    { id: 3, title: "Answer Questions", icon: "fa-clipboard-question" },
+    { id: 4, title: "Add Notes", icon: "fa-note-sticky" },
+    { id: 5, title: "Review & Submit", icon: "fa-check-circle" },
 ];
 
 export function ProposalResponseWizard({
@@ -51,8 +54,9 @@ export function ProposalResponseWizard({
         existingDocumentIds: [],
         primaryResumeIndex: null,
         primaryExistingDocId: null,
+        coverLetter: "",
         preScreenAnswers: {},
-        notes: '',
+        notes: "",
     });
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -79,8 +83,9 @@ export function ProposalResponseWizard({
                 existingDocumentIds: [],
                 primaryResumeIndex: null,
                 primaryExistingDocId: null,
+                coverLetter: "",
                 preScreenAnswers: {},
-                notes: '',
+                notes: "",
             });
             setError(null);
             onClose();
@@ -95,7 +100,11 @@ export function ProposalResponseWizard({
             await onComplete(wizardData);
             handleClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to submit application');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Failed to submit application",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -108,11 +117,13 @@ export function ProposalResponseWizard({
     if (!isOpen) return null;
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="mb-6">
-                    <h3 className="font-bold text-2xl mb-2">Complete Your Application</h3>
+                    <h3 className="font-bold text-2xl mb-2">
+                        Complete Your Application
+                    </h3>
                     <p className="text-base-content/70">{jobTitle}</p>
                 </div>
 
@@ -122,10 +133,14 @@ export function ProposalResponseWizard({
                         {STEPS.map((step) => (
                             <li
                                 key={step.id}
-                                className={`step ${currentStep >= step.id ? 'step-primary' : ''}`}
-                                data-content={currentStep > step.id ? '✓' : step.id}
+                                className={`step ${currentStep >= step.id ? "step-primary" : ""}`}
+                                data-content={
+                                    currentStep > step.id ? "✓" : step.id
+                                }
                             >
-                                <span className="hidden sm:inline">{step.title}</span>
+                                <span className="hidden sm:inline">
+                                    {step.title}
+                                </span>
                             </li>
                         ))}
                     </ul>
@@ -146,18 +161,20 @@ export function ProposalResponseWizard({
                             documents={wizardData.documents}
                             existingDocumentIds={wizardData.existingDocumentIds}
                             primaryResumeIndex={wizardData.primaryResumeIndex}
-                            primaryExistingDocId={wizardData.primaryExistingDocId}
+                            primaryExistingDocId={
+                                wizardData.primaryExistingDocId
+                            }
                             onUpdate={(
                                 documents: File[],
                                 existingDocumentIds: string[],
                                 primaryResumeIndex: number | null,
-                                primaryExistingDocId: string | null
+                                primaryExistingDocId: string | null,
                             ) =>
                                 updateWizardData({
                                     documents,
                                     existingDocumentIds,
                                     primaryResumeIndex,
-                                    primaryExistingDocId
+                                    primaryExistingDocId,
                                 })
                             }
                             onNext={handleNext}
@@ -165,28 +182,54 @@ export function ProposalResponseWizard({
                     )}
 
                     {currentStep === 2 && (
-                        <AnswerQuestionsStep
-                            questions={preScreenQuestions.map(q => ({
-                                ...q,
-                                is_required: q.required
-                            }))}
-                            answers={wizardData.preScreenAnswers}
-                            onUpdate={(answers: { [questionId: string]: string }) => updateWizardData({ preScreenAnswers: answers })}
+                        <CoverLetterStep
+                            coverLetterText={wizardData.coverLetter}
+                            uploadedCoverLetterDocs={
+                                wizardData.existingDocumentIds
+                                    .map((id) => {
+                                        // In a real implementation, you'd need to get the actual document data
+                                        // For now, we'll pass empty array and update this when we have document data
+                                        return null;
+                                    })
+                                    .filter(Boolean) as any[]
+                            }
+                            onUpdate={(coverLetter: string) =>
+                                updateWizardData({ coverLetter })
+                            }
                             onNext={handleNext}
                             onBack={handleBack}
                         />
                     )}
 
                     {currentStep === 3 && (
-                        <AddNotesStep
-                            notes={wizardData.notes}
-                            onUpdate={(notes: string) => updateWizardData({ notes })}
+                        <AnswerQuestionsStep
+                            questions={preScreenQuestions.map((q) => ({
+                                ...q,
+                                is_required: q.required,
+                            }))}
+                            answers={wizardData.preScreenAnswers}
+                            onUpdate={(answers: {
+                                [questionId: string]: string;
+                            }) =>
+                                updateWizardData({ preScreenAnswers: answers })
+                            }
                             onNext={handleNext}
                             onBack={handleBack}
                         />
                     )}
 
                     {currentStep === 4 && (
+                        <AddNotesStep
+                            notes={wizardData.notes}
+                            onUpdate={(notes: string) =>
+                                updateWizardData({ notes })
+                            }
+                            onNext={handleNext}
+                            onBack={handleBack}
+                        />
+                    )}
+
+                    {currentStep === 5 && (
                         <ReviewSubmitStep
                             wizardData={wizardData}
                             questions={preScreenQuestions}
@@ -209,7 +252,13 @@ export function ProposalResponseWizard({
                     </button>
                 </div>
             </div>
-            <div className="modal-backdrop" onClick={handleClose}></div>
-        </div>
+            <form
+                method="dialog"
+                className="modal-backdrop"
+                onClick={handleClose}
+            >
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

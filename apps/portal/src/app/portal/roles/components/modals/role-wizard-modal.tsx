@@ -511,7 +511,7 @@ export default function RoleWizardModal({
     if (!isOpen) return null;
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-3xl">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
@@ -657,6 +657,9 @@ export default function RoleWizardModal({
                     )}
                 </div>
             </div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

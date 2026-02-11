@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { DataTable, type TableColumn } from "@/components/ui";
 import { PaginationControls, EmptyState } from "@/hooks/use-standard-list";
 import { useMessageSidebar } from "@/hooks/use-message-sidebar";
@@ -16,7 +17,12 @@ const columns: TableColumn[] = [
     { key: "company", label: "Company", sortable: false, hideOnMobile: true },
     { key: "ai_score", label: "AI Score", sortable: true, hideOnMobile: true },
     { key: "stage", label: "Stage", sortable: true },
-    { key: "created_at", label: "Submitted", sortable: true, hideOnMobile: true },
+    {
+        key: "created_at",
+        label: "Submitted",
+        sortable: true,
+        hideOnMobile: true,
+    },
     { key: "actions" as any, label: "Actions", align: "right" },
 ];
 
@@ -32,8 +38,42 @@ export default function TableView() {
         goToPage,
     } = useFilter();
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const selectedId = searchParams.get("applicationId");
     const [sidebarItem, setSidebarItem] = useState<Application | null>(null);
     const messageSidebar = useMessageSidebar();
+
+    // Sync sidebar item with URL parameter
+    useEffect(() => {
+        if (selectedId) {
+            const item = data.find(
+                (application) => application.id === selectedId,
+            );
+            if (item) {
+                setSidebarItem(item);
+            }
+        } else {
+            setSidebarItem(null);
+        }
+    }, [selectedId, data]);
+
+    const handleViewDetails = useCallback(
+        (application: Application) => {
+            const params = new URLSearchParams(searchParams);
+            params.set("applicationId", application.id);
+            router.push(`${pathname}?${params.toString()}`);
+        },
+        [pathname, router, searchParams],
+    );
+
+    const handleCloseSidebar = useCallback(() => {
+        const params = new URLSearchParams(searchParams);
+        params.delete("applicationId");
+        router.push(`${pathname}?${params.toString()}`);
+    }, [pathname, router, searchParams]);
 
     return (
         <>
@@ -59,7 +99,7 @@ export default function TableView() {
                         <Row
                             key={item.id}
                             item={item}
-                            onViewDetails={() => setSidebarItem(item)}
+                            onViewDetails={() => handleViewDetails(item)}
                             onMessage={messageSidebar.openSidebar}
                         />
                     ))}
@@ -76,7 +116,7 @@ export default function TableView() {
 
             <Sidebar
                 item={sidebarItem}
-                onClose={() => setSidebarItem(null)}
+                onClose={handleCloseSidebar}
                 onMessage={messageSidebar.openSidebar}
             />
 

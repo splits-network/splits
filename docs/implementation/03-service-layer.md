@@ -124,40 +124,38 @@ async requestPreScreen(
 
 ```typescript
 export class PreScreenService {
-  constructor(
-    private repository: AtsRepository
-  ) {}
+    constructor(private repository: AtsRepository) {}
 
-  /**
-   * Get pre-screen questions for a job
-   */
-  async getQuestionsForJob(jobId: string): Promise<PreScreenQuestion[]>
+    /**
+     * Get pre-screen questions for a job
+     */
+    async getQuestionsForJob(jobId: string): Promise<PreScreenQuestion[]>;
 
-  /**
-   * Validate answers completeness
-   */
-  async validateAnswers(
-    jobId: string,
-    answers: PreScreenAnswer[]
-  ): Promise<{
-    valid: boolean;
-    missingRequired: string[];
-  }>
+    /**
+     * Validate answers completeness
+     */
+    async validateAnswers(
+        jobId: string,
+        answers: PreScreenAnswer[],
+    ): Promise<{
+        valid: boolean;
+        missingRequired: string[];
+    }>;
 
-  /**
-   * Save answers for an application
-   */
-  async saveAnswers(
-    applicationId: string,
-    answers: PreScreenAnswer[]
-  ): Promise<PreScreenAnswer[]>
+    /**
+     * Save answers for an application
+     */
+    async saveAnswers(
+        applicationId: string,
+        answers: PreScreenAnswer[],
+    ): Promise<PreScreenAnswer[]>;
 
-  /**
-   * Get answers for an application
-   */
-  async getAnswersForApplication(
-    applicationId: string
-  ): Promise<PreScreenAnswerWithQuestion[]>
+    /**
+     * Get answers for an application
+     */
+    async getAnswersForApplication(
+        applicationId: string,
+    ): Promise<PreScreenAnswerWithQuestion[]>;
 }
 ```
 
@@ -169,61 +167,59 @@ export class PreScreenService {
 
 ```typescript
 export class ApplicationDocumentService {
-  constructor(
-    private repository: AtsRepository,
-    private documentServiceClient: DocumentServiceClient
-  ) {}
+    constructor(
+        private repository: AtsRepository,
+        private documentServiceClient: DocumentServiceClient,
+    ) {}
 
-  /**
-   * Link documents to application
-   */
-  async linkDocuments(
-    applicationId: string,
-    documentIds: string[],
-    primaryResumeId: string
-  ): Promise<ApplicationDocument[]>
+    /**
+     * Link documents to application
+     */
+    async linkDocuments(
+        applicationId: string,
+        documentIds: string[],
+        primaryResumeId: string,
+    ): Promise<ApplicationDocument[]>;
 
-  /**
-   * Verify candidate owns all documents
-   */
-  async verifyDocumentOwnership(
-    candidateId: string,
-    documentIds: string[]
-  ): Promise<boolean>
+    /**
+     * Verify candidate owns all documents
+     */
+    async verifyDocumentOwnership(
+        candidateId: string,
+        documentIds: string[],
+    ): Promise<boolean>;
 
-  /**
-   * Ensure at least one resume exists
-   */
-  async validateDocuments(
-    documentIds: string[]
-  ): Promise<{
-    valid: boolean;
-    hasResume: boolean;
-    invalidIds: string[];
-  }>
+    /**
+     * Ensure at least one resume exists
+     */
+    async validateDocuments(documentIds: string[]): Promise<{
+        valid: boolean;
+        hasResume: boolean;
+        invalidIds: string[];
+    }>;
 
-  /**
-   * Get documents for application
-   */
-  async getDocumentsForApplication(
-    applicationId: string
-  ): Promise<ApplicationDocumentWithDetails[]>
+    /**
+     * Get documents for application
+     */
+    async getDocumentsForApplication(
+        applicationId: string,
+    ): Promise<ApplicationDocumentWithDetails[]>;
 
-  /**
-   * Add additional documents (recruiter enhancement)
-   */
-  async addDocuments(
-    applicationId: string,
-    documentIds: string[]
-  ): Promise<ApplicationDocument[]>
+    /**
+     * Add additional documents (recruiter enhancement)
+     */
+    async addDocuments(
+        applicationId: string,
+        documentIds: string[],
+    ): Promise<ApplicationDocument[]>;
 
-  /**
-   * Update primary resume
-   */
-  async updatePrimaryResume(
-    applicationId: string,
-    newPrimaryResumeId: string
-  ): Promise<void>
+    /**
+     * Update primary resume
+     */
+    async updatePrimaryResume(
+        applicationId: string,
+        newPrimaryResumeId: string,
+    ): Promise<void>;
 }
 ```
 
@@ -412,7 +408,7 @@ async submitCandidateApplication(params: {
     params.jobId
   );
   if (isDuplicate) {
-    throw new ApplicationError('DUPLICATE_APPLICATION', 
+    throw new ApplicationError('DUPLICATE_APPLICATION',
       'You have already applied to this job');
   }
 
@@ -421,7 +417,7 @@ async submitCandidateApplication(params: {
     params.documentIds
   );
   if (!docValidation.valid || !docValidation.hasResume) {
-    throw new ApplicationError('MISSING_RESUME', 
+    throw new ApplicationError('MISSING_RESUME',
       'At least one resume document is required');
   }
 
@@ -431,7 +427,7 @@ async submitCandidateApplication(params: {
     params.documentIds
   );
   if (!ownsDocuments) {
-    throw new ApplicationError('INVALID_DOCUMENT', 
+    throw new ApplicationError('INVALID_DOCUMENT',
       'One or more documents do not belong to you');
   }
 
@@ -442,8 +438,8 @@ async submitCandidateApplication(params: {
       params.preScreenAnswers
     );
     if (!validation.valid) {
-      throw new ApplicationError('MISSING_REQUIRED_ANSWERS', 
-        'Required pre-screen questions not answered', 
+      throw new ApplicationError('MISSING_REQUIRED_ANSWERS',
+        'Required pre-screen questions not answered',
         { missing: validation.missingRequired });
     }
   }
@@ -457,7 +453,7 @@ async submitCandidateApplication(params: {
   const recruiterId = recruiterRelationship?.recruiter_id || null;
 
   // 7. Determine application stage based on recruiter presence
-  const stage = hasRecruiter 
+  const stage = hasRecruiter
     ? 'screen'      // Pending recruiter review
     : 'submitted';  // Direct to company
 
@@ -574,7 +570,7 @@ async recruiterSubmitApplication(
   }
 
   if (application.stage !== 'screen') {
-    throw new ApplicationError('INVALID_STATE', 
+    throw new ApplicationError('INVALID_STATE',
       'Application not in pending review state (must be in screen stage)');
   }
 
@@ -594,11 +590,21 @@ async recruiterSubmitApplication(
     );
   }
 
-  // 4. Update application stage and notes
+  // 4. Update application stage and create note
   const updatedApplication = await this.repository.updateApplication(applicationId, {
     stage: 'submitted',  // Move from 'screen' to 'submitted'
-    recruiter_notes: options?.recruiterNotes || null,
   });
+
+  // Create application note if recruiter added notes
+  if (options?.recruiterNotes && options.recruiterNotes.trim()) {
+    await this.noteService.create(recruiterId, {
+      application_id: applicationId,
+      created_by_type: 'candidate_recruiter',
+      note_type: 'stage_transition',
+      visibility: 'shared',
+      message_text: options.recruiterNotes.trim(),
+    });
+  }
 
   // 5. Log audit entry - use application_audit_log table
   await this.repository.createAuditLog({
@@ -607,7 +613,7 @@ async recruiterSubmitApplication(
     performed_by_user_id: recruiterId,
     metadata: { notes: options?.recruiterNotes, approved: true },
   });
-  
+
   await this.repository.createAuditLog({
     application_id: applicationId,
     action: 'submitted_to_company',
@@ -720,59 +726,59 @@ async requestPreScreen(
 ```typescript
 // Application Draft
 interface ApplicationDraft {
-  id: string;
-  candidate_id: string;
-  job_id: string;
-  draft_data: ApplicationDraftData;
-  last_saved_at: Date;
-  created_at: Date;
+    id: string;
+    candidate_id: string;
+    job_id: string;
+    draft_data: ApplicationDraftData;
+    last_saved_at: Date;
+    created_at: Date;
 }
 
 interface ApplicationDraftData {
-  step?: number;
-  documents?: {
-    selected: string[];
-    primary_resume_id?: string;
-  };
-  pre_screen_answers?: {
-    [questionId: string]: {
-      answer_text?: string;
-      answer_boolean?: boolean;
-      answer_json?: any;
+    step?: number;
+    documents?: {
+        selected: string[];
+        primary_resume_id?: string;
     };
-  };
-  notes?: string;
-  last_step_completed?: number;
+    pre_screen_answers?: {
+        [questionId: string]: {
+            answer_text?: string;
+            answer_boolean?: boolean;
+            answer_json?: any;
+        };
+    };
+    notes?: string;
+    last_step_completed?: number;
 }
 
 // Pre-Screen Answer
 interface PreScreenAnswer {
-  question_id: string;
-  answer: any;                  // JSONB matching question_type
+    question_id: string;
+    answer: any; // JSONB matching question_type
 }
 
 interface PreScreenAnswerWithQuestion extends PreScreenAnswer {
-  question: PreScreenQuestion;
+    question: PreScreenQuestion;
 }
 
 // Application Document
 interface ApplicationDocument {
-  id: string;
-  application_id: string;
-  document_id: string;
-  document_type: 'resume' | 'cover_letter' | 'portfolio' | 'other';
-  is_primary: boolean;
-  created_at: Date;
+    id: string;
+    application_id: string;
+    document_id: string;
+    document_type: "resume" | "cover_letter" | "portfolio" | "other";
+    is_primary: boolean;
+    created_at: Date;
 }
 
 // Application Stage (using existing applications.stage column)
 type ApplicationStage =
-  | 'screen'      // Pending recruiter review
-  | 'submitted'   // Submitted to company
-  | 'interview'   // Company interviewing
-  | 'offer'       // Offer extended
-  | 'hired'       // Candidate hired
-  | 'rejected';   // Application rejected
+    | "screen" // Pending recruiter review
+    | "submitted" // Submitted to company
+    | "interview" // Company interviewing
+    | "offer" // Offer extended
+    | "hired" // Candidate hired
+    | "rejected"; // Application rejected
 ```
 
 ---
@@ -781,27 +787,27 @@ type ApplicationStage =
 
 ```typescript
 class ApplicationError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-    public details?: any
-  ) {
-    super(message);
-    this.name = 'ApplicationError';
-  }
+    constructor(
+        public code: string,
+        message: string,
+        public details?: any,
+    ) {
+        super(message);
+        this.name = "ApplicationError";
+    }
 }
 
 // Error codes
 const ERROR_CODES = {
-  JOB_NOT_FOUND: 'Job not found or closed',
-  DUPLICATE_APPLICATION: 'Already applied to this job',
-  MISSING_RESUME: 'At least one resume required',
-  INVALID_DOCUMENT: 'Document not found or not owned',
-  MISSING_REQUIRED_ANSWERS: 'Required questions not answered',
-  INVALID_STATE: 'Invalid application state',
-  FORBIDDEN: 'Not authorized',
-  NOT_FOUND: 'Resource not found',
-  NO_RECRUITERS: 'No recruiters available',
+    JOB_NOT_FOUND: "Job not found or closed",
+    DUPLICATE_APPLICATION: "Already applied to this job",
+    MISSING_RESUME: "At least one resume required",
+    INVALID_DOCUMENT: "Document not found or not owned",
+    MISSING_REQUIRED_ANSWERS: "Required questions not answered",
+    INVALID_STATE: "Invalid application state",
+    FORBIDDEN: "Not authorized",
+    NOT_FOUND: "Resource not found",
+    NO_RECRUITERS: "No recruiters available",
 };
 ```
 

@@ -51,8 +51,7 @@ export function ReleaseModal({ hold, onClose, onConfirm }: ReleaseModalProps) {
 
     return (
         <>
-            {/* Modal backdrop */}
-            <div className="modal modal-open">
+            <dialog className="modal modal-open" open>
                 <div className="modal-box max-w-2xl">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
@@ -155,7 +154,10 @@ export function ReleaseModal({ hold, onClose, onConfirm }: ReleaseModalProps) {
                         </div>
                     </form>
                 </div>
-            </div>
+                <form method="dialog" className="modal-backdrop" onClick={handleCancel}>
+                    <button type="button">close</button>
+                </form>
+            </dialog>
         </>
     );
 }

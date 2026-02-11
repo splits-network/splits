@@ -266,8 +266,18 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const updateUrl = useCallback(() => {
         if (!syncToUrl) return;
 
-        const params = new URLSearchParams();
+        // Start with existing URL parameters to preserve deep linking params like candidateId
+        const params = new URLSearchParams(searchParams.toString());
 
+        // Remove our managed parameters first (we'll add them back if needed)
+        params.delete('page');
+        params.delete('limit');
+        params.delete('search');
+        params.delete('sort_by');
+        params.delete('sort_order');
+        params.delete('filters');
+
+        // Add back our parameters only if they differ from defaults
         if (page !== DEFAULT_PAGE) params.set('page', String(page));
         if (limit !== defaultLimit) params.set('limit', String(limit));
         if (searchQuery) params.set('search', searchQuery);
@@ -296,7 +306,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
-    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultFiltersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
+    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultFiltersKey, defaultLimit, defaultSortBy, defaultSortOrder, searchParams]);
 
     // Fetch data
     const fetchData = useCallback(async () => {
@@ -384,7 +394,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include]);
 
     // Debounced search

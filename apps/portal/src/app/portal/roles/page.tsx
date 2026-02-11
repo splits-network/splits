@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Grid from "./components/grid/view";
 import List from "./components/table/view";
 import BrowseRolesView from "./components/browse/browse-view";
@@ -18,6 +18,7 @@ import {
 function RolesPageContent() {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { viewMode, setViewMode, isLoaded } = useViewMode("rolesViewMode");
 
     // Get filter state from context to pass to header filters
@@ -36,14 +37,18 @@ function RolesPageContent() {
         setShowStats,
     } = useRolesFilter();
 
-    // Clear URL params when switching views to prevent stale selection state
+    // Preserve search parameters when changing views
     const handleViewChange = useCallback(
         (newView: ViewMode) => {
-            // Clear URL params (like jobId) when changing views
-            router.replace(pathname);
+            // Preserve search parameters when changing views
+            const params = new URLSearchParams(searchParams);
+            const url = params.toString()
+                ? `${pathname}?${params.toString()}`
+                : pathname;
+            router.replace(url);
             setViewMode(newView);
         },
-        [router, pathname, setViewMode],
+        [router, pathname, searchParams, setViewMode],
     );
 
     // Prevent hydration mismatch by not rendering until loaded

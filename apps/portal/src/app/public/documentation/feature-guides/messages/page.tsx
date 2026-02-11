@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/messages");
 export default function MessagesGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/messages")} id="docs-feature-guides-messages-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Messages"
                 description="Centralized conversations with recruiters and company collaborators."
@@ -129,7 +135,7 @@ export default function MessagesGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

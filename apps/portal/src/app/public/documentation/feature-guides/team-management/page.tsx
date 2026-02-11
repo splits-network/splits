@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/team-management");
 export default function TeamManagementGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/team-management")} id="docs-feature-guides-team-management-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Team Management"
                 description="Manage team members, roles, and access levels."
@@ -128,7 +134,7 @@ export default function TeamManagementGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

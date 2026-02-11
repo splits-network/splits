@@ -92,13 +92,13 @@ describe('ApplicationServiceV2 (unit)', () => {
         ).rejects.toThrow('Invalid stage transition: draft -> submitted');
     });
 
-    it('requires rejection notes or reasons', async () => {
+    it('requires rejection reasons', async () => {
         mockAccessContext({ identityUserId: 'user-1' });
         repository.findApplication.mockResolvedValue({ id: 'app-1', stage: 'screen' });
 
         await expect(
             service.updateApplication('app-1', { stage: 'rejected' } as any, 'clerk-1')
-        ).rejects.toThrow('Notes/rejection reason required when rejecting');
+        ).rejects.toThrow('Decline reason required when rejecting');
     });
 
     it('submits to recruiter_review when candidate has recruiter', async () => {

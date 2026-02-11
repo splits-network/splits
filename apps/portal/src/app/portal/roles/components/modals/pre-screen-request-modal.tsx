@@ -108,7 +108,7 @@ export default function PreScreenRequestModal({
         : null;
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-lg">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
@@ -248,7 +248,9 @@ export default function PreScreenRequestModal({
                     </div>
                 </form>
             </div>
-            <div className="modal-backdrop" onClick={onClose}></div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={onClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

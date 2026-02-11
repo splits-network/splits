@@ -576,7 +576,7 @@ export default function TeamManagementContent({
 
             {/* Confirmation Modal */}
             {confirmModal && (
-                <div className="modal modal-open">
+                <dialog className="modal modal-open" open>
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">
                             {confirmModal.title}
@@ -597,7 +597,14 @@ export default function TeamManagementContent({
                             </button>
                         </div>
                     </div>
-                </div>
+                    <form
+                        method="dialog"
+                        className="modal-backdrop"
+                        onClick={() => setConfirmModal(null)}
+                    >
+                        <button type="button">close</button>
+                    </form>
+                </dialog>
             )}
         </div>
     );

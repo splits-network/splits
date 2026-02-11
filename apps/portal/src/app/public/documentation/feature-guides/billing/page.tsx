@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/billing");
 export default function BillingGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/billing")} id="docs-feature-guides-billing-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Billing"
                 description="Manage subscription details and payment methods."
@@ -129,7 +135,7 @@ export default function BillingGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

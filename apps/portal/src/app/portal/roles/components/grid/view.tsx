@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     PaginationControls,
     EmptyState,
@@ -44,6 +44,8 @@ const roleColumns: TableColumn[] = [
 // ===== COMPONENT =====
 
 export default function Grid({ view }: RolesListProps) {
+    const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
 
     // Get filter state from context
@@ -73,15 +75,15 @@ export default function Grid({ view }: RolesListProps) {
     const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
     // Sidebar state for viewing role details - check URL param for initial selection
-    const urlJobId = searchParams.get("jobId");
-    const [sidebarRoleId, setSidebarRoleId] = useState<string | null>(urlJobId);
+    const urlRoleId = searchParams.get("roleId");
+    const [sidebarRoleId, setSidebarRoleId] = useState<string | null>(
+        urlRoleId,
+    );
 
     // Sync sidebar state with URL param changes
     useEffect(() => {
-        if (urlJobId) {
-            setSidebarRoleId(urlJobId);
-        }
-    }, [urlJobId]);
+        setSidebarRoleId(urlRoleId);
+    }, [urlRoleId]);
 
     // Pipeline sidebar state for viewing applications
     const [pipelineRoleId, setPipelineRoleId] = useState<string | null>(null);
@@ -104,14 +106,21 @@ export default function Grid({ view }: RolesListProps) {
     };
 
     // Handler for opening role detail sidebar
-    const handleViewDetails = (jobId: string) => {
-        setSidebarRoleId(jobId);
-    };
+    const handleViewDetails = useCallback(
+        (jobId: string) => {
+            const params = new URLSearchParams(searchParams);
+            params.set("roleId", jobId);
+            router.push(`${pathname}?${params.toString()}`);
+        },
+        [pathname, router, searchParams],
+    );
 
     // Handler for closing sidebar
-    const handleCloseSidebar = () => {
-        setSidebarRoleId(null);
-    };
+    const handleCloseSidebar = useCallback(() => {
+        const params = new URLSearchParams(searchParams);
+        params.delete("roleId");
+        router.push(`${pathname}?${params.toString()}`);
+    }, [pathname, router, searchParams]);
 
     // Handler for opening pipeline sidebar
     const handleViewPipeline = (jobId: string) => {

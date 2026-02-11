@@ -206,7 +206,7 @@ export default function SubmitToJobWizard({
     };
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="flex justify-between items-start mb-4">
                     <div>
@@ -742,6 +742,9 @@ export default function SubmitToJobWizard({
                     </div>
                 </div>
             </div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={onClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

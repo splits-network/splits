@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getDocMetadata, getDocJsonLd } from "../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 const guides = [
     {
@@ -63,9 +65,13 @@ const guides = [
     },
 ];
 
+
+export const metadata = getDocMetadata("feature-guides");
 export default function FeatureGuidesIndexPage() {
     return (
-        <div className="space-y-8">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides")} id="docs-feature-guides-jsonld" />
+            <div className="space-y-8">
             <div className="space-y-3">
                 <nav className="text-sm breadcrumbs">
                     <ul>
@@ -98,6 +104,7 @@ export default function FeatureGuidesIndexPage() {
                     </Link>
                 ))}
             </div>
-        </div>
+            </div>
+        </>
     );
 }

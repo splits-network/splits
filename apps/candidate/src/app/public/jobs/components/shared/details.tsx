@@ -402,14 +402,14 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                     </p>
                                     <div className="flex gap-2 justify-center">
                                         <Link
-                                            href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs-new/${item.id}`)}`}
+                                            href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs/${item.id}`)}`}
                                             className="btn btn-sm bg-white text-primary hover:bg-gray-100"
                                         >
                                             <i className="fa-duotone fa-regular fa-user-plus" />
                                             Create Account
                                         </Link>
                                         <Link
-                                            href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs-new/${item.id}`)}`}
+                                            href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs/${item.id}`)}`}
                                             className="btn btn-sm btn-outline text-primary-content border-primary-content hover:bg-primary-content hover:text-primary"
                                         >
                                             <i className="fa-duotone fa-regular fa-right-to-bracket" />
@@ -423,7 +423,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                         {/* View Full Job Page Link */}
                         <div className="flex justify-center">
                             <Link
-                                href={`/public/jobs-new/${item.id}`}
+                                href={`/public/jobs/${item.id}`}
                                 className="btn btn-primary btn-sm"
                             >
                                 Open Full Job Page
@@ -448,3 +448,4 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         </div>
     );
 }
+

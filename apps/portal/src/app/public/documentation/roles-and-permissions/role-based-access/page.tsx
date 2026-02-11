@@ -1,5 +1,7 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 const accessMatrix = [
     {
@@ -60,9 +62,13 @@ const accessMatrix = [
     },
 ];
 
+
+export const metadata = getDocMetadata("roles-and-permissions/role-based-access");
 export default function RoleBasedAccessPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("roles-and-permissions/role-based-access")} id="docs-roles-and-permissions-role-based-access-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Role-Based Access"
                 description="How permissions are determined and why navigation changes based on your role."
@@ -198,7 +204,7 @@ export default function RoleBasedAccessPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

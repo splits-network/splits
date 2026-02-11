@@ -269,14 +269,13 @@ export class ApplicationServiceV2 {
             );
         }
 
-        // Validate rejection has notes
+        // Validate rejection has decline reason or details
         if (
             updates.stage === 'rejected' &&
-            !persistedUpdates.notes &&
             !decline_details &&
             !decline_reason
         ) {
-            throw new Error('Notes/rejection reason required when rejecting');
+            throw new Error('Decline reason required when rejecting');
         }
 
         // Link documents if provided

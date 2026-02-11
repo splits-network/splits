@@ -40,7 +40,7 @@ export function FeeInput({
           <label htmlFor={salaryId} className="label">
             <span className="label-text font-medium">Annual Salary</span>
           </label>
-          <label className="input input-bordered flex items-center gap-2">
+          <label className="input w-full flex items-center gap-2">
             <span className="text-base-content/60">$</span>
             <input
               id={salaryId}
@@ -58,7 +58,7 @@ export function FeeInput({
           <label htmlFor={percentageId} className="label">
             <span className="label-text font-medium">Fee %</span>
           </label>
-          <label className={`input input-bordered flex items-center gap-2 ${feeReadOnly ? 'bg-base-200 cursor-not-allowed' : ''}`}>
+          <label className={`input w-full flex items-center gap-2 ${feeReadOnly ? 'bg-base-200 cursor-not-allowed' : ''}`}>
             <input
               id={percentageId}
               type="number"

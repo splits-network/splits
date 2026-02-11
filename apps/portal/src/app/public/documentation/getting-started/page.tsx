@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { getDocMetadata, getDocJsonLd } from "../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("getting-started");
 export default function GettingStartedIndexPage() {
     return (
-        <div className="space-y-8">
+        <>
+            <JsonLd data={getDocJsonLd("getting-started")} id="docs-getting-started-jsonld" />
+            <div className="space-y-8">
             <div className="space-y-3">
                 <nav className="text-sm breadcrumbs">
                     <ul>
@@ -57,7 +63,7 @@ export default function GettingStartedIndexPage() {
                     </div>
                 </Link>
             </div>
-        </div>
+            </div>
+        </>
     );
 }
-

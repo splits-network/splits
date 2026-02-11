@@ -173,7 +173,7 @@ export default function ActionsToolbar({
             />
 
             {showReportModal && (
-                <div className="modal modal-open">
+                <dialog className="modal modal-open" open>
                     <div className="modal-box">
                         <div className="flex items-start gap-4">
                             <div className="text-2xl text-warning">
@@ -214,7 +214,7 @@ export default function ActionsToolbar({
                                         Details (optional)
                                     </legend>
                                     <textarea
-                                        className="textarea textarea-bordered w-full"
+                                        className="textarea w-full"
                                         rows={3}
                                         placeholder="Provide additional details about this report..."
                                         value={reportDescription}
@@ -260,7 +260,7 @@ export default function ActionsToolbar({
                     >
                         <button type="button">close</button>
                     </form>
-                </div>
+                </dialog>
             )}
         </ModalPortal>
     );

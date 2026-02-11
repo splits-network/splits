@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("core-workflows/invite-recruiters-or-teammates");
 export default function InviteRecruitersOrTeammatesPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/invite-recruiters-or-teammates")} id="docs-core-workflows-invite-recruiters-or-teammates-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Invite Recruiters Or Teammates"
                 description="Invite collaborators to your organization and assign the correct permissions."
@@ -138,7 +144,7 @@ export default function InviteRecruitersOrTeammatesPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

@@ -1,10 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: 'Terms of Service - Applicant Network | User Agreement',
-    description: 'Read the Terms of Service for Applicant  Understand your rights and responsibilities when using our job search and recruiting platform.',
+    description: 'Read the Terms of Service for Applicant Network. Understand your rights and responsibilities when using our job search and recruiting platform.',
+    openGraph: {
+        title: "Terms of Service - Applicant Network | User Agreement",
+        description: "Read the Terms of Service for Applicant Network. Understand your rights and responsibilities when using our job search and recruiting platform.",
+        url: "https://applicant.network/public/terms-of-service",
+    },
     robots: 'index, follow',
+    ...buildCanonical("/public/terms-of-service"),
 };
 
 export default function TermsOfServicePage() {
@@ -26,7 +33,7 @@ export default function TermsOfServicePage() {
                 <section className="mb-8">
                     <h2 className="text-3xl font-bold mb-4">1. Acceptance of Terms</h2>
                     <p className="text-base-content/80">
-                        These Terms of Service ("Terms") govern your access to and use of Applicant Network (the "Platform"), operated by Splits Network, Inc. ("we," "us," or "our"). By creating an account, accessing, or using our Platform, you agree to be bound by these Terms and our <Link href="/privacy" className="link link-primary">Privacy Policy</Link>.
+                        These Terms of Service ("Terms") govern your access to and use of Applicant Network (the "Platform"), operated by Splits Network, Inc. ("we," "us," or "our"). By creating an account, accessing, or using our Platform, you agree to be bound by these Terms and our <Link href="/public/privacy-policy" className="link link-primary">Privacy Policy</Link>.
                     </p>
                     <p className="text-base-content/80 mt-4">
                         If you do not agree to these Terms, you may not access or use our Platform.
@@ -268,15 +275,15 @@ export default function TermsOfServicePage() {
                 <div className="divider my-8"></div>
 
                 <div className="flex flex-wrap gap-4 justify-center">
-                    <Link href="/privacy" className="btn btn-outline">
+                    <Link href="/public/privacy-policy" className="btn btn-outline">
                         <i className="fa-duotone fa-regular fa-shield-halved mr-2"></i>
                         Privacy Policy
                     </Link>
-                    <Link href="/cookies" className="btn btn-outline">
+                    <Link href="/public/cookie-policy" className="btn btn-outline">
                         <i className="fa-duotone fa-regular fa-cookie mr-2"></i>
                         Cookie Policy
                     </Link>
-                    <Link href="/contact" className="btn btn-primary">
+                    <Link href="/public/contact" className="btn btn-primary">
                         <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                         Contact Us
                     </Link>

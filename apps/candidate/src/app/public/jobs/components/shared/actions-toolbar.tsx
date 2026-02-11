@@ -62,7 +62,7 @@ export default function ActionsToolbar({
     }, [fetchAuthData]);
 
     const handleViewFull = () => {
-        router.push(`/public/jobs-new/${item.id}`);
+        router.push(`/public/jobs/${item.id}`);
     };
 
     // Determine apply button config based on auth state
@@ -72,7 +72,7 @@ export default function ActionsToolbar({
                 text: "Get Started",
                 icon: "fa-rocket",
                 action: () => {
-                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/public/jobs-new/${item.id}`)}`;
+                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/public/jobs/${item.id}`)}`;
                 },
             };
         }
@@ -184,3 +184,4 @@ export default function ActionsToolbar({
         </>
     );
 }
+

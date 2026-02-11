@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import { CareersContent } from "./careers-content";
+import { buildCanonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
     title: "Careers",
-    description: "Join the team building the future of collaborative recruiting.",
+    description: "Join the team building the future of collaborative recruiting at Splits Network and help shape transparent, scalable hiring.",
+    openGraph: {
+        title: "Careers",
+        description: "Join the team building the future of collaborative recruiting at Splits Network and help shape transparent, scalable hiring.",
+        url: "https://splits.network/public/careers",
+    },
+    ...buildCanonical("/public/careers"),
 };
 
 export default function CareersPage() {

@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'Negotiating Your Job Offer',
     description: 'Master the art of salary and benefits negotiation with confidence.',
+    openGraph: {
+        title: "Negotiating Your Job Offer",
+        description: "Master the art of salary and benefits negotiation with confidence.",
+        url: "https://applicant.network/public/resources/career-guides/negotiating-offers",
+    },
+    ...buildCanonical("/public/resources/career-guides/negotiating-offers"),
 };
 
 export default function NegotiatingOffersGuidePage() {
@@ -193,7 +201,14 @@ export default function NegotiatingOffersGuidePage() {
         },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "Negotiating Your Job Offer",
+        description: "Master the art of salary and benefits negotiation with confidence.",
+        path: "/public/resources/career-guides/negotiating-offers",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="handshake"
@@ -385,5 +400,6 @@ export default function NegotiatingOffersGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

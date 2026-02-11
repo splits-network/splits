@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
@@ -22,10 +22,12 @@ export default function InvitationsNewPage() {
 }
 
 function InvitationsNewPageContent() {
-    const { viewMode, setViewMode, isLoaded } =
-        useViewMode("invitationsNewViewMode");
+    const { viewMode, setViewMode, isLoaded } = useViewMode(
+        "invitationsNewViewMode",
+    );
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const {
         searchInput,
@@ -41,10 +43,15 @@ function InvitationsNewPageContent() {
 
     const handleViewChange = useCallback(
         (newView: ViewMode) => {
-            router.replace(pathname);
+            // Preserve search parameters when changing views
+            const params = new URLSearchParams(searchParams);
+            const url = params.toString()
+                ? `${pathname}?${params.toString()}`
+                : pathname;
+            router.replace(url);
             setViewMode(newView);
         },
-        [router, pathname, setViewMode],
+        [router, pathname, searchParams, setViewMode],
     );
 
     if (!isLoaded) {

@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'First 90 Days in a New Role',
     description: 'Set yourself up for success in your new position from day one.',
+    openGraph: {
+        title: "First 90 Days in a New Role",
+        description: "Set yourself up for success in your new position from day one.",
+        url: "https://applicant.network/public/resources/career-guides/first-90-days",
+    },
+    ...buildCanonical("/public/resources/career-guides/first-90-days"),
 };
 
 export default function First90DaysGuidePage() {
@@ -177,7 +185,14 @@ export default function First90DaysGuidePage() {
         },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "First 90 Days in a New Role",
+        description: "Set yourself up for success in your new position from day one.",
+        path: "/public/resources/career-guides/first-90-days",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="rocket"
@@ -396,5 +411,6 @@ export default function First90DaysGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

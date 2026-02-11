@@ -129,7 +129,7 @@ export function AnswerQuestionsStep({
             default:
                 return (
                     <textarea
-                        className="textarea textarea-bordered w-full"
+                        className="textarea w-full"
                         value={answer}
                         onChange={(e) =>
                             handleAnswerChange(question.id, e.target.value)

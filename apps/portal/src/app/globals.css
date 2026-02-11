@@ -33,35 +33,6 @@
    Design System Tokens & Utilities
    ============================================ */
 
-/* Elevation Shadow System */
-.shadow-elevation-1 {
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-}
-
-.shadow-elevation-2 {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-}
-
-.shadow-elevation-3 {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.shadow-elevation-4 {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.shadow-elevation-hover {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
-
-/* Card Hover Lift Effect */
-.hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-    transform: translateY(-2px);
-}
 
 /* Expand/Collapse Animation */
 @keyframes expand-down {
@@ -198,15 +169,6 @@
     background-color: oklch(var(--color-base-content) / 0.3);
 }
 
-/* Focus ring for accessibility */
-.focus-ring {
-    outline: none;
-}
-
-.focus-ring:focus-visible {
-    outline: 2px solid oklch(var(--color-primary));
-    outline-offset: 2px;
-}
 
 /* .expanded-row {
     animation: expand-down 0.3s ease-out;

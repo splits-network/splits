@@ -206,7 +206,7 @@ export default function MarketplaceMetricsPage() {
 
                 {/* Date Range Selector */}
                 <select
-                    className="select select-bordered"
+                    className="select w-full"
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
                 >

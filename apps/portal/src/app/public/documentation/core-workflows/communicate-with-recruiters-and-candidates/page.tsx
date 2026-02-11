@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("core-workflows/communicate-with-recruiters-and-candidates");
 export default function CommunicateWithRecruitersAndCandidatesPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("core-workflows/communicate-with-recruiters-and-candidates")} id="docs-core-workflows-communicate-with-recruiters-and-candidates-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Communicate With Recruiters And Candidates"
                 description="Use Messages and Notifications to coordinate feedback, updates, and next steps."
@@ -139,7 +145,7 @@ export default function CommunicateWithRecruitersAndCandidatesPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

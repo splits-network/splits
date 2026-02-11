@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/invitations");
 export default function InvitationsGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/invitations")} id="docs-feature-guides-invitations-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Invitations"
                 description="Invite teammates and track invitation status."
@@ -129,7 +135,7 @@ export default function InvitationsGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

@@ -1460,13 +1460,13 @@ import { Line } from "react-chartjs-2";
 
 #### 11.2 Improved Focus States
 
-```css
-/* Enhanced focus states for keyboard navigation */
-@layer utilities {
-    .focus-ring {
-        @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100;
-    }
-}
+```tsx
+{/* Apply focus-visible utilities directly on interactive elements */}
+<button
+    className="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+>
+    Continue
+</button>;
 ```
 
 #### 11.3 ARIA Labels for Interactive Elements

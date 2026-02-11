@@ -608,7 +608,7 @@ export function UpdatesContent() {
                             <input
                                 type="email"
                                 placeholder="your@email.com"
-                                className="input input-bordered join-item flex-grow"
+                                className="input w-full join-item flex-grow"
                             />
                             <button className="btn btn-primary join-item">
                                 <i className="fa-duotone fa-regular fa-envelope"></i>

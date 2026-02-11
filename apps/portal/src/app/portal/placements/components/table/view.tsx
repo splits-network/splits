@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { DataTable, type TableColumn } from "@/components/ui";
 import { PaginationControls, EmptyState } from "@/hooks/use-standard-list";
 import { useFilter } from "../../contexts/filter-context";
@@ -43,7 +44,39 @@ export default function TableView() {
         goToPage,
     } = useFilter();
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const selectedId = searchParams.get("placementId");
     const [sidebarItem, setSidebarItem] = useState<Placement | null>(null);
+
+    // Sync sidebar item with URL parameter
+    useEffect(() => {
+        if (selectedId) {
+            const item = data.find((placement) => placement.id === selectedId);
+            if (item) {
+                setSidebarItem(item);
+            }
+        } else {
+            setSidebarItem(null);
+        }
+    }, [selectedId, data]);
+
+    const handleViewDetails = useCallback(
+        (placement: Placement) => {
+            const params = new URLSearchParams(searchParams);
+            params.set("placementId", placement.id);
+            router.push(`${pathname}?${params.toString()}`);
+        },
+        [pathname, router, searchParams],
+    );
+
+    const handleCloseSidebar = useCallback(() => {
+        const params = new URLSearchParams(searchParams);
+        params.delete("placementId");
+        router.push(`${pathname}?${params.toString()}`);
+    }, [pathname, router, searchParams]);
 
     return (
         <>
@@ -69,7 +102,7 @@ export default function TableView() {
                         <Row
                             key={item.id}
                             item={item}
-                            onViewDetails={() => setSidebarItem(item)}
+                            onViewDetails={() => handleViewDetails(item)}
                         />
                     ))}
                 </DataTable>
@@ -83,10 +116,7 @@ export default function TableView() {
                 )}
             </div>
 
-            <Sidebar
-                item={sidebarItem}
-                onClose={() => setSidebarItem(null)}
-            />
+            <Sidebar item={sidebarItem} onClose={handleCloseSidebar} />
         </>
     );
 }

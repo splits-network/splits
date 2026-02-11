@@ -32,7 +32,7 @@ function buildDescription(job: any) {
 }
 
 function getJobUrl(job: any) {
-    return `${baseUrl}/public/jobs-new/${job?.id}`;
+    return `${baseUrl}/public/jobs/${job?.id}`;
 }
 
 export async function GET() {
@@ -75,7 +75,7 @@ export async function GET() {
         "<rss version=\"2.0\">",
         "<channel>",
         "<title>Applicant Network Jobs</title>",
-        `<link>${baseUrl}/public/jobs-new</link>`,
+        `<link>${baseUrl}/public/jobs</link>`,
         "<description>Latest jobs published on Applicant Network.</description>",
         "<language>en-us</language>",
         `<lastBuildDate>${now}</lastBuildDate>`,
@@ -91,3 +91,4 @@ export async function GET() {
         },
     });
 }
+

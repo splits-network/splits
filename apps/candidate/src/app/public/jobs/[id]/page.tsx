@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
 import JobDetailClient from "./components/job-detail-client";
 import { cache } from "react";
+import { JsonLd } from "@splits-network/shared-ui";
+import { buildCanonical, CANDIDATE_BASE_URL } from "@/lib/seo";
 
 interface JobRequirement {
     id: string;
@@ -40,6 +42,15 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
+function stripHtml(value: string) {
+    return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function truncateText(value: string, maxLength = 155) {
+    if (value.length <= maxLength) return value;
+    return value.slice(0, maxLength - 1).trimEnd() + "…";
+}
+
 const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
         const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
@@ -57,23 +68,29 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
     const { id } = await params;
     const job = await fetchJob(id);
+    const canonicalPath = `/public/jobs/${id}`;
 
     if (!job) {
         return {
             title: "Job Details",
             description:
                 "Explore job details and requirements on Applicant Network.",
+            ...buildCanonical(canonicalPath),
         };
     }
+
+    const rawDescription =
+        job.candidate_description ||
+        job.description ||
+        "View job responsibilities, requirements, and application details.";
+    const description = truncateText(stripHtml(rawDescription));
 
     return {
         title: job.title
             ? `${job.title} at ${job.company?.name ?? "Applicant Network"}`
             : "Job Details",
-        description:
-            job.candidate_description ||
-            job.description ||
-            "View job responsibilities, requirements, and application details.",
+        description,
+        ...buildCanonical(canonicalPath),
     };
 }
 
@@ -88,6 +105,52 @@ export default async function JobDetailPage({ params }: PageProps) {
     if (!job) {
         notFound();
     }
+
+    const jobPostingJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        title: job.title || "Job Opportunity",
+        description:
+            job.candidate_description ||
+            job.description ||
+            "View job responsibilities, requirements, and application details.",
+        datePosted: job.created_at || job.updated_at,
+        validThrough: job.updated_at,
+        employmentType: job.employment_type,
+        hiringOrganization: job.company?.name
+            ? {
+                  "@type": "Organization",
+                  name: job.company.name,
+              }
+            : undefined,
+        jobLocation: job.location
+            ? {
+                  "@type": "Place",
+                  address: job.location,
+              }
+            : undefined,
+        baseSalary:
+            job.salary_min || job.salary_max
+                ? {
+                      "@type": "MonetaryAmount",
+                      currency: "USD",
+                      value: {
+                          "@type": "QuantitativeValue",
+                          minValue: job.salary_min ?? undefined,
+                          maxValue: job.salary_max ?? undefined,
+                          unitText: "YEAR",
+                      },
+                  }
+                : undefined,
+        identifier: job.id
+            ? {
+                  "@type": "PropertyValue",
+                  name: "Applicant Network Job ID",
+                  value: job.id,
+              }
+            : undefined,
+        url: `${CANDIDATE_BASE_URL}/public/jobs/${job.id}`,
+    };
 
     // Check if user has an active recruiter relationship and existing application
     if (userId) {
@@ -124,11 +187,14 @@ export default async function JobDetailPage({ params }: PageProps) {
     }
 
     return (
-        <JobDetailClient
-            job={job}
-            isAuthenticated={!!userId}
-            hasActiveRecruiter={hasActiveRecruiter}
-            existingApplication={existingApplication}
-        />
+        <>
+            <JsonLd data={jobPostingJsonLd} id="job-posting-jsonld" />
+            <JobDetailClient
+                job={job}
+                isAuthenticated={!!userId}
+                hasActiveRecruiter={hasActiveRecruiter}
+                existingApplication={existingApplication}
+            />
+        </>
     );
 }

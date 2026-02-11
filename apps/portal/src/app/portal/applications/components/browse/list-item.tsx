@@ -47,7 +47,7 @@ export default function ListItem({
                     {/* Status + AI Score Badges */}
                     <div className="flex flex-wrap gap-1.5">
                         <span
-                            className={`badge badge-xs ${status.badgeClass} badge-soft gap-1 border-0`}
+                            className={`badge badge-sm ${status.badgeClass} badge-soft gap-1 border-0`}
                         >
                             <i
                                 className={`fa-duotone fa-regular ${status.icon} text-[10px]`}
@@ -55,7 +55,7 @@ export default function ListItem({
                             {status.label}
                         </span>
                         {item.ai_review?.fit_score != null && (
-                            <span className="badge badge-xs badge-accent badge-soft gap-1 border-0">
+                            <span className="badge badge-sm badge-accent badge-soft gap-1 border-0">
                                 <i className="fa-duotone fa-regular fa-robot text-[10px]" />
                                 {Math.round(item.ai_review.fit_score)}%
                             </span>

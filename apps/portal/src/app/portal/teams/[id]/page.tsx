@@ -423,7 +423,7 @@ export default function TeamDetailPage({
 
             {/* Invite Modal */}
             {showInviteModal && (
-                <div className="modal modal-open">
+                <dialog className="modal modal-open" open>
                     <div className="modal-box">
                         <h3 className="font-bold text-lg mb-4">
                             Invite Team Member
@@ -513,11 +513,14 @@ export default function TeamDetailPage({
                             </div>
                         </form>
                     </div>
-                    <div
+                    <form
+                        method="dialog"
                         className="modal-backdrop"
                         onClick={() => !inviting && setShowInviteModal(false)}
-                    ></div>
-                </div>
+                    >
+                        <button type="button">close</button>
+                    </form>
+                </dialog>
             )}
         </div>
     );

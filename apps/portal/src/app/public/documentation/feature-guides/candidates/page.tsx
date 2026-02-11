@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/candidates");
 export default function CandidatesGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/candidates")} id="docs-feature-guides-candidates-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Candidates"
                 description="Manage candidate profiles, verification status, and sourcing data."
@@ -128,7 +134,7 @@ export default function CandidatesGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

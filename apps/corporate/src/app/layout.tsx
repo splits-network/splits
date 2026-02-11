@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -50,80 +51,53 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const clarityId = process.env.NEXT_PUBLIC_CORPORATE_CLARITY_ID;
+    const gaId = process.env.NEXT_PUBLIC_CORPORATE_GA_ID;
+    const organizationJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "Employment Networks",
+        url: "https://employment-networks.com",
+        logo: "https://employment-networks.com/logo.png",
+        description:
+            "Powering the future of recruiting with Splits (collaborative recruiting platform) and Applicant (modern candidate portal). Transform your hiring process with our innovative platforms.",
+        sameAs: ["https://splits.network", "https://applicant.network"],
+        contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "Customer Service",
+            email: "support@employment-networks.com",
+        },
+    };
+    const softwareAppJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Splits Network",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        offers: {
+            "@type": "AggregateOffer",
+            lowPrice: "0",
+            highPrice: "249",
+            priceCurrency: "USD",
+            offerCount: "3",
+        },
+    };
+    const websiteJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Employment Networks",
+        url: "https://employment-networks.com",
+    };
     return (
         <html lang="en" data-theme="splits-light">
             <head>
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            "@context": "https://schema.org",
-                            "@type": "Organization",
-                            name: "Employment Networks",
-                            url: "https://employment-networks.com",
-                            logo: "https://employment-networks.com/logo.png",
-                            description:
-                                "Powering the future of recruiting with Splits (collaborative recruiting platform) and Applicant (modern candidate portal). Transform your hiring process with our innovative platforms.",
-                            sameAs: [
-                                "https://splits.network",
-                                "https://applicant.network",
-                            ],
-                            contactPoint: {
-                                "@type": "ContactPoint",
-                                contactType: "Customer Service",
-                                email: "support@employment-networks.com",
-                            },
-                            founder: {
-                                "@type": "Organization",
-                                name: "Employment Networks",
-                            },
-                        }),
-                    }}
-                />
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            "@context": "https://schema.org",
-                            "@type": "SoftwareApplication",
-                            name: "Splits Network",
-                            applicationCategory: "BusinessApplication",
-                            operatingSystem: "Web",
-                            offers: {
-                                "@type": "AggregateOffer",
-                                lowPrice: "0",
-                                highPrice: "249",
-                                priceCurrency: "USD",
-                                offerCount: "3",
-                            },
-                            aggregateRating: {
-                                "@type": "AggregateRating",
-                                ratingValue: "4.8",
-                                ratingCount: "150",
-                            },
-                        }),
-                    }}
-                />
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            "@context": "https://schema.org",
-                            "@type": "WebSite",
-                            name: "Employment Networks",
-                            url: "https://employment-networks.com",
-                            potentialAction: {
-                                "@type": "SearchAction",
-                                target: {
-                                    "@type": "EntryPoint",
-                                    urlTemplate:
-                                        "https://employment-networks.com/search?q={search_term_string}",
-                                },
-                                "query-input":
-                                    "required name=search_term_string",
-                            },
-                        }),
-                    }}
+                <JsonLd data={organizationJsonLd} id="corporate-org-jsonld" />
+                <JsonLd data={softwareAppJsonLd} id="corporate-software-jsonld" />
+                <JsonLd data={websiteJsonLd} id="corporate-website-jsonld" />
+                <link
+                    rel="preload"
+                    as="style"
+                    href="https://kit.fontawesome.com/728c8ddec8.css"
                 />
                 <link
                     rel="stylesheet"
@@ -136,6 +110,43 @@ export default function RootLayout({
                 <Header />
                 <main className="flex-grow">{children}</main>
                 <Footer />
+
+                {clarityId ? (
+                    <Script
+                        id="microsoft-clarity"
+                        strategy="afterInteractive"
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                (function(c,l,a,r,i,t,y){
+                                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                                })(window, document, "clarity", "script", "${clarityId}");
+                            `,
+                        }}
+                    />
+                ) : null}
+
+                {gaId ? (
+                    <>
+                        <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                            strategy="afterInteractive"
+                        />
+                        <Script
+                            id="google-analytics"
+                            strategy="afterInteractive"
+                            dangerouslySetInnerHTML={{
+                                __html: `
+                                    window.dataLayer = window.dataLayer || [];
+                                    function gtag(){dataLayer.push(arguments);}
+                                    gtag('js', new Date());
+                                    gtag('config', '${gaId}');
+                                `,
+                            }}
+                        />
+                    </>
+                ) : null}
             </body>
         </html>
     );

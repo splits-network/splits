@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("feature-guides/applications");
 export default function ApplicationsGuidePage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("feature-guides/applications")} id="docs-feature-guides-applications-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="Applications"
                 description="Track candidate submissions, review stages, and decision history."
@@ -129,7 +135,7 @@ export default function ApplicationsGuidePage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-

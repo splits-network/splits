@@ -70,7 +70,7 @@ export function DeclineModal({
     if (!isOpen) return null;
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-times-circle text-error"></i>{" "}
@@ -158,7 +158,9 @@ export function DeclineModal({
                     </div>
                 </form>
             </div>
-            <div className="modal-backdrop" onClick={handleClose}></div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

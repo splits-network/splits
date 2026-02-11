@@ -5,6 +5,7 @@ import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
@@ -61,6 +62,38 @@ export default async function RootLayout({
             "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable",
         );
     }
+    const webAppJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "Splits Network",
+        url: "https://splits.network",
+        applicationCategory: "BusinessApplication",
+        description:
+            "Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.",
+        operatingSystem: "Web",
+        sameAs: ["https://employment-networks.com", "https://applicant.network"],
+        offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+        },
+        provider: {
+            "@type": "Organization",
+            name: "Employment Networks",
+            url: "https://employment-networks.com",
+            logo: "https://splits.network/logo.png",
+            sameAs: ["https://employment-networks.com", "https://applicant.network"],
+        },
+        featureList: [
+            "Split-fee recruiting",
+            "Collaborative hiring",
+            "Job marketplace",
+            "Candidate management",
+            "Recruiter network",
+            "Commission tracking",
+            "Placement management",
+        ],
+    };
 
     return (
         <ClerkProvider publishableKey={publishableKey}>
@@ -85,43 +118,13 @@ export default async function RootLayout({
                             `,
                         }}
                     />
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{
-                            __html: JSON.stringify({
-                                "@context": "https://schema.org",
-                                "@type": "WebApplication",
-                                name: "Splits Network",
-                                url: "https://splits.network",
-                                applicationCategory: "BusinessApplication",
-                                description:
-                                    "Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.",
-                                operatingSystem: "Web",
-                                offers: {
-                                    "@type": "Offer",
-                                    price: "0",
-                                    priceCurrency: "USD",
-                                },
-                                provider: {
-                                    "@type": "Organization",
-                                    name: "Employment Networks",
-                                    url: "https://employment-networks.com",
-                                    logo: "https://splits.network/logo.png",
-                                    sameAs: ["https://employment-networks.com"],
-                                },
-                                featureList: [
-                                    "Split-fee recruiting",
-                                    "Collaborative hiring",
-                                    "Job marketplace",
-                                    "Candidate management",
-                                    "Recruiter network",
-                                    "Commission tracking",
-                                    "Placement management",
-                                ],
-                            }),
-                        }}
-                    />
+                    <JsonLd data={webAppJsonLd} id="splits-webapp-jsonld" />
 
+                    <link
+                        rel="preload"
+                        as="style"
+                        href="https://kit.fontawesome.com/728c8ddec8.css"
+                    />
                     <link
                         rel="stylesheet"
                         href="https://kit.fontawesome.com/728c8ddec8.css"

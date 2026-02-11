@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedGuideHero } from '../components/animated-guide-hero';
+import { buildCanonical, buildArticleJsonLd } from "@/lib/seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export const metadata: Metadata = {
     title: 'Building Your Professional Network',
     description: 'Learn strategies to grow and maintain meaningful professional connections.',
+    openGraph: {
+        title: "Building Your Professional Network",
+        description: "Learn strategies to grow and maintain meaningful professional connections.",
+        url: "https://applicant.network/public/resources/career-guides/networking",
+    },
+    ...buildCanonical("/public/resources/career-guides/networking"),
 };
 
 export default function NetworkingGuidePage() {
@@ -82,7 +90,14 @@ export default function NetworkingGuidePage() {
         },
     ];
 
+    const articleJsonLd = buildArticleJsonLd({
+        title: "Building Your Professional Network",
+        description: "Learn strategies to grow and maintain meaningful professional connections.",
+        path: "/public/resources/career-guides/networking",
+    });
     return (
+        <>
+            <JsonLd data={articleJsonLd} id="resource-article-jsonld" />
         <div className="min-h-screen bg-base-200">
             <AnimatedGuideHero
                 icon="users"
@@ -248,5 +263,6 @@ export default function NetworkingGuidePage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

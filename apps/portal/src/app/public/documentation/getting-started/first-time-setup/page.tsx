@@ -1,9 +1,15 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
+import { getDocMetadata, getDocJsonLd } from "../../seo";
+import { JsonLd } from "@splits-network/shared-ui";
 
+
+export const metadata = getDocMetadata("getting-started/first-time-setup");
 export default function FirstTimeSetupPage() {
     return (
-        <div className="space-y-10">
+        <>
+            <JsonLd data={getDocJsonLd("getting-started/first-time-setup")} id="docs-getting-started-first-time-setup-jsonld" />
+            <div className="space-y-10">
             <DocPageHeader
                 title="First-Time Setup"
                 description="Get access, connect to your organization, and complete onboarding so you can start working on roles and candidates."
@@ -163,8 +169,8 @@ export default function FirstTimeSetupPage() {
                     </div>
                 </div>
             </section>
-        </div>
+            </div>
+        </>
     );
 }
-
 
