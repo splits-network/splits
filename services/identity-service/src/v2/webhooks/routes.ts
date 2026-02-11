@@ -10,7 +10,11 @@ import type { Logger } from '@splits-network/shared-logging';
 import { WebhooksServiceV2 } from './service';
 import { ClerkWebhookEvent, WebhookHeaders } from './types';
 
-const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+// Webhook secrets for each Clerk instance (portal + candidate app)
+const SPLITS_WEBHOOK_SECRET = process.env.SPLITS_CLERK_WEBHOOK_SECRET;
+const APP_WEBHOOK_SECRET = process.env.APP_CLERK_WEBHOOK_SECRET;
+// Fallback to legacy single-secret env var for backwards compatibility
+const LEGACY_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
 const logger = createLogger({
     serviceName: 'identity-service',
@@ -80,8 +84,15 @@ export async function webhooksRoutesV2(
             }
         }
     }, async (request: FastifyRequest<{ Headers: WebhookHeaders; Body: any }>, reply) => {
-        if (!WEBHOOK_SECRET) {
-            logger.error('CLERK_WEBHOOK_SECRET not configured');
+        // Collect all available webhook secrets to try
+        const secrets = [
+            SPLITS_WEBHOOK_SECRET,
+            APP_WEBHOOK_SECRET,
+            LEGACY_WEBHOOK_SECRET,
+        ].filter(Boolean) as string[];
+
+        if (secrets.length === 0) {
+            logger.error('No Clerk webhook secrets configured (need SPLITS_CLERK_WEBHOOK_SECRET or APP_CLERK_WEBHOOK_SECRET)');
             return reply.code(500).send({
                 error: {
                     code: 'WEBHOOK_SECRET_MISSING',
@@ -91,19 +102,29 @@ export async function webhooksRoutesV2(
         }
 
         try {
-            // Verify webhook signature using Svix
-            const webhook = new Webhook(WEBHOOK_SECRET);
             const headers = {
                 'svix-id': request.headers['svix-id'],
                 'svix-timestamp': request.headers['svix-timestamp'],
                 'svix-signature': request.headers['svix-signature']
             };
+            const payload = JSON.stringify(request.body);
 
-            // Verify and parse the webhook payload
-            const event = webhook.verify(
-                JSON.stringify(request.body),
-                headers
-            ) as ClerkWebhookEvent;
+            // Try each secret until one verifies successfully
+            // (webhook could come from either the portal or candidate Clerk instance)
+            let event: ClerkWebhookEvent | null = null;
+            for (const secret of secrets) {
+                try {
+                    const wh = new Webhook(secret);
+                    event = wh.verify(payload, headers) as ClerkWebhookEvent;
+                    break; // Verification succeeded
+                } catch {
+                    // This secret didn't match, try the next one
+                }
+            }
+
+            if (!event) {
+                throw new Error('Invalid signature: no configured secret could verify this webhook');
+            }
 
             logger.info({
                 type: event.type,

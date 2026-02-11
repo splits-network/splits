@@ -35,6 +35,9 @@ function SSOCallbackInner() {
         if (hasAttemptedRef.current) return;
         hasAttemptedRef.current = true;
 
+        // Capture user in local const so TypeScript retains narrowing in async closure
+        const currentUser = user;
+
         async function ensureUserAndRedirect() {
             try {
                 // Get token for API calls
@@ -46,16 +49,12 @@ function SSOCallbackInner() {
                 // Update status to creating user
                 setStatus("creating_user");
 
-                if (!user) {
-                    throw new Error("User data is unavailable");
-                }
-
                 // Ensure user exists in database
                 const result = await ensureUserInDatabase(token, {
-                    clerk_user_id: user.id,
-                    email: user.primaryEmailAddress?.emailAddress || "",
-                    name: user.fullName || user.firstName || "",
-                    image_url: user.imageUrl,
+                    clerk_user_id: currentUser.id,
+                    email: currentUser.primaryEmailAddress?.emailAddress || "",
+                    name: currentUser.fullName || currentUser.firstName || "",
+                    image_url: currentUser.imageUrl,
                 });
 
                 if (!result.success) {

@@ -226,7 +226,6 @@ export async function ensureUserAndCandidateInDatabase(
                     user_id: user.id,
                     full_name: data.name || data.email.split('@')[0],  // API expects full_name, not name
                     email: data.email,
-                    onboarding_status: 'pending',
                 });
 
                 if (createCandidateResponse?.data) {

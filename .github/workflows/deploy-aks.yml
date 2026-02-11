@@ -229,9 +229,11 @@ jobs:
                     --from-literal=splits-clerk-publishable-key=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
                     --from-literal=splits-clerk-secret-key=${{ secrets.SPLITS_CLERK_SECRET_KEY }} \
                     --from-literal=splits-clerk-jwks-url=${{ secrets.SPLITS_CLERK_JWKS_URL }} \
+                    --from-literal=splits-clerk-webhook-secret=${{ secrets.SPLITS_CLERK_WEBHOOK_SECRET }} \
                     --from-literal=app-clerk-publishable-key=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                     --from-literal=app-clerk-secret-key=${{ secrets.APP_CLERK_SECRET_KEY }} \
                     --from-literal=app-clerk-jwks-url=${{ secrets.APP_CLERK_JWKS_URL }} \
+                    --from-literal=app-clerk-webhook-secret=${{ secrets.APP_CLERK_WEBHOOK_SECRET }} \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 

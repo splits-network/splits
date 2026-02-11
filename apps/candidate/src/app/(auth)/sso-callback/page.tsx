@@ -118,9 +118,9 @@ function SSOCallbackInner() {
         userLoaded,
         isSignedIn,
         user,
-        getToken,
         router,
         searchParams,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     ]);
 
     // Render UI based on status
