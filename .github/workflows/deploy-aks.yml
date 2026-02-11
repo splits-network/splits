@@ -40,6 +40,8 @@ jobs:
                       path: services/chat-gateway
                     - name: chat-service
                       path: services/chat-service
+                    - name: health-monitor
+                      path: services/health-monitor
                     - name: portal
                       path: apps/portal
                     - name: candidate
@@ -312,6 +314,7 @@ jobs:
                   kubectl apply -f infra/k8s/analytics-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/health-monitor/ --namespace=splits-network
                   kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=splits-network
                   kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=splits-network
 
@@ -329,6 +332,7 @@ jobs:
                   kubectl rollout status deployment/analytics-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/chat-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/health-monitor --timeout=180s --namespace=splits-network
 
             - name: Deploy API Gateway
               run: |

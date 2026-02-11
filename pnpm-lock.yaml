@@ -582,6 +582,9 @@ importers:
       '@splits-network/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
       amqplib:
         specifier: ^0.10.3
         version: 0.10.9
@@ -992,6 +995,52 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+
+  services/health-monitor:
+    dependencies:
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+      amqplib:
+        specifier: ^0.10.9
+        version: 0.10.9
+      fastify:
+        specifier: ^5.6.2
+        version: 5.6.2
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.8.2
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@vitest/coverage-v8':
+        specifier: ^2.1.9
+        version: 2.1.9(vitest@2.1.9(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1))
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/identity-service:
     dependencies:

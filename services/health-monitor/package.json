@@ -1,5 +1,5 @@
 {
-    "name": "@splits-network/api-gateway",
+    "name": "@splits-network/health-monitor",
     "version": "0.1.0",
     "private": true,
     "main": "./dist/index.js",
@@ -11,27 +11,17 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@clerk/backend": "^2.4.0",
-        "@fastify/http-proxy": "^11.4.1",
-        "@fastify/multipart": "^9.0.1",
-        "@fastify/oauth2": "^8.1.0",
-        "@fastify/rate-limit": "^10.1.1",
-        "@fastify/swagger": "^9.5.0",
-        "@fastify/swagger-ui": "^5.2.3",
         "@splits-network/shared-config": "workspace:*",
         "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-logging": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
-        "@sentry/node": "^10.32.1",
         "@supabase/supabase-js": "^2.86.2",
-        "amqplib": "^0.10.3",
+        "amqplib": "^0.10.9",
         "fastify": "^5.6.2",
-        "form-data": "^4.0.5",
-        "ioredis": "^5.8.2",
-        "jsonwebtoken": "^9.0.2"
+        "ioredis": "^5.8.2"
     },
     "devDependencies": {
-        "@types/jsonwebtoken": "^9.0.7",
+        "@types/amqplib": "^0.10.5",
         "@types/node": "^24.10.1",
         "@vitest/coverage-v8": "^2.1.9",
         "tsx": "^4.19.2",

@@ -28,6 +28,7 @@ import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
+import { SplashLoading } from "@splits-network/shared-ui";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -58,7 +59,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         loading: true,
         persisting: false,
     });
-
     // Fetch user's onboarding status on mount
     useEffect(() => {
         if (!user || profileLoading) return;
@@ -203,9 +203,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         fetchOnboardingStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, profileLoading, isAdmin]);
-
     // No auto-save on load - only save when user explicitly interacts with the wizard
     // The persistOnboardingState() function is called from the actions below when needed
 
@@ -570,36 +569,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     // Show loading/creating account overlay during initialization
     if (initStatus === "loading" || initStatus === "creating_account") {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200">
-                <div className="card w-full max-w-md bg-base-100 shadow-xl">
-                    <div className="card-body items-center text-center">
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
-                        <h2 className="card-title mt-4">
-                            {initStatus === "creating_account"
-                                ? "Setting Up Your Account"
-                                : "Loading..."}
-                        </h2>
-                        <p className="text-base-content/70">
-                            {initStatus === "creating_account"
-                                ? "Finalizing your account setup..."
-                                : initMessage}
-                        </p>
-                        {initStatus === "creating_account" && (
-                            <p className="text-sm text-base-content/50 mt-2">
-                                This only takes a moment...
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
+        const message =
+            initStatus === "creating_account"
+                ? "Setting up your account..."
+                : initMessage;
+        return <SplashLoading message={message} />;
     }
 
     // Show error state with retry options
     if (initStatus === "error") {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="card w-full max-w-md bg-base-100 shadow-xl">
                     <div className="card-body items-center text-center">
                         <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center">

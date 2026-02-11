@@ -1,10 +1,11 @@
-import { loadBaseConfig, loadMultiClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadMultiClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import Redis from 'ioredis';
+import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
@@ -15,6 +16,7 @@ import { EventPublisher } from './events/event-publisher';
 async function main() {
     const baseConfig = loadBaseConfig('api-gateway');
     const clerkConfig = loadMultiClerkConfig();
+    const dbConfig = loadDatabaseConfig();
     const redisConfig = loadRedisConfig();
     const rabbitConfig = loadRabbitMQConfig();
 
@@ -329,6 +331,14 @@ async function main() {
             return;
         }
 
+        // Skip auth for public system health and site notification endpoints
+        if (request.method === 'GET' && (
+            request.url.startsWith('/api/v2/system-health') ||
+            request.url.startsWith('/api/v2/site-notifications')
+        )) {
+            return;
+        }
+
         // Skip auth for public V2 plans endpoint (pricing page)
         // GET /api/v2/plans - list all plans for public pricing page
         if (request.method === 'GET' && request.url.startsWith('/api/v2/plans')) {
@@ -362,8 +372,14 @@ async function main() {
     services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
     services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
 
+    // Initialize Supabase client for system health and site notifications
+    const supabase = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+    );
+
     // Register V2 proxy routes only
-    registerV2GatewayRoutes(app, services, { eventPublisher });
+    registerV2GatewayRoutes(app, services, { eventPublisher, redis, supabase });
 
     // Health check endpoint (no auth required)
     app.get('/health', async (request, reply) => {

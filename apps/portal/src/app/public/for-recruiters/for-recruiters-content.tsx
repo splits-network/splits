@@ -267,7 +267,7 @@ export function ForRecruitersContent() {
                                 <img
                                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2088&q=80"
                                     alt="Recruiter working collaboratively"
-                                    className="rounded-2xl shadow-2xl w-full h-96 object-contain object-[5%_30%]"
+                                    className="rounded-2xl shadow-2xl w-full h-96 object-cover object-[0_20%]"
                                 />
                                 <div className="absolute -bottom-6 -right-6 bg-primary text-primary-content p-4 rounded-xl shadow-lg">
                                     <div className="text-sm font-medium">
@@ -684,7 +684,7 @@ export function ForRecruitersContent() {
                                 <img
                                     src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80"
                                     alt="Remote work from a beautiful beach location with laptop"
-                                    className="rounded-2xl shadow-2xl w-full h-96 object-contain"
+                                    className="rounded-2xl shadow-2xl w-full h-96 object-cover rounded"
                                 />
                                 <div className="absolute -bottom-6 -right-6 bg-secondary text-secondary-content p-4 rounded-xl shadow-lg">
                                     <div className="text-sm font-medium">

@@ -1,72 +1,30 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getGatewayBaseUrl } from "./gateway-url";
 
 export interface ServiceHealth {
     name: string;
-    url: string;
-    status: "healthy" | "unhealthy" | "checking";
+    status: "healthy" | "unhealthy" | "degraded" | "checking" | "unknown";
     timestamp?: string;
     error?: string;
     responseTime?: number;
 }
 
-const services: Omit<ServiceHealth, "status" | "timestamp" | "error" | "responseTime">[] = [
-    { name: "API Gateway", url: "/api-health/gateway" },
-    { name: "Identity Service", url: "/api-health/identity" },
-    { name: "ATS Service", url: "/api-health/ats" },
-    { name: "Network Service", url: "/api-health/network" },
-    { name: "Billing Service", url: "/api-health/billing" },
-    { name: "Notification Service", url: "/api-health/notification" },
-    { name: "Automation Service", url: "/api-health/automation" },
-    { name: "Document Service", url: "/api-health/document" },
-    { name: "Document Processing Service", url: "/api-health/document-processing" },
-    { name: "AI Review Service", url: "/api-health/ai" },
-];
-
-const checkServiceHealth = async (
-    service: typeof services[0],
-): Promise<ServiceHealth> => {
-    const startTime = Date.now();
-    try {
-        const response = await fetch(service.url, {
-            cache: "no-store",
-            signal: AbortSignal.timeout(5000),
-        });
-        const responseTime = Date.now() - startTime;
-        
-        // Guard against non-JSON responses (e.g., proxy error pages, HTML responses)
-        const data = await response.json().catch(() => ({}));
-
-        if (response.ok && data.status === "healthy") {
-            return {
-                ...service,
-                status: "healthy",
-                timestamp: data.timestamp,
-                responseTime,
-            };
-        }
-
-        return {
-            ...service,
-            status: "unhealthy",
-            error: data.error || response.statusText || "Service returned unhealthy status",
-            timestamp: data.timestamp,
-            responseTime,
-        };
-    } catch (error) {
-        const responseTime = Date.now() - startTime;
-        return {
-            ...service,
-            status: "unhealthy",
-            error:
-                error instanceof Error
-                    ? error.message
-                    : "Failed to connect to service",
-            responseTime,
-        };
-    }
-};
+export interface SystemHealthData {
+    status: string;
+    services: Array<{
+        service: string;
+        displayName: string;
+        status: string;
+        lastCheck: string;
+        lastResponseTime: number;
+        error?: string;
+        recentResults: Array<{ status: string; timestamp: string }>;
+    }>;
+    lastUpdated: string;
+    checkIntervalMs: number;
+}
 
 export function useServiceHealth(options?: {
     autoRefresh?: boolean;
@@ -83,45 +41,65 @@ export function useServiceHealth(options?: {
 
     const hasInitialStatuses = initialStatuses !== undefined;
     const [serviceStatuses, setServiceStatuses] = useState<ServiceHealth[]>(
-        initialStatuses ??
-        services.map((service) => ({
-            ...service,
-            status: "checking" as const,
-        })),
+        initialStatuses ?? [],
     );
     const [lastChecked, setLastChecked] = useState<Date>(
         initialCheckedAt ? new Date(initialCheckedAt) : new Date(),
     );
     const [isLoading, setIsLoading] = useState(!hasInitialStatuses);
 
-    const checkAllServices = useCallback(async () => {
-        const results = await Promise.all(services.map(checkServiceHealth));
-        setServiceStatuses(results);
-        setLastChecked(new Date());
-        setIsLoading(false);
+    const fetchSystemHealth = useCallback(async () => {
+        try {
+            const response = await fetch(`${getGatewayBaseUrl()}/api/v2/system-health`, {
+                cache: "no-store",
+                signal: AbortSignal.timeout(10000),
+            });
+
+            const json = await response.json().catch(() => ({}));
+            const data: SystemHealthData | undefined = json.data;
+
+            if (!data || !data.services) {
+                return;
+            }
+
+            const mapped: ServiceHealth[] = data.services.map((s) => ({
+                name: s.displayName,
+                status: s.status as ServiceHealth["status"],
+                timestamp: s.lastCheck,
+                responseTime: s.lastResponseTime,
+                error: s.error,
+            }));
+
+            setServiceStatuses(mapped);
+            setLastChecked(new Date(data.lastUpdated));
+            setIsLoading(false);
+        } catch {
+            // If the aggregated endpoint is unavailable, keep existing data
+            setIsLoading(false);
+        }
     }, []);
 
     useEffect(() => {
         if (!hasInitialStatuses) {
-            checkAllServices();
+            fetchSystemHealth();
         }
 
         if (autoRefresh) {
-            const interval = setInterval(checkAllServices, refreshInterval);
+            const interval = setInterval(fetchSystemHealth, refreshInterval);
             return () => clearInterval(interval);
         }
-    }, [hasInitialStatuses, autoRefresh, refreshInterval, checkAllServices]);
+    }, [hasInitialStatuses, autoRefresh, refreshInterval, fetchSystemHealth]);
 
     const healthyCount = serviceStatuses.filter(
-        (service) => service.status === "healthy",
+        (s) => s.status === "healthy",
     ).length;
     const totalCount = serviceStatuses.length;
-    const allHealthy = healthyCount === totalCount;
+    const allHealthy = totalCount > 0 && healthyCount === totalCount;
     const someUnhealthy = serviceStatuses.some(
-        (service) => service.status === "unhealthy",
+        (s) => s.status === "unhealthy" || s.status === "degraded",
     );
     const unhealthyServices = serviceStatuses.filter(
-        (service) => service.status === "unhealthy",
+        (s) => s.status === "unhealthy" || s.status === "degraded",
     );
 
     return {
@@ -133,6 +111,6 @@ export function useServiceHealth(options?: {
         allHealthy,
         someUnhealthy,
         unhealthyServices,
-        refresh: checkAllServices,
+        refresh: fetchSystemHealth,
     };
 }

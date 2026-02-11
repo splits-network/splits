@@ -25,6 +25,10 @@ export {
     ChartLoadingState,
     type ChartLoadingStateProps,
 } from './chart-loading-state';
+export {
+    SplashLoading,
+    type SplashLoadingProps,
+} from './splash-loading';
 
 // Types and constants
 export type {

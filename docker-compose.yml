@@ -365,6 +365,45 @@ services:
       chat-service:
         condition: service_started
 
+  health-monitor:
+    build:
+      context: .
+      dockerfile: services/health-monitor/Dockerfile
+      target: development
+    container_name: splits-health-monitor
+    ports:
+      - "3012:3012"
+    environment:
+      NODE_ENV: development
+      PORT: 3012
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      API_GATEWAY_URL: http://api-gateway:3000
+      IDENTITY_SERVICE_URL: http://identity-service:3001
+      ATS_SERVICE_URL: http://ats-service:3002
+      NETWORK_SERVICE_URL: http://network-service:3003
+      BILLING_SERVICE_URL: http://billing-service:3004
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      DOCUMENT_SERVICE_URL: http://document-service:3006
+      AUTOMATION_SERVICE_URL: http://automation-service:3007
+      DOCUMENT_PROCESSING_SERVICE_URL: http://document-processing-service:3008
+      AI_SERVICE_URL: http://ai-service:3009
+    volumes:
+      - ./services/health-monitor/src:/app/services/health-monitor/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   automation-service:
     build:
       context: .
