@@ -11,19 +11,20 @@ const CHECK_INTERVAL_MS = 15_000;
 export class MonitorLoop {
     private timer: ReturnType<typeof setInterval> | null = null;
     private isRunning = false;
-    private supabase: SupabaseClient;
+    private supabase: SupabaseClient | null;
 
     constructor(
         private healthChecker: HealthChecker,
         private slidingWindow: SlidingWindowManager,
-        private incidentManager: IncidentManager,
-        private notificationManager: NotificationManager,
+        private incidentManager: IncidentManager | null,
+        private notificationManager: NotificationManager | null,
         private eventPublisher: EventPublisher | null,
         supabaseUrl: string,
         supabaseKey: string,
         private logger: Logger,
+        private dryRun = false,
     ) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = dryRun ? null : createClient(supabaseUrl, supabaseKey);
     }
 
     start(): void {
@@ -61,19 +62,31 @@ export class MonitorLoop {
             const aggregated =
                 await this.slidingWindow.evaluateAndAggregate();
 
+            // Steps 4-7 are skipped in dry-run mode (no DB/event writes)
+            if (this.dryRun) {
+                const unhealthyCount = aggregated.filter(
+                    (s) => s.status !== "healthy",
+                ).length;
+                this.logger.debug(
+                    { unhealthyCount, dryRun: true },
+                    "Health check cycle complete (dry-run, DB writes skipped)",
+                );
+                return;
+            }
+
             // Step 4: Persist raw check results to health_checks table
             await this.persistHealthChecks(results);
 
             // Step 5: Process incident transitions
             const transitions =
-                await this.incidentManager.processStatusChanges(aggregated);
+                await this.incidentManager!.processStatusChanges(aggregated);
 
             // Step 6: Process notification transitions
             for (const status of aggregated) {
                 if (status.status !== "healthy") {
-                    await this.notificationManager.onServiceUnhealthy(status);
+                    await this.notificationManager!.onServiceUnhealthy(status);
                 } else {
-                    await this.notificationManager.onServiceRecovered(
+                    await this.notificationManager!.onServiceRecovered(
                         status.service,
                     );
                 }

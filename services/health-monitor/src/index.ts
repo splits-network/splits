@@ -51,6 +51,13 @@ async function main() {
     const serviceDefinitions = loadServiceDefinitions();
     const supabaseKey =
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey;
+    const dryRun = process.env.DRY_RUN === "true";
+
+    if (dryRun) {
+        logger.info(
+            "DRY_RUN mode enabled - health checks and Redis will run, but database writes are disabled",
+        );
+    }
 
     // Initialize components
     const healthChecker = new HealthChecker(serviceDefinitions, logger);
@@ -59,35 +66,44 @@ async function main() {
         serviceDefinitions,
         logger,
     );
-    const incidentManager = new IncidentManager(
-        dbConfig.supabaseUrl,
-        supabaseKey,
-        logger,
-    );
-    await incidentManager.initialize();
 
-    const notificationManager = new NotificationManager(
-        dbConfig.supabaseUrl,
-        supabaseKey,
-        logger,
-    );
-    await notificationManager.initialize();
+    // In dry-run mode, skip DB-dependent managers (no reads or writes to staging)
+    let incidentManager: IncidentManager | null = null;
+    let notificationManager: NotificationManager | null = null;
 
-    // Initialize optional event publisher
-    let eventPublisher: EventPublisher | null = null;
-    try {
-        eventPublisher = new EventPublisher(
-            rabbitConfig.url,
+    if (!dryRun) {
+        incidentManager = new IncidentManager(
+            dbConfig.supabaseUrl,
+            supabaseKey,
             logger,
-            baseConfig.serviceName,
         );
-        await eventPublisher.connect();
-    } catch (error) {
-        logger.warn(
-            { err: error },
-            "RabbitMQ unavailable - events will not be published",
+        await incidentManager.initialize();
+
+        notificationManager = new NotificationManager(
+            dbConfig.supabaseUrl,
+            supabaseKey,
+            logger,
         );
-        eventPublisher = null;
+        await notificationManager.initialize();
+    }
+
+    // Initialize optional event publisher (also skip in dry-run)
+    let eventPublisher: EventPublisher | null = null;
+    if (!dryRun) {
+        try {
+            eventPublisher = new EventPublisher(
+                rabbitConfig.url,
+                logger,
+                baseConfig.serviceName,
+            );
+            await eventPublisher.connect();
+        } catch (error) {
+            logger.warn(
+                { err: error },
+                "RabbitMQ unavailable - events will not be published",
+            );
+            eventPublisher = null;
+        }
     }
 
     // Start the monitoring loop
@@ -100,6 +116,7 @@ async function main() {
         dbConfig.supabaseUrl,
         supabaseKey,
         logger,
+        dryRun,
     );
     monitorLoop.start();
 
