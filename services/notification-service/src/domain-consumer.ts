@@ -16,6 +16,7 @@ import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
 import { BillingEventConsumer } from './consumers/billing/consumer';
 import { ReputationEventConsumer } from './consumers/reputation/consumer';
+import { HealthEventConsumer } from './consumers/health/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -43,6 +44,7 @@ export class DomainEventConsumer {
     private chatConsumer: ChatEventConsumer;
     private billingConsumer: BillingEventConsumer;
     private reputationConsumer: ReputationEventConsumer;
+    private healthConsumer: HealthEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -139,6 +141,11 @@ export class DomainEventConsumer {
             logger,
             portalUrl,
             contactLookup
+        );
+        this.healthConsumer = new HealthEventConsumer(
+            notificationService.health,
+            logger,
+            portalUrl,
         );
     }
 
@@ -262,6 +269,10 @@ export class DomainEventConsumer {
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
+
+            // Health monitoring events
+            await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_unhealthy');
+            await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_recovered');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -525,6 +536,14 @@ export class DomainEventConsumer {
             // Reputation tier changes
             case 'reputation.tier_changed':
                 await this.reputationConsumer.handleTierChanged(event);
+                break;
+
+            // Health monitoring
+            case 'system.health.service_unhealthy':
+                await this.healthConsumer.handleServiceUnhealthy(event);
+                break;
+            case 'system.health.service_recovered':
+                await this.healthConsumer.handleServiceRecovered(event);
                 break;
 
             default:
