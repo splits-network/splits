@@ -30,6 +30,12 @@ import {
     type UserData,
 } from "@/lib/user-registration";
 import { getCachedCurrentUserProfile } from "@/lib/current-user-profile";
+import {
+    shouldShowOnboardingModal,
+    buildCandidatePayload,
+    completeOnboarding as completeOnboardingAction,
+    skipOnboarding as skipOnboardingAction,
+} from "@/lib/onboarding-actions";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -157,7 +163,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 // Check onboarding status from the USER record (not candidate)
                 const onboardingStatus = userData?.onboarding_status || "pending";
-                const shouldShowModal = onboardingStatus === "pending";
+                const shouldShowModal = shouldShowOnboardingModal(userData?.onboarding_status);
 
                 // Pre-fill profile data from existing candidate data
                 const profileData: CandidateProfileData = {
