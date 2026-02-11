@@ -108,7 +108,7 @@ export function ProposalResponseWizard({
     if (!isOpen) return null;
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="mb-6">
@@ -209,7 +209,9 @@ export function ProposalResponseWizard({
                     </button>
                 </div>
             </div>
-            <div className="modal-backdrop" onClick={handleClose}></div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

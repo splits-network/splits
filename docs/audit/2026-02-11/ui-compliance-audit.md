@@ -17,7 +17,7 @@ The Splits Network frontend codebase is in **good overall health** with signific
 4. **35 files** use hardcoded `bg-white` / `text-white` (some are legitimate on gradient backgrounds, but many will break in dark mode).
 5. **5 files** use hardcoded Tailwind gray scale classes (`text-gray-600`, `bg-gray-100`) instead of semantic tokens.
 6. **124 files** use inline `loading loading-spinner` instead of shared-ui `LoadingSpinner` or `ButtonLoading` components.
-7. The custom elevation shadow system (`shadow-elevation-*`) is defined but almost entirely unused (1 file) -- the codebase uses default Tailwind shadows (`shadow-sm`, `shadow-lg`, etc.) across 145+ files instead.
+7. The custom elevation shadow system (`shadow-elevation-*`) is defined but almost entirely unused (1 file) -- the codebase uses default Tailwind shadows (`shadow-sm`, `shadow-lg`, etc.) across 145+ files instead. These should be removed.
 
 **Estimated overall compliance: 72%** -- the core patterns are sound, but legacy v4 patterns and hardcoded values persist in pockets.
 

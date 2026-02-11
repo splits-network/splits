@@ -425,7 +425,7 @@ export function BlogContent() {
                                         <input
                                             type="email"
                                             placeholder="Enter your email"
-                                            className="input input-bordered join-item flex-grow text-base-content"
+                                            className="input w-full join-item flex-grow text-base-content"
                                         />
                                         <button className="btn btn-secondary join-item">
                                             Subscribe

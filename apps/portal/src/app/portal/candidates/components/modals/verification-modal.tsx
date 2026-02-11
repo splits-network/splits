@@ -69,7 +69,7 @@ export default function VerificationModal({
     };
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box">
                 <form onSubmit={handleSubmit}>
                     <h3 className="text-lg font-bold mb-4">
@@ -189,6 +189,6 @@ export default function VerificationModal({
                     close
                 </button>
             </form>
-        </div>
+        </dialog>
     );
 }

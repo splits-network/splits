@@ -156,7 +156,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                 <div className="flex gap-2">
                     <input
                         type="search"
-                        className="input input-bordered w-full"
+                        className="input w-full"
                         placeholder="Search messages..."
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}

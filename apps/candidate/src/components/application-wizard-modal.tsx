@@ -356,7 +356,7 @@ export default function ApplicationWizardModal({
     };
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-base-300">
@@ -422,7 +422,9 @@ export default function ApplicationWizardModal({
                 </div>
             </div>
             {/* Backdrop */}
-            <div className="modal-backdrop" onClick={onClose}></div>
-        </div>
+            <form method="dialog" className="modal-backdrop" onClick={onClose}>
+                <button type="button">close</button>
+            </form>
+        </dialog>
     );
 }

@@ -20,7 +20,7 @@ export function DocsMobileNav() {
                 Documentation
             </label>
             <select
-                className="select select-bordered w-full mt-2"
+                className="select w-full mt-2"
                 value={pathname}
                 onChange={(event) => {
                     const value = event.target.value;

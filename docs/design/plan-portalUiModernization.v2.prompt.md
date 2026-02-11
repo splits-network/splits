@@ -76,8 +76,6 @@ This gives you a single source of truth for elevation/borders/radii/motion **wit
   .motion-fast { @apply transition duration-150 ease-out; }
   .motion-med  { @apply transition duration-200 ease-out; }
 
-  /* Focus defaults (apply to interactive elements/components) */
-  .focus-ring { @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40; }
 }
 ```
 
@@ -301,7 +299,7 @@ apps/portal/src/components/ui/
 ---
 
 ## 13) Quick Start Task List (First Implementation Sprint)
-1. Add `surface-*`, `motion-*`, and `focus-ring` classes to global CSS.
+1. Add `surface-*` and `motion-*` classes to global CSS.
 2. Implement `Surface` + `PageHeader` + `Badge` + `Skeleton`.
 3. Implement `DataTable` + `ExpandableRow` with:
    - keyboard accessibility
@@ -309,4 +307,3 @@ apps/portal/src/components/ui/
    - density toggle
 4. Build the Kitchen Sink page and match the reference style visually.
 5. Convert one flagship list page end-to-end using the new primitives.
-

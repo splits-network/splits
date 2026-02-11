@@ -425,7 +425,7 @@ export default function TeamsPage() {
 
             {/* Create Team Modal */}
             {showCreateModal && (
-                <div className="modal modal-open">
+                <dialog className="modal modal-open" open>
                     <div className="modal-box">
                         <h3 className="font-bold text-lg mb-4">
                             Create New Team
@@ -496,11 +496,14 @@ export default function TeamsPage() {
                             </div>
                         </form>
                     </div>
-                    <div
+                    <form
+                        method="dialog"
                         className="modal-backdrop"
                         onClick={() => !creating && setShowCreateModal(false)}
-                    ></div>
-                </div>
+                    >
+                        <button type="button">close</button>
+                    </form>
+                </dialog>
             )}
         </div>
     );

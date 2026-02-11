@@ -85,7 +85,7 @@ export default function UploadDocumentModal({
     };
 
     return (
-        <div className="modal modal-open">
+        <dialog className="modal modal-open" open>
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">Upload Document</h3>
 
@@ -124,7 +124,7 @@ export default function UploadDocumentModal({
                         <input
                             type="file"
                             ref={fileInputRef}
-                            className="file-input file-input-bordered w-full"
+                            className="file-input w-full"
                             accept=".pdf,.doc,.docx,.txt,.rtf"
                             onChange={handleFileChange}
                             required
@@ -177,8 +177,8 @@ export default function UploadDocumentModal({
                 </form>
             </div>
             <form method="dialog" className="modal-backdrop" onClick={onClose}>
-                <button>close</button>
+                <button type="button">close</button>
             </form>
-        </div>
+        </dialog>
     );
 }

@@ -248,7 +248,7 @@ export function CompanyInvitationsClient() {
 
                         {/* Status Filter */}
                         <select
-                            className="select select-bordered select-sm"
+                            className="select w-full select-sm"
                             value={filters.status || ""}
                             onChange={(e) => setFilter("status", e.target.value)}
                         >

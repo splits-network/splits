@@ -673,7 +673,7 @@ export default function ThreadPanel({
                             />
                         ) : (
                             <textarea
-                                className="textarea textarea-bordered w-full"
+                                className="textarea w-full"
                                 value={draft}
                                 onChange={(e) => setDraft(e.target.value)}
                                 rows={5}

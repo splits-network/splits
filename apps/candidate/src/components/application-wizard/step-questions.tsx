@@ -131,7 +131,7 @@ export default function StepQuestions({
                                     {/* Text Input */}
                                     {question.question_type === "text" && (
                                         <textarea
-                                            className="textarea textarea-bordered w-full"
+                                            className="textarea w-full"
                                             value={
                                                 (getAnswer(
                                                     question.id,
