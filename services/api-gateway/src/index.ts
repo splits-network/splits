@@ -332,9 +332,13 @@ async function main() {
         }
 
         // Skip auth for public system health and site notification endpoints
+        // Note: /api/v2/site-notifications/all is an admin endpoint and must NOT be skipped
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/system-health')) {
+            return;
+        }
         if (request.method === 'GET' && (
-            request.url.startsWith('/api/v2/system-health') ||
-            request.url.startsWith('/api/v2/site-notifications')
+            request.url === '/api/v2/site-notifications' ||
+            request.url.startsWith('/api/v2/site-notifications?')
         )) {
             return;
         }
