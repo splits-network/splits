@@ -1,34 +1,32 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { MembershipServiceV2 } from './service';
+import { UserRoleServiceV2 } from './service';
 import {
     requireUserContext,
     validatePaginationParams,
     buildPaginationResponse,
 } from '../shared/helpers';
 
-interface RegisterMembershipRoutesConfig {
-    membershipService: MembershipServiceV2;
+interface RegisterUserRoleRoutesConfig {
+    userRoleService: UserRoleServiceV2;
     logError: (message: string, error: unknown) => void;
 }
 
-export function registerMembershipRoutes(
+export function registerUserRoleRoutes(
     app: FastifyInstance,
-    config: RegisterMembershipRoutesConfig
+    config: RegisterUserRoleRoutesConfig
 ) {
-    const { membershipService, logError } = config;
+    const { userRoleService, logError } = config;
 
-    app.get('/api/v2/memberships', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/user-roles', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
             const paginationParams = validatePaginationParams(query.page, query.limit);
 
-            const result = await membershipService.findMemberships(clerkUserId, {
+            const result = await userRoleService.findUserRoles(clerkUserId, {
                 ...paginationParams,
                 user_id: query.user_id,
                 role_name: query.role_name,
-                organization_id: query.organization_id,
-                company_id: query.company_id,
             });
 
             reply.send(
@@ -40,60 +38,60 @@ export function registerMembershipRoutes(
                 )
             );
         } catch (error) {
-            logError('GET /api/v2/memberships failed', error);
-            reply.code(500).send({ error: { message: 'Failed to list memberships' } });
+            logError('GET /api/v2/user-roles failed', error);
+            reply.code(500).send({ error: { message: 'Failed to list user roles' } });
         }
     });
 
-    app.get('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/user-roles/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            const membership = await membershipService.findMembershipById(clerkUserId, id);
-            reply.send({ data: membership });
+            const userRole = await userRoleService.findUserRoleById(clerkUserId, id);
+            reply.send({ data: userRole });
         } catch (error) {
-            logError('GET /api/v2/memberships/:id failed', error);
-            reply.code(500).send({ error: { message: 'Failed to fetch membership' } });
+            logError('GET /api/v2/user-roles/:id failed', error);
+            reply.code(500).send({ error: { message: 'Failed to fetch user role' } });
         }
     });
 
-    app.post('/api/v2/memberships', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/user-roles', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
 
-            const membership = await membershipService.createMembership(clerkUserId, body);
-            reply.code(201).send({ data: membership });
+            const userRole = await userRoleService.createUserRole(clerkUserId, body);
+            reply.code(201).send({ data: userRole });
         } catch (error) {
-            logError('POST /api/v2/memberships failed', error);
+            logError('POST /api/v2/user-roles failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
 
-    app.patch('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/user-roles/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as any;
 
-            const membership = await membershipService.updateMembership(clerkUserId, id, body);
-            reply.send({ data: membership });
+            const userRole = await userRoleService.updateUserRole(clerkUserId, id, body);
+            reply.send({ data: userRole });
         } catch (error) {
-            logError('PATCH /api/v2/memberships/:id failed', error);
+            logError('PATCH /api/v2/user-roles/:id failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
 
-    app.delete('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/user-roles/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            await membershipService.deleteMembership(clerkUserId, id);
+            await userRoleService.deleteUserRole(clerkUserId, id);
             reply.code(204).send();
         } catch (error) {
-            logError('DELETE /api/v2/memberships/:id failed', error);
+            logError('DELETE /api/v2/user-roles/:id failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });

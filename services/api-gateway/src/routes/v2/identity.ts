@@ -18,16 +18,22 @@ const IDENTITY_RESOURCES: ResourceDefinition[] = [
         tag: 'organizations',
     },
     {
-        name: 'memberships',
-        service: 'identity',
-        basePath: '/memberships',
-        tag: 'memberships',
-    },
-    {
         name: 'invitations',
         service: 'identity',
         basePath: '/invitations',
         tag: 'invitations',
+    },
+    {
+        name: 'user-roles',
+        service: 'identity',
+        basePath: '/user-roles',
+        tag: 'user-roles',
+    },
+    {
+        name: 'memberships',
+        service: 'identity',
+        basePath: '/memberships',
+        tag: 'memberships',
     }
 ];
 

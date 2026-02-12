@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useSignUp, useAuth, useClerk } from '@clerk/nextjs';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useState, useEffect } from 'react';
-import Link from 'next/link';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useSignUp, useAuth, useClerk } from "@clerk/nextjs";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useState, useEffect } from "react";
+import Link from "next/link";
+import { ensureUserInDatabase } from "@/lib/user-registration";
 
 export default function SignUpPage() {
     const { isLoaded, signUp, setActive } = useSignUp();
@@ -13,18 +13,18 @@ export default function SignUpPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [pendingVerification, setPendingVerification] = useState(false);
-    const [code, setCode] = useState('');
-    const [error, setError] = useState('');
+    const [code, setCode] = useState("");
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     // Get redirect URL from search params (Clerk preserves this through verification)
-    const redirectUrl = searchParams.get('redirect_url');
-    const isFromInvitation = redirectUrl?.includes('/accept-invitation/');
+    const redirectUrl = searchParams.get("redirect_url");
+    const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -36,7 +36,7 @@ export default function SignUpPage() {
         e.preventDefault();
         if (!isLoaded) return;
 
-        setError('');
+        setError("");
         setIsLoading(true);
 
         try {
@@ -48,11 +48,13 @@ export default function SignUpPage() {
             });
 
             // Send email verification code
-            await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+            await signUp.prepareEmailAddressVerification({
+                strategy: "email_code",
+            });
 
             setPendingVerification(true);
         } catch (err: any) {
-            setError(err.errors?.[0]?.message || 'Failed to create account');
+            setError(err.errors?.[0]?.message || "Failed to create account");
         } finally {
             setIsLoading(false);
         }
@@ -62,68 +64,78 @@ export default function SignUpPage() {
         e.preventDefault();
         if (!isLoaded) return;
 
-        setError('');
+        setError("");
         setIsLoading(true);
 
         try {
-            const completeSignUp = await signUp.attemptEmailAddressVerification({
-                code,
-            });
+            const completeSignUp = await signUp.attemptEmailAddressVerification(
+                {
+                    code,
+                },
+            );
 
             // Try to complete sign up regardless of status if we have a session
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
 
-                // Create user in our database immediately using Clerk data
-                try {
-                    const user = {
-                        id: completeSignUp.createdUserId,
-                        email: completeSignUp.emailAddress,
-                        firstName: completeSignUp.firstName,
-                        lastName: completeSignUp.lastName,
-                    }
-
-                    if (user) {
-
+                // Wait a moment for session to be fully established
+                setTimeout(async () => {
+                    try {
+                        // Get auth token for API calls
                         const token = await getToken();
                         if (!token) {
-                            throw new Error('Failed to get auth token');
+                            console.warn(
+                                "No auth token available, proceeding with redirect",
+                            );
+                        } else {
+                            // Ensure user exists in database using the same logic as SSO callback
+                            const result = await ensureUserInDatabase(token, {
+                                clerk_user_id: completeSignUp.createdUserId!,
+                                email: completeSignUp.emailAddress!,
+                                name: `${completeSignUp.firstName || firstName} ${completeSignUp.lastName || lastName}`.trim(),
+                            });
+
+                            if (!result.success) {
+                                // Log the error but don't block - onboarding will catch this
+                                console.warn(
+                                    "[SignUp] User creation warning:",
+                                    result.error,
+                                );
+                            }
                         }
-                        // Create authenticated API client with session token
-                        const apiClient = createAuthenticatedClient(token);
-
-                        // Create user record in our identity service using registration endpoint
-                        const newUser = await apiClient.post('/users/register', {
-                            clerk_user_id: user.id,
-                            email: user.email,
-                            name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
-                        });
+                    } catch (userCreationError) {
+                        // Log error but don't block the flow - webhook will catch this later
+                        console.error(
+                            "Failed to create user in database (webhook will handle):",
+                            userCreationError,
+                        );
                     }
-                } catch (userCreationError) {
-                    // Log error but don't block the flow - webhook will catch this later
-                    console.error('Failed to create user in database (webhook will handle):', userCreationError);
-                }
 
-                // Redirect to the URL Clerk preserved through verification
-                router.push(redirectUrl || '/portal/dashboard');
+                    // Redirect using replace to prevent back navigation to verification
+                    router.replace(redirectUrl || "/portal/dashboard");
+                }, 500); // 500ms delay to ensure session is stable
             } else {
-                setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
+                setError(
+                    `Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`,
+                );
             }
         } catch (err: any) {
-            console.error('Verification error:', err);
-            setError(err.errors?.[0]?.message || 'Invalid verification code');
+            console.error("Verification error:", err);
+            setError(err.errors?.[0]?.message || "Invalid verification code");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const signUpWithOAuth = (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
+    const signUpWithOAuth = (
+        provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
+    ) => {
         if (!isLoaded) return;
 
         signUp.authenticateWithRedirect({
             strategy: provider,
-            redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirectUrl || '/portal/dashboard',
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: redirectUrl || "/portal/dashboard",
         });
     };
 
@@ -139,16 +151,19 @@ export default function SignUpPage() {
 
                         <div className="alert alert-info mb-4">
                             <i className="fa-duotone fa-regular fa-circle-info"></i>
-                            <span>You're already signed in to your account.</span>
+                            <span>
+                                You're already signed in to your account.
+                            </span>
                         </div>
 
                         <p className="text-center mb-4">
-                            To create a new account, you'll need to sign out first.
+                            To create a new account, you'll need to sign out
+                            first.
                         </p>
 
                         <div className="space-y-2">
                             <button
-                                onClick={() => router.push('/portal/dashboard')}
+                                onClick={() => router.push("/portal/dashboard")}
                                 className="btn btn-primary w-full"
                             >
                                 <i className="fa-duotone fa-regular fa-home"></i>
@@ -185,7 +200,11 @@ export default function SignUpPage() {
                     <div className="card-body">
                         <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
                             <Link href="/" className="mb-6">
-                                <img src="/logo.svg" alt="Applicant Network" className="h-12" />
+                                <img
+                                    src="/logo.svg"
+                                    alt="Applicant Network"
+                                    className="h-12"
+                                />
                             </Link>
                             Verify Your Email
                         </h2>
@@ -204,7 +223,9 @@ export default function SignUpPage() {
 
                         <form onSubmit={handleVerification}>
                             <fieldset className="fieldset mb-4">
-                                <legend className="fieldset-legend">Verification Code</legend>
+                                <legend className="fieldset-legend">
+                                    Verification Code
+                                </legend>
                                 <input
                                     type="text"
                                     placeholder="123456"
@@ -229,7 +250,7 @@ export default function SignUpPage() {
                                         Verifying...
                                     </>
                                 ) : (
-                                    'Verify Email'
+                                    "Verify Email"
                                 )}
                             </button>
                         </form>
@@ -252,7 +273,11 @@ export default function SignUpPage() {
                 <div className="card-body">
                     <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
                         <Link href="/" className="mb-6">
-                            <img src="/logo.svg" alt="Applicant Network" className="h-12" />
+                            <img
+                                src="/logo.svg"
+                                alt="Applicant Network"
+                                className="h-12"
+                            />
                         </Link>
                         Create Your Splits Account
                     </h2>
@@ -260,7 +285,9 @@ export default function SignUpPage() {
                     {isFromInvitation && (
                         <div className="alert alert-info mb-4">
                             <i className="fa-duotone fa-regular fa-envelope-open-text"></i>
-                            <span>Complete sign-up to accept your invitation</span>
+                            <span>
+                                Complete sign-up to accept your invitation
+                            </span>
                         </div>
                     )}
 
@@ -277,25 +304,33 @@ export default function SignUpPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">First Name</legend>
+                                <legend className="fieldset-legend">
+                                    First Name
+                                </legend>
                                 <input
                                     type="text"
                                     placeholder="John"
                                     className="input w-full"
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    onChange={(e) =>
+                                        setFirstName(e.target.value)
+                                    }
                                     required
                                     disabled={isLoading}
                                 />
                             </fieldset>
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Last Name</legend>
+                                <legend className="fieldset-legend">
+                                    Last Name
+                                </legend>
                                 <input
                                     type="text"
                                     placeholder="Doe"
                                     className="input w-full"
                                     value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    onChange={(e) =>
+                                        setLastName(e.target.value)
+                                    }
                                     required
                                     disabled={isLoading}
                                 />
@@ -316,7 +351,9 @@ export default function SignUpPage() {
                         </fieldset>
 
                         <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Password</legend>
+                            <legend className="fieldset-legend">
+                                Password
+                            </legend>
                             <input
                                 type="password"
                                 placeholder="••••••••"
@@ -327,7 +364,9 @@ export default function SignUpPage() {
                                 disabled={isLoading}
                                 minLength={8}
                             />
-                            <p className="fieldset-label">Must be at least 8 characters</p>
+                            <p className="fieldset-label">
+                                Must be at least 8 characters
+                            </p>
                         </fieldset>
 
                         <button
@@ -341,7 +380,7 @@ export default function SignUpPage() {
                                     Creating account...
                                 </>
                             ) : (
-                                'Sign Up'
+                                "Sign Up"
                             )}
                         </button>
                     </form>
@@ -350,7 +389,7 @@ export default function SignUpPage() {
 
                     <div className="space-y-2">
                         <button
-                            onClick={() => signUpWithOAuth('oauth_google')}
+                            onClick={() => signUpWithOAuth("oauth_google")}
                             className="btn btn-outline w-full"
                             disabled={!isLoaded}
                         >
@@ -358,7 +397,7 @@ export default function SignUpPage() {
                             Continue with Google
                         </button>
                         <button
-                            onClick={() => signUpWithOAuth('oauth_github')}
+                            onClick={() => signUpWithOAuth("oauth_github")}
                             className="btn btn-outline w-full"
                             disabled={!isLoaded}
                         >
@@ -366,7 +405,7 @@ export default function SignUpPage() {
                             Continue with GitHub
                         </button>
                         <button
-                            onClick={() => signUpWithOAuth('oauth_microsoft')}
+                            onClick={() => signUpWithOAuth("oauth_microsoft")}
                             className="btn btn-outline w-full"
                             disabled={!isLoaded}
                         >
@@ -376,9 +415,13 @@ export default function SignUpPage() {
                     </div>
 
                     <p className="text-center text-sm mt-4">
-                        Already have an account?{' '}
+                        Already have an account?{" "}
                         <Link
-                            href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-in'}
+                            href={
+                                redirectUrl
+                                    ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`
+                                    : "/sign-in"
+                            }
                             className="link link-primary"
                         >
                             Sign in

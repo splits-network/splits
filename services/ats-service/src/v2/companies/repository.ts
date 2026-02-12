@@ -147,23 +147,23 @@ export class CompanyRepository {
             return [];
         }
 
-        // Cross-schema JOIN: memberships + users for hiring managers and company admins
+        // Query memberships + users for hiring managers and company admins
         const { data, error } = await this.supabase
             .from('memberships')
-            .select('id, role, user_id, users(id, name, email, profile_image_url)')
+            .select('id, role_name, user_id, users(id, name, email, profile_image_url)')
             .eq('organization_id', company.identity_organization_id)
-            .in('role', ['hiring_manager', 'company_admin'])
+            .in('role_name', ['hiring_manager', 'company_admin'])
             .is('deleted_at', null);
 
         if (error) throw error;
 
-        return (data || []).map((membership: any) => ({
-            id: membership.id,
-            role: membership.role,
-            user_id: membership.user_id,
-            name: membership.users?.name || null,
-            email: membership.users?.email || null,
-            profile_image_url: membership.users?.profile_image_url || null,
+        return (data || []).map((userRole: any) => ({
+            id: userRole.id,
+            role: userRole.role_name,
+            user_id: userRole.user_id,
+            name: userRole.users?.name || null,
+            email: userRole.users?.email || null,
+            profile_image_url: userRole.users?.profile_image_url || null,
         }));
     }
 }

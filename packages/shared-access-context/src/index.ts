@@ -15,16 +15,16 @@ export interface AccessContext {
 /**
  * AccessContextResolver - Reusable class for services
  * Initialize once with Supabase client, then call resolve() as needed
- * 
+ *
  * @example
  * ```typescript
  * export class JobServiceV2 {
  *   private accessResolver: AccessContextResolver;
- *   
+ *
  *   constructor(supabase: SupabaseClient) {
  *     this.accessResolver = new AccessContextResolver(supabase);
  *   }
- *   
+ *
  *   async createJob(clerkUserId: string) {
  *     const context = await this.accessResolver.resolve(clerkUserId);
  *     // Use context.identityUserId, context.roles, etc.
@@ -45,7 +45,9 @@ export class AccessContextResolver {
 
 /**
  * Resolve role/access context starting from the Clerk user ID.
- * Converts Clerk -> users -> memberships/recruiters/candidates.
+ * Reads from two tables in a single Supabase round-trip:
+ * - memberships: org-scoped roles (platform_admin, company_admin, hiring_manager) with organization_id/company_id
+ * - user_roles: entity-linked roles (recruiter, candidate) with role_entity_id
  */
 export async function resolveAccessContext(
     supabase: SupabaseClient,
@@ -64,20 +66,29 @@ export async function resolveAccessContext(
                 error: 'No clerkUserId provided',
             };
         }
-        const identityUserResult = await supabase
+
+        const userResult = await supabase
             .from('users')
             .select(
                 `
                 id,
-                candidates!candidates_user_id_fkey ( id ),
-                recruiters!recruiters_user_id_fkey ( id, status ),
-                memberships!memberships_user_id_fkey ( organization_id, company_id, role )
+                memberships!memberships_user_id_fkey (
+                    role_name,
+                    organization_id,
+                    company_id
+                ),
+                user_roles!user_roles_user_id_fkey (
+                    role_name,
+                    role_entity_id
+                )
             `
             )
             .eq('clerk_user_id', clerkUserId)
+            .is('memberships.deleted_at', null)
+            .is('user_roles.deleted_at', null)
             .maybeSingle();
 
-        const identityUserId = identityUserResult.data?.id || null;
+        const identityUserId = userResult.data?.id || null;
 
         if (!identityUserId) {
             return {
@@ -92,43 +103,48 @@ export async function resolveAccessContext(
             };
         }
 
-        const memberships = identityUserResult.data?.memberships || [];
-        const organizationIds = memberships.map(m => m.organization_id).filter(Boolean);
-        const companyIds = memberships.map(m => m.company_id).filter(Boolean);
-        const roles = memberships.map(m => m.role).filter(Boolean);
+        // Handle both array and single object cases (Supabase returns object for 1:1, array for 1:many)
+        const membershipsData = userResult.data?.memberships as MembershipRow[] | MembershipRow | null;
+        const memberships: MembershipRow[] = Array.isArray(membershipsData)
+            ? membershipsData
+            : membershipsData ? [membershipsData] : [];
 
-        // Handle both array and single object cases for recruiters (Supabase returns object for 1:1, array for 1:many)
-        const recruitersData = identityUserResult.data?.recruiters as { id: string; status: string }[] | { id: string; status: string } | null;
-        const activeRecruiter = Array.isArray(recruitersData)
-            ? recruitersData.find(r => r.status === 'active')
-            : (recruitersData?.status === 'active' ? recruitersData : null);
-        
-        if(activeRecruiter) {
-            roles.push('recruiter');
-        }
+        const userRolesData = userResult.data?.user_roles as EntityRoleRow[] | EntityRoleRow | null;
+        const userRoles: EntityRoleRow[] = Array.isArray(userRolesData)
+            ? userRolesData
+            : userRolesData ? [userRolesData] : [];
 
-        // Handle both array and single object cases for candidates
-        const candidatesData = identityUserResult.data?.candidates as { id: string }[] | { id: string } | null;
-        const candidateId = Array.isArray(candidatesData)
-            ? candidatesData[0]?.id
-            : candidatesData?.id || null;
+        // Extract role names (deduplicated union of both tables)
+        const roles = [...new Set([
+            ...memberships.map(m => m.role_name),
+            ...userRoles.map(r => r.role_name),
+        ].filter(Boolean))];
 
-        if(candidateId) {
-            roles.push('candidate');
-        }
+        // Extract organization and company IDs from memberships
+        const organizationIds = [...new Set(
+            memberships.map(m => m.organization_id).filter(Boolean) as string[]
+        )];
+        const companyIds = [...new Set(
+            memberships.map(m => m.company_id).filter(Boolean) as string[]
+        )];
 
-        const finalContext = {
+        // Extract entity-linked IDs from user_roles (role_name determines entity type)
+        const recruiterRole = userRoles.find(r => r.role_name === 'recruiter');
+        const candidateRole = userRoles.find(r => r.role_name === 'candidate');
+
+        const recruiterId = recruiterRole?.role_entity_id || null;
+        const candidateId = candidateRole?.role_entity_id || null;
+
+        return {
             identityUserId,
             candidateId,
-            recruiterId: activeRecruiter?.id || null,
+            recruiterId,
             organizationIds,
             companyIds,
             roles,
             isPlatformAdmin: roles.includes('platform_admin'),
             error: '',
         };
-
-        return finalContext;
     } catch (error) {
         console.error('Error in resolveAccessContext:', error);
         return {
@@ -142,4 +158,17 @@ export async function resolveAccessContext(
             isPlatformAdmin: false,
         };
     }
+}
+
+/** Shape of a memberships row (org-scoped) */
+interface MembershipRow {
+    role_name: string;
+    organization_id: string;
+    company_id: string | null;
+}
+
+/** Shape of a user_roles row (entity-linked) */
+interface EntityRoleRow {
+    role_name: string;
+    role_entity_id: string;
 }

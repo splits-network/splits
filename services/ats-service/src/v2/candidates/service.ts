@@ -80,6 +80,11 @@ export class CandidateServiceV2 {
             updated_at: new Date().toISOString(),
         });
 
+        // Create user_role entry if candidate has a user account
+        if (candidate.user_id) {
+            await this.repository.createCandidateUserRole(candidate.user_id, candidate.id);
+        }
+
         // Emit event
         if (this.eventPublisher) {
             await this.eventPublisher.publish('candidate.created', {

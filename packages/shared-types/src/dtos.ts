@@ -5,17 +5,23 @@ export interface UserProfileDTO {
     id: string;
     email: string;
     name: string;
-    memberships: MembershipDTO[];
+    user_roles: UserRoleDTO[];
     onboarding_status?: string;
     onboarding_step?: number;
     onboarding_completed_at?: Date;
 }
 
+export interface UserRoleDTO {
+    id: string;
+    role_name: string;
+    role_entity_id: string;
+}
+
 export interface MembershipDTO {
     id: string;
+    role_name: string;
     organization_id: string;
-    organization_name: string;
-    role: string;
+    company_id?: string;
 }
 
 // ATS DTOs

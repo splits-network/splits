@@ -1,6 +1,7 @@
 /**
  * V2 Membership Service - Identity Service
- * Handles organization membership lifecycle and events
+ * Handles org-scoped role assignment lifecycle and events.
+ * Manages company_admin, hiring_manager, platform_admin memberships.
  */
 
 import { Logger } from '@splits-network/shared-logging';
@@ -33,12 +34,10 @@ export class MembershipServiceV2 {
     ): Promise<AccessContext> {
         const access = await this.resolveAccessContext(clerkUserId);
 
-        // Platform admins can always proceed
         if (access.isPlatformAdmin) {
             return access;
         }
 
-        // Check if user is company_admin for this organization
         if (!access.roles.includes('company_admin')) {
             this.logger.warn({ clerkUserId }, 'User does not have company_admin role');
             throw new Error('You must be a company admin');
@@ -56,11 +55,9 @@ export class MembershipServiceV2 {
      * Find all memberships with pagination and filters
      */
     async findMemberships(clerkUserId: string, filters: any) {
-        // Allow company admins to view memberships for their organization
         if (filters.organization_id) {
             await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, filters.organization_id);
         } else {
-            // If no organization filter, require platform admin
             await this.requirePlatformAdmin(clerkUserId);
         }
 
@@ -79,12 +76,10 @@ export class MembershipServiceV2 {
             throw new Error(`Membership not found: ${id}`);
         }
 
-        // Verify user has access to this membership's organization
         const access = await this.resolveAccessContext(clerkUserId);
         if (!access.isPlatformAdmin) {
-            // Check if user is company admin for this organization
             if (!access.organizationIds.includes(membership.organization_id)) {
-                this.logger.warn({ clerkUserId, membershipOrgId: membership.organization_id }, 'User does not have access to this membership');
+                this.logger.warn({ clerkUserId, orgId: membership.organization_id }, 'User does not have access to this membership');
                 throw new Error('You do not have access to this membership');
             }
         }
@@ -93,48 +88,50 @@ export class MembershipServiceV2 {
     }
 
     /**
-     * Create a new membership
+     * Create a new membership (org-scoped role assignment)
      */
     async createMembership(clerkUserId: string, membershipData: any) {
-        //await this.requirePlatformAdmin(clerkUserId);
         this.logger.info(
             {
+                user_id: membershipData.user_id,
+                role_name: membershipData.role_name,
                 organization_id: membershipData.organization_id,
                 company_id: membershipData.company_id,
-                user_id: membershipData.user_id,
-                role: membershipData.role,
             },
             'MembershipService.createMembership'
         );
-
-        if (!membershipData.organization_id) {
-            throw new Error('Organization ID is required');
-        }
 
         if (!membershipData.user_id) {
             throw new Error('User ID is required');
         }
 
-        if (!membershipData.role) {
-            throw new Error('Role is required');
+        if (!membershipData.role_name) {
+            throw new Error('Role name is required');
         }
+
+        if (!membershipData.organization_id) {
+            throw new Error('Organization ID is required');
+        }
+
+        // Authorize: company_admin for their org or platform_admin
+        await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, membershipData.organization_id);
 
         const membership = await this.repository.createMembership({
             id: uuidv4(),
+            user_id: membershipData.user_id,
+            role_name: membershipData.role_name,
             organization_id: membershipData.organization_id,
             company_id: membershipData.company_id || null,
-            user_id: membershipData.user_id,
-            role: membershipData.role,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
 
         await this.eventPublisher.publish('membership.created', {
             membership_id: membership.id,
+            user_id: membership.user_id,
+            role_name: membership.role_name,
             organization_id: membership.organization_id,
             company_id: membership.company_id,
-            user_id: membership.user_id,
-            role: membership.role,
         });
 
         this.logger.info({ id: membership.id }, 'MembershipService.createMembership - membership created');
@@ -145,10 +142,10 @@ export class MembershipServiceV2 {
      * Update membership
      */
     async updateMembership(clerkUserId: string, id: string, updates: MembershipUpdate) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'MembershipService.updateMembership');
 
-        await this.findMembershipById(clerkUserId, id);
+        const existing = await this.findMembershipById(clerkUserId, id);
+        await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, existing.organization_id);
 
         const updateData: any = {
             ...updates,
@@ -170,10 +167,11 @@ export class MembershipServiceV2 {
      * Delete membership (soft delete)
      */
     async deleteMembership(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'MembershipService.deleteMembership');
 
-        await this.findMembershipById(clerkUserId, id);
+        const existing = await this.findMembershipById(clerkUserId, id);
+        await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, existing.organization_id);
+
         await this.repository.deleteMembership(id);
 
         await this.eventPublisher.publish('membership.deleted', {

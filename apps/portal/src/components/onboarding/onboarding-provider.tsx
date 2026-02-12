@@ -504,8 +504,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     // This ensures the user has company_admin role for billing operations
                     await client.post("/memberships", {
                         user_id: userData.id,
+                        role_name: selectedRole,
                         organization_id: organization.id,
-                        role: selectedRole,
                     });
 
                     await client.post(

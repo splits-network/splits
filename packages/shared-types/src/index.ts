@@ -37,4 +37,9 @@ export type {
     StripePaymentInfo,
     PersonalInfo,
     CompanyInfo,
+    // Role system types
+    RoleName,
+    RoleDefinition,
+    UserRole,
+    Membership,
 } from './models';
