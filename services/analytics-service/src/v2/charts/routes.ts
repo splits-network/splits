@@ -59,6 +59,8 @@ export async function registerChartRoutes(
                                 'commission-breakdown',
                                 'recruitment-funnel',
                                 'reputation-radar',
+                                'hiring-pipeline',
+                                'company-health-radar',
                             ],
                         },
                     },

@@ -33,6 +33,12 @@ interface ChartData {
     }[];
 }
 
+function getGridColor(): string {
+    if (typeof window === 'undefined') return 'rgba(229,231,235,0.5)';
+    const val = getComputedStyle(document.documentElement).getPropertyValue('--color-base-300').trim();
+    return val ? `${val}40` : 'rgba(229,231,235,0.5)';
+}
+
 export default function PlacementStackedBar({
     trendPeriod = 6,
     refreshKey,
@@ -41,6 +47,16 @@ export default function PlacementStackedBar({
     const { getToken } = useAuth();
     const [chartData, setChartData] = useState<ChartData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [gridColor, setGridColor] = useState(getGridColor());
+
+    useEffect(() => {
+        const update = () => setGridColor(getGridColor());
+        update();
+
+        const observer = new MutationObserver(update);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         loadData();
@@ -125,7 +141,7 @@ export default function PlacementStackedBar({
                             stacked: true,
                             beginAtZero: true,
                             ticks: { precision: 0, font: { size: 9 } },
-                            grid: { color: 'rgba(128,128,128,0.1)' },
+                            grid: { color: gridColor },
                         },
                     },
                 }}

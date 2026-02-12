@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { useUserProfile } from "@/contexts";
 import { useRecruiterStats } from "../hooks/use-recruiter-stats";
 import { useTopRoles } from "../hooks/use-top-roles";
 import { useDashboardRealtime } from "../hooks/use-dashboard-realtime";
@@ -13,6 +14,8 @@ import {
     EmptyState,
 } from "@/components/ui/cards";
 import { AnalyticsChart } from "@/components/charts/analytics-chart";
+import { PageTitle } from "@/components/page-title";
+import { TrendPeriodSelector } from "@/components/charts/trend-period-selector";
 import { ConnectPromptBanner } from "@/components/stripe/connect-prompt-banner";
 import { ConnectDrawer } from "@/components/stripe/connect-drawer";
 import PipelineActivity from "./pipeline-activity";
@@ -29,16 +32,10 @@ function formatCurrency(value: number): string {
     return `$${value.toLocaleString()}`;
 }
 
-interface RecruiterDashboardProps {
-    trendPeriod: number;
-    onTrendPeriodChange: (period: number) => void;
-}
-
-export default function RecruiterDashboard({
-    trendPeriod,
-    onTrendPeriodChange,
-}: RecruiterDashboardProps) {
+export default function RecruiterDashboard() {
     const { userId } = useAuth();
+    const { profile } = useUserProfile();
+    const [trendPeriod, setTrendPeriod] = useState(6);
     const [connectDrawerOpen, setConnectDrawerOpen] = useState(false);
     const [chartRefreshKey, setChartRefreshKey] = useState(0);
 
@@ -79,6 +76,33 @@ export default function RecruiterDashboard({
 
     return (
         <div className="space-y-8 animate-fade-in">
+            <PageTitle
+                title={`Welcome back, ${profile?.name || 'Recruiter'}!`}
+                subtitle="Here's an overview of your recruiting activity."
+            >
+                <TrendPeriodSelector
+                    trendPeriod={trendPeriod}
+                    onTrendPeriodChange={setTrendPeriod}
+                />
+                <div className="hidden lg:block w-px h-6 bg-base-300" />
+                <Link href="/portal/roles" className="btn btn-primary btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-briefcase w-3.5"></i>
+                    Browse Roles
+                </Link>
+                <Link href="/portal/candidates" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-users w-3.5"></i>
+                    Candidates
+                </Link>
+                <Link href="/portal/applications" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-inbox w-3.5"></i>
+                    Applications
+                </Link>
+                <Link href="/portal/placements" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-trophy w-3.5"></i>
+                    Placements
+                </Link>
+            </PageTitle>
+
             {/* Stripe Connect banner */}
             <ConnectPromptBanner onSetUp={() => setConnectDrawerOpen(true)} />
             {connectDrawerOpen && (
@@ -259,7 +283,7 @@ export default function RecruiterDashboard({
                             scope="recruiter"
                             height={140}
                             trendPeriod={trendPeriod}
-                            onTrendPeriodChange={onTrendPeriodChange}
+                            onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
                 </div>
@@ -317,7 +341,7 @@ export default function RecruiterDashboard({
                                                 <div className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">
                                                     {role.title}
                                                 </div>
-                                                <div className="text-xs text-base-content/50 flex items-center gap-1.5 mt-1">
+                                                <div className="text-xs text-base-content/60 flex items-center gap-1.5 mt-1">
                                                     <i className="fa-duotone fa-regular fa-building text-[10px]"></i>
                                                     <span className="line-clamp-1">
                                                         {role.company?.name}

@@ -36,6 +36,11 @@ ENV NEXT_PUBLIC_CHAT_GATEWAY_URL=$NEXT_PUBLIC_CHAT_GATEWAY_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+# Clerk redirect URLs - static values inlined at build time for client-side SDK
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/portal/dashboard
 COPY --from=dependencies /app ./
 # Copy package source files (needed for Next.js transpilePackages)
 COPY packages/shared-api-client ./packages/shared-api-client

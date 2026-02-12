@@ -56,7 +56,7 @@ export function PortalHeader() {
 
     return (
         <div className="sticky top-0 z-40">
-            <header className="navbar bg-base-100 border-b border-base-300 min-h-16">
+            <header className="navbar bg-base-100 border-b border-base-300 min-h-16 px-4">
                 {/* Logo */}
                 <div className="flex-none">
                     <Link href="/" className="">
