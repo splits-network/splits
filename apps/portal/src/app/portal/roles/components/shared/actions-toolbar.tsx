@@ -357,41 +357,7 @@ export default function RoleActionsToolbar({
         return (
             <>
                 <div className={`flex ${getLayoutClass()} ${className}`}>
-                    {/* View Details */}
-                    {actions.viewDetails && (
-                        <>
-                            {onViewDetails ? (
-                                <button
-                                    onClick={handleViewDetails}
-                                    className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </button>
-                            ) : (
-                                <Link
-                                    href={`/portal/roles/${job.id}`}
-                                    className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </Link>
-                            )}
-                        </>
-                    )}
-
-                    {/* View Pipeline */}
-                    {actions.viewPipeline && (
-                        <button
-                            onClick={handleViewPipeline}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                            title="View Pipeline"
-                        >
-                            <i className="fa-duotone fa-regular fa-users-line" />
-                        </button>
-                    )}
-
-                    {/* Submit Candidate */}
+                    {/* Submit Candidate - CTA */}
                     {actions.submitCandidate && (
                         <button
                             onClick={handleSubmitClick}
@@ -399,6 +365,17 @@ export default function RoleActionsToolbar({
                             title="Submit Candidate"
                         >
                             <i className="fa-duotone fa-regular fa-user-plus" />
+                        </button>
+                    )}
+
+                    {/* Edit Role */}
+                    {actions.edit && (
+                        <button
+                            onClick={handleEditClick}
+                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                            title="Edit Role"
+                        >
+                            <i className="fa-duotone fa-regular fa-pen-to-square" />
                         </button>
                     )}
 
@@ -418,19 +395,48 @@ export default function RoleActionsToolbar({
                         </button>
                     )}
 
-                    {/* Edit Role */}
-                    {actions.edit && (
+                    {/* Quick Status Action */}
+                    {renderQuickStatusButton()}
+
+                    {/* Divider before View Pipeline */}
+                    {actions.viewPipeline && (actions.submitCandidate || actions.edit || actions.share || actions.statusActions) && (
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                    )}
+
+                    {/* View Pipeline */}
+                    {actions.viewPipeline && (
                         <button
-                            onClick={handleEditClick}
+                            onClick={handleViewPipeline}
                             className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                            title="Edit Role"
+                            title="View Pipeline"
                         >
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
+                            <i className="fa-duotone fa-regular fa-users-line" />
                         </button>
                     )}
 
-                    {/* Quick Status Action */}
-                    {renderQuickStatusButton()}
+                    {/* View Details - far right */}
+                    {actions.viewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            {onViewDetails ? (
+                                <button
+                                    onClick={handleViewDetails}
+                                    className={`btn ${getSizeClass()} btn-square btn-primary`}
+                                    title="View Details"
+                                >
+                                    <i className="fa-duotone fa-regular fa-eye" />
+                                </button>
+                            ) : (
+                                <Link
+                                    href={`/portal/roles/${job.id}`}
+                                    className={`btn ${getSizeClass()} btn-square btn-primary`}
+                                    title="View Details"
+                                >
+                                    <i className="fa-duotone fa-regular fa-eye" />
+                                </Link>
+                            )}
+                        </>
+                    )}
                 </div>
 
                 {/* Modals - portaled to body to escape drawer stacking context */}
@@ -464,41 +470,7 @@ export default function RoleActionsToolbar({
     return (
         <>
             <div className={`flex ${getLayoutClass()} ${className}`}>
-                {/* View Details */}
-                {actions.viewDetails && (
-                    <>
-                        {onViewDetails ? (
-                            <button
-                                onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
-                            </button>
-                        ) : (
-                            <Link
-                                href={`/portal/roles/${job.id}`}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
-                            </Link>
-                        )}
-                    </>
-                )}
-
-                {/* View Pipeline */}
-                {actions.viewPipeline && (
-                    <button
-                        onClick={handleViewPipeline}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-users-line" />
-                        View Pipeline
-                    </button>
-                )}
-
-                {/* Submit Candidate */}
+                {/* Submit Candidate - CTA */}
                 {actions.submitCandidate && (
                     <button
                         onClick={handleSubmitClick}
@@ -506,6 +478,17 @@ export default function RoleActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-user-plus" />
                         Submit Candidate
+                    </button>
+                )}
+
+                {/* Edit Role */}
+                {actions.edit && (
+                    <button
+                        onClick={handleEditClick}
+                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-pen-to-square" />
+                        Edit Role
                     </button>
                 )}
 
@@ -525,19 +508,48 @@ export default function RoleActionsToolbar({
                     </button>
                 )}
 
-                {/* Edit Role */}
-                {actions.edit && (
+                {/* Status Action Buttons */}
+                {renderStatusButtons()}
+
+                {/* Divider before View Pipeline */}
+                {actions.viewPipeline && (actions.submitCandidate || actions.edit || actions.share || actions.statusActions) && (
+                    <div className="divider divider-horizontal mx-0" />
+                )}
+
+                {/* View Pipeline */}
+                {actions.viewPipeline && (
                     <button
-                        onClick={handleEditClick}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        onClick={handleViewPipeline}
+                        className={`btn ${getSizeClass()} btn-outline gap-2`}
                     >
-                        <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        Edit Role
+                        <i className="fa-duotone fa-regular fa-users-line" />
+                        View Pipeline
                     </button>
                 )}
 
-                {/* Status Action Buttons */}
-                {renderStatusButtons()}
+                {/* View Details - far right */}
+                {actions.viewDetails && (
+                    <>
+                        <div className="divider divider-horizontal mx-0" />
+                        {onViewDetails ? (
+                            <button
+                                onClick={handleViewDetails}
+                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                                View Details
+                            </button>
+                        ) : (
+                            <Link
+                                href={`/portal/roles/${job.id}`}
+                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                                View Details
+                            </Link>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* Modals - portaled to body to escape drawer stacking context */}

@@ -34,8 +34,8 @@ export default function DetailHeader({ item, onClose, onMessage }: DetailHeaderP
                 {item && (
                     <ActionsToolbar
                         application={item}
-                        variant="icon-only"
-                        size="sm"
+                        variant="descriptive"
+                        size="md"
                         showActions={{
                             viewDetails: false,
                             message: true,

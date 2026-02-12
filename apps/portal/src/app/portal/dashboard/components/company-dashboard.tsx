@@ -314,7 +314,7 @@ export default function CompanyDashboard() {
                             <h2 className="text-2xl md:text-3xl font-bold">
                                 Hiring Dashboard
                             </h2>
-                            <p className="text-lg opacity-90 mt-1">
+                            <p className="text-sm text-base-content/60 mt-1">
                                 Track your recruiting pipeline and hiring
                                 performance.
                             </p>
@@ -504,25 +504,25 @@ export default function CompanyDashboard() {
                                 <table className="table table-sm">
                                     <thead>
                                         <tr className="border-b border-base-200">
-                                            <th className="bg-transparent">
+                                            <th className="bg-transparent text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Role
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Applications
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Interviews
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Offers
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Hires
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Days Open
                                             </th>
-                                            <th className="bg-transparent text-center">
+                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
                                                 Status
                                             </th>
                                             <th className="bg-transparent"></th>

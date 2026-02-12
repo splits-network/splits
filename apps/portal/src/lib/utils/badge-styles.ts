@@ -58,6 +58,20 @@ export function getJobStatusBadge(status: string): string {
 }
 
 /**
+ * Get badge label for job/role status
+ */
+export function getJobStatus(status: string): string {
+    const labels: Record<string, string> = {
+        active: 'Active',
+        paused: 'Paused',
+        filled: 'Filled',
+        closed: 'Closed',
+        open: 'Open',
+    };
+    return labels[status] || status;
+}
+
+/**
  * Get badge color for recruiter-candidate relationship status
  */
 export function getRelationshipStatusBadge(status: string): string {

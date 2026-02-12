@@ -94,7 +94,7 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                                         recruiter={recruiter}
                                         variant="icon-only"
                                         layout="horizontal"
-                                        size="sm"
+                                        size="md"
                                     />
                                 </div>
                                 <div className="hidden md:block">
@@ -102,7 +102,7 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                                         recruiter={recruiter}
                                         variant="descriptive"
                                         layout="horizontal"
-                                        size="sm"
+                                        size="md"
                                     />
                                 </div>
                             </div>

@@ -47,7 +47,7 @@ export default function Sidebar({ invitation, onClose }: SidebarProps) {
                                     invitation={invitation}
                                     layout="horizontal"
                                     variant="descriptive"
-                                    size="sm"
+                                    size="md"
                                 />
                                 <button
                                     onClick={onClose}

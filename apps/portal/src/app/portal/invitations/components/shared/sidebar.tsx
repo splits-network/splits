@@ -43,8 +43,8 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
                                     invitation={item}
-                                    variant="icon-only"
-                                    size="sm"
+                                    variant="descriptive"
+                                    size="md"
                                     showActions={{
                                         viewCandidate: true,
                                         resend: true,

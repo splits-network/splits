@@ -54,8 +54,8 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                 <div className="flex items-center gap-2">
                                     <ActionsToolbar
                                         candidate={item}
-                                        variant="icon-only"
-                                        size="sm"
+                                        variant="descriptive"
+                                        size="md"
                                         onRefresh={handleRefresh}
                                         onEdit={() => setShowEditModal(true)}
                                         onVerify={() =>

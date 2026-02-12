@@ -9,7 +9,9 @@ import { CacheManager } from "./cache/cache-manager";
 import { CacheInvalidator } from "./cache/invalidation";
 import { registerV2Routes } from "./v2/routes";
 import { DomainEventConsumer } from "./consumers/domain-consumer";
+import { DashboardEventPublisher } from "./v2/shared/dashboard-events";
 import { startBackgroundJobs } from "./jobs";
+import Redis from "ioredis";
 
 const logger = createLogger("AnalyticsService");
 
@@ -127,6 +129,15 @@ async function startServer() {
             cache,
             cacheInvalidator,
         );
+
+        // Wire dashboard event publisher for real-time WebSocket updates
+        const pubRedis = new Redis({
+            host: process.env.REDIS_HOST || "localhost",
+            port: Number(process.env.REDIS_PORT) || 6379,
+            password: process.env.REDIS_PASSWORD || undefined,
+        });
+        eventConsumer.setDashboardPublisher(new DashboardEventPublisher(pubRedis));
+
         await eventConsumer.connect();
         await eventConsumer.start();
         logger.info("Event consumer started and listening for domain events");

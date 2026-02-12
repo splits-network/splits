@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/cards";
 import { formatRelativeTime } from "@/lib/utils";
 import { getRoleBadges } from "@/lib/utils/role-badges";
-import { getJobStatusBadge } from "@/lib/utils/badge-styles";
+import { getJobStatusBadge, getJobStatus } from "@/lib/utils/badge-styles";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 import { Job } from "../../types";
 
@@ -80,6 +80,13 @@ export function RoleCard({
     };
     return (
         <MetricCard className="group hover:shadow-lg transition-all duration-200">
+            <div className="flex items-center gap-2">
+                <div
+                    className={`badge ${getJobStatusBadge(job.status)} w-full rounded-t-2xl`}
+                >
+                    {getJobStatus(job.status)}
+                </div>
+            </div>
             <MetricCard.Header>
                 <div className="flex items-center gap-3 min-w-0">
                     <div className="flex justify-between w-full items-center">
@@ -113,14 +120,6 @@ export function RoleCard({
                                 <p className="text-sm text-base-content/60 truncate">
                                     {job.company?.name}
                                 </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                            {/* Status Badge */}
-                            <div
-                                className={`badge ${getJobStatusBadge(job.status)} shrink-0`}
-                            >
-                                {job.status}
                             </div>
                         </div>
                     </div>

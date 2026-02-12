@@ -149,16 +149,7 @@ export default function InvitationActionsToolbar({
 
     if (variant === "icon-only") {
         return (
-            <div className={`flex ${getLayoutClass()} ${className}`}>
-                {onViewDetails && (
-                    <button
-                        onClick={handleViewDetails}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
-                        title="View Details"
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                    </button>
-                )}
+            <div className={`flex items-center ${getLayoutClass()} ${className}`}>
                 {actions.copyCode && (
                     <button
                         onClick={handleCopyCode}
@@ -214,6 +205,19 @@ export default function InvitationActionsToolbar({
                         )}
                     </button>
                 )}
+                {/* View Details - far right */}
+                {onViewDetails && (
+                    <>
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                        <button
+                            onClick={handleViewDetails}
+                            className={`btn ${getSizeClass()} btn-circle btn-primary`}
+                            title="View Details"
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                        </button>
+                    </>
+                )}
             </div>
         );
     }
@@ -223,15 +227,6 @@ export default function InvitationActionsToolbar({
         <div
             className={`flex ${layout === "horizontal" ? "flex-wrap gap-2" : "flex-col gap-2"} ${className}`}
         >
-            {onViewDetails && (
-                <button
-                    onClick={handleViewDetails}
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
-                >
-                    <i className="fa-duotone fa-regular fa-eye" />
-                    View Details
-                </button>
-            )}
             {actions.copyCode && (
                 <button
                     onClick={handleCopyCode}
@@ -253,9 +248,10 @@ export default function InvitationActionsToolbar({
             {actions.share && (
                 <button
                     onClick={handleShare}
-                    className={`btn ${getSizeClass()} btn-primary btn-circle gap-2`}
+                    className={`btn ${getSizeClass()} btn-outline gap-2`}
                 >
                     <i className="fa-duotone fa-regular fa-share" />
+                    Share
                 </button>
             )}
             {actions.resend && (
@@ -285,6 +281,19 @@ export default function InvitationActionsToolbar({
                     )}
                     Revoke
                 </button>
+            )}
+            {/* View Details - far right */}
+            {onViewDetails && (
+                <>
+                    <div className="divider divider-horizontal mx-0" />
+                    <button
+                        onClick={handleViewDetails}
+                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-eye" />
+                        View Details
+                    </button>
+                </>
             )}
         </div>
     );

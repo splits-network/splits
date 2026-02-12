@@ -30,7 +30,7 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
                                 invitation={invitation}
                                 variant="descriptive"
                                 layout="horizontal"
-                                size="sm"
+                                size="md"
                             />
                         </div>
                         <Details invitation={invitation} />

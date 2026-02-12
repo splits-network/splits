@@ -253,7 +253,7 @@ export function StatCard({
         <>
             <div className="stat-title whitespace-normal">{title}</div>
             <div className="grid grid-cols-2 items-center">
-                <div className={`stat-value ${statColorClasses[color]}`}>
+                <div className={`stat-value tabular-nums ${statColorClasses[color]}`}>
                     {displayValue}
                 </div>
                 {icon && (
@@ -267,7 +267,7 @@ export function StatCard({
             {(description || trend !== undefined) && (
                 <div className="stat-desc">
                     {trend !== undefined && (
-                        <span className={trendColor}>
+                        <span className={`${trendColor} tabular-nums`}>
                             {trendArrow} {Math.abs(Math.round(trend))}%
                         </span>
                     )}

@@ -29,8 +29,8 @@ export default function DetailHeader({ item, onClose, onRefresh }: DetailHeaderP
                 {item && (
                     <ActionsToolbar
                         candidate={item}
-                        variant="icon-only"
-                        size="sm"
+                        variant="descriptive"
+                        size="md"
                         onRefresh={onRefresh}
                         showActions={{
                             viewDetails: false,
