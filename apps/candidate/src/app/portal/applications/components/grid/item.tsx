@@ -135,21 +135,13 @@ export default function Item({
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(item.updated_at)}
                     </span>
-                    <div className="flex items-center gap-2">
-                        <ActionsToolbar
-                            item={item}
-                            variant="icon-only"
-                            size="xs"
-                            onStageChange={onStageChange}
-                        />
-                        <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => onViewDetails(item.id)}
-                        >
-                            View
-                            <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
-                        </button>
-                    </div>
+                    <ActionsToolbar
+                        item={item}
+                        variant="icon-only"
+                        size="xs"
+                        onStageChange={onStageChange}
+                        onViewDetails={onViewDetails}
+                    />
                 </div>
             </EntityCard.Footer>
         </EntityCard>

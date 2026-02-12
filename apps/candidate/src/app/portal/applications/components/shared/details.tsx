@@ -777,23 +777,6 @@ function DocumentsTab({ application }: { application: Application }) {
     );
 }
 
-function AIReviewTab({ application }: { application: Application }) {
-    if (!application.ai_review?.id) {
-        return (
-            <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-brain text-4xl mb-2" />
-                <p>AI analysis not yet available</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-4">
-            <AIReviewPanel aiReviewId={application.ai_review.id} />
-        </div>
-    );
-}
-
 function NotesTab({
     application,
     getToken,

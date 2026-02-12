@@ -101,6 +101,7 @@ export default function Row({ item, onViewDetails, onStageChange }: RowProps) {
                     variant="icon-only"
                     size="sm"
                     onStageChange={onStageChange}
+                    onViewDetails={onViewDetails}
                 />
             </td>
         </DataTableRow>
