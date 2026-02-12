@@ -62,7 +62,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         subscriptionRepository,
         planRepository,
         accessResolver,
-        config.eventPublisher
+        config.eventPublisher,
+        undefined,
+        accessClient
     );
     
     // Initialize discount service

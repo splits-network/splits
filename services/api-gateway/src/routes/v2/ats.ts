@@ -64,6 +64,7 @@ const ATS_RESOURCES: ResourceDefinition[] = [
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register custom sub-resource routes BEFORE generic CRUD to avoid path conflicts
     registerCompanyContactRoutes(app, services);
+    registerTerminationRoutes(app, services);
 
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
     ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
@@ -77,6 +78,74 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerAiReviewRoutes(app, services);
     registerApplicationNoteRoutes(app, services);
     registerApplicationProposalRoutes(app, services);
+}
+
+function registerTerminationRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    // GET affected applications by recruiter-candidate termination
+    app.get(
+        '/api/v2/applications/affected-by-termination',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().get(
+                '/api/v2/applications/affected-by-termination',
+                request.query as Record<string, any>,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    // POST application termination decisions
+    app.post(
+        '/api/v2/applications/termination-decisions',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().post(
+                '/api/v2/applications/termination-decisions',
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    // GET affected jobs by recruiter-company termination
+    app.get(
+        '/api/v2/jobs/affected-by-termination',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().get(
+                '/api/v2/jobs/affected-by-termination',
+                request.query as Record<string, any>,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    // POST job termination decisions
+    app.post(
+        '/api/v2/jobs/termination-decisions',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().post(
+                '/api/v2/jobs/termination-decisions',
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
 }
 
 function registerCompanyContactRoutes(app: FastifyInstance, services: ServiceRegistry) {

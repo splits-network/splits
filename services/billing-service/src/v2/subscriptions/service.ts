@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { EventPublisher } from '../shared/events';
 import { buildPaginationResponse, isBillingAdmin } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
@@ -27,7 +28,8 @@ export class SubscriptionServiceV2 {
         private planRepository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher,
-        stripeSecretKey?: string
+        stripeSecretKey?: string,
+        private supabase?: SupabaseClient
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
             apiVersion: '2025-11-17.clover',
@@ -275,7 +277,22 @@ export class SubscriptionServiceV2 {
 
         // Create Stripe Customer if needed
         if (!customerId) {
+            // Fetch user email/name for Stripe customer record
+            let userEmail: string | undefined;
+            let userName: string | undefined;
+            if (this.supabase) {
+                const { data: user } = await this.supabase
+                    .from('users')
+                    .select('email, name')
+                    .eq('id', access.identityUserId)
+                    .single();
+                userEmail = user?.email || undefined;
+                userName = user?.name || undefined;
+            }
+
             const customer = await this.stripe.customers.create({
+                email: userEmail,
+                name: userName,
                 metadata: {
                     user_id: access.identityUserId,
                     clerk_user_id: clerkUserId,

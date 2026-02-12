@@ -69,10 +69,7 @@ export function PortalHeader() {
 
                 {/* Logo */}
                 <div className="flex-none">
-                    <Link
-                        href="/portal/dashboard"
-                        className="btn btn-ghost px-2"
-                    >
+                    <Link href="/" className="">
                         <img
                             src="/logo.svg"
                             alt="Splits Network"

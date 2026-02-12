@@ -13,6 +13,7 @@ import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { Candidate } from "../../types";
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
+import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 
 export interface ActionsToolbarProps {
     candidate: Candidate;
@@ -25,6 +26,7 @@ export interface ActionsToolbarProps {
         sendJobOpportunity?: boolean;
         edit?: boolean;
         verify?: boolean;
+        endRepresentation?: boolean;
     };
     onRefresh?: () => void;
     onViewDetails?: (candidateId: string) => void;
@@ -59,6 +61,7 @@ export default function ActionsToolbar({
 
     const [startingChat, setStartingChat] = useState(false);
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
+    const [showTerminateModal, setShowTerminateModal] = useState(false);
     const canChat = Boolean(candidate.user_id);
     const chatDisabledReason = canChat
         ? null
@@ -140,6 +143,7 @@ export default function ActionsToolbar({
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
         edit: showActions.edit !== false && canManageCandidate,
         verify: showActions.verify !== false && canVerifyCandidate,
+        endRepresentation: showActions.endRepresentation !== false && isRecruiter && candidate.has_active_relationship,
     };
 
     const sizeClass = `btn-${size}`;
@@ -222,6 +226,16 @@ export default function ActionsToolbar({
                                 <i className="fa-duotone fa-regular fa-badge-check" />
                             </button>
                         )}
+
+                    {actions.endRepresentation && (
+                        <button
+                            onClick={() => setShowTerminateModal(true)}
+                            className={`btn ${sizeClass} btn-square btn-error btn-outline`}
+                            title="End Representation"
+                        >
+                            <i className="fa-duotone fa-regular fa-link-slash" />
+                        </button>
+                    )}
                 </div>
 
                 <ModalPortal>
@@ -234,6 +248,18 @@ export default function ActionsToolbar({
                         />
                     )}
                 </ModalPortal>
+                {showTerminateModal && (
+                    <TerminateCandidateModal
+                        isOpen={showTerminateModal}
+                        onClose={() => setShowTerminateModal(false)}
+                        onSuccess={() => {
+                            setShowTerminateModal(false);
+                            onRefresh?.();
+                        }}
+                        candidateId={candidate.id}
+                        candidateName={candidate.full_name || "Unknown"}
+                    />
+                )}
             </>
         );
     }
@@ -312,6 +338,16 @@ export default function ActionsToolbar({
                             Verify
                         </button>
                     )}
+
+                {actions.endRepresentation && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${sizeClass} btn-error btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Representation
+                    </button>
+                )}
             </div>
 
             <ModalPortal>
@@ -324,6 +360,18 @@ export default function ActionsToolbar({
                     />
                 )}
             </ModalPortal>
+            {showTerminateModal && (
+                <TerminateCandidateModal
+                    isOpen={showTerminateModal}
+                    onClose={() => setShowTerminateModal(false)}
+                    onSuccess={() => {
+                        setShowTerminateModal(false);
+                        onRefresh?.();
+                    }}
+                    candidateId={candidate.id}
+                    candidateName={candidate.full_name || "Unknown"}
+                />
+            )}
         </>
     );
 }

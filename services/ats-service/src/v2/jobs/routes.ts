@@ -63,6 +63,54 @@ export function registerJobRoutes(
         }
     });
 
+    // Termination-related routes
+
+    /**
+     * GET /api/v2/jobs/affected-by-termination
+     * Returns active jobs affected by a recruiter-company relationship termination
+     */
+    app.get('/api/v2/jobs/affected-by-termination', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const query = request.query as { recruiter_id?: string; company_id?: string };
+
+            if (!query.recruiter_id || !query.company_id) {
+                return reply.code(400).send({ error: { message: 'recruiter_id and company_id are required' } });
+            }
+
+            const jobs = await config.jobService.getAffectedByTermination(
+                query.recruiter_id,
+                query.company_id
+            );
+            return reply.send({ data: jobs });
+        } catch (error: any) {
+            return reply.code(500).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/jobs/termination-decisions
+     * Process per-job decisions when terminating a recruiter-company relationship
+     */
+    app.post('/api/v2/jobs/termination-decisions', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as {
+                recruiter_id: string;
+                decisions: { job_id: string; action: 'keep' | 'pause' | 'close' }[];
+            };
+
+            if (!body.decisions || !Array.isArray(body.decisions) || !body.recruiter_id) {
+                return reply.code(400).send({ error: { message: 'recruiter_id and decisions array are required' } });
+            }
+
+            await config.jobService.processCompanyTerminationDecisions(body.decisions, body.recruiter_id);
+            return reply.send({ data: { message: 'Termination decisions processed' } });
+        } catch (error: any) {
+            return reply.code(500).send({ error: { message: error.message } });
+        }
+    });
+
     app.delete('/api/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

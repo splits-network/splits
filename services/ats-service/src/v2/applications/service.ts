@@ -1110,4 +1110,23 @@ export class ApplicationServiceV2 {
 
         return updated;
     }
+
+    /**
+     * Get applications affected by a recruiter-candidate relationship termination.
+     */
+    async getAffectedByTermination(
+        recruiterId: string,
+        candidateId: string
+    ): Promise<any[]> {
+        return this.repository.findAffectedByTermination(recruiterId, candidateId);
+    }
+
+    /**
+     * Process termination decisions for applications.
+     */
+    async processTerminationDecisions(
+        decisions: { application_id: string; action: 'keep' | 'withdraw' }[]
+    ): Promise<void> {
+        await this.repository.processTerminationDecisions(decisions);
+    }
 }

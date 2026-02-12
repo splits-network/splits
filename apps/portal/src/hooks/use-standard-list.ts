@@ -258,16 +258,20 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const isInitialMount = useRef(true);
 
+    // Use a ref for searchParams to avoid re-creating updateUrl when the URL changes
+    // (router.replace → searchParams changes → updateUrl recreated → effect fires → loop)
+    const searchParamsRef = useRef(searchParams);
+    searchParamsRef.current = searchParams;
+
     // Create stable key for callback dependencies (defaultFilters uses ref, so always stable)
     const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
-    const defaultFiltersKey = useMemo(() => JSON.stringify(defaultFiltersRef.current), []);
 
     // Update URL when state changes
     const updateUrl = useCallback(() => {
         if (!syncToUrl) return;
 
         // Start with existing URL parameters to preserve deep linking params like candidateId
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(searchParamsRef.current.toString());
 
         // Remove our managed parameters first (we'll add them back if needed)
         params.delete('page');
@@ -304,9 +308,15 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
+        // Bail out if the URL hasn't actually changed
+        const currentQuery = searchParamsRef.current.toString();
+        const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+        if (newUrl === currentUrl) return;
+
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
-    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultFiltersKey, defaultLimit, defaultSortBy, defaultSortOrder, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
 
     // Fetch data
     const fetchData = useCallback(async () => {

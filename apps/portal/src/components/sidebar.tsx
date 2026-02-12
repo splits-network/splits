@@ -54,12 +54,31 @@ const navItems: NavItem[] = [
 
     // Management section (recruiter/company focused)
     {
-        href: "/portal/marketplace/recruiters",
-        label: "Find Recruiters",
+        href: "#recruiters",
+        label: "Recruiters",
         icon: "fa-users-viewfinder",
         roles: ["company_admin", "hiring_manager"],
         section: "management",
         mobileDock: false,
+        expandable: true,
+        children: [
+            {
+                href: "/portal/marketplace/recruiters",
+                label: "Find",
+                icon: "fa-magnifying-glass",
+                roles: ["company_admin", "hiring_manager"],
+                section: "management",
+                mobileDock: false,
+            },
+            {
+                href: "/portal/company-invitations",
+                label: "Invitations",
+                icon: "fa-envelope",
+                roles: ["company_admin", "hiring_manager"],
+                section: "management",
+                mobileDock: false,
+            },
+        ],
     },
     {
         href: "#candidates",
@@ -448,6 +467,7 @@ export function Sidebar() {
                 "/portal/placements": counts.placement || 0,
                 "/portal/roles": counts.proposal || 0,
                 "/portal/invitations": counts.invitation || 0,
+                "/portal/company-invitations": counts.company_invitation || 0,
             }));
         } catch (error) {
             console.warn("Failed to fetch notification counts:", error);

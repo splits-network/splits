@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { RecruiterCard } from './recruiter-card';
+import TerminateRecruiterModal from './terminate-recruiter-modal';
 
 interface RecruiterRelationship {
     id: string;
@@ -33,51 +34,53 @@ export function MyRecruitersSection() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showHistorical, setShowHistorical] = useState(false);
+    const [terminateRelationship, setTerminateRelationship] = useState<RecruiterRelationship | null>(null);
+
+    const fetchRecruiters = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = await getToken();
+            if (!token) {
+                setError('Please sign in to view recruiter relationships');
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/recruiter-candidates');
+            const allRelationships = response.data || [];
+
+            // Group relationships by status
+            const grouped: MyRecruitersResponse = {
+                active: [],
+                expired: [],
+                terminated: []
+            };
+
+            allRelationships.forEach((rel: RecruiterRelationship) => {
+                if (rel.status === 'active') {
+                    grouped.active.push(rel);
+                } else if (rel.status === 'expired') {
+                    grouped.expired.push(rel);
+                } else if (rel.status === 'terminated') {
+                    grouped.terminated.push(rel);
+                }
+            });
+
+            setRecruiters(grouped);
+        } catch (err: any) {
+            console.error('Failed to fetch recruiters:', err);
+            setError(err.message || 'Failed to load recruiter relationships');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        async function fetchRecruiters() {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const token = await getToken();
-                if (!token) {
-                    setError('Please sign in to view recruiter relationships');
-                    return;
-                }
-
-                const client = createAuthenticatedClient(token);
-                const response = await client.get('/recruiter-candidates');
-                const allRelationships = response.data || [];
-
-                // Group relationships by status
-                const grouped: MyRecruitersResponse = {
-                    active: [],
-                    expired: [],
-                    terminated: []
-                };
-
-                allRelationships.forEach((rel: RecruiterRelationship) => {
-                    if (rel.status === 'active') {
-                        grouped.active.push(rel);
-                    } else if (rel.status === 'expired') {
-                        grouped.expired.push(rel);
-                    } else if (rel.status === 'terminated') {
-                        grouped.terminated.push(rel);
-                    }
-                });
-
-                setRecruiters(grouped);
-            } catch (err: any) {
-                console.error('Failed to fetch recruiters:', err);
-                setError(err.message || 'Failed to load recruiter relationships');
-            } finally {
-                setLoading(false);
-            }
-        }
-
         fetchRecruiters();
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (loading) {
         return (
@@ -126,7 +129,11 @@ export function MyRecruitersSection() {
                 {recruiters && recruiters.active.length > 0 ? (
                     <div className="space-y-3 mt-4">
                         {recruiters.active.map((rel) => (
-                            <RecruiterCard key={rel.id} relationship={rel} />
+                            <RecruiterCard
+                                key={rel.id}
+                                relationship={rel}
+                                onTerminate={(r) => setTerminateRelationship(r)}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -199,6 +206,19 @@ export function MyRecruitersSection() {
                         Recruiter relationships last 12 months and can be renewed. Contact your recruiter if you have questions.
                     </p>
                 </div>
+
+                {/* Terminate Modal */}
+                {terminateRelationship && (
+                    <TerminateRecruiterModal
+                        isOpen={!!terminateRelationship}
+                        onClose={() => setTerminateRelationship(null)}
+                        onSuccess={() => {
+                            setTerminateRelationship(null);
+                            fetchRecruiters();
+                        }}
+                        relationship={terminateRelationship}
+                    />
+                )}
             </div>
         </div>
     );

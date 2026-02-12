@@ -5,6 +5,7 @@ import { ModalPortal } from "@splits-network/shared-ui";
 import { useFilterOptional } from "../../contexts/filter-context";
 import { Company, CompanyRelationship } from "../../types";
 import RequestConnectionModal from "../modals/request-connection-modal";
+import TerminateCompanyModal from "../modals/terminate-company-modal";
 
 export interface CompanyActionsToolbarProps {
     company: Company;
@@ -34,6 +35,7 @@ export default function ActionsToolbar({
     });
 
     const [showRequestModal, setShowRequestModal] = useState(false);
+    const [showTerminateModal, setShowTerminateModal] = useState(false);
 
     const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
@@ -80,11 +82,11 @@ export default function ActionsToolbar({
                     {/* Status indicator for connected/pending */}
                     {relationship?.status === "active" && (
                         <button
-                            className={`btn ${getSizeClass()} btn-square btn-success btn-outline`}
-                            title="Connected"
-                            disabled
+                            onClick={() => setShowTerminateModal(true)}
+                            className={`btn ${getSizeClass()} btn-square btn-error btn-outline`}
+                            title="End Relationship"
                         >
-                            <i className="fa-duotone fa-regular fa-check" />
+                            <i className="fa-duotone fa-regular fa-link-slash" />
                         </button>
                     )}
                     {relationship?.status === "pending" && (
@@ -111,6 +113,21 @@ export default function ActionsToolbar({
                         />
                     )}
                 </ModalPortal>
+                {showTerminateModal && relationship && (
+                    <TerminateCompanyModal
+                        isOpen={showTerminateModal}
+                        onClose={() => setShowTerminateModal(false)}
+                        onSuccess={() => {
+                            setShowTerminateModal(false);
+                            refresh();
+                        }}
+                        relationshipId={relationship.id}
+                        recruiterId={relationship.recruiter_id}
+                        companyId={relationship.company_id}
+                        targetName={company.name}
+                        targetRole="company"
+                    />
+                )}
             </>
         );
     }
@@ -154,11 +171,11 @@ export default function ActionsToolbar({
                 {/* Status for connected/pending */}
                 {relationship?.status === "active" && (
                     <button
-                        className={`btn ${getSizeClass()} btn-success btn-outline gap-2`}
-                        disabled
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
                     >
-                        <i className="fa-duotone fa-regular fa-check" />
-                        Connected
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Relationship
                     </button>
                 )}
                 {relationship?.status === "pending" && (
@@ -185,6 +202,21 @@ export default function ActionsToolbar({
                     />
                 )}
             </ModalPortal>
+            {showTerminateModal && relationship && (
+                <TerminateCompanyModal
+                    isOpen={showTerminateModal}
+                    onClose={() => setShowTerminateModal(false)}
+                    onSuccess={() => {
+                        setShowTerminateModal(false);
+                        refresh();
+                    }}
+                    relationshipId={relationship.id}
+                    recruiterId={relationship.recruiter_id}
+                    companyId={relationship.company_id}
+                    targetName={company.name}
+                    targetRole="company"
+                />
+            )}
         </>
     );
 }

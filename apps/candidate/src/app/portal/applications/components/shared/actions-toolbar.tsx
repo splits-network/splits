@@ -507,32 +507,6 @@ export default function ActionsToolbar({
                         )}
                     </button>
                 )}
-
-                {/* Divider — only if there are action buttons before message */}
-                {(canEdit || canBackToDraft || canSubmit || canWithdraw) && (
-                    <div className="w-px h-4 bg-base-300 mx-0.5" />
-                )}
-
-                {/* Message — always visible */}
-                <span title={chatDisabledReason || undefined}>
-                    <button
-                        className={`btn btn-ghost btn-circle relative ${getSizeClass()}`}
-                        disabled={!recruiterUserId || startingChat}
-                        onClick={handleMessageRecruiter}
-                        title="Message recruiter"
-                    >
-                        <Presence
-                            status={presenceStatus}
-                            className="absolute -top-1 -right-1"
-                        />
-                        {startingChat ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-messages" />
-                        )}
-                    </button>
-                </span>
-
                 {/* Proposal actions — contextual */}
                 {isProposal && (
                     <>
@@ -560,6 +534,35 @@ export default function ActionsToolbar({
                         </button>
                     </>
                 )}
+
+                {/* Divider — only if there are action buttons before message */}
+                {(canEdit ||
+                    canBackToDraft ||
+                    canSubmit ||
+                    canWithdraw ||
+                    isProposal) && (
+                    <div className="w-px h-4 bg-base-300 mx-0.5" />
+                )}
+
+                {/* Message — always visible */}
+                <span title={chatDisabledReason || undefined}>
+                    <button
+                        className={`btn btn-ghost btn-circle relative ${getSizeClass()}`}
+                        disabled={!recruiterUserId || startingChat}
+                        onClick={handleMessageRecruiter}
+                        title="Message recruiter"
+                    >
+                        <Presence
+                            status={presenceStatus}
+                            className="absolute -top-1 -right-1"
+                        />
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-messages" />
+                        )}
+                    </button>
+                </span>
 
                 {/* View Details */}
                 {onViewDetails && (

@@ -135,10 +135,6 @@
     background-clip: text;
 }
 
-.badge {
-    @apply h-auto;
-}
-
 /* Badge Ribbon (for entity cards) */
 .badge-ribbon {
     border-top-left-radius: 0;

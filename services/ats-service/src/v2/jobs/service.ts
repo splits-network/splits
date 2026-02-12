@@ -234,4 +234,24 @@ export class JobServiceV2 {
             throw new Error('Only admins can close jobs');
         }
     }
+
+    /**
+     * Get jobs affected by a recruiter-company relationship termination.
+     */
+    async getAffectedByTermination(
+        recruiterId: string,
+        companyId: string
+    ): Promise<any[]> {
+        return this.repository.findAffectedByTermination(recruiterId, companyId);
+    }
+
+    /**
+     * Process termination decisions for jobs.
+     */
+    async processCompanyTerminationDecisions(
+        decisions: { job_id: string; action: 'keep' | 'pause' | 'close' }[],
+        recruiterId: string
+    ): Promise<void> {
+        await this.repository.processCompanyTerminationDecisions(decisions, recruiterId);
+    }
 }
