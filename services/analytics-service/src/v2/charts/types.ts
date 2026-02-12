@@ -9,9 +9,17 @@ export type ChartType =
     | 'recruiter-activity'
     | 'application-trends'
     | 'placement-trends'
+    | 'placement-stacked'
     | 'role-trends'
     | 'candidate-trends'
-    | 'time-to-hire-trends';
+    | 'time-to-hire-trends'
+    | 'submission-trends'
+    | 'submission-heatmap'
+    | 'earnings-trends'
+    | 'time-to-place-trends'
+    | 'commission-breakdown'
+    | 'recruitment-funnel'
+    | 'reputation-radar';
 
 /**
  * Chart.js compatible dataset structure
@@ -19,8 +27,8 @@ export type ChartType =
 export interface ChartDataset {
     label: string;
     data: number[];
-    backgroundColor?: string;
-    borderColor?: string;
+    backgroundColor?: string | string[];
+    borderColor?: string | string[];
     borderWidth?: number;
     fill?: boolean;
 }
@@ -62,7 +70,15 @@ export const CHART_METRIC_MAPPING: Record<ChartType, string[]> = {
     'recruiter-activity': ['applications_submitted', 'placements_completed'],
     'application-trends': ['applications_submitted'],
     'placement-trends': ['placements_completed'],
+    'placement-stacked': ['placements_by_state'],
     'role-trends': ['roles_created', 'roles_active'],
     'candidate-trends': ['applications_submitted'],
     'time-to-hire-trends': ['avg_time_to_hire'],
+    'submission-trends': ['recruiter_submissions'],
+    'submission-heatmap': ['daily_submissions'],
+    'earnings-trends': ['recruiter_earnings'],
+    'time-to-place-trends': ['recruiter_avg_time_to_place'],
+    'commission-breakdown': ['commission_by_role'],
+    'recruitment-funnel': ['funnel_stage_counts'],
+    'reputation-radar': ['reputation_metrics'],
 };

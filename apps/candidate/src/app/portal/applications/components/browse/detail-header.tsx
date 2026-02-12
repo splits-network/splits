@@ -59,6 +59,7 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                         <ActionsToolbar
                             item={item}
                             variant="descriptive"
+                            size="md"
                             onStageChange={() => {
                                 refresh();
                                 fetchItem();

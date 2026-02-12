@@ -113,17 +113,8 @@ export default function ActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${layoutClass} ${className}`}>
-                    {actions.viewCandidate && (
-                        <Link
-                            href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
-                            className={`btn ${sizeClass} btn-circle btn-ghost`}
-                            title="View Candidate"
-                        >
-                            <i className="fa-duotone fa-regular fa-user" />
-                        </Link>
-                    )}
-
+                <div className={`flex items-center ${layoutClass} ${className}`}>
+                    {/* Resend - CTA */}
                     {actions.resend && (
                         <button
                             onClick={handleResend}
@@ -139,6 +130,7 @@ export default function ActionsToolbar({
                         </button>
                     )}
 
+                    {/* Cancel */}
                     {actions.cancel && (
                         <button
                             onClick={() => setConfirmDialog(true)}
@@ -154,6 +146,7 @@ export default function ActionsToolbar({
                         </button>
                     )}
 
+                    {/* View Decline Reason */}
                     {actions.viewDeclineReason && (
                         <button
                             onClick={handleViewDeclineReason}
@@ -162,6 +155,22 @@ export default function ActionsToolbar({
                         >
                             <i className="fa-duotone fa-regular fa-comment" />
                         </button>
+                    )}
+
+                    {/* View Candidate - far right */}
+                    {actions.viewCandidate && (
+                        <>
+                            {(actions.resend || actions.cancel || actions.viewDeclineReason) && (
+                                <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            )}
+                            <Link
+                                href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
+                                className={`btn ${sizeClass} btn-circle btn-primary`}
+                                title="View Candidate"
+                            >
+                                <i className="fa-duotone fa-regular fa-user" />
+                            </Link>
+                        </>
                     )}
                 </div>
 
@@ -184,16 +193,7 @@ export default function ActionsToolbar({
     return (
         <>
             <div className={`flex ${layoutClass} ${className}`}>
-                {actions.viewCandidate && (
-                    <Link
-                        href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
-                        className={`btn ${sizeClass} btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-user" />
-                        View Candidate
-                    </Link>
-                )}
-
+                {/* Resend - CTA */}
                 {actions.resend && (
                     <button
                         onClick={handleResend}
@@ -209,6 +209,7 @@ export default function ActionsToolbar({
                     </button>
                 )}
 
+                {/* Cancel */}
                 {actions.cancel && (
                     <button
                         onClick={() => setConfirmDialog(true)}
@@ -224,6 +225,7 @@ export default function ActionsToolbar({
                     </button>
                 )}
 
+                {/* View Decline Reason */}
                 {actions.viewDeclineReason && (
                     <button
                         onClick={handleViewDeclineReason}
@@ -232,6 +234,22 @@ export default function ActionsToolbar({
                         <i className="fa-duotone fa-regular fa-comment" />
                         View Decline Reason
                     </button>
+                )}
+
+                {/* View Candidate - far right */}
+                {actions.viewCandidate && (
+                    <>
+                        {(actions.resend || actions.cancel || actions.viewDeclineReason) && (
+                            <div className="divider divider-horizontal mx-0" />
+                        )}
+                        <Link
+                            href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
+                            className={`btn ${sizeClass} btn-outline gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-user" />
+                            View Candidate
+                        </Link>
+                    </>
                 )}
             </div>
 

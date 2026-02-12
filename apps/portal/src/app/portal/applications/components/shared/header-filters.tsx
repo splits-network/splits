@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { ApplicationFilters } from "../../types";
+import UniversalSubmitCandidateWizard from "../wizards/universal-submit-candidate-wizard";
 
 interface HeaderFiltersProps {
     searchInput: string;
@@ -30,6 +31,8 @@ export default function HeaderFilters({
     showStats,
     setShowStats,
 }: HeaderFiltersProps) {
+    const [showSubmitWizard, setShowSubmitWizard] = useState(false);
+
     const handleReset = useCallback(() => {
         setFilter("stage", undefined);
         setFilter("ai_score_filter", undefined);
@@ -180,10 +183,23 @@ export default function HeaderFilters({
             </div>
 
             {/* Submit Candidate Button */}
-            <Link href="/portal/roles" className="btn btn-sm btn-primary">
+            <button
+                className="btn btn-sm btn-primary"
+                onClick={() => setShowSubmitWizard(true)}
+            >
                 <i className="fa-duotone fa-regular fa-user-plus" />
                 <span className="hidden sm:inline">Submit Candidate</span>
-            </Link>
+            </button>
+
+            {/* Universal Submit Candidate Wizard */}
+            <UniversalSubmitCandidateWizard
+                isOpen={showSubmitWizard}
+                onClose={() => setShowSubmitWizard(false)}
+                onSuccess={() => {
+                    setShowSubmitWizard(false);
+                    refresh(); // Refresh the applications list
+                }}
+            />
         </div>
     );
 }

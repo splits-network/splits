@@ -53,8 +53,8 @@ export default function Sidebar({ item, onClose, onMessage }: SidebarProps) {
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
                                     application={item}
-                                    variant="icon-only"
-                                    size="sm"
+                                    variant="descriptive"
+                                    size="md"
                                     showActions={{
                                         viewDetails: false,
                                         message: true,

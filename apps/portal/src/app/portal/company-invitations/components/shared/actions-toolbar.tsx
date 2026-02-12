@@ -126,16 +126,8 @@ export default function ConnectionActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${getLayoutClass()} ${className}`}>
-                    {onViewDetails && (
-                        <button
-                            onClick={handleViewDetails}
-                            className={`btn ${getSizeClass()} btn-circle btn-ghost`}
-                            title="View Details"
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                        </button>
-                    )}
+                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+                    {/* Accept - CTA */}
                     {actions.accept && (
                         <button
                             onClick={handleAccept}
@@ -150,6 +142,7 @@ export default function ConnectionActionsToolbar({
                             )}
                         </button>
                     )}
+                    {/* Decline */}
                     {actions.decline && (
                         <button
                             onClick={handleDecline}
@@ -164,6 +157,7 @@ export default function ConnectionActionsToolbar({
                             )}
                         </button>
                     )}
+                    {/* End Relationship */}
                     {actions.terminate && (
                         <button
                             onClick={() => setShowTerminateModal(true)}
@@ -172,6 +166,21 @@ export default function ConnectionActionsToolbar({
                         >
                             <i className="fa-duotone fa-regular fa-link-slash" />
                         </button>
+                    )}
+                    {/* View Details - far right */}
+                    {onViewDetails && (
+                        <>
+                            {(actions.accept || actions.decline || actions.terminate) && (
+                                <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            )}
+                            <button
+                                onClick={handleViewDetails}
+                                className={`btn ${getSizeClass()} btn-circle btn-primary`}
+                                title="View Details"
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                            </button>
+                        </>
                     )}
                 </div>
                 {terminateModal}
@@ -185,15 +194,7 @@ export default function ConnectionActionsToolbar({
             <div
                 className={`flex ${layout === "horizontal" ? "flex-wrap gap-2" : "flex-col gap-2"} ${className}`}
             >
-                {onViewDetails && (
-                    <button
-                        onClick={handleViewDetails}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        View Details
-                    </button>
-                )}
+                {/* Accept - CTA */}
                 {actions.accept && (
                     <button
                         onClick={handleAccept}
@@ -208,6 +209,7 @@ export default function ConnectionActionsToolbar({
                         Accept
                     </button>
                 )}
+                {/* Decline */}
                 {actions.decline && (
                     <button
                         onClick={handleDecline}
@@ -222,6 +224,7 @@ export default function ConnectionActionsToolbar({
                         Decline
                     </button>
                 )}
+                {/* End Relationship */}
                 {actions.terminate && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
@@ -230,6 +233,21 @@ export default function ConnectionActionsToolbar({
                         <i className="fa-duotone fa-regular fa-link-slash" />
                         End Relationship
                     </button>
+                )}
+                {/* View Details - far right */}
+                {onViewDetails && (
+                    <>
+                        {(actions.accept || actions.decline || actions.terminate) && (
+                            <div className="divider divider-horizontal mx-0" />
+                        )}
+                        <button
+                            onClick={handleViewDetails}
+                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                            View Details
+                        </button>
+                    </>
                 )}
             </div>
             {terminateModal}

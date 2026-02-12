@@ -145,41 +145,8 @@ export default function RecruiterActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${getLayoutClass()} ${className}`}>
-                    {/* View Details */}
-                    {actions.viewDetails && onViewDetails && (
-                        <button
-                            onClick={handleViewDetails}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                            title="View Details"
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                        </button>
-                    )}
-
-                    {/* Message */}
-                    {actions.message && (
-                        <span title={chatDisabledReason || undefined}>
-                            <button
-                                onClick={handleStartChat}
-                                className={`btn ${getSizeClass()} btn-square btn-outline relative`}
-                                title="Message Recruiter"
-                                disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-1 -right-1"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages" />
-                                )}
-                            </button>
-                        </span>
-                    )}
-
-                    {/* Invite to Company */}
+                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+                    {/* Invite to Company - CTA */}
                     {actions.inviteToCompany && (
                         <button
                             onClick={handleInviteToCompany}
@@ -200,6 +167,47 @@ export default function RecruiterActionsToolbar({
                             <i className="fa-duotone fa-regular fa-link-slash" />
                         </button>
                     )}
+
+                    {/* Divider before Message */}
+                    {actions.message && (actions.inviteToCompany || actions.endRelationship) && (
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                    )}
+
+                    {/* Message */}
+                    {actions.message && (
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                onClick={handleStartChat}
+                                className={`btn ${getSizeClass()} btn-square btn-ghost relative`}
+                                title="Message Recruiter"
+                                disabled={!canChat || startingChat}
+                            >
+                                <Presence
+                                    status={presenceStatus}
+                                    className="absolute -top-1 -right-1"
+                                />
+                                {startingChat ? (
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-messages" />
+                                )}
+                            </button>
+                        </span>
+                    )}
+
+                    {/* View Details - far right */}
+                    {actions.viewDetails && onViewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <button
+                                onClick={handleViewDetails}
+                                className={`btn ${getSizeClass()} btn-square btn-primary`}
+                                title="View Details"
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                            </button>
+                        </>
+                    )}
                 </div>
                 {inviteModal}
                 {terminateModal}
@@ -211,15 +219,31 @@ export default function RecruiterActionsToolbar({
     return (
         <>
             <div className={`flex ${getLayoutClass()} ${className}`}>
-                {/* View Details */}
-                {actions.viewDetails && onViewDetails && (
+                {/* Invite to Company - CTA */}
+                {actions.inviteToCompany && (
                     <button
-                        onClick={handleViewDetails}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        onClick={handleInviteToCompany}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
                     >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        View Details
+                        <i className="fa-duotone fa-regular fa-paper-plane" />
+                        Invite
                     </button>
+                )}
+
+                {/* End Relationship */}
+                {actions.endRelationship && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Relationship
+                    </button>
+                )}
+
+                {/* Divider before Message */}
+                {actions.message && (actions.inviteToCompany || actions.endRelationship) && (
+                    <div className="divider divider-horizontal mx-0" />
                 )}
 
                 {/* Message */}
@@ -241,26 +265,18 @@ export default function RecruiterActionsToolbar({
                     </span>
                 )}
 
-                {/* Invite to Company */}
-                {actions.inviteToCompany && (
-                    <button
-                        onClick={handleInviteToCompany}
-                        className={`btn ${getSizeClass()} btn-primary gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-paper-plane" />
-                        Invite
-                    </button>
-                )}
-
-                {/* End Relationship */}
-                {actions.endRelationship && (
-                    <button
-                        onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link-slash" />
-                        End Relationship
-                    </button>
+                {/* View Details - far right */}
+                {actions.viewDetails && onViewDetails && (
+                    <>
+                        <div className="divider divider-horizontal mx-0" />
+                        <button
+                            onClick={handleViewDetails}
+                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                            View Details
+                        </button>
+                    </>
                 )}
             </div>
             {inviteModal}

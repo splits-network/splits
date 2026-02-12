@@ -47,8 +47,8 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                             <div className="flex items-center gap-2">
                                 <RecruiterActionsToolbar
                                     recruiter={item}
-                                    variant="icon-only"
-                                    size="sm"
+                                    variant="descriptive"
+                                    size="md"
                                 />
                                 <button
                                     onClick={onClose}

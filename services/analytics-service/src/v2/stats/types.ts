@@ -23,6 +23,10 @@ export interface RecruiterStatsMetrics {
     placements_this_year: number;
     total_earnings_ytd: number;
     pending_payouts: number;
+    pipeline_value: number;
+    submissions_mtd: number;
+    stale_candidates: number;
+    pending_reviews: number;
 }
 
 export interface CandidateStatsMetrics {

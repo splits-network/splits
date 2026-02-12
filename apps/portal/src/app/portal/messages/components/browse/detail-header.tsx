@@ -83,8 +83,8 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                 {item && (
                     <ActionsToolbar
                         conversation={item}
-                        variant="icon-only"
-                        size="sm"
+                        variant="descriptive"
+                        size="md"
                     />
                 )}
 

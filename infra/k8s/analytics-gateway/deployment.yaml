@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: analytics-gateway
+    namespace: splits-network
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: analytics-gateway
+    template:
+        metadata:
+            labels:
+                app: analytics-gateway
+        spec:
+            containers:
+                - name: analytics-gateway
+                  image: ${ACR_SERVER}/analytics-gateway:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3025
+                        name: http
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3025"
+                      - name: SENTRY_DSN
+                        value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
+                      - name: CORS_ORIGIN
+                        value: "https://splits.network,https://www.splits.network,https://applicant.network,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com"
+                      # Portal app (splits.network) Clerk credentials
+                      - name: SPLITS_CLERK_PUBLISHABLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: splits-clerk-publishable-key
+                      - name: SPLITS_CLERK_SECRET_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: splits-clerk-secret-key
+                      - name: SPLITS_CLERK_JWKS_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: splits-clerk-jwks-url
+                      # Candidate app (applicant.network) Clerk credentials
+                      - name: APP_CLERK_PUBLISHABLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: app-clerk-publishable-key
+                      - name: APP_CLERK_SECRET_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: app-clerk-secret-key
+                      - name: APP_CLERK_JWKS_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: app-clerk-jwks-url
+                      - name: REDIS_HOST
+                        value: "redis"
+                      - name: REDIS_PORT
+                        value: "6379"
+                      - name: IDENTITY_SERVICE_URL
+                        value: "http://identity-service:3001"
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3025
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3025
+                      initialDelaySeconds: 10
+                      periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: analytics-gateway
+    namespace: splits-network
+spec:
+    type: ClusterIP
+    ports:
+        - port: 80
+          targetPort: 3025
+          name: http
+    selector:
+        app: analytics-gateway

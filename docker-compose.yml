@@ -365,6 +365,38 @@ services:
       chat-service:
         condition: service_started
 
+  analytics-gateway:
+    build:
+      context: .
+      dockerfile: services/analytics-gateway/Dockerfile
+      target: development
+    container_name: splits-analytics-gateway
+    ports:
+      - "3025:3025"
+    environment:
+      NODE_ENV: development
+      PORT: 3025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      IDENTITY_SERVICE_URL: http://identity-service:3001
+      SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      SPLITS_CLERK_JWKS_URL: ${SPLITS_CLERK_JWKS_URL}
+      APP_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+      APP_CLERK_JWKS_URL: ${APP_CLERK_JWKS_URL}
+    volumes:
+      - ./services/analytics-gateway/src:/app/services/analytics-gateway/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+
   health-monitor:
     build:
       context: .
@@ -617,6 +649,7 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:3000
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
       NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
+      NEXT_PUBLIC_ANALYTICS_GATEWAY_URL: ws://analytics-gateway:3025/ws/analytics
       NEXT_PUBLIC_CANDIDATE_APP_URL: http://localhost:3101
       CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

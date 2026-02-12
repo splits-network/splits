@@ -88,7 +88,7 @@ export default function DetailHeader({
                     job={job}
                     variant="descriptive"
                     layout="horizontal"
-                    size="sm"
+                    size="md"
                     showActions={{
                         viewDetails: false, // Already in detail view
                     }}

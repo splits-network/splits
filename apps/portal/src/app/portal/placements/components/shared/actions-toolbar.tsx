@@ -116,16 +116,24 @@ export default function ActionsToolbar({
     // Icon-only variant
     if (variant === "icon-only") {
         return (
-            <div className={`flex ${layoutClass} ${className}`}>
-                {actions.viewDetails && onViewDetails && (
-                    <button
-                        onClick={() => onViewDetails(placement.id)}
-                        className={`btn ${sizeClass} btn-square btn-ghost`}
-                        title="View Details"
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                    </button>
-                )}
+            <div className={`flex items-center ${layoutClass} ${className}`}>
+                {/* Mark Completed - CTA */}
+                {actions.statusActions &&
+                    isNonTerminal &&
+                    placement.state === "active" && (
+                        <button
+                            onClick={() => handleStatusChange("completed")}
+                            className={`btn ${sizeClass} btn-square btn-success`}
+                            title="Mark Completed"
+                            disabled={updatingStatus}
+                        >
+                            {isLoading && statusAction === "completed" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-check" />
+                            )}
+                        </button>
+                    )}
                 {actions.viewJob && (
                     <Link
                         href={`/portal/roles/${placement.job_id}`}
@@ -162,22 +170,19 @@ export default function ActionsToolbar({
                         <i className="fa-duotone fa-regular fa-building" />
                     </Link>
                 )}
-                {actions.statusActions &&
-                    isNonTerminal &&
-                    placement.state === "active" && (
+                {/* View Details - far right */}
+                {actions.viewDetails && onViewDetails && (
+                    <>
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
-                            onClick={() => handleStatusChange("completed")}
-                            className={`btn ${sizeClass} btn-square btn-success`}
-                            title="Mark Completed"
-                            disabled={updatingStatus}
+                            onClick={() => onViewDetails(placement.id)}
+                            className={`btn ${sizeClass} btn-square btn-primary`}
+                            title="View Details"
                         >
-                            {isLoading && statusAction === "completed" ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
-                            )}
+                            <i className="fa-duotone fa-regular fa-eye" />
                         </button>
-                    )}
+                    </>
+                )}
             </div>
         );
     }
@@ -185,14 +190,34 @@ export default function ActionsToolbar({
     // Descriptive variant
     return (
         <div className={`flex ${layoutClass} ${className}`}>
-            {actions.viewDetails && onViewDetails && (
-                <button
-                    onClick={() => onViewDetails(placement.id)}
-                    className={`btn ${sizeClass} btn-outline gap-2`}
-                >
-                    <i className="fa-duotone fa-regular fa-eye" />
-                    View Details
-                </button>
+            {/* Status actions - CTAs first */}
+            {actions.statusActions && isNonTerminal && (
+                <>
+                    <button
+                        onClick={() => handleStatusChange("completed")}
+                        className={`btn ${sizeClass} btn-success gap-2`}
+                        disabled={updatingStatus}
+                    >
+                        {isLoading && statusAction === "completed" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-check" />
+                        )}
+                        Mark Completed
+                    </button>
+                    <button
+                        onClick={() => handleStatusChange("failed")}
+                        className={`btn ${sizeClass} btn-error gap-2`}
+                        disabled={updatingStatus}
+                    >
+                        {isLoading && statusAction === "failed" ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-xmark" />
+                        )}
+                        Mark Failed
+                    </button>
+                </>
             )}
             {actions.viewJob && (
                 <Link
@@ -230,31 +255,16 @@ export default function ActionsToolbar({
                     View Company
                 </Link>
             )}
-            {actions.statusActions && isNonTerminal && (
+            {/* View Details - far right */}
+            {actions.viewDetails && onViewDetails && (
                 <>
+                    <div className="divider divider-horizontal mx-0" />
                     <button
-                        onClick={() => handleStatusChange("completed")}
-                        className={`btn ${sizeClass} btn-success gap-2`}
-                        disabled={updatingStatus}
+                        onClick={() => onViewDetails(placement.id)}
+                        className={`btn ${sizeClass} btn-outline gap-2`}
                     >
-                        {isLoading && statusAction === "completed" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-check" />
-                        )}
-                        Mark Completed
-                    </button>
-                    <button
-                        onClick={() => handleStatusChange("failed")}
-                        className={`btn ${sizeClass} btn-error gap-2`}
-                        disabled={updatingStatus}
-                    >
-                        {isLoading && statusAction === "failed" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-xmark" />
-                        )}
-                        Mark Failed
+                        <i className="fa-duotone fa-regular fa-eye" />
+                        View Details
                     </button>
                 </>
             )}

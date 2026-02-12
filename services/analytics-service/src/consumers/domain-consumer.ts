@@ -4,6 +4,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { CacheManager } from '../cache/cache-manager';
 import { CacheInvalidator } from '../cache/invalidation';
 import { EventType } from '../v2/types';
+import { DashboardEventPublisher } from '../v2/shared/dashboard-events';
 
 const logger = createLogger('DomainEventConsumer');
 
@@ -18,12 +19,22 @@ export class DomainEventConsumer {
     private readonly exchange = 'splits-network-events';
     private readonly queue = 'analytics-service-queue';
 
+    private dashboardPublisher?: DashboardEventPublisher;
+
     constructor(
         private rabbitMqUrl: string,
         private supabase: SupabaseClient,
         private cache: CacheManager,
         private cacheInvalidator: CacheInvalidator
     ) { }
+
+    /**
+     * Set the dashboard event publisher for real-time WebSocket updates.
+     * Optional - if not set, dashboard events are simply not published.
+     */
+    setDashboardPublisher(publisher: DashboardEventPublisher) {
+        this.dashboardPublisher = publisher;
+    }
 
     /**
      * Connect to RabbitMQ and set up queue bindings
@@ -115,6 +126,9 @@ export class DomainEventConsumer {
 
             // Invalidate cache
             await this.cacheInvalidator.handleEvent(eventType as EventType, data);
+
+            // Publish real-time dashboard update via Redis → analytics-gateway → WebSocket
+            await this.publishDashboardUpdate(eventType, data);
 
             logger.info({ eventType }, 'Successfully processed event');
         } catch (error) {
@@ -211,6 +225,41 @@ export class DomainEventConsumer {
                     dimension_user_id: dimensionId,
                     value: 1,
                 });
+        }
+    }
+
+    /**
+     * Publish real-time dashboard updates to affected recruiters via Redis.
+     */
+    private async publishDashboardUpdate(eventType: string, data: any): Promise<void> {
+        if (!this.dashboardPublisher) return;
+
+        try {
+            // Identify affected recruiter(s) from event data
+            const recruiterIds = new Set<string>();
+
+            if (data.recruiterId) recruiterIds.add(data.recruiterId);
+            if (data.candidateRecruiterId) recruiterIds.add(data.candidateRecruiterId);
+            if (data.companyRecruiterId) recruiterIds.add(data.companyRecruiterId);
+
+            // Determine which metrics changed based on event type
+            const changedMetrics: string[] = [];
+            if (eventType.startsWith('application.')) {
+                changedMetrics.push('candidates_in_process', 'offers_pending');
+            }
+            if (eventType.startsWith('placement.')) {
+                changedMetrics.push('placements_this_month', 'placements_this_year', 'total_earnings_ytd');
+            }
+            if (eventType.startsWith('job.') || eventType.startsWith('recruiter.')) {
+                changedMetrics.push('active_roles');
+            }
+
+            // Publish to each affected recruiter's dashboard channel
+            for (const recruiterId of recruiterIds) {
+                await this.dashboardPublisher.publishRecruiterUpdate(recruiterId, changedMetrics);
+            }
+        } catch (error) {
+            logger.warn({ error, eventType }, 'Failed to publish dashboard update (non-critical)');
         }
     }
 

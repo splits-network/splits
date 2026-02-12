@@ -47,16 +47,43 @@ export default function ActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${getLayoutClass()} ${className}`}>
-                    {/* View Details */}
-                    {onViewDetails && (
+                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+                    {/* Connect - CTA */}
+                    {!hasConnection && (
                         <button
-                            onClick={onViewDetails}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                            title="View Details"
+                            onClick={() => setShowRequestModal(true)}
+                            className={`btn ${getSizeClass()} btn-square btn-primary`}
+                            title="Request Connection"
                         >
-                            <i className="fa-duotone fa-regular fa-eye" />
+                            <i className="fa-duotone fa-regular fa-link" />
                         </button>
+                    )}
+
+                    {/* End Relationship */}
+                    {relationship?.status === "active" && (
+                        <button
+                            onClick={() => setShowTerminateModal(true)}
+                            className={`btn ${getSizeClass()} btn-square btn-error btn-outline`}
+                            title="End Relationship"
+                        >
+                            <i className="fa-duotone fa-regular fa-link-slash" />
+                        </button>
+                    )}
+
+                    {/* Pending */}
+                    {relationship?.status === "pending" && (
+                        <button
+                            className={`btn ${getSizeClass()} btn-square btn-warning btn-outline`}
+                            title="Connection Pending"
+                            disabled
+                        >
+                            <i className="fa-duotone fa-regular fa-clock" />
+                        </button>
+                    )}
+
+                    {/* Divider before Message */}
+                    {(!hasConnection || relationship?.status === "active" || relationship?.status === "pending") && (
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
                     )}
 
                     {/* Message - Coming Soon */}
@@ -68,35 +95,18 @@ export default function ActionsToolbar({
                         <i className="fa-duotone fa-regular fa-messages" />
                     </button>
 
-                    {/* Connect */}
-                    {!hasConnection && (
-                        <button
-                            onClick={() => setShowRequestModal(true)}
-                            className={`btn ${getSizeClass()} btn-square btn-primary`}
-                            title="Request Connection"
-                        >
-                            <i className="fa-duotone fa-regular fa-link" />
-                        </button>
-                    )}
-
-                    {/* Status indicator for connected/pending */}
-                    {relationship?.status === "active" && (
-                        <button
-                            onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${getSizeClass()} btn-square btn-error btn-outline`}
-                            title="End Relationship"
-                        >
-                            <i className="fa-duotone fa-regular fa-link-slash" />
-                        </button>
-                    )}
-                    {relationship?.status === "pending" && (
-                        <button
-                            className={`btn ${getSizeClass()} btn-square btn-warning btn-outline`}
-                            title="Connection Pending"
-                            disabled
-                        >
-                            <i className="fa-duotone fa-regular fa-clock" />
-                        </button>
+                    {/* View Details - far right */}
+                    {onViewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <button
+                                onClick={onViewDetails}
+                                className={`btn ${getSizeClass()} btn-square btn-primary`}
+                                title="View Details"
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -136,15 +146,42 @@ export default function ActionsToolbar({
     return (
         <>
             <div className={`flex ${getLayoutClass()} ${className}`}>
-                {/* View Details */}
-                {onViewDetails && (
+                {/* Connect - CTA */}
+                {!hasConnection && (
                     <button
-                        onClick={onViewDetails}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        onClick={() => setShowRequestModal(true)}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
                     >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        View Details
+                        <i className="fa-duotone fa-regular fa-link" />
+                        Connect
                     </button>
+                )}
+
+                {/* End Relationship */}
+                {relationship?.status === "active" && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Relationship
+                    </button>
+                )}
+
+                {/* Pending */}
+                {relationship?.status === "pending" && (
+                    <button
+                        className={`btn ${getSizeClass()} btn-warning btn-outline gap-2`}
+                        disabled
+                    >
+                        <i className="fa-duotone fa-regular fa-clock" />
+                        Pending
+                    </button>
+                )}
+
+                {/* Divider before Message */}
+                {(!hasConnection || relationship?.status === "active" || relationship?.status === "pending") && (
+                    <div className="divider divider-horizontal mx-0" />
                 )}
 
                 {/* Message - Coming Soon */}
@@ -157,35 +194,18 @@ export default function ActionsToolbar({
                     Message
                 </button>
 
-                {/* Connect */}
-                {!hasConnection && (
-                    <button
-                        onClick={() => setShowRequestModal(true)}
-                        className={`btn ${getSizeClass()} btn-primary gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link" />
-                        Connect
-                    </button>
-                )}
-
-                {/* Status for connected/pending */}
-                {relationship?.status === "active" && (
-                    <button
-                        onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link-slash" />
-                        End Relationship
-                    </button>
-                )}
-                {relationship?.status === "pending" && (
-                    <button
-                        className={`btn ${getSizeClass()} btn-warning btn-outline gap-2`}
-                        disabled
-                    >
-                        <i className="fa-duotone fa-regular fa-clock" />
-                        Pending
-                    </button>
+                {/* View Details - far right */}
+                {onViewDetails && (
+                    <>
+                        <div className="divider divider-horizontal mx-0" />
+                        <button
+                            onClick={onViewDetails}
+                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                            View Details
+                        </button>
+                    </>
                 )}
             </div>
 

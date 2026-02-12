@@ -28,8 +28,8 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                 {item && (
                     <ActionsToolbar
                         invitation={item}
-                        variant="icon-only"
-                        size="sm"
+                        variant="descriptive"
+                        size="md"
                         showActions={{
                             viewCandidate: true,
                             resend: true,

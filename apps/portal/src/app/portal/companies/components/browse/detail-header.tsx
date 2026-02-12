@@ -77,8 +77,8 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                         <ActionsToolbar
                             company={company}
                             relationship={relationship}
-                            variant="icon-only"
-                            size="sm"
+                            variant="descriptive"
+                            size="md"
                             onRefresh={handleRefresh}
                         />
                     )}

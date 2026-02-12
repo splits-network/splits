@@ -113,8 +113,9 @@ export default function ActionsToolbar({
                         <i className="fa-duotone fa-regular fa-bookmark mr-1" />
                         Save
                     </button>
+                    <div className="divider divider-horizontal mx-0" />
                     <button
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-primary btn-sm"
                         onClick={handleViewFull}
                     >
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square mr-1" />
@@ -158,8 +159,9 @@ export default function ActionsToolbar({
                 <button className="btn btn-sm btn-ghost" title="Save">
                     <i className="fa-duotone fa-regular fa-bookmark" />
                 </button>
+                <div className="w-px h-4 bg-base-300 mx-0.5" />
                 <button
-                    className="btn btn-sm btn-ghost"
+                    className="btn btn-sm btn-primary"
                     onClick={handleViewFull}
                     title="View full job"
                 >

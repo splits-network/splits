@@ -116,21 +116,19 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                 </span>
             </td>
             {/* Actions */}
-            <td
-                onClick={(e) => e.stopPropagation()}
-                className="text-right"
-            >
+            <td onClick={(e) => e.stopPropagation()} className="text-right">
                 <ActionsToolbar
                     application={item}
                     variant="icon-only"
                     size="xs"
                     showActions={{
                         viewDetails: true,
-                        message: false,
-                        addNote: false,
+                        message: true,
+                        addNote: true,
                         advanceStage: true,
                         reject: true,
                     }}
+                    onViewDetails={onViewDetails}
                     onMessage={onMessage}
                     className="justify-end"
                 />
@@ -143,15 +141,23 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
             <ExpandedDetailSection title="Application Details">
                 <div className="space-y-2">
                     {item.accepted_by_company && (
-                        <div className="text-sm text-success">
-                            <i className="fa-duotone fa-regular fa-circle-check mr-2" />
-                            Accepted by company
+                        <div className="flex">
+                            <div className="text-sm text-success">
+                                <i className="fa-duotone fa-regular fa-circle-check mr-2" />
+                                Accepted by company
+                            </div>
+                            {item.accepted_at && (
+                                <span className="text-base-content/60 ml-2">
+                                    ({daysBetween(item.accepted_at, new Date())}{" "}
+                                    days ago)
+                                </span>
+                            )}
                         </div>
                     )}
                 </div>
             </ExpandedDetailSection>
 
-            <ExpandedDetailGrid cols={2}>
+            <ExpandedDetailGrid cols={3}>
                 <ExpandedDetailItem
                     icon="fa-user"
                     label="Candidate"
@@ -161,6 +167,15 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                     icon="fa-envelope"
                     label="Email"
                     value={item.candidate?.email}
+                />
+                <ExpandedDetailItem
+                    icon="fa-robot"
+                    label="AI Score"
+                    value={
+                        item.ai_review?.fit_score != null
+                            ? `${Math.round(item.ai_review.fit_score)}%`
+                            : "Not reviewed"
+                    }
                 />
             </ExpandedDetailGrid>
 
@@ -174,15 +189,6 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                     icon="fa-building"
                     label="Company"
                     value={item.job?.company?.name || "N/A"}
-                />
-                <ExpandedDetailItem
-                    icon="fa-robot"
-                    label="AI Score"
-                    value={
-                        item.ai_review?.fit_score != null
-                            ? `${Math.round(item.ai_review.fit_score)}%`
-                            : "Not reviewed"
-                    }
                 />
             </ExpandedDetailGrid>
 
@@ -199,6 +205,7 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                         advanceStage: true,
                         reject: true,
                     }}
+                    onViewDetails={onViewDetails}
                     onMessage={onMessage}
                 />
             </div>

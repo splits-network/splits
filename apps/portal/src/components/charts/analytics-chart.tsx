@@ -38,9 +38,17 @@ export type ChartType =
     | 'recruiter-activity'
     | 'application-trends'
     | 'placement-trends'
+    | 'placement-stacked'
     | 'role-trends'
     | 'candidate-trends'
-    | 'time-to-hire-trends';
+    | 'time-to-hire-trends'
+    | 'submission-trends'
+    | 'submission-heatmap'
+    | 'earnings-trends'
+    | 'time-to-place-trends'
+    | 'commission-breakdown'
+    | 'recruitment-funnel'
+    | 'reputation-radar';
 
 export interface AnalyticsChartProps {
     type: ChartType;
@@ -213,13 +221,21 @@ export function AnalyticsChart({
             break;
     }
 
-    // Handle undefined or invalid chart data
-    if (!chartData || !chartData.datasets || chartData.datasets.length === 0) {
+    // Handle undefined, invalid, or all-zero chart data
+    const hasData = chartData?.datasets?.length > 0 &&
+        chartData.datasets.some(ds => ds.data?.some(v => v !== 0));
+    if (!chartData || !hasData) {
+        const iconMap: Partial<Record<ChartType, string>> = {
+            'earnings-trends': 'fa-sack-dollar',
+            'placement-trends': 'fa-trophy',
+            'submission-trends': 'fa-paper-plane',
+        };
+        const icon = iconMap[type] || 'fa-chart-line';
         return (
             <div style={{ height }} className="flex items-center justify-center text-base-content/50">
                 <div className="text-center">
-                    <i className="fa-duotone fa-regular fa-chart-line fa-3x mb-2 opacity-20"></i>
-                    <p className="text-sm">No data available</p>
+                    <i className={`fa-duotone fa-regular ${icon} fa-2x mb-1 opacity-20`}></i>
+                    <p className="text-xs">No data yet</p>
                 </div>
             </div>
         );

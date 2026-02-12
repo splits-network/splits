@@ -152,34 +152,63 @@ export default function ActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${layoutClass} ${className}`}>
-                    {actions.viewDetails && (
-                        <>
-                            {onViewDetails ? (
-                                <button
-                                    onClick={() => onViewDetails(candidate.id)}
-                                    className={`btn ${sizeClass} btn-square btn-ghost`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </button>
-                            ) : (
-                                <Link
-                                    href={`/portal/candidates/${candidate.id}`}
-                                    className={`btn ${sizeClass} btn-square btn-ghost`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </Link>
-                            )}
-                        </>
+                <div className={`flex items-center ${layoutClass} ${className}`}>
+                    {/* Send Job Opportunity - CTA */}
+                    {actions.sendJobOpportunity && (
+                        <button
+                            onClick={() => setShowSubmitWizard(true)}
+                            className={`btn ${sizeClass} btn-square btn-primary`}
+                            title="Send Job Opportunity"
+                        >
+                            <i className="fa-duotone fa-regular fa-paper-plane" />
+                        </button>
                     )}
 
+                    {/* Edit */}
+                    {actions.edit && (
+                        <button
+                            onClick={() => onEdit?.(candidate.id)}
+                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                            title="Edit Candidate"
+                        >
+                            <i className="fa-duotone fa-regular fa-pen-to-square" />
+                        </button>
+                    )}
+
+                    {/* Verify */}
+                    {actions.verify &&
+                        candidate.verification_status !== "verified" && (
+                            <button
+                                onClick={() => onVerify?.(candidate)}
+                                className={`btn ${sizeClass} btn-square btn-success`}
+                                title="Verify Candidate"
+                            >
+                                <i className="fa-duotone fa-regular fa-badge-check" />
+                            </button>
+                        )}
+
+                    {/* End Representation */}
+                    {actions.endRepresentation && (
+                        <button
+                            onClick={() => setShowTerminateModal(true)}
+                            className={`btn ${sizeClass} btn-square btn-error btn-outline`}
+                            title="End Representation"
+                        >
+                            <i className="fa-duotone fa-regular fa-link-slash" />
+                        </button>
+                    )}
+
+                    {/* Divider before Message */}
+                    {actions.message && (actions.sendJobOpportunity || actions.edit || actions.verify || actions.endRepresentation) && (
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                    )}
+
+                    {/* Message */}
                     {actions.message && (
                         <span title={chatDisabledReason || undefined}>
                             <button
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-square btn-outline relative`}
+                                className={`btn ${sizeClass} btn-square btn-ghost relative`}
                                 title="Message Candidate"
                                 disabled={!canChat || startingChat}
                             >
@@ -196,45 +225,28 @@ export default function ActionsToolbar({
                         </span>
                     )}
 
-                    {actions.sendJobOpportunity && (
-                        <button
-                            onClick={() => setShowSubmitWizard(true)}
-                            className={`btn ${sizeClass} btn-square btn-primary`}
-                            title="Send Job Opportunity"
-                        >
-                            <i className="fa-duotone fa-regular fa-paper-plane" />
-                        </button>
-                    )}
-
-                    {actions.edit && (
-                        <button
-                            onClick={() => onEdit?.(candidate.id)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
-                            title="Edit Candidate"
-                        >
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        </button>
-                    )}
-
-                    {actions.verify &&
-                        candidate.verification_status !== "verified" && (
-                            <button
-                                onClick={() => onVerify?.(candidate)}
-                                className={`btn ${sizeClass} btn-square btn-success`}
-                                title="Verify Candidate"
-                            >
-                                <i className="fa-duotone fa-regular fa-badge-check" />
-                            </button>
-                        )}
-
-                    {actions.endRepresentation && (
-                        <button
-                            onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-error btn-outline`}
-                            title="End Representation"
-                        >
-                            <i className="fa-duotone fa-regular fa-link-slash" />
-                        </button>
+                    {/* View Details - far right */}
+                    {actions.viewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            {onViewDetails ? (
+                                <button
+                                    onClick={() => onViewDetails(candidate.id)}
+                                    className={`btn ${sizeClass} btn-square btn-primary`}
+                                    title="View Details"
+                                >
+                                    <i className="fa-duotone fa-regular fa-eye" />
+                                </button>
+                            ) : (
+                                <Link
+                                    href={`/portal/candidates/${candidate.id}`}
+                                    className={`btn ${sizeClass} btn-square btn-primary`}
+                                    title="View Details"
+                                >
+                                    <i className="fa-duotone fa-regular fa-eye" />
+                                </Link>
+                            )}
+                        </>
                     )}
                 </div>
 
@@ -268,28 +280,57 @@ export default function ActionsToolbar({
     return (
         <>
             <div className={`flex ${layoutClass} ${className}`}>
-                {actions.viewDetails && (
-                    <>
-                        {onViewDetails ? (
-                            <button
-                                onClick={() => onViewDetails(candidate.id)}
-                                className={`btn ${sizeClass} btn-outline gap-2`}
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
-                            </button>
-                        ) : (
-                            <Link
-                                href={`/portal/candidates/${candidate.id}`}
-                                className={`btn ${sizeClass} btn-outline gap-2`}
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
-                            </Link>
-                        )}
-                    </>
+                {/* Send Job Opportunity - CTA */}
+                {actions.sendJobOpportunity && (
+                    <button
+                        onClick={() => setShowSubmitWizard(true)}
+                        className={`btn ${sizeClass} btn-primary gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-paper-plane" />
+                        Send Job
+                    </button>
                 )}
 
+                {/* Edit */}
+                {actions.edit && (
+                    <button
+                        onClick={() => onEdit?.(candidate.id)}
+                        className={`btn ${sizeClass} btn-ghost gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-pen-to-square" />
+                        Edit
+                    </button>
+                )}
+
+                {/* Verify */}
+                {actions.verify &&
+                    candidate.verification_status !== "verified" && (
+                        <button
+                            onClick={() => onVerify?.(candidate)}
+                            className={`btn ${sizeClass} btn-success gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-badge-check" />
+                            Verify
+                        </button>
+                    )}
+
+                {/* End Representation */}
+                {actions.endRepresentation && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${sizeClass} btn-error btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Representation
+                    </button>
+                )}
+
+                {/* Divider before Message */}
+                {actions.message && (actions.sendJobOpportunity || actions.edit || actions.verify || actions.endRepresentation) && (
+                    <div className="divider divider-horizontal mx-0" />
+                )}
+
+                {/* Message */}
                 {actions.message && (
                     <span title={chatDisabledReason || undefined}>
                         <button
@@ -308,45 +349,28 @@ export default function ActionsToolbar({
                     </span>
                 )}
 
-                {actions.sendJobOpportunity && (
-                    <button
-                        onClick={() => setShowSubmitWizard(true)}
-                        className={`btn ${sizeClass} btn-primary gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-paper-plane" />
-                        Send Job
-                    </button>
-                )}
-
-                {actions.edit && (
-                    <button
-                        onClick={() => onEdit?.(candidate.id)}
-                        className={`btn ${sizeClass} btn-ghost gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        Edit
-                    </button>
-                )}
-
-                {actions.verify &&
-                    candidate.verification_status !== "verified" && (
-                        <button
-                            onClick={() => onVerify?.(candidate)}
-                            className={`btn ${sizeClass} btn-success gap-2`}
-                        >
-                            <i className="fa-duotone fa-regular fa-badge-check" />
-                            Verify
-                        </button>
-                    )}
-
-                {actions.endRepresentation && (
-                    <button
-                        onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${sizeClass} btn-error btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link-slash" />
-                        End Representation
-                    </button>
+                {/* View Details - far right */}
+                {actions.viewDetails && (
+                    <>
+                        <div className="divider divider-horizontal mx-0" />
+                        {onViewDetails ? (
+                            <button
+                                onClick={() => onViewDetails(candidate.id)}
+                                className={`btn ${sizeClass} btn-outline gap-2`}
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                                View Details
+                            </button>
+                        ) : (
+                            <Link
+                                href={`/portal/candidates/${candidate.id}`}
+                                className={`btn ${sizeClass} btn-outline gap-2`}
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                                View Details
+                            </Link>
+                        )}
+                    </>
                 )}
             </div>
 

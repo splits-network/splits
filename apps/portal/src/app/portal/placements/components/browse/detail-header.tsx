@@ -28,8 +28,8 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                 {item && (
                     <ActionsToolbar
                         placement={item}
-                        variant="icon-only"
-                        size="sm"
+                        variant="descriptive"
+                        size="md"
                         showActions={{
                             viewDetails: false,
                             statusActions: true,

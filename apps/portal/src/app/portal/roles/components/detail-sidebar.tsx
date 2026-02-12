@@ -166,9 +166,9 @@ export default function DetailSidebar({
                                 {/* Actions Toolbar */}
                                 <RoleActionsToolbar
                                     job={job}
-                                    variant="icon-only"
+                                    variant="descriptive"
                                     layout="horizontal"
-                                    size="sm"
+                                    size="md"
                                     onRefresh={handleRefresh}
                                     onViewPipeline={onViewPipeline}
                                     showActions={{
@@ -181,9 +181,9 @@ export default function DetailSidebar({
                                 {/* Actions Toolbar */}
                                 <RoleActionsToolbar
                                     job={job}
-                                    variant="icon-only"
+                                    variant="descriptive"
                                     layout="horizontal"
-                                    size="sm"
+                                    size="md"
                                     onRefresh={handleRefresh}
                                     onViewPipeline={onViewPipeline}
                                     showActions={{
