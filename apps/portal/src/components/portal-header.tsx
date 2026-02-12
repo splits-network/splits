@@ -57,16 +57,6 @@ export function PortalHeader() {
     return (
         <div className="sticky top-0 z-40">
             <header className="navbar bg-base-100 border-b border-base-300 min-h-16">
-                {/* Mobile menu toggle */}
-                <div className="flex-none lg:hidden">
-                    <label
-                        htmlFor="sidebar-drawer"
-                        className="btn btn-square btn-ghost"
-                    >
-                        <i className="fa-duotone fa-regular fa-bars text-lg"></i>
-                    </label>
-                </div>
-
                 {/* Logo */}
                 <div className="flex-none">
                     <Link href="/" className="">
