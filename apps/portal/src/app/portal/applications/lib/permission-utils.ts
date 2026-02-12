@@ -60,7 +60,6 @@ export function canTakeActionOnApplication(
             waitingMessage: getTerminalMessage(stage),
         };
     }
-
     // Determine base permissions by stage
     const permissions = getPermissionsByStage(stage, isRecruiter, isCompanyUser, isPlatformAdmin, candidateRecruiterId);
 
