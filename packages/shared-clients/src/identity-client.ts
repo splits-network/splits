@@ -1,5 +1,5 @@
 import { BaseClient, BaseClientConfig, ApiResponse } from './base-client';
-import { User, Organization, Membership } from '@splits-network/shared-types';
+import { User, Organization, UserRole, Membership } from '@splits-network/shared-types';
 
 /**
  * Client for Identity Service
@@ -38,23 +38,48 @@ export class IdentityClient extends BaseClient {
         return this.post('/organizations', data);
     }
 
-    // Membership endpoints
-    async getUserMemberships(userId: string): Promise<ApiResponse<Membership[]>> {
-        return this.get(`/users/${userId}/memberships`);
+    // User Role endpoints (entity-linked: recruiter, candidate)
+    async getUserRoles(userId: string): Promise<ApiResponse<UserRole[]>> {
+        return this.get(`/user-roles?user_id=${userId}`);
+    }
+
+    async createUserRole(data: {
+        user_id: string;
+        role_name: string;
+        role_entity_id: string;
+    }): Promise<ApiResponse<UserRole>> {
+        return this.post('/user-roles', data);
+    }
+
+    // Membership endpoints (org-scoped: company_admin, hiring_manager, platform_admin)
+    async getMemberships(params: {
+        organization_id?: string;
+        company_id?: string;
+        user_id?: string;
+    }): Promise<ApiResponse<Membership[]>> {
+        const query = new URLSearchParams();
+        if (params.organization_id) query.set('organization_id', params.organization_id);
+        if (params.company_id) query.set('company_id', params.company_id);
+        if (params.user_id) query.set('user_id', params.user_id);
+        return this.get(`/memberships?${query.toString()}`);
     }
 
     async createMembership(data: {
         user_id: string;
+        role_name: string;
         organization_id: string;
-        role: string;
+        company_id?: string;
     }): Promise<ApiResponse<Membership>> {
         return this.post('/memberships', data);
+    }
+
+    async deleteMembership(membershipId: string): Promise<ApiResponse<void>> {
+        return this.delete(`/memberships/${membershipId}`);
     }
 
     // Me endpoint
     async getCurrentUser(clerkUserId: string): Promise<ApiResponse<{
         user: User;
-        memberships: Membership[];
     }>> {
         return this.get(`/me?clerk_user_id=${clerkUserId}`);
     }

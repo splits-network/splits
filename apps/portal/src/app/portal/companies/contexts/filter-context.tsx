@@ -111,6 +111,10 @@ export function useFilter() {
     return context;
 }
 
+export function useFilterOptional() {
+    return useContext(FilterContext);
+}
+
 export function useActiveContext() {
     const { activeTab, marketplaceContext, myCompaniesContext } = useFilter();
     return activeTab === "marketplace" ? marketplaceContext : myCompaniesContext;

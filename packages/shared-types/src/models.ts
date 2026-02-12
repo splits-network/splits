@@ -112,15 +112,43 @@ export interface Organization {
     updated_at: Date;
 }
 
-export type MembershipRole = 'recruiter' | 'company_admin' | 'hiring_manager' | 'platform_admin';
+/** All possible role names in the system */
+export type RoleName = 'platform_admin' | 'company_admin' | 'hiring_manager' | 'recruiter' | 'candidate';
 
+/** A role definition from the roles table */
+export interface RoleDefinition {
+    id: string;
+    name: RoleName;
+    display_name: string;
+    description: string | null;
+    permissions: Record<string, Record<string, boolean>>;
+    is_system: boolean;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+/** A user's entity-linked role assignment from the user_roles table (recruiter, candidate) */
+export interface UserRole {
+    id: string;
+    user_id: string;
+    role_name: RoleName;
+    role_entity_id: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+}
+
+/** An org-scoped membership from the memberships table (company_admin, hiring_manager, platform_admin) */
 export interface Membership {
     id: string;
     user_id: string;
+    role_name: RoleName;
     organization_id: string;
-    role: MembershipRole;
-    created_at: Date;
-    updated_at: Date;
+    company_id: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
 }
 
 // ATS domain types

@@ -156,3 +156,7 @@ export function useRolesFilter() {
     }
     return context;
 }
+
+export function useRolesFilterOptional() {
+    return useContext(RolesFilterContext);
+}

@@ -2,7 +2,7 @@
  * ATS Service Domain Types
  * 
  * Generated from Supabase database schema.
- * Includes: applications, application_feedback, candidates, jobs, companies, placements, 
+ * Includes: applications, candidates, jobs, companies, placements,
  * ai_reviews, application_audit_log, job_requirements, job_pre_screen_questions, 
  * job_pre_screen_answers, candidate_sourcers, recruiter_candidates\n * \n * Note: candidate_role_assignments table was dropped during application flow consolidation
  */
@@ -22,14 +22,6 @@ export type Application = DbTable<'applications'>;
 export type ApplicationInsert = DbTableInsert<'applications'>;
 export type ApplicationUpdate = DbTableUpdate<'applications'>;
 
-
-// ============================================================================
-// APPLICATION FEEDBACK (NEW - PHASE 1 AI REVIEW LOOP)
-// ============================================================================
-
-export type ApplicationFeedback = DbTable<'application_feedback'>;
-export type ApplicationFeedbackInsert = DbTableInsert<'application_feedback'>;
-export type ApplicationFeedbackUpdate = DbTableUpdate<'application_feedback'>;
 
 // ============================================================================
 // CANDIDATES

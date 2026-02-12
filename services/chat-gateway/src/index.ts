@@ -18,7 +18,7 @@ type ClientMessage =
     | { type: "subscribe"; channels: string[] }
     | { type: "typing.started"; conversationId: string }
     | { type: "typing.stopped"; conversationId: string }
-    | { type: "presence.ping" }
+    | { type: "presence.ping"; status?: "online" | "idle" }
     | {
         type: "read.receipt";
         conversationId: string;
@@ -284,12 +284,12 @@ async function fetchIdentityUserId(
     return payload?.data?.id ?? null;
 }
 
-async function setPresence(redisData: Redis, identityUserId: string) {
+async function setPresence(redisData: Redis, identityUserId: string, status: "online" | "idle" = "online") {
     await redisData.setex(
         `presence:user:${identityUserId}`,
         PRESENCE_TTL_SECONDS,
         JSON.stringify({
-            status: "online",
+            status,
             lastSeenAt: new Date().toISOString(),
         }),
     );
@@ -344,7 +344,8 @@ async function handleClientMessage(
     }
 
     if (message.type === "presence.ping") {
-        await setPresence(redisData, authContext.identityUserId);
+        const status = message.status === "idle" ? "idle" : "online";
+        await setPresence(redisData, authContext.identityUserId, status);
         return;
     }
 

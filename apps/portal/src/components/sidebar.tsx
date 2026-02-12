@@ -6,6 +6,7 @@ import { useUserProfile } from "@/contexts";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useChatGateway } from "@/hooks/use-chat-gateway";
+import { useActivityStatus } from "@/hooks/use-activity-status";
 import {
     registerChatRefresh,
     requestChatRefresh,
@@ -91,6 +92,14 @@ const navItems: NavItem[] = [
                 href: "/portal/invitations",
                 label: "Invitations",
                 icon: "fa-envelope",
+                roles: ["recruiter"],
+                section: "management",
+                mobileDock: false,
+            },
+            {
+                href: "/portal/referral-codes",
+                label: "Referral Codes",
+                icon: "fa-link",
                 roles: ["recruiter"],
                 section: "management",
                 mobileDock: false,
@@ -349,6 +358,7 @@ export function Sidebar() {
     // Badge counts (could be fetched from API)
     const [badges, setBadges] = useState<Record<string, number>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const activityStatus = useActivityStatus({ enabled: Boolean(currentUserId) });
 
     const fetchUnreadCount = useCallback(async () => {
         const token = await getToken();
@@ -476,6 +486,7 @@ export function Sidebar() {
         enabled: Boolean(currentUserId),
         channels: currentUserId ? [`user:${currentUserId}`] : [],
         getToken,
+        presenceStatus: activityStatus,
         onReconnect: () => {
             requestChatRefresh();
         },

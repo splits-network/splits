@@ -68,10 +68,15 @@ export class RecruiterServiceV2 {
 
         const recruiter = await this.repository.createRecruiter({
             ...data,
-            status: data.status || 'active',  //may be changed to 'pending' based on requirements 
+            status: data.status || 'active',  //may be changed to 'pending' based on requirements
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
+
+        // Create user_role entry for the recruiter
+        if (recruiter.user_id && recruiter.status === 'active') {
+            await this.repository.createRecruiterUserRole(recruiter.user_id, recruiter.id);
+        }
 
         // Publish event
         await this.eventPublisher.publish('recruiter.created', {

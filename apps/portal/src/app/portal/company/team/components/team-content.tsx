@@ -10,8 +10,8 @@ interface TeamMember {
     id: string;
     user_id: string;
     organization_id: string;
-    role: string;
-    user?: {
+    role_name: string;
+    users?: {
         id: string;
         name?: string;
         email: string;
@@ -452,9 +452,9 @@ export default function TeamManagementContent({
                                                         <div className="bg-neutral text-neutral-content rounded-full w-10">
                                                             <span className="text-xs">
                                                                 {(
-                                                                    member.user
+                                                                    member.users
                                                                         ?.name ||
-                                                                    member.user
+                                                                    member.users
                                                                         ?.email ||
                                                                     "U"
                                                                 )
@@ -468,19 +468,19 @@ export default function TeamManagementContent({
                                                     </div>
                                                     <div>
                                                         <div className="font-medium">
-                                                            {member.user
+                                                            {member.users
                                                                 ?.name ||
                                                                 "Unknown"}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{member.user?.email}</td>
+                                            <td>{member.users?.email}</td>
                                             <td>
                                                 <span
-                                                    className={`badge ${getRoleBadge(member.role)}`}
+                                                    className={`badge ${getRoleBadge(member.role_name)}`}
                                                 >
-                                                    {getRoleLabel(member.role)}
+                                                    {getRoleLabel(member.role_name)}
                                                 </span>
                                             </td>
                                             <td>
@@ -489,16 +489,16 @@ export default function TeamManagementContent({
                                                 ).toLocaleDateString()}
                                             </td>
                                             <td>
-                                                {member.role !==
+                                                {member.role_name !==
                                                     "company_admin" && (
                                                     <button
                                                         className="btn btn-ghost btn-xs text-error"
                                                         onClick={() =>
                                                             handleRemoveMember(
                                                                 member.id,
-                                                                member.user
+                                                                member.users
                                                                     ?.name ||
-                                                                    member.user
+                                                                    member.users
                                                                         ?.email ||
                                                                     "user",
                                                             )

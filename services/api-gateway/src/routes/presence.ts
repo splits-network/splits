@@ -4,8 +4,15 @@ import { requireAuth, AuthenticatedRequest } from "../rbac";
 import { getCorrelationId } from "./v2/common";
 
 /**
- * Register presence routes for site-wide activity tracking
- * Replaces chat-only WebSocket presence with comprehensive activity monitoring
+ * Register presence routes for site-wide activity tracking.
+ *
+ * DEPRECATED: These REST POST routes are superseded by WebSocket-based presence
+ * via the chat-gateway (presence.ping messages). The frontend no longer calls these
+ * endpoints. They also have a bug: they write to presence:user:${clerkUserId} but
+ * the GET endpoint reads by identityUserId, so pings written here are never read.
+ *
+ * Kept temporarily for backward compatibility. Safe to remove once confirmed
+ * no external consumers exist.
  */
 export async function registerPresenceRoutes(
     app: FastifyInstance,

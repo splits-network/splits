@@ -29,7 +29,7 @@ function deriveUserRole(user: any): string | null {
     const memberships = Array.isArray(user.memberships)
         ? user.memberships
         : user.memberships ? [user.memberships] : [];
-    if (memberships.some((m: any) => ['company_admin', 'hiring_manager'].includes(m.role)))
+    if (memberships.some((m: any) => ['company_admin', 'hiring_manager'].includes(m.role_name)))
         return 'company';
 
     return null;
@@ -275,7 +275,7 @@ export class ChatRepository {
                 id, name, email, profile_image_url,
                 recruiters!recruiters_user_id_fkey ( id, status ),
                 candidates!candidates_user_id_fkey ( id ),
-                memberships!memberships_user_id_fkey ( role )
+                memberships!memberships_user_id_fkey1 ( role_name )
             `)
             .in('id', Array.from(userIds));
 
@@ -355,7 +355,7 @@ export class ChatRepository {
                 id, name, email, profile_image_url,
                 recruiters!recruiters_user_id_fkey ( id, status ),
                 candidates!candidates_user_id_fkey ( id ),
-                memberships!memberships_user_id_fkey ( role )
+                memberships!memberships_user_id_fkey1 ( role_name )
             `)
             .in('id', [conversation.participant_a_id, conversation.participant_b_id]);
 

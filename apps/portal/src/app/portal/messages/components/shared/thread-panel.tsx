@@ -217,6 +217,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
             ? [`user:${data.participant.user_id}`, `conv:${conversationId}`]
             : [`conv:${conversationId}`],
         getToken,
+        presencePingEnabled: false, // Sidebar handles presence pings
         onReconnect: () => {
             requestChatRefresh();
         },

@@ -6,6 +6,8 @@ import { UserRepository } from './users/repository';
 import { UserServiceV2 } from './users/service';
 import { OrganizationRepository } from './organizations/repository';
 import { OrganizationServiceV2 } from './organizations/service';
+import { UserRoleRepository } from './user-roles/repository';
+import { UserRoleServiceV2 } from './user-roles/service';
 import { MembershipRepository } from './memberships/repository';
 import { MembershipServiceV2 } from './memberships/service';
 import { InvitationRepository } from './invitations/repository';
@@ -16,6 +18,7 @@ import { WebhookRepositoryV2 } from './webhooks/repository';
 import { WebhooksServiceV2 } from './webhooks/service';
 import { registerUserRoutes } from './users/routes';
 import { registerOrganizationRoutes } from './organizations/routes';
+import { registerUserRoleRoutes } from './user-roles/routes';
 import { registerMembershipRoutes } from './memberships/routes';
 import { registerInvitationRoutes } from './invitations/routes';
 import { registerConsentRoutes } from './consent/routes';
@@ -38,6 +41,7 @@ export async function registerV2Routes(
     const accessResolver = (clerkUserId: string) => resolveAccessContext(supabase, clerkUserId);
     const userRepository = new UserRepository(supabaseUrl, supabaseKey);
     const orgRepository = new OrganizationRepository(supabaseUrl, supabaseKey);
+    const userRoleRepository = new UserRoleRepository(supabaseUrl, supabaseKey);
     const membershipRepository = new MembershipRepository(supabaseUrl, supabaseKey);
     const invitationRepository = new InvitationRepository(supabaseUrl, supabaseKey);
     const consentRepository = new ConsentRepository(supabaseUrl, supabaseKey);
@@ -45,6 +49,12 @@ export async function registerV2Routes(
 
     const userService = new UserServiceV2(userRepository, eventPublisher, logger, accessResolver);
     const orgService = new OrganizationServiceV2(orgRepository, eventPublisher, logger, accessResolver);
+    const userRoleService = new UserRoleServiceV2(
+        userRoleRepository,
+        eventPublisher,
+        logger,
+        accessResolver
+    );
     const membershipService = new MembershipServiceV2(
         membershipRepository,
         eventPublisher,
@@ -54,10 +64,10 @@ export async function registerV2Routes(
     const invitationService = new InvitationServiceV2(
         invitationRepository,
         userRepository,
-        membershipRepository,
         eventPublisher,
         logger,
-        accessResolver
+        accessResolver,
+        membershipRepository
     );
     const consentService = new ConsentServiceV2(consentRepository, accessResolver);
     const webhookService = new WebhooksServiceV2(webhookRepository, eventPublisher);
@@ -66,6 +76,7 @@ export async function registerV2Routes(
 
     registerUserRoutes(app, { userService, logError, logInfo });
     registerOrganizationRoutes(app, { organizationService: orgService, logError });
+    registerUserRoleRoutes(app, { userRoleService, logError });
     registerMembershipRoutes(app, { membershipService, logError });
     registerInvitationRoutes(app, { invitationService, logError });
     registerConsentRoutes(app, { consentService, logError });

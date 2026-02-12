@@ -291,51 +291,54 @@ function OverviewTab({ application }: { application: Application }) {
     const stageBadge = getApplicationStageBadge(application.stage);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Status</h4>
-                <span className={`badge ${stageBadge.className} badge-lg`}>
-                    {stageBadge.label}
-                </span>
-            </div>
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">Status</h4>
+                    <span
+                        className={`badge ${stageBadge.className} badge-soft badge-outline`}
+                    >
+                        {stageBadge.label}
+                    </span>
+                </div>
 
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Submitted</h4>
-                <p>{formatApplicationDate(application.created_at)}</p>
-            </div>
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">Submitted</h4>
+                    <p>{formatApplicationDate(application.created_at)}</p>
+                </div>
 
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Recruiter</h4>
-                {(() => {
-                    const recruiterName =
-                        application.recruiter?.name ||
-                        application.recruiter?.user?.name;
-                    const recruiterEmail =
-                        application.recruiter?.email ||
-                        application.recruiter?.user?.email;
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">Recruiter</h4>
+                    {(() => {
+                        const recruiterName =
+                            application.recruiter?.name ||
+                            application.recruiter?.user?.name;
+                        const recruiterEmail =
+                            application.recruiter?.email ||
+                            application.recruiter?.user?.email;
 
-                    if (recruiterName || recruiterEmail) {
+                        if (recruiterName || recruiterEmail) {
+                            return (
+                                <>
+                                    {recruiterName && <p>{recruiterName}</p>}
+                                    {recruiterEmail && (
+                                        <p className="text-sm text-base-content/60">
+                                            {recruiterEmail}
+                                        </p>
+                                    )}
+                                </>
+                            );
+                        }
                         return (
-                            <>
-                                {recruiterName && <p>{recruiterName}</p>}
-                                {recruiterEmail && (
-                                    <p className="text-sm text-base-content/60">
-                                        {recruiterEmail}
-                                    </p>
-                                )}
-                            </>
+                            <p className="text-sm text-base-content/50 italic">
+                                No candidate recruiter assigned
+                            </p>
                         );
-                    }
-                    return (
-                        <p className="text-sm text-base-content/50 italic">
-                            No candidate recruiter assigned
-                        </p>
-                    );
-                })()}
+                    })()}
+                </div>
             </div>
-
-            <AIReviewPanel applicationId={application.id} variant="mini-card" />
-        </div>
+            <AIReviewPanel applicationId={application.id} variant="full" />
+        </>
     );
 }
 
@@ -546,7 +549,11 @@ function JobTab({ application }: { application: Application }) {
                         <i className="fa-duotone fa-users mr-2" />
                         Company Contacts
                     </h4>
-                    <CompanyContacts companyId={(job.company?.id || job.company_id) as string} />
+                    <CompanyContacts
+                        companyId={
+                            (job.company?.id || job.company_id) as string
+                        }
+                    />
                 </div>
             )}
 

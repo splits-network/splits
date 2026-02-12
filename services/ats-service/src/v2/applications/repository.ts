@@ -361,7 +361,7 @@ export class ApplicationRepository {
             switch (inc) {
                 case 'recruiter':
                     // Join with network schema recruiters table and identity users for contact info
-                    selectClause += `,recruiter:recruiters(id, bio, phone, specialties, status, user_id, user:users(name, email))`;
+                    selectClause += `,recruiter:recruiters(id, bio, phone, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
                     break;
                 case 'documents':
                 case 'document':
@@ -372,12 +372,12 @@ export class ApplicationRepository {
                 case 'pre_screen_answers':
                 case 'pre-screen-answers':
                     // Join with pre-screen answers (one-to-many relationship via application_id)
-                    selectClause += `,pre_screen_answers:job_pre_screen_answers!application_id(id, question_id, answer, created_at, question:job_pre_screen_questions(question, question_type, is_required))`;
+                    selectClause += `,pre_screen_answers:job_pre_screen_answers!job_pre_screen_answers_application_id_fkey(id, question_id, answer, created_at, question:job_pre_screen_questions(question, question_type, is_required))`;
                     break;
                 case 'audit_log':
                 case 'audit':
                     // Audit log - comprehensive activity trail
-                    selectClause += `,audit_log:application_audit_log!application_id(id, action, performed_by_user_id, performed_by_role, company_id, old_value, new_value, metadata, ip_address, user_agent, created_at)`;
+                    selectClause += `,audit_log:application_audit_log!application_audit_log_application_id_fkey(id, action, performed_by_user_id, performed_by_role, company_id, old_value, new_value, metadata, ip_address, user_agent, created_at)`;
                     break;
                 case 'job_requirements':
                     // Requirements are part of the job - already fetched with job.requirements
@@ -737,7 +737,7 @@ export class ApplicationRepository {
                     id,
                     user_id,
                     status,
-                    user:users!user_id(name, email)
+                    user:users!recruiters_user_id_fkey(name, email)
                 )
             `)
             .eq('candidate_id', candidateId)

@@ -21,6 +21,14 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
 
     return (
         <MetricCard className="group hover:shadow-lg transition-all duration-200">
+            <div className="flex items-center gap-2">
+                <span
+                    className={`badge ${status.badgeClass} w-full rounded-t-2xl`}
+                >
+                    <i className={`fa-duotone fa-regular ${status.icon}`} />
+                    {status.label}
+                </span>
+            </div>
             <MetricCard.Header>
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3 min-w-0">
@@ -45,16 +53,6 @@ export default function Item({ item, onViewDetails, onMessage }: ItemProps) {
                                 {item.candidate?.email || "N/A"}
                             </p>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                        <span
-                            className={`badge ${status.badgeClass} badge-sm gap-1.5`}
-                        >
-                            <i
-                                className={`fa-duotone fa-regular ${status.icon}`}
-                            />
-                            {status.label}
-                        </span>
                     </div>
                 </div>
             </MetricCard.Header>

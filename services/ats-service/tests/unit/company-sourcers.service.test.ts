@@ -29,17 +29,17 @@ describe('CompanySourcerServiceV2 (unit)', () => {
         service = new CompanySourcerServiceV2(repository, eventPublisher as any, supabase);
     });
 
-    it('requires company_id and sourcer_recruiter_id', async () => {
+    it('requires company_id and recruiter_id', async () => {
         (resolveAccessContext as any).mockResolvedValue({ roles: ['recruiter'], isPlatformAdmin: false, recruiterId: 'rec-1', identityUserId: 'user-1' });
-        await expect(service.create('clerk-1', { company_id: '', sourcer_recruiter_id: '' } as any)).rejects.toThrow(
-            'company_id and sourcer_recruiter_id are required'
+        await expect(service.create('clerk-1', { company_id: '', recruiter_id: '' } as any)).rejects.toThrow(
+            'company_id and recruiter_id are required'
         );
     });
 
     it('prevents recruiters assigning other recruiters', async () => {
         (resolveAccessContext as any).mockResolvedValue({ roles: ['recruiter'], isPlatformAdmin: false, recruiterId: 'rec-1', identityUserId: 'user-1' });
         await expect(
-            service.create('clerk-1', { company_id: 'comp-1', sourcer_recruiter_id: 'rec-2' } as any)
+            service.create('clerk-1', { company_id: 'comp-1', recruiter_id: 'rec-2' } as any)
         ).rejects.toThrow('Recruiters can only assign sourcer credit to themselves');
     });
 });

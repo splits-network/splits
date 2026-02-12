@@ -78,6 +78,10 @@ export {
 // Portal components
 export { ModalPortal } from './portal/modal-portal';
 
+// Note: DevDebugPanel moved to apps/portal/src/components/dev-debug-panel.tsx
+// because it depends on Clerk hooks which cause duplicate-instance issues
+// when imported cross-package via transpilePackages.
+
 // Application Notes components
 export {
     ApplicationNotesPanel,

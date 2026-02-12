@@ -899,24 +899,92 @@ All role-based actions are logged:
 
 ### 9.1 Key Files
 
-- **RBAC Logic:** [services/api-gateway/src/rbac.ts](../services/api-gateway/src/rbac.ts)
-- **Auth Middleware:** [services/api-gateway/src/auth.ts](../services/api-gateway/src/auth.ts)
-- **Identity Service:** [services/identity-service/src/service.ts](../services/identity-service/src/service.ts)
-- **Shared Types:** [packages/shared-types/src/](../packages/shared-types/src/)
+- **Access Context Resolution:** [packages/shared-access-context/src/index.ts](../../packages/shared-access-context/src/index.ts)
+- **User Role Service:** [services/identity-service/src/v2/user-roles/service.ts](../../services/identity-service/src/v2/user-roles/service.ts)
+- **User Role Repository:** [services/identity-service/src/v2/user-roles/repository.ts](../../services/identity-service/src/v2/user-roles/repository.ts)
+- **RBAC Logic:** [services/api-gateway/src/rbac.ts](../../services/api-gateway/src/rbac.ts)
+- **Auth Middleware:** [services/api-gateway/src/auth.ts](../../services/api-gateway/src/auth.ts)
+- **Shared Types:** [packages/shared-types/src/models.ts](../../packages/shared-types/src/models.ts)
 
 ### 9.2 Database Tables
 
 - **Users:** `users`
+- **Roles:** `roles` - Centralized role definitions with permissions JSONB
+- **Memberships:** `memberships` - Org-scoped role assignments (company_admin, hiring_manager, platform_admin)
+- **User Roles:** `user_roles` - Entity-linked role assignments (recruiter, candidate)
 - **Organizations:** `organizations` (with `type`: `company` or `platform`)
-- **Memberships:** `memberships` (links users to organizations with roles)
+- **Legacy:** `_deprecated_memberships` (historical backup, do not use)
 - **Teams:** `teams` (Phase 4+)
 - **Team Members:** `team_members` (Phase 4+, with team-level roles)
 
-### 9.3 Type Definitions
+### 9.3 Schema: `roles` table
+
+```sql
+-- Role definitions with extensible permissions
+CREATE TABLE roles (
+    id UUID PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,          -- 'platform_admin', 'company_admin', 'hiring_manager', 'recruiter', 'candidate'
+    display_name TEXT NOT NULL,
+    description TEXT,
+    permissions JSONB DEFAULT '{}',     -- Extensible permission capabilities
+    is_system BOOLEAN DEFAULT false,    -- System roles cannot be deleted
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### 9.4 Schema: `memberships` table
+
+```sql
+-- Org-scoped role assignments (company_admin, hiring_manager, platform_admin)
+CREATE TABLE memberships (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    role_name TEXT NOT NULL REFERENCES roles(name),
+    organization_id UUID NOT NULL REFERENCES organizations(id),
+    company_id UUID REFERENCES companies(id),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    deleted_at TIMESTAMPTZ
+);
+```
+
+### 9.5 Schema: `user_roles` table
+
+```sql
+-- Entity-linked role assignments (recruiter, candidate)
+CREATE TABLE user_roles (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    role_name TEXT NOT NULL REFERENCES roles(name),
+    role_entity_id UUID NOT NULL,       -- recruiters.id (when role_name='recruiter'), candidates.id (when role_name='candidate')
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    deleted_at TIMESTAMPTZ
+);
+```
+
+### 9.6 Type Definitions
 
 ```typescript
-// From api-gateway/src/auth.ts
-export type UserRole = 'recruiter' | 'company_admin' | 'hiring_manager' | 'platform_admin';
+// From packages/shared-types/src/models.ts
+export type RoleName = 'platform_admin' | 'company_admin' | 'hiring_manager' | 'recruiter' | 'candidate';
+
+export interface Membership {
+    id: string;
+    user_id: string;
+    role_name: RoleName;
+    organization_id: string;
+    company_id: string | null;
+}
+
+export interface UserRole {
+    id: string;
+    user_id: string;
+    role_name: RoleName;
+    role_entity_id: string;  // role_name determines what this points to
+}
 
 // Team roles from team_members
 export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';

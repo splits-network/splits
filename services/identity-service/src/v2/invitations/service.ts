@@ -16,10 +16,10 @@ export class InvitationServiceV2 {
     constructor(
         private repository: InvitationRepository,
         private userRepository: UserRepository,
-        private membershipRepository: MembershipRepository,
         private eventPublisher: EventPublisherV2,
         private logger: Logger,
-        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
+        private membershipRepository: MembershipRepository
     ) { }
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
@@ -273,7 +273,7 @@ export class InvitationServiceV2 {
     }
 
     /**
-     * Accept an invitation and create membership
+     * Accept an invitation and create user_role
      */
     async acceptInvitation(invitationId: string, clerkUserId: string, userEmail: string) {
         this.logger.info({ invitationId, clerkUserId }, 'InvitationService.acceptInvitation');
@@ -323,10 +323,10 @@ export class InvitationServiceV2 {
         // Create membership with the role from the invitation
         const membership = await this.membershipRepository.createMembership({
             id: uuidv4(),
+            user_id: userId,
+            role_name: invitation.role,
             organization_id: invitation.organization_id,
             company_id: invitation.company_id,
-            user_id: userId,
-            role: invitation.role,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
@@ -342,10 +342,10 @@ export class InvitationServiceV2 {
 
         await this.eventPublisher.publish('membership.created', {
             membership_id: membership.id,
-            organization_id: membership.organization_id,
-            company_id: membership.company_id,
-            user_id: membership.user_id,
-            role: membership.role,
+            user_id: userId,
+            role_name: invitation.role,
+            organization_id: invitation.organization_id,
+            company_id: invitation.company_id,
         });
 
         // Final update to ensure onboarding status is correctly set to completed

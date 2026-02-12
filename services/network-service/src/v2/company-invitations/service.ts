@@ -232,15 +232,15 @@ export class CompanyInvitationServiceV2 {
         }
 
         // Check if user already has a company
-        const { data: existingMembership } = await this.supabase
+        const { data: existingRole } = await this.supabase
             .from('memberships')
             .select('id')
             .eq('user_id', accessContext.identityUserId)
-            .eq('role', 'company_admin')
+            .eq('role_name', 'company_admin')
             .is('deleted_at', null)
             .maybeSingle();
 
-        if (existingMembership) {
+        if (existingRole) {
             throw new Error('You are already an admin of a company');
         }
 

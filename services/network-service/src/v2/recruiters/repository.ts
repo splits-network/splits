@@ -322,4 +322,25 @@ export class RecruiterRepository {
 
         return result;
     }
+
+    /**
+     * Create a user_role entry for a recruiter.
+     * Used during recruiter creation to explicitly assign the 'recruiter' role.
+     */
+    async createRecruiterUserRole(userId: string, recruiterId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('user_roles')
+            .insert({
+                user_id: userId,
+                role_name: 'recruiter',
+                role_entity_id: recruiterId,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
+
+        // Ignore unique constraint violations (role already exists)
+        if (error && !error.message?.includes('duplicate') && error.code !== '23505') {
+            throw error;
+        }
+    }
 }

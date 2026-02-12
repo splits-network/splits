@@ -15,8 +15,16 @@ export class MembershipRepository {
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
             .from('memberships')
-            .select('*, organizations(*), companies(*), users(*)', { count: 'exact' })
+            .select('*, users(*), organizations(*), companies(*), roles!memberships_role_name_fkey(*)', { count: 'exact' })
             .is('deleted_at', null);
+
+        if (filters.user_id) {
+            query = query.eq('user_id', filters.user_id);
+        }
+
+        if (filters.role_name) {
+            query = query.eq('role_name', filters.role_name);
+        }
 
         if (filters.organization_id) {
             query = query.eq('organization_id', filters.organization_id);
@@ -30,18 +38,6 @@ export class MembershipRepository {
             }
         }
 
-        if (filters.user_id) {
-            query = query.eq('user_id', filters.user_id);
-        }
-
-        if (filters.role) {
-            query = query.eq('role', filters.role);
-        }
-
-        if (filters.status) {
-            query = query.eq('status', filters.status);
-        }
-
         const { data, count, error } = await query
             .order('created_at', { ascending: false })
             .range((filters.page - 1) * filters.limit, filters.page * filters.limit - 1);
@@ -53,7 +49,7 @@ export class MembershipRepository {
     async findMembershipById(id: string): Promise<any> {
         const { data, error } = await this.supabase
             .from('memberships')
-            .select('*, organizations(*), companies(*), users(*)')
+            .select('*, users(*), organizations(*), companies(*), roles!memberships_role_name_fkey(*)')
             .eq('id', id)
             .is('deleted_at', null)
             .single();
@@ -66,7 +62,7 @@ export class MembershipRepository {
         const { data: membership, error } = await this.supabase
             .from('memberships')
             .insert([data])
-            .select('*, organizations(*), companies(*), users(*)')
+            .select('*, users(*), organizations(*), companies(*), roles!memberships_role_name_fkey(*)')
             .single();
 
         if (error) throw error;
@@ -78,7 +74,7 @@ export class MembershipRepository {
             .from('memberships')
             .update(updates)
             .eq('id', id)
-            .select('*, organizations(*), companies(*), users(*)')
+            .select('*, users(*), organizations(*), companies(*), roles!memberships_role_name_fkey(*)')
             .single();
 
         if (error) throw error;

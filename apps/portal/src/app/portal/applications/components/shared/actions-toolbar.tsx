@@ -482,6 +482,7 @@ export default function ActionsToolbar({
                             disabled={actionLoading}
                         >
                             <i className="fa-duotone fa-regular fa-comment-edit" />
+                            Request
                         </button>
                     )}
                     {actions.advanceStage && (

@@ -43,10 +43,10 @@ describe('InvitationServiceV2 (unit)', () => {
         const service = new InvitationServiceV2(
             repository as any,
             userRepository as any,
-            membershipRepository as any,
             eventPublisher as any,
             logger as any,
-            resolver
+            resolver,
+            membershipRepository as any
         );
 
         await expect(service.createInvitation('clerk-1', { organization_id: 'org-1', role: 'company_admin' }))
@@ -58,10 +58,10 @@ describe('InvitationServiceV2 (unit)', () => {
         const service = new InvitationServiceV2(
             repository as any,
             userRepository as any,
-            membershipRepository as any,
             eventPublisher as any,
             logger as any,
-            resolver
+            resolver,
+            membershipRepository as any
         );
 
         await expect(service.createInvitation('clerk-1', {
@@ -87,10 +87,10 @@ describe('InvitationServiceV2 (unit)', () => {
         const service = new InvitationServiceV2(
             repository as any,
             userRepository as any,
-            membershipRepository as any,
             eventPublisher as any,
             logger as any,
-            resolver
+            resolver,
+            membershipRepository as any
         );
 
         await service.acceptInvitation('inv-1', 'clerk-1', 'test@example.com');
@@ -98,6 +98,14 @@ describe('InvitationServiceV2 (unit)', () => {
         expect(repository.updateInvitation).toHaveBeenCalledWith(
             'inv-1',
             expect.objectContaining({ status: 'accepted' })
+        );
+        expect(membershipRepository.createMembership).toHaveBeenCalledWith(
+            expect.objectContaining({
+                user_id: 'user-1',
+                role_name: 'company_admin',
+                organization_id: 'org-1',
+                company_id: 'company-1',
+            })
         );
         expect(eventPublisher.publish).toHaveBeenCalledWith(
             'invitation.accepted',

@@ -666,4 +666,25 @@ export class CandidateRepository {
             await Promise.all(updates);
         }
     }
+
+    /**
+     * Create a user_role entry for a candidate with a user account.
+     * Used when a candidate is created or linked to a user.
+     */
+    async createCandidateUserRole(userId: string, candidateId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('user_roles')
+            .insert({
+                user_id: userId,
+                role_name: 'candidate',
+                role_entity_id: candidateId,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
+
+        // Ignore unique constraint violations (role already exists)
+        if (error && !error.message?.includes('duplicate') && error.code !== '23505') {
+            throw error;
+        }
+    }
 }

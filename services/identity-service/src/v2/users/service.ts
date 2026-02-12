@@ -214,7 +214,7 @@ export class UserServiceV2 {
             return existingUser;
         }
 
-        // Create user data  
+        // Create user data
         const createData: any = {
             clerk_user_id: clerkUserId,
             email: userData.email,
@@ -222,6 +222,7 @@ export class UserServiceV2 {
             //image_url: userData.image_url,
             onboarding_status: 'pending',
             onboarding_step: 1,
+            referred_by_recruiter_id: userData.referred_by_recruiter_id || null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };

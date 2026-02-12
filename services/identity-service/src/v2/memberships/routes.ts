@@ -26,9 +26,9 @@ export function registerMembershipRoutes(
             const result = await membershipService.findMemberships(clerkUserId, {
                 ...paginationParams,
                 user_id: query.user_id,
+                role_name: query.role_name,
                 organization_id: query.organization_id,
                 company_id: query.company_id,
-                role: query.role,
             });
 
             reply.send(

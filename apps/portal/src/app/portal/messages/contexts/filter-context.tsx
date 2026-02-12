@@ -44,7 +44,7 @@ interface FilterContextValue {
     showStats: boolean;
     setShowStats: (show: boolean) => void;
     currentUserId: string | null;
-    presenceMap: Record<string, { status: "online" | "offline" }>;
+    presenceMap: Record<string, { status: "online" | "idle" | "offline" }>;
     requestCount: number;
     contextMap: Record<string, ConversationContext>;
 }
@@ -191,6 +191,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         enabled: Boolean(currentUserId),
         channels: currentUserId ? [`user:${currentUserId}`] : [],
         getToken,
+        presencePingEnabled: false, // Sidebar handles presence pings
         onReconnect: () => {
             requestChatRefresh();
         },

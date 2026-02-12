@@ -46,15 +46,9 @@ export default function Sidebar({ item, onClose, onMessage }: SidebarProps) {
                     <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4">
                         <div className="flex items-center justify-between mb-2">
                             <div className="min-w-0 flex-1">
-                                <h2 className="text-lg font-bold truncate">
-                                    <i className="fa-duotone fa-regular fa-briefcase mr-2" />
-                                    {candidateName}
+                                <h2 className="text-lg font-semibold text-base-content truncate">
+                                    Application Details
                                 </h2>
-                                {jobTitle && (
-                                    <p className="text-sm text-base-content/60 truncate">
-                                        {jobTitle}
-                                    </p>
-                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
@@ -67,6 +61,8 @@ export default function Sidebar({ item, onClose, onMessage }: SidebarProps) {
                                         addNote: true,
                                         advanceStage: true,
                                         reject: true,
+                                        requestChanges: true,
+                                        requestPrescreen: true,
                                     }}
                                     onMessage={onMessage}
                                 />

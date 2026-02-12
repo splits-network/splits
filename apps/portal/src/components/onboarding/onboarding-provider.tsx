@@ -504,8 +504,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     // This ensures the user has company_admin role for billing operations
                     await client.post("/memberships", {
                         user_id: userData.id,
+                        role_name: selectedRole,
                         organization_id: organization.id,
-                        role: selectedRole,
                     });
 
                     await client.post(
@@ -532,6 +532,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             // Non-blocking - company is created, relationship can be fixed later
                             console.error(
                                 "Failed to complete recruiter relationship:",
+                                relError,
+                            );
+                        }
+                    }
+
+                    // If user was referred by a recruiter (rec_code), create sourcer relationship
+                    if (userData.referred_by_recruiter_id && !state.fromInvitation?.id) {
+                        try {
+                            await client.post(
+                                "/recruiter-companies/request-connection",
+                                {
+                                    recruiter_id: userData.referred_by_recruiter_id,
+                                    company_id: company.id,
+                                    relationship_type: "sourcer",
+                                },
+                            );
+                        } catch (relError) {
+                            // Non-blocking - company is created, sourcer can be set later
+                            console.error(
+                                "Failed to create sourcer relationship from rec_code:",
                                 relError,
                             );
                         }

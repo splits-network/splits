@@ -287,10 +287,11 @@ export class ContactLookupHelper {
                 .from('memberships')
                 .select('user_id')
                 .eq('organization_id', organizationId)
-                .eq('role', 'company_admin');
+                .eq('role_name', 'company_admin')
+                .is('deleted_at', null);
 
             if (error) {
-                this.logger.error({ organizationId, error }, 'Failed to fetch org memberships from database');
+                this.logger.error({ organizationId, error }, 'Failed to fetch company admin user_roles from database');
                 return [];
             }
 
