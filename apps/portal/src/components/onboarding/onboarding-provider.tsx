@@ -536,6 +536,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             );
                         }
                     }
+
+                    // If user was referred by a recruiter (rec_code), create sourcer relationship
+                    if (userData.referred_by_recruiter_id && !state.fromInvitation?.id) {
+                        try {
+                            await client.post(
+                                "/recruiter-companies/request-connection",
+                                {
+                                    recruiter_id: userData.referred_by_recruiter_id,
+                                    company_id: company.id,
+                                    relationship_type: "sourcer",
+                                },
+                            );
+                        } catch (relError) {
+                            // Non-blocking - company is created, sourcer can be set later
+                            console.error(
+                                "Failed to create sourcer relationship from rec_code:",
+                                relError,
+                            );
+                        }
+                    }
                 } else {
                     throw new Error("Invalid role");
                 }

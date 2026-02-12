@@ -26,7 +26,7 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
                     id,
@@ -123,7 +123,7 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
                     id,
@@ -198,7 +198,7 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
                     id,
@@ -242,7 +242,7 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
                     id,
@@ -282,7 +282,7 @@ export class RecruiterCompanyRepository {
             .select(`
                 id,
                 user_id,
-                user:users!inner(name, email)
+                user:users!recruiters_user_id_fkey!inner(name, email)
             `)
             .eq('user.email', email)
             .maybeSingle();
@@ -344,7 +344,7 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
                     id,

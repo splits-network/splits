@@ -28,7 +28,7 @@ export function getApplicationStageBadge(stage: string | null | undefined): { cl
         offer: { className: 'badge-success', label: 'Offer' },
         hired: { className: 'badge-success', label: 'Hired' },
         rejected: { className: 'badge-error', label: 'Rejected' },
-        withdrawn: { className: 'badge-error badge-soft badge-outline', label: 'Withdrawn' },
+        withdrawn: { className: 'badge-neutral badge-soft badge-outline', label: 'Withdrawn' },
         expired: { className: 'badge-error', label: 'Expired' },
     };
 

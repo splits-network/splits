@@ -92,3 +92,7 @@ export function useInvitationFilter() {
     }
     return context;
 }
+
+export function useInvitationFilterOptional() {
+    return useContext(InvitationFilterContext);
+}

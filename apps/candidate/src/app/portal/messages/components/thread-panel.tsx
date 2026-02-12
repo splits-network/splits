@@ -206,6 +206,7 @@ export default function ThreadPanel({
             ? [`user:${data.participant.user_id}`, `conv:${conversationId}`]
             : [`conv:${conversationId}`],
         getToken,
+        presencePingEnabled: false, // List panel handles presence pings
         onReconnect: () => {
             requestChatRefresh();
         },

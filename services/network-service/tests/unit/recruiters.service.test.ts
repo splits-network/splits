@@ -8,6 +8,7 @@ describe('RecruiterServiceV2 (unit)', () => {
         findByClerkUserId: vi.fn(),
         findRecruiterByUserId: vi.fn(),
         createRecruiter: vi.fn(),
+        createRecruiterUserRole: vi.fn(),
         updateRecruiter: vi.fn(),
         deleteRecruiter: vi.fn(),
     };

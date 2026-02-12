@@ -6,6 +6,8 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ensureUserInDatabase } from "@/lib/user-registration";
+import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
+import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 
 type SSOStatus = "authenticating" | "creating_user" | "redirecting" | "error";
 
@@ -49,12 +51,30 @@ function SSOCallbackInner() {
                 // Update status to creating user
                 setStatus("creating_user");
 
+                // Resolve rec_code from cookie (set by middleware when user first visited with ?rec_code=xxx)
+                const recCode = getRecCodeFromCookie();
+                let referredByRecruiterId: string | undefined;
+                if (recCode) {
+                    try {
+                        const unauthClient = createUnauthenticatedClient();
+                        const lookupResponse: any = await unauthClient.get(
+                            `/recruiter-codes/lookup?code=${encodeURIComponent(recCode)}`
+                        );
+                        if (lookupResponse?.data?.is_valid) {
+                            referredByRecruiterId = lookupResponse.data.recruiter_id;
+                        }
+                    } catch (lookupError) {
+                        console.warn("[SSOCallback] Failed to resolve rec_code:", lookupError);
+                    }
+                }
+
                 // Ensure user exists in database
                 const result = await ensureUserInDatabase(token, {
                     clerk_user_id: currentUser.id,
                     email: currentUser.primaryEmailAddress?.emailAddress || "",
                     name: currentUser.fullName || currentUser.firstName || "",
                     image_url: currentUser.imageUrl,
+                    referred_by_recruiter_id: referredByRecruiterId,
                 });
 
                 if (!result.success) {
@@ -63,6 +83,18 @@ function SSOCallbackInner() {
                         "[SSOCallback] User creation warning:",
                         result.error,
                     );
+                }
+
+                // Log rec_code usage after successful registration
+                if (recCode && result.success && !result.wasExisting) {
+                    try {
+                        const authClient = createAuthenticatedClient(token);
+                        await authClient.post("/recruiter-codes/log", {
+                            code: recCode,
+                        });
+                    } catch (logError) {
+                        console.warn("[SSOCallback] Failed to log rec_code usage:", logError);
+                    }
                 }
 
                 // Update status to redirecting

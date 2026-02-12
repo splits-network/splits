@@ -192,10 +192,10 @@ export class ReputationRepository {
 
         // Get all feedback entries for these applications
         const { data: feedback, error: feedbackError } = await this.supabase
-            .from('application_feedback')
-            .select('id, application_id, feedback_type, in_response_to_id, created_at')
+            .from('application_notes')
+            .select('id, application_id, note_type, in_response_to_id, created_at')
             .in('application_id', applicationIds)
-            .in('feedback_type', ['info_request', 'info_response'])
+            .in('note_type', ['info_request', 'info_response'])
             .order('created_at', { ascending: true });
 
         if (feedbackError) throw feedbackError;
@@ -207,7 +207,7 @@ export class ReputationRepository {
         // Build a map of info_request IDs to their created_at timestamps
         const requestTimes = new Map<string, Date>();
         for (const f of feedback) {
-            if (f.feedback_type === 'info_request') {
+            if (f.note_type === 'info_request') {
                 requestTimes.set(f.id, new Date(f.created_at));
             }
         }
@@ -215,7 +215,7 @@ export class ReputationRepository {
         // Calculate response times
         const responseTimes: number[] = [];
         for (const f of feedback) {
-            if (f.feedback_type === 'info_response' && f.in_response_to_id) {
+            if (f.note_type === 'info_response' && f.in_response_to_id) {
                 const requestTime = requestTimes.get(f.in_response_to_id);
                 if (requestTime) {
                     const responseTime = new Date(f.created_at);

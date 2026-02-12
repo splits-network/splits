@@ -80,6 +80,7 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
     registerTeamRoutes(app, services);
     registerRecruiterCompanyRoutes(app, services);
     registerCompanyInvitationRoutes(app, services);
+    registerRecruiterCodeRoutes(app, services);
     registerPublicRecruitersListRoute(app, services);
 
     // Register generic CRUD routes LAST (skip recruiters as we have custom routes)
@@ -768,6 +769,189 @@ function registerCompanyInvitationRoutes(app: FastifyInstance, services: Service
                 return reply.send(data);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to delete invitation');
+            }
+        }
+    );
+}
+
+/**
+ * Register recruiter referral code routes
+ * Enables recruiters to create and manage referral codes for tracking sourcing attribution
+ */
+function registerRecruiterCodeRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+
+    const routeOptions = () => ({
+        preHandler: requireAuth(),
+    });
+
+    const handleNetworkError = (
+        request: FastifyRequest,
+        reply: FastifyReply,
+        error: any,
+        message: string
+    ) => {
+        request.log.error({ error, message }, 'Recruiter code route failed');
+        return reply.status(error?.statusCode || 500).send(error?.jsonBody || { error: message });
+    };
+
+    // LIST codes (authenticated)
+    app.get(
+        '/api/v2/recruiter-codes',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/recruiter-codes',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list recruiter codes');
+            }
+        }
+    );
+
+    // PUBLIC LOOKUP - no auth required (for signup flow)
+    app.get(
+        '/api/v2/recruiter-codes/lookup',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/recruiter-codes/lookup',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to lookup recruiter code');
+            }
+        }
+    );
+
+    // GET code by ID (authenticated)
+    app.get(
+        '/api/v2/recruiter-codes/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/api/v2/recruiter-codes/${id}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch recruiter code');
+            }
+        }
+    );
+
+    // CREATE code (authenticated, recruiters only)
+    app.post(
+        '/api/v2/recruiter-codes',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    '/api/v2/recruiter-codes',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to create recruiter code');
+            }
+        }
+    );
+
+    // UPDATE code (authenticated)
+    app.patch(
+        '/api/v2/recruiter-codes/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().patch(
+                    `/api/v2/recruiter-codes/${id}`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to update recruiter code');
+            }
+        }
+    );
+
+    // DELETE code (authenticated)
+    app.delete(
+        '/api/v2/recruiter-codes/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().delete(
+                    `/api/v2/recruiter-codes/${id}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to delete recruiter code');
+            }
+        }
+    );
+
+    // LOG code usage (authenticated, called at signup)
+    app.post(
+        '/api/v2/recruiter-codes/log',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    '/api/v2/recruiter-codes/log',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to log recruiter code usage');
+            }
+        }
+    );
+
+    // GET usage log (authenticated)
+    app.get(
+        '/api/v2/recruiter-codes/log',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/recruiter-codes/log',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch recruiter code usage log');
             }
         }
     );

@@ -37,7 +37,7 @@ export class RecruiterCandidateRepository {
             switch (inc) {
                 case 'recruiter':
                     // Join with recruiters table and identity users for contact info
-                    selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))';
+                    selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))';
                     break;
             }
         }
@@ -203,7 +203,7 @@ export class RecruiterCandidateRepository {
 
             .from('recruiter_candidates')
             .select(`*
-                ,recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))
+                ,recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))
                 ,candidate:candidates!candidate_id(id, user_id, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))`)
             .eq('invitation_token', token)
             .maybeSingle();

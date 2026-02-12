@@ -19,6 +19,7 @@ export interface UserRegistrationData {
     email: string;
     name?: string;
     image_url?: string;
+    referred_by_recruiter_id?: string;
 }
 
 /**
@@ -93,6 +94,7 @@ export async function ensureUserInDatabase(
             email: data.email,
             name: data.name || '',
             image_url: data.image_url,
+            referred_by_recruiter_id: data.referred_by_recruiter_id || undefined,
         });
 
         if (createResponse?.data) {

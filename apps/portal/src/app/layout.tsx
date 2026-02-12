@@ -5,6 +5,7 @@ import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -139,6 +140,7 @@ export default async function RootLayout({
                             <main className="grow">{children}</main>
                             <CookieConsent />
                         </ToastProvider>
+                        <DevDebugPanel />
                     </UserProfileProvider>
 
                     {/* HelpNinja widget loaded after page becomes interactive */}

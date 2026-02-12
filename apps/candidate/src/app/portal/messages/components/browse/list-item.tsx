@@ -7,7 +7,7 @@ interface MessageListItemProps {
     row: ConversationRow;
     otherUser?: UserSummary | null;
     isSelected: boolean;
-    presenceStatus?: "online" | "offline";
+    presenceStatus?: "online" | "idle" | "offline";
     onSelect: (id: string) => void;
 }
 

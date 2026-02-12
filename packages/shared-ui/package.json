@@ -18,7 +18,6 @@
         "unified": "^11.0.5"
     },
     "peerDependencies": {
-        "@clerk/nextjs": "^5.0.0",
         "@splits-network/shared-types": "workspace:*",
         "next": "^16.0.0",
         "react": "^19.0.0",

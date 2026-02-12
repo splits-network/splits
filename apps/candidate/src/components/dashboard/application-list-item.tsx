@@ -18,7 +18,7 @@ interface ApplicationListItemProps {
         recruiter_user_id?: string | null;
     };
     onChatClick?: (e: React.MouseEvent) => void;
-    presenceStatus?: 'online' | 'offline' | null;
+    presenceStatus?: 'online' | 'idle' | 'offline' | null;
     startingChat?: boolean;
 }
 

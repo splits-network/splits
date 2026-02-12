@@ -38,7 +38,7 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 )
             `, { count: 'exact' });
 
@@ -107,7 +107,7 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 )
             `)
             .eq('id', id);
@@ -139,7 +139,7 @@ export class CompanyInvitationRepository {
                     years_experience,
                     industries,
                     specialties,
-                    user:users!inner(name, email, profile_image_url)
+                    user:users!recruiters_user_id_fkey!inner(name, email, profile_image_url)
                 )
             `)
             .eq('invite_code', code.toUpperCase())
@@ -161,7 +161,7 @@ export class CompanyInvitationRepository {
                     years_experience,
                     industries,
                     specialties,
-                    user:users!inner(name, email, profile_image_url)
+                    user:users!recruiters_user_id_fkey!inner(name, email, profile_image_url)
                 )
             `)
             .eq('invite_link_token', token)
@@ -212,7 +212,7 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 )
             `)
             .single();
@@ -233,7 +233,7 @@ export class CompanyInvitationRepository {
                 *,
                 recruiter:recruiters!inner(
                     id,
-                    user:users!inner(name, email)
+                    user:users!recruiters_user_id_fkey!inner(name, email)
                 )
             `)
             .single();

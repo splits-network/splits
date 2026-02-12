@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { useInvitationFilterOptional } from "../../contexts/filter-context";
 import { CompanyInvitation, getInviteLink } from "../../types";
 
 export interface InvitationActionsToolbarProps {
@@ -35,6 +36,8 @@ export default function InvitationActionsToolbar({
 }: InvitationActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const filterContext = useInvitationFilterOptional();
+    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
     const [resending, setResending] = useState(false);
     const [revoking, setRevoking] = useState(false);
@@ -124,7 +127,7 @@ export default function InvitationActionsToolbar({
             const client = createAuthenticatedClient(token);
             await client.patch(`/company-invitations/${invitation.id}/revoke`);
             toast.success("Invitation revoked");
-            onRefresh?.();
+            refresh();
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||

@@ -15,6 +15,7 @@ type UseChatGatewayOptions = {
   onReconnect?: () => void;
   presencePingEnabled?: boolean;
   presencePingIntervalMs?: number;
+  presenceStatus?: "online" | "idle";
 };
 
 function buildGatewayUrl(baseUrl: string, token: string) {
@@ -31,6 +32,7 @@ export function useChatGateway({
   onReconnect,
   presencePingEnabled = true,
   presencePingIntervalMs = 30000,
+  presenceStatus = "online",
 }: UseChatGatewayOptions) {
   const wsRef = useRef<WebSocket | null>(null);
   const closedRef = useRef(false);
@@ -38,6 +40,8 @@ export function useChatGateway({
   const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const presenceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelsRef = useRef<string[]>([]);
+  const presenceStatusRef = useRef(presenceStatus);
+  useEffect(() => { presenceStatusRef.current = presenceStatus; }, [presenceStatus]);
 
   // store callbacks in refs so effect deps don't churn
   const getTokenRef = useRef(getToken);
@@ -64,7 +68,7 @@ export function useChatGateway({
     if (!presencePingEnabled) return;
     const current = wsRef.current;
     if (!current || current.readyState !== WebSocket.OPEN) return;
-    current.send(JSON.stringify({ type: "presence.ping" }));
+    current.send(JSON.stringify({ type: "presence.ping", status: presenceStatusRef.current }));
   }, [presencePingEnabled]);
 
   useEffect(() => {
@@ -155,4 +159,9 @@ export function useChatGateway({
       wsRef.current = null;
     };
   }, [enabled, normalizedChannels.join("|"), presencePingEnabled, presencePingIntervalMs, sendPresencePing]);
+
+  // Send an immediate ping when presence status changes (idle ↔ online)
+  useEffect(() => {
+    sendPresencePing();
+  }, [presenceStatus, sendPresencePing]);
 }

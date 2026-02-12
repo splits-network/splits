@@ -10,6 +10,7 @@ interface SubmitCandidateWizardProps {
     roleTitle: string;
     companyName?: string;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
 interface Candidate {
@@ -28,6 +29,7 @@ export default function SubmitCandidateWizard({
     roleTitle,
     companyName,
     onClose,
+    onSuccess,
 }: SubmitCandidateWizardProps) {
     const { getToken } = useAuth();
     const toast = useToast();
@@ -272,7 +274,7 @@ export default function SubmitCandidateWizard({
             // Success
             toast.success(`Opportunity sent to ${selectedCandidate.full_name}! They'll receive an email notification.`);
             onClose();
-            window.location.reload();
+            onSuccess?.();
         } catch (err: any) {
             console.error('Failed to submit candidate:', err);
 

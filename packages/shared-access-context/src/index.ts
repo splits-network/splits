@@ -43,11 +43,24 @@ export class AccessContextResolver {
     }
 }
 
+const EMPTY_CONTEXT: AccessContext = {
+    identityUserId: null,
+    candidateId: null,
+    recruiterId: null,
+    organizationIds: [],
+    companyIds: [],
+    roles: [],
+    isPlatformAdmin: false,
+    error: '',
+};
+
 /**
  * Resolve role/access context starting from the Clerk user ID.
  * Reads from two tables in a single Supabase round-trip:
  * - memberships: org-scoped roles (platform_admin, company_admin, hiring_manager) with organization_id/company_id
  * - user_roles: entity-linked roles (recruiter, candidate) with role_entity_id
+ *
+ * Returns an AccessContext with roles, org IDs, company IDs, recruiter/candidate IDs.
  */
 export async function resolveAccessContext(
     supabase: SupabaseClient,
@@ -55,16 +68,7 @@ export async function resolveAccessContext(
 ): Promise<AccessContext> {
     try {
         if (!clerkUserId) {
-            return {
-                identityUserId: null,
-                candidateId: null,
-                recruiterId: null,
-                organizationIds: [],
-                companyIds: [],
-                roles: [],
-                isPlatformAdmin: false,
-                error: 'No clerkUserId provided',
-            };
+            return { ...EMPTY_CONTEXT, error: 'No clerkUserId provided' };
         }
 
         const userResult = await supabase
@@ -72,7 +76,7 @@ export async function resolveAccessContext(
             .select(
                 `
                 id,
-                memberships!memberships_user_id_fkey (
+                memberships!memberships_user_id_fkey1 (
                     role_name,
                     organization_id,
                     company_id
@@ -88,19 +92,15 @@ export async function resolveAccessContext(
             .is('user_roles.deleted_at', null)
             .maybeSingle();
 
+        if (userResult.error) {
+            console.error('resolveAccessContext query error:', userResult.error);
+            return { ...EMPTY_CONTEXT, error: userResult.error.message };
+        }
+
         const identityUserId = userResult.data?.id || null;
 
         if (!identityUserId) {
-            return {
-                identityUserId: null,
-                candidateId: null,
-                recruiterId: null,
-                organizationIds: [],
-                companyIds: [],
-                roles: [],
-                isPlatformAdmin: false,
-                error: 'Identity user not found',
-            };
+            return { ...EMPTY_CONTEXT, error: 'Identity user not found' };
         }
 
         // Handle both array and single object cases (Supabase returns object for 1:1, array for 1:many)
@@ -148,14 +148,8 @@ export async function resolveAccessContext(
     } catch (error) {
         console.error('Error in resolveAccessContext:', error);
         return {
+            ...EMPTY_CONTEXT,
             error: error instanceof Error ? error.message : String(error),
-            identityUserId: null,
-            candidateId: null,
-            recruiterId: null,
-            organizationIds: [],
-            companyIds: [],
-            roles: [],
-            isPlatformAdmin: false,
         };
     }
 }
@@ -172,3 +166,4 @@ interface EntityRoleRow {
     role_name: string;
     role_entity_id: string;
 }
+

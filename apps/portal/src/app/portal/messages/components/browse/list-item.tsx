@@ -12,7 +12,7 @@ interface ListItemProps {
     row: ConversationRow;
     isSelected: boolean;
     currentUserId: string | null;
-    presenceStatus?: "online" | "offline";
+    presenceStatus?: "online" | "idle" | "offline";
     onSelect: (id: string) => void;
     context?: ConversationContext | null;
     otherUserRole?: string | null;

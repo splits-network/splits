@@ -88,10 +88,11 @@ export async function registerChatRoutes(
                 }
                 try {
                     const parsed = JSON.parse(payload);
+                    const s = parsed?.status;
                     return {
                         userId: id,
                         status:
-                            parsed?.status === "online" ? "online" : "offline",
+                            s === "online" ? "online" : s === "idle" ? "idle" : "offline",
                         lastSeenAt: parsed?.lastSeenAt || null,
                     };
                 } catch {
@@ -107,7 +108,9 @@ export async function registerChatRoutes(
         }
     });
 
-    // New site-wide presence endpoints
+    // DEPRECATED: These POST endpoints write to presence:user:${clerkUserId} but the
+    // GET endpoint reads by identityUserId, so data written here is never read correctly.
+    // Presence is now handled via WebSocket presence.ping in the chat-gateway.
     app.post("/api/v2/chat/presence/ping", async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

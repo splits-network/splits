@@ -3,7 +3,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
 type PresenceStatus = {
-    status: "online" | "offline";
+    status: "online" | "idle" | "offline";
     lastSeenAt: string | null;
 };
 
@@ -66,13 +66,14 @@ export function usePresence(
         });
         const data = (response?.data || []) as Array<{
             userId: string;
-            status: "online" | "offline";
+            status: "online" | "idle" | "offline";
             lastSeenAt: string | null;
         }>;
         const updates: Record<string, PresenceStatus> = {};
         data.forEach((item) => {
+            const s = item?.status;
             const entry: PresenceStatus = {
-                status: item?.status === "online" ? "online" : "offline",
+                status: s === "online" ? "online" : s === "idle" ? "idle" : "offline",
                 lastSeenAt: item?.lastSeenAt ?? null,
             };
             updates[item.userId] = entry;

@@ -7,7 +7,8 @@
       "Bash(pnpm --filter @splits-network/billing-service build:*)",
       "Bash(docker ps:*)",
       "Bash(pnpm --filter @splits-network/network-service build:*)",
-      "Bash(pnpm --filter @splits-network/ats-service build:*)"
+      "Bash(pnpm --filter @splits-network/ats-service build:*)",
+      "Bash(pnpm --filter @splits-network/network-service test:*)"
     ]
   }
 }

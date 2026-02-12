@@ -1,5 +1,5 @@
 type PresenceProps = {
-    status?: "online" | "offline" | null;
+    status?: "online" | "idle" | "offline" | null;
     size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
     variant?: "dot" | "badge" | "both";
     label?: string;
@@ -13,8 +13,8 @@ export function Presence({
     label,
     className = "",
 }: PresenceProps) {
-    const statusClass =
-        status === "online" ? "status status-success" : "status status-neutral";
+    const isActive = status === "online" || status === "idle";
+    const statusClass = isActive ? "status status-success" : "status status-neutral";
     const sizeClass =
         size === "2xl"
             ? "status-2xl"
@@ -27,7 +27,7 @@ export function Presence({
                   : size === "sm"
                     ? "status-sm"
                     : "status-xs";
-    const statusLabel = label ?? (status === "online" ? "Online" : "Offline");
+    const statusLabel = label ?? (isActive ? "Online" : "Offline");
 
     if (variant === "both") {
         return (
@@ -40,7 +40,7 @@ export function Presence({
                     />
                 </span>
                 <span
-                    className={`badge badge-sm ${status === "online" ? "badge-outline badge-success badge-soft" : ""} gap-2}`}
+                    className={`badge badge-sm ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2}`}
                     aria-label={statusLabel}
                     title={statusLabel}
                 >
@@ -53,7 +53,7 @@ export function Presence({
     if (variant === "badge") {
         return (
             <span
-                className={`badge badge-sm ${status === "online" ? "badge-outline badge-success badge-soft" : ""} gap-2} ${className}`}
+                className={`badge badge-sm ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2} ${className}`}
                 aria-label={statusLabel}
                 title={statusLabel}
             >
@@ -65,7 +65,7 @@ export function Presence({
     return (
         <span
             className={`${statusClass} ${sizeClass} ${
-                status === "online" ? "animate-pulse" : "hidden"
+                isActive ? (status === "online" ? "animate-pulse" : "") : "hidden"
             } ${className}`}
             aria-label={statusLabel}
             title={statusLabel}

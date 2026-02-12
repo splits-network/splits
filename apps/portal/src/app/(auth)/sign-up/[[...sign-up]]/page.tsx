@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
 import { ensureUserInDatabase } from "@/lib/user-registration";
+import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
+import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 
 export default function SignUpPage() {
     const { isLoaded, signUp, setActive } = useSignUp();
@@ -25,6 +27,9 @@ export default function SignUpPage() {
     // Get redirect URL from search params (Clerk preserves this through verification)
     const redirectUrl = searchParams.get("redirect_url");
     const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
+
+    // Get rec_code from URL params or cookie (set by middleware)
+    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -88,11 +93,28 @@ export default function SignUpPage() {
                                 "No auth token available, proceeding with redirect",
                             );
                         } else {
+                            // Resolve rec_code to recruiter_id if present
+                            let referredByRecruiterId: string | undefined;
+                            if (recCode) {
+                                try {
+                                    const unauthClient = createUnauthenticatedClient();
+                                    const lookupResponse: any = await unauthClient.get(
+                                        `/recruiter-codes/lookup?code=${encodeURIComponent(recCode)}`
+                                    );
+                                    if (lookupResponse?.data?.is_valid) {
+                                        referredByRecruiterId = lookupResponse.data.recruiter_id;
+                                    }
+                                } catch (lookupError) {
+                                    console.warn("[SignUp] Failed to resolve rec_code:", lookupError);
+                                }
+                            }
+
                             // Ensure user exists in database using the same logic as SSO callback
                             const result = await ensureUserInDatabase(token, {
                                 clerk_user_id: completeSignUp.createdUserId!,
                                 email: completeSignUp.emailAddress!,
                                 name: `${completeSignUp.firstName || firstName} ${completeSignUp.lastName || lastName}`.trim(),
+                                referred_by_recruiter_id: referredByRecruiterId,
                             });
 
                             if (!result.success) {
@@ -101,6 +123,18 @@ export default function SignUpPage() {
                                     "[SignUp] User creation warning:",
                                     result.error,
                                 );
+                            }
+
+                            // Log rec_code usage after successful registration
+                            if (recCode && result.success && !result.wasExisting) {
+                                try {
+                                    const authClient = createAuthenticatedClient(token);
+                                    await authClient.post("/recruiter-codes/log", {
+                                        code: recCode,
+                                    });
+                                } catch (logError) {
+                                    console.warn("[SignUp] Failed to log rec_code usage:", logError);
+                                }
                             }
                         }
                     } catch (userCreationError) {

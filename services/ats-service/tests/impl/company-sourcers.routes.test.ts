@@ -39,9 +39,7 @@ describe('Company sourcer routes (integration)', () => {
             headers: { 'x-clerk-user-id': 'clerk-1' },
             payload: {
                 company_id: '33333333-3333-3333-3333-333333333333',
-                sourcer_recruiter_id: '22222222-2222-2222-2222-222222222222',
-                sourcer_type: 'recruiter',
-                protection_expires_at: new Date().toISOString(),
+                recruiter_id: '22222222-2222-2222-2222-222222222222',
             },
         });
 

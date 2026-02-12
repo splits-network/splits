@@ -101,7 +101,8 @@ export default function AIReviewPanel({
     compact = false,
     variant,
 }: AIReviewPanelProps) {
-    const resolvedVariant: AIReviewVariant = variant ?? (compact ? "compact" : "full");
+    const resolvedVariant: AIReviewVariant =
+        variant ?? (compact ? "compact" : "full");
     const { getToken } = useAuth();
     const { isAdmin } = useUserProfile();
     const [loading, setLoading] = useState(true);
@@ -208,9 +209,12 @@ export default function AIReviewPanel({
 
     // Badge variant: inline span only, invisible during load/error/null
     if (resolvedVariant === "badge") {
-        if (loading || error || !aiReview || aiReview.fit_score == null) return null;
+        if (loading || error || !aiReview || aiReview.fit_score == null)
+            return null;
         return (
-            <span className={`badge badge-xs ${getRecommendationColor(aiReview.recommendation)} ml-1`}>
+            <span
+                className={`badge badge-xs ${getRecommendationColor(aiReview.recommendation)} ml-1`}
+            >
                 {Math.round(aiReview.fit_score)}%
             </span>
         );
@@ -444,249 +448,248 @@ export default function AIReviewPanel({
     }
 
     return (
-        <div className="card bg-base-100 shadow">
-            <div className="card-body">
-                <div className="flex justify-between">
-                    <h3 className="card-title text-lg mb-4">
-                        <i className="fa-duotone fa-regular fa-robot"></i>
-                        AI Analysis
-                    </h3>
+        <>
+            <div className="flex justify-between">
+                <h3 className="card-title text-lg mb-4">
+                    <i className="fa-duotone fa-regular fa-robot"></i>
+                    AI Analysis
+                </h3>
 
-                    {isAdmin && (
-                        <button
-                            onClick={handleRequestNewReview}
-                            disabled={requesting}
-                            className="btn btn-primary btn-sm"
-                        >
-                            {requesting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                    Requesting Review...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-rotate"></i>
-                                    Request New Review
-                                </>
-                            )}
-                        </button>
-                    )}
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-4">
-                    <StatCardGrid
-                        direction="responsive"
-                        className="shadow-lg bg-base-200/50 w-full"
+                {isAdmin && (
+                    <button
+                        onClick={handleRequestNewReview}
+                        disabled={requesting}
+                        className="btn btn-primary btn-sm"
                     >
-                        <StatCard
-                            title="Match Score"
-                            value={
-                                aiReview.fit_score != null
-                                    ? `${Math.round(aiReview.fit_score)}%`
-                                    : "Not reviewed"
-                            }
-                            icon={getFitScoreIcon(aiReview.fit_score)}
-                            color={getFitScoreColor(aiReview.fit_score)}
-                            description={
-                                <span
-                                    className={`badge ${getRecommendationColor(
-                                        aiReview.recommendation,
-                                    )} badge-sm gap-1.5`}
-                                >
-                                    {getRecommendationLabel(
-                                        aiReview.recommendation,
-                                    )}
-                                </span>
-                            }
-                        />
-                        <StatCard
-                            title="Confidence Level"
-                            value={
-                                aiReview.confidence_level != null
-                                    ? `${aiReview.confidence_level}%`
-                                    : "N/A"
-                            }
-                            icon={getConfidenceIcon(aiReview.confidence_level)}
-                            color={getConfidenceColor(
-                                aiReview.confidence_level,
-                            )}
-                            description="AI confidence in analysis"
-                        />
-                        <StatCard
-                            title="Skills Match"
-                            value={
-                                aiReview.skills_match_percentage != null
-                                    ? `${aiReview.skills_match_percentage}%`
-                                    : "N/A"
-                            }
-                            icon="fa-duotone fa-regular fa-list-check"
-                            color={getFitScoreColor(
-                                aiReview.skills_match_percentage,
-                            )}
-                            description="Job skills match percentage"
-                        />
-                    </StatCardGrid>
-                </div>
-
-                {/* Overall Summary */}
-                {aiReview.overall_summary && (
-                    <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2">
-                            Summary
-                        </h4>
-                        <p className="text-sm text-base-content/80">
-                            {aiReview.overall_summary}
-                        </p>
-                    </div>
+                        {requesting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Requesting Review...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-rotate"></i>
+                                Request New Review
+                            </>
+                        )}
+                    </button>
                 )}
+            </div>
 
-                {/* Strengths */}
-                {aiReview.strengths && aiReview.strengths.length > 0 && (
-                    <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
-                            Key Strengths
-                        </h4>
-                        <ul className="list-disc list-inside space-y-1">
-                            {aiReview.strengths.map((strength, index) => (
-                                <li
-                                    key={index}
-                                    className="text-sm text-base-content/80"
-                                >
-                                    {strength}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Concerns */}
-                {aiReview.concerns && aiReview.concerns.length > 0 && (
-                    <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning"></i>
-                            Areas to Address
-                        </h4>
-                        <ul className="list-disc list-inside space-y-1">
-                            {aiReview.concerns.map((concern, index) => (
-                                <li
-                                    key={index}
-                                    className="text-sm text-base-content/80"
-                                >
-                                    {concern}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Skills Match - Using flat structure */}
-                {aiReview.skills_match_percentage !== null && (
-                    <div className="mb-4">
-                        <h4 className="font-semibold text-base mb-2">
-                            Skills Analysis
-                        </h4>
-
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="text-sm">Match Rate:</span>
-                            <div className="flex-1">
-                                <progress
-                                    className="progress progress-success w-full"
-                                    value={
-                                        aiReview.skills_match_percentage ?? 0
-                                    }
-                                    max="100"
-                                ></progress>
-                            </div>
-                            <span className="text-sm font-semibold">
-                                {aiReview.skills_match_percentage}%
+            <div className="flex flex-col md:flex-row gap-4">
+                <StatCardGrid
+                    direction="responsive"
+                    className="shadow-lg bg-base-200/50 w-full"
+                >
+                    <StatCard
+                        title="Match Score"
+                        value={
+                            aiReview.fit_score != null
+                                ? `${Math.round(aiReview.fit_score)}%`
+                                : "Not reviewed"
+                        }
+                        icon={getFitScoreIcon(aiReview.fit_score)}
+                        color={getFitScoreColor(aiReview.fit_score)}
+                        description={
+                            <span
+                                className={`badge ${getRecommendationColor(
+                                    aiReview.recommendation,
+                                )} badge-sm gap-1.5`}
+                            >
+                                {getRecommendationLabel(
+                                    aiReview.recommendation,
+                                )}
                             </span>
+                        }
+                    />
+                    <StatCard
+                        title="Confidence Level"
+                        value={
+                            aiReview.confidence_level != null
+                                ? `${aiReview.confidence_level}%`
+                                : "N/A"
+                        }
+                        icon={getConfidenceIcon(aiReview.confidence_level)}
+                        color={getConfidenceColor(aiReview.confidence_level)}
+                        description="AI confidence in analysis"
+                    />
+                    <StatCard
+                        title="Skills Match"
+                        value={
+                            aiReview.skills_match_percentage != null
+                                ? `${aiReview.skills_match_percentage}%`
+                                : "N/A"
+                        }
+                        icon="fa-duotone fa-regular fa-list-check"
+                        color={getFitScoreColor(
+                            aiReview.skills_match_percentage,
+                        )}
+                        description="Job skills match percentage"
+                    />
+                </StatCardGrid>
+            </div>
+
+            {/* Overall Summary */}
+            {aiReview.overall_summary && (
+                <div className="mb-4">
+                    <h4 className="font-semibold text-base mb-2">Summary</h4>
+                    <p className="text-sm text-base-content/80">
+                        {aiReview.overall_summary}
+                    </p>
+                </div>
+            )}
+
+            {/* Strengths */}
+            {aiReview.strengths && aiReview.strengths.length > 0 && (
+                <div className="mb-4">
+                    <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
+                        Key Strengths
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1">
+                        {aiReview.strengths.map((strength, index) => (
+                            <li
+                                key={index}
+                                className="text-sm text-base-content/80"
+                            >
+                                {strength}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {/* Concerns */}
+            {aiReview.concerns && aiReview.concerns.length > 0 && (
+                <div className="mb-4">
+                    <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning"></i>
+                        Areas to Address
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1">
+                        {aiReview.concerns.map((concern, index) => (
+                            <li
+                                key={index}
+                                className="text-sm text-base-content/80"
+                            >
+                                {concern}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {/* Skills Match - Using flat structure */}
+            {aiReview.skills_match_percentage !== null && (
+                <div className="mb-4">
+                    <h4 className="font-semibold text-base mb-2">
+                        Skills Analysis
+                    </h4>
+
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm">Match Rate:</span>
+                        <div className="flex-1">
+                            <progress
+                                className="progress progress-success w-full"
+                                value={aiReview.skills_match_percentage ?? 0}
+                                max="100"
+                            ></progress>
                         </div>
-
-                        {aiReview.matched_skills &&
-                            aiReview.matched_skills.length > 0 && (
-                                <div className="mb-2">
-                                    <span className="text-sm font-medium">
-                                        Matched Skills:
-                                    </span>
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        {aiReview.matched_skills.map(
-                                            (skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="badge badge-success badge-sm"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ),
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                        {aiReview.missing_skills &&
-                            aiReview.missing_skills.length > 0 && (
-                                <div>
-                                    <span className="text-sm font-medium">
-                                        Missing Skills:
-                                    </span>
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        {aiReview.missing_skills.map(
-                                            (skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="badge badge-warning badge-sm"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ),
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                        <span className="text-sm font-semibold">
+                            {aiReview.skills_match_percentage}%
+                        </span>
                     </div>
-                )}
 
-                {/* Experience & Location */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    {aiReview.candidate_years !== null &&
-                        aiReview.required_years !== null && (
-                            <div>
-                                <h4 className="font-medium text-sm mb-1">
-                                    Experience
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                    {aiReview.meets_experience_requirement ? (
-                                        <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
-                                    ) : (
-                                        <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
+                    {aiReview.matched_skills &&
+                        aiReview.matched_skills.length > 0 && (
+                            <div className="mb-2">
+                                <span className="text-sm font-medium">
+                                    Matched Skills:
+                                </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {aiReview.matched_skills.map(
+                                        (skill, index) => (
+                                            <span
+                                                key={index}
+                                                className="badge badge-success badge-sm"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ),
                                     )}
-                                    <span className="text-sm">
-                                        {aiReview.candidate_years} yrs (Req:{" "}
-                                        {aiReview.required_years})
-                                    </span>
                                 </div>
                             </div>
                         )}
 
-                    <div>
-                        <h4 className="font-medium text-sm mb-1">Location</h4>
-                        <span className="text-sm">
-                            {getLocationLabel(aiReview.location_compatibility)}
-                        </span>
-                    </div>
+                    {aiReview.missing_skills &&
+                        aiReview.missing_skills.length > 0 && (
+                            <div>
+                                <span className="text-sm font-medium">
+                                    Missing Skills:
+                                </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {aiReview.missing_skills.map(
+                                        (skill, index) => (
+                                            <span
+                                                key={index}
+                                                className="badge badge-warning badge-sm"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        )}
                 </div>
+            )}
 
-                {/* Analysis Metadata */}
-                <div className="text-xs text-base-content/60 border-t pt-2">
-                    <p>
-                        Analyzed by {aiReview.model_version ?? "AI"} on{" "}
-                        {aiReview.analyzed_at
-                            ? new Date(aiReview.analyzed_at).toLocaleString()
-                            : "N/A"}
-                    </p>
+            {/* Experience & Location */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                {aiReview.candidate_years !== null &&
+                    aiReview.required_years !== null && (
+                        <div>
+                            <h4 className="font-medium text-sm mb-1">
+                                Experience
+                            </h4>
+                            <div className="flex items-center gap-2">
+                                {aiReview.meets_experience_requirement ? (
+                                    <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
+                                )}
+                                <span className="text-sm">
+                                    {aiReview.candidate_years} yrs (Req:{" "}
+                                    {aiReview.required_years})
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                <div>
+                    <h4 className="font-medium text-sm mb-1">Location</h4>
+                    <span className="text-sm">
+                        {getLocationLabel(aiReview.location_compatibility)}
+                    </span>
                 </div>
             </div>
-        </div>
+
+            {/* Analysis Metadata */}
+            <div className="text-xs text-base-content/60 border-t pt-2">
+                <p>
+                    Analyzed by {aiReview.model_version ?? "AI"} on{" "}
+                    {aiReview.analyzed_at
+                        ? new Date(aiReview.analyzed_at).toLocaleString()
+                        : "N/A"}
+                </p>
+                <p>
+                    It is recommended to use this analysis as a supplementary
+                    tool alongside human judgment. Always review the candidate's
+                    full profile and application materials before making any
+                    decisions. AI analysis may not capture all nuances of a
+                    candidate's qualifications or potential.
+                </p>
+            </div>
+        </>
     );
 }

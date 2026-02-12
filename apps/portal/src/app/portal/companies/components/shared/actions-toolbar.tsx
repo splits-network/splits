@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
+import { useFilterOptional } from "../../contexts/filter-context";
 import { Company, CompanyRelationship } from "../../types";
 import RequestConnectionModal from "../modals/request-connection-modal";
 
@@ -26,6 +27,12 @@ export default function ActionsToolbar({
     onRefresh,
     className = "",
 }: CompanyActionsToolbarProps) {
+    const filterContext = useFilterOptional();
+    const refresh = onRefresh ?? (() => {
+        filterContext?.marketplaceContext?.refresh();
+        filterContext?.myCompaniesContext?.refresh();
+    });
+
     const [showRequestModal, setShowRequestModal] = useState(false);
 
     const getSizeClass = () => `btn-${size}`;
@@ -99,7 +106,7 @@ export default function ActionsToolbar({
                             company={company}
                             onSuccess={() => {
                                 setShowRequestModal(false);
-                                onRefresh?.();
+                                refresh();
                             }}
                         />
                     )}
@@ -173,7 +180,7 @@ export default function ActionsToolbar({
                         company={company}
                         onSuccess={() => {
                             setShowRequestModal(false);
-                            onRefresh?.();
+                            refresh();
                         }}
                     />
                 )}

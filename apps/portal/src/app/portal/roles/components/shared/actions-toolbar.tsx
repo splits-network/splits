@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { ButtonLoading, ModalPortal } from "@splits-network/shared-ui";
+import { useRolesFilterOptional } from "../../contexts/roles-filter-context";
 import RoleWizardModal from "../modals/role-wizard-modal";
 import SubmitCandidateWizard from "../wizards/submit-candidate-wizard";
 
@@ -60,6 +61,8 @@ export default function RoleActionsToolbar({
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, manageableCompanyIds } = useUserProfile();
+    const filterContext = useRolesFilterOptional();
+    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
     // Modal states
     const [showEditModal, setShowEditModal] = useState(false);
@@ -114,10 +117,7 @@ export default function RoleActionsToolbar({
             await client.patch(`/jobs/${job.id}`, { status: newStatus });
 
             toast.success(`Role status updated to ${newStatus}!`);
-
-            if (onRefresh) {
-                onRefresh();
-            }
+            refresh();
         } catch (error: any) {
             console.error("Failed to update status:", error);
             toast.error(`Failed to update status: ${error.message}`);
@@ -197,9 +197,7 @@ export default function RoleActionsToolbar({
 
     const handleEditSuccess = () => {
         setShowEditModal(false);
-        if (onRefresh) {
-            onRefresh();
-        }
+        refresh();
     };
 
     // ===== ACTION VISIBILITY =====
@@ -562,6 +560,7 @@ export default function RoleActionsToolbar({
                             job.company?.name || job.company_id || undefined
                         }
                         onClose={() => setShowSubmitModal(false)}
+                            onSuccess={refresh}
                     />
                 )}
             </ModalPortal>
