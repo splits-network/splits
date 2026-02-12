@@ -91,7 +91,7 @@ export default function TableView() {
             <div className="space-y-6">
                 <DataTable
                     columns={columns}
-                    className="table-fixed"
+                    className=""
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                     onSort={handleSort}

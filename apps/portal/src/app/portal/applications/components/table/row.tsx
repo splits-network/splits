@@ -116,21 +116,19 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                 </span>
             </td>
             {/* Actions */}
-            <td
-                onClick={(e) => e.stopPropagation()}
-                className="text-right"
-            >
+            <td onClick={(e) => e.stopPropagation()} className="text-right">
                 <ActionsToolbar
                     application={item}
                     variant="icon-only"
                     size="xs"
                     showActions={{
                         viewDetails: true,
-                        message: false,
-                        addNote: false,
+                        message: true,
+                        addNote: true,
                         advanceStage: true,
                         reject: true,
                     }}
+                    onViewDetails={onViewDetails}
                     onMessage={onMessage}
                     className="justify-end"
                 />
@@ -199,6 +197,7 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                         advanceStage: true,
                         reject: true,
                     }}
+                    onViewDetails={onViewDetails}
                     onMessage={onMessage}
                 />
             </div>

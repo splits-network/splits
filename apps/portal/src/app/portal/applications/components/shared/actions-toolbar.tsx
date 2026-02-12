@@ -541,32 +541,6 @@ export default function ActionsToolbar({
     return (
         <>
             <div className={`flex ${layoutClass} ${className}`}>
-                {actions.viewDetails && onViewDetails && (
-                    <button
-                        onClick={() => onViewDetails(application.id)}
-                        className={`btn ${sizeClass} btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        View Details
-                    </button>
-                )}
-                {actions.message && (
-                    <span title={chatDisabledReason || undefined}>
-                        <button
-                            onClick={handleStartChat}
-                            className={`btn ${sizeClass} btn-outline gap-2`}
-                            disabled={!canChat || startingChat}
-                        >
-                            <Presence status={presenceStatus} />
-                            {startingChat ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-messages" />
-                            )}
-                            Message
-                        </button>
-                    </span>
-                )}
                 {actions.addNote && (
                     <button
                         onClick={() => setShowNoteModal(true)}
@@ -650,6 +624,32 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                         {permissions.rejectButtonText}
+                    </button>
+                )}
+                {actions.message && (
+                    <span title={chatDisabledReason || undefined}>
+                        <button
+                            onClick={handleStartChat}
+                            className={`btn ${sizeClass} btn-ghost gap-2`}
+                            disabled={!canChat || startingChat}
+                        >
+                            <Presence status={presenceStatus} />
+                            {startingChat ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-messages" />
+                            )}
+                            Message
+                        </button>
+                    </span>
+                )}
+                {actions.viewDetails && onViewDetails && (
+                    <button
+                        onClick={() => onViewDetails(application.id)}
+                        className={`btn ${sizeClass} btn-primary gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-eye" />
+                        View Details
                     </button>
                 )}
             </div>
