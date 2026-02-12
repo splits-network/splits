@@ -26,11 +26,14 @@ interface MeResponse {
  * Collapsible to minimize screen real-estate usage.
  */
 export function DevDebugPanel() {
+    const [mounted, setMounted] = useState(false);
     const isDev =
         process.env.NODE_ENV === "development" ||
         process.env.NEXT_PUBLIC_DEV_DEBUG === "true";
 
-    if (!isDev) return null;
+    useEffect(() => { setMounted(true); }, []);
+
+    if (!isDev || !mounted) return null;
 
     return <DevDebugPanelInner />;
 }

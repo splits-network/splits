@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface UseActivityStatusOptions {
     enabled?: boolean;
@@ -17,14 +18,20 @@ export function useActivityStatus({
     idleTimeoutMs = 900000, // 15 minutes
 }: UseActivityStatusOptions = {}): "online" | "idle" {
     const lastActivityRef = useRef<number>(Date.now());
-    const lastUrlRef = useRef<string>(typeof window !== "undefined" ? window.location.href : "");
     const [status, setStatus] = useState<"online" | "idle">("online");
+    const pathname = usePathname();
 
     const updateActivity = useCallback(() => {
         lastActivityRef.current = Date.now();
         setStatus((prev) => (prev === "idle" ? "online" : prev));
     }, []);
 
+    // Route changes count as activity
+    useEffect(() => {
+        if (enabled) updateActivity();
+    }, [pathname, enabled, updateActivity]);
+
+    // DOM activity events + visibility changes
     useEffect(() => {
         if (!enabled) return;
 
@@ -38,42 +45,20 @@ export function useActivityStatus({
             }
         };
 
-        const handleRouteChange = () => {
-            const currentUrl = window.location.href;
-            if (currentUrl !== lastUrlRef.current) {
-                lastUrlRef.current = currentUrl;
-                updateActivity();
-            }
-        };
-
         activityEvents.forEach((event) => {
             document.addEventListener(event, handleActivity, { passive: true });
         });
         document.addEventListener("visibilitychange", handleVisibilityChange);
-        window.addEventListener("popstate", handleRouteChange);
-
-        const originalPushState = history.pushState;
-        const originalReplaceState = history.replaceState;
-        history.pushState = function (...args) {
-            originalPushState.apply(this, args);
-            handleRouteChange();
-        };
-        history.replaceState = function (...args) {
-            originalReplaceState.apply(this, args);
-            handleRouteChange();
-        };
 
         return () => {
             activityEvents.forEach((event) => {
                 document.removeEventListener(event, handleActivity);
             });
             document.removeEventListener("visibilitychange", handleVisibilityChange);
-            window.removeEventListener("popstate", handleRouteChange);
-            history.pushState = originalPushState;
-            history.replaceState = originalReplaceState;
         };
     }, [enabled, updateActivity]);
 
+    // Periodic idle check
     useEffect(() => {
         if (!enabled) return;
 
