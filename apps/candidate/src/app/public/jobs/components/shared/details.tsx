@@ -148,8 +148,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                             <i className="fa-duotone fa-regular fa-calendar text-xs" />
                             Posted{" "}
                             {formatRelativeTime(
-                                (item.updated_at ||
-                                    item.created_at) as string,
+                                (item.updated_at || item.created_at) as string,
                             )}
                         </span>
                     )}
@@ -212,7 +211,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                 </h4>
 
                                 {mandatoryReqs.length === 0 &&
-                                    preferredReqs.length === 0 ? (
+                                preferredReqs.length === 0 ? (
                                     <p className="text-sm text-base-content/50 italic">
                                         No requirements listed for this role.
                                     </p>
@@ -281,9 +280,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                     <DataRow
                                         icon="fa-location-dot"
                                         label="Location"
-                                        value={
-                                            item.location || "Not specified"
-                                        }
+                                        value={item.location || "Not specified"}
                                     />
                                     <DataRow
                                         icon="fa-location-arrow"
@@ -336,16 +333,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                         value={companyHQ || "Not specified"}
                                     />
                                     <DataRow
-                                        icon="fa-shield-check"
-                                        label="Guarantee"
-                                        value={
-                                            item.guarantee_days != null &&
-                                            item.guarantee_days > 0
-                                                ? `${item.guarantee_days} days`
-                                                : "Not specified"
-                                        }
-                                    />
-                                    <DataRow
                                         icon="fa-calendar"
                                         label="Posted"
                                         value={
@@ -376,9 +363,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                 {item.company?.description ? (
                                     <div className="text-sm">
                                         <MarkdownRenderer
-                                            content={
-                                                item.company.description
-                                            }
+                                            content={item.company.description}
                                         />
                                     </div>
                                 ) : (
@@ -448,4 +433,3 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         </div>
     );
 }
-

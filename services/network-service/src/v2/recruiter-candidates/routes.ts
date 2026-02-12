@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { RecruiterCandidateServiceV2 } from './service';
+import { TerminateRecruiterCandidateRequest } from './types';
 import { requireUserContext } from '../shared/helpers';
 import { validatePaginationParams } from '../shared/pagination';
 
@@ -108,6 +109,35 @@ export function registerRecruiterCandidateRoutes(
             await config.recruiterCandidateService.deleteRecruiterCandidate(id, clerkUserId);
             return reply.code(204).send();
         } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
+    // PATCH - Terminate relationship
+    app.patch('/api/v2/recruiter-candidates/:id/terminate', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const body = request.body as TerminateRecruiterCandidateRequest;
+
+            if (!body.reason) {
+                return reply.code(400).send({ error: 'reason is required' });
+            }
+
+            const record = await config.recruiterCandidateService.terminateRelationship(
+                id,
+                body,
+                clerkUserId
+            );
+            return reply.send({ data: record });
+        } catch (error: any) {
+            if (error.message?.includes('not found')) {
+                return reply.code(404).send({
+                    error: { code: 'RELATIONSHIP_NOT_FOUND', message: error.message }
+                });
+            }
             return reply
                 .code(error.statusCode || 500)
                 .send({ error: error.message || 'Internal server error' });

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import BrowseMessagesClient from "./components/browse/browse-messages-client";
+import { PageTitle } from "@/components/page-title";
 
 type MessagesSearchParams = {
     conversationId?: string;
@@ -15,12 +16,10 @@ export default async function MessagesPage({
     const resolvedParams = await searchParams;
     return (
         <div className="container mx-auto space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold">Messages</h1>
-                <p className="text-base-content/70">
-                    Manage your recruiter and company conversations.
-                </p>
-            </div>
+            <PageTitle
+                title="Messages"
+                subtitle="Manage your recruiter and company conversations."
+            />
 
             <Suspense
                 fallback={

@@ -35,6 +35,7 @@ interface ActionsToolbarProps {
     size?: "xs" | "sm" | "md";
     variant?: "icon-only" | "descriptive";
     onStageChange?: () => void;
+    onViewDetails?: (id: string) => void;
 }
 
 export default function ActionsToolbar({
@@ -42,6 +43,7 @@ export default function ActionsToolbar({
     size = "md",
     variant = "icon-only",
     onStageChange,
+    onViewDetails,
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
     const router = useRouter();
@@ -203,7 +205,7 @@ export default function ActionsToolbar({
     // Get submit button label based on stage
     const getSubmitLabel = () => {
         if (item.stage === "draft") return "Submit for Review";
-        if (item.stage === "ai_reviewed") return "Submit Application";
+        if (item.stage === "ai_reviewed") return "Submit";
         return "Submit";
     };
 
@@ -246,7 +248,7 @@ export default function ActionsToolbar({
                     {/* Move to Draft — available in several stages */}
                     {canBackToDraft && (
                         <button
-                            className={`btn btn-outline ${getSizeClass()}`}
+                            className={`btn ${confirmAction ? "btn-success" : "btn-outline"} ${getSizeClass()}`}
                             disabled={isLoading}
                             onClick={() =>
                                 handleConfirmClick(
@@ -260,7 +262,7 @@ export default function ActionsToolbar({
                             actions.loading === "return-to-draft" ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-rotate-left mr-1" />
+                                <i className="fa-duotone fa-regular fa-file-pen mr-1" />
                             )}
                             {confirmAction === "back-to-draft"
                                 ? "Confirm?"
@@ -293,7 +295,7 @@ export default function ActionsToolbar({
                     {/* Withdraw */}
                     {canWithdraw && (
                         <button
-                            className={`btn btn-outline ${getSizeClass()}`}
+                            className={`btn btn-error btn-outline ${getSizeClass()}`}
                             disabled={isLoading}
                             onClick={() =>
                                 handleConfirmClick("withdraw", handleWithdraw)
@@ -331,6 +333,7 @@ export default function ActionsToolbar({
                             ) : (
                                 <>
                                     <Presence status={presenceStatus} />
+                                    <i className="fa-duotone fa-regular fa-messages ml-1" />
                                     Message
                                 </>
                             )}
@@ -448,7 +451,7 @@ export default function ActionsToolbar({
                         ) : confirmAction === "back-to-draft" ? (
                             <i className="fa-duotone fa-regular fa-check text-success" />
                         ) : (
-                            <i className="fa-duotone fa-regular fa-rotate-left" />
+                            <i className="fa-duotone fa-regular fa-file-pen" />
                         )}
                     </button>
                 )}
@@ -456,7 +459,7 @@ export default function ActionsToolbar({
                 {/* Submit — only shown when applicable */}
                 {canSubmit && (
                     <button
-                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        className={`btn btn-success ${getSizeClass()}`}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick("submit", handleSubmit)
@@ -471,10 +474,13 @@ export default function ActionsToolbar({
                         actions.loading === "submit-ai" ? (
                             <span className="loading loading-spinner loading-xs" />
                         ) : confirmAction === "submit" ? (
-                            <i className="fa-duotone fa-regular fa-check text-success" />
+                            <i className="fa-duotone fa-regular fa-check" />
                         ) : (
                             <i className="fa-duotone fa-regular fa-paper-plane" />
                         )}
+                        {confirmAction === "submit"
+                            ? "Confirm?"
+                            : getSubmitLabel()}
                     </button>
                 )}
 
@@ -501,9 +507,40 @@ export default function ActionsToolbar({
                         )}
                     </button>
                 )}
+                {/* Proposal actions — contextual */}
+                {isProposal && (
+                    <>
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                        <button
+                            className={`btn btn-success ${getSizeClass()}`}
+                            disabled={isJobClosed || isLoading}
+                            onClick={handleAcceptProposal}
+                            title={
+                                isJobClosed
+                                    ? "Position closed"
+                                    : "Accept & Apply"
+                            }
+                        >
+                            <i className="fa-duotone fa-regular fa-handshake" />
+                            Accept
+                        </button>
+                        <button
+                            className={`btn btn-error btn-circle ${getSizeClass()}`}
+                            disabled={isJobClosed || isLoading}
+                            onClick={() => setShowDeclineModal(true)}
+                            title="Decline proposal"
+                        >
+                            <i className="fa-duotone fa-regular fa-times" />
+                        </button>
+                    </>
+                )}
 
                 {/* Divider — only if there are action buttons before message */}
-                {(canEdit || canBackToDraft || canSubmit || canWithdraw) && (
+                {(canEdit ||
+                    canBackToDraft ||
+                    canSubmit ||
+                    canWithdraw ||
+                    isProposal) && (
                     <div className="w-px h-4 bg-base-300 mx-0.5" />
                 )}
 
@@ -527,29 +564,16 @@ export default function ActionsToolbar({
                     </button>
                 </span>
 
-                {/* Proposal actions — contextual */}
-                {isProposal && (
+                {/* View Details */}
+                {onViewDetails && (
                     <>
                         <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
-                            className={`btn btn-success btn-circle ${getSizeClass()}`}
-                            disabled={isJobClosed || isLoading}
-                            onClick={handleAcceptProposal}
-                            title={
-                                isJobClosed
-                                    ? "Position closed"
-                                    : "Accept & Apply"
-                            }
+                            className={`btn btn-primary btn-circle ${getSizeClass()}`}
+                            onClick={() => onViewDetails(item.id)}
+                            title="View details"
                         >
-                            <i className="fa-duotone fa-regular fa-handshake" />
-                        </button>
-                        <button
-                            className={`btn btn-error btn-circle ${getSizeClass()}`}
-                            disabled={isJobClosed || isLoading}
-                            onClick={() => setShowDeclineModal(true)}
-                            title="Decline proposal"
-                        >
-                            <i className="fa-duotone fa-regular fa-times" />
+                            <i className="fa-duotone fa-regular fa-eye" />
                         </button>
                     </>
                 )}

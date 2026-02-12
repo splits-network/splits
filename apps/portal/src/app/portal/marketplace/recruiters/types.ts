@@ -37,6 +37,20 @@ export interface Company {
 }
 
 /**
+ * Recruiter-company relationship data for termination flow
+ */
+export interface CompanyRecruiterRelationship {
+    id: string;
+    recruiter_id: string;
+    company_id: string;
+    status: string;
+    company?: {
+        id: string;
+        name: string;
+    };
+}
+
+/**
  * Resolve display name from recruiter with user join data
  */
 export function getDisplayName(recruiter: RecruiterWithUser): string {

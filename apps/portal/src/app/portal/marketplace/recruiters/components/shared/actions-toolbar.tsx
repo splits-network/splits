@@ -12,6 +12,7 @@ import { ModalPortal } from "@splits-network/shared-ui";
 import { RecruiterWithUser, getDisplayName } from "../../types";
 import { useRecruiterFilter } from "../../contexts/filter-context";
 import InviteRecruiterModal from "../modals/invite-recruiter-modal";
+import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
 
 export interface RecruiterActionsToolbarProps {
     recruiter: RecruiterWithUser;
@@ -45,8 +46,12 @@ export default function RecruiterActionsToolbar({
 
     const [startingChat, setStartingChat] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    const { companies } = useRecruiterFilter();
+    const { companies, recruiterRelationships, refreshRelationships } = useRecruiterFilter();
+
+    const companyRelationship = recruiterRelationships.get(recruiter.id);
+    const hasActiveRelationship = companyRelationship?.status === "active";
 
     const recruiterUserId = recruiter.users?.id;
     const canChat = Boolean(recruiterUserId);
@@ -100,6 +105,7 @@ export default function RecruiterActionsToolbar({
         viewDetails: showActions.viewDetails === true,
         message: showActions.message !== false,
         inviteToCompany: showActions.inviteToCompany !== false && canInvite,
+        endRelationship: (isCompanyUser || isAdmin) && hasActiveRelationship,
     };
 
     const getSizeClass = () => `btn-${size}`;
@@ -117,6 +123,23 @@ export default function RecruiterActionsToolbar({
                 companies={companies}
             />
         </ModalPortal>
+    );
+
+    const terminateModal = showTerminateModal && companyRelationship && (
+        <TerminateCompanyModal
+            isOpen={showTerminateModal}
+            onClose={() => setShowTerminateModal(false)}
+            onSuccess={() => {
+                setShowTerminateModal(false);
+                refreshRelationships();
+            }}
+            relationshipId={companyRelationship.id}
+            recruiterId={companyRelationship.recruiter_id}
+            companyId={companyRelationship.company_id}
+            targetName={getDisplayName(recruiter)}
+            targetEmail={recruiter.users?.email}
+            targetRole="recruiter"
+        />
     );
 
     if (variant === "icon-only") {
@@ -166,8 +189,20 @@ export default function RecruiterActionsToolbar({
                             <i className="fa-duotone fa-regular fa-paper-plane" />
                         </button>
                     )}
+
+                    {/* End Relationship */}
+                    {actions.endRelationship && (
+                        <button
+                            onClick={() => setShowTerminateModal(true)}
+                            className={`btn ${getSizeClass()} btn-square btn-error btn-outline`}
+                            title="End Relationship"
+                        >
+                            <i className="fa-duotone fa-regular fa-link-slash" />
+                        </button>
+                    )}
                 </div>
                 {inviteModal}
+                {terminateModal}
             </>
         );
     }
@@ -216,8 +251,20 @@ export default function RecruiterActionsToolbar({
                         Invite
                     </button>
                 )}
+
+                {/* End Relationship */}
+                {actions.endRelationship && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        End Relationship
+                    </button>
+                )}
             </div>
             {inviteModal}
+            {terminateModal}
         </>
     );
 }

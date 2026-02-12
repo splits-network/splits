@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDate } from "@/lib/utils";
+import { daysSince, formatDate } from "@/lib/utils";
 import {
     ExpandableTableRow,
     ExpandedDetailGrid,
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tables";
 import { Application, getDisplayStatus } from "../../types";
 import ActionsToolbar from "../shared/actions-toolbar";
+import { daysBetween } from "@/lib/utils/date-formatting";
 
 interface RowProps {
     item: Application;
@@ -21,13 +22,23 @@ interface RowProps {
     ) => void;
 }
 
+function getStageTextColor(badgeClass: string): string {
+    if (badgeClass.includes("badge-success")) return "text-success";
+    if (badgeClass.includes("badge-error")) return "text-error";
+    if (badgeClass.includes("badge-warning")) return "text-warning";
+    if (badgeClass.includes("badge-info")) return "text-info";
+    if (badgeClass.includes("badge-primary")) return "text-primary";
+    if (badgeClass.includes("badge-neutral")) return "text-base-content/70";
+    return "text-base-content/60";
+}
+
 export default function Row({ item, onViewDetails, onMessage }: RowProps) {
     const status = getDisplayStatus(item);
 
     const cells = (
         <>
             {/* Candidate */}
-            <td className="py-4">
+            <td className="py-4 overflow-hidden">
                 <div className="flex items-center gap-3">
                     <div className="avatar avatar-placeholder shrink-0">
                         <div className="bg-primary/10 text-base-content/70 w-10 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -37,62 +48,78 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                     </div>
                     <div className="text-sm min-w-0">
                         <span
-                            className="font-semibold"
+                            className="font-semibold block truncate"
                             title={item.candidate?.full_name ?? undefined}
                         >
                             {item.candidate?.full_name || "Unknown"}
                         </span>
-                        <div className="text-sm text-base-content/60">
+                        <div
+                            className="text-sm text-base-content/60 truncate"
+                            title={item.candidate?.email ?? undefined}
+                        >
                             {item.candidate?.email}
                         </div>
                     </div>
                 </div>
             </td>
             {/* Job */}
-            <td>
-                <div className="flex flex-col justify-start">
-                    <span className="text-sm font-medium">
+            <td className="overflow-hidden">
+                <div className="flex flex-col justify-start min-w-0">
+                    <span
+                        className="text-sm font-medium truncate"
+                        title={item.job?.title ?? undefined}
+                    >
                         {item.job?.title || "Unknown"}
                     </span>
-                    <span className="text-sm text-base-content/60">
+                    <span
+                        className="text-sm text-base-content/60 truncate"
+                        title={item.job?.company?.name ?? undefined}
+                    >
                         {item.job?.company?.name || "N/A"}
                     </span>
                 </div>
             </td>
-            {/* Company */}
-            <td></td>
             {/* AI Score */}
             <td>
                 {item.ai_review?.fit_score != null ? (
-                    <div className="flex items-center gap-2">
-                        <progress
-                            className="progress progress-accent w-12"
-                            value={item.ai_review.fit_score}
-                            max="100"
-                        />
-                        <span className="text-xs font-bold">
-                            {Math.round(item.ai_review.fit_score)}%
-                        </span>
-                    </div>
+                    <span
+                        className={`text-xs font-bold ${
+                            item.ai_review.fit_score >= 70
+                                ? "text-success"
+                                : item.ai_review.fit_score >= 40
+                                  ? "text-warning"
+                                  : "text-error"
+                        }`}
+                    >
+                        {Math.round(item.ai_review.fit_score)}%
+                    </span>
                 ) : (
                     <span className="text-xs text-base-content/40">N/A</span>
                 )}
             </td>
             {/* Stage */}
-            <td>
-                <span className={`badge ${status.badgeClass} badge-sm gap-1.5`}>
-                    <i className={`fa-duotone fa-regular ${status.icon}`} />
+            <td className="overflow-hidden">
+                <span
+                    className={`text-xs font-semibold truncate block ${getStageTextColor(status.badgeClass)}`}
+                    title={status.label}
+                >
+                    <i
+                        className={`fa-duotone fa-regular ${status.icon} mr-1.5`}
+                    />
                     {status.label}
                 </span>
             </td>
             {/* Submitted */}
             <td>
-                <span className="text-xs text-base-content/60">
+                <span className="text-xs text-base-content/60 whitespace-nowrap">
                     {item.created_at ? formatDate(item.created_at) : "N/A"}
                 </span>
             </td>
             {/* Actions */}
-            <td onClick={(e) => e.stopPropagation()}>
+            <td
+                onClick={(e) => e.stopPropagation()}
+                className="text-right"
+            >
                 <ActionsToolbar
                     application={item}
                     variant="icon-only"
@@ -105,6 +132,7 @@ export default function Row({ item, onViewDetails, onMessage }: RowProps) {
                         reject: true,
                     }}
                     onMessage={onMessage}
+                    className="justify-end"
                 />
             </td>
         </>

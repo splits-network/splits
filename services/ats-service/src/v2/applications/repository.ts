@@ -728,6 +728,76 @@ export class ApplicationRepository {
      * Find the active recruiter representing a candidate
      * Returns null if no active relationship exists
      */
+    /**
+     * Find active applications affected by a recruiter-candidate relationship termination.
+     * Returns applications where the recruiter is candidate_recruiter_id and the candidate matches,
+     * excluding terminal stages.
+     */
+    async findAffectedByTermination(
+        recruiterId: string,
+        candidateId: string
+    ): Promise<any[]> {
+        const terminalStages = ['rejected', 'withdrawn', 'hired', 'expired'];
+
+        const { data, error } = await this.supabase
+            .from('applications')
+            .select(`
+                id,
+                stage,
+                created_at,
+                job:jobs!job_id(
+                    id,
+                    title,
+                    company:companies!company_id(id, name)
+                )
+            `)
+            .eq('candidate_recruiter_id', recruiterId)
+            .eq('candidate_id', candidateId)
+            .not('stage', 'in', `(${terminalStages.join(',')})`)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (data || []).map((app: any) => ({
+            id: app.id,
+            stage: app.stage,
+            created_at: app.created_at,
+            job_title: app.job?.title || 'Unknown',
+            company_name: app.job?.company?.name || 'Unknown',
+        }));
+    }
+
+    /**
+     * Process termination decisions for applications.
+     * 'keep' = unassign recruiter (set candidate_recruiter_id to null)
+     * 'withdraw' = set stage to 'withdrawn'
+     */
+    async processTerminationDecisions(
+        decisions: { application_id: string; action: 'keep' | 'withdraw' }[]
+    ): Promise<void> {
+        for (const decision of decisions) {
+            if (decision.action === 'withdraw') {
+                const { error } = await this.supabase
+                    .from('applications')
+                    .update({
+                        stage: 'withdrawn',
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', decision.application_id);
+                if (error) throw error;
+            } else if (decision.action === 'keep') {
+                const { error } = await this.supabase
+                    .from('applications')
+                    .update({
+                        candidate_recruiter_id: null,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', decision.application_id);
+                if (error) throw error;
+            }
+        }
+    }
+
     async findActiveRecruiterForCandidate(candidateId: string): Promise<any> {
         const { data: relationship } = await this.supabase
             .from('recruiter_candidates')

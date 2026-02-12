@@ -26,6 +26,14 @@ export default function Item({
 
     return (
         <EntityCard className="group hover:shadow-lg transition-all duration-200">
+            {/* Status Badge */}
+            <div className="flex items-center gap-2">
+                <div
+                    className={`badge ${getStatusColor(item.stage)} font-semibold whitespace-nowrap w-full rounded-t-2xl`}
+                >
+                    {formatStage(item.stage)}
+                </div>
+            </div>
             <EntityCard.Header>
                 <div className="flex items-center gap-3 w-full">
                     <div className="flex justify-between w-full items-center">
@@ -53,14 +61,6 @@ export default function Item({
                                     {item.job?.company?.name ||
                                         "Unknown Company"}
                                 </p>
-                            </div>
-                        </div>
-                        {/* Status Badge */}
-                        <div className="flex items-center gap-2 ml-4">
-                            <div
-                                className={`badge ${getStatusColor(item.stage)} badge-sm font-semibold whitespace-nowrap`}
-                            >
-                                {formatStage(item.stage)}
                             </div>
                         </div>
                     </div>
@@ -135,21 +135,13 @@ export default function Item({
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(item.updated_at)}
                     </span>
-                    <div className="flex items-center gap-2">
-                        <ActionsToolbar
-                            item={item}
-                            variant="icon-only"
-                            size="xs"
-                            onStageChange={onStageChange}
-                        />
-                        <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => onViewDetails(item.id)}
-                        >
-                            View
-                            <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
-                        </button>
-                    </div>
+                    <ActionsToolbar
+                        item={item}
+                        variant="icon-only"
+                        size="xs"
+                        onStageChange={onStageChange}
+                        onViewDetails={onViewDetails}
+                    />
                 </div>
             </EntityCard.Footer>
         </EntityCard>

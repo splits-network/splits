@@ -17,6 +17,10 @@ export interface RecruiterCandidateUpdate {
     [key: string]: any;
 }
 
+export interface TerminateRecruiterCandidateRequest {
+    reason: string;
+}
+
 export interface RepositoryListResponse<T> {
     data: T[];
     total: number;

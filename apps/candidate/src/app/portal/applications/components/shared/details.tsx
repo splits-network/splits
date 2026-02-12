@@ -85,15 +85,23 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     return (
         <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
             {/* Job Closed Warning */}
-            {application.job?.status && ["closed", "filled", "cancelled"].includes(application.job.status) && (
-                <div className="alert alert-warning shrink-0">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation" />
-                    <div>
-                        <h3 className="font-bold">This position is no longer available</h3>
-                        <p className="text-sm mt-1">The company has closed this position and is not accepting new applications.</p>
+            {application.job?.status &&
+                ["closed", "filled", "cancelled"].includes(
+                    application.job.status,
+                ) && (
+                    <div className="alert alert-warning shrink-0">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation" />
+                        <div>
+                            <h3 className="font-bold">
+                                This position is no longer available
+                            </h3>
+                            <p className="text-sm mt-1">
+                                The company has closed this position and is not
+                                accepting new applications.
+                            </p>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {/* Proposal Info Banner */}
             {application.stage === "recruiter_proposed" && (
@@ -101,15 +109,25 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     <i className="fa-duotone fa-regular fa-handshake text-2xl" />
                     <div className="w-full">
                         <h3 className="font-bold text-lg mb-1">
-                            {application.recruiter?.user?.name || application.recruiter?.name || "A recruiter"} thinks you'd be a great fit for this role!
+                            {application.recruiter?.user?.name ||
+                                application.recruiter?.name ||
+                                "A recruiter"}{" "}
+                            thinks you'd be a great fit for this role!
                         </h3>
                         {application.recruiter_notes && (
                             <div className="mt-2 p-3 bg-base-100 rounded-lg w-full">
-                                <div className="text-sm text-base-content/60 mb-1">Recruiter's Message:</div>
-                                <div className="whitespace-pre-wrap text-sm">{application.recruiter_notes}</div>
+                                <div className="text-sm text-base-content/60 mb-1">
+                                    Recruiter's Message:
+                                </div>
+                                <div className="whitespace-pre-wrap text-sm">
+                                    {application.recruiter_notes}
+                                </div>
                             </div>
                         )}
-                        <p className="text-sm text-base-content/60 mt-2">Use the toolbar buttons above to accept or decline this proposal.</p>
+                        <p className="text-sm text-base-content/60 mt-2">
+                            Use the toolbar buttons above to accept or decline
+                            this proposal.
+                        </p>
                     </div>
                 </div>
             )}
@@ -184,17 +202,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     </a>
                     <a
                         role="tab"
-                        className={`tab ${activeTab === "ai_review" ? "tab-active" : ""}`}
-                        onClick={() => setActiveTab("ai_review")}
-                    >
-                        <i className="fa-duotone fa-brain mr-2" />
-                        AI Review
-                        {application.ai_review?.id && (
-                            <AIReviewPanel aiReviewId={application.ai_review.id} variant="badge" />
-                        )}
-                    </a>
-                    <a
-                        role="tab"
                         className={`tab ${activeTab === "notes" ? "tab-active" : ""}`}
                         onClick={() => setActiveTab("notes")}
                     >
@@ -221,9 +228,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {activeTab === "documents" && (
                     <DocumentsTab application={application} />
                 )}
-                {activeTab === "ai_review" && (
-                    <AIReviewTab application={application} />
-                )}
                 {activeTab === "notes" && user && (
                     <NotesTab
                         application={application}
@@ -246,88 +250,108 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
 function OverviewTab({ application }: { application: Application }) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Status</h4>
-                <span
-                    className={`badge ${getStatusColor(application.stage)} badge-lg`}
-                >
-                    {formatStage(application.stage)}
-                </span>
-            </div>
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">Status</h4>
+                    <span
+                        className={`badge ${getStatusColor(application.stage)} badge-lg`}
+                    >
+                        {formatStage(application.stage)}
+                    </span>
+                </div>
 
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">Submitted</h4>
-                <p>{formatDate(application.created_at)}</p>
-                {application.updated_at !== application.created_at && (
-                    <p className="text-sm text-base-content/60 mt-1">
-                        Updated {formatDate(application.updated_at)}
-                    </p>
-                )}
-            </div>
-
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-user-tie mr-2 text-primary" />
-                    Your Recruiter
-                </h4>
-                {(() => {
-                    const recruiterName =
-                        application.recruiter?.name ||
-                        application.recruiter?.user?.name;
-                    const recruiterEmail =
-                        application.recruiter?.email ||
-                        application.recruiter?.user?.email;
-
-                    if (recruiterName || recruiterEmail) {
-                        return (
-                            <div className="space-y-2">
-                                {recruiterName && <p className="font-medium">{recruiterName}</p>}
-                                {application.recruiter?.tagline && (
-                                    <p className="text-sm text-base-content/70 italic">
-                                        {application.recruiter.tagline}
-                                    </p>
-                                )}
-                                {application.recruiter?.bio && (
-                                    <p className="text-sm text-base-content/70">
-                                        {application.recruiter.bio}
-                                    </p>
-                                )}
-                                {application.recruiter?.years_experience && (
-                                    <p className="text-sm text-base-content/60">
-                                        <i className="fa-duotone fa-regular fa-clock mr-1" />
-                                        {application.recruiter.years_experience} years experience
-                                    </p>
-                                )}
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {recruiterEmail && (
-                                        <a href={`mailto:${recruiterEmail}`} className="badge badge-outline badge-sm gap-1">
-                                            <i className="fa-duotone fa-regular fa-envelope" />
-                                            {recruiterEmail}
-                                        </a>
-                                    )}
-                                    {application.recruiter?.phone && (
-                                        <a href={`tel:${application.recruiter.phone}`} className="badge badge-outline badge-sm gap-1">
-                                            <i className="fa-duotone fa-regular fa-phone" />
-                                            {application.recruiter.phone}
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    }
-                    return (
-                        <p className="text-sm text-base-content/50 italic">
-                            No recruiter assigned
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">Submitted</h4>
+                    <p>{formatDate(application.created_at)}</p>
+                    {application.updated_at !== application.created_at && (
+                        <p className="text-sm text-base-content/60 mt-1">
+                            Updated {formatDate(application.updated_at)}
                         </p>
-                    );
-                })()}
+                    )}
+                </div>
+
+                <div className="card bg-base-200 p-4">
+                    <h4 className="font-semibold mb-2">
+                        <i className="fa-duotone fa-regular fa-user-tie mr-2 text-primary" />
+                        Your Recruiter
+                    </h4>
+                    {(() => {
+                        const recruiterName =
+                            application.recruiter?.name ||
+                            application.recruiter?.user?.name;
+                        const recruiterEmail =
+                            application.recruiter?.email ||
+                            application.recruiter?.user?.email;
+
+                        if (recruiterName || recruiterEmail) {
+                            return (
+                                <div className="space-y-2">
+                                    {recruiterName && (
+                                        <p className="font-medium">
+                                            {recruiterName}
+                                        </p>
+                                    )}
+                                    {application.recruiter?.tagline && (
+                                        <p className="text-sm text-base-content/70 italic">
+                                            {application.recruiter.tagline}
+                                        </p>
+                                    )}
+                                    {application.recruiter?.bio && (
+                                        <p className="text-sm text-base-content/70">
+                                            {application.recruiter.bio}
+                                        </p>
+                                    )}
+                                    {application.recruiter
+                                        ?.years_experience && (
+                                        <p className="text-sm text-base-content/60">
+                                            <i className="fa-duotone fa-regular fa-clock mr-1" />
+                                            {
+                                                application.recruiter
+                                                    .years_experience
+                                            }{" "}
+                                            years experience
+                                        </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {recruiterEmail && (
+                                            <a
+                                                href={`mailto:${recruiterEmail}`}
+                                                className="badge badge-outline badge-sm gap-1"
+                                            >
+                                                <i className="fa-duotone fa-regular fa-envelope" />
+                                                {recruiterEmail}
+                                            </a>
+                                        )}
+                                        {application.recruiter?.phone && (
+                                            <a
+                                                href={`tel:${application.recruiter.phone}`}
+                                                className="badge badge-outline badge-sm gap-1"
+                                            >
+                                                <i className="fa-duotone fa-regular fa-phone" />
+                                                {application.recruiter.phone}
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        }
+                        return (
+                            <p className="text-sm text-base-content/50 italic">
+                                No recruiter assigned
+                            </p>
+                        );
+                    })()}
+                </div>
             </div>
 
             {application.ai_review?.id && (
-                <AIReviewPanel aiReviewId={application.ai_review.id} variant="mini-card" />
+                <AIReviewPanel
+                    aiReviewId={application.ai_review.id}
+                    variant="full"
+                />
             )}
-        </div>
+        </>
     );
 }
 
@@ -386,10 +410,17 @@ function JobTab({ application }: { application: Application }) {
                                             Salary Range
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {job.salary_currency && job.salary_currency !== "USD" ? `${job.salary_currency} ` : "$"}
+                                            {job.salary_currency &&
+                                            job.salary_currency !== "USD"
+                                                ? `${job.salary_currency} `
+                                                : "$"}
                                             {job.salary_min?.toLocaleString() ||
                                                 "..."}{" "}
-                                            - {job.salary_currency && job.salary_currency !== "USD" ? `${job.salary_currency} ` : "$"}
+                                            -{" "}
+                                            {job.salary_currency &&
+                                            job.salary_currency !== "USD"
+                                                ? `${job.salary_currency} `
+                                                : "$"}
                                             {job.salary_max?.toLocaleString() ||
                                                 "..."}
                                         </div>
@@ -402,9 +433,15 @@ function JobTab({ application }: { application: Application }) {
                                         </div>
                                         <div className="text-sm font-medium">
                                             {job.open_to_relocation ? (
-                                                <><i className="fa-duotone fa-regular fa-check text-success mr-1" />Open to relocation</>
+                                                <>
+                                                    <i className="fa-duotone fa-regular fa-check text-success mr-1" />
+                                                    Open to relocation
+                                                </>
                                             ) : (
-                                                <><i className="fa-duotone fa-regular fa-xmark text-error mr-1" />No relocation</>
+                                                <>
+                                                    <i className="fa-duotone fa-regular fa-xmark text-error mr-1" />
+                                                    No relocation
+                                                </>
                                             )}
                                         </div>
                                     </div>
@@ -448,39 +485,44 @@ function JobTab({ application }: { application: Application }) {
             </div>
 
             {/* Company Info */}
-            {job.company && (job.company.description || job.company.company_size || job.company.headquarters_location) && (
-                <div className="card bg-base-200 p-4">
-                    <h4 className="font-semibold mb-3">
-                        <i className="fa-duotone fa-regular fa-building mr-2 text-primary" />
-                        About {job.company.name || "the Company"}
-                    </h4>
-                    <div className="space-y-2">
-                        {job.company.description && (
-                            <p className="text-sm text-base-content/80">{job.company.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
-                            {job.company.company_size && (
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-users mr-1" />
-                                    {job.company.company_size}
-                                </span>
+            {job.company &&
+                (job.company.description ||
+                    job.company.company_size ||
+                    job.company.headquarters_location) && (
+                    <div className="card bg-base-200 p-4">
+                        <h4 className="font-semibold mb-3">
+                            <i className="fa-duotone fa-regular fa-building mr-2 text-primary" />
+                            About {job.company.name || "the Company"}
+                        </h4>
+                        <div className="space-y-2">
+                            {job.company.description && (
+                                <p className="text-sm text-base-content/80">
+                                    {job.company.description}
+                                </p>
                             )}
-                            {job.company.headquarters_location && (
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                                    {job.company.headquarters_location}
-                                </span>
-                            )}
-                            {job.company.industry && (
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-industry mr-1" />
-                                    {job.company.industry}
-                                </span>
-                            )}
+                            <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
+                                {job.company.company_size && (
+                                    <span>
+                                        <i className="fa-duotone fa-regular fa-users mr-1" />
+                                        {job.company.company_size}
+                                    </span>
+                                )}
+                                {job.company.headquarters_location && (
+                                    <span>
+                                        <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                                        {job.company.headquarters_location}
+                                    </span>
+                                )}
+                                {job.company.industry && (
+                                    <span>
+                                        <i className="fa-duotone fa-regular fa-industry mr-1" />
+                                        {job.company.industry}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {/* Description */}
             {(job.candidate_description ||
@@ -628,12 +670,20 @@ function DocumentsTab({ application }: { application: Application }) {
 
     const isOfferStage = application.stage === "offer";
 
-    const renderDocumentList = (docs: ApplicationDocument[], title: string, isCompanyDocs = false) => (
-        <div className={`card bg-base-200 p-4 ${isCompanyDocs && isOfferStage ? "border-2 border-success" : ""}`}>
+    const renderDocumentList = (
+        docs: ApplicationDocument[],
+        title: string,
+        isCompanyDocs = false,
+    ) => (
+        <div
+            className={`card bg-base-200 p-4 ${isCompanyDocs && isOfferStage ? "border-2 border-success" : ""}`}
+        >
             <h4 className="font-semibold mb-4 flex items-center gap-2">
                 {title}
                 {isCompanyDocs && isOfferStage && (
-                    <span className="badge badge-success badge-sm">Action Required</span>
+                    <span className="badge badge-success badge-sm">
+                        Action Required
+                    </span>
                 )}
             </h4>
             {isCompanyDocs && isOfferStage && (
@@ -708,7 +758,11 @@ function DocumentsTab({ application }: { application: Application }) {
                 {candidateDocuments.length > 0 &&
                     renderDocumentList(candidateDocuments, "Your Documents")}
                 {companyDocuments.length > 0 &&
-                    renderDocumentList(companyDocuments, "Company Documents", true)}
+                    renderDocumentList(
+                        companyDocuments,
+                        "Company Documents",
+                        true,
+                    )}
             </div>
 
             <DocumentViewerModal
@@ -723,23 +777,6 @@ function DocumentsTab({ application }: { application: Application }) {
     );
 }
 
-function AIReviewTab({ application }: { application: Application }) {
-    if (!application.ai_review?.id) {
-        return (
-            <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-brain text-4xl mb-2" />
-                <p>AI analysis not yet available</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-4">
-            <AIReviewPanel aiReviewId={application.ai_review.id} />
-        </div>
-    );
-}
-
 function NotesTab({
     application,
     getToken,
@@ -751,37 +788,42 @@ function NotesTab({
 }) {
     // API functions for notes - wrapped in useCallback to prevent infinite re-fetching
     // getToken is stable from Clerk, so these callbacks are stable too
-    const fetchNotes = useCallback(async (
-        applicationId: string,
-    ): Promise<ApplicationNote[]> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-        const client = createAuthenticatedClient(token);
-        const response = await client.get(
-            `/applications/${applicationId}/notes`,
-        );
-        return response.data || [];
-    }, [getToken]);
+    const fetchNotes = useCallback(
+        async (applicationId: string): Promise<ApplicationNote[]> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(
+                `/applications/${applicationId}/notes`,
+            );
+            return response.data || [];
+        },
+        [getToken],
+    );
 
-    const createNote = useCallback(async (
-        data: CreateNoteData,
-    ): Promise<ApplicationNote> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-        const client = createAuthenticatedClient(token);
-        const response = await client.post(
-            `/applications/${data.application_id}/notes`,
-            data,
-        );
-        return response.data;
-    }, [getToken]);
+    const createNote = useCallback(
+        async (data: CreateNoteData): Promise<ApplicationNote> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            const response = await client.post(
+                `/applications/${data.application_id}/notes`,
+                data,
+            );
+            return response.data;
+        },
+        [getToken],
+    );
 
-    const deleteNote = useCallback(async (noteId: string): Promise<void> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-        const client = createAuthenticatedClient(token);
-        await client.delete(`/application-notes/${noteId}`);
-    }, [getToken]);
+    const deleteNote = useCallback(
+        async (noteId: string): Promise<void> => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/application-notes/${noteId}`);
+        },
+        [getToken],
+    );
 
     return (
         <ApplicationNotesPanel

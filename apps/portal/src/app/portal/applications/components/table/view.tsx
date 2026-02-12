@@ -12,18 +12,29 @@ import Row from "./row";
 import Sidebar from "../shared/sidebar";
 
 const columns: TableColumn[] = [
-    { key: "candidate", label: "Candidate", sortable: true },
-    { key: "job", label: "Job", sortable: true },
-    { key: "company", label: "Company", sortable: false, hideOnMobile: true },
-    { key: "ai_score", label: "AI Score", sortable: true, hideOnMobile: true },
-    { key: "stage", label: "Stage", sortable: true },
+    { key: "candidate", label: "Candidate", sortable: true, width: "w-[26%]" },
+    { key: "job", label: "Job", sortable: true, width: "w-[20%]" },
+    {
+        key: "ai_score",
+        label: "AI Score",
+        sortable: true,
+        hideOnMobile: true,
+        width: "w-[9%]",
+    },
+    { key: "stage", label: "Stage", sortable: true, width: "w-[13%]" },
     {
         key: "created_at",
         label: "Submitted",
         sortable: true,
         hideOnMobile: true,
+        width: "w-[12%]",
     },
-    { key: "actions" as any, label: "Actions", align: "right" },
+    {
+        key: "actions" as any,
+        label: "Actions",
+        align: "right",
+        width: "w-[16%]",
+    },
 ];
 
 export default function TableView() {
@@ -80,6 +91,7 @@ export default function TableView() {
             <div className="space-y-6">
                 <DataTable
                     columns={columns}
+                    className="table-fixed"
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                     onSort={handleSort}

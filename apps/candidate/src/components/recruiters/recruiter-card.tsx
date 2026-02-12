@@ -18,9 +18,10 @@ interface RecruiterRelationship {
 interface RecruiterCardProps {
     relationship: RecruiterRelationship;
     showActions?: boolean;
+    onTerminate?: (relationship: RecruiterRelationship) => void;
 }
 
-export function RecruiterCard({ relationship, showActions = true }: RecruiterCardProps) {
+export function RecruiterCard({ relationship, showActions = true, onTerminate }: RecruiterCardProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -125,6 +126,15 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                             <button className="btn btn-sm btn-primary">
                                 <i className="fa-duotone fa-regular fa-rotate"></i>
                                 Request Renewal
+                            </button>
+                        )}
+                        {onTerminate && (
+                            <button
+                                className="btn btn-sm btn-error btn-outline"
+                                onClick={() => onTerminate(relationship)}
+                            >
+                                <i className="fa-duotone fa-regular fa-link-slash"></i>
+                                End Representation
                             </button>
                         )}
                     </div>

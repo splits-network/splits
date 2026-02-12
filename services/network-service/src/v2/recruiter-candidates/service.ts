@@ -2,16 +2,19 @@
  * Recruiter-Candidate Service - Business logic for recruiter-candidate relationships
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
 import { EventPublisherV2 } from '../shared/events';
 import { RecruiterCandidateRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { RecruiterCandidateFilters, RecruiterCandidateUpdate } from './types';
+import { RecruiterCandidateFilters, RecruiterCandidateUpdate, TerminateRecruiterCandidateRequest } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export class RecruiterCandidateServiceV2 {
 
     constructor(
         private repository: RecruiterCandidateRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: EventPublisherV2,
+        private supabase?: SupabaseClient
     ) {
         // V2 services use direct database queries, not HTTP clients
     }
@@ -123,6 +126,37 @@ export class RecruiterCandidateServiceV2 {
         await this.eventPublisher.publish('recruiter_candidate.updated', {
             relationship_id: id,
             updates: Object.keys(updates),
+        });
+
+        return relationship;
+    }
+
+    async terminateRelationship(
+        id: string,
+        request: TerminateRecruiterCandidateRequest,
+        clerkUserId: string
+    ): Promise<any> {
+        // Resolve who is terminating
+        let terminatedByUserId: string | undefined;
+        if (this.supabase) {
+            const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+            terminatedByUserId = accessContext.identityUserId || undefined;
+        }
+
+        const relationship = await this.repository.updateRecruiterCandidate(id, {
+            status: 'terminated',
+            termination_reason: request.reason,
+            terminated_by: terminatedByUserId,
+            relationship_end_date: new Date().toISOString(),
+        });
+
+        // Publish termination event
+        await this.eventPublisher.publish('recruiter_candidate.terminated', {
+            relationship_id: id,
+            recruiter_id: relationship.recruiter_id,
+            candidate_id: relationship.candidate_id,
+            reason: request.reason,
+            terminated_by: terminatedByUserId,
         });
 
         return relationship;

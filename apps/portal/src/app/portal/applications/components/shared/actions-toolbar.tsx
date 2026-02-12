@@ -101,7 +101,10 @@ export default function ActionsToolbar({
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
-    const presence = usePresence([candidateUserId], { enabled: canChat });
+    const messageVisible = showActions.message !== false;
+    const presence = usePresence([candidateUserId], {
+        enabled: canChat && messageVisible,
+    });
     const presenceStatus = candidateUserId
         ? presence[candidateUserId]?.status
         : undefined;
@@ -424,36 +427,9 @@ export default function ActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${layoutClass} ${className}`}>
-                    {actions.viewDetails && onViewDetails && (
-                        <button
-                            onClick={() => onViewDetails(application.id)}
-                            className={`btn ${sizeClass} btn-circle btn-ghost`}
-                            title="View Details"
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                        </button>
-                    )}
-                    {actions.message && (
-                        <span title={chatDisabledReason || undefined}>
-                            <button
-                                onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-circle btn-outline relative`}
-                                title="Message Candidate"
-                                disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-1 -right-1"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages" />
-                                )}
-                            </button>
-                        </span>
-                    )}
+                <div
+                    className={`flex items-center ${layoutClass} ${className}`}
+                >
                     {actions.addNote && (
                         <button
                             onClick={() => setShowNoteModal(true)}
@@ -467,21 +443,22 @@ export default function ActionsToolbar({
                     {actions.requestPrescreen && (
                         <button
                             onClick={() => setShowPreScreenModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-warning`}
+                            className={`btn ${sizeClass} btn-warning`}
                             title="Request Pre-Screen"
                             disabled={actionLoading}
                         >
                             <i className="fa-duotone fa-regular fa-user-check" />
+                            Pre-Screen
                         </button>
                     )}
                     {actions.requestChanges && (
                         <button
                             onClick={() => setShowRequestChangesModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-warning`}
+                            className={`btn ${sizeClass} btn-warning`}
                             title="Request Changes"
                             disabled={actionLoading}
                         >
-                            <i className="fa-duotone fa-regular fa-comment-edit" />
+                            <i className="fa-duotone fa-regular fa-question" />
                             Request
                         </button>
                     )}
@@ -511,6 +488,48 @@ export default function ActionsToolbar({
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                         </button>
+                    )}
+
+                    {/* Divider — only if there are action buttons before message */}
+                    {(actions.addNote ||
+                        actions.requestPrescreen ||
+                        actions.requestChanges ||
+                        actions.advanceStage ||
+                        actions.reject) && (
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
+                    )}
+
+                    {actions.message && (
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                onClick={handleStartChat}
+                                className={`btn ${sizeClass} btn-circle btn-ghost relative`}
+                                title="Message Candidate"
+                                disabled={!canChat || startingChat}
+                            >
+                                <Presence
+                                    status={presenceStatus}
+                                    className="absolute -top-1 -right-1"
+                                />
+                                {startingChat ? (
+                                    <span className="loading loading-spinner loading-xs" />
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-messages" />
+                                )}
+                            </button>
+                        </span>
+                    )}
+                    {actions.viewDetails && onViewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <button
+                                onClick={() => onViewDetails(application.id)}
+                                className={`btn ${sizeClass} btn-circle btn-primary`}
+                                title="View Details"
+                            >
+                                <i className="fa-duotone fa-regular fa-eye" />
+                            </button>
+                        </>
                     )}
                 </div>
                 {modals}

@@ -406,4 +406,103 @@ export class JobRepository {
         const { error } = await query;
         if (error) throw error;
     }
+
+    /**
+     * Find active jobs affected by a recruiter-company relationship termination.
+     * Returns jobs where the recruiter is job_owner_recruiter_id or company_recruiter_id
+     * for the given company, with active/paused status.
+     */
+    async findAffectedByTermination(
+        recruiterId: string,
+        companyId: string
+    ): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .from('jobs')
+            .select(`
+                id,
+                title,
+                status,
+                created_at
+            `)
+            .eq('company_id', companyId)
+            .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
+            .in('status', ['active', 'paused'])
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Get application counts for each job
+        const jobIds = (data || []).map(j => j.id);
+        let applicationCounts: Record<string, number> = {};
+
+        if (jobIds.length > 0) {
+            const { data: counts, error: countError } = await this.supabase
+                .from('applications')
+                .select('job_id', { count: 'exact' })
+                .in('job_id', jobIds)
+                .not('stage', 'in', '(rejected,withdrawn,expired)');
+
+            if (!countError && counts) {
+                // Count manually since we need per-job counts
+                for (const app of counts) {
+                    applicationCounts[app.job_id] = (applicationCounts[app.job_id] || 0) + 1;
+                }
+            }
+        }
+
+        return (data || []).map((job: any) => ({
+            id: job.id,
+            title: job.title,
+            status: job.status,
+            created_at: job.created_at,
+            application_count: applicationCounts[job.id] || 0,
+        }));
+    }
+
+    /**
+     * Process termination decisions for jobs.
+     * 'keep' = unassign recruiter fields
+     * 'pause' = pause job + unassign
+     * 'close' = close job
+     */
+    async processCompanyTerminationDecisions(
+        decisions: { job_id: string; action: 'keep' | 'pause' | 'close' }[],
+        recruiterId: string
+    ): Promise<void> {
+        for (const decision of decisions) {
+            const updates: Record<string, any> = {
+                updated_at: new Date().toISOString(),
+            };
+
+            if (decision.action === 'close') {
+                updates.status = 'closed';
+            } else if (decision.action === 'pause') {
+                updates.status = 'paused';
+            }
+
+            // For keep and pause, also unassign the recruiter
+            // Check which field the recruiter is on and null it out
+            const { data: job } = await this.supabase
+                .from('jobs')
+                .select('job_owner_recruiter_id, company_recruiter_id')
+                .eq('id', decision.job_id)
+                .single();
+
+            if (job) {
+                if (job.job_owner_recruiter_id === recruiterId) {
+                    updates.job_owner_recruiter_id = null;
+                }
+                if (job.company_recruiter_id === recruiterId) {
+                    updates.company_recruiter_id = null;
+                }
+            }
+
+            const { error } = await this.supabase
+                .from('jobs')
+                .update(updates)
+                .eq('id', decision.job_id);
+
+            if (error) throw error;
+        }
+    }
 }

@@ -98,6 +98,34 @@ function registerRecruiterCandidateInvitationRoutes(
 ) {
     const networkService = () => services.get('network');
 
+    // Terminate recruiter-candidate relationship
+    app.patch(
+        '/api/v2/recruiter-candidates/:id/terminate',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await networkService().patch(
+                    `/api/v2/recruiter-candidates/${id}/terminate`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to terminate recruiter-candidate relationship');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to terminate relationship' });
+            }
+        }
+    );
+
     app.get(
         '/api/v2/recruiter-candidates/invitations/:token',
         {

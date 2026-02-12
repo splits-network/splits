@@ -78,6 +78,53 @@ export function registerApplicationRoutes(
         }
     });
 
+    // Termination-related routes
+
+    /**
+     * GET /api/v2/applications/affected-by-termination
+     * Returns active applications affected by a recruiter-candidate relationship termination
+     */
+    app.get('/api/v2/applications/affected-by-termination', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const query = request.query as { recruiter_id?: string; candidate_id?: string };
+
+            if (!query.recruiter_id || !query.candidate_id) {
+                return reply.code(400).send({ error: { message: 'recruiter_id and candidate_id are required' } });
+            }
+
+            const applications = await config.applicationService.getAffectedByTermination(
+                query.recruiter_id,
+                query.candidate_id
+            );
+            return reply.send({ data: applications });
+        } catch (error: any) {
+            return reply.code(500).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/applications/termination-decisions
+     * Process per-application decisions when terminating a recruiter-candidate relationship
+     */
+    app.post('/api/v2/applications/termination-decisions', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as {
+                decisions: { application_id: string; action: 'keep' | 'withdraw' }[];
+            };
+
+            if (!body.decisions || !Array.isArray(body.decisions)) {
+                return reply.code(400).send({ error: { message: 'decisions array is required' } });
+            }
+
+            await config.applicationService.processTerminationDecisions(body.decisions);
+            return reply.send({ data: { message: 'Termination decisions processed' } });
+        } catch (error: any) {
+            return reply.code(500).send({ error: { message: error.message } });
+        }
+    });
+
     // AI Review Loop Routes
     app.post('/api/v2/applications/:id/trigger-ai-review', async (request: FastifyRequest, reply: FastifyReply) => {
         try {

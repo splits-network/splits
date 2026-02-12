@@ -42,6 +42,8 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                             </h2>
                             <div className="flex items-center gap-2">
                                 <ActionsToolbar
+                                    variant="descriptive"
+                                    size="sm"
                                     item={item}
                                     onStageChange={() => {
                                         refresh();

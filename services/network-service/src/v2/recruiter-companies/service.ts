@@ -213,9 +213,23 @@ export class RecruiterCompanyServiceV2 {
             throw new Error('This invitation has already been responded to');
         }
 
-        // Verify the current user is the invited recruiter
-        console.log(`[RESPOND] Checking ownership - relationship.recruiter_id: ${relationship.recruiter_id}, userContext.recruiterId: ${userContext.recruiterId}`);
-        if (relationship.recruiter_id !== userContext.recruiterId) {
+        // Verify the current user is a party in this relationship
+        // Either the invited recruiter OR a member of the invited company can respond
+        const isRecruiterParty = userContext.recruiterId && relationship.recruiter_id === userContext.recruiterId;
+
+        // For company users, resolve company IDs via organizationIds (same as repository.findById)
+        let isCompanyParty = false;
+        if (!isRecruiterParty && userContext.organizationIds.length > 0) {
+            const { data: companies } = await this.repository['supabase']
+                .from('companies')
+                .select('id')
+                .in('identity_organization_id', userContext.organizationIds);
+            const resolvedCompanyIds = companies?.map((c: any) => c.id) || [];
+            isCompanyParty = resolvedCompanyIds.includes(relationship.company_id);
+        }
+
+        console.log(`[RESPOND] Checking ownership - isRecruiterParty: ${isRecruiterParty}, isCompanyParty: ${isCompanyParty}`);
+        if (!isRecruiterParty && !isCompanyParty) {
             throw new Error('You can only respond to your own invitations');
         }
 
