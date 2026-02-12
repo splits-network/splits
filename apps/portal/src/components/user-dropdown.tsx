@@ -70,81 +70,156 @@ export function UserDropdown() {
                 ? "Candidate"
                 : "User";
 
+    const roleIcon = isAdmin
+        ? "fa-shield-check"
+        : isRecruiter
+          ? "fa-user-tie"
+          : isCompanyUser
+            ? "fa-building"
+            : isCandidate
+              ? "fa-user"
+              : "fa-user";
+
+    const menuItems = [
+        {
+            href: "/portal/profile",
+            icon: "fa-user-pen",
+            label: "Profile",
+            description: "Manage your account",
+        },
+        {
+            href: "/portal/billing",
+            icon: "fa-credit-card",
+            label: "Billing",
+            description: "Plans & payments",
+        },
+    ];
+
     return (
         <div className="relative" ref={dropdownRef}>
+            {/* Trigger */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 hover:border-base-200 border-3 border-base-100 transition-colors p-2 rounded-lg"
+                className={`
+                    group flex items-center gap-2.5 px-2 py-1.5 rounded-xl
+                    transition-all duration-200 cursor-pointer
+                    hover:bg-base-200/80
+                    ${isOpen ? "bg-base-200/80" : ""}
+                `}
             >
-                {userName && (
-                    <div className="hidden md:flex flex-col leading-tight text-left pl-2">
-                        <span className="text-sm font-medium text-base-content">
-                            {userName}
-                        </span>
-                        <span className="text-xs text-base-content/60">
-                            {roleDisplay}
-                        </span>
-                    </div>
-                )}
-                {user.imageUrl ? (
-                    <img
-                        src={user.imageUrl}
-                        alt={userName}
-                        className="w-9 h-9 rounded-full object-contain"
-                    />
-                ) : (
-                    <div className="w-9 h-9 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">
-                        {userInitials}
-                    </div>
-                )}
+                <div className="relative">
+                    {user.imageUrl ? (
+                        <img
+                            src={user.imageUrl}
+                            alt={userName}
+                            className="w-8 h-8 rounded-full object-cover ring-2 ring-base-300 group-hover:ring-primary/30 transition-all duration-200"
+                        />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-xs ring-2 ring-primary/20">
+                            {userInitials}
+                        </div>
+                    )}
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-success rounded-full ring-2 ring-base-100" />
+                </div>
+
+                <div className="hidden md:flex flex-col leading-tight text-left">
+                    <span className="text-sm font-medium text-base-content truncate max-w-[120px]">
+                        {user.firstName || userName}
+                    </span>
+                </div>
+
+                <i
+                    className={`
+                        fa-duotone fa-regular fa-chevron-down text-[10px] text-base-content/40
+                        transition-transform duration-200 hidden md:block
+                        ${isOpen ? "rotate-180" : ""}
+                    `}
+                />
             </button>
 
-            {isOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-base-100 rounded-lg shadow border border-base-200 overflow-hidden z-[100]">
-                    <div className="px-4 py-4 border-b border-base-200">
-                        <div className="font-semibold text-sm text-base-content">
-                            {userName}
+            {/* Dropdown Panel */}
+            <div
+                className={`
+                    absolute right-0 mt-2 w-72 bg-base-100 rounded-2xl shadow-lg
+                    border border-base-200 overflow-hidden z-[100]
+                    transition-all duration-200 origin-top-right
+                    ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}
+                `}
+            >
+                {/* User Header */}
+                <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
+                    <div className="flex items-center gap-3">
+                        <div className="relative shrink-0">
+                            {user.imageUrl ? (
+                                <img
+                                    src={user.imageUrl}
+                                    alt={userName}
+                                    className="w-11 h-11 rounded-full object-cover ring-2 ring-base-300"
+                                />
+                            ) : (
+                                <div className="w-11 h-11 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-sm ring-2 ring-primary/20">
+                                    {userInitials}
+                                </div>
+                            )}
                         </div>
-                        <div className="text-xs text-base-content/60 mt-0.5">
-                            {roleDisplay}
-                        </div>
-                        {userEmail && (
-                            <div className="text-sm text-base-content/60 mt-0.5">
-                                {userEmail}
+                        <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-sm text-base-content truncate">
+                                {userName}
                             </div>
-                        )}
-                    </div>
-
-                    <div className="py-2">
-                        <Link
-                            href="/portal/profile"
-                            onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
-                        >
-                            <i className="fa-duotone fa-regular fa-user w-4 text-base-content/60"></i>
-                            Profile
-                        </Link>
-                        <Link
-                            href="/portal/billing"
-                            onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
-                        >
-                            <i className="fa-duotone fa-regular fa-credit-card w-4 text-base-content/60"></i>
-                            Billing
-                        </Link>
-                    </div>
-
-                    <div className="border-t border-base-200 py-2">
-                        <button
-                            onClick={handleSignOut}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-error/10 transition-colors text-sm text-error"
-                        >
-                            <i className="fa-duotone fa-regular fa-right-from-bracket w-4"></i>
-                            Sign out
-                        </button>
+                            {userEmail && (
+                                <div className="text-xs text-base-content/50 truncate mt-0.5">
+                                    {userEmail}
+                                </div>
+                            )}
+                            <div className="mt-1.5">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                    <i className={`fa-duotone fa-regular ${roleIcon} text-[10px]`}></i>
+                                    {roleDisplay}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            )}
+
+                {/* Menu Items */}
+                <div className="p-2">
+                    {menuItems.map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsOpen(false)}
+                            className="group/item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-base-200/70 transition-all duration-150"
+                        >
+                            <span className="w-8 h-8 rounded-lg bg-base-200/60 flex items-center justify-center group-hover/item:bg-primary/10 group-hover/item:text-primary transition-colors duration-150">
+                                <i className={`fa-duotone fa-regular ${item.icon} text-sm text-base-content/50 group-hover/item:text-primary transition-colors duration-150`}></i>
+                            </span>
+                            <div>
+                                <div className="text-sm font-medium text-base-content">
+                                    {item.label}
+                                </div>
+                                <div className="text-[11px] text-base-content/45">
+                                    {item.description}
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+
+                {/* Sign Out */}
+                <div className="p-2 border-t border-base-200">
+                    <button
+                        onClick={handleSignOut}
+                        className="group/signout flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-error/8 transition-all duration-150"
+                    >
+                        <span className="w-8 h-8 rounded-lg bg-base-200/60 flex items-center justify-center group-hover/signout:bg-error/10 transition-colors duration-150">
+                            <i className="fa-duotone fa-regular fa-right-from-bracket text-sm text-base-content/50 group-hover/signout:text-error transition-colors duration-150"></i>
+                        </span>
+                        <span className="text-sm font-medium text-base-content group-hover/signout:text-error transition-colors duration-150">
+                            Sign out
+                        </span>
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

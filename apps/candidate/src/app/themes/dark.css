@@ -11,30 +11,30 @@
   --color-secondary: #14b8a6;          /* teal-500 */
   --color-secondary-content: #ecfeff;
 
-  --color-accent: #60a5fa;             /* blue-400 */
-  --color-accent-content: #0b1120;
+  --color-accent: #ec4899;             /* pink-500 / bright magenta */
+  --color-accent-content: #09090b;
 
-  --color-neutral: #111827;            /* slate-900 */
+  --color-neutral: #18181b;            /* zinc-900 */
   --color-neutral-content: #e5e7eb;
 
   /* Base surfaces */
-  --color-base-100: #020617;           /* slate-950 – page bg */
-  --color-base-200: #111827;           /* cards / nav */
-  --color-base-300: #1f2937;           /* raised surfaces */
+  --color-base-100: #09090b;           /* zinc-950 – page bg */
+  --color-base-200: #18181b;           /* zinc-900 – cards / nav */
+  --color-base-300: #27272a;           /* zinc-800 – raised surfaces */
   --color-base-content: #e5e7eb;       /* main text */
 
   /* Semantic */
   --color-info: #38bdf8;
-  --color-info-content: #0b1120;
+  --color-info-content: #09090b;
 
   --color-success: #22c55e;
-  --color-success-content: #022c22;
+  --color-success-content: #09090b;
 
-  --color-warning: #facc15;
-  --color-warning-content: #422006;
+  --color-warning: #fbbf24;            /* amber-400 */
+  --color-warning-content: #09090b;
 
-  --color-error: #f87171;
-  --color-error-content: #450a0a;
+  --color-error: #ef4444;             /* red-500 */
+  --color-error-content: #09090b;
 
   /* Radii / sizing (same as light for consistency) */
   --radius-selector: 0.25rem;

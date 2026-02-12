@@ -638,34 +638,50 @@ export function Sidebar() {
             <div className="md:hidden fixed inset-x-0 bottom-0 z-50">
                 <div className="dock bg-base-100 border-t border-base-200">
                     {(() => {
+                        // Filter dock items by role and resolve hrefs for expandable parents
                         const dockItems = navItems
-                            .filter((i) => i.mobileDock)
-                            .map((item) => (
-                                <button
-                                    key={item.href}
-                                    type="button"
-                                    onClick={() => router.push(item.href)}
-                                    className={
-                                        pathname === item.href ||
-                                        pathname.startsWith(item.href + "/")
-                                            ? "dock-active"
-                                            : ""
-                                    }
-                                    title={item.label}
-                                >
-                                    <i
-                                        className={`fa-duotone fa-regular ${item.icon}`}
-                                    ></i>
-                                    <span className="dock-label">
-                                        {item.label}
-                                    </span>
-                                </button>
-                            ));
+                            .filter((i) => i.mobileDock && filterByRole(i))
+                            .map((item) => {
+                                // For expandable parents, navigate to first child route
+                                const href = item.expandable && item.children?.length
+                                    ? item.children[0].href
+                                    : item.href;
+                                const isActive = pathname === href ||
+                                    pathname.startsWith(href + "/") ||
+                                    // Also check all children for active state
+                                    (item.children?.some(c => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false);
 
-                        const moreItems = navItems.filter(
-                            (i) => !i.mobileDock && filterByRole(i),
-                        );
-                        const allMoreItems = [...moreItems];
+                                return (
+                                    <button
+                                        key={item.href}
+                                        type="button"
+                                        onClick={() => router.push(href)}
+                                        className={isActive ? "dock-active" : ""}
+                                        title={item.label}
+                                    >
+                                        <i className={`fa-duotone fa-regular ${item.icon}`}></i>
+                                        <span className="dock-label">{item.label}</span>
+                                    </button>
+                                );
+                            });
+
+                        // Build "More" menu: flatten children, skip # parents, filter by role
+                        const moreItems: NavItem[] = [];
+                        navItems.forEach((item) => {
+                            if (item.mobileDock) return; // already in dock
+                            if (!filterByRole(item)) return;
+
+                            if (item.expandable && item.children?.length) {
+                                // Flatten: add children directly instead of the # parent
+                                item.children.forEach((child) => {
+                                    if (filterByRole(child)) {
+                                        moreItems.push(child);
+                                    }
+                                });
+                            } else if (!item.href.startsWith("#")) {
+                                moreItems.push(item);
+                            }
+                        });
 
                         dockItems.push(
                             <details
@@ -679,13 +695,12 @@ export function Sidebar() {
                                     <i className="fa-duotone fa-regular fa-ellipsis text-lg"></i>
                                 </summary>
                                 <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-1">
-                                    {allMoreItems.map((item) => (
+                                    {moreItems.map((item) => (
                                         <li key={item.href}>
                                             <button
                                                 type="button"
                                                 onClick={() => {
                                                     router.push(item.href);
-                                                    // Close dropdown by finding and unchecking the details element
                                                     const details =
                                                         document.querySelector(
                                                             "details[open]",

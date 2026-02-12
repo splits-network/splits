@@ -34,13 +34,54 @@ const brandColors = [
     },
     {
         name: "Accent",
-        hex: "#945769",
+        hex: "#db2777",
         className: "bg-accent text-accent-content",
     },
     {
         name: "Neutral",
-        hex: "#111827",
+        hex: "#18181b",
         className: "bg-neutral text-neutral-content",
+    },
+];
+
+const baseColors = [
+    {
+        name: "Base 100",
+        label: "Page BG",
+        className: "bg-base-100 text-base-content border border-base-300",
+    },
+    {
+        name: "Base 200",
+        label: "Surfaces",
+        className: "bg-base-200 text-base-content border border-base-300",
+    },
+    {
+        name: "Base 300",
+        label: "Borders",
+        className: "bg-base-300 text-base-content",
+    },
+];
+
+const semanticColors = [
+    {
+        name: "Info",
+        hex: "#0ea5e9",
+        className: "bg-info text-info-content",
+    },
+    {
+        name: "Success",
+        hex: "#16a34a",
+        className: "bg-success text-success-content",
+    },
+    {
+        name: "Warning",
+        hex: "#d97706",
+        className: "bg-warning text-warning-content",
+    },
+    {
+        name: "Error",
+        hex: "#ef4444",
+        className: "bg-error text-error-content",
     },
 ];
 
@@ -535,6 +576,46 @@ export function PressContent() {
                                             </div>
                                             <div className="text-xs opacity-75">
                                                 {color.hex}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid md:grid-cols-4 gap-3 mt-4">
+                                {semanticColors.map((color, index) => (
+                                    <div
+                                        key={index}
+                                        className={`color-card card ${color.className} shadow`}
+                                    >
+                                        <div className="card-body items-center text-center p-4">
+                                            <div
+                                                className={`w-12 h-12 rounded-full ${color.className} border-2 border-current mb-2`}
+                                            ></div>
+                                            <div className="font-semibold text-sm">
+                                                {color.name}
+                                            </div>
+                                            <div className="text-xs opacity-75">
+                                                {color.hex}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid md:grid-cols-3 gap-3 mt-4">
+                                {baseColors.map((color, index) => (
+                                    <div
+                                        key={index}
+                                        className={`color-card card ${color.className} shadow`}
+                                    >
+                                        <div className="card-body items-center text-center p-4">
+                                            <div
+                                                className={`w-12 h-12 rounded-full ${color.className} mb-2`}
+                                            ></div>
+                                            <div className="font-semibold text-sm">
+                                                {color.name}
+                                            </div>
+                                            <div className="text-xs opacity-60">
+                                                {color.label}
                                             </div>
                                         </div>
                                     </div>
