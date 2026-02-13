@@ -8,6 +8,7 @@ import { registerWebhookRoutes } from './oauth/webhook-handler';
 import { OAuthService } from './oauth/oauth-service';
 import { GptActionRepository } from './actions/repository';
 import { registerActionRoutes } from './actions/routes';
+import { registerOpenapiRoute } from '../openapi-route';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -42,4 +43,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     // Register GPT Action routes
     registerActionRoutes(app, { repository: actionRepository, oauthService, eventPublisher });
+
+    // Register OpenAPI schema routes
+    registerOpenapiRoute(app);
 }
