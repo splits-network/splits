@@ -170,6 +170,10 @@ export type JobStatus = 'active' | 'paused' | 'filled' | 'closed';
 
 export type EmploymentType = 'full_time' | 'contract' | 'temporary';
 
+export type CommuteType = 'remote' | 'hybrid_1' | 'hybrid_2' | 'hybrid_3' | 'hybrid_4' | 'in_office';
+
+export type JobLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'manager' | 'director' | 'vp' | 'c_suite';
+
 export type RequirementType = 'mandatory' | 'preferred';
 
 export interface Job {
@@ -186,6 +190,8 @@ export interface Job {
     candidate_description?: string;
     employment_type?: EmploymentType;
     open_to_relocation: boolean;
+    commute_types?: CommuteType[];
+    job_level?: JobLevel;
     show_salary_range: boolean;
     guarantee_days?: number; // Placement guarantee period in days (default 90)
     job_owner_id?: string; // Splits Network or recruiting partner GUID

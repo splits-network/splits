@@ -42,4 +42,7 @@ export type {
     RoleDefinition,
     UserRole,
     Membership,
+    // Job attribute types
+    CommuteType,
+    JobLevel,
 } from './models';
