@@ -19,6 +19,7 @@ spec:
         - hosts:
               - staging.splits.network
               - api.staging.splits.network
+              - api.staging.applicant.network
               - staging.applicant.network
               - staging.employment-networks.com
           secretName: splits-network-tls
@@ -60,6 +61,16 @@ spec:
                             name: analytics-gateway
                             port:
                                 number: 80
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: api-gateway
+                            port:
+                                number: 80
+        - host: api.staging.applicant.network
+          http:
+              paths:
                   - path: /
                     pathType: Prefix
                     backend:
