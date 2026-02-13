@@ -10,7 +10,7 @@ Build full-stack global search from database infrastructure through API to real-
 - Integer phases (1, 2, 3, 4): Planned milestone work
 
 - [x] **Phase 1: Search Infrastructure** - Dedicated search schema with trigger-based sync from all entity tables
-- [ ] **Phase 2: Search API** - Backend search endpoints with access control and validation
+- [x] **Phase 2: Search API** - Backend search endpoints with access control and validation
 - [ ] **Phase 3: Typeahead Search** - Real-time search bar in portal header with keyboard navigation
 - [ ] **Phase 4: Full Search Page** - Dedicated search page with filtering and pagination
 
@@ -45,8 +45,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create search-service: repository, service, types, and route handler with access control and validation
-- [ ] 02-02-PLAN.md — Wire search-service into API gateway with proxy routes and service registration
+- [x] 02-01-PLAN.md — Create search-service: repository, service, types, and route handler with access control and validation
+- [x] 02-02-PLAN.md — Wire search-service into API gateway with proxy routes and service registration
 
 ### Phase 3: Typeahead Search
 **Goal**: Real-time search bar in portal header with keyboard navigation and result navigation
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Search Infrastructure | 3/3 | **Complete** | 2026-02-13 |
-| 2. Search API | 0/2 | Not started | - |
+| 2. Search API | 2/2 | **Complete** | 2026-02-13 |
 | 3. Typeahead Search | 0/TBD | Not started | - |
 | 4. Full Search Page | 0/TBD | Not started | - |
 

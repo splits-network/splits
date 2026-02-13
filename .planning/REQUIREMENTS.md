@@ -21,9 +21,9 @@ Requirements for milestone v2.0. Each maps to roadmap phases.
 
 ### API
 
-- [ ] **API-01**: GET /v2/search endpoint querying search.search_index with typeahead mode (top 5 per entity) and full mode (paginated)
-- [ ] **API-02**: Access control filtering on all search results via resolveAccessContext (users only see entities they have access to)
-- [ ] **API-03**: Input sanitization and query validation (min query length, special character handling, injection prevention)
+- [x] **API-01**: GET /v2/search endpoint querying search.search_index with typeahead mode (top 5 per entity) and full mode (paginated)
+- [x] **API-02**: Access control filtering on all search results via resolveAccessContext (users only see entities they have access to)
+- [x] **API-03**: Input sanitization and query validation (min query length, special character handling, injection prevention)
 
 ### Typeahead
 
@@ -101,9 +101,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-07 | Phase 1 | **Complete** (01-03) |
 | INFRA-08 | Phase 1 | **Complete** (01-01) |
 | INFRA-09 | Phase 1 | **Complete** (01-01) |
-| API-01 | Phase 2 | Pending |
-| API-02 | Phase 2 | Pending |
-| API-03 | Phase 2 | Pending |
+| API-01 | Phase 2 | **Complete** (02-01) |
+| API-02 | Phase 2 | **Complete** (02-01) |
+| API-03 | Phase 2 | **Complete** (02-01) |
 | TYPE-01 | Phase 3 | Pending |
 | TYPE-02 | Phase 3 | Pending |
 | TYPE-03 | Phase 3 | Pending |

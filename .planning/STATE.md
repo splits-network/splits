@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-12)
 
 **Core value:** Users find anything in the platform by typing natural language queries and getting ranked, cross-entity results in real-time.
-**Current focus:** Phase 1 - Search Infrastructure
+**Current focus:** Phase 2 - Search API (COMPLETE)
 
 ## Current Position
 
