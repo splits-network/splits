@@ -275,6 +275,7 @@ jobs:
                     --from-literal=gpt-client-secret="${{ secrets.GPT_CLIENT_SECRET }}" \
                     --from-literal=gpt-ec-private-key="${{ secrets.GPT_EC_PRIVATE_KEY }}" \
                     --from-literal=gpt-redirect-uri="${{ secrets.GPT_REDIRECT_URI }}" \
+                    --from-literal=gpt-clerk-webhook-secret="${{ secrets.GPT_CLERK_WEBHOOK_SECRET }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 

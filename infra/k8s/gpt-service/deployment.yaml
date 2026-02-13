@@ -62,11 +62,11 @@ spec:
                             secretKeyRef:
                                 name: gpt-secrets
                                 key: gpt-redirect-uri
-                      - name: CLERK_WEBHOOK_SECRET
+                      - name: GPT_CLERK_WEBHOOK_SECRET
                         valueFrom:
                             secretKeyRef:
                                 name: gpt-secrets
-                                key: clerk-webhook-secret
+                                key: gpt-clerk-webhook-secret
                   resources:
                       requests:
                           cpu: 100m

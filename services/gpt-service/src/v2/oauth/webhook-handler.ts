@@ -34,7 +34,7 @@ export function registerWebhookRoutes(
                     return reply.status(400).send({ error: 'Invalid webhook signature' });
                 }
             } else {
-                logger.warn('CLERK_WEBHOOK_SECRET not configured -- skipping webhook signature verification (development only)');
+                logger.warn('GPT_CLERK_WEBHOOK_SECRET not configured -- skipping webhook signature verification (development only)');
             }
 
             // Parse Clerk webhook payload
