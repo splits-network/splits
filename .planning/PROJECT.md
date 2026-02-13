@@ -46,12 +46,16 @@ Connecting recruiters and companies through a marketplace model with transparent
 - All 13 frontend isPlatformAdmin checks work without modification — v3.0
 - Platform admin grant/revoke publishes enriched audit events via RabbitMQ — v3.0
 
-<!-- v4.0 (schema + API complete, frontend pending) -->
+<!-- v4.0 -->
 
 - commute_types TEXT[] column on jobs table with CHECK constraint — v4.0
 - job_level TEXT column on jobs table with CHECK constraint — v4.0
 - TypeScript types for commute types and job levels in shared-types — v4.0
 - ats-service CRUD and filtering support for commute_types and job_level — v4.0
+- Job create/edit form with commute type checkboxes and job level dropdown — v4.0
+- Job detail view displaying commute types and job level with human-readable labels — v4.0
+- Job list filtering by commute type and job level — v4.0
+- Search index includes commute_types and job_level for full-text matching — v4.0
 
 ### Active
 
@@ -130,4 +134,4 @@ Connecting recruiters and companies through a marketplace model with transparent
 | Confirmation safety pattern | All write actions require confirmed flag. Prevents AI misuse of write endpoints. | — Pending |
 
 ---
-*Last updated: 2026-02-13 after v5.0 milestone started*
+*Last updated: 2026-02-13 after v4.0 milestone complete, v5.0 milestone started*
