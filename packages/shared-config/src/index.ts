@@ -224,6 +224,32 @@ export async function loadResendConfigFromVault(): Promise<ResendConfig> {
     };
 }
 
+export interface GptConfig {
+    clientId: string;
+    clientSecret: string;
+    jwtSecret: string;
+    redirectUri: string;
+    accessTokenExpiry: number;  // seconds
+    refreshTokenExpiry: number; // seconds
+    authCodeExpiry: number;     // seconds
+}
+
+/**
+ * Load GPT OAuth configuration
+ * Used by gpt-service for Custom GPT OAuth2 provider
+ */
+export function loadGptConfig(): GptConfig {
+    return {
+        clientId: getEnvOrThrow('GPT_CLIENT_ID'),
+        clientSecret: getEnvOrThrow('GPT_CLIENT_SECRET'),
+        jwtSecret: getEnvOrThrow('GPT_JWT_SECRET'),
+        redirectUri: getEnvOrThrow('GPT_REDIRECT_URI'),
+        accessTokenExpiry: parseInt(getEnvOrDefault('GPT_ACCESS_TOKEN_EXPIRY', '3600'), 10),
+        refreshTokenExpiry: parseInt(getEnvOrDefault('GPT_REFRESH_TOKEN_EXPIRY', '2592000'), 10),
+        authCodeExpiry: parseInt(getEnvOrDefault('GPT_AUTH_CODE_EXPIRY', '600'), 10),
+    };
+}
+
 /**
  * Generic config loader for simple service configuration
  * Returns a Record<string, string | undefined> of all environment variables
