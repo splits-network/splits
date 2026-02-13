@@ -1,10 +1,9 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyBaseLogger } from 'fastify';
 import { OAuthService } from './oauth-service';
-import { Logger } from 'pino';
 
 export function registerWebhookRoutes(
     app: FastifyInstance,
-    deps: { oauthService: OAuthService; logger: Logger }
+    deps: { oauthService: OAuthService; logger: FastifyBaseLogger }
 ) {
     app.post('/api/v2/webhooks/clerk', async (request, reply) => {
         const { oauthService, logger } = deps;
