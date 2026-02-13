@@ -43,10 +43,11 @@ Plans:
   3. Platform admin grant/revoke publishes user_role.created/deleted events to RabbitMQ
   4. All 13 frontend files checking isPlatformAdmin continue working without code changes
   5. 119+ downstream consumers of resolveAccessContext receive correct authorization context
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Update resolveAccessContext to handle platform_admin from user_roles with nullable role_entity_id
+- [ ] 05-02-PLAN.md — Update identity-service user-roles API to accept platform_admin with null entity fields, enrich audit events
 
 ### Phase 6: Cleanup & Validation
 **Goal**: Synthetic platform organization removed, system health validated
@@ -71,5 +72,5 @@ Phases execute in numeric order: 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 4. Schema & Data Migration | 1/1 | Complete | 2026-02-13 |
-| 5. Access Integration | 0/TBD | Not started | - |
+| 5. Access Integration | 0/2 | Not started | - |
 | 6. Cleanup & Validation | 0/TBD | Not started | - |
