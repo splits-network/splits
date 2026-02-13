@@ -195,7 +195,11 @@ Plans:
   2. GPT-specific per-user rate limits are enforced in api-gateway, preventing abuse of expensive endpoints
   3. Token cleanup job automatically expires old authorization codes and revoked refresh tokens
   4. All GPT OAuth events and action executions are audit-logged via RabbitMQ events
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Deployment hardening, token cleanup CronJob, Clerk webhook signature verification
+- [ ] 15-02-PLAN.md — GPT-specific per-user tiered rate limiting in api-gateway
 
 ## Progress
 
@@ -218,8 +222,8 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 12. OAuth2 Provider | v5.0 | 6/6 | Complete | 2026-02-13 |
 | 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
 | 14. OpenAPI Schema + GPT Configuration | v5.0 | 2/2 | Complete | 2026-02-13 |
-| 15. Production Hardening | v5.0 | 0/TBD | Not started | - |
+| 15. Production Hardening | v5.0 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-13 (Phase 14 complete)*
+*Last updated: 2026-02-13 (Phase 15 planned)*
