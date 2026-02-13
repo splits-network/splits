@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    name: gpt-token-cleanup
+    namespace: splits-network
+    labels:
+        app: gpt-service
+        component: cron
+spec:
+    # Run every 6 hours to clean up expired OAuth artifacts
+    schedule: "0 */6 * * *"
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    jobTemplate:
+        spec:
+            activeDeadlineSeconds: 300
+            backoffLimit: 0
+            template:
+                metadata:
+                    labels:
+                        app: gpt-service
+                        component: cron-job
+                spec:
+                    restartPolicy: Never
+                    containers:
+                        - name: gpt-token-cleanup
+                          image: ${ACR_SERVER}/gpt-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/gpt-service/dist/jobs/token-cleanup.js",
+                              ]
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"
