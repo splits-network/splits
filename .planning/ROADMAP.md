@@ -23,15 +23,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (starts v3.0 milestone)
 **Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03
 **Success Criteria** (what must be TRUE):
-  1. role_entity_id and role_entity_type are nullable in user_roles table
+  1. role_entity_id is nullable in user_roles table (role_entity_type was already dropped)
   2. Partial unique index prevents duplicate platform_admin rows per user
   3. All existing platform admins have matching rows in user_roles (count validation passed)
   4. Revoking platform_admin via deleted_at immediately blocks access in queries
   5. Migration is reversible with documented rollback SQL
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Schema change (nullable role_entity_id), index restructuring, platform_admin data migration with atomic validation
 
 ### Phase 5: Access Integration
 **Goal**: All backend services and frontend checks use user_roles for platform_admin authorization
@@ -70,6 +70,6 @@ Phases execute in numeric order: 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. Schema & Data Migration | 0/TBD | Not started | - |
+| 4. Schema & Data Migration | 0/1 | Not started | - |
 | 5. Access Integration | 0/TBD | Not started | - |
 | 6. Cleanup & Validation | 0/TBD | Not started | - |
