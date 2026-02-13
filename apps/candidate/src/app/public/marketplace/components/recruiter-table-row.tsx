@@ -2,12 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { MarketplaceProfile } from '@splits-network/shared-types';
-import {
-    ExpandableTableRow,
-    ExpandedDetailSection,
-    ExpandedDetailGrid,
-    ExpandedDetailItem,
-} from '@/components/ui/tables';
+import { ExpandableTableRow } from '@/components/ui/tables';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 import RecruiterReputation from './recruiter-reputation';
 
 interface MarketplaceRecruiter {
@@ -112,106 +108,75 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
         </>
     );
 
+    const hasStats = (recruiter.years_experience !== undefined && recruiter.years_experience > 0)
+        || recruiter.total_placements !== undefined
+        || (recruiter.success_rate !== undefined && recruiter.success_rate > 0);
+
+    const hasTags = (recruiter.industries && recruiter.industries.length > 0)
+        || (recruiter.specialties && recruiter.specialties.length > 0);
+
     // Expanded content for additional details
     const expandedContent = (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {/* Tagline */}
             {recruiter.tagline && (
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-quote-left"></i>
-                    <span className="italic">{recruiter.tagline}</span>
-                </div>
+                <p className="text-sm italic text-base-content/60">
+                    <i className="fa-duotone fa-regular fa-quote-left text-xs mr-1"></i>
+                    {recruiter.tagline}
+                </p>
             )}
 
             {/* Bio */}
-            {recruiter.bio && (
-                <ExpandedDetailSection title="About">
-                    <p className="text-sm text-base-content/70">{recruiter.bio}</p>
-                </ExpandedDetailSection>
+            {(recruiter.marketplace_profile?.bio_rich || recruiter.bio) && (
+                <div className="text-sm text-base-content/80">
+                    <MarkdownRenderer content={recruiter.marketplace_profile?.bio_rich || recruiter.bio || ''} />
+                </div>
             )}
 
-            {/* Industries */}
-            {recruiter.industries && recruiter.industries.length > 0 && (
-                <ExpandedDetailSection title="Industries">
-                    <div className="flex flex-wrap gap-1">
-                        {recruiter.industries.map(industry => (
-                            <span key={industry} className="badge badge-sm">
-                                {industry}
-                            </span>
-                        ))}
-                    </div>
-                </ExpandedDetailSection>
+            {/* Industries & Specialties inline */}
+            {hasTags && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {recruiter.industries?.map(industry => (
+                        <span key={industry} className="badge badge-sm">
+                            {industry}
+                        </span>
+                    ))}
+                    {recruiter.specialties?.map(specialty => (
+                        <span key={specialty} className="badge badge-sm badge-outline">
+                            {specialty}
+                        </span>
+                    ))}
+                </div>
             )}
 
-            {/* Specialties */}
-            {recruiter.specialties && recruiter.specialties.length > 0 && (
-                <ExpandedDetailSection title="Specialties">
-                    <div className="flex flex-wrap gap-1">
-                        {recruiter.specialties.map(specialty => (
-                            <span key={specialty} className="badge badge-sm badge-outline">
-                                {specialty}
-                            </span>
-                        ))}
-                    </div>
-                </ExpandedDetailSection>
-            )}
-
-            {/* Stats */}
-            <ExpandedDetailSection title="Statistics">
-                <ExpandedDetailGrid cols={4}>
+            {/* Stats inline */}
+            {hasStats && (
+                <div className="flex items-center gap-4 text-xs text-base-content/60">
                     {recruiter.years_experience !== undefined && recruiter.years_experience > 0 && (
-                        <ExpandedDetailItem
-                            label="Experience"
-                            value={`${recruiter.years_experience}+ yrs`}
-                        />
+                        <span><i className="fa-duotone fa-regular fa-briefcase mr-1"></i>{recruiter.years_experience}+ yrs exp</span>
                     )}
-
                     {recruiter.total_placements !== undefined && (
-                        <ExpandedDetailItem
-                            label="Total Placements"
-                            value={recruiter.total_placements.toString()}
-                        />
+                        <span><i className="fa-duotone fa-regular fa-handshake mr-1"></i>{recruiter.total_placements} placements</span>
                     )}
-
                     {recruiter.success_rate !== undefined && recruiter.success_rate > 0 && (
-                        <ExpandedDetailItem
-                            label="Success Rate"
-                            value={`${recruiter.success_rate}%`}
-                        />
+                        <span><i className="fa-duotone fa-regular fa-chart-line mr-1"></i>{recruiter.success_rate}% success</span>
                     )}
+                </div>
+            )}
 
-                    {recruiter.reputation_score !== undefined && recruiter.reputation_score > 0 && (
-                        <ExpandedDetailItem
-                            label="Rating"
-                            value={`${(recruiter.reputation_score / 20).toFixed(1)} / 5`}
-                        />
-                    )}
-                </ExpandedDetailGrid>
-            </ExpandedDetailSection>
-
-            {/* Contact Actions */}
-            <div className="flex gap-2 pt-2 border-t border-base-300">
-                <button
-                    className="btn btn-primary btn-sm gap-2"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        viewRecruiter();
-                    }}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                    View Full Profile
-                </button>
-                {recruiter.contact_available && recruiter.users?.email && (
+            {/* Contact action (only if email available, profile button already in main row) */}
+            {recruiter.contact_available && recruiter.users?.email && (
+                <div className="pt-1">
                     <a
                         href={`mailto:${recruiter.users.email}`}
-                        className="btn btn-outline btn-sm gap-2"
+                        className="btn btn-outline btn-sm btn-xs gap-1"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <i className="fa-duotone fa-regular fa-envelope"></i>
                         Contact
                     </a>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 

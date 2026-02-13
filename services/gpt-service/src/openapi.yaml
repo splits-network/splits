@@ -1,0 +1,706 @@
+openapi: 3.1.1
+info:
+  title: Applicant Network Career Copilot API
+  description: API for Career Copilot GPT -- search jobs, check applications, submit applications, and analyze resume fit.
+  version: 1.0.0
+
+servers:
+  - url: https://api.applicant.network
+    description: Production API Gateway
+
+paths:
+  /api/v1/gpt/jobs/search:
+    get:
+      operationId: searchJobs
+      summary: Search for job openings
+      description: >-
+        Search for jobs matching keywords, location, commute preferences, and experience level.
+        Returns up to 5 results per page. Use this when the candidate asks to find jobs, look for
+        opportunities, or mentions specific roles, skills, or locations. If no results, suggest
+        broadening the search criteria.
+      parameters:
+        - name: keywords
+          in: query
+          description: >-
+            Search terms to match against job titles, descriptions, and skills.
+            Examples: 'software engineer', 'remote python developer', 'marketing manager'
+          required: false
+          schema:
+            type: string
+        - name: location
+          in: query
+          description: >-
+            City, state, or region to filter by. Examples: 'San Francisco', 'New York, NY', 'Remote'
+          required: false
+          schema:
+            type: string
+        - name: commute_type
+          in: query
+          description: >-
+            Filter by work arrangement. hybrid_1 through hybrid_4 indicates days in office per week.
+          required: false
+          schema:
+            type: string
+            enum:
+              - remote
+              - hybrid_1
+              - hybrid_2
+              - hybrid_3
+              - hybrid_4
+              - in_office
+        - name: job_level
+          in: query
+          description: Filter by seniority level
+          required: false
+          schema:
+            type: string
+            enum:
+              - entry
+              - mid
+              - senior
+              - lead
+              - manager
+              - director
+              - vp
+              - c_suite
+        - name: page
+          in: query
+          description: Page number for pagination. Each page returns 5 results.
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Successful job search
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - jobs
+                      - pagination
+                    properties:
+                      jobs:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GptJobSearchResult'
+                      pagination:
+                        $ref: '#/components/schemas/PaginationInfo'
+        '401':
+          description: OAuth token error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+
+  /api/v1/gpt/jobs/{id}:
+    get:
+      operationId: getJobDetails
+      summary: Get full details for a specific job
+      description: >-
+        Retrieve comprehensive job information including description, requirements, pre-screen questions,
+        salary, and company details. Use this when the candidate wants to learn more about a specific job
+        from search results, or asks about a job they've seen.
+      parameters:
+        - name: id
+          in: path
+          description: The unique job identifier (UUID format)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful job detail retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GptJobDetail'
+        '400':
+          description: Invalid job ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+
+  /api/v1/gpt/applications:
+    get:
+      operationId: getApplications
+      summary: Check your application status
+      description: >-
+        List the candidate's job applications with current status. Shows active applications by default
+        (Interview, Under Review, Submitted, etc.). Use this when the candidate asks about their applications,
+        wants to check status, or says 'what's happening with my applications?'
+      parameters:
+        - name: include_inactive
+          in: query
+          description: >-
+            Set to true to include completed/closed applications (Hired, Not Selected, Withdrawn)
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          description: Page number. Each page returns 10 applications.
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Successful application list retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - applications
+                      - pagination
+                    properties:
+                      applications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GptApplicationStatus'
+                      pagination:
+                        $ref: '#/components/schemas/PaginationInfo'
+        '404':
+          description: No candidate profile found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+
+  /api/v1/gpt/applications/submit:
+    post:
+      operationId: submitApplication
+      summary: Submit a job application
+      description: >-
+        Two-step submission with confirmation. First call (confirmed omitted/false): validates job,
+        checks duplicates, returns confirmation summary with token. Second call (confirmed=true with
+        token): executes submission. Always show confirmation to candidate before the second call.
+      x-openai-isConsequential: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_id
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                  description: UUID of the job to apply to
+                confirmed:
+                  type: boolean
+                  description: >-
+                    Set to true on the second call to execute submission. Omit or set to false for
+                    initial confirmation request.
+                confirmation_token:
+                  type: string
+                  description: >-
+                    Token from the first call's response. Required when confirmed=true.
+                pre_screen_answers:
+                  type: array
+                  description: >-
+                    Answers to required pre-screen questions. Each answer pairs a question_id with
+                    the candidate's response.
+                  items:
+                    type: object
+                    required:
+                      - question_id
+                      - answer
+                    properties:
+                      question_id:
+                        type: string
+                        description: ID of the pre-screen question
+                      answer:
+                        type: string
+                        description: Candidate's answer to the question
+                cover_letter:
+                  type: string
+                  description: Optional cover letter text
+      responses:
+        '200':
+          description: Confirmation required (first call)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GptConfirmationSummary'
+        '201':
+          description: Application submitted successfully (second call)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      application_id:
+                        type: string
+                        description: ID of the created application
+                      status_label:
+                        type: string
+                        description: Current status of the application
+                      message:
+                        type: string
+                        description: Success message
+        '400':
+          description: Missing pre-screen answers or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '404':
+          description: Job or candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '409':
+          description: Duplicate application (includes original application date)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+
+  /api/v1/gpt/resume/analyze:
+    post:
+      operationId: analyzeResume
+      summary: Analyze resume fit against a job
+      description: >-
+        Analyze how well the candidate's resume matches a job. Returns fit score (0-100), strengths,
+        gaps, and recommendations. Candidate can paste resume text (resume_text) or use stored profile
+        resume. Use when candidate asks about fit or wants resume feedback.
+      x-openai-isConsequential: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_id
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                  description: UUID of the job to analyze fit against
+                resume_text:
+                  type: string
+                  description: >-
+                    Resume text pasted by the candidate in chat. If omitted, the stored profile resume
+                    is used.
+      responses:
+        '200':
+          description: Successful resume analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GptResumeAnalysisResponse'
+        '400':
+          description: No resume available or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '404':
+          description: Job or candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+        '500':
+          description: Server error or AI service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptErrorResponse'
+
+components:
+  schemas:
+    GptJobSearchResult:
+      type: object
+      required:
+        - id
+        - title
+        - company_name
+        - location
+        - commute_types
+        - posted_date
+        - job_level
+        - summary
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique job identifier
+        title:
+          type: string
+          description: Job title
+        company_name:
+          type: string
+          description: Name of the hiring company
+        location:
+          type: string
+          description: Job location (city, state, or 'Remote')
+        commute_types:
+          type: array
+          description: Work arrangement options (remote, hybrid, in-office)
+          items:
+            type: string
+            enum:
+              - remote
+              - hybrid_1
+              - hybrid_2
+              - hybrid_3
+              - hybrid_4
+              - in_office
+        posted_date:
+          type: string
+          format: date
+          description: Date the job was posted (YYYY-MM-DD)
+        salary_range:
+          type:
+            - string
+            - 'null'
+          description: >-
+            Salary range in format '$80k-$120k', '$80k+', 'Up to $120k', or null when not disclosed
+        job_level:
+          type: string
+          description: Seniority level required
+          enum:
+            - entry
+            - mid
+            - senior
+            - lead
+            - manager
+            - director
+            - vp
+            - c_suite
+        summary:
+          type: string
+          description: Brief job summary (1-2 sentences, ~200 characters)
+
+    GptJobDetail:
+      allOf:
+        - $ref: '#/components/schemas/GptJobSearchResult'
+        - type: object
+          required:
+            - description
+            - responsibilities
+            - requirements
+            - pre_screen_questions
+            - company
+          properties:
+            description:
+              type: string
+              description: Full job description
+            responsibilities:
+              type: array
+              description: List of job responsibilities
+              items:
+                type: string
+            requirements:
+              type: array
+              description: Job requirements (mandatory and preferred)
+              items:
+                type: object
+                required:
+                  - text
+                  - type
+                properties:
+                  text:
+                    type: string
+                    description: Requirement description
+                  type:
+                    type: string
+                    description: Whether requirement is mandatory or preferred
+                    enum:
+                      - mandatory
+                      - preferred
+            pre_screen_questions:
+              type: array
+              description: Pre-screening questions for this job
+              items:
+                type: object
+                required:
+                  - id
+                  - question
+                  - type
+                  - is_required
+                properties:
+                  id:
+                    type: string
+                    description: Question identifier
+                  question:
+                    type: string
+                    description: Question text
+                  type:
+                    type: string
+                    description: Question type (text, boolean, etc.)
+                  is_required:
+                    type: boolean
+                    description: Whether answering this question is required
+            company:
+              type: object
+              required:
+                - name
+                - industry
+                - location
+              properties:
+                name:
+                  type: string
+                  description: Company name
+                industry:
+                  type: string
+                  description: Company industry
+                location:
+                  type: string
+                  description: Company headquarters location
+                website:
+                  type:
+                    - string
+                    - 'null'
+                  description: Company website URL
+                description:
+                  type:
+                    - string
+                    - 'null'
+                  description: Company description
+
+    GptApplicationStatus:
+      type: object
+      required:
+        - id
+        - job_title
+        - company_name
+        - status_label
+        - applied_date
+        - last_updated
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Application identifier
+        job_title:
+          type: string
+          description: Title of the job applied to
+        company_name:
+          type: string
+          description: Name of the hiring company
+        status_label:
+          type: string
+          description: >-
+            Current application status. Possible values: Submitted, Under Review, Interviewing,
+            Offer Received, Hired, Not Selected, Withdrawn, Screening, Recruiter Proposed,
+            Changes Requested
+        applied_date:
+          type: string
+          format: date
+          description: Date the application was submitted (YYYY-MM-DD)
+        last_updated:
+          type: string
+          format: date
+          description: Date of the last status change (YYYY-MM-DD)
+
+    GptConfirmationSummary:
+      type: object
+      required:
+        - confirmation_token
+        - expires_at
+        - job_title
+        - company_name
+        - requirements_summary
+        - pre_screen_answers_provided
+        - missing_required_questions
+        - warnings
+      properties:
+        confirmation_token:
+          type: string
+          description: Token to use for the second call (confirmed=true)
+        expires_at:
+          type: string
+          format: date-time
+          description: When this confirmation token expires (ISO 8601 timestamp)
+        job_title:
+          type: string
+          description: Title of the job being applied to
+        company_name:
+          type: string
+          description: Name of the hiring company
+        requirements_summary:
+          type: array
+          description: Summary of key job requirements
+          items:
+            type: string
+        pre_screen_answers_provided:
+          type: array
+          description: Pre-screen questions and answers that will be submitted
+          items:
+            type: object
+            required:
+              - question
+              - answer
+            properties:
+              question:
+                type: string
+                description: Question text
+              answer:
+                type: string
+                description: Candidate's answer
+        missing_required_questions:
+          type: array
+          description: Required pre-screen questions that haven't been answered yet
+          items:
+            type: object
+            required:
+              - id
+              - question
+            properties:
+              id:
+                type: string
+                description: Question identifier
+              question:
+                type: string
+                description: Question text
+        warnings:
+          type: array
+          description: Any warnings or important notes (e.g., duplicate application detected)
+          items:
+            type: string
+
+    GptResumeAnalysisResponse:
+      type: object
+      required:
+        - fit_score
+        - strengths
+        - gaps
+        - recommendation
+        - overall_summary
+      properties:
+        fit_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Overall fit score (0-100) indicating how well the resume matches the job
+        strengths:
+          type: array
+          description: Areas where the candidate is a strong match
+          items:
+            type: string
+        gaps:
+          type: array
+          description: Areas where the candidate may need improvement or lacks requirements
+          items:
+            type: string
+        recommendation:
+          type: string
+          description: Actionable recommendation for the candidate
+        overall_summary:
+          type: string
+          description: Overall assessment of the candidate's fit for this role
+
+    GptErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code for programmatic handling
+            message:
+              type: string
+              description: Human-readable error message
+            suggestion:
+              type: string
+              description: Suggested action to resolve the error
+            required_scope:
+              type: string
+              description: OAuth scope required for this operation (if scope error)
+
+    PaginationInfo:
+      type: object
+      required:
+        - page
+        - total_pages
+        - total_results
+      properties:
+        page:
+          type: integer
+          description: Current page number
+        total_pages:
+          type: integer
+          description: Total number of pages available
+        total_results:
+          type: integer
+          description: Total number of results across all pages

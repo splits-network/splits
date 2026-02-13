@@ -1,5 +1,33 @@
 # Project Milestones: Splits Network
 
+## v5.0 Custom GPT / Applicant Network (Shipped: 2026-02-13)
+
+**Delivered:** Full Custom GPT backend enabling candidates to interact with Applicant.Network via natural language in ChatGPT — OAuth2 authentication, job search, resume analysis, application submission with confirmation safety, and production-ready deployment.
+
+**Phases completed:** 11-15 (18 plans total)
+
+**Key accomplishments:**
+
+- New gpt-service microservice with Fastify scaffold, RabbitMQ audit event pipeline, and 4 GPT OAuth database tables
+- Full OAuth2 authorization code flow with ES256 JWT signing (jose), PKCE verification, refresh token rotation, and replay detection
+- OAuth consent UI in candidate app with auto-approve for returning users, Connected Apps profile management, and Clerk webhook integration for user deletion
+- Five GPT action endpoints: job search with multi-filter support, job details, application status, application submission with two-step confirmation safety, and resume analysis via ai-service
+- OpenAPI 3.0.1 schema (727 lines) with behavioral descriptions and GPT Instructions document (456 lines) for Career Copilot configuration
+- Production-ready deployment: 2-replica K8s manifests, per-user tiered rate limiting (30/10 req/min), 6-hour token cleanup CronJob, svix webhook signature verification
+
+**Stats:**
+
+- 118 files created/modified
+- ~17,255 lines of TypeScript + SQL + YAML
+- 5 phases, 18 plans
+- ~55 minutes execution time (2026-02-13)
+
+**Git range:** `165b8d4d` → `aefb4014`
+
+**What's next:** TBD — next milestone
+
+---
+
 ## v4.0 Commute Types & Job Levels (Shipped: 2026-02-13)
 
 **Delivered:** Full-stack commute type (multi-select) and job level (single-select) fields added to the jobs system — from database schema through API filtering to portal UI and search index.

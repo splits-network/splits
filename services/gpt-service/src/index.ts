@@ -69,6 +69,7 @@ async function main() {
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         gptConfig,
         eventPublisher,
+        clerkWebhookSecret: process.env.GPT_CLERK_WEBHOOK_SECRET,
     });
 
     // Register health check endpoint

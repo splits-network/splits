@@ -15,6 +15,13 @@ export default function SignUpPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    // Get redirect URL from search params (Clerk preserves this through verification)
+    const redirectUrl = searchParams.get("redirect_url");
+    const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
+
+    // Get rec_code from URL params or cookie (set by middleware)
+    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
@@ -24,12 +31,57 @@ export default function SignUpPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect URL from search params (Clerk preserves this through verification)
-    const redirectUrl = searchParams.get("redirect_url");
-    const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
+    // Referral code state
+    const [referralCode, setReferralCode] = useState(recCode || "");
+    const [referralStatus, setReferralStatus] = useState<
+        "idle" | "validating" | "valid" | "invalid"
+    >("idle");
+    const [referralRecruiter, setReferralRecruiter] = useState<{
+        id: string;
+        name: string;
+        profile_image_url?: string | null;
+    } | null>(null);
+    const [referralError, setReferralError] = useState("");
 
-    // Get rec_code from URL params or cookie (set by middleware)
-    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
+    // Validate referral code with debounce
+    useEffect(() => {
+        if (!referralCode || referralCode.length < 8) {
+            setReferralStatus("idle");
+            setReferralRecruiter(null);
+            setReferralError("");
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setReferralStatus("validating");
+            try {
+                const client = createUnauthenticatedClient();
+                const response: any = await client.get(
+                    `/recruiter-codes/lookup?code=${encodeURIComponent(referralCode)}`,
+                );
+                if (response?.data?.is_valid) {
+                    setReferralStatus("valid");
+                    setReferralRecruiter(response.data.recruiter);
+                    setReferralError("");
+                    // Set cookie so OAuth flow picks it up via SSO callback
+                    document.cookie = `rec_code=${encodeURIComponent(referralCode)}; path=/; max-age=${30 * 24 * 60 * 60}; samesite=lax`;
+                } else {
+                    setReferralStatus("invalid");
+                    setReferralRecruiter(null);
+                    setReferralError(
+                        response?.data?.error_message ||
+                            "Invalid referral code",
+                    );
+                }
+            } catch {
+                setReferralStatus("invalid");
+                setReferralRecruiter(null);
+                setReferralError("Unable to validate referral code");
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [referralCode]);
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -93,13 +145,14 @@ export default function SignUpPage() {
                                 "No auth token available, proceeding with redirect",
                             );
                         } else {
-                            // Resolve rec_code to recruiter_id if present
+                            // Resolve referral code to recruiter_id if present
                             let referredByRecruiterId: string | undefined;
-                            if (recCode) {
+                            const codeToUse = referralCode || recCode;
+                            if (codeToUse) {
                                 try {
                                     const unauthClient = createUnauthenticatedClient();
                                     const lookupResponse: any = await unauthClient.get(
-                                        `/recruiter-codes/lookup?code=${encodeURIComponent(recCode)}`
+                                        `/recruiter-codes/lookup?code=${encodeURIComponent(codeToUse)}`,
                                     );
                                     if (lookupResponse?.data?.is_valid) {
                                         referredByRecruiterId = lookupResponse.data.recruiter_id;
@@ -126,11 +179,11 @@ export default function SignUpPage() {
                             }
 
                             // Log rec_code usage after successful registration
-                            if (recCode && result.success && !result.wasExisting) {
+                            if (codeToUse && result.success && !result.wasExisting) {
                                 try {
                                     const authClient = createAuthenticatedClient(token);
                                     await authClient.post("/recruiter-codes/log", {
-                                        code: recCode,
+                                        code: codeToUse,
                                     });
                                 } catch (logError) {
                                     console.warn("[SignUp] Failed to log rec_code usage:", logError);
@@ -401,6 +454,53 @@ export default function SignUpPage() {
                             <p className="fieldset-label">
                                 Must be at least 8 characters
                             </p>
+                        </fieldset>
+
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Referral Code
+                                <span className="text-base-content/50 font-normal ml-1">
+                                    (optional)
+                                </span>
+                            </legend>
+                            <input
+                                type="text"
+                                placeholder="e.g. abc12345"
+                                className={`input w-full tracking-wider ${
+                                    referralStatus === "valid"
+                                        ? "input-success"
+                                        : referralStatus === "invalid"
+                                          ? "input-error"
+                                          : ""
+                                }`}
+                                value={referralCode}
+                                onChange={(e) =>
+                                    setReferralCode(
+                                        e.target.value.toLowerCase().trim(),
+                                    )
+                                }
+                                disabled={isLoading}
+                                maxLength={8}
+                            />
+                            {referralStatus === "validating" && (
+                                <p className="fieldset-label flex items-center gap-1">
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                    Validating...
+                                </p>
+                            )}
+                            {referralStatus === "valid" &&
+                                referralRecruiter && (
+                                    <p className="fieldset-label text-success flex items-center gap-1">
+                                        <i className="fa-duotone fa-regular fa-circle-check"></i>
+                                        Referred by {referralRecruiter.name}
+                                    </p>
+                                )}
+                            {referralStatus === "invalid" && (
+                                <p className="fieldset-label text-error flex items-center gap-1">
+                                    <i className="fa-duotone fa-regular fa-circle-xmark"></i>
+                                    {referralError}
+                                </p>
+                            )}
                         </fieldset>
 
                         <button

@@ -4,8 +4,8 @@ metadata:
     name: gpt-service
     namespace: splits-network
 spec:
-    # Keep at 1 replica - consumes RabbitMQ audit events
-    replicas: 1
+    # 2 replicas for redundancy - audit consumer uses exclusive queues so each message goes to one replica only
+    replicas: 2
     selector:
         matchLabels:
             app: gpt-service
@@ -62,6 +62,16 @@ spec:
                             secretKeyRef:
                                 name: gpt-secrets
                                 key: gpt-redirect-uri
+                      - name: GPT_CLERK_WEBHOOK_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: gpt-secrets
+                                key: gpt-clerk-webhook-secret
+                      - name: INTERNAL_SERVICE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: internal-service-secrets
+                                key: internal-service-key
                   resources:
                       requests:
                           cpu: 100m

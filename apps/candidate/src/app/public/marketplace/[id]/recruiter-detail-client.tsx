@@ -348,7 +348,9 @@ export default function RecruiterDetailClient({
                         <div className="card bg-base-100 shadow mb-6">
                             <div className="card-body">
                                 <h2 className="card-title">Bio & Information</h2>
-                                <p className="text-base-content/80 whitespace-pre-wrap">{recruiter.bio}</p>
+                                <div className="text-base-content/80">
+                                    <MarkdownRenderer content={recruiter.bio} />
+                                </div>
                             </div>
                         </div>
                     )}

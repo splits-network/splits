@@ -8,6 +8,7 @@ import { registerWebhookRoutes } from './oauth/webhook-handler';
 import { OAuthService } from './oauth/oauth-service';
 import { GptActionRepository } from './actions/repository';
 import { registerActionRoutes } from './actions/routes';
+import { registerOpenapiRoute } from '../openapi-route';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -15,10 +16,11 @@ interface RegisterConfig {
     gptConfig: GptConfig;
     eventPublisher?: EventPublisher;
     actionRepository?: GptActionRepository;
+    clerkWebhookSecret?: string;
 }
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
-    const { supabaseUrl, supabaseKey, gptConfig, eventPublisher } = config;
+    const { supabaseUrl, supabaseKey, gptConfig, eventPublisher, clerkWebhookSecret } = config;
 
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -38,8 +40,11 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerOAuthRoutes(app, { oauthService });
 
     // Register webhook routes
-    registerWebhookRoutes(app, { oauthService, logger: app.log as Logger });
+    registerWebhookRoutes(app, { oauthService, logger: app.log as Logger, clerkWebhookSecret });
 
     // Register GPT Action routes
     registerActionRoutes(app, { repository: actionRepository, oauthService, eventPublisher });
+
+    // Register OpenAPI schema routes
+    registerOpenapiRoute(app);
 }

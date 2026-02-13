@@ -9,7 +9,8 @@
       "Bash(pnpm --filter @splits-network/network-service build:*)",
       "Bash(pnpm --filter @splits-network/ats-service build:*)",
       "Bash(pnpm --filter @splits-network/network-service test:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(ls:*)"
     ]
   }
 }
