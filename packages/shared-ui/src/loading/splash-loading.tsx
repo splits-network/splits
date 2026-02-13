@@ -1,10 +1,12 @@
 'use client';
 
 /**
- * SplashLoading - Premium loading animation inspired by Monday.com
+ * SplashLoading - "The Split" loading animation
  *
- * Centers a logo image with orbiting dots and a breathing glow effect.
- * Use for full-page app loading / splash screens.
+ * A single line draws from center outward, then splits into two parallel lines.
+ * The logo is revealed in the gap between them. Energy pulses continuously
+ * travel along the split lines, representing network connections flowing
+ * through the platform.
  *
  * @example
  * <SplashLoading iconSrc="/icon.png" />
@@ -28,55 +30,60 @@ export interface SplashLoadingProps {
     className?: string;
 }
 
-interface OrbitDot {
-    radius: number;
-    size: number;
-    duration: number;
-    delay: number;
-    color: string;
-    opacity: number;
-}
-
-const ORBIT_DOTS: OrbitDot[] = [
-    // Inner ring - fast, small dots (primary navy)
-    { radius: 52, size: 6, duration: 2.8, delay: 0, color: '#233876', opacity: 0.9 },
-    { radius: 52, size: 5, duration: 2.8, delay: -0.93, color: '#233876', opacity: 0.6 },
-    { radius: 52, size: 4, duration: 2.8, delay: -1.87, color: '#233876', opacity: 0.35 },
-
-    // Middle ring - medium dots (teal)
-    { radius: 74, size: 8, duration: 3.8, delay: 0, color: '#0f9d8a', opacity: 0.85 },
-    { radius: 74, size: 6, duration: 3.8, delay: -1.9, color: '#0f9d8a', opacity: 0.5 },
-
-    // Outer ring - slow, larger dots (accent + mixed)
-    { radius: 96, size: 7, duration: 5.2, delay: 0, color: '#945769', opacity: 0.7 },
-    { radius: 96, size: 5, duration: 5.2, delay: -2.6, color: '#0f9d8a', opacity: 0.4 },
-    { radius: 96, size: 6, duration: 5.2, delay: -1.73, color: '#233876', opacity: 0.3 },
-];
-
+/*
+ * Animation timeline:
+ *   0.00s        Container visible
+ *   0.00–0.55s   Both lines draw from center outward (scale 0→1)
+ *   0.35–0.80s   Lines split apart vertically (slight overshoot bounce)
+ *   0.55–1.05s   Logo + glow fade in
+ *   0.90–1.40s   Message fades in
+ *   1.10s+       Upper pulse begins sweeping right  (loops 2.6s)
+ *   1.40s+       Logo breathe + glow pulse begin    (loops 3s / 3.5s)
+ *   1.50s+       Lower pulse begins sweeping left   (loops 3.0s)
+ *
+ * Uses CSS individual transform properties (translate, scale) so the
+ * draw and split animations compose without conflict.
+ */
 const KEYFRAMES = `
-@keyframes splash-orbit {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+@keyframes sn-draw {
+    from { scale: 0 1; }
+    to   { scale: 1 1; }
 }
-@keyframes splash-breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+@keyframes sn-split-up {
+    from { translate: 0 0; }
+    to   { translate: 0 calc(var(--sn-split) * -1); }
 }
-@keyframes splash-glow-pulse {
-    0%, 100% { opacity: 0.15; transform: scale(0.92); }
-    50% { opacity: 0.35; transform: scale(1.08); }
+@keyframes sn-split-down {
+    from { translate: 0 0; }
+    to   { translate: 0 var(--sn-split); }
 }
-@keyframes splash-dot-pulse {
-    0%, 100% { transform: translateX(var(--dot-radius)) scale(1); }
-    50% { transform: translateX(var(--dot-radius)) scale(1.35); }
+@keyframes sn-reveal {
+    from { opacity: 0; scale: 0.85; }
+    to   { opacity: 1; scale: 1; }
 }
-@keyframes splash-fade-in {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+@keyframes sn-breathe {
+    0%, 100% { scale: 1; }
+    50%      { scale: 1.035; }
 }
-@keyframes splash-message-fade {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes sn-glow-pulse {
+    0%, 100% { opacity: 0.05; scale: 0.92; }
+    50%      { opacity: 0.18; scale: 1.08; }
+}
+@keyframes sn-sweep-r {
+    0%   { left: -80px; opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+}
+@keyframes sn-sweep-l {
+    0%   { left: 100%; opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { left: -80px; opacity: 0; }
+}
+@keyframes sn-text-in {
+    from { opacity: 0; translate: 0 6px; }
+    to   { opacity: 1; translate: 0 0; }
 }
 `;
 
@@ -93,142 +100,140 @@ export function SplashLoading({
         setMounted(true);
     }, []);
 
-    const resolvedIconSize = iconSize ?? (fullScreen ? 64 : 48);
-    const scale = fullScreen ? 1 : 0.8;
-    const containerSize = Math.round(240 * scale);
-    const center = containerSize / 2;
+    const resolvedSize = iconSize ?? (fullScreen ? 64 : 48);
+    const split = fullScreen ? 44 : 32;
 
     const outerClasses = fullScreen
         ? `fixed inset-0 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm z-50 ${className}`
         : `relative flex flex-col items-center justify-center min-h-[400px] w-full ${className}`;
 
-    const dots = ORBIT_DOTS.map((d) => ({
-        ...d,
-        radius: Math.round(d.radius * scale),
-        size: Math.round(d.size * scale),
-    }));
+    if (!mounted) {
+        return <div className={outerClasses} style={{ opacity: 0 }} />;
+    }
 
-    const orbitRadii = [52, 74, 96].map((r) => Math.round(r * scale));
+    const lineGradient =
+        'linear-gradient(90deg, transparent, oklch(var(--color-primary) / 0.18) 12%, oklch(var(--color-primary) / 0.18) 88%, transparent)';
 
     return (
-        <div className={outerClasses}>
+        <div
+            className={outerClasses}
+            style={{ '--sn-split': `${split}px` } as React.CSSProperties}
+        >
             <style>{KEYFRAMES}</style>
 
             <div
                 style={{
-                    width: containerSize,
-                    height: containerSize,
                     position: 'relative',
-                    animation: mounted
-                        ? 'splash-fade-in 0.6s ease-out forwards'
-                        : 'none',
-                    opacity: mounted ? undefined : 0,
+                    width: fullScreen ? '50%' : '42%',
+                    minWidth: 260,
+                    maxWidth: 480,
+                    height: split * 2 + 20,
                 }}
             >
-                {/* Glow layers */}
+                {/* Upper split line */}
                 <div
                     style={{
                         position: 'absolute',
-                        left: center - Math.round(44 * scale),
-                        top: center - Math.round(44 * scale),
-                        width: Math.round(88 * scale),
-                        height: Math.round(88 * scale),
-                        borderRadius: '50%',
-                        background:
-                            'radial-gradient(circle, rgba(15, 157, 138, 0.3) 0%, rgba(35, 56, 118, 0.15) 50%, transparent 70%)',
-                        animation: 'splash-glow-pulse 3s ease-in-out infinite',
-                    }}
-                />
-                <div
-                    style={{
-                        position: 'absolute',
-                        left: center - Math.round(56 * scale),
-                        top: center - Math.round(56 * scale),
-                        width: Math.round(112 * scale),
-                        height: Math.round(112 * scale),
-                        borderRadius: '50%',
-                        background:
-                            'radial-gradient(circle, rgba(35, 56, 118, 0.12) 0%, transparent 70%)',
+                        inset: '50% 0 auto 0',
+                        height: 1.5,
+                        marginTop: -0.75,
+                        background: lineGradient,
+                        transformOrigin: 'center',
+                        overflow: 'hidden',
                         animation:
-                            'splash-glow-pulse 3s ease-in-out infinite 0.5s',
+                            'sn-draw 0.55s ease-out both, sn-split-up 0.45s cubic-bezier(.33,1.4,.64,1) 0.35s both',
                     }}
-                />
-
-                {/* Orbit rings (faint track lines) */}
-                {orbitRadii.map((radius) => (
+                >
+                    {/* Teal energy pulse sweeping right */}
                     <div
-                        key={radius}
                         style={{
                             position: 'absolute',
-                            left: center - radius,
-                            top: center - radius,
-                            width: radius * 2,
-                            height: radius * 2,
-                            borderRadius: '50%',
-                            border: '1px solid',
-                            borderColor: 'rgba(35, 56, 118, 0.06)',
+                            top: -1,
+                            width: 70,
+                            height: 3.5,
+                            borderRadius: 2,
+                            background:
+                                'linear-gradient(90deg, transparent 0%, oklch(var(--color-secondary) / 0.6) 35%, oklch(var(--color-secondary) / 0.8) 50%, oklch(var(--color-secondary) / 0.35) 75%, transparent)',
+                            animation:
+                                'sn-sweep-r 2.6s ease-in-out 1.1s infinite',
                         }}
                     />
-                ))}
+                </div>
 
-                {/* Orbiting dots */}
-                {dots.map((dot, i) => (
-                    <div
-                        key={i}
-                        style={{
-                            position: 'absolute',
-                            left: center,
-                            top: center,
-                            width: 0,
-                            height: 0,
-                            animation: `splash-orbit ${dot.duration}s linear infinite`,
-                            animationDelay: `${dot.delay}s`,
-                        }}
-                    >
-                        <div
-                            style={
-                                {
-                                    '--dot-radius': `${dot.radius}px`,
-                                    width: dot.size,
-                                    height: dot.size,
-                                    borderRadius: '50%',
-                                    backgroundColor: dot.color,
-                                    opacity: dot.opacity,
-                                    position: 'absolute',
-                                    top: -(dot.size / 2),
-                                    left: -(dot.size / 2),
-                                    animation: `splash-dot-pulse ${dot.duration * 0.8}s ease-in-out infinite`,
-                                    animationDelay: `${dot.delay}s`,
-                                    boxShadow: `0 0 ${dot.size * 2}px ${dot.color}40`,
-                                    transform: `translateX(${dot.radius}px)`,
-                                } as React.CSSProperties
-                            }
-                        />
-                    </div>
-                ))}
-
-                {/* Center logo */}
+                {/* Lower split line */}
                 <div
                     style={{
                         position: 'absolute',
-                        left: center - resolvedIconSize / 2,
-                        top: center - resolvedIconSize / 2,
-                        width: resolvedIconSize,
-                        height: resolvedIconSize,
-                        animation: 'splash-breathe 3s ease-in-out infinite',
+                        inset: '50% 0 auto 0',
+                        height: 1.5,
+                        marginTop: -0.75,
+                        background: lineGradient,
+                        transformOrigin: 'center',
+                        overflow: 'hidden',
+                        animation:
+                            'sn-draw 0.55s ease-out both, sn-split-down 0.45s cubic-bezier(.33,1.4,.64,1) 0.35s both',
+                    }}
+                >
+                    {/* Accent energy pulse sweeping left */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: -1,
+                            width: 70,
+                            height: 3.5,
+                            borderRadius: 2,
+                            background:
+                                'linear-gradient(90deg, transparent 0%, oklch(var(--color-accent) / 0.4) 25%, oklch(var(--color-accent) / 0.55) 50%, oklch(var(--color-accent) / 0.25) 80%, transparent)',
+                            animation:
+                                'sn-sweep-l 3.0s ease-in-out 1.5s infinite',
+                        }}
+                    />
+                </div>
+
+                {/* Center glow behind logo */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        width: resolvedSize * 2.4,
+                        height: resolvedSize * 1.8,
+                        marginTop: -(resolvedSize * 0.9),
+                        marginLeft: -(resolvedSize * 1.2),
+                        borderRadius: '50%',
+                        background:
+                            'radial-gradient(ellipse, oklch(var(--color-secondary) / 0.12) 0%, transparent 70%)',
+                        animation:
+                            'sn-reveal 0.5s ease-out 0.55s both, sn-glow-pulse 3.5s ease-in-out 1.4s infinite',
+                        pointerEvents: 'none',
+                    }}
+                />
+
+                {/* Logo */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        width: resolvedSize,
+                        height: resolvedSize,
+                        marginTop: -(resolvedSize / 2),
+                        marginLeft: -(resolvedSize / 2),
+                        animation:
+                            'sn-reveal 0.5s ease-out 0.6s both, sn-breathe 3s ease-in-out 1.4s infinite',
                     }}
                 >
                     <img
                         src={iconSrc}
                         alt="Loading"
-                        width={resolvedIconSize}
-                        height={resolvedIconSize}
+                        width={resolvedSize}
+                        height={resolvedSize}
                         style={{
                             display: 'block',
                             width: '100%',
                             height: '100%',
                             objectFit: 'contain',
-                            filter: 'drop-shadow(0 2px 12px rgba(35, 56, 118, 0.2))',
+                            filter: 'drop-shadow(0 1px 8px oklch(var(--color-primary) / 0.12))',
                         }}
                     />
                 </div>
@@ -237,11 +242,14 @@ export function SplashLoading({
             {/* Message */}
             {message && (
                 <p
-                    className="text-base-content/50 text-sm mt-6 tracking-wide"
+                    className="text-base-content/40"
                     style={{
-                        animation: mounted
-                            ? 'splash-message-fade 0.8s ease-out 0.3s both'
-                            : 'none',
+                        marginTop: 28,
+                        fontSize: '0.7rem',
+                        letterSpacing: '0.12em',
+                        fontWeight: 300,
+                        textTransform: 'uppercase' as const,
+                        animation: 'sn-text-in 0.5s ease-out 0.9s both',
                     }}
                 >
                     {message}
