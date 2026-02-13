@@ -8,16 +8,19 @@ A split-fee recruiting marketplace connecting recruiters, hiring companies, and 
 
 Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements.
 
-## Current Milestone: v4.0 Commute Types & Job Levels
+## Current Milestone: v5.0 Custom GPT (Applicant Network)
 
-**Goal:** Add work arrangement (commute types) and seniority level fields to the jobs table, with full-stack support from database through API to UI.
+**Goal:** Build a Custom GPT backend that allows candidates to interact with Applicant.Network via natural language in ChatGPT — search jobs, analyze resumes, check application status, and submit applications.
 
 **Target features:**
-- Multi-select commute types per job (remote, hybrid 1-4 days, in-office)
-- Single-select job seniority level (entry through c-suite)
-- Job form UI for setting commute types and job level
-- Filtering jobs by commute type and job level
-- Display commute types and job level on job detail views
+- New gpt-service microservice with GPT-specific API endpoints
+- OAuth2 provider flow (backend issues scoped GPT tokens, Clerk handles identity)
+- Job search via natural language
+- Resume analysis (parsing and job fit scoring)
+- Application status lookup
+- Application submission with confirmation safety pattern
+- OpenAPI 3.0 schema for GPT Actions
+- GPT Instructions document
 
 ## Requirements
 
@@ -43,49 +46,68 @@ Connecting recruiters and companies through a marketplace model with transparent
 - All 13 frontend isPlatformAdmin checks work without modification — v3.0
 - Platform admin grant/revoke publishes enriched audit events via RabbitMQ — v3.0
 
+<!-- v4.0 (schema + API complete, frontend pending) -->
+
+- commute_types TEXT[] column on jobs table with CHECK constraint — v4.0
+- job_level TEXT column on jobs table with CHECK constraint — v4.0
+- TypeScript types for commute types and job levels in shared-types — v4.0
+- ats-service CRUD and filtering support for commute_types and job_level — v4.0
+
 ### Active
 
-<!-- v4.0 Commute Types & Job Levels -->
+<!-- v5.0 Custom GPT (Applicant Network) -->
 
-- [ ] commute_types TEXT[] column on jobs table with CHECK constraint
-- [ ] job_level TEXT column on jobs table with CHECK constraint
-- [ ] TypeScript types updated (shared-types, DTOs, models)
-- [ ] ats-service repository and service support for new fields
-- [ ] Job creation/edit form UI with commute type multi-select and job level dropdown
-- [ ] Job detail display showing commute types and job level
-- [ ] Job list filtering by commute type and job level
-- [ ] Search index updated to include new fields
+- [ ] New gpt-service microservice following nano-service architecture
+- [ ] OAuth2 provider endpoints (authorize, token, revoke) with Clerk identity
+- [ ] GPT-scoped short-lived access tokens with per-user isolation
+- [ ] Job search endpoint for GPT Actions (natural language query → structured results)
+- [ ] Resume analysis endpoint (parse uploaded resume, score against job postings)
+- [ ] Application status lookup endpoint
+- [ ] Application submission endpoint with confirmation safety pattern
+- [ ] OpenAPI 3.0 schema defining all GPT Actions
+- [ ] GPT Instructions document for Custom GPT configuration
 
 ### Out of Scope
 
 - Restructuring company_admin/hiring_manager roles — they're legitimately org-scoped, stay in memberships
 - Fine-grained permissions system — future milestone
-- Role UI/admin panel redesign — just the data model change
 - Elasticsearch/external search engine — Postgres FTS is sufficient for current scale
-- Search analytics/tracking — defer to future milestone
-- Role-entity type validation DB constraint (platform_admin with entity_id) — v3.1
-- Shared assignSystemRole() helper — v4+
+- Splits.Network GPT features (recruiter search, candidate search, split opportunities) — future milestone
+- Contract execution via GPT — too risky for v1
+- Payment processing via GPT — too risky for v1
+- Fully autonomous submissions — all writes require explicit confirmation
+- GPT Store publishing — v5.0 builds the backend, store listing is a separate step
 
 ## Context
 
-**Current role architecture (post-v3.0):**
-- `memberships` table: org-scoped roles (company_admin, hiring_manager) — requires organization_id NOT NULL
-- `user_roles` table: entity-linked roles (recruiter, candidate) with role_entity_id, and system-level roles (platform_admin) with role_entity_id = NULL
-- `resolveAccessContext()` reads from both tables, deduplicates, builds AccessContext with `isPlatformAdmin` flag
-- Platform organization no longer exists — removed in v3.0 cleanup
+**GPT Actions architecture:**
+- ChatGPT → Custom GPT → OpenAPI Action → gpt-service → existing services (ats-service, ai-service, document-service)
+- gpt-service is an OAuth2 provider: GPT sends OAuth request → backend redirects to Clerk login → validates session → issues short-lived GPT access token
+- Clerk = identity provider, backend = OAuth provider, GPT = OAuth client
+- All write actions require `confirmed: true` flag, return `CONFIRMATION_REQUIRED` error if missing
 
-**Key files:**
-- `packages/shared-access-context/src/index.ts` — resolveAccessContext
-- `services/identity-service/src/v2/` — user/role management (SYSTEM_ROLES constant for conditional validation)
-- `apps/portal/src/contexts/user-profile-context.tsx` — frontend role checks
-- `supabase/migrations/` — schema definitions
+**Existing guidance docs:**
+- `docs/gpt/01_PRD_Custom_GPT.md` — Product requirements
+- `docs/gpt/02_Architecture_Custom_GPT.md` — Architecture overview
+- `docs/gpt/03_Technical_Specification.md` — Technical spec
+- `docs/gpt/04_OpenAPI_Starter.yaml` — OpenAPI starter schema
+- `docs/gpt/05_GPT_Instructions_Template.md` — GPT instructions template
+
+**Key integration points:**
+- `services/ats-service/` — Jobs, applications data
+- `services/ai-service/` — AI-powered fit analysis
+- `services/document-service/` — Resume file storage
+- `packages/shared-access-context/` — resolveAccessContext for RBAC
+- `services/api-gateway/` — Routes to domain services
 
 ## Constraints
 
-- **Backward compatible**: resolveAccessContext returns `isPlatformAdmin: boolean` — 119+ downstream consumers unchanged
-- **Zero downtime**: Migration handled existing platform admin data without breaking active sessions
-- **Tech stack**: Postgres migrations, Supabase, existing V2 service patterns
-- **Scope**: Only platform_admin moved — company_admin and hiring_manager stay in memberships
+- **Nano-service**: gpt-service is a dedicated microservice, routes through api-gateway
+- **No direct DB queries for domain data**: gpt-service calls existing services' repositories or uses shared database access patterns
+- **Write-action safety**: All mutations require confirmed flag — no exceptions
+- **Token scoping**: GPT tokens are scoped to candidate actions only, not recruiter/admin
+- **Rate limiting**: Per-user GPT-specific throttle policies
+- **Tech stack**: Fastify, TypeScript, Supabase Postgres, existing V2 service patterns
 
 ## Key Decisions
 
@@ -99,11 +121,13 @@ Connecting recruiters and companies through a marketplace model with transparent
 | Minimal code change (EntityRoleRow nullable) | Existing deduplicated roles union already supports dual-read. One type change. | ✓ Good |
 | SYSTEM_ROLES constant | Explicit array defining system-level roles. Extensible for future system roles. | ✓ Good |
 | Event enrichment for audit | user_role.deleted event includes full context (user_id, role_name, role_entity_id). | ✓ Good |
-
-| commute_types as TEXT[] array | Multi-select per job. Postgres arrays are queryable (`@>` operator), filterable, and simpler than junction tables for a small fixed value set. | — Pending |
-| Hybrid granularity: hybrid_1 through hybrid_4 | Full granularity (1-4 days in office) matches real job postings. Values encode both type and detail in one string. | — Pending |
-| job_level as TEXT with CHECK constraint | Single-select, 8 levels (entry → c_suite). Text with CHECK over enum for easier future extension. | — Pending |
-| Keep open_to_relocation as-is | Relocation is orthogonal to commute type — a remote role can still prefer candidates willing to relocate. | — Pending |
+| commute_types as TEXT[] array | Multi-select per job. Postgres arrays with @> filtering. | ✓ Good |
+| Hybrid granularity: hybrid_1 through hybrid_4 | Full granularity (1-4 days in office) matches real job postings. | ✓ Good |
+| job_level as TEXT with CHECK constraint | Single-select, 8 levels. Text with CHECK over enum for easier extension. | ✓ Good |
+| Backend as OAuth provider for GPT | Full control over token scoping, GPT-specific permissions, clean revocation, multi-tenant awareness. Clerk handles identity only. | — Pending |
+| New gpt-service microservice | Follows nano-service philosophy. Keeps GPT concerns isolated from domain services. | — Pending |
+| Applicant.Network features first | Candidate-facing features are simpler, lower risk. Splits.Network recruiter features in future milestone. | — Pending |
+| Confirmation safety pattern | All write actions require confirmed flag. Prevents AI misuse of write endpoints. | — Pending |
 
 ---
-*Last updated: 2026-02-13 after v4.0 milestone started*
+*Last updated: 2026-02-13 after v5.0 milestone started*

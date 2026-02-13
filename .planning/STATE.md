@@ -4,16 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-13)
 
-**Core value:** Jobs accurately describe work arrangements and seniority level
-**Current focus:** v4.0 Commute Types & Job Levels — COMPLETE
+**Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
+**Current focus:** v5.0 Custom GPT (Applicant Network)
 
 ## Current Position
 
-Phase: 10 of 10 (Frontend & Search)
-Plan: 3 of 3 in current phase
-Status: Phase complete — Milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-13 — Milestone v5.0 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -41,21 +42,10 @@ Progress: [██████████] 100%
 
 ### Decisions
 
-- commute_types as TEXT[] array (multi-select, Postgres array with @> filtering)
-- Hybrid granularity: hybrid_1 through hybrid_4 (1-4 days in office)
-- job_level as TEXT with CHECK constraint (8 levels: entry -> c_suite)
-- Keep open_to_relocation as-is (orthogonal to commute type)
-- Inline literal types in dtos.ts (no model imports in that file)
-- commute_types placed after open_to_relocation in Job interface (semantic grouping)
-- Used Supabase .overlaps() (Postgres &&) for commute_type any-match filtering
-- Self-contained VALID_COMMUTE_TYPES/VALID_JOB_LEVELS const arrays in service.ts (no shared-types coupling)
-- commute_type filter supports both top-level query param and nested filters object
-- Search index metadata stores commute_types as JSONB array via to_jsonb()
-- Search context includes array values via array_to_string() for full-text matching
-- Job wizard uses checkbox group (flex-wrap) for commute types, dropdown for job level
-- Conditional payload inclusion: only send commute_types/job_level if set (preserves null on edit)
-- Job detail views use label maps for human-readable display (COMMUTE_TYPE_LABELS, JOB_LEVEL_LABELS)
-- Single-select dropdowns for commute_type and job_level filters (matches API any-match semantics)
+- Backend as OAuth provider for GPT (Clerk = identity, backend = OAuth provider, GPT = OAuth client)
+- New gpt-service microservice (nano-service philosophy)
+- Applicant.Network features first (candidate-facing)
+- Confirmation safety pattern for all write actions
 
 ### Pending Todos
 
@@ -76,10 +66,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: v4.0 Milestone complete
+Stopped at: Milestone v5.0 initialization
 Resume file: None
-Next: /gsd:complete-milestone
+Next: Research or requirements definition
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 10 complete, v4.0 milestone complete)*
+*Last updated: 2026-02-13 (v5.0 milestone started)*
