@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 15 of 15 (Production Hardening)
-Plan: 2 of 2 (GPT Rate Limiting)
-Status: In progress
-Last activity: 2026-02-13 -- Completed 15-02-PLAN.md (GPT Rate Limiting)
+Plan: 2 of 2 (all plans complete)
+Status: Phase complete -- v5.0 complete
+Last activity: 2026-02-13 -- Completed 15-01-PLAN.md (GPT Service Production Hardening)
 
-Progress: [██████████] ~100% (17/~17 v5.0 plans)
+Progress: [██████████] 100% (17/17 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [██████████] ~100% (17/~17 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 3.1 min
-- Total execution time: ~51 minutes
+- Total execution time: ~54 minutes
 
 **Cumulative:**
-- Total plans completed: 34
+- Total plans completed: 35
 - Average duration: 3.3 min
-- Total execution time: ~115 minutes
+- Total execution time: ~118 minutes
 
 ## Accumulated Context
 
@@ -101,6 +101,10 @@ Progress: [██████████] ~100% (17/~17 v5.0 plans)
 - Prompt injection defense with explicit stay-in-role instructions (Phase 14-02)
 - Route-level @fastify/rate-limit config overrides for tiered GPT rate limiting (Phase 15-02)
 - Bearer token suffix keying for per-user rate limit buckets with gpt-read:/gpt-write: prefixes (Phase 15-02)
+- 2 replicas safe for gpt-service (audit consumer uses exclusive queues) (Phase 15-01)
+- 30-day retention for expired OAuth artifacts before token cleanup (Phase 15-01)
+- Skip webhook signature verification in dev when CLERK_WEBHOOK_SECRET not configured (Phase 15-01)
+- gpt_oauth_events kept indefinitely, not cleaned up by CronJob (Phase 15-01)
 - OAuth endpoints classified as read tier (30/min) since not computationally expensive (Phase 15-02)
 
 ### Pending Todos
@@ -134,16 +138,19 @@ None.
 - User must configure privacy policy URL.
 - GPT_REDIRECT_URI catch-22: Need to create GPT to get redirect URI, but need redirect URI to configure OAuth (resolve by creating GPT first, getting redirect URI, then updating environment).
 
+**From v5.0 (Phase 15):**
+- User must add `CLERK_WEBHOOK_SECRET` GitHub environment secret (from Clerk Dashboard -> Webhooks -> Signing Secret).
+
 **v5.0 Research Flags:**
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 15-02-PLAN.md (GPT Rate Limiting)
+Stopped at: Completed Phase 15 (Production Hardening) -- all plans complete
 Resume file: None
-Next: Phase 15 remaining plans (if any) or v5.0 complete
+Next: v5.0 Custom GPT complete -- all 17 plans across 5 phases executed
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 15, plan 02 complete)*
+*Last updated: 2026-02-13 (Phase 15 complete, v5.0 complete)*
