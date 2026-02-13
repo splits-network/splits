@@ -260,7 +260,280 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
     );
 
     // ========================================================================
-    // Route 4: POST /api/v2/resume/analyze
+    // Route 4: POST /api/v2/applications/submit
+    // ========================================================================
+
+    app.post<{ Body: GptSubmitApplicationRequest }>(
+        '/api/v2/applications/submit',
+        {
+            preHandler: [extractGptAuth(oauthService), requireScope('applications:write')],
+        },
+        async (request, reply) => {
+            try {
+                const { job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter } =
+                    request.body;
+
+                // Get clerkUserId from validated token
+                const clerkUserId = request.gptAuth!.clerkUserId;
+
+                // =============================================================
+                // Path A: First call (confirmed is falsy) - Return CONFIRMATION_REQUIRED
+                // =============================================================
+
+                if (!confirmed) {
+                    // Step 1: Resolve candidateId
+                    const candidateId = await repository.resolveCandidateId(clerkUserId);
+                    if (!candidateId) {
+                        return reply.status(404).send(
+                            gptError('NOT_FOUND', 'No candidate profile found', {
+                                suggestion: 'Create a profile at applicant.network/portal/profile',
+                            })
+                        );
+                    }
+
+                    // Step 2: Validate job_id
+                    if (!job_id) {
+                        return reply.status(400).send(gptError('INVALID_REQUEST', 'job_id is required'));
+                    }
+
+                    // Step 3: Check for duplicate application
+                    const existingApp = await repository.checkDuplicateApplication(candidateId, job_id);
+                    if (existingApp) {
+                        const appliedDate = existingApp.created_at
+                            ? new Date(existingApp.created_at).toISOString().split('T')[0]
+                            : 'unknown date';
+                        return reply.status(409).send(
+                            gptError(
+                                'DUPLICATE_APPLICATION',
+                                `You already applied to this job on ${appliedDate}`,
+                                {
+                                    suggestion: 'Check your application status instead',
+                                }
+                            )
+                        );
+                    }
+
+                    // Step 4: Fetch job details
+                    const job = await repository.getJobDetail(job_id);
+                    if (!job) {
+                        return reply.status(404).send(
+                            gptError('NOT_FOUND', 'Job not found or no longer active')
+                        );
+                    }
+
+                    // Step 5: Fetch pre-screen questions
+                    const preScreenQuestions = await repository.getPreScreenQuestions(job_id);
+
+                    // Step 6: Check required pre-screen questions
+                    const requiredQuestions = preScreenQuestions.filter((q: any) => q.is_required);
+                    const providedAnswerIds = (pre_screen_answers || []).map((a) => a.question_id);
+                    const missingRequiredQuestions = requiredQuestions.filter(
+                        (q: any) => !providedAnswerIds.includes(q.id)
+                    );
+
+                    if (missingRequiredQuestions.length > 0) {
+                        // If no answers provided at all, return all questions
+                        // If some answers provided, return only missing ones
+                        const questionsToReturn =
+                            !pre_screen_answers || pre_screen_answers.length === 0
+                                ? requiredQuestions
+                                : missingRequiredQuestions;
+
+                        return reply.status(400).send({
+                            error: {
+                                code: 'MISSING_PRE_SCREEN_ANSWERS',
+                                message:
+                                    'This job requires answers to pre-screen questions before applying',
+                                questions: questionsToReturn.map((q: any) => ({
+                                    id: q.id,
+                                    question: q.question,
+                                    type: q.question_type,
+                                    is_required: true,
+                                })),
+                            },
+                        });
+                    }
+
+                    // Step 7: Generate confirmation token
+                    const token = generateConfirmationToken(
+                        clerkUserId,
+                        job_id,
+                        candidateId,
+                        pre_screen_answers,
+                        cover_letter
+                    );
+
+                    // Step 8: Build confirmation summary
+                    const requirementsSummary: string[] = [];
+                    if (job.requirements) {
+                        const mandatoryReqs = job.requirements
+                            .filter((r: any) => r.requirement_type === 'mandatory')
+                            .slice(0, 5);
+                        requirementsSummary.push(
+                            ...mandatoryReqs.map((r: any) => r.description || r.text || '')
+                        );
+                    }
+
+                    const preScreenAnswersProvided = (pre_screen_answers || []).map((ans) => {
+                        const question = preScreenQuestions.find((q: any) => q.id === ans.question_id);
+                        return {
+                            question: question?.question || 'Unknown question',
+                            answer: ans.answer,
+                        };
+                    });
+
+                    const missingOptionalQuestions = preScreenQuestions.filter(
+                        (q: any) => !q.is_required && !providedAnswerIds.includes(q.id)
+                    );
+
+                    const warnings: string[] = [];
+                    if (!cover_letter || cover_letter.trim() === '') {
+                        warnings.push('No cover letter provided');
+                    }
+                    if (missingOptionalQuestions.length > 0) {
+                        warnings.push(
+                            `${missingOptionalQuestions.length} optional pre-screen question${
+                                missingOptionalQuestions.length > 1 ? 's' : ''
+                            } not answered`
+                        );
+                    }
+
+                    const summary: GptConfirmationSummary = {
+                        confirmation_token: token.token,
+                        expires_at: token.expiresAt.toISOString(),
+                        job_title: job.title,
+                        company_name: job.company?.name || 'Unknown Company',
+                        requirements_summary: requirementsSummary,
+                        pre_screen_answers_provided: preScreenAnswersProvided,
+                        missing_required_questions: [], // Should be empty if we got here
+                        warnings,
+                    };
+
+                    // Step 9: Return confirmation required
+                    return reply.status(200).send({
+                        data: {
+                            status: 'CONFIRMATION_REQUIRED',
+                            message: 'Please review the application details and confirm submission',
+                            summary,
+                        },
+                    });
+                }
+
+                // =============================================================
+                // Path B: Second call (confirmed === true) - Execute submission
+                // =============================================================
+
+                // Step 1: Validate confirmation_token
+                if (!confirmation_token) {
+                    return reply.status(400).send(
+                        gptError('INVALID_REQUEST', 'confirmation_token is required when confirmed=true')
+                    );
+                }
+
+                // Step 2: Retrieve token
+                const token = getConfirmationToken(confirmation_token);
+                if (!token) {
+                    return reply.status(400).send(
+                        gptError(
+                            'CONFIRMATION_EXPIRED',
+                            'Confirmation token has expired. Please start the application process again.'
+                        )
+                    );
+                }
+
+                // Step 3: Validate token belongs to this user
+                if (token.clerkUserId !== clerkUserId) {
+                    return reply.status(403).send(
+                        gptError('INVALID_REQUEST', 'Confirmation token does not belong to this user')
+                    );
+                }
+
+                // Step 4: Re-check for duplicate (race condition guard)
+                const existingApp = await repository.checkDuplicateApplication(
+                    token.candidateId,
+                    token.jobId
+                );
+                if (existingApp) {
+                    deleteConfirmationToken(confirmation_token);
+                    const appliedDate = existingApp.created_at
+                        ? new Date(existingApp.created_at).toISOString().split('T')[0]
+                        : 'unknown date';
+                    return reply.status(409).send(
+                        gptError(
+                            'DUPLICATE_APPLICATION',
+                            `You already applied to this job on ${appliedDate}`,
+                            {
+                                suggestion: 'Check your application status instead',
+                            }
+                        )
+                    );
+                }
+
+                // Step 5: Create the application
+                const application = await repository.createApplication(
+                    token.candidateId,
+                    token.jobId,
+                    token.coverLetter
+                );
+
+                // Step 6: Save pre-screen answers if present
+                if (token.preScreenAnswers && token.preScreenAnswers.length > 0) {
+                    await repository.savePreScreenAnswers(application.id, token.preScreenAnswers);
+                }
+
+                // Step 7: Delete the confirmation token
+                deleteConfirmationToken(confirmation_token);
+
+                // Step 8: Publish audit event
+                if (eventPublisher) {
+                    try {
+                        await eventPublisher.publish('gpt.action.application_submitted', {
+                            application_id: application.id,
+                            candidate_id: token.candidateId,
+                            job_id: token.jobId,
+                            clerk_user_id: token.clerkUserId,
+                        });
+                    } catch (eventError: any) {
+                        // Log but don't fail the request
+                        app.log.error(
+                            { error: eventError, application_id: application.id },
+                            'Failed to publish application_submitted event'
+                        );
+                    }
+                }
+
+                // Step 9: Fetch job details for response
+                const job = await repository.getJobDetail(token.jobId);
+
+                // Return success
+                return reply.status(201).send({
+                    data: {
+                        status: 'SUBMITTED',
+                        message: 'Application submitted successfully',
+                        application: {
+                            id: application.id,
+                            job_title: job?.title || 'Unknown',
+                            company_name: job?.company?.name || 'Unknown',
+                            applied_date: application.submitted_at
+                                ? new Date(application.submitted_at).toISOString().split('T')[0]
+                                : new Date(application.created_at).toISOString().split('T')[0],
+                            status_label: 'Submitted',
+                        },
+                    },
+                });
+            } catch (error: any) {
+                app.log.error({ error }, 'Application submission failed');
+                return reply.status(500).send(
+                    gptError('INTERNAL_ERROR', 'Failed to process application', {
+                        suggestion: 'Please try again later',
+                    })
+                );
+            }
+        }
+    );
+
+    // ========================================================================
+    // Route 5: POST /api/v2/resume/analyze
     // ========================================================================
 
     app.post<{

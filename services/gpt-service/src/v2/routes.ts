@@ -41,5 +41,5 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerWebhookRoutes(app, { oauthService, logger: app.log as Logger });
 
     // Register GPT Action routes
-    registerActionRoutes(app, { repository: actionRepository, oauthService });
+    registerActionRoutes(app, { repository: actionRepository, oauthService, eventPublisher });
 }
