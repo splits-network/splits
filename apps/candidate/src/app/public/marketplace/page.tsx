@@ -86,6 +86,66 @@ async function buildMarketplaceParams(searchParams: MarketplacePageProps['search
     };
 }
 
+function StaticRecruiterList({ recruiters }: { recruiters: Recruiter[] }) {
+    return (
+        <div>
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold">Recruiter Marketplace</h1>
+                <p className="text-base-content/70 mt-1">
+                    Discover expert recruiters by industry, specialty, and location
+                </p>
+            </div>
+            {recruiters.length === 0 ? (
+                <p>No recruiters found. Check back soon.</p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {recruiters.map((recruiter) => (
+                        <article
+                            key={recruiter.id}
+                            className="card bg-base-100 shadow-sm border border-base-300"
+                        >
+                            <div className="card-body p-4">
+                                <h2 className="card-title text-md">
+                                    <a href={`/public/marketplace/${recruiter.id}`}>
+                                        {recruiter.users?.name || recruiter.name || "Recruiter"}
+                                    </a>
+                                </h2>
+                                {recruiter.tagline && (
+                                    <p className="text-sm text-base-content/70">
+                                        {recruiter.tagline}
+                                    </p>
+                                )}
+                                {recruiter.specialization && (
+                                    <p className="text-sm">{recruiter.specialization}</p>
+                                )}
+                                {recruiter.location && (
+                                    <p className="text-sm">{recruiter.location}</p>
+                                )}
+                                {recruiter.years_experience != null && (
+                                    <p className="text-sm">
+                                        {recruiter.years_experience} years experience
+                                    </p>
+                                )}
+                                {recruiter.bio && (
+                                    <p className="text-sm line-clamp-3 text-base-content/80">
+                                        {recruiter.bio.substring(0, 200)}
+                                    </p>
+                                )}
+                                <a
+                                    href={`/public/marketplace/${recruiter.id}`}
+                                    className="btn btn-primary btn-sm mt-2"
+                                >
+                                    View Profile
+                                </a>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default async function MarketplacePage({ searchParams }: MarketplacePageProps) {
     const params = await buildMarketplaceParams(searchParams);
     let initialData: Recruiter[] | undefined;
@@ -102,11 +162,9 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
 
     return (
         <div className="container mx-auto p-6">
-            <Suspense fallback={
-                <div className="flex items-center justify-center py-12">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            }>
+            <Suspense
+                fallback={<StaticRecruiterList recruiters={initialData || []} />}
+            >
                 <MarketplaceList initialData={initialData} initialPagination={initialPagination} />
             </Suspense>
         </div>
