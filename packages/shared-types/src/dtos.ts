@@ -14,7 +14,7 @@ export interface UserProfileDTO {
 export interface UserRoleDTO {
     id: string;
     role_name: string;
-    role_entity_id: string;
+    role_entity_id: string | null;
 }
 
 export interface MembershipDTO {

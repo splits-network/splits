@@ -38,7 +38,7 @@ export class IdentityClient extends BaseClient {
         return this.post('/organizations', data);
     }
 
-    // User Role endpoints (entity-linked: recruiter, candidate)
+    // User Role endpoints (entity-linked: recruiter, candidate; system-level: platform_admin)
     async getUserRoles(userId: string): Promise<ApiResponse<UserRole[]>> {
         return this.get(`/user-roles?user_id=${userId}`);
     }
@@ -46,7 +46,7 @@ export class IdentityClient extends BaseClient {
     async createUserRole(data: {
         user_id: string;
         role_name: string;
-        role_entity_id: string;
+        role_entity_id?: string | null;
     }): Promise<ApiResponse<UserRole>> {
         return this.post('/user-roles', data);
     }
