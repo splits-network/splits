@@ -7,7 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
 import { EventPublisher } from '../shared/events';
-import { SignJWT, jwtVerify, importPKCS8 } from 'jose';
+import { SignJWT, jwtVerify, importPKCS8, type KeyLike } from 'jose';
 import { randomBytes, createHash } from 'crypto';
 import {
     GPT_SCOPES,
@@ -21,7 +21,7 @@ import {
 } from './types';
 
 export class OAuthService {
-    private privateKey: CryptoKey | null = null;
+    private privateKey: KeyLike | null = null;
     private readonly issuer = 'splits-network-gpt';
     private readonly audience = 'gpt';
 
@@ -51,7 +51,7 @@ export class OAuthService {
     /**
      * Ensure private key is loaded
      */
-    private async ensurePrivateKey(): Promise<CryptoKey> {
+    private async ensurePrivateKey(): Promise<KeyLike> {
         if (!this.privateKey) {
             await this.initializePrivateKey();
         }
@@ -505,21 +505,26 @@ export class OAuthService {
     /**
      * Check if user has existing consent for requested scopes
      */
-    async hasExistingConsent(clerkUserId: string, requestedScopes: string[]): Promise<boolean> {
+    async hasExistingConsent(clerkUserId: string, requestedScopes: string[]): Promise<{ hasConsent: boolean; sessionCount: number }> {
         const { data, error } = await this.supabase
             .from('gpt_sessions')
             .select('granted_scopes')
             .eq('clerk_user_id', clerkUserId);
 
         if (error || !data || data.length === 0) {
-            return false;
+            return { hasConsent: false, sessionCount: 0 };
         }
 
         // Check if any session has granted_scopes that is a superset of requestedScopes
-        return data.some(session => {
+        const hasConsent = data.some(session => {
             const grantedScopes = session.granted_scopes || [];
             return requestedScopes.every(scope => grantedScopes.includes(scope));
         });
+
+        return {
+            hasConsent,
+            sessionCount: data.length,
+        };
     }
 
     /**
