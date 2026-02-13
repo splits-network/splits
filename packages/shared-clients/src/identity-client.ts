@@ -33,7 +33,7 @@ export class IdentityClient extends BaseClient {
 
     async createOrganization(data: {
         name: string;
-        type: 'company' | 'platform';
+        type: 'company';
     }): Promise<ApiResponse<Organization>> {
         return this.post('/organizations', data);
     }
@@ -51,7 +51,7 @@ export class IdentityClient extends BaseClient {
         return this.post('/user-roles', data);
     }
 
-    // Membership endpoints (org-scoped: company_admin, hiring_manager, platform_admin)
+    // Membership endpoints (org-scoped: company_admin, hiring_manager)
     async getMemberships(params: {
         organization_id?: string;
         company_id?: string;

@@ -59,10 +59,7 @@ const EMPTY_CONTEXT: AccessContext = {
  * Resolve role/access context starting from the Clerk user ID.
  * Reads from two tables in a single Supabase round-trip:
  * - memberships: org-scoped roles (company_admin, hiring_manager) with organization_id/company_id
- * - user_roles: entity-linked roles (recruiter, candidate) with role_entity_id, and platform_admin (role_entity_id = NULL)
- *
- * During migration period (v3.0 Phase 5-6), platform_admin may exist in both memberships (legacy) and user_roles (new).
- * Both sources are checked via the deduplicated roles union.
+ * - user_roles: entity-linked roles (recruiter, candidate) with role_entity_id, and system-level roles (platform_admin) with role_entity_id = NULL
  *
  * Returns an AccessContext with roles, org IDs, company IDs, recruiter/candidate IDs.
  */
