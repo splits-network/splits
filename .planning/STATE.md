@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 11 of 15 (Service Foundation)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-13 -- Roadmap created for v5.0
+Plan: 02 of 3 complete
+Status: In progress
+Last activity: 2026-02-13 -- Completed 11-02-PLAN.md (GPT OAuth tables migration)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] ~7% (1/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -64,6 +64,9 @@ None.
 - User must apply migration `20260217000001_add_commute_types_and_job_level.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
 - User must apply migration `20260218000001_search_index_add_commute_and_level.sql` to update search index triggers.
 
+**From v5.0 (Phase 11):**
+- User must apply migration `20260220000001_create_gpt_oauth_tables.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
+
 **v5.0 Research Flags:**
 - Phase 12 (OAuth): HIGH priority -- must validate Clerk redirect mechanism, OpenAI callback URL format, PKCE requirement, and token_exchange_method before writing production code.
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
@@ -71,10 +74,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Roadmap created for v5.0 Custom GPT
+Stopped at: Completed 11-02-PLAN.md (GPT OAuth tables migration)
 Resume file: None
-Next: Plan Phase 11 (Service Foundation)
+Next: Execute 11-03-PLAN.md (Audit event consumer)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (v5.0 roadmap created)*
+*Last updated: 2026-02-13 (11-02 GPT OAuth tables complete)*
