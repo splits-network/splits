@@ -53,39 +53,16 @@ export class RecruiterRepository {
         }
         // All users (authenticated or not) can browse active recruiters in the marketplace
 
-        // Apply filters with multi-criteria search parsing
-        let useRelevanceSort = false;
+        // Apply full-text search using tsvector
         if (params.search) {
-            const searchTerms = this.parseSearchQuery(params.search);
-
-            // Build multi-field search with relevance scoring
-            const searchConditions: string[] = [];
-
-            // Search in name (highest weight)
-            searchConditions.push(`name.ilike.%${params.search}%`);
-
-            // Search in email
-            searchConditions.push(`email.ilike.%${params.search}%`);
-
-            // Search in specialization (medium weight)
-            if (searchTerms.specialization) {
-                searchConditions.push(`specialization.ilike.%${searchTerms.specialization}%`);
-            }
-
-            // Search in bio (low weight)
-            if (searchTerms.skills && searchTerms.skills.length > 0) {
-                searchTerms.skills.forEach(skill => {
-                    searchConditions.push(`bio.ilike.%${skill}%`);
-                    searchConditions.push(`specialization.ilike.%${skill}%`);
-                });
-            }
-
-            query = query.or(searchConditions.join(','));
-
-            // Use relevance-based sorting when search is active (unless explicitly overridden)
-            if (!params.sort_by) {
-                useRelevanceSort = true;
-            }
+            const tsquery = params.search
+                .split(/\s+/)
+                .filter((t: string) => t.trim())
+                .join(' & ');
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english',
+            });
         }
 
         if (params.status) {
@@ -100,27 +77,21 @@ export class RecruiterRepository {
             query = query.eq('marketplace_enabled', params.filters?.marketplace_enabled);
         }
 
-        // Apply sorting - relevance-based when searching, otherwise by sort_by parameter
-        if (useRelevanceSort) {
-            // For now, sort by created_at desc as proxy for relevance
-            // In future, implement proper ts_rank with tsvector indexes
-            query = query.order('created_at', { ascending: false });
+        // Apply sorting
+        const sortBy = params.sort_by || 'created_at';
+        const sortOrder = params.sort_order?.toLowerCase() === 'asc' ? true : false;
+
+        // Columns that live on recruiter_reputation (joined table), not recruiters
+        const reputationColumns = new Set([
+            'reputation_score', 'total_submissions', 'total_hires',
+            'hire_rate', 'completion_rate', 'quality_score',
+            'avg_time_to_hire_days', 'avg_response_time_hours',
+        ]);
+
+        if (reputationColumns.has(sortBy)) {
+            query = query.order(sortBy, { ascending: sortOrder, referencedTable: 'recruiter_reputation' });
         } else {
-            const sortBy = params.sort_by || 'created_at';
-            const sortOrder = params.sort_order?.toLowerCase() === 'asc' ? true : false;
-
-            // Columns that live on recruiter_reputation (joined table), not recruiters
-            const reputationColumns = new Set([
-                'reputation_score', 'total_submissions', 'total_hires',
-                'hire_rate', 'completion_rate', 'quality_score',
-                'avg_time_to_hire_days', 'avg_response_time_hours',
-            ]);
-
-            if (reputationColumns.has(sortBy)) {
-                query = query.order(sortBy, { ascending: sortOrder, referencedTable: 'recruiter_reputation' });
-            } else {
-                query = query.order(sortBy, { ascending: sortOrder });
-            }
+            query = query.order(sortBy, { ascending: sortOrder });
         }
 
         // Apply pagination
@@ -272,56 +243,6 @@ export class RecruiterRepository {
         return selectParts.join(', ');
     }
 
-    /**
-     * Parse search query into structured search terms
-     * Extracts: skills/keywords, years of experience, location, specialization
-     */
-    private parseSearchQuery(search: string): {
-        skills: string[];
-        years?: number;
-        location?: string;
-        specialization?: string;
-    } {
-        const terms = search.toLowerCase().trim();
-        const result: any = {
-            skills: []
-        };
-
-        // Extract years of experience (e.g., "5 years", "10+ years")
-        const yearsMatch = terms.match(/(\d+)\+?\s*(?:years?|yrs?)/i);
-        if (yearsMatch) {
-            result.years = parseInt(yearsMatch[1]);
-        }
-
-        // Extract location keywords (common cities/states)
-        const locationKeywords = ['california', 'ca', 'san francisco', 'sf', 'new york', 'ny', 'nyc',
-            'texas', 'tx', 'austin', 'seattle', 'boston', 'remote'];
-        for (const location of locationKeywords) {
-            if (terms.includes(location)) {
-                result.location = location;
-                break;
-            }
-        }
-
-        // Extract specialization/role keywords
-        const specializationKeywords = ['tech', 'technology', 'engineering', 'software', 'sales',
-            'marketing', 'finance', 'healthcare', 'executive'];
-        for (const spec of specializationKeywords) {
-            if (terms.includes(spec)) {
-                result.specialization = spec;
-                break;
-            }
-        }
-
-        // Split into individual skill keywords (filter out stop words)
-        const stopWords = ['the', 'and', 'or', 'for', 'with', 'years', 'year', 'yrs', 'yr'];
-        const words = terms.split(/\s+/).filter(word =>
-            word.length > 2 && !stopWords.includes(word) && !word.match(/^\d+$/)
-        );
-        result.skills = words;
-
-        return result;
-    }
 
     /**
      * Create a user_role entry for a recruiter.
