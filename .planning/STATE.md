@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 9 of 10 (API)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-13 — Completed 09-01-PLAN.md
+Phase: 10 of 10 (Frontend & Search)
+Plan: 3 of 5 in current phase
+Status: In progress
+Last activity: 2026-02-13 — Completed 10-03-PLAN.md
 
 Progress: [██░░░░░░░░] 20%
 
@@ -29,14 +29,14 @@ Progress: [██░░░░░░░░] 20%
 - Total execution time: ~19 minutes
 
 **Velocity (v4.0):**
-- Total plans completed: 2
-- Average duration: 2.0 min
-- Total execution time: ~3.9 minutes
+- Total plans completed: 3
+- Average duration: 1.6 min
+- Total execution time: ~4.9 minutes
 
 **Cumulative:**
-- Total plans completed: 15
-- Average duration: 3.6 min
-- Total execution time: ~54 minutes
+- Total plans completed: 16
+- Average duration: 3.5 min
+- Total execution time: ~55 minutes
 
 ## Accumulated Context
 
@@ -51,6 +51,8 @@ Progress: [██░░░░░░░░] 20%
 - Used Supabase .overlaps() (Postgres &&) for commute_type any-match filtering
 - Self-contained VALID_COMMUTE_TYPES/VALID_JOB_LEVELS const arrays in service.ts (no shared-types coupling)
 - commute_type filter supports both top-level query param and nested filters object
+- Search index metadata stores commute_types as JSONB array via to_jsonb()
+- Search context includes array values via array_to_string() for full-text matching
 
 ### Pending Todos
 
@@ -66,14 +68,15 @@ None.
 
 **From v4.0:**
 - User must apply migration `20260217000001_add_commute_types_and_job_level.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
+- User must apply migration `20260218000001_search_index_add_commute_and_level.sql` to update search index triggers.
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 09-01-PLAN.md (API)
+Stopped at: Completed 10-03-PLAN.md (Search Index)
 Resume file: None
-Next: /gsd:plan-phase 10
+Next: /gsd:plan-phase 10 (continue with remaining plans)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 9 complete)*
+*Last updated: 2026-02-13 (Phase 10 in progress - Plan 03 complete)*
