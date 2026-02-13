@@ -1,68 +1,91 @@
-# Pricing Page Redesign
+# Global Search
 
 ## What This Is
 
-Redesign the portal's public pricing page to match the updated landing page design, and add an interactive RTI (Return on Investment) calculator that shows recruiters exactly how upgrading their subscription tier increases their payout on placements.
+A Google-like global search system for the Splits Network portal. Users type into a persistent search bar and get real-time results across all entities (candidates, jobs, companies, recruiters, applications, placements) ranked by relevance. Typeahead shows top 5 results instantly; pressing Enter opens a full search results page.
 
 ## Core Value
 
-Recruiters see concrete dollar amounts showing how upgrading pays for itself with a single placement.
+Users find anything in the platform by typing natural language queries and getting ranked, cross-entity results in real-time.
+
+## Current Milestone: v2.0 Global Search
+
+**Goal:** Build full-stack global search from database functions through API to real-time UI
+
+**Target features:**
+- Postgres global search function querying all entity tables via UNION ALL with ts_rank scoring
+- Search API endpoints in api-gateway (typeahead + full results)
+- Real-time typeahead dropdown in portal header (top 5 results as user types)
+- Full search results page with entity type filtering and pagination
+- Role-based access control on all search results
 
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Per-entity full-text search with tsvector columns on 7 tables — existing
+- ✓ Weighted search fields (A-D) with auto-update triggers — existing
+- ✓ GIN indexes on all search_vector columns — existing
+- ✓ pg_trgm extension for trigram matching — existing
+- ✓ SearchInput component for per-list search — existing
 
 ### Active
 
-- [ ] Pricing page visual design matches landing page (GSAP animations, scroll triggers, same component patterns)
-- [ ] RTI calculator lets recruiters input placement fee amount (or salary + fee %)
-- [ ] RTI calculator lets recruiters select their role(s) in a deal (multi-select: Candidate Recruiter, Job Owner, Company Recruiter, Candidate Sourcer, Company Sourcer)
-- [ ] Calculator shows side-by-side payout comparison across all three tiers (Free, Paid $99, Premium $249)
-- [ ] Calculator highlights the upgrade value (difference in dollars between tiers)
-- [ ] Animated number counters for payout amounts (matching landing page style)
-- [ ] Mobile-responsive calculator interface
+- [ ] Global search function in Postgres querying all searchable tables with relevance ranking
+- [ ] Search API endpoints (typeahead and full search) in api-gateway
+- [ ] Real-time typeahead search bar in portal header with top 5 results dropdown
+- [ ] Full search results page with entity type filtering and pagination
+- [ ] Multi-term natural language queries return ranked cross-entity results
+- [ ] Role-based filtering (users only see entities they have access to)
+- [ ] Keyboard navigation (Cmd/Ctrl+K to focus, arrows to navigate, Enter to select)
 
 ### Out of Scope
 
-- [ ] Backend changes — calculator is purely frontend, uses hardcoded commission rates
-- [ ] Stripe integration changes — this is just the pricing display page
-- [ ] Authentication — this is a public page
+- Elasticsearch/external search engine — Postgres FTS is sufficient for current scale
+- Search analytics/tracking — defer to future milestone
+- Fuzzy/typo-tolerant search — pg_trgm handles basic fuzzy, full fuzzy deferred
+- Saved searches — future milestone
+- Search across chat messages — external service, not in Postgres
 
 ## Context
 
-**Existing codebase:**
-- Landing page at `apps/portal/src/app/page.tsx` with GSAP animations
-- Current pricing page at `apps/portal/src/app/public/pricing/page.tsx` — static, no animations
-- Landing sections use shared animation utilities from `components/landing/shared/animation-utils.ts`
-- DaisyUI theme with semantic colors (primary, secondary, accent)
+**Existing search infrastructure:**
+- 7 tables with tsvector search_vector columns: candidates (12 fields), jobs (12+ fields), applications (5 fields), placements (7 fields), companies (6 fields), recruiters (8 fields), recruiter_candidates (4 fields)
+- Per-entity search works via `textSearch('search_vector', tsquery)` in V2 repositories
+- Recruiters still use ILIKE search (needs migration to tsvector)
+- Jobs search_vector does NOT include salary — needs update for numeric search
+- `docs/search/scalable-search-architecture.md` documents current FTS patterns
 
-**Commission structure (from docs/flows/):**
+**Architecture:**
+- Single Supabase Postgres database (public schema)
+- API Gateway (Fastify) proxies to domain services
+- Access context resolves user roles/permissions for filtering
+- Portal header at `apps/portal/src/components/portal-header.tsx` — integration point for search bar
+- `use-standard-list.ts` hook has 300ms debounce pattern for per-entity search
 
-| Role | Premium ($249) | Paid ($99) | Free ($0) |
-|------|----------------|------------|----------|
-| Candidate Recruiter | 40% | 30% | 20% |
-| Job Owner | 20% | 15% | 10% |
-| Company Recruiter | 20% | 15% | 10% |
-| Candidate Sourcer | 10% | 8% | 6% |
-| Company Sourcer | 10% | 8% | 6% |
-| **Platform Take** | **0%** | **24%** | **48%** |
-
-Recruiters can hold multiple roles in a single deal (e.g., Candidate Recruiter + Candidate Sourcer).
+**Key tables to search across:**
+- candidates: name, email, skills, location, title, company, salary
+- jobs: title, description, location, company, salary, requirements
+- companies: name, industry, location, description
+- recruiters: name, email, bio, specialties, location
+- applications: candidate name, job title, company, stage
+- placements: candidate name, job title, company, recruiter name, salary
 
 ## Constraints
 
-- **Tech stack**: Next.js 16, React 19, GSAP, DaisyUI — must use existing patterns
-- **Design language**: Must match landing page animations and visual style
-- **Public page**: No authentication required, SEO-friendly
+- **Tech stack**: Postgres FTS (tsvector/ts_rank), Fastify, Next.js 16, React 19, DaisyUI — must use existing patterns
+- **Performance**: Typeahead must respond in <200ms
+- **Access control**: All results must be filtered through resolveAccessContext()
+- **API pattern**: Must follow V2 `{ data, pagination }` response envelope
+- **No new infra**: No Elasticsearch, no new databases — Postgres only
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Frontend-only calculator | Commission rates are fixed, no need for API calls | — Pending |
-| Multi-role selection | Recruiters often hold multiple roles in a deal | — Pending |
+| Postgres UNION ALL function vs parallel HTTP queries | Single DB round-trip, Postgres optimizes query plan, avoids N service calls | — Pending |
+| Search routes in api-gateway vs new search service | Read-only aggregation, not a domain service; keeps it simple | — Pending |
+| Typeahead + full search as same endpoint with different limits | DRY; same function, different parameters | — Pending |
 
 ---
-*Last updated: 2026-01-31 after initialization*
+*Last updated: 2026-02-12 after milestone v2.0 initialization*
