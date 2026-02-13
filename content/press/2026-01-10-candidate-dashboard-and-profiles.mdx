@@ -1,0 +1,38 @@
+---
+title: "Candidate Dashboard, Profile Completeness, and Smarter Invitations"
+date: "2026-01-10"
+summary: "Candidates get a dedicated dashboard with type-safe data handling. Profile completeness tracking helps candidates present their best selves, and recruiter-candidate invitations now support richer detail inclusion."
+tags: ["new-feature", "improvement", "candidate", "recruiter"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release is a big step forward for the candidate experience, with a new dashboard, profile management tools, and smarter invitation handling for recruiters.
+
+## New Features
+
+### Candidate Dashboard
+
+Candidates now have a dedicated dashboard built with modern data patterns and robust error handling. The dashboard surfaces relevant information about active applications, recruiter connections, and next steps in a clear, organized layout. When something goes wrong, error messages are specific and actionable rather than generic.
+
+### Profile Completeness Tracking
+
+A new profile completeness feature helps candidates understand what information is missing from their profile. You can see a completeness score and identify exactly which fields to fill in to make your profile more attractive to recruiters and hiring companies. A complete profile means better matches and faster placement.
+
+### Enriched Invitation Details
+
+When managing recruiter-candidate invitations, you can now optionally include full recruiter and candidate details in the response. Resending invitations uses a streamlined update action, and cancelling invitations works the same way. This means fewer round-trips and richer context when reviewing your invitation pipeline.
+
+## Improvements
+
+### Smarter Application Handling
+
+The application service now automatically resolves candidate and identity user information when processing submissions. If a lookup fails, you get a clear error message explaining what went wrong instead of a silent failure. This reduces the manual work of matching candidates to applications.
+
+### Improved Loading States
+
+Job listing pages no longer flash empty grid or table layouts while data is loading. The loading indicator appears cleanly, and content renders only when it's ready. This eliminates the visual flicker that could make pages feel unfinished.
+
+### Conditional Role Creation
+
+The "Add New Role" button now appears only when you have the appropriate permissions. If your role doesn't include role creation rights, the button is hidden entirely rather than showing a disabled or error state.

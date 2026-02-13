@@ -1,574 +1,547 @@
-# Technology Stack for Platform Admin Restructure
+# Technology Stack: Custom GPT with Actions Backend
 
-**Project:** Splits Network v3.0 Platform Admin Restructure
+**Project:** Splits Network - Custom GPT (Applicant.Network)
 **Researched:** 2026-02-13
-**Confidence:** HIGH
+**Confidence:** HIGH (stack decisions) / MEDIUM (OpenAI-specific behavior, web search unavailable)
 
 ## Overview
 
-This is a **focused database restructure** within an established tech stack. The goal is to safely migrate platform_admin role from the memberships table to user_roles table while making role_entity_id/role_entity_type nullable. No new technologies are needed — this research focuses on migration strategies within the existing Postgres/Fastify/Vitest stack.
+This document covers stack **additions only** for the gpt-service microservice. The existing stack (Fastify 5, Supabase Postgres, Clerk, TypeScript, RabbitMQ, Redis) is validated and unchanged. The new capability is: **acting as an OAuth2 authorization server** so OpenAI's Custom GPT can authenticate users and call platform APIs.
 
-## Existing Stack (No Changes Needed)
+## Decision Summary
 
-| Technology | Version | Purpose | Status |
-|------------|---------|---------|--------|
-| Supabase Postgres | Latest | Single database, public schema | Already in use |
-| Fastify | ^5.6.2 | Backend services (identity-service) | Already in use |
-| Vitest | ^3.0.0 | Unit testing | Already in use |
-| @supabase/supabase-js | ^2.86.2 | Database client | Already in use |
+| Capability | Recommendation | Rationale |
+|-----------|---------------|-----------|
+| OAuth2 provider | Hand-rolled Fastify routes | Narrowly scoped single-client flow; library overhead unjustified |
+| Token signing/verification | `jsonwebtoken` ^9.0.3 | Already in api-gateway; proven, well-understood |
+| Token storage | Supabase Postgres tables | Consistent with all services; no new infrastructure |
+| OpenAPI schema serving | Static YAML file served via Fastify route | Simple, version-controlled, no runtime generation needed |
+| Form body parsing | `@fastify/formbody` ^8.0.2 | OAuth2 token endpoint requires `application/x-www-form-urlencoded` |
+| Confirmation safety | Application-level pattern (no library) | Domain logic, not a library concern |
+| Rate limiting | Existing Redis + `@fastify/rate-limit` via api-gateway | Already configured; add GPT-specific rate limit tiers |
 
-**Why no additions:** The restructure is a pure database schema change with service layer updates. All necessary tooling already exists.
+## Recommended Stack Additions
 
-## Migration Strategy (Postgres-Specific)
+### New Dependencies for gpt-service
 
-### 1. Schema Changes
+| Technology | Version | Purpose | Why This |
+|------------|---------|---------|----------|
+| `@fastify/formbody` | ^8.0.2 | Parse `application/x-www-form-urlencoded` bodies | OAuth2 token endpoint (`/oauth/token`) receives form-encoded POST per RFC 6749 Section 4.1.3. Fastify does not parse this content type by default. This is a tiny, official Fastify plugin. |
+| `jsonwebtoken` | ^9.0.3 | Sign and verify GPT access tokens and refresh tokens | Already used in api-gateway (^9.0.2). Proven JWT library. Keeps token infrastructure consistent across services. |
+| `@types/jsonwebtoken` | ^9.0.7 | TypeScript definitions | Already in api-gateway devDependencies. |
+| `uuid` | ^11.0.3 (or ^13.0.0) | Generate authorization codes, token IDs | Already used in identity-service and document-service. Use whichever version is current in the monorepo for consistency. |
 
-**Approach: Multi-step migration with transactional safety**
+### Existing Dependencies (Already Available)
 
-The migration requires three schema modifications:
-1. Make `user_roles.role_entity_id` nullable (currently NOT NULL)
-2. Make `user_roles.role_entity_type` nullable (currently has values)
-3. Remove NOT NULL constraint on memberships (if any blocking constraints exist)
+These are already in the monorepo and used by other services. The gpt-service follows the same pattern:
 
-**Postgres Commands:**
-```sql
-BEGIN;
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| `fastify` | ^5.6.2 | HTTP server framework |
+| `@supabase/supabase-js` | ^2.86.2 | Database client for token storage |
+| `@fastify/swagger` | ^9.5.0 | Internal Swagger docs (service-level) |
+| `@fastify/swagger-ui` | ^5.2.3 | Internal Swagger UI |
+| `@splits-network/shared-config` | workspace:* | Environment/config loading |
+| `@splits-network/shared-fastify` | workspace:* | Server builder, error handler, health checks |
+| `@splits-network/shared-logging` | workspace:* | Structured logging |
+| `@splits-network/shared-types` | workspace:* | Shared domain types |
+| `@splits-network/shared-access-context` | workspace:* | resolveAccessContext for authorization |
+| `@sentry/node` | ^10.32.1 | Error tracking |
+| `amqplib` | ^0.10.9 | RabbitMQ event publishing |
 
--- Step 1: Remove NOT NULL constraint
-ALTER TABLE public.user_roles ALTER COLUMN role_entity_id DROP NOT NULL;
-ALTER TABLE public.user_roles ALTER COLUMN role_entity_type DROP NOT NULL;
+## Critical Decision: OAuth2 Provider Approach
 
--- Step 2: Update comments to reflect new usage
-COMMENT ON COLUMN public.user_roles.role_entity_id IS
-  'Links to domain entity: recruiters.id when role_name=recruiter, candidates.id when role_name=candidate, NULL for platform_admin';
-COMMENT ON COLUMN public.user_roles.role_entity_type IS
-  'Type of entity: recruiter, candidate, or NULL for platform_admin';
+### Decision: Hand-rolled Fastify routes (NOT an OAuth2 server library)
 
-COMMIT;
+**Evaluated alternatives:**
+
+| Option | Version | Pros | Cons | Verdict |
+|--------|---------|------|------|---------|
+| **Hand-rolled routes** | N/A | Minimal code (~200 lines), no new dependency, full control, exactly matches GPT's narrow needs | Must implement correctly per RFC 6749 | **RECOMMENDED** |
+| `@jmondi/oauth2-server` | 4.2.2 | Full RFC compliance, Fastify adapter, TypeScript native, authorization code grant built-in | Heavy abstraction for single-client use case, requires implementing 3 repository interfaces (client, token, scope), adds indirection | Not recommended |
+| `@node-oauth/oauth2-server` | 5.2.1 | Full RFC compliance, well-maintained fork of oauth2-server | Express-oriented API, requires adapter glue for Fastify, heavier dependency tree | Not recommended |
+| `@fastify/oauth2` | 8.2.0 | Already in api-gateway package.json | **Wrong tool**: this is an OAuth2 CLIENT (for consuming OAuth), NOT a provider/server. Cannot be used for our use case. Already unused in api-gateway (listed but never imported). | **Incorrect tool** |
+
+**Why hand-rolled wins:**
+
+1. **Single client**: OpenAI's GPT is the ONLY OAuth2 client. There is no client registry, no dynamic client registration, no multi-tenant OAuth complexity. The client_id and client_secret are configured once in the GPT builder UI and stored as environment variables.
+
+2. **Single grant type**: Authorization code flow only. No client_credentials, no implicit, no ROPC. One flow, three endpoints.
+
+3. **Narrow scope**: The entire OAuth2 provider is three endpoints:
+   - `GET /oauth/authorize` -- Redirect to Clerk login, store authorization state
+   - `GET /oauth/callback` -- Clerk redirects back, issue authorization code
+   - `POST /oauth/token` -- Exchange code for access token (or refresh token for new access token)
+
+4. **Library overhead**: `@jmondi/oauth2-server` requires implementing `OAuthClientRepository`, `OAuthTokenRepository`, and `OAuthScopeRepository` interfaces. For a single static client, this is ceremony without value. The repository interfaces assume multiple clients with varying grants, scopes, and redirect URIs.
+
+5. **Debuggability**: When something goes wrong with OpenAI's token exchange (and it will during development), hand-rolled code with explicit logging at each step is far easier to debug than tracing through library abstractions.
+
+6. **Security surface**: Fewer dependencies = smaller attack surface. The hand-rolled approach uses only `jsonwebtoken` (already audited, already in use) and `crypto.randomBytes` (Node.js built-in) for authorization codes.
+
+### Implementation Pattern
+
+```
+gpt-service/src/
+  oauth/
+    types.ts           # OAuthCode, OAuthToken, GPTAccessToken interfaces
+    repository.ts      # Supabase CRUD for auth codes and tokens
+    service.ts         # Business logic: validate, issue, refresh, revoke
+    routes.ts          # Three Fastify route handlers
+  v1/
+    gpt/
+      routes.ts        # GPT action endpoints (jobs, applications, etc.)
+  index.ts             # Service entry point
 ```
 
-**Why this works:**
-- Postgres allows ALTER TABLE to drop NOT NULL instantly (no table rewrite needed)
-- Existing rows (recruiter/candidate) maintain their entity_id values
-- New rows (platform_admin) can insert with NULL
-- Zero downtime — no data movement at this stage
+**The three OAuth endpoints:**
 
-**Confidence:** HIGH — Standard Postgres DDL operation, observed in existing migrations (20260212000001_split_user_roles_into_memberships.sql drops columns safely)
-
-### 2. Data Migration Pattern
-
-**Approach: Safe row movement with validation**
-
-Based on project's established migration pattern (seen in 20260212000001_split_user_roles_into_memberships.sql and 20260201000004_create_recruiter_companies_table.sql), use this structure:
-
-```sql
-BEGIN;
-
--- Step 1: Migrate platform_admin rows from memberships → user_roles
-INSERT INTO public.user_roles (
-    id,              -- Preserve original ID for traceability
-    user_id,
-    role_name,
-    role_entity_id,  -- NULL for platform_admin
-    role_entity_type, -- NULL for platform_admin
-    created_at,
-    updated_at,
-    deleted_at
-)
-SELECT
-    m.id,
-    m.user_id,
-    m.role_name,     -- 'platform_admin'
-    NULL,            -- No entity link
-    NULL,            -- No entity type
-    m.created_at,
-    m.updated_at,
-    m.deleted_at
-FROM public.memberships m
-WHERE m.role_name = 'platform_admin'
-  AND m.organization_id IN (
-      SELECT id FROM public.organizations WHERE type = 'platform'
-  )
-ON CONFLICT DO NOTHING;
-
--- Step 2: Validate migration counts
-DO $$
-DECLARE
-    source_count INTEGER;
-    migrated_count INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO source_count
-    FROM public.memberships m
-    WHERE m.role_name = 'platform_admin';
-
-    SELECT COUNT(*) INTO migrated_count
-    FROM public.user_roles
-    WHERE role_name = 'platform_admin';
-
-    RAISE NOTICE 'Platform admin migration: % source → % user_roles',
-                 source_count, migrated_count;
-
-    IF source_count != migrated_count THEN
-        RAISE EXCEPTION 'Migration count mismatch! Expected %, got %',
-                        source_count, migrated_count;
-    END IF;
-END $$;
-
--- Step 3: Delete migrated platform_admin rows from memberships
-DELETE FROM public.memberships
-WHERE role_name = 'platform_admin';
-
--- Step 4: Delete synthetic platform organization
-DELETE FROM public.organizations
-WHERE type = 'platform';
-
-COMMIT;
-```
-
-**Why this pattern:**
-- **ID preservation:** Maintains traceability with original membership ID
-- **ON CONFLICT DO NOTHING:** Safe for re-running migration if deployment fails mid-flight
-- **Validation block:** Postgres DO block verifies count matching before proceeding
-- **RAISE EXCEPTION:** Aborts transaction if validation fails — no partial migration
-- **Transaction boundary:** All-or-nothing atomicity
-
-**Confidence:** HIGH — Pattern directly observed in project's existing migrations (20260212000001, 20260211000003, 20260201000004)
-
-### 3. Migration Rollback Strategy
-
-**Approach: Single DOWN migration for emergency rollback**
-
-```sql
-BEGIN;
-
--- Rollback Step 1: Recreate platform organization if it doesn't exist
-INSERT INTO public.organizations (id, name, type, created_at)
-VALUES (
-    '00000000-0000-0000-0000-000000000000',
-    'Splits Network Platform',
-    'platform',
-    now()
-)
-ON CONFLICT (id) DO NOTHING;
-
--- Rollback Step 2: Move platform_admin back to memberships
-INSERT INTO public.memberships (
-    id,
-    user_id,
-    role_name,
-    organization_id,
-    company_id,
-    created_at,
-    updated_at,
-    deleted_at
-)
-SELECT
-    ur.id,
-    ur.user_id,
-    ur.role_name,
-    '00000000-0000-0000-0000-000000000000'::uuid, -- Platform org
-    NULL,
-    ur.created_at,
-    ur.updated_at,
-    ur.deleted_at
-FROM public.user_roles ur
-WHERE ur.role_name = 'platform_admin'
-ON CONFLICT DO NOTHING;
-
--- Rollback Step 3: Delete platform_admin from user_roles
-DELETE FROM public.user_roles
-WHERE role_name = 'platform_admin';
-
--- Rollback Step 4: Restore NOT NULL constraints
-ALTER TABLE public.user_roles ALTER COLUMN role_entity_id SET NOT NULL;
-ALTER TABLE public.user_roles ALTER COLUMN role_entity_type SET NOT NULL;
-
-COMMIT;
-```
-
-**When to use:**
-- If resolveAccessContext() breaks in production
-- If identity-service user-roles endpoints fail
-- If platform admin users lose access after migration
-
-**Why this works:**
-- Reverses migration steps in opposite order
-- Recreates synthetic platform org with known UUID
-- Restores original data structure
-- Can run safely multiple times (ON CONFLICT DO NOTHING)
-
-**Confidence:** HIGH — Standard rollback pattern, reverses migration operations
-
-### 4. Index and Constraint Management
-
-**Current indexes on user_roles (from baseline):**
-```sql
--- From 20260212000001_split_user_roles_into_memberships.sql
-CREATE UNIQUE INDEX IF NOT EXISTS uq_user_role_entity_assignment
-    ON public.user_roles (user_id, role_name, role_entity_id)
-    WHERE deleted_at IS NULL;
-
-CREATE INDEX IF NOT EXISTS idx_user_roles_user_id
-    ON public.user_roles(user_id)
-    WHERE deleted_at IS NULL;
-
-CREATE INDEX IF NOT EXISTS idx_user_roles_role_name
-    ON public.user_roles(role_name)
-    WHERE deleted_at IS NULL;
-```
-
-**Impact of nullable columns:**
-- **uq_user_role_entity_assignment:** Will NOT prevent duplicate platform_admin rows (NULL values don't participate in unique index)
-- **Solution:** Add separate unique index for platform_admin:
-
-```sql
--- Add to migration after making columns nullable
-CREATE UNIQUE INDEX IF NOT EXISTS uq_user_role_platform_admin
-    ON public.user_roles (user_id, role_name)
-    WHERE deleted_at IS NULL AND role_name = 'platform_admin';
-```
-
-**Why this works:**
-- Partial unique index on (user_id, role_name) only applies when role_name='platform_admin'
-- Ensures one platform_admin assignment per user
-- Doesn't conflict with existing entity-linked role uniqueness
-- Postgres partial indexes are highly efficient
-
-**Confidence:** HIGH — Postgres partial index pattern, already used in project (20260212000001 has similar WHERE clauses)
-
-### 5. Foreign Key Considerations
-
-**Current foreign keys on user_roles:**
-- `user_id` → `users(id)` — No change needed
-- `role_name` → `roles(name)` — Assumes 'platform_admin' already exists in roles table
-
-**Pre-migration check:**
-```sql
--- Verify platform_admin role exists
-SELECT name FROM public.roles WHERE name = 'platform_admin';
-```
-
-**If missing, add to migration:**
-```sql
-INSERT INTO public.roles (name, description)
-VALUES (
-    'platform_admin',
-    'Platform administrator with system-wide access'
-)
-ON CONFLICT (name) DO NOTHING;
-```
-
-**Confidence:** MEDIUM — Assumes roles table exists and has expected structure (not verified in baseline.sql review)
-
-## Testing Approach
-
-### 1. Unit Testing (Vitest)
-
-**Existing test pattern (from identity-service/tests/unit/invitations.service.test.ts):**
 ```typescript
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// 1. GET /api/v1/gpt/oauth/authorize
+//    OpenAI redirects user here with: client_id, redirect_uri, state, response_type=code
+//    Service validates client_id, stores state, redirects to Clerk login
 
-describe('UserRoleServiceV2 (unit)', () => {
-    const repository = {
-        findUserRoles: vi.fn(),
-        createUserRole: vi.fn(),
-    };
-    const resolver = vi.fn();
+// 2. GET /api/v1/gpt/oauth/callback
+//    Clerk redirects here after login with Clerk session
+//    Service validates Clerk session, generates authorization code,
+//    redirects to OpenAI's redirect_uri with code + state
 
-    beforeEach(() => {
-        vi.resetAllMocks();
-    });
+// 3. POST /api/v1/gpt/oauth/token
+//    OpenAI sends: grant_type, code (or refresh_token), client_id, client_secret
+//    Content-Type: application/x-www-form-urlencoded (hence @fastify/formbody)
+//    Service validates, returns { access_token, refresh_token, token_type, expires_in }
+```
 
-    it('allows creating platform_admin with null entity_id', async () => {
-        repository.createUserRole.mockResolvedValue({
-            id: 'role-1',
-            user_id: 'user-1',
-            role_name: 'platform_admin',
-            role_entity_id: null,
-            role_entity_type: null,
-        });
+## Token Strategy
 
-        const service = new UserRoleServiceV2(repository, resolver);
-        const result = await service.createUserRole('clerk-1', {
-            role_name: 'platform_admin',
-        });
+### Access Tokens
 
-        expect(result.role_entity_id).toBeNull();
-        expect(result.role_entity_type).toBeNull();
-    });
+| Property | Value | Rationale |
+|----------|-------|-----------|
+| Format | JWT (signed with HS256) | Stateless verification at api-gateway; consistent with existing auth pattern |
+| Lifetime | 1 hour (3600 seconds) | Short-lived for security. OpenAI automatically refreshes using refresh_token. |
+| Signing key | Dedicated `GPT_JWT_SECRET` env var | Separate from Clerk secrets. If compromised, revoke without affecting Clerk auth. |
+| Payload | `{ sub: clerkUserId, iss: "splits-gpt", aud: "openai-gpt", iat, exp, jti, scope: "candidate" }` | `sub` maps to existing clerkUserId for downstream resolution via resolveAccessContext. `jti` enables revocation. |
+
+### Refresh Tokens
+
+| Property | Value | Rationale |
+|----------|-------|-----------|
+| Format | Opaque string (crypto.randomBytes(32).toString('hex')) | Not decoded client-side; used only for exchange. |
+| Lifetime | 30 days | Long enough for persistent GPT sessions; short enough for security rotation. |
+| Storage | Supabase `gpt_refresh_tokens` table | Enables revocation, rotation, audit trail. |
+| Rotation | Issue new refresh token on each use; invalidate old one | Prevents replay attacks. Standard refresh token rotation per OAuth2 best practices. |
+
+### Authorization Codes
+
+| Property | Value | Rationale |
+|----------|-------|-----------|
+| Format | Opaque string (crypto.randomBytes(32).toString('hex')) | One-time use, short-lived. |
+| Lifetime | 10 minutes | Per RFC 6749 Section 4.1.2 recommendation. |
+| Storage | Supabase `gpt_authorization_codes` table | Must persist across redirect chain (authorize -> Clerk -> callback -> token exchange). |
+| Single use | Delete on exchange | Prevents replay. |
+
+## Database Tables (New)
+
+Three new tables in the `public` schema:
+
+```sql
+-- OAuth2 authorization codes (short-lived, single-use)
+CREATE TABLE public.gpt_authorization_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code TEXT NOT NULL UNIQUE,
+    clerk_user_id TEXT NOT NULL,
+    redirect_uri TEXT NOT NULL,
+    state TEXT,                    -- OpenAI's state parameter, returned on redirect
+    scope TEXT DEFAULT 'candidate',
+    expires_at TIMESTAMPTZ NOT NULL,
+    used_at TIMESTAMPTZ,          -- NULL until exchanged; prevents replay
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_gpt_auth_codes_code ON public.gpt_authorization_codes(code);
+CREATE INDEX idx_gpt_auth_codes_expires ON public.gpt_authorization_codes(expires_at);
+
+-- OAuth2 refresh tokens (long-lived, rotated on use)
+CREATE TABLE public.gpt_refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    token_hash TEXT NOT NULL UNIQUE,  -- SHA-256 hash, never store plaintext
+    clerk_user_id TEXT NOT NULL,
+    scope TEXT DEFAULT 'candidate',
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,           -- NULL until revoked
+    replaced_by UUID,                 -- Points to new token after rotation
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_gpt_refresh_tokens_hash ON public.gpt_refresh_tokens(token_hash);
+CREATE INDEX idx_gpt_refresh_tokens_user ON public.gpt_refresh_tokens(clerk_user_id);
+
+-- Audit log for GPT OAuth events (observability)
+CREATE TABLE public.gpt_oauth_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type TEXT NOT NULL,  -- 'authorize', 'token_exchange', 'refresh', 'revoke'
+    clerk_user_id TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_gpt_oauth_events_type ON public.gpt_oauth_events(event_type);
+CREATE INDEX idx_gpt_oauth_events_user ON public.gpt_oauth_events(clerk_user_id);
+CREATE INDEX idx_gpt_oauth_events_created ON public.gpt_oauth_events(created_at);
+```
+
+**Why these tables and not Redis:**
+- Authorization codes need to survive service restarts (redirect chain spans multiple HTTP requests)
+- Refresh tokens require durable storage with revocation tracking
+- Audit log is a compliance requirement for OAuth operations
+- Redis is appropriate for caching, not for authorization state that must not be lost
+- Consistent with the project's "single Supabase Postgres database" rule
+
+**Why hash refresh tokens:**
+- If the database is compromised, plaintext refresh tokens would allow impersonation
+- Store SHA-256 hash of the token; compare hashes on exchange
+- Authorization codes are ephemeral (10 min) and single-use, so plaintext is acceptable
+
+## OpenAPI Schema for GPT Actions
+
+### Approach: Static YAML File Served via Route
+
+The GPT Actions OpenAPI schema is a separate, hand-crafted YAML file. It is NOT auto-generated from Fastify's Swagger plugin.
+
+**Why separate from Fastify Swagger:**
+1. The GPT-facing OpenAPI schema is a **contract with OpenAI**, not internal documentation
+2. It must follow OpenAI's specific requirements (operationIds, descriptions that guide GPT behavior, x-openai-isConsequential annotations)
+3. Auto-generated schemas include internal details (health checks, Swagger UI routes) that should not be exposed to GPT
+4. The schema is version-controlled and reviewed as a first-class artifact
+
+**Implementation:**
+
+```typescript
+// gpt-service/src/v1/gpt/openapi.ts
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// Serve the static OpenAPI schema
+app.get('/api/v1/gpt/openapi.yaml', async (request, reply) => {
+    const schema = readFileSync(
+        join(__dirname, '../../openapi/gpt-actions.yaml'),
+        'utf-8'
+    );
+    reply.type('text/yaml').send(schema);
+});
+
+// Also serve as JSON for flexibility
+app.get('/api/v1/gpt/openapi.json', async (request, reply) => {
+    // Parse YAML to JSON at startup, cache in memory
+    reply.type('application/json').send(cachedJsonSchema);
 });
 ```
 
-**What to test:**
-- Repository can query user_roles with NULL entity_id
-- Service validates platform_admin doesn't require entity_id
-- resolveAccessContext() correctly identifies isPlatformAdmin from user_roles table
+**No additional YAML parsing library needed.** The schema is served as a raw text file. If JSON conversion is needed, use the `yaml` package (^2.8.2) -- but this can be deferred until actually needed. Start with YAML-only serving.
 
-**Why unit tests only:**
-- Project uses mocked repositories (no live DB in tests)
-- Fast feedback loop (vitest runs in milliseconds)
-- No test database seeding infrastructure observed in codebase
+### OpenAI GPT Actions OpenAPI Requirements
 
-**Confidence:** HIGH — Follows project's established testing pattern
+**Confidence: MEDIUM** -- Based on training data knowledge of OpenAI's GPT Actions specification. WebSearch/WebFetch unavailable to verify against current docs. Key requirements as understood:
 
-### 2. Manual Verification (Production-like)
+| Requirement | Details |
+|-------------|---------|
+| OpenAPI version | 3.0.x or 3.1.x (3.0.1 used in existing starter) |
+| Authentication | `securitySchemes` with `type: oauth2`, `flows.authorizationCode` specifying `authorizationUrl` and `tokenUrl` |
+| operationId | **Required** on every path operation. GPT uses these to decide which action to call. Must be descriptive (e.g., `searchJobs`, `createApplication`). |
+| Description quality | `summary` and `description` on operations guide GPT's tool selection. Write them as if instructing the AI. |
+| x-openai-isConsequential | Boolean annotation on operations. `true` = GPT must confirm with user before calling. `false` = GPT can call without confirmation. |
+| Response descriptions | Must describe what GPT should tell the user based on the response. |
+| Schema size | Keep the schema focused. Large schemas with many endpoints degrade GPT's action selection accuracy. |
+| Server URL | Single `servers[0].url` pointing to production API base URL. |
 
-**Pre-migration checklist:**
-```bash
-# 1. Count platform admins in current system
-psql $DATABASE_URL -c "
-SELECT COUNT(*) as platform_admin_count
-FROM memberships m
-WHERE m.role_name = 'platform_admin'
-  AND m.deleted_at IS NULL;
-"
+**Verification needed:** The `x-openai-isConsequential` flag behavior should be verified against current OpenAI documentation before implementation. This is flagged as a research gap.
 
-# 2. Identify platform organization ID
-psql $DATABASE_URL -c "
-SELECT id, name, type
-FROM organizations
-WHERE type = 'platform';
-"
+## Confirmation Safety Pattern
 
-# 3. Verify roles table has platform_admin entry
-psql $DATABASE_URL -c "
-SELECT name FROM roles WHERE name = 'platform_admin';
-"
+### Approach: Dual-layer confirmation (OpenAI built-in + application-level)
+
+**Layer 1: OpenAI's `x-openai-isConsequential` flag**
+
+```yaml
+paths:
+  /api/v1/gpt/applications:
+    post:
+      operationId: createApplication
+      x-openai-isConsequential: true  # GPT asks user to confirm
+      summary: Submit a job application on behalf of the user
 ```
 
-**Post-migration verification:**
-```bash
-# 1. Verify platform admins moved to user_roles
-psql $DATABASE_URL -c "
-SELECT COUNT(*) as migrated_count
-FROM user_roles
-WHERE role_name = 'platform_admin'
-  AND deleted_at IS NULL;
-"
+When `x-openai-isConsequential: true`, ChatGPT displays a confirmation dialog to the user before making the API call. This is the first line of defense.
 
-# 2. Verify no platform admins remain in memberships
-psql $DATABASE_URL -c "
-SELECT COUNT(*) as remaining_count
-FROM memberships
-WHERE role_name = 'platform_admin';
-"
-# Should return 0
+**Layer 2: Application-level `confirmed` flag**
 
-# 3. Verify platform organization deleted
-psql $DATABASE_URL -c "
-SELECT COUNT(*) as platform_orgs
-FROM organizations
-WHERE type = 'platform';
-"
-# Should return 0
+Even with OpenAI's confirmation, the backend independently enforces confirmation:
 
-# 4. Test resolveAccessContext with platform admin user
-# (Manual API call to identity-service or portal login)
-```
-
-**Why manual verification:**
-- No automated integration test suite for database migrations observed
-- Supabase migrations run in production environment
-- Critical path verification before code deploy
-- Matches project's current QA approach
-
-**Confidence:** MEDIUM — Based on observed project patterns, but no explicit migration testing guide found
-
-### 3. Role-Based Access Testing
-
-**Approach: Test resolveAccessContext() behavior change**
-
-The critical change is in `packages/shared-access-context/src/index.ts`:
-
-**Before (reads memberships only):**
 ```typescript
-// Currently platform_admin comes from memberships table
-const memberships: MembershipRow[] = ...;
-const roles = [...new Set(memberships.map(m => m.role_name))];
+// In gpt-service route handler
+if (!body.confirmed) {
+    return reply.status(400).send({
+        error: {
+            code: 'CONFIRMATION_REQUIRED',
+            message: 'This action requires explicit confirmation. Please confirm you want to proceed.',
+            action_summary: {
+                type: 'create_application',
+                job_title: job.title,
+                company: job.company_name,
+            }
+        }
+    });
+}
 ```
 
-**After (reads both memberships and user_roles):**
+**Why both layers:**
+- OpenAI's flag could be bypassed if someone calls the API directly (not through GPT)
+- The application-level check ensures write safety regardless of caller
+- The GPT instructions template tells GPT to set `confirmed: true` only after user confirms
+- Defense in depth: if either layer fails, the other catches it
+
+**No library needed.** This is pure application logic in route handlers.
+
+## Integration Points with Existing Stack
+
+### 1. Clerk Authentication (Identity Bridge)
+
+The gpt-service does NOT verify Clerk JWTs directly for GPT action requests. Instead:
+
+```
+GPT Action Request Flow:
+  ChatGPT -> api-gateway -> gpt-service
+                |
+                v
+    GPT access token verified at api-gateway
+    (new auth path, separate from Clerk JWT path)
+    Sets x-clerk-user-id header (extracted from GPT token's sub claim)
+                |
+                v
+    gpt-service reads x-clerk-user-id header
+    Uses resolveAccessContext() for authorization (same as all V2 services)
+```
+
+**During OAuth flow only**, the gpt-service interacts with Clerk:
+- `GET /oauth/authorize` redirects to Clerk's hosted login page
+- `GET /oauth/callback` validates the Clerk session/code to confirm the user authenticated
+- This uses `@clerk/backend` to verify the user's identity during the OAuth handshake
+
+**Integration approach for the callback:**
+The authorize endpoint redirects the user to the Clerk-hosted sign-in page for the `candidate` app. After Clerk authenticates the user, it redirects back to the callback URL. The callback verifies the Clerk session and extracts the `clerkUserId` to bind to the authorization code.
+
+**Implementation note:** The exact mechanism for Clerk redirect-based auth (as opposed to JWT verification) needs investigation during implementation. Options include:
+- Redirecting to the candidate app's sign-in page, which sets a Clerk session cookie, then redirecting back to the callback
+- Using Clerk's OAuth-compatible endpoints if available
+- Using a lightweight sign-in page hosted by the candidate app that redirects back with proof of authentication
+
+This is flagged as a **research gap** that should be resolved in the first implementation phase.
+
+### 2. API Gateway Routing
+
+The api-gateway needs a new auth path for GPT tokens:
+
 ```typescript
-// After migration: platform_admin comes from user_roles table
-const memberships: MembershipRow[] = ...;
-const userRoles: EntityRoleRow[] = ...;
-const roles = [...new Set([
-    ...memberships.map(m => m.role_name),
-    ...userRoles.map(r => r.role_name),  // Includes platform_admin
-])];
+// In api-gateway auth hook, add GPT token path:
+// If request path starts with /api/v1/gpt/ AND has Bearer token that is NOT a Clerk JWT:
+//   1. Verify token using GPT_JWT_SECRET (jsonwebtoken.verify)
+//   2. Extract clerkUserId from token's sub claim
+//   3. Set x-clerk-user-id header
+//   4. Proxy to gpt-service
+
+// OAuth endpoints (/api/v1/gpt/oauth/*) should bypass auth entirely
+// (they ARE the auth flow, not consumers of it)
 ```
 
-**Test scenarios:**
-1. **Platform admin user**: Verify `isPlatformAdmin: true` and `roles: ['platform_admin']`
-2. **Recruiter with platform admin**: Verify both roles present
-3. **Company admin (no change)**: Verify still works from memberships table
-4. **Regular recruiter (no change)**: Verify no regression
+**No new dependencies for api-gateway.** It already has `jsonwebtoken`. The change is routing logic only.
 
-**Testing method:**
-- Unit tests with mocked Supabase responses
-- Manual API testing via Postman/curl to identity-service endpoints
-- Frontend verification: Log in as platform admin, check admin UI visibility
+### 3. Supabase Database
 
-**Confidence:** HIGH — resolveAccessContext already handles both tables (existing code in shared-access-context/src/index.ts lines 78-94)
+All token storage uses the existing Supabase client pattern:
 
-## Migration File Structure
+```typescript
+// gpt-service repository pattern (matches ai-service, ats-service, etc.)
+export class OAuthRepository {
+    private supabase: SupabaseClient;
 
-**Recommended filename:** `20260214000002_platform_admin_to_user_roles.sql`
+    constructor(supabaseUrl: string, supabaseKey: string) {
+        this.supabase = createClient(supabaseUrl, supabaseKey);
+    }
 
-**Why this numbering:**
-- Latest migration is `20260214000001_search_index_company_access_control.sql`
-- YYYYMMDD format + sequence number (existing project pattern)
-- Higher number ensures correct ordering
-
-**File structure:**
-```sql
--- Migration: Move platform_admin from memberships to user_roles
---
--- Purpose:
--- 1. Make role_entity_id and role_entity_type nullable in user_roles
--- 2. Migrate platform_admin rows from memberships to user_roles
--- 3. Remove synthetic platform organization (type='platform')
--- 4. Add unique constraint for platform_admin role assignments
---
--- Rationale:
--- Platform admin is a system-level role, not organization-scoped.
--- Storing it in memberships required a synthetic organization that
--- has no business meaning. Moving to user_roles with nullable entity
--- fields makes the data model cleaner and more accurate.
-
-BEGIN;
-
--- [Steps 1-5 as detailed in sections above]
-
-COMMIT;
+    async createAuthorizationCode(data: CreateAuthCodeData): Promise<AuthCode> {
+        const { data: code, error } = await this.supabase
+            .from('gpt_authorization_codes')
+            .insert(data)
+            .select()
+            .single();
+        if (error) throw error;
+        return code;
+    }
+    // ... standard repository CRUD
+}
 ```
 
-**Confidence:** HIGH — Matches project's migration file patterns exactly (see 20260201000004, 20260212000001)
+### 4. RabbitMQ Events
+
+The gpt-service publishes events for observability:
+
+```typescript
+// Events published:
+'gpt.oauth.authorized'     // User completed OAuth linking
+'gpt.oauth.token_issued'   // Access token issued
+'gpt.oauth.token_refreshed' // Token refreshed
+'gpt.action.executed'      // GPT action endpoint called
+'gpt.action.confirmed'     // Write action confirmed and executed
+```
+
+These events can be consumed by analytics-service and notification-service for tracking GPT usage metrics.
 
 ## What NOT to Add
 
-### 1. Database Migration Tools (Avoid)
+### 1. @fastify/oauth2 (WRONG TOOL)
 
-**Tools like Flyway, Liquibase, migrate, node-pg-migrate:**
-- Project uses raw SQL migration files in `supabase/migrations/`
-- Supabase handles migration application automatically
-- Adding migration tooling = introducing unnecessary complexity
-- Current pattern works: 15+ migrations already applied successfully
+**Already in api-gateway package.json but unused.** This is an OAuth2 CLIENT library (for consuming external OAuth providers like Google, Facebook). It cannot act as an OAuth2 PROVIDER. Do not use it for this feature. Consider removing the unused dependency from api-gateway in a cleanup pass.
 
-**Verdict:** Do NOT add migration tools
+### 2. @jmondi/oauth2-server or @node-oauth/oauth2-server
 
-### 2. Integration Test Database
+**Over-engineered for single-client use case.** These libraries shine when building a multi-tenant OAuth2 provider with multiple clients, varying grant types, and dynamic scopes. Our use case is one client (OpenAI), one grant type (authorization code), one scope (candidate). The library abstraction adds complexity without corresponding value.
 
-**Pattern like test database seeding, docker-compose with Postgres:**
-- No test DB infrastructure observed in project
-- Vitest tests use mocked repositories
-- Production Supabase instance is source of truth
-- Setting up test DB = large scope increase for marginal benefit
+### 3. Separate Redis token store
 
-**Verdict:** Do NOT add integration test database
+**Tokens belong in Postgres, not Redis.** Reasons:
+- Refresh tokens are long-lived (30 days) and require durable storage with revocation tracking
+- Authorization codes must survive the redirect chain (authorize -> Clerk -> callback -> exchange)
+- Audit trail of OAuth events needs persistent storage
+- Redis is for caching and rate limiting (ephemeral data), not authorization state
+- The project rule: "single Supabase Postgres database"
 
-### 3. TypeScript Schema Validators
+**Exception:** Access tokens are JWTs verified statelessly. They do not need storage at all (verified by signature). If token revocation before expiry is needed later, a Redis revocation list could be added -- but this is a future optimization, not a launch requirement.
 
-**Tools like Zod, io-ts for database schema validation:**
-- Repository layer already handles type safety with TypeScript interfaces
-- Supabase client provides typed queries
-- Runtime validation overhead without clear benefit
-- Would need to add to every repository in every service
+### 4. Passport.js or @fastify/passport
 
-**Verdict:** Do NOT add schema validators (beyond existing TypeScript types)
+**Session-based auth middleware, wrong paradigm.** The GPT flow is stateless token-based auth. Passport.js adds session management, strategy patterns, and serialize/deserialize hooks that are unnecessary. The project already handles auth via Clerk JWTs and custom middleware.
 
-### 4. Database Versioning/Snapshot Tools
+### 5. YAML parsing library (for now)
 
-**Tools like pg_dump automation, migration snapshots:**
-- Supabase provides point-in-time recovery
-- Git already versions migration files
-- Snapshots useful for large-scale refactors, but this is targeted migration
+**Defer unless needed.** The OpenAPI schema is served as a static YAML file. If JSON conversion is needed, the `yaml` package (^2.8.2) can be added later. No need to add it preemptively.
 
-**Verdict:** Do NOT add database snapshot tooling
+### 6. OpenAI SDK for the gpt-service
 
-## Critical Success Factors
+**The openai npm package (^4.82.1) is NOT needed in gpt-service.** The gpt-service does not call the OpenAI API. It RECEIVES calls FROM OpenAI's GPT. The openai package is correctly used in ai-service for candidate-job fit analysis -- do not confuse the two services.
 
-### 1. Order of Operations
+### 7. Separate signing key infrastructure (JWKS, RSA)
 
-**Deployment sequence matters:**
+**HS256 with a symmetric secret is sufficient.** The GPT access tokens are verified only by our own api-gateway. There is no third-party token verification scenario. HS256 (HMAC-SHA256) is simpler, faster, and appropriate when the issuer and verifier are the same system. If the platform later becomes a public OAuth2 provider for third-party integrations, upgrade to RS256 with JWKS at that time.
 
-```
-1. Run database migration (20260214000002_platform_admin_to_user_roles.sql)
-   ↓
-2. Deploy updated shared-access-context package (resolveAccessContext reads user_roles)
-   ↓
-3. Deploy identity-service with updated user-roles repository
-   ↓
-4. Deploy portal app with any admin UI changes
+## Environment Variables (New)
+
+```bash
+# GPT OAuth Configuration
+GPT_CLIENT_ID=splits-gpt-client          # Configured in OpenAI GPT builder
+GPT_CLIENT_SECRET=<generated-secret>      # Configured in OpenAI GPT builder
+GPT_JWT_SECRET=<32-byte-random-secret>    # Signs GPT access tokens (separate from Clerk)
+GPT_TOKEN_EXPIRY=3600                     # Access token lifetime in seconds (1 hour)
+GPT_REFRESH_TOKEN_EXPIRY=2592000          # Refresh token lifetime in seconds (30 days)
+GPT_AUTH_CODE_EXPIRY=600                  # Authorization code lifetime in seconds (10 min)
+GPT_REDIRECT_URI=https://chat.openai.com/aip/<plugin-id>/oauth/callback  # OpenAI's callback URL
+
+# Clerk Candidate App (for OAuth redirect flow)
+# These already exist in shared-config for the candidate app
+APP_CLERK_PUBLISHABLE_KEY=<existing>
+APP_CLERK_SECRET_KEY=<existing>
 ```
 
-**Why this order:**
-- Database migration is backward compatible (doesn't break existing code)
-- shared-access-context can read from both tables safely
-- Service deploy activates new behavior
-- Frontend gets updated last (least critical)
+## Installation (gpt-service package.json)
 
-**Rollback order:** Reverse sequence, run DOWN migration
+```json
+{
+    "name": "@splits-network/gpt-service",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc -b",
+        "start": "node dist/index.js",
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "test": "vitest"
+    },
+    "dependencies": {
+        "@fastify/formbody": "^8.0.2",
+        "@fastify/swagger": "^9.5.0",
+        "@fastify/swagger-ui": "^5.2.3",
+        "@clerk/backend": "^2.4.0",
+        "@sentry/node": "^10.32.1",
+        "@splits-network/shared-access-context": "workspace:*",
+        "@splits-network/shared-config": "workspace:*",
+        "@splits-network/shared-fastify": "workspace:*",
+        "@splits-network/shared-logging": "workspace:*",
+        "@splits-network/shared-types": "workspace:*",
+        "@supabase/supabase-js": "^2.86.2",
+        "amqplib": "^0.10.9",
+        "fastify": "^5.6.2",
+        "jsonwebtoken": "^9.0.3"
+    },
+    "devDependencies": {
+        "@types/amqplib": "^0.10.5",
+        "@types/jsonwebtoken": "^9.0.7",
+        "@types/node": "^24.10.1",
+        "@vitest/coverage-v8": "^2.1.9",
+        "tsx": "^4.19.2",
+        "typescript": "^5.9.3",
+        "vitest": "^2.1.9"
+    }
+}
+```
 
-### 2. Zero-Downtime Considerations
+**New dependencies (not already in any service):** Only `@fastify/formbody` ^8.0.2.
+**Everything else** is already used across the monorepo.
 
-**The migration is zero-downtime compatible:**
-- ALTER TABLE to drop NOT NULL doesn't lock table
-- INSERT...SELECT is atomic (transaction)
-- DELETE only affects platform_admin rows (typically <10 users)
-- Platform organization deletion has no foreign key dependents (platform_admin memberships already deleted)
+## API Gateway Changes (No New Dependencies)
 
-**Potential lock concern:** Concurrent INSERT into user_roles during migration
-**Mitigation:** Migration runs in transaction, Postgres handles locking
+The api-gateway already has `jsonwebtoken` and all routing infrastructure. Changes needed:
 
-### 3. Validation Gates
+1. **New route registration** for `/api/v1/gpt/*` proxy to gpt-service
+2. **GPT token verification** in the auth hook (verify HS256 JWT with `GPT_JWT_SECRET`)
+3. **Auth bypass** for OAuth endpoints (`/api/v1/gpt/oauth/*`)
+4. **Rate limit tier** for GPT-sourced requests (lower than authenticated users, higher than anonymous)
 
-**Before marking migration complete:**
-- [ ] Platform admin count matches (source = destination)
-- [ ] No platform_admin rows remain in memberships
-- [ ] Platform organization deleted successfully
-- [ ] resolveAccessContext returns isPlatformAdmin: true for test user
-- [ ] Platform admin can access admin UI in portal
-- [ ] No errors in service logs related to role resolution
+These are code changes, not dependency additions.
 
-## Sources and Confidence Assessment
+## Confidence Assessment
 
-| Research Area | Confidence | Source |
-|---------------|------------|--------|
-| Postgres nullable column migration | HIGH | Observed in 20260212000001_split_user_roles_into_memberships.sql (DROP COLUMN pattern) |
-| Data migration pattern | HIGH | Project migrations: 20260212000001, 20260211000003, 20260201000004 |
-| Transaction safety | HIGH | All project migrations use BEGIN/COMMIT with validation blocks |
-| Index management | HIGH | Partial unique index pattern in 20260212000001 (uq_membership_assignment) |
-| Vitest testing approach | HIGH | identity-service/tests/unit/invitations.service.test.ts shows mocking pattern |
-| Integration testing | MEDIUM | No test DB infrastructure found; manual verification appears to be standard |
-| resolveAccessContext implementation | HIGH | Source code review: packages/shared-access-context/src/index.ts |
-| V2 service pattern | HIGH | identity-service/src/v2 structure (memberships, user-roles, routes.ts) |
+| Area | Confidence | Reason |
+|------|------------|--------|
+| OAuth2 provider approach (hand-rolled) | HIGH | Well-understood RFC, narrow scope, team controls both sides |
+| Token strategy (JWT access, opaque refresh) | HIGH | Industry standard pattern, jsonwebtoken already in use |
+| Database schema for tokens | HIGH | Follows existing Supabase migration patterns exactly |
+| Fastify formbody requirement | HIGH | OAuth2 token endpoint MUST accept form-encoded POST per RFC 6749 |
+| OpenAI GPT Actions OpenAPI spec | MEDIUM | Based on training data; x-openai-isConsequential behavior not verified against current docs |
+| Clerk redirect flow for OAuth | MEDIUM | Exact mechanism for redirect-based auth with Clerk needs implementation-phase research |
+| GPT_REDIRECT_URI format | LOW | OpenAI's exact callback URL format may have changed; verify during GPT builder setup |
 
-**Overall confidence for migration success:** HIGH
+## Research Gaps
 
-**Risks identified:**
-1. MEDIUM: Roles table may not have platform_admin entry (add to migration)
-2. LOW: Unique constraint gap for platform_admin (add partial index)
-3. LOW: Deployment sequence matters (document in migration comments)
+1. **OpenAI GPT Actions current documentation** -- WebSearch/WebFetch were unavailable. The `x-openai-isConsequential` flag, exact OAuth callback URL format, and any new schema requirements should be verified against https://platform.openai.com/docs/actions before implementation begins.
 
-## Summary
+2. **Clerk redirect-based authentication** -- The OAuth flow requires redirecting users to Clerk for login and getting proof of authentication back. The exact mechanism (Clerk hosted pages, session cookies, or Clerk's own OAuth endpoints) needs investigation. The Clerk docs at https://clerk.com/docs should be consulted.
 
-**Stack changes required:** None — use existing Postgres, Fastify, Vitest
+3. **OpenAI's token refresh behavior** -- How frequently OpenAI refreshes tokens, whether it handles refresh token rotation gracefully, and error recovery behavior should be tested empirically during development.
 
-**Migration approach:**
-- Single SQL migration file with transaction safety
-- Multi-step: schema change → data migration → validation → cleanup
-- Rollback script for emergency reversal
+## Sources
 
-**Testing approach:**
-- Unit tests with mocked repositories (Vitest)
-- Manual verification queries (psql)
-- Role-based access testing via resolveAccessContext
-
-**What to avoid:**
-- Migration tools (Flyway, Liquibase)
-- Integration test database setup
-- Schema validators beyond TypeScript
-- Database snapshot tooling
-
-This is a straightforward database restructure using project's established patterns. No technology additions needed.
+| Source | Type | What It Provided |
+|--------|------|-----------------|
+| `npm view @jmondi/oauth2-server` | npm registry (verified) | Version 4.2.2, Fastify adapter support, RFC compliance, TypeScript native |
+| `npm view @node-oauth/oauth2-server` | npm registry (verified) | Version 5.2.1, Express-oriented, fork of oauth2-server |
+| `npm view @fastify/oauth2` | npm registry (verified) | Version 8.2.0, OAuth2 CLIENT library (not provider) |
+| `npm view @fastify/formbody` | npm registry (verified) | Version 8.0.2, Fastify 5 compatible |
+| `npm view jsonwebtoken` | npm registry (verified) | Version 9.0.3 |
+| `services/api-gateway/src/auth.ts` | Codebase (verified) | Existing Clerk JWT verification pattern |
+| `services/api-gateway/src/index.ts` | Codebase (verified) | Auth hook structure, route registration pattern |
+| `services/ai-service/src/` | Codebase (verified) | V2 service pattern, repository pattern, package.json template |
+| `docs/gpt/*.md` | Codebase (verified) | PRD, architecture, tech spec, OpenAPI starter, GPT instructions |
+| RFC 6749 (OAuth 2.0) | Training data | Authorization code flow specification |

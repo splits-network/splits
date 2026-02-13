@@ -1,0 +1,42 @@
+---
+title: "Markdown Editor, Improved Onboarding, and Access Context"
+date: "2026-01-11"
+summary: "A new markdown editor makes role descriptions richer and more readable. The onboarding process now creates your company and membership in one step, and services use a unified access context for consistent permissions."
+tags: ["new-feature", "improvement", "onboarding", "portal"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release introduces a richer editing experience for job descriptions, a streamlined onboarding flow, and better permission consistency across the platform.
+
+## New Features
+
+### Markdown Editor for Role Descriptions
+
+You can now write and edit role descriptions using a full markdown editor. Format job descriptions with headings, bullet points, bold text, and links to make them more readable and professional. When candidates view the role, the description renders as clean, formatted content instead of plain text. This applies to both job detail pages and role editing.
+
+### Streamlined Onboarding
+
+The onboarding process has been rebuilt to handle company creation, organization setup, and membership assignment in a single flow. When a new hiring company signs up, the platform creates the company record, establishes the organization, and assigns the founding membership automatically. Recruiter onboarding now includes profile validation to ensure key information is captured before you start using the platform.
+
+### Category Filter for Job Listings
+
+You can now filter job listings by category directly from the jobs list page. The category filter is integrated into the existing filter panel, making it easy to narrow your search to specific industries or role types.
+
+## Improvements
+
+### Unified Access Context Across Services
+
+Multiple backend services now use a unified access context resolver for determining user permissions. This means your role and access level are evaluated consistently regardless of which part of the platform you're interacting with. Fewer edge cases, more predictable behavior.
+
+### Improved Application Handling
+
+The application service now leverages the same access context resolver, ensuring that application creation, viewing, and updates respect your permissions uniformly. Combined with smarter error handling for stats retrieval, the application experience is more reliable.
+
+### Cleaner Job Detail Pages
+
+Job detail pages have been refined with updated styling and removal of redundant sections. The focus is on the information that matters: role requirements, compensation, company details, and the application action.
+
+### Updated Status Page Links
+
+Status contact endpoints have been updated, and links on the public status page now point to the correct destinations. If you need to report an issue or check service health, everything routes properly.

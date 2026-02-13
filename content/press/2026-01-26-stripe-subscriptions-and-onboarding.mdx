@@ -1,0 +1,30 @@
+---
+title: "Stripe Subscriptions and Enhanced Onboarding"
+date: "2026-01-26"
+summary: "Recruiters can now subscribe to paid plans directly through Stripe, and the onboarding experience gets smarter with fallback account creation for SSO sign-ups."
+tags: ["new-feature", "improvement", "billing", "onboarding"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release brings self-service billing to recruiters and makes the onboarding process more resilient. Subscribe to the plan that fits your needs and get started faster, no matter how you sign up.
+
+## New Features
+
+### Recruiter Subscription Plans
+
+You can now subscribe to a paid plan directly from the platform. The new subscription flow is powered by Stripe, giving you a secure, familiar checkout experience. Choose your plan, enter payment details, and you're upgraded instantly. Your subscription status is visible in your account settings, and you can manage billing at any time.
+
+### Dynamic Page Titles
+
+The portal header now displays a dynamic page title that updates as you navigate. Whether you're on the dashboard, reviewing applications, or managing settings, the header reflects exactly where you are. This is a small but meaningful usability improvement, especially when you have multiple tabs open.
+
+## Improvements
+
+### SSO Onboarding Fallback
+
+If you sign up using Google or another SSO provider, the platform now automatically creates your account even if the initial registration step was skipped. Previously, SSO sign-ups could occasionally land in a state where the account existed in the authentication system but not in the platform. This fallback ensures a smooth experience regardless of how you create your account.
+
+### Improved Error Handling for Authentication
+
+Sign-in and SSO callback flows now handle edge cases more gracefully. If something goes wrong during authentication, you'll see a clear message explaining what happened and how to proceed, rather than a generic error screen.

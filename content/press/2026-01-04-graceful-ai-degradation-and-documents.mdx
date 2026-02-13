@@ -1,0 +1,46 @@
+---
+title: "Graceful AI Degradation, Document Permissions, and Application Details"
+date: "2026-01-04"
+summary: "The AI review panel now handles service outages gracefully, document uploads are locked down by role, and application details display richer recruiter and company information."
+tags: ["improvement", "ai", "documents", "security"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release hardens the platform against real-world conditions. AI features degrade gracefully when services are unavailable, document handling is more secure, and application pages surface the details you actually need.
+
+## New Features
+
+### Graceful AI Service Degradation
+
+If the AI review service is temporarily unavailable, the application detail page now handles it cleanly instead of showing an error. You still see all application data and can take action manually. When the AI service comes back online, reviews resume automatically. No workflow interruption, no confusing error screens.
+
+### Role-Based Document Permissions
+
+Document uploads are now restricted based on your role. Platform administrators retain full upload access, while other roles have appropriately scoped permissions. This prevents unauthorized file uploads and keeps your document storage organized and secure.
+
+### Document Upload and Retrieval
+
+Authenticated document upload and retrieval endpoints are now available, ensuring that every file interaction is tied to a verified user session. You can upload and access documents with confidence that access controls are enforced at every step.
+
+### Public Recruiter Endpoints with Optional Auth
+
+Recruiter profile pages now support optional authentication. Public visitors can view recruiter profiles, while authenticated users see additional details and actions. This makes it easier to share recruiter profiles externally while still providing a richer experience for logged-in users.
+
+## Improvements
+
+### Richer Application Details
+
+The application detail page now displays recruiter information alongside the application data. When reviewing a candidate's application, you can see which recruiter submitted it and their relevant details without navigating away.
+
+### Improved Application Stage Handling
+
+Application stage transitions and role breakdown calculations have been refined. The pipeline view now accurately reflects where each candidate stands, and financial breakdowns for roles compute correctly across all edge cases.
+
+### Recruiter Phone Numbers
+
+Recruiter profiles now include phone contact information, making it easier to reach out directly when time-sensitive communication is needed.
+
+### Smarter Dashboard Data Loading
+
+Dashboard data fetching has been optimized to load faster and handle authentication more reliably. Whether you're a recruiter checking your pipeline or a company reviewing applications, the dashboard renders with the right data on the first load.

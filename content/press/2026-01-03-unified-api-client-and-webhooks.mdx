@@ -1,0 +1,38 @@
+---
+title: "Unified API Client, Confirmation Dialogs, and Candidate App Migration"
+date: "2026-01-03"
+summary: "A unified API client streamlines how the platform communicates with backend services. Confirmation dialogs prevent accidental actions, and the candidate app has been fully migrated to the latest architecture."
+tags: ["new-feature", "improvement", "candidate"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release focuses on reliability and polish. A unified communication layer, new safety dialogs, and a fully modernized candidate experience set the stage for faster feature development ahead.
+
+## New Features
+
+### Confirmation Dialogs
+
+Destructive actions like cancelling an invitation now require explicit confirmation before proceeding. A reusable confirmation dialog appears when you're about to do something irreversible, giving you a chance to reconsider before committing. No more accidental cancellations.
+
+### Recruiter Candidate Management
+
+You can now perform both soft and hard deletes on candidate relationships, depending on consent status and the nature of the recruiter-candidate connection. This gives you more precise control over your candidate pipeline when cleaning up records.
+
+### Enhanced Document Service Health Checks
+
+The document service now reports richer health information, making it easier for the platform to detect and surface issues with file uploads or downloads before they affect your workflow.
+
+## Improvements
+
+### Candidate App Fully Modernized
+
+The candidate-facing application has been fully migrated to the latest platform architecture. Every page, form, and data call now uses the same modern patterns as the main portal, resulting in faster load times and more consistent behavior for candidates interacting with your job listings.
+
+### Streamlined URL Structure
+
+API endpoints across the platform have been simplified by removing unnecessary version prefixes from URLs. While invisible to you, this cleanup reduces complexity and makes the platform easier to maintain, which translates to faster bug fixes and feature delivery.
+
+### Improved Onboarding Logic
+
+The onboarding flow now fetches user data more efficiently and handles edge cases more gracefully. Whether you're a recruiter accepting an invitation or a hiring company setting up your account, the process is smoother from start to finish.

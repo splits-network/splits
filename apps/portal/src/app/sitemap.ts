@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { getAllArticleSlugs } from "@/lib/press";
 
 const baseUrl = 'https://splits.network';
 const appRoot = join(process.cwd(), "apps", "portal", "src", "app");
@@ -9,6 +10,7 @@ const publicRoutes = [
     '',
     '/public/about',
     '/public/blog',
+    '/public/brand',
     '/public/careers',
     '/public/cookie-policy',
     '/public/documentation',
@@ -62,7 +64,10 @@ const documentationRoutes = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const routes = [...publicRoutes, ...documentationRoutes];
+    const pressArticleRoutes = getAllArticleSlugs().map(
+        (slug) => `/public/press/${slug}`,
+    );
+    const routes = [...publicRoutes, ...documentationRoutes, ...pressArticleRoutes];
     const corePages = new Set([
         "/public/features",
         "/public/pricing",
@@ -79,6 +84,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const weeklyPages = new Set([
         "/public/blog",
         "/public/updates",
+        "/public/press",
     ]);
     const yearlyPages = new Set([
         "/public/cookie-policy",
@@ -115,8 +121,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
                     ? 0.4
                     : corePages.has(path)
                       ? 0.9
-                      : path.startsWith("/public/documentation")
-                        ? 0.7
-                        : 0.7,
+                      : path.startsWith("/public/press/")
+                        ? 0.6
+                        : path.startsWith("/public/documentation")
+                          ? 0.7
+                          : 0.7,
     }));
 }
