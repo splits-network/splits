@@ -16,6 +16,7 @@ import { registerSearchRoutes } from './search';
 import { registerStatusRoutes } from './status';
 import { registerSystemHealthRoutes } from './system-health';
 import { registerSiteNotificationRoutes } from './site-notifications';
+import { registerGptRoutes } from './gpt';
 import { EventPublisher } from '../../events/event-publisher';
 
 export function registerV2GatewayRoutes(
@@ -33,6 +34,7 @@ export function registerV2GatewayRoutes(
     registerChatRoutes(app, services);
     registerBillingRoutes(app, services);
     registerDocumentRoutes(app, services);
+    registerGptRoutes(app, services);
     registerIdentityRoutes(app, services);
     registerNetworkRoutes(app, services);
     registerNotificationRoutes(app, services);

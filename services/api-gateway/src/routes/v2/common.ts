@@ -12,7 +12,8 @@ export type ServiceName =
     | 'identity'
     | 'document'
     | 'automation'
-    | 'search';
+    | 'search'
+    | 'gpt';
 
 export interface ResourceDefinition {
     name: string;
