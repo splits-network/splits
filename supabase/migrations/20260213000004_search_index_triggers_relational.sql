@@ -110,7 +110,7 @@ BEGIN
         NEW.id,
         COALESCE(NEW.candidate_name, '') || ' - ' || COALESCE(NEW.job_title, ''),
         CONCAT_WS(' at ', NULLIF(NEW.job_title, ''), NULLIF(NEW.company_name, '')),
-        CONCAT_WS(' ', NEW.candidate_name, NEW.candidate_email, NEW.job_title, NEW.company_name, NEW.notes, NEW.stage, NEW.recruiter_notes, NEW.candidate_notes),
+        CONCAT_WS(' ', NEW.candidate_name, NEW.candidate_email, NEW.job_title, NEW.company_name, NEW.stage),
         NEW.search_vector,  -- Already computed by update_applications_search_vector trigger
         jsonb_build_object('candidate_name', NEW.candidate_name, 'candidate_email', NEW.candidate_email, 'job_title', NEW.job_title, 'company_name', NEW.company_name, 'stage', NEW.stage),
         NULL,  -- Organization filtering done at query time via access context
@@ -154,9 +154,9 @@ BEGIN
         NEW.id,
         COALESCE(NEW.candidate_name, '') || ' - ' || COALESCE(NEW.job_title, ''),
         CONCAT_WS(' at ', NULLIF(NEW.job_title, ''), NULLIF(NEW.company_name, '')),
-        CONCAT_WS(' ', NEW.candidate_name, NEW.candidate_email, NEW.job_title, NEW.company_name, NEW.recruiter_name, NEW.recruiter_email, NEW.state, CASE WHEN NEW.salary IS NOT NULL THEN NEW.salary::text ELSE '' END, NEW.failure_reason),
+        CONCAT_WS(' ', NEW.candidate_name, NEW.candidate_email, NEW.job_title, NEW.company_name, NEW.state, CASE WHEN NEW.salary IS NOT NULL THEN NEW.salary::text ELSE '' END, NEW.failure_reason),
         NEW.search_vector,  -- Already computed by update_placements_search_vector trigger
-        jsonb_build_object('candidate_name', NEW.candidate_name, 'job_title', NEW.job_title, 'company_name', NEW.company_name, 'recruiter_name', NEW.recruiter_name, 'state', NEW.state, 'salary', NEW.salary),
+        jsonb_build_object('candidate_name', NEW.candidate_name, 'job_title', NEW.job_title, 'company_name', NEW.company_name, 'state', NEW.state, 'salary', NEW.salary),
         NULL,  -- Organization filtering done at query time
         now()
     )
@@ -268,7 +268,7 @@ SELECT
     a.id AS entity_id,
     COALESCE(a.candidate_name, '') || ' - ' || COALESCE(a.job_title, '') AS title,
     CONCAT_WS(' at ', NULLIF(a.job_title, ''), NULLIF(a.company_name, '')) AS subtitle,
-    CONCAT_WS(' ', a.candidate_name, a.candidate_email, a.job_title, a.company_name, a.notes, a.stage, a.recruiter_notes, a.candidate_notes) AS context,
+    CONCAT_WS(' ', a.candidate_name, a.candidate_email, a.job_title, a.company_name, a.stage) AS context,
     a.search_vector,
     jsonb_build_object('candidate_name', a.candidate_name, 'candidate_email', a.candidate_email, 'job_title', a.job_title, 'company_name', a.company_name, 'stage', a.stage) AS metadata,
     NULL AS organization_id,
@@ -289,9 +289,9 @@ SELECT
     p.id AS entity_id,
     COALESCE(p.candidate_name, '') || ' - ' || COALESCE(p.job_title, '') AS title,
     CONCAT_WS(' at ', NULLIF(p.job_title, ''), NULLIF(p.company_name, '')) AS subtitle,
-    CONCAT_WS(' ', p.candidate_name, p.candidate_email, p.job_title, p.company_name, p.recruiter_name, p.recruiter_email, p.state, CASE WHEN p.salary IS NOT NULL THEN p.salary::text ELSE '' END, p.failure_reason) AS context,
+    CONCAT_WS(' ', p.candidate_name, p.candidate_email, p.job_title, p.company_name, p.state, CASE WHEN p.salary IS NOT NULL THEN p.salary::text ELSE '' END, p.failure_reason) AS context,
     p.search_vector,
-    jsonb_build_object('candidate_name', p.candidate_name, 'job_title', p.job_title, 'company_name', p.company_name, 'recruiter_name', p.recruiter_name, 'state', p.state, 'salary', p.salary) AS metadata,
+    jsonb_build_object('candidate_name', p.candidate_name, 'job_title', p.job_title, 'company_name', p.company_name, 'state', p.state, 'salary', p.salary) AS metadata,
     NULL AS organization_id,
     now() AS updated_at
 FROM public.placements p

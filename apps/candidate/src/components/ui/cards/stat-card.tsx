@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactNode, useEffect, useState, useRef, useCallback } from "react";
+import { type ReactNode, useEffect, useState, useRef, useCallback, memo } from "react";
 
 // ===== ANIMATED COUNTER HOOK =====
 
@@ -188,7 +188,7 @@ const iconColorClasses = {
  * - Loading skeleton state
  * - Animated counting effect when visible
  */
-export function StatCard({
+export const StatCard = memo(function StatCard({
     value,
     title,
     description,
@@ -307,4 +307,4 @@ export function StatCard({
             {statContent}
         </div>
     );
-}
+});

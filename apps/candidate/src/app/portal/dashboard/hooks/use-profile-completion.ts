@@ -16,7 +16,6 @@ export function useProfileCompletion() {
     const [loading, setLoading] = useState(true);
 
     const refresh = useCallback(async () => {
-        setLoading(true);
         try {
             const token = await getToken();
             if (!token) return;

@@ -62,7 +62,7 @@ app.register(registerV2Routes, {
 async function startServer() {
     try {
         // Start Fastify server
-        const port = Number(process.env.PORT || 3012);
+        const port = Number(process.env.PORT || 3013);
         await app.listen({ port, host: "0.0.0.0" });
         logger.info(`Search service started on port ${port}`);
     } catch (error) {

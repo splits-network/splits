@@ -61,7 +61,6 @@ export function useCandidateDashboardData() {
     const [error, setError] = useState<string | null>(null);
 
     const refresh = useCallback(async () => {
-        setLoading(true);
         setError(null);
         try {
             const token = await getToken();

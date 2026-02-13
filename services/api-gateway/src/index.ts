@@ -392,7 +392,7 @@ async function main() {
     services.register('ai', process.env.AI_SERVICE_URL || 'http://localhost:3009');
     services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
     services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
-    services.register('search', process.env.SEARCH_SERVICE_URL || 'http://localhost:3012');
+    services.register('search', process.env.SEARCH_SERVICE_URL || 'http://localhost:3013');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

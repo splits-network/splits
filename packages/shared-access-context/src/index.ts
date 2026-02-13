@@ -5,11 +5,11 @@ export interface AccessContext {
     candidateId: string | null;
     recruiterId: string | null;
     organizationIds: string[];
+    orgWideOrganizationIds: string[];
     companyIds: string[];
     roles: string[];
     isPlatformAdmin: boolean;
     error: string;
-
 }
 
 /**
@@ -48,6 +48,7 @@ const EMPTY_CONTEXT: AccessContext = {
     candidateId: null,
     recruiterId: null,
     organizationIds: [],
+    orgWideOrganizationIds: [],
     companyIds: [],
     roles: [],
     isPlatformAdmin: false,
@@ -128,6 +129,11 @@ export async function resolveAccessContext(
             memberships.map(m => m.company_id).filter(Boolean) as string[]
         )];
 
+        // Org-wide org IDs: orgs where user has membership WITHOUT company_id constraint
+        const orgWideOrganizationIds = [...new Set(
+            memberships.filter(m => !m.company_id).map(m => m.organization_id).filter(Boolean) as string[]
+        )];
+
         // Extract entity-linked IDs from user_roles (role_name determines entity type)
         const recruiterRole = userRoles.find(r => r.role_name === 'recruiter');
         const candidateRole = userRoles.find(r => r.role_name === 'candidate');
@@ -140,6 +146,7 @@ export async function resolveAccessContext(
             candidateId,
             recruiterId,
             organizationIds,
+            orgWideOrganizationIds,
             companyIds,
             roles,
             isPlatformAdmin: roles.includes('platform_admin'),

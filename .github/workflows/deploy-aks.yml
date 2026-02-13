@@ -42,6 +42,8 @@ jobs:
                       path: services/analytics-gateway
                     - name: chat-service
                       path: services/chat-service
+                    - name: search-service
+                      path: services/search-service
                     - name: health-monitor
                       path: services/health-monitor
                     - name: portal
