@@ -31,13 +31,13 @@ export interface AuthorizeParams {
     redirectUri: string;
     scopes: string[];
     state: string;
-    codeChallenge: string;
-    codeChallengeMethod: 'S256' | 'plain';
+    codeChallenge?: string;
+    codeChallengeMethod?: 'S256' | 'plain';
 }
 
 export interface TokenExchangeParams {
     code: string;
-    codeVerifier: string;
+    codeVerifier?: string;
     clientId: string;
     clientSecret: string;
     redirectUri: string;
