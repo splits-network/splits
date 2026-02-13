@@ -178,11 +178,11 @@ export function registerOAuthRoutes(app: FastifyInstance, config: RegisterOAuthC
 
             try {
                 if (grant_type === 'authorization_code') {
-                    // Validate required params
-                    if (!code || !code_verifier || !redirect_uri) {
+                    // Validate required params (code_verifier optional - only needed if PKCE was used)
+                    if (!code || !redirect_uri) {
                         return reply.status(400).send({
                             error: 'invalid_request',
-                            error_description: 'Missing required parameters: code, code_verifier, redirect_uri',
+                            error_description: 'Missing required parameters: code, redirect_uri',
                         });
                     }
 

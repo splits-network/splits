@@ -161,10 +161,15 @@ export class OAuthService {
             throw new OAuthError('invalid_grant', 'Redirect URI mismatch');
         }
 
-        // Validate PKCE
-        const challenge = this.generatePkceChallenge(codeVerifier);
-        if (challenge !== authCode.code_challenge) {
-            throw new OAuthError('invalid_grant', 'PKCE verification failed');
+        // Validate PKCE (only if code_challenge was provided during authorization)
+        if (authCode.code_challenge) {
+            if (!codeVerifier) {
+                throw new OAuthError('invalid_grant', 'PKCE code_verifier required');
+            }
+            const challenge = this.generatePkceChallenge(codeVerifier);
+            if (challenge !== authCode.code_challenge) {
+                throw new OAuthError('invalid_grant', 'PKCE verification failed');
+            }
         }
 
         // Mark auth code as used
