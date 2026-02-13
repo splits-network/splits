@@ -73,12 +73,12 @@ Plans:
   2. Job detail view displays commute types and job level with human-readable labels
   3. Job list page supports filtering by commute type and job level
   4. Search index includes commute_types and job_level so jobs appear in search results by these fields
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: Job form commute type and job level controls
-- [ ] 10-02: Job detail display and list filtering
-- [ ] 10-03: Search index update
+- [ ] 10-01-PLAN.md -- Wizard form commute type checkboxes and job level dropdown with modal state wiring
+- [ ] 10-02-PLAN.md -- Job detail display cards and list filter controls for commute type and job level
+- [ ] 10-03-PLAN.md -- Search index trigger update to include commute_types and job_level in metadata and context
 
 ## Progress
 
