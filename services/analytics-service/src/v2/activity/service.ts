@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { HeartbeatPayload, ActivitySnapshot } from './types';
+import { HeartbeatPayload, ActivitySnapshot, UserType, ALL_USER_TYPES, ALL_APPS, TimelinePoint } from './types';
 
 const ONLINE_KEY = 'activity:online';
 const SESSION_PREFIX = 'activity:session:';
@@ -18,7 +18,6 @@ function minuteKey(date: Date): string {
 }
 
 function minuteLabel(key: string): string {
-    // Convert YYYYMMDDHHMM to HH:MM
     return `${key.slice(8, 10)}:${key.slice(10, 12)}`;
 }
 
@@ -30,6 +29,7 @@ export class ActivityService {
         const currentMinute = minuteKey(new Date(now));
         const sessionKey = `${SESSION_PREFIX}${payload.session_id}`;
         const timelineKey = `${TIMELINE_PREFIX}${currentMinute}`;
+        const userType: UserType = payload.user_type || (payload.user_id ? 'recruiter' : 'anonymous');
 
         const pipeline = this.redis.pipeline();
 
@@ -42,12 +42,23 @@ export class ActivityService {
             page: payload.page,
             status: payload.status,
             user_id: payload.user_id || '',
+            user_type: userType,
         });
         pipeline.expire(sessionKey, SESSION_TTL);
 
-        // 3. Track unique users per minute
+        // 3. Track unique users per minute (total)
         pipeline.sadd(timelineKey, payload.session_id);
         pipeline.expire(timelineKey, TIMELINE_TTL);
+
+        // 4. Track per-app timeline
+        const appTimelineKey = `${TIMELINE_PREFIX}${currentMinute}:app:${payload.app}`;
+        pipeline.sadd(appTimelineKey, payload.session_id);
+        pipeline.expire(appTimelineKey, TIMELINE_TTL);
+
+        // 5. Track per-role timeline
+        const roleTimelineKey = `${TIMELINE_PREFIX}${currentMinute}:role:${userType}`;
+        pipeline.sadd(roleTimelineKey, payload.session_id);
+        pipeline.expire(roleTimelineKey, TIMELINE_TTL);
 
         await pipeline.exec();
     }
@@ -65,6 +76,9 @@ export class ActivityService {
 
         // 3. Get session metadata for breakdown
         const byApp = { portal: 0, candidate: 0, corporate: 0 };
+        const byRole: Record<UserType, number> = {
+            recruiter: 0, company_admin: 0, hiring_manager: 0, candidate: 0, anonymous: 0,
+        };
         let authenticated = 0;
         let anonymous = 0;
 
@@ -83,39 +97,72 @@ export class ActivityService {
                     if (app in byApp) byApp[app]++;
                     if (session.user_id) authenticated++;
                     else anonymous++;
+                    const role = session.user_type as UserType;
+                    if (role && role in byRole) byRole[role]++;
+                    else byRole.anonymous++;
                 }
             }
         }
 
-        // 4. Build timeline (last 30 minutes)
-        const timeline: { minute: string; count: number }[] = [];
-        const timelinePipeline = this.redis.pipeline();
+        // 4. Build minute keys for last 30 minutes
         const minuteKeys: string[] = [];
-
         for (let i = 29; i >= 0; i--) {
-            const d = new Date(now - i * 60_000);
-            const mk = minuteKey(d);
-            minuteKeys.push(mk);
+            minuteKeys.push(minuteKey(new Date(now - i * 60_000)));
+        }
+
+        // 5. Pipeline: total + per-app + per-role SCARD for each minute
+        const timelinePipeline = this.redis.pipeline();
+        for (const mk of minuteKeys) {
             timelinePipeline.scard(`${TIMELINE_PREFIX}${mk}`);
+            for (const app of ALL_APPS) {
+                timelinePipeline.scard(`${TIMELINE_PREFIX}${mk}:app:${app}`);
+            }
+            for (const role of ALL_USER_TYPES) {
+                timelinePipeline.scard(`${TIMELINE_PREFIX}${mk}:role:${role}`);
+            }
         }
 
         const timelineResults = await timelinePipeline.exec();
+
+        // 6. Parse results — each minute has 1 + 3 + 5 = 9 entries
+        const RESULTS_PER_MINUTE = 1 + ALL_APPS.length + ALL_USER_TYPES.length;
+        const timeline: TimelinePoint[] = [];
+        const timelineByApp: Record<string, TimelinePoint[]> = {};
+        const timelineByRole: Record<string, TimelinePoint[]> = {};
+
+        for (const app of ALL_APPS) timelineByApp[app] = [];
+        for (const role of ALL_USER_TYPES) timelineByRole[role] = [];
+
         if (timelineResults) {
             for (let i = 0; i < minuteKeys.length; i++) {
-                const [err, count] = timelineResults[i];
-                timeline.push({
-                    minute: minuteLabel(minuteKeys[i]),
-                    count: err ? 0 : (count as number) || 0,
-                });
+                const base = i * RESULTS_PER_MINUTE;
+                const label = minuteLabel(minuteKeys[i]);
+                const val = (idx: number) => {
+                    const [err, count] = timelineResults[base + idx];
+                    return err ? 0 : (count as number) || 0;
+                };
+
+                timeline.push({ minute: label, count: val(0) });
+
+                let offset = 1;
+                for (const app of ALL_APPS) {
+                    timelineByApp[app].push({ minute: label, count: val(offset++) });
+                }
+                for (const role of ALL_USER_TYPES) {
+                    timelineByRole[role].push({ minute: label, count: val(offset++) });
+                }
             }
         }
 
         return {
             total_online: totalOnline,
             by_app: byApp,
+            by_role: byRole,
             authenticated,
             anonymous,
             timeline,
+            timeline_by_app: timelineByApp,
+            timeline_by_role: timelineByRole,
             timestamp: new Date().toISOString(),
         };
     }

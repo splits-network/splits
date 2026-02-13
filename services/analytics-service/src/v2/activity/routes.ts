@@ -27,6 +27,7 @@ export function registerActivityRoutes(app: FastifyInstance, config: RegisterAct
                         app: { type: 'string', enum: ['portal', 'candidate', 'corporate'] },
                         page: { type: 'string', maxLength: 512 },
                         status: { type: 'string', enum: ['active', 'idle'] },
+                        user_type: { type: 'string', enum: ['recruiter', 'company_admin', 'hiring_manager', 'candidate', 'anonymous'] },
                     },
                 },
                 response: {

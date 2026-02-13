@@ -82,6 +82,9 @@ export { ModalPortal } from './portal/modal-portal';
 // because it depends on Clerk hooks which cause duplicate-instance issues
 // when imported cross-package via transpilePackages.
 
+// Activity tracker
+export { ActivityTracker, type ActivityTrackerProps } from './activity';
+
 // Application Notes components
 export {
     ApplicationNotesPanel,

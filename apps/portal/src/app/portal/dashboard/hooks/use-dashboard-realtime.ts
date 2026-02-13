@@ -7,10 +7,7 @@ type DashboardEvent = {
     type: string;
     eventVersion: number;
     serverTime: string;
-    data?: {
-        metrics?: string[];
-        charts?: string[];
-    };
+    data?: Record<string, unknown>;
 };
 
 interface UseDashboardRealtimeOptions {
@@ -22,6 +19,10 @@ interface UseDashboardRealtimeOptions {
     onChartsUpdate?: () => void;
     /** Called on reconnection (resync all data) */
     onReconnect?: () => void;
+    /** Called when an activity.updated event arrives with the snapshot payload */
+    onActivityUpdate?: (snapshot: any) => void;
+    /** Additional channels to subscribe to (e.g. 'dashboard:activity') */
+    extraChannels?: string[];
 }
 
 function buildGatewayUrl(baseUrl: string, token: string) {
@@ -41,6 +42,8 @@ export function useDashboardRealtime({
     onStatsUpdate,
     onChartsUpdate,
     onReconnect,
+    onActivityUpdate,
+    extraChannels = [],
 }: UseDashboardRealtimeOptions) {
     const { getToken } = useAuth();
 
@@ -54,11 +57,15 @@ export function useDashboardRealtime({
     const onStatsRef = useRef(onStatsUpdate);
     const onChartsRef = useRef(onChartsUpdate);
     const onReconnectRef = useRef(onReconnect);
+    const onActivityRef = useRef(onActivityUpdate);
+    const extraChannelsRef = useRef(extraChannels);
 
     useEffect(() => { getTokenRef.current = getToken; }, [getToken]);
     useEffect(() => { onStatsRef.current = onStatsUpdate; }, [onStatsUpdate]);
     useEffect(() => { onChartsRef.current = onChartsUpdate; }, [onChartsUpdate]);
     useEffect(() => { onReconnectRef.current = onReconnect; }, [onReconnect]);
+    useEffect(() => { onActivityRef.current = onActivityUpdate; }, [onActivityUpdate]);
+    useEffect(() => { extraChannelsRef.current = extraChannels; }, [extraChannels]);
 
     const handleEvent = useCallback((event: DashboardEvent) => {
         if (event.type === 'stats.updated') {
@@ -66,6 +73,9 @@ export function useDashboardRealtime({
         }
         if (event.type === 'chart.invalidated' || event.type === 'stats.updated') {
             onChartsRef.current?.();
+        }
+        if (event.type === 'activity.updated') {
+            onActivityRef.current?.(event.data);
         }
     }, []);
 
@@ -94,18 +104,25 @@ export function useDashboardRealtime({
 
             ws.onopen = () => {
                 retryRef.current = 0;
-                // Subscribe to recruiter dashboard channel
-                ws.send(JSON.stringify({
-                    type: 'subscribe',
-                    channels: [`dashboard:${userId}`],
-                }));
-                onReconnectRef.current?.();
             };
 
             ws.onmessage = (message) => {
                 try {
                     const payload = JSON.parse(message.data) as DashboardEvent;
-                    if (!payload?.type || payload.type === 'hello') return;
+                    if (!payload?.type) return;
+
+                    // Subscribe after receiving "hello" — the server registers its
+                    // message handler *before* sending hello, so this avoids a race
+                    // where an early subscribe sent in onopen gets dropped.
+                    if (payload.type === 'hello') {
+                        ws.send(JSON.stringify({
+                            type: 'subscribe',
+                            channels: [`dashboard:${userId}`, ...extraChannelsRef.current],
+                        }));
+                        onReconnectRef.current?.();
+                        return;
+                    }
+
                     handleEvent(payload);
                 } catch {
                     // ignore malformed payloads
@@ -134,7 +151,7 @@ export function useDashboardRealtime({
             } else if (current.readyState === WebSocket.OPEN) {
                 current.send(JSON.stringify({
                     type: 'subscribe',
-                    channels: [`dashboard:${userId}`],
+                    channels: [`dashboard:${userId}`, ...extraChannelsRef.current],
                 }));
                 onReconnectRef.current?.();
             }

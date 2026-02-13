@@ -65,7 +65,7 @@ export default function PlatformActivityTable({ events, loading }: PlatformActiv
                 </Link>
             }
         >
-            <div className="space-y-1 -mx-2">
+            <div className="space-y-1 -mx-2 max-h-[26rem] overflow-y-auto">
                 {events.map((event, i) => {
                     const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.application;
                     return (

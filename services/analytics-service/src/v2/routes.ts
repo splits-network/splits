@@ -23,6 +23,8 @@ interface RouteOptions extends FastifyPluginOptions {
     supabase: SupabaseClient;
     cache: CacheManager;
     config: any;
+    redis?: import('ioredis').default;
+    activityService?: ActivityService;
 }
 
 /**
@@ -32,7 +34,7 @@ export async function registerV2Routes(
     app: FastifyInstance,
     options: RouteOptions
 ) {
-    const { supabase, cache, redis, config } = options;
+    const { supabase, cache, config, activityService } = options;
 
     // Root V2 endpoint
     app.get('/', async (request, reply) => {
@@ -66,9 +68,6 @@ export async function registerV2Routes(
     const proposalStatsRepository = new ProposalStatsRepository(supabase);
     const proposalStatsService = new ProposalStatsService(proposalStatsRepository, cache, supabase);
 
-    // Initialize activity service (uses Redis for real-time presence tracking)
-    const activityService = redis ? new ActivityService(redis) : null;
-
     // Register domain routes
     registerStatsRoutes(app, { statsService });
     registerMarketplaceMetricsRoutes(app, { marketplaceMetricsService });
@@ -77,7 +76,4 @@ export async function registerV2Routes(
     if (activityService) {
         registerActivityRoutes(app, { activityService });
     }
-
-    // Expose activityService on the app instance for the publisher to use
-    (app as any).activityService = activityService;
 }

@@ -24,6 +24,7 @@ import RoleDistributionDoughnut from './admin/role-distribution-doughnut';
 import RecruiterStatusBreakdown from './admin/recruiter-status-breakdown';
 import FinancialSummaryCard from './admin/financial-summary-card';
 import SubscriptionOverview from './admin/subscription-overview';
+import OnlineActivityChart, { type ActivitySnapshot } from './admin/online-activity-chart';
 
 function formatCurrency(value: number): string {
     if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
@@ -35,6 +36,7 @@ export default function AdminDashboard() {
     const { userId } = useAuth();
     const [trendPeriod, setTrendPeriod] = useState(6);
     const [chartRefreshKey, setChartRefreshKey] = useState(0);
+    const [activitySnapshot, setActivitySnapshot] = useState<ActivitySnapshot | null>(null);
 
     // ── Independent data hooks ──
     const { stats, loading: statsLoading, refresh: refreshStats } = usePlatformStats();
@@ -62,12 +64,18 @@ export default function AdminDashboard() {
         setChartRefreshKey((k) => k + 1);
     }, [refreshStats, refreshPipeline, refreshHealth, refreshActivity, refreshPerformers]);
 
+    const handleActivityUpdate = useCallback((snapshot: ActivitySnapshot) => {
+        setActivitySnapshot(snapshot);
+    }, []);
+
     useDashboardRealtime({
         enabled: !!userId,
         userId: userId || undefined,
         onStatsUpdate: handleStatsUpdate,
         onChartsUpdate: handleChartsUpdate,
         onReconnect: handleReconnect,
+        onActivityUpdate: handleActivityUpdate,
+        extraChannels: ['dashboard:activity'],
     });
 
     // ── 60s polling for aggregate freshness ──
@@ -111,6 +119,9 @@ export default function AdminDashboard() {
 
             {/* ── Section 0: Platform Alerts Bar (conditional) ── */}
             {!statsLoading && <PlatformAlertsBar stats={stats} />}
+
+            {/* ── Live Activity (real-time online users) ── */}
+            <OnlineActivityChart snapshot={activitySnapshot} />
 
             {/* ── Section 1: KPI Strip (7 cards) ── */}
             <StatCardGrid className="shadow-lg w-full">

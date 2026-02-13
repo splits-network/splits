@@ -93,6 +93,7 @@ jobs:
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/ws/chat \
+                      --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_CANDIDATE_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
@@ -106,6 +107,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/ws/chat \
+                      --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
@@ -270,6 +272,7 @@ jobs:
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
                   export API_BASE_URL="https://api.staging.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.staging.splits.network/ws/chat"
+                  export ANALYTICS_GATEWAY_URL="wss://api.staging.splits.network/ws/analytics"
                   export PORTAL_URL="https://staging.splits.network"
                   export CANDIDATE_URL="https://staging.applicant.network"
                   export CORPORATE_URL="https://staging.employment-networks.com"

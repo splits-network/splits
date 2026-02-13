@@ -114,12 +114,16 @@ const redisData = new Redis({
     password: process.env.REDIS_PASSWORD || undefined,
 });
 
+// Create ActivityService at the top level so it's accessible outside the plugin scope
+const activityService = new ActivityService(redisData);
+
 // Register V2 routes (routes include full /api/v2 paths since API Gateway forwards them)
 app.register(registerV2Routes, {
     supabase,
     cache,
     config,
     redis: redisData,
+    activityService,
 });
 
 // Initialize event consumer and activity publisher
@@ -158,12 +162,9 @@ async function startServer() {
         logger.info("Background aggregation jobs started");
 
         // Start activity publisher (15s interval pushing online counts via WebSocket)
-        const activityService = (app as any).activityService as ActivityService | null;
-        if (activityService) {
-            activityPublisher = new ActivityPublisher(activityService, pubRedis);
-            activityPublisher.start();
-            logger.info("Activity publisher started");
-        }
+        activityPublisher = new ActivityPublisher(activityService, pubRedis);
+        activityPublisher.start();
+        logger.info("Activity publisher started");
     } catch (error) {
         logger.error({ error }, "Failed to start analytics service");
         process.exit(1);
