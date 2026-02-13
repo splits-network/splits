@@ -14,7 +14,7 @@ export interface UserProfileDTO {
 export interface UserRoleDTO {
     id: string;
     role_name: string;
-    role_entity_id: string;
+    role_entity_id: string | null;
 }
 
 export interface MembershipDTO {
@@ -34,6 +34,8 @@ export interface CreateJobDTO {
     fee_percentage: number;
     description?: string;
     status?: string;
+    commute_types?: ('remote' | 'hybrid_1' | 'hybrid_2' | 'hybrid_3' | 'hybrid_4' | 'in_office')[];
+    job_level?: 'entry' | 'mid' | 'senior' | 'lead' | 'manager' | 'director' | 'vp' | 'c_suite';
 }
 
 export interface JobDTO {
@@ -48,6 +50,8 @@ export interface JobDTO {
     fee_percentage: number;
     description?: string;
     status: string;
+    commute_types?: ('remote' | 'hybrid_1' | 'hybrid_2' | 'hybrid_3' | 'hybrid_4' | 'in_office')[] | null;
+    job_level?: 'entry' | 'mid' | 'senior' | 'lead' | 'manager' | 'director' | 'vp' | 'c_suite' | null;
     created_at: string;
     updated_at: string;
 }

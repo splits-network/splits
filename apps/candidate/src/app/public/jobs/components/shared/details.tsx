@@ -12,6 +12,8 @@ import { JobAnalyticsChart } from "@/components/ui/charts/job-analytics-chart";
 import type { Job } from "../../types";
 import {
     formatEmploymentType,
+    formatCommuteTypes,
+    formatJobLevel,
     getCompanyInitials,
     getCompanyName,
     getCompanyIndustry,
@@ -132,6 +134,18 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                         <span className="flex items-center gap-1.5">
                             <i className="fa-duotone fa-regular fa-briefcase text-xs" />
                             {formatEmploymentType(item.employment_type)}
+                        </span>
+                    )}
+                    {formatCommuteTypes(item.commute_types) && (
+                        <span className="flex items-center gap-1.5">
+                            <i className="fa-duotone fa-regular fa-building-user text-xs" />
+                            {formatCommuteTypes(item.commute_types)}
+                        </span>
+                    )}
+                    {formatJobLevel(item.job_level) && (
+                        <span className="flex items-center gap-1.5">
+                            <i className="fa-duotone fa-regular fa-signal text-xs" />
+                            {formatJobLevel(item.job_level)}
                         </span>
                     )}
                     {shouldShowSalary(item) && (
@@ -297,6 +311,23 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                         value={formatEmploymentType(
                                             item.employment_type,
                                         )}
+                                    />
+                                    <DataRow
+                                        icon="fa-building-user"
+                                        label="Work Type"
+                                        value={
+                                            formatCommuteTypes(
+                                                item.commute_types,
+                                            ) || "Not specified"
+                                        }
+                                    />
+                                    <DataRow
+                                        icon="fa-signal"
+                                        label="Level"
+                                        value={
+                                            formatJobLevel(item.job_level) ||
+                                            "Not specified"
+                                        }
                                     />
                                     <DataRow
                                         icon="fa-dollar-sign"

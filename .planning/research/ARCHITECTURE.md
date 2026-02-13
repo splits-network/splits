@@ -1,722 +1,892 @@
-# Architecture Patterns: Global Cross-Entity Search
+# Architecture Patterns: Custom GPT Actions Backend
 
-**Domain:** Global search across recruiting marketplace entities
-**Researched:** 2026-02-12
-**Confidence:** HIGH
+**Domain:** Custom GPT with OAuth2-authenticated Actions backend for recruiting marketplace
+**Researched:** 2026-02-13
+**Confidence:** HIGH (codebase analysis) / MEDIUM (GPT Actions spec from training data, not live-verified)
 
 ## Executive Summary
 
-Global cross-entity search for a recruiting marketplace must query 6-7 entity tables (candidates, jobs, companies, recruiters, applications, placements), apply role-based access filtering, rank results by relevance, and serve both typeahead (fast, top results) and full search (paginated) use cases. The architecture must integrate with existing Supabase Postgres full-text search infrastructure (tsvector columns with GIN indexes already exist) and the Fastify API Gateway + V2 service pattern.
+The Custom GPT Actions backend requires a new `gpt-service` microservice that serves as an OAuth2 provider and GPT-specific API layer. This service has a fundamentally different auth model from existing services: instead of Clerk JWTs from browser sessions, it receives bearer tokens that the gpt-service itself issues after an OAuth2 authorization code flow. The gpt-service sits *behind* the api-gateway but with a separate auth path -- the gateway routes GPT requests to gpt-service which handles its own token validation, then gpt-service queries the database directly using `shared-access-context` (following the established "no HTTP calls between services" rule).
 
-**Key architectural decision:** Extend existing ATS service rather than creating a new search service. Search is inherently an ATS concern (finding entities within the applicant tracking system), and consolidating here avoids cross-service coordination overhead.
+**Critical architectural insight:** The GPT is NOT a frontend app. It is an external OAuth2 client. The backend must act as an OAuth2 Authorization Server, but the identity provider is still Clerk. This creates a two-layer auth model: Clerk authenticates the human, gpt-service issues and validates GPT-scoped tokens.
 
 ## Recommended Architecture
 
-### High-Level Data Flow
+### High-Level Request Flow
 
 ```
-User keystroke (frontend)
-  ↓
-Debounced API call (250ms for typeahead, immediate for full search)
-  ↓
-API Gateway: GET /v2/search
-  ↓
-ATS Service: SearchService
-  ↓
-SearchRepository.globalSearch(clerkUserId, query, options)
-  ↓
-resolveAccessContext(clerkUserId) → role filtering rules
-  ↓
-Parallel Postgres queries (6-7 entities) with ts_rank ordering
-  ↓
-In-memory merge + re-rank (or UNION ALL query)
-  ↓
-Return top N results with entity_type discriminator
-  ↓
-API Gateway wraps in { data: [...] } envelope
-  ↓
-Frontend renders grouped/unified results
+ChatGPT Custom GPT
+    |
+    | (1) HTTP request with Bearer token (GPT access token)
+    v
+NGINX Ingress (api.splits.network)
+    |
+    | (2) Routes /api/v1/gpt/* to api-gateway
+    v
+API Gateway (Fastify)
+    |
+    | (3) Detects /api/v1/gpt/* path prefix
+    | (4) SKIPS Clerk JWT validation for this prefix
+    | (5) Proxies request to gpt-service with raw Bearer token
+    v
+GPT Service (Fastify)
+    |
+    | (6) Validates GPT access token from Bearer header
+    | (7) Resolves clerk_user_id from gpt_tokens table
+    | (8) Uses resolveAccessContext(clerkUserId) for RBAC
+    | (9) Queries Supabase directly for domain data
+    | (10) Returns GPT-formatted response
+    v
+Response flows back through gateway to ChatGPT
 ```
 
-### Component Boundaries
+### OAuth2 Authorization Flow (One-Time Account Linking)
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| **Frontend SearchInput** | Debouncing, UI state, typeahead dropdown | API Gateway via ApiClient |
-| **API Gateway /v2/search** | Auth extraction (Clerk JWT → clerkUserId), rate limiting, proxy to ATS | ATS Service SearchService |
-| **ATS SearchService** | Query coordination, access control resolution, result merging | SearchRepository, AccessContextResolver |
-| **SearchRepository** | Execute Postgres queries, apply ts_rank, role-based WHERE clauses | Supabase (direct DB queries) |
-| **AccessContextResolver** | Resolve user's role, company IDs, recruiter ID | Supabase (memberships, user_roles tables) |
-| **Redis Cache** | Cache access context (1 min TTL), cache search results (30s TTL for typeahead) | ATS SearchService |
+```
+User clicks "Sign in" in ChatGPT Custom GPT
+    |
+    v
+(1) ChatGPT redirects to:
+    https://api.splits.network/api/v1/gpt/oauth/authorize
+    ?client_id=<gpt_client_id>
+    &redirect_uri=https://chatgpt.com/aip/<plugin_id>/oauth/callback
+    &response_type=code
+    &state=<random_state>
+    &scope=candidate
+    |
+    v
+(2) gpt-service receives authorize request
+    - Validates client_id against oauth_clients table
+    - Validates redirect_uri matches registered callback
+    - Stores state + client_id + scope in gpt_sessions table
+    - Redirects user to Clerk login page:
+      https://accounts.applicant.network/sign-in
+      ?redirect_url=https://api.splits.network/api/v1/gpt/oauth/callback
+      &state=<session_id>
+    |
+    v
+(3) User authenticates with Clerk (existing Clerk login page)
+    - Email/password, Google, etc.
+    - Clerk issues session
+    |
+    v
+(4) Clerk redirects back to gpt-service callback:
+    https://api.splits.network/api/v1/gpt/oauth/callback
+    ?state=<session_id>
+    - gpt-service extracts Clerk session from cookie/token
+    - Validates user via Clerk Backend SDK
+    - Retrieves clerk_user_id
+    |
+    v
+(5) gpt-service generates authorization code
+    - Stores: auth_code -> {clerk_user_id, client_id, scope, expires_at}
+    - Redirects to ChatGPT callback:
+      https://chatgpt.com/aip/<plugin_id>/oauth/callback
+      ?code=<auth_code>
+      &state=<original_state>
+    |
+    v
+(6) ChatGPT exchanges code for tokens (server-to-server):
+    POST https://api.splits.network/api/v1/gpt/oauth/token
+    Content-Type: application/x-www-form-urlencoded
 
-### Integration Points with Existing Architecture
+    grant_type=authorization_code
+    &code=<auth_code>
+    &client_id=<gpt_client_id>
+    &client_secret=<gpt_client_secret>
+    &redirect_uri=https://chatgpt.com/aip/<plugin_id>/oauth/callback
+    |
+    v
+(7) gpt-service validates code, issues tokens:
+    {
+      "access_token": "<jwt_or_opaque_token>",
+      "token_type": "bearer",
+      "expires_in": 3600,
+      "refresh_token": "<refresh_token>"
+    }
+    - Stores token in gpt_tokens table linked to clerk_user_id
+    |
+    v
+(8) ChatGPT stores tokens, uses access_token for all subsequent API calls:
+    GET /api/v1/gpt/jobs?keywords=senior+engineer
+    Authorization: Bearer <access_token>
+```
 
-#### 1. Database Layer (Existing Infrastructure)
+### Token Refresh Flow
 
-**Already exists:**
-- `search_vector tsvector` columns on 7 tables (candidates, jobs, companies, recruiters, applications, placements, recruiter_candidates)
-- GIN indexes on all search_vector columns (e.g., `CREATE INDEX jobs_search_vector_idx ON jobs USING gin(search_vector)`)
-- Postgres functions to build search vectors (e.g., `build_jobs_search_vector()`)
-- Triggers to auto-update search_vector on INSERT/UPDATE
+```
+(1) ChatGPT detects 401 response (expired access token)
+    |
+    v
+(2) ChatGPT sends refresh request:
+    POST /api/v1/gpt/oauth/token
+    grant_type=refresh_token
+    &refresh_token=<refresh_token>
+    &client_id=<gpt_client_id>
+    &client_secret=<gpt_client_secret>
+    |
+    v
+(3) gpt-service validates refresh token
+    - Checks gpt_tokens table: not revoked, not expired
+    - Resolves clerk_user_id
+    - Issues new access_token (and optionally new refresh_token)
+    - Invalidates old access_token
+    |
+    v
+(4) Returns new tokens to ChatGPT
+```
 
-**No database changes needed.** Use existing full-text search infrastructure.
+## Component Boundaries
 
-#### 2. API Gateway Layer (Modified)
+### New Components
 
-**New route:**
+| Component | Type | Responsibility | Location |
+|-----------|------|----------------|----------|
+| **gpt-service** | New microservice | OAuth2 provider + GPT API endpoints | `services/gpt-service/` |
+| **GPT auth middleware** | New module in gpt-service | Validate GPT tokens, resolve user | `services/gpt-service/src/v2/shared/auth.ts` |
+| **OAuth routes** | New routes in gpt-service | /authorize, /callback, /token, /revoke | `services/gpt-service/src/v2/oauth/` |
+| **GPT API routes** | New routes in gpt-service | Jobs search, resume analysis, applications | `services/gpt-service/src/v2/` |
+| **OpenAPI schema** | Static file | Served at /.well-known/openapi.yaml | `services/gpt-service/src/openapi/` |
+| **DB tables** | Schema additions | gpt_tokens, gpt_auth_codes, oauth_clients | Supabase migration |
+
+### Modified Components
+
+| Component | Type | Modification | Why |
+|-----------|------|-------------|-----|
+| **api-gateway auth hook** | Existing | Skip Clerk auth for `/api/v1/gpt/*` paths | GPT tokens are NOT Clerk JWTs |
+| **api-gateway routes** | Existing | Add proxy routes for gpt-service | Route GPT requests to gpt-service |
+| **api-gateway index.ts** | Existing | Register gpt-service in ServiceRegistry | Connect to gpt-service URL |
+| **api-gateway deployment.yaml** | Existing | Add GPT_SERVICE_URL env var | K8s routing |
+| **K8s ingress.yaml** | Unchanged | Already routes api.splits.network/* to api-gateway | No change needed |
+
+### Unchanged Components
+
+| Component | Why Unchanged |
+|-----------|--------------|
+| **ats-service** | gpt-service queries DB directly, not via HTTP |
+| **ai-service** | gpt-service queries DB directly OR uses internal-service-key for AI calls |
+| **document-service** | gpt-service can use Supabase Storage SDK directly |
+| **identity-service** | User data accessed via shared DB |
+| **shared-access-context** | gpt-service uses resolveAccessContext() as-is |
+| **Clerk configuration** | Existing Candidate app Clerk instance used for GPT login |
+| **NGINX Ingress** | Already routes all api.splits.network to api-gateway |
+
+## Integration Points with Existing Architecture
+
+### 1. API Gateway Integration
+
+The api-gateway already has a pattern for skipping Clerk auth on certain paths (webhooks, public endpoints, internal service calls). GPT routes follow the same pattern.
+
+**Current auth skip patterns in api-gateway/src/index.ts:**
 ```typescript
-// services/api-gateway/src/routes/v2/ats.ts (modify existing file)
+// Already exists:
+if (request.url.includes('/webhooks/')) return;           // Signature-verified
+if (request.url.startsWith('/api/public/')) return;       // Public
+if (request.url.startsWith('/api/marketplace/')) return;  // Public
 
-app.get('/v2/search', {
-    preHandler: requireAuth, // Extract clerkUserId from JWT
-    schema: {
-        querystring: {
-            type: 'object',
-            properties: {
-                q: { type: 'string', minLength: 1 }, // Query string
-                mode: { type: 'string', enum: ['typeahead', 'full'], default: 'typeahead' },
-                entity_types: { type: 'string' }, // Comma-separated: "jobs,candidates"
-                limit: { type: 'number', default: 5 },
-            },
-            required: ['q'],
-        },
-    },
-}, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'];
-    const { q, mode, entity_types, limit } = request.query;
+// NEW: Add GPT route skip
+if (request.url.startsWith('/api/v1/gpt/')) return;       // GPT token auth (handled by gpt-service)
+```
 
-    const response = await services.ats.get(`/v2/search?q=${encodeURIComponent(q)}&mode=${mode}&entity_types=${entity_types || ''}&limit=${limit}`, {
-        headers: buildAuthHeaders(clerkUserId, getCorrelationId(request)),
+**Gateway proxy pattern** (same as all other services):
+```typescript
+// services/api-gateway/src/routes/v2/gpt.ts (new file)
+export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const gptService = () => services.get('gpt');
+
+    // Proxy ALL /api/v1/gpt/* requests to gpt-service
+    // Note: v1 namespace, not v2, because this is a separate API surface
+    app.all('/api/v1/gpt/*', async (request, reply) => {
+        const path = request.url; // Pass full path through
+        const correlationId = getCorrelationId(request);
+
+        // Forward the raw Authorization header (GPT token, NOT Clerk)
+        const headers: Record<string, string> = {};
+        if (request.headers.authorization) {
+            headers['authorization'] = request.headers.authorization as string;
+        }
+        headers['x-correlation-id'] = correlationId;
+
+        // Proxy to gpt-service
+        const response = await gptService().get(path, request.query, correlationId, headers);
+        return reply.send(response);
     });
+}
+```
 
-    reply.send(response.data); // Already wrapped in { data: [...] }
+**ServiceRegistry addition** (api-gateway/src/index.ts):
+```typescript
+services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
+```
+
+### 2. Database Integration (Direct Access)
+
+The gpt-service follows the existing pattern: direct Supabase client for database queries, using `shared-access-context` for RBAC. This adheres to the "no HTTP calls between services" rule.
+
+**gpt-service accesses these existing tables (read-only):**
+- `jobs` (with company join) -- for job search
+- `candidates` -- for user's candidate profile
+- `applications` -- for application status
+- `companies` -- for company context
+- `users` -- via resolveAccessContext
+
+**gpt-service owns these new tables (read-write):**
+- `oauth_clients` -- registered OAuth clients (the GPT itself)
+- `gpt_auth_codes` -- short-lived authorization codes
+- `gpt_tokens` -- access and refresh tokens
+- `gpt_sessions` -- OAuth flow state management
+- `gpt_audit_log` -- all GPT-initiated actions
+
+### 3. Auth Integration (Clerk + Custom OAuth)
+
+**Two auth systems coexist, never overlap:**
+
+| System | Used By | Validated By | Token Format |
+|--------|---------|-------------|-------------|
+| Clerk JWT | Portal app, Candidate app | api-gateway AuthMiddleware | JWT signed by Clerk |
+| GPT tokens | ChatGPT Custom GPT | gpt-service auth middleware | Opaque token (DB lookup) |
+
+**Critical rule:** GPT tokens and Clerk JWTs never mix. The api-gateway does NOT validate GPT tokens. The gpt-service does NOT validate Clerk JWTs. The bridge between them is the `clerk_user_id` stored in the `gpt_tokens` table, which was established during the OAuth flow.
+
+### 4. AI Service Integration
+
+For resume analysis and fit scoring, gpt-service needs AI capabilities. Two options:
+
+**Option A: Direct AI calls from gpt-service (RECOMMENDED)**
+- gpt-service calls OpenAI API directly for GPT-specific AI tasks
+- Uses its own `OPENAI_API_KEY` env var
+- Keeps AI logic GPT-specific (prompt formatting, response parsing)
+- No dependency on existing ai-service
+
+**Option B: Internal service call to ai-service**
+- gpt-service calls ai-service via `x-internal-service-key` header
+- Reuses existing AI review infrastructure
+- Creates coupling between services
+
+**Recommendation: Option A.** The GPT AI tasks (resume parsing for GPT responses, natural language query interpretation) are different from existing ai-service tasks (formal fit analysis for ATS). Keeping them separate follows nano-service philosophy and avoids coupling.
+
+### 5. Document Service Integration (Resume Uploads)
+
+For resume analysis, the GPT needs to handle file uploads. ChatGPT sends files as part of the action request.
+
+**Approach:** gpt-service uses Supabase Storage SDK directly (same pattern as document-service).
+- Receives file from ChatGPT action
+- Stores in Supabase Storage bucket (`gpt-uploads/`)
+- Processes/analyzes the resume
+- Returns analysis to GPT
+
+This avoids HTTP calls to document-service while reusing the same storage backend.
+
+## gpt-service Internal Architecture
+
+Following the V2 service pattern established in the codebase:
+
+```
+services/gpt-service/
+├── Dockerfile
+├── package.json
+├── tsconfig.json
+└── src/
+    ├── index.ts                          # Entry point, Fastify server setup
+    ├── v2/
+    │   ├── shared/
+    │   │   ├── auth.ts                   # GPT token validation middleware
+    │   │   ├── events.ts                 # EventPublisher for audit
+    │   │   ├── helpers.ts                # Common helpers
+    │   │   └── pagination.ts             # Reuse shared pagination
+    │   ├── oauth/
+    │   │   ├── types.ts                  # OAuth types (AuthCode, Token, Client)
+    │   │   ├── repository.ts             # oauth_clients, gpt_auth_codes, gpt_tokens CRUD
+    │   │   ├── service.ts                # OAuth flow logic (validate, issue, refresh, revoke)
+    │   │   └── routes.ts                 # /authorize, /callback, /token, /revoke
+    │   ├── jobs/
+    │   │   ├── types.ts                  # GPT job search types
+    │   │   ├── repository.ts             # Job queries (read from existing jobs table)
+    │   │   ├── service.ts                # Search logic, natural language parsing
+    │   │   └── routes.ts                 # GET /api/v1/gpt/jobs
+    │   ├── applications/
+    │   │   ├── types.ts                  # GPT application types
+    │   │   ├── repository.ts             # Application queries/writes
+    │   │   ├── service.ts                # Confirmation enforcement, status logic
+    │   │   └── routes.ts                 # GET/POST /api/v1/gpt/applications
+    │   ├── resume/
+    │   │   ├── types.ts                  # Resume analysis types
+    │   │   ├── service.ts                # AI-powered resume parsing + fit scoring
+    │   │   └── routes.ts                 # POST /api/v1/gpt/resume/analyze
+    │   └── routes.ts                     # Route registry
+    └── openapi/
+        └── schema.yaml                   # OpenAPI 3.0 spec served at /.well-known/openapi.yaml
+```
+
+### GPT Token Validation Middleware
+
+```typescript
+// services/gpt-service/src/v2/shared/auth.ts
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+
+export interface GptAuthContext {
+    tokenId: string;
+    clerkUserId: string;
+    scope: string;
+    // AccessContext fields resolved from clerkUserId
+    candidateId: string | null;
+    identityUserId: string | null;
+}
+
+export class GptAuthMiddleware {
+    private accessResolver: AccessContextResolver;
+
+    constructor(private supabase: SupabaseClient) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
+
+    createMiddleware() {
+        return async (request: FastifyRequest, reply: FastifyReply) => {
+            const authHeader = request.headers.authorization;
+            if (!authHeader?.startsWith('Bearer ')) {
+                return reply.status(401).send({
+                    error: { code: 'UNAUTHORIZED', message: 'Missing bearer token' }
+                });
+            }
+
+            const token = authHeader.substring(7);
+
+            // Look up token in database
+            const { data: tokenRecord, error } = await this.supabase
+                .from('gpt_tokens')
+                .select('id, clerk_user_id, scope, expires_at, revoked_at')
+                .eq('access_token_hash', this.hashToken(token))
+                .is('revoked_at', null)
+                .maybeSingle();
+
+            if (error || !tokenRecord) {
+                return reply.status(401).send({
+                    error: { code: 'INVALID_TOKEN', message: 'Invalid or expired token' }
+                });
+            }
+
+            // Check expiry
+            if (new Date(tokenRecord.expires_at) < new Date()) {
+                return reply.status(401).send({
+                    error: { code: 'TOKEN_EXPIRED', message: 'Token has expired' }
+                });
+            }
+
+            // Resolve full access context from clerk_user_id
+            const context = await this.accessResolver.resolve(tokenRecord.clerk_user_id);
+
+            // Attach GPT auth context to request
+            (request as any).gptAuth = {
+                tokenId: tokenRecord.id,
+                clerkUserId: tokenRecord.clerk_user_id,
+                scope: tokenRecord.scope,
+                candidateId: context.candidateId,
+                identityUserId: context.identityUserId,
+            } as GptAuthContext;
+        };
+    }
+
+    private hashToken(token: string): string {
+        // SHA-256 hash for secure token storage
+        const crypto = require('crypto');
+        return crypto.createHash('sha256').update(token).digest('hex');
+    }
+}
+```
+
+## Database Schema
+
+### New Tables
+
+```sql
+-- OAuth2 client registration (the Custom GPT itself)
+CREATE TABLE oauth_clients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id TEXT UNIQUE NOT NULL,          -- Public client identifier
+    client_secret_hash TEXT NOT NULL,         -- SHA-256 hash of client secret
+    name TEXT NOT NULL,                       -- "Applicant Network GPT"
+    redirect_uris TEXT[] NOT NULL,            -- Allowed callback URLs
+    scopes TEXT[] NOT NULL DEFAULT '{candidate}', -- Allowed scopes
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Short-lived authorization codes (10 minute TTL)
+CREATE TABLE gpt_auth_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code TEXT UNIQUE NOT NULL,               -- The authorization code
+    client_id TEXT NOT NULL REFERENCES oauth_clients(client_id),
+    clerk_user_id TEXT NOT NULL,             -- User who authorized
+    scope TEXT NOT NULL DEFAULT 'candidate',
+    redirect_uri TEXT NOT NULL,              -- Must match on exchange
+    expires_at TIMESTAMPTZ NOT NULL,         -- code + 10 minutes
+    used_at TIMESTAMPTZ,                     -- Set when exchanged (prevents replay)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Access and refresh tokens
+CREATE TABLE gpt_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id TEXT NOT NULL REFERENCES oauth_clients(client_id),
+    clerk_user_id TEXT NOT NULL,
+    access_token_hash TEXT UNIQUE NOT NULL,   -- SHA-256 of access token
+    refresh_token_hash TEXT UNIQUE,           -- SHA-256 of refresh token
+    scope TEXT NOT NULL DEFAULT 'candidate',
+    access_token_expires_at TIMESTAMPTZ NOT NULL,  -- 1 hour
+    refresh_token_expires_at TIMESTAMPTZ,          -- 30 days
+    revoked_at TIMESTAMPTZ,                        -- Null = active
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Indexes for token lookup performance
+CREATE INDEX idx_gpt_tokens_access_hash ON gpt_tokens(access_token_hash) WHERE revoked_at IS NULL;
+CREATE INDEX idx_gpt_tokens_refresh_hash ON gpt_tokens(refresh_token_hash) WHERE revoked_at IS NULL;
+CREATE INDEX idx_gpt_tokens_clerk_user ON gpt_tokens(clerk_user_id);
+CREATE INDEX idx_gpt_auth_codes_code ON gpt_auth_codes(code) WHERE used_at IS NULL;
+
+-- OAuth flow session state
+CREATE TABLE gpt_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    state TEXT UNIQUE NOT NULL,              -- CSRF state parameter
+    client_id TEXT NOT NULL,
+    scope TEXT NOT NULL DEFAULT 'candidate',
+    redirect_uri TEXT NOT NULL,
+    clerk_redirect_url TEXT,                 -- Where to redirect after Clerk login
+    expires_at TIMESTAMPTZ NOT NULL,         -- 15 minute TTL
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Audit log for all GPT-initiated actions
+CREATE TABLE gpt_audit_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    token_id UUID REFERENCES gpt_tokens(id),
+    clerk_user_id TEXT NOT NULL,
+    action TEXT NOT NULL,                    -- e.g., 'search_jobs', 'submit_application'
+    endpoint TEXT NOT NULL,                  -- e.g., 'GET /api/v1/gpt/jobs'
+    request_summary JSONB,                   -- Sanitized request params
+    response_status INTEGER NOT NULL,
+    confirmed BOOLEAN DEFAULT false,         -- For write actions
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_gpt_audit_log_user ON gpt_audit_log(clerk_user_id);
+CREATE INDEX idx_gpt_audit_log_created ON gpt_audit_log(created_at);
+```
+
+### Token Lifecycle
+
+| State | access_token | refresh_token | access_token_expires_at | revoked_at |
+|-------|-------------|---------------|------------------------|------------|
+| Active | hash present | hash present | future | NULL |
+| Access expired | hash present | hash present | past | NULL |
+| Refreshed | NEW hash | same or new | future | NULL (old row revoked) |
+| Revoked | hash present | hash present | any | SET |
+
+**Token durations:**
+- Access token: 1 hour (short-lived, limits blast radius)
+- Refresh token: 30 days (allows persistent session)
+- Authorization code: 10 minutes (one-time use)
+- OAuth session state: 15 minutes (login flow timeout)
+
+## Key Decision: gpt-service Goes Through api-gateway
+
+**Decision:** GPT requests route through api-gateway, NOT directly to gpt-service via separate ingress.
+
+**Rationale:**
+
+1. **Single ingress point** -- all api.splits.network traffic goes through api-gateway. Adding a second ingress for GPT creates operational complexity (separate TLS certs, separate rate limiting, separate CORS).
+
+2. **Rate limiting** -- api-gateway already has Redis-backed rate limiting. GPT requests benefit from this without reimplementing.
+
+3. **Observability** -- all requests logged in one place with correlation IDs.
+
+4. **CORS irrelevant** -- ChatGPT makes server-to-server calls, not browser calls. CORS doesn't apply. The api-gateway's CORS config won't block GPT requests because they aren't browser-origin requests.
+
+5. **Auth skip is trivial** -- adding one `if (request.url.startsWith('/api/v1/gpt/'))` check to the auth hook is a 1-line change.
+
+**Alternative considered:** Separate K8s ingress for gpt-service at e.g., `gpt.splits.network`. Rejected because it adds infrastructure complexity for no real benefit. The api-gateway proxy is lightweight (same pattern as all other services).
+
+## Key Decision: Opaque Tokens (Not JWTs)
+
+**Decision:** GPT access tokens are opaque random strings, validated via database lookup.
+
+**Rationale:**
+
+1. **Revocation** -- JWTs can't be revoked before expiry without a blacklist (which is just a database lookup anyway). Opaque tokens can be instantly revoked by setting `revoked_at`.
+
+2. **Simplicity** -- no JWT signing keys to manage, no key rotation, no JWT library needed in gpt-service.
+
+3. **Security** -- token value is never stored (only hash), so database compromise doesn't leak usable tokens.
+
+4. **Performance** -- single indexed DB lookup per request is fast enough. At GPT scale (tens of requests per user per session, not thousands per second), DB validation is not a bottleneck.
+
+**Alternative considered:** JWT access tokens with short expiry. Would eliminate DB lookup per request but makes revocation complex and adds JWT infrastructure. Not worth it at GPT scale.
+
+## Key Decision: /api/v1/gpt/* Namespace
+
+**Decision:** GPT endpoints live under `/api/v1/gpt/` not `/api/v2/`.
+
+**Rationale:**
+
+1. **Separate API surface** -- GPT API serves a different client (ChatGPT) with different auth, different response formats, different rate limits. It's not a v2 extension.
+
+2. **Versioning independence** -- GPT API can evolve independently of the main v2 API. When GPT needs v2, it becomes `/api/v2/gpt/`.
+
+3. **Clean auth boundary** -- api-gateway can skip Clerk auth for all `/api/v1/gpt/*` in one rule.
+
+4. **OpenAPI isolation** -- GPT Actions require their own OpenAPI schema. Keeping the namespace separate makes the schema self-contained.
+
+## Key Decision: Direct DB Access (Not Service-to-Service HTTP)
+
+**Decision:** gpt-service queries the Supabase database directly for jobs, applications, candidates data.
+
+**Rationale:**
+
+1. **Codebase rule** -- CLAUDE.md explicitly states "No HTTP calls between services -- use direct database queries or RabbitMQ events."
+
+2. **Performance** -- direct DB query is faster than gpt-service -> api-gateway -> ats-service -> DB -> ats-service -> api-gateway -> gpt-service.
+
+3. **Existing pattern** -- all V2 services access the shared Supabase database directly. gpt-service is no different.
+
+4. **Access control** -- gpt-service uses `resolveAccessContext(clerkUserId)` from `shared-access-context` package, same as all other services.
+
+**What gpt-service reads from existing tables:**
+- `jobs` (with `companies` join) -- job search, job details
+- `candidates` -- candidate profile for the authenticated user
+- `applications` (with `jobs` join) -- application status, history
+- `users`, `memberships`, `user_roles` -- via resolveAccessContext (automatic)
+
+**What gpt-service writes to existing tables:**
+- `applications` -- creating new applications (with confirmation enforcement)
+- `gpt_audit_log` -- logging all actions (new table, owned by gpt-service)
+
+## OpenAPI Schema Strategy
+
+**Decision:** Serve a static OpenAPI 3.0 YAML file at a well-known endpoint.
+
+**How Custom GPT Actions work (from training data, MEDIUM confidence):**
+1. When configuring a Custom GPT, you paste or link an OpenAPI schema
+2. ChatGPT reads the schema to understand available endpoints
+3. `operationId` values become the action names the GPT can invoke
+4. `description` fields on operations and parameters guide the GPT's understanding
+5. The schema must include server URL and auth configuration
+
+**Schema serving approach:**
+```typescript
+// services/gpt-service/src/v2/routes.ts
+import fs from 'fs';
+import path from 'path';
+
+// Serve OpenAPI schema for GPT configuration
+app.get('/api/v1/gpt/openapi.yaml', async (request, reply) => {
+    const schemaPath = path.join(__dirname, '../openapi/schema.yaml');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+    reply.header('Content-Type', 'text/yaml').send(schema);
+});
+
+// Also serve at well-known path
+app.get('/.well-known/openapi.yaml', async (request, reply) => {
+    const schemaPath = path.join(__dirname, '../openapi/schema.yaml');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+    reply.header('Content-Type', 'text/yaml').send(schema);
 });
 ```
 
-**Integration:** Add to existing `registerAtsRoutes()` function (line ~76 in ats.ts).
-
-#### 3. ATS Service Layer (New Component)
-
-**New files:**
-```
-services/ats-service/src/v2/search/
-├── types.ts          # SearchOptions, SearchResult, EntityType enum
-├── repository.ts     # SearchRepository class
-├── service.ts        # SearchService class (validation, caching)
-└── routes.ts         # Fastify route registration
-```
-
-**New route in ATS service:**
-```typescript
-// services/ats-service/src/v2/search/routes.ts
-
-import { FastifyInstance } from 'fastify';
-import { SearchService } from './service';
-
-export function registerSearchRoutes(app: FastifyInstance, searchService: SearchService) {
-    app.get('/v2/search', {
-        schema: {
-            querystring: {
-                type: 'object',
-                properties: {
-                    q: { type: 'string', minLength: 1 },
-                    mode: { type: 'string', enum: ['typeahead', 'full'], default: 'typeahead' },
-                    entity_types: { type: 'string' },
-                    limit: { type: 'number', default: 5, maximum: 100 },
-                    page: { type: 'number', default: 1 },
-                },
-                required: ['q'],
-            },
-        },
-    }, async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string;
-        const { q, mode, entity_types, limit, page } = request.query as any;
-
-        const results = await searchService.search(clerkUserId, {
-            query: q,
-            mode,
-            entityTypes: entity_types ? entity_types.split(',') : undefined,
-            limit,
-            page,
-        });
-
-        reply.send({ data: results });
-    });
-}
+**Schema structure:**
+```yaml
+openapi: 3.0.1
+info:
+  title: Applicant Network GPT API
+  version: 1.0.0
+  description: >
+    API for the Applicant Network Custom GPT. Enables job search,
+    resume analysis, application management via natural language.
+servers:
+  - url: https://api.splits.network
+security:
+  - OAuth2: [candidate]
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.splits.network/api/v1/gpt/oauth/authorize
+          tokenUrl: https://api.splits.network/api/v1/gpt/oauth/token
+          scopes:
+            candidate: Access candidate features (jobs, applications, resume)
+paths:
+  /api/v1/gpt/jobs:
+    get:
+      operationId: searchJobs
+      summary: Search for job postings
+      description: >
+        Search available job postings by keywords, location, salary range,
+        commute type, and job level. Returns paginated results.
+      parameters:
+        - name: keywords
+          in: query
+          schema:
+            type: string
+          description: Search terms (job title, skills, company name)
+        - name: location
+          in: query
+          schema:
+            type: string
+          description: City, state, or "remote"
+        # ... more parameters
+      responses:
+        '200':
+          description: Job search results
+          # ... schema
+  # ... more paths
 ```
 
-**Integration:** Register in `services/ats-service/src/v2/routes.ts` (add to existing V2 route registration).
-
-#### 4. Access Control Integration
-
-**Existing pattern (from shared-access-context):**
-```typescript
-const context = await resolveAccessContext(clerkUserId, this.supabase);
-// Returns: { roles, companyIds, organizationIds, recruiterId, candidateId, isPlatformAdmin }
-```
-
-**Role-based filtering rules:**
-
-| Role | Candidates | Jobs | Companies | Recruiters | Applications | Placements |
-|------|-----------|------|-----------|-----------|--------------|------------|
-| **platform_admin** | All | All | All | All | All | All |
-| **company_admin** | All active | Own company + active marketplace | Own company | All active | Own company | Own company |
-| **hiring_manager** | All active | Own company + active marketplace | Own company | All active | Own company jobs | Own company jobs |
-| **recruiter** | Own candidates | Active marketplace jobs | All active | All active | Own applications | Own placements |
-| **candidate** | None | Active marketplace jobs | None (via jobs) | None (via applications) | Own applications | None |
-
-**Implementation in SearchRepository:**
-```typescript
-async globalSearch(clerkUserId: string, options: SearchOptions): Promise<SearchResult[]> {
-    const context = await resolveAccessContext(this.supabase, clerkUserId);
-    const tsQuery = this.buildTsQuery(options.query);
-
-    const queries: Promise<SearchResult[]>[] = [];
-    const entityTypes = options.entityTypes || ['jobs', 'candidates', 'companies', 'recruiters', 'applications', 'placements'];
-
-    // Build parallel queries with role-based WHERE clauses
-    if (entityTypes.includes('jobs')) {
-        queries.push(this.searchJobs(tsQuery, context, options));
-    }
-    if (entityTypes.includes('candidates') && !context.roles.includes('candidate')) {
-        queries.push(this.searchCandidates(tsQuery, context, options));
-    }
-    // ... repeat for other entity types
-
-    const results = await Promise.all(queries);
-    return this.mergeAndRank(results.flat(), options.limit);
-}
-```
-
-#### 5. Caching Strategy
-
-**Two-tier cache:**
-
-1. **Access Context Cache (Redis, 1 min TTL)**
-   - Key: `access_context:{clerkUserId}`
-   - Value: Serialized AccessContext object
-   - Why: Avoid resolving memberships/roles on every search keystroke
-   - Invalidation: On role changes (RabbitMQ event from identity-service)
-
-2. **Search Results Cache (Redis, 30s TTL, typeahead only)**
-   - Key: `search:{clerkUserId}:{query}:{entityTypes}:{limit}`
-   - Value: Serialized SearchResult[]
-   - Why: Identical typeahead queries within 30s (e.g., user backspaces)
-   - Skip for full search mode (pagination makes caching less effective)
-
-**Cache-aside pattern:**
-```typescript
-async search(clerkUserId: string, options: SearchOptions): Promise<SearchResult[]> {
-    if (options.mode === 'typeahead') {
-        const cacheKey = `search:${clerkUserId}:${options.query}:${options.entityTypes?.join(',') || 'all'}:${options.limit}`;
-        const cached = await this.redis.get(cacheKey);
-        if (cached) return JSON.parse(cached);
-    }
-
-    const results = await this.repository.globalSearch(clerkUserId, options);
-
-    if (options.mode === 'typeahead') {
-        await this.redis.setex(cacheKey, 30, JSON.stringify(results));
-    }
-
-    return results;
-}
-```
-
-#### 6. Frontend Component Hierarchy
-
-**New components:**
-```
-apps/portal/src/components/global-search/
-├── search-input.tsx           # Input with debounce, dropdown trigger
-├── search-dropdown.tsx        # Typeahead results dropdown
-├── search-result-item.tsx     # Single result with entity icon/type
-├── search-page.tsx            # Full search results page
-└── hooks/
-    └── use-global-search.ts   # API hook with debouncing
-```
-
-**Integration point:**
-```typescript
-// apps/portal/src/components/portal-header.tsx (line ~86, between PlanBadge and theme toggle)
-
-<div className="flex-none flex items-center gap-1">
-    <GlobalSearchInput /> {/* NEW */}
-    <PlanBadge />
-    {/* Theme toggle... */}
-</div>
-```
-
-**Frontend data flow:**
-```typescript
-// use-global-search.ts
-export function useGlobalSearch(mode: 'typeahead' | 'full') {
-    const [query, setQuery] = useState('');
-    const [results, setResults] = useState<SearchResult[]>([]);
-    const [loading, setLoading] = useState(false);
-    const debouncedQuery = useDebounce(query, mode === 'typeahead' ? 250 : 0);
-
-    useEffect(() => {
-        if (!debouncedQuery) return;
-
-        setLoading(true);
-        apiClient.search({ q: debouncedQuery, mode, limit: mode === 'typeahead' ? 5 : 25 })
-            .then(setResults)
-            .finally(() => setLoading(false));
-    }, [debouncedQuery, mode]);
-
-    return { query, setQuery, results, loading };
-}
-```
+**OpenAPI requirements for GPT Actions (MEDIUM confidence, from training):**
+- Must be OpenAPI 3.0 (not 3.1 -- ChatGPT may not support 3.1 yet)
+- operationId is required and must be unique
+- Descriptions are critical -- the GPT uses them to decide when to call each action
+- Maximum ~30 endpoints per GPT (practical limit)
+- Request bodies should be simple, flat objects when possible
+- Response schemas help the GPT format output
 
 ## Patterns to Follow
 
-### Pattern 1: Parallel Query Execution with Result Merging
+### Pattern 1: Confirmation Safety for Write Actions
 
-**What:** Execute separate `SELECT ... FROM <entity> WHERE search_vector @@ to_tsquery(...)` queries in parallel, then merge results in application code.
+**What:** All mutation endpoints require `confirmed: true` in the request body. If missing, return a CONFIRMATION_REQUIRED error with a summary of what will happen.
 
-**When:** When entity tables have different access control rules and you need to apply ts_rank consistently.
+**When:** Any POST/PATCH/DELETE endpoint that modifies data.
 
-**Why:** Avoids complex UNION queries with role-based WHERE clauses. Easier to test, easier to add/remove entity types.
-
-**Example:**
-```typescript
-async globalSearch(clerkUserId: string, options: SearchOptions): Promise<SearchResult[]> {
-    const context = await resolveAccessContext(this.supabase, clerkUserId);
-    const tsQuery = this.buildTsQuery(options.query);
-
-    // Execute queries in parallel
-    const [jobResults, candidateResults, companyResults] = await Promise.all([
-        this.searchJobs(tsQuery, context, options),
-        this.searchCandidates(tsQuery, context, options),
-        this.searchCompanies(tsQuery, context, options),
-    ]);
-
-    // Merge and re-rank
-    const allResults = [...jobResults, ...candidateResults, ...companyResults];
-    return this.sortByRelevance(allResults).slice(0, options.limit);
-}
-
-private sortByRelevance(results: SearchResult[]): SearchResult[] {
-    return results.sort((a, b) => {
-        // ts_rank descending (higher = more relevant)
-        if (b.rank !== a.rank) return b.rank - a.rank;
-        // Tie-breaker: updated_at descending
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-    });
-}
-```
-
-### Pattern 2: Access Context Caching with Event-Driven Invalidation
-
-**What:** Cache resolved access context in Redis with 1-minute TTL, invalidate on role/membership changes via RabbitMQ events.
-
-**When:** High-frequency API calls (search typeahead) that need access control but can tolerate 1-minute stale data.
-
-**Why:** Reduces database load for memberships/user_roles queries. 1-minute staleness is acceptable for search (worst case: user granted admin role, sees updated search results in <60s).
+**Why:** Prevents the AI from accidentally executing actions. Forces a human-in-the-loop confirmation step within the ChatGPT conversation.
 
 **Example:**
 ```typescript
-// ATS SearchService
-private async getAccessContext(clerkUserId: string): Promise<AccessContext> {
-    const cacheKey = `access_context:${clerkUserId}`;
-    const cached = await this.redis.get(cacheKey);
+// services/gpt-service/src/v2/applications/service.ts
+async createApplication(
+    clerkUserId: string,
+    data: { jobId: string; confirmed?: boolean }
+): Promise<any> {
+    // Load job details for confirmation summary
+    const job = await this.jobRepository.findJob(data.jobId);
+    if (!job) throw new Error('Job not found');
 
-    if (cached) {
-        return JSON.parse(cached);
+    // Resolve user's candidate profile
+    const context = await this.accessResolver.resolve(clerkUserId);
+    if (!context.candidateId) {
+        throw new Error('No candidate profile found. Please create a profile first.');
     }
 
-    const context = await resolveAccessContext(this.supabase, clerkUserId);
-    await this.redis.setex(cacheKey, 60, JSON.stringify(context));
+    // Confirmation check
+    if (!data.confirmed) {
+        return {
+            status: 'CONFIRMATION_REQUIRED',
+            message: 'Please confirm you want to submit this application.',
+            summary: {
+                job_title: job.title,
+                company: job.company?.name,
+                location: job.location,
+                salary_range: job.salary_min && job.salary_max
+                    ? `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
+                    : 'Not specified',
+            },
+            instruction: 'Call this endpoint again with confirmed: true to proceed.'
+        };
+    }
 
-    return context;
+    // Execute the write
+    const application = await this.applicationRepository.create({
+        job_id: data.jobId,
+        candidate_id: context.candidateId,
+        status: 'draft',
+        source: 'gpt',  // Track GPT-originated applications
+        created_at: new Date().toISOString(),
+    }, clerkUserId);
+
+    // Audit log
+    await this.auditLog('submit_application', clerkUserId, {
+        application_id: application.id,
+        job_id: data.jobId,
+        confirmed: true,
+    });
+
+    return { status: 'SUCCESS', application };
 }
-
-// Identity Service: on membership/role change
-await this.eventPublisher.publish('identity.membership.updated', {
-    userId: identityUserId,
-    clerkUserId,
-});
-
-// ATS Service: consume event
-this.eventConsumer.on('identity.membership.updated', async (event) => {
-    const cacheKey = `access_context:${event.clerkUserId}`;
-    await this.redis.del(cacheKey); // Force re-resolve on next search
-});
 ```
 
-### Pattern 3: Discriminated Union for Multi-Entity Results
+### Pattern 2: GPT-Optimized Response Format
 
-**What:** Return array of results with `entity_type` discriminator field, each result having entity-specific fields.
+**What:** GPT responses should be concise, structured, and include only fields the GPT needs to present to the user. No internal IDs unless needed for follow-up actions.
 
-**When:** API returns heterogeneous entities (jobs, candidates, companies) in single response.
+**When:** All GPT API endpoints.
 
-**Why:** Type-safe on frontend, easy to render entity-specific icons/metadata.
+**Why:** ChatGPT has a context window. Sending full database rows wastes tokens and confuses the model. Lean responses produce better GPT outputs.
 
 **Example:**
 ```typescript
-// Backend types.ts
-export type SearchResult =
-    | { entity_type: 'job'; id: string; title: string; company_name: string; rank: number; updated_at: string; }
-    | { entity_type: 'candidate'; id: string; full_name: string; email: string; current_title: string; rank: number; updated_at: string; }
-    | { entity_type: 'company'; id: string; name: string; industry: string; rank: number; updated_at: string; }
-    | { entity_type: 'recruiter'; id: string; name: string; email: string; rank: number; updated_at: string; }
-    | { entity_type: 'application'; id: string; candidate_name: string; job_title: string; stage: string; rank: number; updated_at: string; }
-    | { entity_type: 'placement'; id: string; candidate_name: string; job_title: string; state: string; rank: number; updated_at: string; };
-
-// Frontend rendering
-{results.map(result => (
-    <SearchResultItem key={`${result.entity_type}-${result.id}`} result={result}>
-        {result.entity_type === 'job' && <JobIcon />}
-        {result.entity_type === 'candidate' && <CandidateIcon />}
-        {/* ... */}
-    </SearchResultItem>
-))}
-```
-
-### Pattern 4: Query Normalization for ts_query
-
-**What:** Convert user input "senior software engineer" to Postgres tsquery `'senior' & 'software' & 'engineer'` (AND) or `'senior' | 'software' | 'engineer'` (OR).
-
-**When:** Building full-text search queries from user input.
-
-**Why:** `to_tsquery()` requires specific syntax. AND gives precise results (all terms must match), OR gives broader results (any term matches).
-
-**Example:**
-```typescript
-private buildTsQuery(userInput: string, operator: 'AND' | 'OR' = 'AND'): string {
-    // Normalize: lowercase, remove punctuation, split on whitespace
-    const terms = userInput
-        .toLowerCase()
-        .replace(/[^\w\s]/g, ' ')
-        .split(/\s+/)
-        .filter(t => t.length > 0);
-
-    if (terms.length === 0) return '';
-
-    // Join with Postgres operator
-    const joinOp = operator === 'AND' ? ' & ' : ' | ';
-    return terms.join(joinOp);
+// Transform job for GPT consumption (not raw DB row)
+function formatJobForGpt(job: any): GptJobResult {
+    return {
+        id: job.id,  // Needed for "apply to this job" follow-up
+        title: job.title,
+        company: job.company?.name || 'Unknown',
+        location: job.location || 'Not specified',
+        commute_type: job.commute_types?.join(', ') || 'Not specified',
+        job_level: job.job_level || 'Not specified',
+        salary_range: formatSalaryRange(job.salary_min, job.salary_max),
+        posted: formatRelativeDate(job.created_at),  // "3 days ago" not ISO timestamp
+        description_preview: truncate(job.description, 200),  // Short preview
+        // Intentionally omit: internal_notes, job_owner_id, organization_id, etc.
+    };
 }
-
-// Usage
-const tsQuery = this.buildTsQuery('senior software engineer'); // → 'senior & software & engineer'
-const query = this.supabase
-    .from('candidates')
-    .select('*, ts_rank(search_vector, to_tsquery($1)) as rank')
-    .filter('search_vector', '@@', `to_tsquery('${tsQuery}')`)
-    .order('rank', { ascending: false });
 ```
 
-### Pattern 5: Weighted ts_rank Boost
+### Pattern 3: Scope-Restricted Access
 
-**What:** Apply weight multipliers to ts_rank based on entity type or field weights.
+**What:** GPT tokens are scoped to `candidate` role. Even if the underlying Clerk user has recruiter/admin roles, GPT access is limited to candidate-level operations.
 
-**When:** Some entity types should rank higher (e.g., exact name matches > description matches).
+**When:** All GPT API endpoints.
 
-**Why:** Improve result relevance without complex scoring algorithms.
+**Why:** Security principle of least privilege. The GPT should only access what a candidate needs -- not admin functions, not recruiter functions.
 
 **Example:**
 ```typescript
-// Database functions already use setweight() in search_vector construction
-// E.g., build_candidates_search_vector sets:
-//   - full_name → weight 'A' (highest)
-//   - email, current_title → weight 'B'
-//   - location, phone → weight 'C'
-//   - URLs → weight 'D' (lowest)
-
-// Repository can further boost by entity type
-private sortByRelevance(results: SearchResult[]): SearchResult[] {
-    return results.sort((a, b) => {
-        // Apply entity type boost
-        const boostA = this.getEntityBoost(a.entity_type);
-        const boostB = this.getEntityBoost(b.entity_type);
-
-        const scoreA = a.rank * boostA;
-        const scoreB = b.rank * boostB;
-
-        if (scoreB !== scoreA) return scoreB - scoreA;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+// GPT auth middleware enforces scope
+if (gptAuth.scope !== 'candidate') {
+    return reply.status(403).send({
+        error: { code: 'SCOPE_DENIED', message: 'This GPT only supports candidate operations' }
     });
 }
 
-private getEntityBoost(entityType: string): number {
-    // Jobs and candidates are primary entities, boost them
-    if (entityType === 'job' || entityType === 'candidate') return 1.2;
-    // Applications and placements are secondary, standard ranking
-    if (entityType === 'application' || entityType === 'placement') return 1.0;
-    // Companies and recruiters are tertiary, slight de-boost
-    return 0.9;
-}
+// Even if user is a platform_admin, GPT sees candidate-level data
+// Override isPlatformAdmin for GPT requests
+const context = await this.accessResolver.resolve(gptAuth.clerkUserId);
+const gptContext = {
+    ...context,
+    isPlatformAdmin: false,  // Never admin via GPT
+    roles: ['candidate'],     // Force candidate scope
+};
 ```
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Client-Side Filtering After Broad Fetch
+### Anti-Pattern 1: Proxying GPT Requests Through Other Services
 
-**What:** Fetch all entities from database, filter by role in application code.
+**What:** gpt-service calls ats-service HTTP endpoints to get job data.
 
-**Why bad:**
-- Database returns all rows (O(n) DB I/O)
-- Network transfers all rows
-- Application does work that Postgres can do faster
+**Why bad:** Violates "no HTTP between services" rule. Adds latency. Creates coupling.
 
-**Instead:** Apply role-based WHERE clauses in SQL queries. Postgres filters before returning results.
+**Instead:** gpt-service queries Supabase directly using its own repository layer.
 
-```typescript
-// ❌ BAD
-const allJobs = await this.supabase.from('jobs').select('*');
-const filteredJobs = allJobs.filter(job =>
-    context.isPlatformAdmin || context.companyIds.includes(job.company_id)
-);
+### Anti-Pattern 2: Sharing Clerk JWTs as GPT Tokens
 
-// ✅ GOOD
-let query = this.supabase.from('jobs').select('*');
-if (!context.isPlatformAdmin) {
-    query = query.in('company_id', context.companyIds);
-}
-const jobs = await query;
-```
+**What:** Using Clerk JWTs directly as the OAuth2 access token.
 
-### Anti-Pattern 2: Sequential Entity Queries
+**Why bad:** Clerk JWTs are issued for browser sessions with specific audience/issuer claims. ChatGPT can't obtain Clerk JWTs. You'd need Clerk to issue tokens for ChatGPT as a client, which isn't how Clerk works.
 
-**What:** Query each entity type sequentially: jobs → candidates → companies → ...
+**Instead:** gpt-service is a custom OAuth2 provider. It issues its own opaque tokens. Clerk is only used during the authorization flow to verify the user's identity.
 
-**Why bad:**
-- Total latency = sum of all query latencies (7 entities × 50ms = 350ms)
-- User waits for slowest query before seeing any results
+### Anti-Pattern 3: Storing Tokens in Plaintext
 
-**Instead:** Use `Promise.all()` for parallel execution. Total latency = max query latency (~50ms).
+**What:** Storing access_token and refresh_token values directly in the database.
 
-```typescript
-// ❌ BAD
-const jobs = await this.searchJobs(tsQuery, context);
-const candidates = await this.searchCandidates(tsQuery, context);
-const companies = await this.searchCompanies(tsQuery, context);
+**Why bad:** Database breach exposes all active tokens. Tokens can be used to impersonate users.
 
-// ✅ GOOD
-const [jobs, candidates, companies] = await Promise.all([
-    this.searchJobs(tsQuery, context),
-    this.searchCandidates(tsQuery, context),
-    this.searchCompanies(tsQuery, context),
-]);
-```
+**Instead:** Store SHA-256 hashes of tokens. Generate tokens with `crypto.randomBytes(32).toString('hex')`, store `crypto.createHash('sha256').update(token).digest('hex')`. Validate by hashing the incoming token and comparing to stored hash.
 
-### Anti-Pattern 3: LIKE '%term%' Instead of Full-Text Search
+### Anti-Pattern 4: Returning Full Database Rows to GPT
 
-**What:** Use SQL `WHERE name LIKE '%john%'` instead of `WHERE search_vector @@ to_tsquery('john')`.
+**What:** Sending `reply.send({ data: rawDbRow })` from GPT endpoints.
 
-**Why bad:**
-- LIKE can't use GIN index, requires full table scan (O(n))
-- Case-sensitive unless using ILIKE (still O(n))
-- No relevance ranking
-- No stemming (searching "running" won't match "run")
+**Why bad:** Leaks internal fields (organization_id, deleted_at, internal_notes). Wastes GPT context window with irrelevant data. Produces worse GPT responses.
 
-**Instead:** Use existing tsvector columns with @@ operator. Already indexed with GIN.
+**Instead:** Transform all responses through GPT-specific formatter functions that select only user-relevant fields.
 
-```typescript
-// ❌ BAD
-const query = this.supabase
-    .from('candidates')
-    .select('*')
-    .ilike('full_name', `%${searchTerm}%`); // Full table scan
+### Anti-Pattern 5: Separate Ingress for GPT Service
 
-// ✅ GOOD
-const tsQuery = this.buildTsQuery(searchTerm);
-const query = this.supabase
-    .from('candidates')
-    .select('*, ts_rank(search_vector, to_tsquery($1)) as rank', { tsQuery })
-    .filter('search_vector', '@@', `to_tsquery('${tsQuery}')`)
-    .order('rank', { ascending: false }); // Uses GIN index
-```
+**What:** Creating a new K8s ingress at `gpt.splits.network` pointing directly to gpt-service.
 
-### Anti-Pattern 4: Creating a New "Search Service"
+**Why bad:** Bypasses rate limiting, CORS, logging, correlation IDs. Two ingresses to manage. ChatGPT OpenAPI schema references a different domain.
 
-**What:** Create `services/search-service/` as a standalone microservice.
-
-**Why bad:**
-- Violates "No HTTP calls between services" rule
-- Search service would need to call ATS/Network/Identity services to get data
-- OR duplicate database access logic (violates DRY)
-- Adds latency (API Gateway → Search → ATS/Network)
-
-**Instead:** Extend existing ATS service with search domain. ATS service already has candidates, jobs, companies, applications, placements repositories.
-
-```
-✅ GOOD:
-services/ats-service/src/v2/search/
-├── repository.ts  (reuses existing Supabase client)
-├── service.ts
-└── routes.ts
-```
-
-### Anti-Pattern 5: No Debouncing on Frontend
-
-**What:** Call search API on every keystroke without debouncing.
-
-**Why bad:**
-- Typing "software engineer" (17 chars) = 17 API requests
-- Database executes 17 full-text searches
-- Redis cache thrashing (different queries: "s", "so", "sof", ...)
-- Poor UX (results flash on every keystroke)
-
-**Instead:** Debounce typeahead searches by 250-300ms. User pauses → API call fires.
-
-```typescript
-// ❌ BAD
-<input onChange={(e) => search(e.target.value)} />
-
-// ✅ GOOD
-const debouncedQuery = useDebounce(query, 250);
-useEffect(() => {
-    if (debouncedQuery) search(debouncedQuery);
-}, [debouncedQuery]);
-```
-
-## Database Approach: Parallel Queries vs UNION vs Materialized View
-
-### Option 1: Parallel Queries with In-Memory Merge (RECOMMENDED)
-
-**How:** Execute 6-7 separate `SELECT` queries in parallel, merge results in application code.
-
-**Pros:**
-- Leverages existing GIN indexes on each table's search_vector
-- Easy to apply different role-based WHERE clauses per entity
-- Easy to add/remove entity types
-- Type-safe results (discriminated union)
-- No database schema changes
-
-**Cons:**
-- Application does merge/sort work (negligible for <100 results)
-
-**Implementation:**
-```typescript
-const [jobResults, candidateResults, companyResults, recruiterResults, applicationResults, placementResults] =
-    await Promise.all([
-        this.searchJobs(tsQuery, context, limit),
-        this.searchCandidates(tsQuery, context, limit),
-        this.searchCompanies(tsQuery, context, limit),
-        this.searchRecruiters(tsQuery, context, limit),
-        this.searchApplications(tsQuery, context, limit),
-        this.searchPlacements(tsQuery, context, limit),
-    ]);
-
-return this.mergeAndRank([...jobResults, ...candidateResults, ...companyResults, ...recruiterResults, ...applicationResults, ...placementResults], limit);
-```
-
-### Option 2: UNION ALL Query
-
-**How:** Single query with UNION ALL across entity tables.
-
-**Pros:**
-- Single database round-trip
-- Postgres does sorting (ORDER BY rank DESC LIMIT N)
-
-**Cons:**
-- Complex role-based WHERE clauses (different per entity)
-- Hard to maintain (adding entity type requires modifying UNION)
-- Type coercion required (all SELECTs must have same column types)
-- Less flexible for entity-specific filtering
-
-**Not recommended** for this use case. Role-based filtering is too entity-specific.
-
-### Option 3: Materialized View
-
-**How:** Create materialized view that UNIONs all entities, refresh on schedule or trigger.
-
-**Pros:**
-- Pre-computed results, fast reads
-
-**Cons:**
-- Stale data (refresh lag)
-- Complex role-based access control (can't filter by runtime user context)
-- Additional storage (duplicates data)
-- Refresh overhead (locks table during refresh)
-
-**Not recommended** for real-time search with dynamic access control.
-
-### Verdict: Parallel Queries (Option 1)
-
-Use parallel queries with in-memory merge. Fits existing V2 architecture patterns, leverages existing infrastructure, easy to test and extend.
+**Instead:** Route through api-gateway at `api.splits.network/api/v1/gpt/*`. One ingress, one domain, consistent infrastructure.
 
 ## Scalability Considerations
 
-| Concern | At 100 users | At 10K users | At 1M users |
-|---------|--------------|--------------|-------------|
-| **Search QPS** | ~10 qps (typeahead + full) | ~500 qps | ~50K qps |
-| **Database approach** | Parallel queries, no caching | Same + Redis cache (access context, typeahead results) | Same + read replicas for search queries |
-| **API Gateway** | Single instance, in-memory rate limiting | Horizontal scaling (2-3 pods), Redis-backed rate limiting | 10+ pods, Redis rate limiting, CDN for static assets |
-| **ATS Service** | Single instance | Horizontal scaling (2-3 pods), stateless | 10+ pods, connection pooling (PgBouncer) |
-| **Redis** | Single instance | Single instance (sufficient for caching) | Redis Cluster (3 nodes), cache eviction policy |
-| **Postgres** | Single instance (Supabase) | Same (GIN indexes handle load) | Read replicas for search, primary for writes |
-| **GIN index performance** | <10ms per entity query | <50ms per entity query | <100ms per entity query, consider pg_trgm for fuzzy search |
+| Concern | At 100 GPT users | At 10K GPT users | At 100K GPT users |
+|---------|-------------------|-------------------|--------------------|
+| **Token validation** | DB lookup per request (~5ms) | Same, indexed query | Add Redis token cache (30s TTL) |
+| **gpt-service pods** | 1 pod | 2 pods | 3-5 pods (stateless, horizontal) |
+| **Token storage** | Hundreds of rows | Tens of thousands | Partition by created_at, auto-expire old tokens |
+| **Rate limiting** | api-gateway default | Per-user GPT throttle (lower than web) | Per-user + global GPT ceiling |
+| **Audit log** | Small table | Index on created_at | Partition by month, archive old |
 
-**Optimization trigger points:**
-- **At 1K qps:** Enable Redis caching for access context and typeahead
-- **At 10K qps:** Add Postgres read replicas, route search queries to replicas
-- **At 50K qps:** Consider Elasticsearch/Typesense for search offloading (requires data sync)
+## Suggested Build Order
 
-**Current target (100-1K users):** No optimization needed. Parallel queries + GIN indexes sufficient.
+Based on dependency analysis of the architecture:
 
-## Build Order Recommendation
+### Phase 1: Foundation (OAuth + Token Infrastructure)
+**Build in this order:**
+1. Database migration (oauth_clients, gpt_tokens, gpt_auth_codes, gpt_sessions, gpt_audit_log)
+2. gpt-service scaffold (Fastify server, health check, basic config)
+3. Token generation and validation (hash, store, lookup)
+4. OAuth routes (/authorize, /callback, /token, /revoke)
+5. api-gateway integration (auth skip, proxy routes, service registration)
 
-Based on dependencies and existing architecture:
+**Why first:** Everything else depends on authentication working. Can't test any GPT endpoint without a valid token flow.
 
-### Phase 1: Backend Foundation (Search API)
-1. **SearchRepository** - Implement parallel queries with access control
-   - Dependency: shared-access-context (exists)
-   - Output: `globalSearch(clerkUserId, options)` method
-2. **SearchService** - Add validation, caching (optional for MVP)
-   - Dependency: SearchRepository
-   - Output: `search(clerkUserId, options)` with Redis cache
-3. **ATS Service Routes** - Register `/v2/search` endpoint
-   - Dependency: SearchService
-   - Output: Testable API endpoint in ATS service
-4. **API Gateway Route** - Proxy `/v2/search` to ATS service
-   - Dependency: ATS service route
-   - Output: Public API endpoint for frontend
+### Phase 2: Core GPT Endpoints
+**Build in this order:**
+1. Job search endpoint (read-only, simplest)
+2. Application status endpoint (read-only)
+3. Application submission endpoint (write with confirmation)
+4. Resume analysis endpoint (AI integration)
 
-**Testing:** Use Postman/curl to verify search with different clerkUserIds, verify role-based filtering.
+**Why second:** These are the actual GPT Actions. Build read endpoints first (safer, simpler), then writes (need confirmation pattern).
 
-### Phase 2: Frontend Integration (UI)
-1. **ApiClient.search()** - Add search method to shared-api-client
-   - Dependency: API Gateway route
-   - Output: Type-safe frontend API client method
-2. **useGlobalSearch hook** - Debouncing, state management
-   - Dependency: ApiClient.search()
-   - Output: Reusable React hook
-3. **SearchInput component** - Input field with typeahead dropdown
-   - Dependency: useGlobalSearch hook
-   - Output: Standalone component (can test in isolation)
-4. **Integrate into PortalHeader** - Add SearchInput to header
-   - Dependency: SearchInput component
-   - Output: Global search visible in portal
+### Phase 3: OpenAPI Schema + GPT Configuration
+**Build in this order:**
+1. OpenAPI 3.0 schema (YAML file documenting all endpoints)
+2. Schema serving endpoint
+3. GPT Instructions document
+4. Custom GPT configuration in OpenAI platform
 
-**Testing:** Verify debouncing, dropdown rendering, navigation to detail pages.
+**Why third:** Schema documents what was built in Phase 2. Can't configure the GPT until endpoints exist.
 
-### Phase 3: Full Search Page (Optional for MVP)
-1. **SearchPage component** - Full search results with pagination
-   - Dependency: useGlobalSearch hook (mode='full')
-   - Output: `/portal/search?q=...` route
-2. **Grouped results display** - Group by entity type (Jobs, Candidates, etc.)
-   - Dependency: SearchPage
-   - Output: Enhanced UX for full search
-
-**Defer to post-MVP if timeline is tight.** Typeahead in header is sufficient for MVP.
+### Phase 4: Production Hardening
+1. GPT-specific rate limiting (per-user throttle)
+2. Audit log integration
+3. Token cleanup cron job (expire old tokens)
+4. Monitoring and alerting
+5. K8s deployment manifest
 
 ## Sources
 
-**HIGH confidence (project codebase):**
-- `supabase/migrations/20240101000000_baseline.sql` - Existing tsvector columns, GIN indexes, search functions
-- `packages/shared-access-context/src/index.ts` - resolveAccessContext() implementation, role structure
-- `services/ats-service/src/v2/*/repository.ts` - V2 repository pattern, access control integration
-- `services/api-gateway/src/routes/v2/ats.ts` - API Gateway proxy pattern
-- `CLAUDE.md` - V2 architecture rules, no HTTP between services, single Supabase database
+**HIGH confidence (codebase analysis):**
+- `services/api-gateway/src/auth.ts` -- Clerk JWT validation pattern, multi-tenant auth
+- `services/api-gateway/src/index.ts` -- Auth skip patterns, service registration, rate limiting
+- `services/api-gateway/src/routes/v2/common.ts` -- Standard proxy pattern
+- `services/api-gateway/src/helpers/auth-headers.ts` -- x-clerk-user-id forwarding
+- `packages/shared-access-context/src/index.ts` -- resolveAccessContext, AccessContext interface
+- `services/ats-service/src/v2/jobs/service.ts` -- V2 service pattern with AccessContextResolver
+- `infra/k8s/ingress.yaml` -- Current ingress routing (api.splits.network -> api-gateway)
+- `infra/k8s/api-gateway/deployment.yaml` -- Service URL env vars, resource config
+- `docs/deployment/internal-service-authentication.md` -- Internal service key pattern
+- `docs/guidance/service-architecture-pattern.md` -- V2 service file structure
+- `docs/gpt/01_PRD_Custom_GPT.md` -- Product requirements
+- `docs/gpt/02_Architecture_Custom_GPT.md` -- Architecture overview
+- `docs/gpt/03_Technical_Specification.md` -- Technical spec
+- `docs/gpt/04_OpenAPI_Starter.yaml` -- OpenAPI starter schema
 
-**MEDIUM confidence (PostgreSQL best practices):**
-- PostgreSQL documentation (ts_rank, GIN indexes, to_tsquery) - industry standard
-- Common microservices patterns for search (parallel queries vs UNION) - architectural tradeoffs
+**MEDIUM confidence (training data, not live-verified):**
+- OpenAI Custom GPT Actions OAuth2 specification -- based on training data through May 2025. The OAuth2 flow (authorization code grant) is standard; specific GPT Actions requirements (e.g., exact callback URL format, supported OpenAPI versions) should be verified against current OpenAI documentation before implementation.
+- OpenAPI 3.0 schema requirements for GPT Actions -- general structure is well-understood, but edge cases (max endpoints, field length limits, supported auth schemes) should be verified.
 
-**LOW confidence (needs validation):**
-- Specific QPS thresholds for scaling triggers - should monitor in production
-- Redis cluster sizing for 1M users - depends on actual cache hit rates
+**LOW confidence (needs validation during implementation):**
+- Exact ChatGPT OAuth callback URL format (`https://chatgpt.com/aip/<plugin_id>/oauth/callback` vs other patterns) -- verify in OpenAI GPT configuration UI
+- Whether GPT Actions support refresh tokens or only access tokens -- verify in OpenAI docs
+- Maximum number of actions per GPT -- anecdotal "~30" from training data
+- Whether OpenAPI 3.1 is supported -- recommend 3.0 to be safe, verify later

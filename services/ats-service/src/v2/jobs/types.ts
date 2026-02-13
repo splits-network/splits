@@ -11,6 +11,8 @@ export interface JobFilters extends PaginationParams, SortParams {
     status?: string;
     location?: string;
     employment_type?: string;
+    commute_type?: string | string[];
+    job_level?: string;
     company_id?: string;
     job_owner_filter?: 'all' | 'assigned'; // 'all' = all active jobs, 'assigned' = jobs where recruiter is job_owner_id
     filters?: Record<string, any>;
@@ -23,6 +25,8 @@ export interface JobUpdate {
     responsibilities?: string;
     location?: string;
     employment_type?: string;
+    commute_types?: string[];
+    job_level?: string;
     salary_min?: number;
     salary_max?: number;
     salary_currency?: string;

@@ -1,0 +1,62 @@
+---
+title: "Full-Text Search, Invitations Management, and Application Redesign"
+date: "2026-01-12"
+summary: "Full-text search now powers candidate, job, and recruiter-candidate lookups with partial matching and special character handling. A new invitations management interface brings search and trend charts, and the application experience has been redesigned."
+tags: ["new-feature", "improvement", "search", "invitations", "applications"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release is one of the biggest of the month. Full-text search comes to three core data types, invitations get a proper management interface, and the application experience is rebuilt with a modern layout.
+
+## New Features
+
+### Full-Text Search for Candidates
+
+You can now search candidates using partial name matches and special characters. The search engine handles accented names, hyphens, and partial terms intelligently. Type a few letters and the system finds relevant candidates without requiring exact matches. This is a major upgrade from the previous basic text matching.
+
+### Full-Text Search for Jobs
+
+Job search now uses full-text indexing with automatically synced fields. When a job listing is created or updated, the search index updates in real time. Search by title, company, requirements, or description keywords and get accurate results instantly. The search handles inline requirements so every relevant detail is included in the index.
+
+### Full-Text Search for Recruiter-Candidates
+
+Searching your recruiter-candidate connections now uses the same full-text engine. Find candidates in your network by name, skills, or other profile fields with partial matching support.
+
+### Invitation Trends Chart
+
+A new chart on the invitations page visualizes your invitation activity over time. See when invitations were sent, accepted, and declined at a glance. This helps you understand recruiter engagement patterns and optimize your outreach timing.
+
+### Invitations Management Interface
+
+The invitations page has been rebuilt with search functionality and new management components. You can search through invitations, view detailed status information, and take bulk actions more efficiently.
+
+### Application Statistics and List Components
+
+Applications now have dedicated stats and list components. The stats section surfaces key metrics like application counts by stage, while the list component provides a structured view of all applications with improved filtering.
+
+### Role Creation from Company Dashboard
+
+Company administrators can now create new roles directly from the company dashboard using a modal dialog. Add a role without leaving the dashboard and it appears in your listings immediately.
+
+## Improvements
+
+### Redesigned Application Detail Page
+
+The application detail page now features a header section with tabs for organizing information. Navigate between application details, documents, notes, and activity without scrolling through a single long page.
+
+### Updated Application Cards
+
+Application cards display improved status badges with refreshed styling. Vertical data rows make it easier to scan key application details at a glance, and button styles and link structures have been refined for better usability.
+
+### Enhanced Recruiter and Job Table Rows
+
+Recruiter and job table rows now display additional details with an improved layout. You see more relevant information inline without expanding the row or navigating to a detail page.
+
+### Candidate Profile Improvements
+
+The candidate profile creation flow now includes better error handling, especially in the document upload modal. The years of experience field has been removed from candidate profile settings to streamline the form.
+
+### Billing and Company Settings
+
+The billing and company settings pages have been refactored to improve how user profile data is loaded and displayed, resulting in faster page renders and more accurate information.

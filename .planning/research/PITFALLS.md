@@ -1,700 +1,881 @@
-# Domain Pitfalls: Platform Admin Role Storage Migration
+# Domain Pitfalls: Custom GPT with Actions Backend
 
-**Domain:** Moving platform_admin from memberships to user_roles table
+**Domain:** Custom GPT Actions integration for recruiting marketplace (Applicant.Network)
 **Researched:** 2026-02-13
-**Confidence:** HIGH (based on codebase analysis and migration domain knowledge)
+**Confidence:** MEDIUM (training data for OpenAI GPT Actions specifics; HIGH for Clerk/Fastify integration concerns based on codebase analysis)
+
+**Important note on sources:** WebSearch and WebFetch were unavailable during this research. OpenAI GPT Actions specifics are based on training data (cutoff ~May 2025) and should be verified against current OpenAI documentation before implementation. Codebase-specific pitfalls are HIGH confidence based on direct code analysis.
 
 ---
 
 ## CRITICAL PITFALLS
 
-Mistakes that cause outages, data loss, or complete loss of admin access.
+Mistakes that cause the GPT to fail entirely, expose user data, or get rejected from the GPT Store.
 
-### Pitfall 1: Losing All Platform Admin Access During Migration
+### Pitfall 1: OpenAPI Schema Rejected by GPT Actions Parser
 
-**What goes wrong:** If the migration transaction fails partway through (after deleting from memberships but before inserting into user_roles), all platform admins lose their access. The system becomes unmaintainable.
+**What goes wrong:** The OpenAPI schema is valid per the OpenAPI 3.0 spec but GPT Actions rejects it or silently ignores endpoints. The GPT never calls the API or calls it incorrectly.
 
 **Why it happens:**
-- Migration steps run in separate transactions
-- Migration script deletes from memberships before verifying user_roles insert succeeded
-- Network interruption or constraint violation during migration
-- No validation that at least one platform admin exists after migration
+- GPT Actions has a stricter, narrower OpenAPI parser than standard validators
+- Uses OpenAPI 3.0 only (3.1 features like `const`, `examples` as array, nullable shorthand are rejected)
+- `operationId` is missing, duplicated, or contains characters the GPT cannot reference
+- Response schemas are missing or too vague (GPT cannot interpret untyped responses)
+- `$ref` chains are too deep or circular
+- Schema uses `allOf`/`oneOf`/`anyOf` in ways the parser cannot resolve
+- Array parameters in query strings use unsupported serialization styles
+- `description` fields are missing on operations and parameters (GPT relies on descriptions to decide when/how to call actions)
 
 **Consequences:**
-- Complete lockout from admin functions
-- Cannot create new admins (requires admin permissions)
-- Cannot rollback without direct database access
-- Production system requires emergency database intervention
+- GPT never calls the action (silently ignored)
+- GPT calls the wrong endpoint or sends malformed parameters
+- Schema upload fails in GPT Builder with unhelpful error messages
+- Weeks of debugging with no clear error trail
 
 **Prevention:**
-1. **Atomic transaction wrapping**: Entire migration in single BEGIN/COMMIT block
-2. **Verification before deletion**: Query user_roles to confirm platform_admin rows exist before deleting from memberships
-3. **Hard fail on validation**: If migrated count != source count, ROLLBACK entire transaction
-4. **Pre-migration snapshot**: Document existing platform_admin user IDs for manual recovery
-5. **Dual-read period**: Update resolveAccessContext to read from BOTH tables during migration window (union of memberships + user_roles platform_admin)
+1. Use OpenAPI 3.0.x only (not 3.1). The existing starter (`04_OpenAPI_Starter.yaml`) correctly uses `3.0.1` -- maintain this
+2. Every operation MUST have a unique `operationId` (alphanumeric + underscores, no hyphens or dots)
+3. Every operation MUST have a `summary` AND `description` -- the description tells the GPT WHEN to use the action
+4. Every parameter MUST have a `description` explaining what it does in plain English
+5. Every response MUST have a schema with `properties` defined -- do not use empty `{}` schemas
+6. Avoid `$ref` nesting beyond 2 levels -- inline schemas when possible
+7. Use `type: string` with `enum` for constrained values (GPT handles enums well)
+8. Test the schema in GPT Builder preview BEFORE writing any backend code
+9. Keep total schema under ~30 operations (GPT performance degrades with too many actions)
 
-**Migration template:**
-```sql
-BEGIN;
-
--- Step 1: Migrate platform_admin from memberships → user_roles
-INSERT INTO user_roles (user_id, role_name, role_entity_id, role_entity_type, created_at, updated_at)
-SELECT DISTINCT
-    user_id,
-    'platform_admin',
-    NULL,
-    NULL,
-    created_at,
-    updated_at
-FROM memberships
-WHERE role_name = 'platform_admin' AND deleted_at IS NULL
-ON CONFLICT DO NOTHING;
-
--- Step 2: Validate migration succeeded
-DO $$
-DECLARE
-    source_count INTEGER;
-    migrated_count INTEGER;
-BEGIN
-    SELECT COUNT(DISTINCT user_id) INTO source_count
-    FROM memberships
-    WHERE role_name = 'platform_admin' AND deleted_at IS NULL;
-
-    SELECT COUNT(*) INTO migrated_count
-    FROM user_roles
-    WHERE role_name = 'platform_admin' AND deleted_at IS NULL;
-
-    IF source_count != migrated_count THEN
-        RAISE EXCEPTION 'Migration validation failed: % source admins, % migrated', source_count, migrated_count;
-    END IF;
-
-    IF migrated_count = 0 THEN
-        RAISE EXCEPTION 'CRITICAL: Zero platform admins after migration!';
-    END IF;
-
-    RAISE NOTICE 'Validation passed: % platform admins migrated', migrated_count;
-END $$;
-
--- Step 3: Only delete from memberships after validation passes
-DELETE FROM memberships WHERE role_name = 'platform_admin';
-
-COMMIT;
-```
+**Warning signs:**
+- GPT Builder shows "Unable to parse schema" or similar error
+- GPT says "I don't have an action for that" when it clearly should
+- GPT sends requests with wrong parameter types or missing fields
+- Schema validates at editor.swagger.io but fails in GPT Builder
 
 **Detection:**
-- Migration validation block shows count mismatch
-- Post-migration smoke test: Can specific test user (known platform admin) access admin endpoints?
-- Monitor error logs for "Platform admin permissions required" immediately after deployment
+- Validate schema with GPT Builder preview as a CI step
+- Log all incoming requests to gpt-service and compare against expected schema
+- Test each operationId individually in GPT Builder conversation
 
-**Code location affected:**
-- `packages/shared-access-context/src/index.ts` line 119-122 (role extraction)
-- `services/identity-service/src/v2/memberships/service.ts` requirePlatformAdmin checks
-- All 7+ services using isPlatformAdmin checks
+**Existing project risk:** The starter schema (`04_OpenAPI_Starter.yaml`) is incomplete -- response schemas have no `properties` defined (just `description: Job results returned`). This WILL cause the GPT to misinterpret responses. Must add full response schemas.
 
-**Phase impact:** Phase 2 (Data Migration) — Must implement atomic transaction and validation
+**Phase impact:** Phase 1 (OpenAPI Schema) -- validate with GPT Builder before proceeding
+
+**Confidence:** MEDIUM -- Based on training data knowledge of GPT Actions parser behavior. Verify against current OpenAI documentation.
 
 ---
 
-### Pitfall 2: Foreign Key Constraint Violations on DELETE
+### Pitfall 2: OAuth2 Token Exchange Failure Between GPT and Backend
 
-**What goes wrong:** Deleting the platform organization fails because foreign key constraints prevent deletion when memberships still reference it.
+**What goes wrong:** The OAuth2 flow initiated by the GPT never completes. User clicks "Sign in" in ChatGPT, gets redirected, but the token exchange fails silently. The GPT shows "Authentication failed" with no details.
 
 **Why it happens:**
-- Migration order: Attempts to DELETE organization before deleting platform_admin memberships
-- Foreign keys without ON DELETE CASCADE (memberships.organization_id has no cascade behavior by default)
-- companies.identity_organization_id may reference platform org
-- invitations.organization_id may reference platform org
+- GPT Actions OAuth2 requires the Authorization Code Grant flow with PKCE -- other grant types are not supported
+- The `token_exchange_method` must be explicitly set (GPT supports `basic` or `post` for client credentials in the token request)
+- The backend's `/authorize` endpoint must redirect to the exact `redirect_uri` provided by OpenAI (it is NOT a URI you control -- OpenAI provides it during GPT configuration)
+- The token endpoint must return `access_token`, `token_type`, and optionally `refresh_token` and `expires_in` in the response body (not in headers, not in a custom envelope)
+- CORS headers are missing or wrong on the token endpoint (ChatGPT makes browser-based requests)
+- The `client_id` and `client_secret` configured in GPT Builder must match exactly what the backend expects
+- Token endpoint returns `{ data: { access_token: ... } }` (project's standard envelope) instead of bare `{ access_token: ... }` (OAuth2 standard)
 
 **Consequences:**
-- Migration fails with FK constraint violation
-- Partial state: platform_admin rows moved to user_roles but platform org still exists
-- Rollback complexity: must manually restore memberships from user_roles
+- Users cannot link their accounts -- GPT is completely unusable
+- No error details visible (OpenAI's OAuth error reporting is minimal)
+- Hours of debugging blind (cannot see OpenAI's side of the exchange)
 
 **Prevention:**
+1. Implement Authorization Code Grant with PKCE support (code_verifier/code_challenge)
+2. The `/authorize` endpoint must accept `redirect_uri`, `state`, `code_challenge`, `code_challenge_method` params from OpenAI
+3. The `/token` endpoint must return BARE OAuth2 response -- NOT wrapped in the project's `{ data: ... }` envelope:
+   ```json
+   {
+     "access_token": "gpt_abc123...",
+     "token_type": "Bearer",
+     "expires_in": 3600,
+     "refresh_token": "gpt_refresh_abc123..."
+   }
+   ```
+4. The redirect after user auth MUST go to OpenAI's `redirect_uri` with `?code=AUTH_CODE&state=ORIGINAL_STATE`
+5. Set CORS headers to allow `https://chat.openai.com` and `https://chatgpt.com` origins on token endpoints
+6. Log EVERY step of the OAuth flow with correlation IDs for debugging
+7. Build a test page that mimics the GPT OAuth flow (authorize -> redirect -> token exchange) before connecting to the real GPT
+8. Store `client_id` and `client_secret` for the GPT in Supabase Vault (not hardcoded)
 
-**Correct deletion order:**
-```sql
-BEGIN;
-
--- Step 1: Migrate platform_admin from memberships → user_roles
--- (INSERT statement here)
-
--- Step 2: Verify migration succeeded
--- (Validation block here)
-
--- Step 3: Delete platform_admin memberships (not all memberships)
-DELETE FROM memberships WHERE role_name = 'platform_admin';
-
--- Step 4: Verify no FK references to platform org
-DO $$
-DECLARE
-    platform_org_id UUID;
-    company_refs INTEGER;
-    invitation_refs INTEGER;
-BEGIN
-    SELECT id INTO platform_org_id FROM organizations WHERE type = 'platform';
-
-    SELECT COUNT(*) INTO company_refs
-    FROM companies WHERE identity_organization_id = platform_org_id;
-
-    SELECT COUNT(*) INTO invitation_refs
-    FROM invitations WHERE organization_id = platform_org_id;
-
-    IF company_refs > 0 OR invitation_refs > 0 THEN
-        RAISE WARNING 'Cannot delete platform org: % company refs, % invitation refs',
-            company_refs, invitation_refs;
-        RAISE WARNING 'Manual cleanup required for companies/invitations';
-    END IF;
-END $$;
-
--- Step 5: Delete platform organization ONLY if no references
-DELETE FROM organizations
-WHERE type = 'platform'
-  AND id NOT IN (
-      SELECT DISTINCT identity_organization_id FROM companies WHERE identity_organization_id IS NOT NULL
-      UNION
-      SELECT DISTINCT organization_id FROM invitations WHERE organization_id IS NOT NULL
-  );
-
-COMMIT;
-```
+**Warning signs:**
+- User clicks "Sign in" and nothing happens
+- Browser network tab shows CORS errors on token endpoint
+- Token endpoint returns 200 but GPT still shows "Authentication failed"
+- Redirect loop between OpenAI and your authorize endpoint
 
 **Detection:**
-- Migration fails with error: `ERROR: update or delete on table "organizations" violates foreign key constraint`
-- Validation query shows non-zero count of FK references
+- Structured logging on `/oauth/authorize`, `/oauth/token`, and `/oauth/revoke` endpoints
+- Monitor for HTTP 4xx responses on token endpoints
+- Test the full flow in GPT Builder preview mode (it shows more error details than production)
 
-**Code location affected:**
-- `supabase/migrations/20240101000000_baseline.sql` FK constraint definitions
-- Any migration attempting `DELETE FROM organizations WHERE type = 'platform'`
+**Existing project risk:** The API gateway wraps ALL responses in `{ data: ... }` envelope. OAuth token endpoints MUST be excluded from this pattern. The gpt-service OAuth endpoints need raw response format.
 
-**Phase impact:** Phase 4 (Cleanup) — Must verify FK references before deleting platform org
+**Phase impact:** Phase 2 (OAuth2 Implementation) -- this is the highest-risk phase
+
+**Confidence:** MEDIUM -- OAuth2 flow specifics based on training data. The envelope conflict is HIGH confidence based on codebase analysis of API gateway response patterns.
 
 ---
 
-### Pitfall 3: Race Condition Between Migration and Live Traffic
+### Pitfall 3: Cross-User Data Leakage Through GPT Token Scoping
 
-**What goes wrong:** During migration, a user with platform_admin in memberships attempts to access the system. resolveAccessContext reads the new schema (user_roles only) but their platform_admin hasn't migrated yet. Access denied.
+**What goes wrong:** User A authenticates with the GPT, but the GPT token grants access to User B's data. Or the GPT returns data that should be scoped to a specific tenant/organization.
 
 **Why it happens:**
-- Zero-downtime deployment: migration runs while services are live
-- resolveAccessContext code deploys BEFORE data migration completes
-- Service restart happens mid-migration
-- Microservices restart independently, creating inconsistent view of role data
+- GPT access token is not properly bound to the authenticated user's identity
+- Token contains `clerkUserId` but resolveAccessContext is not called (or is called with wrong user)
+- gpt-service queries ats-service data without passing access context
+- GPT token inherits broader permissions than intended (e.g., recruiter-level access when user is a candidate)
+- Token does not encode the user's role scope -- backend trusts the token without verifying role
+- Database queries in gpt-service lack WHERE clauses filtering by candidate ID
 
 **Consequences:**
-- Intermittent authorization failures during deployment window
-- Active platform admins lose access mid-session
-- User confusion: "I was just logged in, now I can't access admin pages"
-- Audit trail shows denied admin actions that should have succeeded
+- Privacy violation -- users see other users' applications, resumes, personal data
+- Legal liability (GDPR, CCPA) for exposing PII
+- GPT Store rejection for privacy violations
+- Complete loss of user trust
 
 **Prevention:**
+1. GPT access tokens MUST encode the `clerkUserId` (or internal `identityUserId`) -- never use a generic service token
+2. Every gpt-service endpoint MUST call `resolveAccessContext(clerkUserId)` and scope queries to the authenticated user
+3. For candidate-facing GPT: tokens MUST be scoped to `candidate` role only -- never grant `recruiter`, `company_admin`, or `platform_admin` access through GPT tokens
+4. Application status lookup: filter by `candidate_id = context.candidateId` -- never return applications for other candidates
+5. Job search: only return active/published jobs (respect existing job visibility rules)
+6. Resume analysis: only access documents owned by the authenticated candidate
+7. Add explicit tenant isolation tests: create two test users, verify User A cannot access User B's data through any GPT endpoint
+8. Log every data access with `userId` and `candidateId` for audit trail
 
-**Two-phase deployment:**
-
-**Phase 1 (Code)**: Deploy resolveAccessContext that reads BOTH tables (union) — backward compatible
-```typescript
-// packages/shared-access-context/src/index.ts
-const roles = [...new Set([
-    ...memberships.map(m => m.role_name),
-    ...userRoles.map(r => r.role_name),
-].filter(Boolean))];
-
-// isPlatformAdmin reads from BOTH sources during transition
-const isPlatformAdmin = roles.includes('platform_admin');
-```
-
-**Phase 2 (Data)**: Run migration to move platform_admin rows
-
-**Phase 3 (Code)**: Deploy resolveAccessContext that reads user_roles only — forward compatible
+**Warning signs:**
+- GPT returns data the user shouldn't see (other users' applications)
+- Application status endpoint returns all applications instead of the current user's
+- Resume analysis processes a document the user doesn't own
+- No `WHERE candidate_id = ?` clauses in gpt-service repository queries
 
 **Detection:**
-- Spike in "Platform admin permissions required" errors during deployment
-- resolveAccessContext returns `isPlatformAdmin: false` for known admin user
-- Service logs show query results with zero memberships but user_roles not yet populated
+- Automated test: authenticate as User A, request User B's application ID -- must return 403 or empty result
+- Review every SQL/Supabase query in gpt-service for proper access context filtering
+- Penetration test: try to access resources by guessing IDs
+- Code review checklist: every repository method must use `context.candidateId` filter
 
-**Code location affected:**
-- All services calling `resolveAccessContext()` (7+ services across codebase)
-- `packages/shared-access-context/src/index.ts` lines 80-94 (query), 119-122 (role extraction), 152 (isPlatformAdmin)
+**Existing project risk:** The existing `resolveAccessContext` returns `candidateId` from user_roles (line 142 in shared-access-context). gpt-service MUST use this to scope all queries. If a user has both `recruiter` and `candidate` roles, the GPT token must only grant candidate-level access.
 
-**Phase impact:** Phase 1 (Schema Changes) and Phase 3 (Code Deployment) — Must coordinate timing
+**Phase impact:** Every phase with data endpoints -- must be verified per-endpoint
+
+**Confidence:** HIGH -- Based on codebase analysis of AccessContext and existing role-based filtering patterns.
 
 ---
 
-### Pitfall 4: Orphaned Platform Admin Memberships After Migration
+### Pitfall 4: Write-Action Safety Pattern Bypassed or Incomplete
 
-**What goes wrong:** Migration copies platform_admin from memberships to user_roles but fails to delete the source rows. Now platform_admin exists in BOTH tables, causing data inconsistency.
+**What goes wrong:** The GPT submits a job application without the user actually confirming, or the confirmation pattern has gaps that allow unintended writes.
 
 **Why it happens:**
-- Migration script separates INSERT and DELETE into different transactions
-- DELETE step commented out or skipped for "safety"
-- Validation checks only confirm INSERT succeeded, not that DELETE happened
-- Fear of data loss leads to keeping "backup" in memberships
+- The `confirmed: true` flag is a request body parameter, but the GPT may auto-populate it without showing the user a summary first
+- GPT Instructions tell it to "ask for confirmation" but the model may skip this under certain prompting conditions (jailbreaking, ambiguous instructions)
+- Backend trusts the `confirmed` flag without verifying the GPT actually showed a summary
+- Missing validation: endpoint accepts `confirmed: true` on first call (no prior "preview" call required)
+- Rate limiting doesn't account for rapid repeated submissions
+- Error responses from `CONFIRMATION_REQUIRED` don't include enough context for the GPT to show a meaningful summary
 
 **Consequences:**
-- Dual source of truth: admin role assignment ambiguous
-- Future updates to platform_admin may only update one table
-- Query performance degrades (resolveAccessContext joins both tables unnecessarily)
-- Data audit shows inconsistent role counts
-- Rollback complexity: unclear which table is authoritative
+- Candidates unknowingly submit applications to wrong jobs
+- Duplicate applications submitted
+- Legal issues if application terms weren't acknowledged
+- Loss of user trust -- "I didn't mean to apply for that"
 
 **Prevention:**
+1. Two-call pattern (strongly recommended over single-call with flag):
+   - Call 1: `POST /applications` without `confirmed` -> Returns `CONFIRMATION_REQUIRED` with full application summary (job title, company, candidate name, resume used)
+   - Call 2: `POST /applications` with `confirmed: true` -> Actually submits
+2. The `CONFIRMATION_REQUIRED` response must return rich summary data for the GPT to display:
+   ```json
+   {
+     "error": "CONFIRMATION_REQUIRED",
+     "summary": {
+       "job_title": "Senior Engineer at Acme Corp",
+       "candidate_name": "John Doe",
+       "resume_used": "john_doe_resume_2026.pdf",
+       "action": "Submit application"
+     },
+     "message": "Please confirm: Apply to 'Senior Engineer at Acme Corp' with resume 'john_doe_resume_2026.pdf'?"
+   }
+   ```
+3. Add server-side deduplication: reject if identical application exists within last 5 minutes
+4. GPT Instructions must explicitly say: "NEVER set confirmed=true on the first call. ALWAYS make the first call without confirmed, show the summary to the user, and only set confirmed=true after the user explicitly says yes."
+5. Log every write action with `confirmed` flag value and timestamp for audit
+6. Consider a nonce/token pattern: CONFIRMATION_REQUIRED returns a `confirmation_token` that must be included in the confirmed request (prevents replay)
 
-**Single atomic transaction:** INSERT and DELETE in same BEGIN/COMMIT block
-
-**Post-migration validation:**
-```sql
-DO $$
-DECLARE
-    orphaned_count INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO orphaned_count
-    FROM memberships
-    WHERE role_name = 'platform_admin' AND deleted_at IS NULL;
-
-    IF orphaned_count > 0 THEN
-        RAISE EXCEPTION 'Migration incomplete: % platform_admin rows remain in memberships', orphaned_count;
-    END IF;
-END $$;
-```
+**Warning signs:**
+- Applications appearing without user awareness
+- GPT logs show `confirmed: true` on first call (bypassing preview)
+- No `CONFIRMATION_REQUIRED` responses in logs (GPT always sends confirmed)
+- Duplicate applications for same job/candidate
 
 **Detection:**
-- Post-migration query: `SELECT COUNT(*) FROM memberships WHERE role_name = 'platform_admin'` returns non-zero
-- Performance monitoring shows resolveAccessContext query time hasn't improved
-- Duplicate role assignments visible in identity-service API responses
+- Monitor ratio of CONFIRMATION_REQUIRED to actual submissions (should be ~1:1 or higher)
+- Audit log review: every submission should have a preceding CONFIRMATION_REQUIRED
+- Automated test: send `confirmed: true` directly -- verify it still works but log a warning
 
-**Code location affected:**
-- Migration script (wherever it's written)
-- `services/identity-service/src/v2/memberships/repository.ts` (if querying memberships for platform_admin after migration)
+**Existing project risk:** The current error contract in `03_Technical_Specification.md` returns only `errorCode` and `message` -- no summary data. The GPT cannot show a meaningful confirmation without summary fields in the CONFIRMATION_REQUIRED response.
 
-**Phase impact:** Phase 2 (Data Migration) — Must include deletion in atomic transaction
+**Phase impact:** Phase 4 (Write Endpoints) -- implement two-call pattern from the start
+
+**Confidence:** HIGH for the pattern design; MEDIUM for GPT behavior specifics (training data on how GPTs handle confirmation flows).
 
 ---
 
 ## MODERATE PITFALLS
 
-Mistakes that cause temporary issues or data inconsistencies requiring manual cleanup.
+Mistakes that cause degraded experience, failed requests, or development delays.
 
-### Pitfall 5: NOT NULL Constraint on role_entity_id Prevents INSERT
+### Pitfall 5: GPT Actions Timeout Causing Silent Failures
 
-**What goes wrong:** Migration attempts to INSERT platform_admin rows into user_roles with role_entity_id = NULL, but the column has a NOT NULL constraint. INSERT fails.
+**What goes wrong:** The GPT calls an action, but the backend takes too long to respond. The GPT shows a vague error or silently fails, with no indication of what went wrong.
 
 **Why it happens:**
-- Current schema: `user_roles.role_entity_id` is NOT NULL (per migration 20260211000003)
-- Platform admin doesn't link to an entity (no recruiter/candidate association)
-- Migration forgets to ALTER TABLE before INSERT
-- Schema change and data migration run out of order
+- OpenAI enforces a timeout on GPT Action HTTP calls (approximately 45 seconds based on training data -- verify current limit)
+- Resume analysis involves calling ai-service (OpenAI API) which has its own latency
+- Resume parsing requires fetching from document-service (Supabase Storage), then sending to OpenAI for analysis
+- Chain: GPT -> gpt-service -> document-service -> ai-service -> OpenAI API. Each hop adds latency
+- Cold starts on Kubernetes pods add initial request latency
+- Database queries with complex access context resolution add overhead
 
 **Consequences:**
-- Migration fails immediately on INSERT
-- Error: `ERROR: null value in column "role_entity_id" violates not-null constraint`
-- Zero data migrated, system state unchanged (safe failure)
-- Deployment blocked until schema corrected
+- User sees "Something went wrong" with no actionable information
+- Resume analysis feature appears broken
+- Users retry, causing duplicate processing
+- Poor user experience erodes trust in the GPT
 
 **Prevention:**
+1. Set a hard response time budget: gpt-service must respond within 30 seconds (leaving 15s buffer for OpenAI's timeout)
+2. For resume analysis (likely to exceed 30s):
+   - Return an immediate acknowledgment with a `status: processing` response
+   - Provide a `GET /resume/analysis/:id` polling endpoint
+   - GPT Instructions should say: "If resume analysis returns 'processing', wait 10 seconds and check the status endpoint"
+3. Alternatively, use the async pattern:
+   - `POST /resume/analyze` returns `{ analysis_id: "xyz", status: "processing" }`
+   - `GET /resume/analysis/xyz` returns results when ready
+4. Set individual timeouts on downstream service calls:
+   - document-service file fetch: 5s timeout
+   - ai-service analysis: 20s timeout
+   - Database queries: 3s timeout
+5. Return meaningful error messages when timeouts occur:
+   ```json
+   {
+     "error": "TIMEOUT",
+     "message": "Resume analysis is taking longer than expected. Please try again in a moment.",
+     "retry_after": 30
+   }
+   ```
+6. Add circuit breaker pattern for ai-service calls (if OpenAI API is down, fail fast)
 
-**Correct migration order:**
-```sql
--- Step 1: ALTER TABLE to allow NULL
-ALTER TABLE user_roles ALTER COLUMN role_entity_id DROP NOT NULL;
-ALTER TABLE user_roles ALTER COLUMN role_entity_type DROP NOT NULL;
-
--- Step 2: Migrate platform_admin data
-INSERT INTO user_roles (user_id, role_name, role_entity_id, role_entity_type, ...)
-SELECT user_id, role_name, NULL, NULL, ...
-FROM memberships WHERE role_name = 'platform_admin';
-
--- Step 3: Update unique index to handle NULL values
-DROP INDEX IF EXISTS uq_user_role_entity_assignment;
-
-CREATE UNIQUE INDEX uq_user_role_assignment
-ON user_roles (
-    user_id,
-    role_name,
-    COALESCE(role_entity_id, '00000000-0000-0000-0000-000000000000'::uuid)
-)
-WHERE deleted_at IS NULL;
-```
+**Warning signs:**
+- GPT frequently shows generic errors for resume analysis
+- gpt-service logs show 504 Gateway Timeout from downstream services
+- High latency metrics on gpt-service endpoints (P95 > 20s)
+- Users report "it works sometimes" (timeout is non-deterministic)
 
 **Detection:**
-- Migration fails with explicit NOT NULL constraint error
-- Zero rows inserted into user_roles (count validation catches this)
+- Track P50/P95/P99 response times per endpoint
+- Alert on any gpt-service response > 25 seconds
+- Monitor ai-service error rates (OpenAI API availability)
+- Log downstream service call durations separately
 
-**Code location affected:**
-- `supabase/migrations/20260211000003_create_user_roles_table.sql` line 9 (role_entity_id UUID)
-- New migration (not yet written) must ALTER this column first
+**Phase impact:** Phase 3 (Resume Analysis endpoint) -- design async pattern before implementation
 
-**Phase impact:** Phase 1 (Schema Changes) — Must ALTER TABLE before data migration
+**Confidence:** MEDIUM for timeout limits (training data); HIGH for the downstream latency chain analysis (based on codebase architecture).
 
 ---
 
-### Pitfall 6: Unique Constraint Violations on Duplicate Platform Admin Assignments
+### Pitfall 6: Natural Language to Structured Query Mapping Failures
 
-**What goes wrong:** Migration attempts to INSERT multiple platform_admin rows for the same user (one per company they're admin of), but user_roles has a unique constraint that prevents duplicates.
+**What goes wrong:** User says "find me remote Python jobs in Austin" but the GPT sends `{"keywords": "remote Python jobs in Austin"}` as a single string instead of structured filters like `{"skills": ["Python"], "location": "Austin", "commute_types": ["remote"]}`.
 
 **Why it happens:**
-- memberships allows multiple rows: same user, same role, different organization_id
-- user_roles unique index after NULL handling may reject duplicates
-- Migration uses INSERT without ON CONFLICT handling
+- The OpenAPI schema defines only a simple `keywords` string parameter (as in the starter schema)
+- The GPT has no way to know about structured filter fields like `commute_types`, `job_level`, `location`, `skills`
+- Even with structured parameters, the GPT may map natural language incorrectly (e.g., "senior" as a keyword vs. `job_level: "senior"`)
+- Schema parameter descriptions are too vague for the GPT to make correct mapping decisions
+- Enum values in schema don't match natural language (e.g., `hybrid_3` vs "3 days in office")
 
 **Consequences:**
-- INSERT fails for second platform_admin row for same user
-- Error: `ERROR: duplicate key value violates unique constraint`
-- Partial migration: some platform admins migrated, others not
-- Inconsistent admin access (some users have it, others don't)
+- Search results are irrelevant or empty
+- Users blame the GPT for being "dumb" when it's a schema/instructions problem
+- Structured filters (commute_types, job_level) added in v4.0 go unused
+- Frustrating UX: user must learn the "right" way to ask
 
 **Prevention:**
+1. Design the OpenAPI schema with granular, well-described parameters:
+   ```yaml
+   parameters:
+     - name: keywords
+       in: query
+       description: "Free-text search terms for job title, skills, or company name. Example: 'Python developer', 'data engineer'"
+       schema:
+         type: string
+     - name: location
+       in: query
+       description: "City, state, or region to filter jobs by location. Example: 'Austin, TX', 'Remote'"
+       schema:
+         type: string
+     - name: commute_types
+       in: query
+       description: "Work arrangement filter. Comma-separated values from: remote, hybrid_1 (1 day in office), hybrid_2 (2 days), hybrid_3 (3 days), hybrid_4 (4 days), in_office"
+       schema:
+         type: string
+     - name: job_level
+       in: query
+       description: "Seniority level filter. One of: entry, mid, senior, lead, manager, director, vp, c_suite"
+       schema:
+         type: string
+         enum: [entry, mid, senior, lead, manager, director, vp, c_suite]
+   ```
+2. GPT Instructions must include mapping guidance:
+   ```
+   When users search for jobs:
+   - Extract location mentions and use the 'location' parameter
+   - Map work arrangement terms: "remote" -> commute_types=remote, "hybrid" -> commute_types=hybrid_2, "in-office"/"on-site" -> commute_types=in_office
+   - Map seniority terms: "junior" -> job_level=entry, "mid-level" -> job_level=mid, "senior" -> job_level=senior, "manager" -> job_level=manager, "VP" -> job_level=vp, "executive"/"C-level" -> job_level=c_suite
+   - Put everything else in the 'keywords' parameter
+   ```
+3. Backend should support BOTH approaches: structured filters AND full-text search on keywords. Even if the GPT sends everything as keywords, the Postgres FTS should still find relevant results.
+4. Add a `search_mode` parameter: `natural` (backend does the parsing) vs `structured` (GPT does the parsing). Start with `natural` where backend handles it, since it's more reliable.
 
-**Design migration for single row per user:**
-```sql
--- Migrate only DISTINCT user_id for platform_admin
-INSERT INTO user_roles (user_id, role_name, role_entity_id, role_entity_type, created_at, updated_at)
-SELECT DISTINCT ON (user_id)
-    user_id,
-    'platform_admin',
-    NULL,
-    NULL,
-    MIN(created_at),
-    MAX(updated_at)
-FROM memberships
-WHERE role_name = 'platform_admin' AND deleted_at IS NULL
-GROUP BY user_id
-ON CONFLICT DO NOTHING;
-```
+**Warning signs:**
+- All GPT search requests use only the `keywords` parameter
+- Search results are frequently irrelevant
+- Users rephrase queries multiple times to get results
+- commute_types and job_level filters are never populated in request logs
 
 **Detection:**
-- Migration fails with unique constraint violation
-- Count mismatch: source memberships count > migrated user_roles count
-- Validation query identifies missing users
+- Log parameter usage: track which parameters the GPT actually sends
+- Monitor search relevance: empty results rate, bounce rate (user searches again immediately)
+- A/B test structured vs natural mode to see which produces better results
 
-**Code location affected:**
-- `supabase/migrations/20260211000003_create_user_roles_table.sql` line 129 (unique index)
-- New migration script (INSERT statement)
+**Existing project risk:** The starter schema (`04_OpenAPI_Starter.yaml`) only has a single `keywords` parameter. The v4.0 commute_types and job_level filters are already in ats-service but not exposed in the GPT schema.
 
-**Phase impact:** Phase 2 (Data Migration) — Must handle duplicates with DISTINCT or ON CONFLICT
+**Phase impact:** Phase 1 (OpenAPI Schema) and Phase 3 (Job Search endpoint) -- schema design determines search quality
+
+**Confidence:** HIGH for the technical schema design; MEDIUM for GPT parameter mapping behavior (training data).
 
 ---
 
-### Pitfall 7: Stale Service Instances Reading Old Schema
+### Pitfall 7: Clerk Session and GPT Token Lifecycle Mismatch
 
-**What goes wrong:** After migration completes and new code deploys, some service instances (not yet restarted) continue reading from memberships for platform_admin. Returns empty results because data deleted.
+**What goes wrong:** User authenticates via OAuth, gets a GPT token, but the underlying Clerk session expires. The GPT token is still valid, but calls fail because the Clerk identity cannot be resolved.
 
 **Why it happens:**
-- Kubernetes rolling deployment: pods restart gradually
-- Old pod instances still running old code (reads memberships)
-- Migration deleted platform_admin from memberships
-- Load balancer routes requests to mix of old/new pods
+- GPT tokens and Clerk sessions have independent lifecycles
+- Backend issues a GPT access token (e.g., 1-hour expiry) during OAuth flow
+- User's Clerk session may expire or be revoked independently
+- GPT sends valid access token, but `resolveAccessContext` fails because the user's Clerk account was deactivated, deleted, or session was revoked
+- Refresh token flow creates a new GPT token without re-validating Clerk session
+- User changes password or logs out of Clerk -- GPT token should be invalidated but isn't
 
 **Consequences:**
-- Intermittent authorization failures: same user denied on retry
-- Hard to debug: works in some requests, fails in others
-- User reports: "logging out and back in fixed it" (new session hits new pod)
-- Authorization logs show isPlatformAdmin flipping between true/false
+- GPT appears to work (valid token) but all API calls fail with confusing errors
+- User data access continues after account deactivation (security issue)
+- Stale GPT tokens survive Clerk session revocation
+- Inconsistent behavior: some calls work (cached context), others fail (fresh resolution)
 
 **Prevention:**
+1. GPT access tokens should be SHORT-lived (15-30 minutes, not hours). Use refresh tokens for longer sessions.
+2. On every gpt-service request, verify the user still exists and is active:
+   ```typescript
+   async verifyGptToken(token: string): Promise<GptTokenPayload> {
+     const payload = jwt.verify(token, GPT_TOKEN_SECRET);
 
-**Dual-read period (recommended):**
-- Deploy code that reads union of both tables
-- Run migration (data exists in both places)
-- Next deployment: remove memberships read, delete old data
+     // Check user still exists and is active
+     const { data: user } = await supabase
+       .from('users')
+       .select('id, clerk_user_id')
+       .eq('clerk_user_id', payload.clerkUserId)
+       .is('deleted_at', null)
+       .single();
 
-**Alternative: Force all pods to restart after migration:**
-```bash
-# After migration completes, force rolling restart
-kubectl rollout restart deployment/ats-service
-kubectl rollout restart deployment/network-service
-# ... all services using resolveAccessContext
-```
+     if (!user) throw new UnauthorizedError('User account not found or deactivated');
+
+     return payload;
+   }
+   ```
+3. When issuing refresh tokens, re-validate with Clerk that the user session is still active (call Clerk's `/users/{userId}` API to check user status)
+4. Implement token revocation endpoint (`/oauth/revoke`) and call it when:
+   - User changes password (listen for Clerk webhook `user.updated`)
+   - User is deactivated (listen for Clerk webhook `user.deleted`)
+   - Admin revokes access
+5. Store issued GPT tokens in a database table (`gpt_tokens`) with `user_id`, `expires_at`, `revoked_at` columns. Check revocation on every request.
+6. Subscribe to Clerk webhooks for user lifecycle events (identity-service already handles these -- extend to revoke GPT tokens):
+   ```typescript
+   // In identity-service webhook handler (existing)
+   case 'user.deleted':
+     await gptTokenRepository.revokeAllForUser(event.data.id);
+     break;
+   ```
+
+**Warning signs:**
+- GPT tokens work after user account deactivation
+- No Clerk validation on token refresh
+- GPT token table has no revocation mechanism
+- Clerk webhook events don't trigger GPT token invalidation
 
 **Detection:**
-- Intermittent authorization failures during deployment window
-- Some pods log "platform_admin found in memberships", others "found in user_roles"
-- Service version metrics show mixed deployment
+- Test: deactivate a Clerk user, verify GPT token is immediately invalid
+- Test: revoke Clerk session, verify GPT refresh token fails
+- Monitor for GPT requests where `resolveAccessContext` returns errors
+- Audit: check for GPT tokens with `expires_at` far in the future
 
-**Code location affected:**
-- All 7+ microservices using resolveAccessContext
-- Kubernetes deployment manifests (health check probes)
+**Existing project risk:** The identity-service already handles Clerk webhooks (`POST /v2/webhooks/clerk`). The GPT token revocation MUST be added to this existing webhook handler, not built as a separate system.
 
-**Phase impact:** Phase 3 (Code Deployment) — Must coordinate service restarts or use dual-read
+**Phase impact:** Phase 2 (OAuth2) and ongoing maintenance
+
+**Confidence:** HIGH -- Based on direct analysis of Clerk webhook handling in identity-service and auth middleware in api-gateway.
 
 ---
 
-### Pitfall 8: Frontend Caching of is_platform_admin Flag
+### Pitfall 8: GPT-Specific Rate Limiting Conflicts with Existing Rate Limiter
 
-**What goes wrong:** Frontend caches user profile with `is_platform_admin: true` from session before migration. After migration, backend returns updated profile but frontend doesn't refetch. User sees admin UI but API calls fail.
+**What goes wrong:** The GPT hits the existing API gateway rate limit (500 req/min for authenticated users), or conversely, the GPT-specific rate limits are too lax and allow abuse.
 
 **Why it happens:**
-- User profile fetched on login, stored in React context/state
-- Migration happens while user session active
-- Frontend doesn't poll for profile updates
-- Backend JWT remains valid (no forced re-authentication)
+- The existing rate limiter in api-gateway uses the last 16 characters of the Bearer token as the rate limit key (line 191 in index.ts)
+- GPT tokens are different from Clerk JWTs -- the key extraction may not work correctly
+- GPT Actions makes multiple rapid API calls in a single conversation turn (e.g., search + status check + resume analysis in parallel)
+- The 500 req/min authenticated user limit is designed for browser SPA usage, not GPT automation
+- OpenAI may retry failed requests, amplifying load
+- No per-endpoint rate limiting -- a resume analysis call (expensive) counts the same as a job search (cheap)
 
 **Consequences:**
-- UI shows admin navigation/buttons
-- Clicking admin features returns 403 Forbidden
-- Confusing UX: "I see the button but can't use it"
-- User must hard refresh or logout/login to clear cache
+- Legitimate GPT usage hits rate limits, causing failures
+- Or: GPT users can make far more API calls than web users, creating unfair resource consumption
+- Rate limit errors (429) confuse the GPT -- it may not handle them gracefully
+- Expensive endpoints (resume analysis) can be called rapidly, running up OpenAI API costs
 
 **Prevention:**
+1. Route GPT traffic through a SEPARATE rate limiting tier in api-gateway:
+   ```typescript
+   // Detect GPT tokens vs Clerk JWTs
+   const isGptToken = token.startsWith('gpt_');
 
-**Backend-driven authorization:** Never trust frontend role checks for access control (already done)
+   if (isGptToken) {
+     // GPT-specific limits
+     return {
+       max: 60,          // 60 requests per minute per user
+       timeWindow: '1 minute',
+       keyGenerator: (req) => `gpt:${extractUserId(token)}`,
+     };
+   }
+   ```
+2. Implement per-endpoint rate limits for expensive operations:
+   - Job search: 30 req/min
+   - Application status: 20 req/min
+   - Resume analysis: 5 req/min (expensive -- involves OpenAI API call)
+   - Application submission: 3 req/min (write action, should be rare)
+3. Return standard rate limit headers so the GPT can handle them:
+   ```
+   X-RateLimit-Limit: 60
+   X-RateLimit-Remaining: 45
+   X-RateLimit-Reset: 1708300000
+   Retry-After: 30
+   ```
+4. Return informative 429 responses (not just "Too Many Requests"):
+   ```json
+   {
+     "error": "RATE_LIMITED",
+     "message": "You've made too many requests. Please wait 30 seconds before trying again.",
+     "retry_after": 30
+   }
+   ```
+5. GPT Instructions should include: "If you receive a rate limit error (429), inform the user and wait the specified time before retrying."
 
-**Profile refresh on 403:**
-```typescript
-// In API client error interceptor
-if (error.response?.status === 403) {
-    // Refetch user profile
-    await userProfileContext.refresh();
-    // Retry the request
-    return api.request(originalRequest);
-}
-```
+**Warning signs:**
+- GPT users frequently see rate limit errors
+- or: GPT users consume disproportionate API resources vs web users
+- ai-service costs spike from rapid resume analysis calls
+- Rate limit key collision: different GPT users sharing a rate limit bucket
 
 **Detection:**
-- Frontend shows admin UI elements
-- Network tab shows 403 errors on admin API calls
-- User profile in frontend differs from backend /v2/users/:id response
+- Monitor 429 response rate by token type (GPT vs Clerk)
+- Track per-user request volume segmented by GPT vs web
+- Alert on ai-service cost spikes correlated with GPT usage
+- Verify rate limit key uniqueness: each GPT user must have their own bucket
 
-**Code location affected:**
-- `apps/portal/src/contexts/user-profile-context.tsx` (frontend profile state)
-- `apps/portal/src/components/sidebar.tsx` (platform admin UI checks)
-- API error handling in frontend (403 response interceptor)
+**Existing project risk:** The api-gateway rate limiter uses `auth.slice(-16)` as key. If GPT tokens are JWTs with similar suffixes across users, different users could share rate limit buckets. Use the embedded userId as the rate limit key instead.
 
-**Phase impact:** Phase 5 (Validation) — Test with active user sessions during migration
+**Phase impact:** Phase 2 (OAuth2/Infrastructure) and Phase 5 (Hardening)
+
+**Confidence:** HIGH for the rate limiter analysis (direct code inspection of api-gateway/src/index.ts lines 178-200); MEDIUM for OpenAI retry behavior (training data).
+
+---
+
+### Pitfall 9: OAuth2 Redirect URI Mismatch
+
+**What goes wrong:** The OAuth2 authorize flow starts but OpenAI rejects the callback because the redirect_uri doesn't match exactly.
+
+**Why it happens:**
+- OpenAI provides a specific `redirect_uri` during GPT configuration that your authorize endpoint must redirect to
+- The redirect URI is NOT configurable by you -- it is assigned by OpenAI
+- Backend hardcodes a redirect_uri or validates against a whitelist that doesn't include OpenAI's URI
+- Trailing slashes, http vs https, port differences cause mismatch
+- Development vs production URIs differ and the backend doesn't handle both
+- The authorize endpoint builds the redirect URL incorrectly (missing `code` or `state` params)
+
+**Consequences:**
+- OAuth flow fails completely -- users cannot authenticate
+- Difficult to debug because the redirect happens in an iframe/popup within ChatGPT
+- Different behavior between GPT Builder (testing) and published GPT (production) due to different redirect URIs
+
+**Prevention:**
+1. Store the allowed redirect_uri(s) from OpenAI in configuration (not hardcoded)
+2. The authorize endpoint must accept and validate the `redirect_uri` parameter from the request
+3. After Clerk authentication, redirect to EXACTLY the redirect_uri provided, with:
+   ```
+   {redirect_uri}?code={auth_code}&state={state}
+   ```
+4. Support both development and production OpenAI redirect URIs
+5. Never modify the redirect_uri (no adding/removing trailing slashes, no URL encoding changes)
+6. Test with BOTH GPT Builder preview AND published GPT (they may use different redirect URIs)
+
+**Warning signs:**
+- OAuth works in GPT Builder but fails in published GPT (or vice versa)
+- Browser shows "redirect_uri mismatch" error
+- The authorize endpoint redirects to your own domain instead of OpenAI's
+
+**Detection:**
+- Log the incoming redirect_uri on every authorize request
+- Compare logged redirect_uri against configured allowed URIs
+- Test OAuth flow end-to-end in both environments
+
+**Phase impact:** Phase 2 (OAuth2 Implementation)
+
+**Confidence:** MEDIUM -- Based on training data knowledge of OAuth2 redirect URI handling in GPT Actions.
+
+---
+
+### Pitfall 10: API Response Format Incompatible with GPT Interpretation
+
+**What goes wrong:** The API returns valid data but the GPT cannot interpret it, shows garbage to the user, or ignores important fields.
+
+**Why it happens:**
+- Response bodies are too large (GPT has context window limits for action responses)
+- Nested objects are too deep (GPT struggles with deeply nested JSON)
+- Field names are cryptic or inconsistent (e.g., `commute_types: ["hybrid_3"]` instead of human-readable labels)
+- Pagination metadata confuses the GPT (it doesn't know to request page 2)
+- Dates in ISO format without timezone context
+- IDs (UUIDs) are returned but the GPT has no use for them and they waste context
+- Error responses use a different format than success responses
+
+**Consequences:**
+- GPT shows raw UUIDs or enum values to the user ("Job commute type: hybrid_3")
+- GPT truncates responses, losing important data
+- User sees confusing or incomplete information
+- GPT doesn't paginate -- only shows first page of results
+
+**Prevention:**
+1. Design GPT-specific response DTOs that are human-readable:
+   ```json
+   {
+     "jobs": [
+       {
+         "title": "Senior Software Engineer",
+         "company": "Acme Corp",
+         "location": "Austin, TX",
+         "work_arrangement": "3 days in office",
+         "level": "Senior",
+         "posted": "2 days ago",
+         "match_score": 85
+       }
+     ],
+     "total_results": 47,
+     "showing": "1-10 of 47",
+     "has_more": true
+   }
+   ```
+2. Do NOT return UUIDs, internal IDs, or system fields in GPT responses unless they are needed for follow-up actions (e.g., `job_id` for applying)
+3. Translate enum values to human-readable strings:
+   - `hybrid_3` -> "Hybrid (3 days in office)"
+   - `senior` -> "Senior"
+   - `c_suite` -> "C-Suite / Executive"
+4. Keep response payloads compact -- aim for < 4KB per response
+5. Use flat or max-1-level-nested structures
+6. Include a `summary` field in complex responses that the GPT can read directly:
+   ```json
+   {
+     "summary": "Found 47 senior Python jobs in Austin. Showing top 10.",
+     "jobs": [...]
+   }
+   ```
+7. Pagination: include `has_more: true` and instructions in the schema description:
+   "If has_more is true, ask the user if they want to see more results before calling with page=2"
+
+**Warning signs:**
+- GPT displays UUID strings to users
+- GPT says "I found some results" but doesn't list them
+- GPT shows enum values instead of readable labels
+- GPT never requests page 2 of results
+
+**Detection:**
+- Test each endpoint in GPT Builder and check how the GPT presents the response
+- Monitor GPT conversation quality (if you have access to logs)
+- Track whether page > 1 is ever requested
+
+**Existing project risk:** The standard API response format includes pagination with `total`, `page`, `limit`, `total_pages`. For GPT responses, simplify to `has_more: true/false` and `showing: "1-10 of 47"`.
+
+**Phase impact:** Phase 3 (All data endpoints) -- design GPT-friendly DTOs from the start
+
+**Confidence:** MEDIUM -- Based on training data about GPT response interpretation behavior.
 
 ---
 
 ## MINOR PITFALLS
 
-Mistakes that cause annoyance but are easily fixable.
+Mistakes that cause annoyance or delays but are fixable.
 
-### Pitfall 9: Migration Validation Only Checks Insert Count, Not Content
+### Pitfall 11: GPT Instructions Too Vague or Too Restrictive
 
-**What goes wrong:** Migration counts source rows and inserted rows, reports success if counts match. But doesn't verify WHICH users migrated. Might insert wrong user IDs or duplicate wrong data.
+**What goes wrong:** The GPT behaves unpredictably -- sometimes it calls actions when it shouldn't, or refuses to call actions when it should.
 
 **Why it happens:**
-- Validation uses COUNT(*) without content verification
-- Migration script has logic bug (wrong WHERE clause, JOIN condition)
-- Counts match accidentally (wrong data but same quantity)
-- No spot-check of actual user IDs migrated
-
-**Consequences:**
-- Wrong users granted platform admin
-- Correct platform admins lose access
-- Discovered days later when someone reports authorization issue
-- Manual data correction required (identify correct admins, fix roles)
+- GPT Instructions (system prompt) are too short/vague (the current template is only 5 lines)
+- Instructions don't specify when to use which action
+- Instructions don't handle edge cases (what to do when not authenticated, what to do with empty results)
+- Instructions are too restrictive ("only do X") causing the GPT to refuse reasonable requests
+- Instructions conflict with action descriptions in the OpenAPI schema
 
 **Prevention:**
+1. Expand GPT Instructions to cover all action scenarios:
+   ```
+   ## Authentication
+   - If the user is not authenticated, immediately prompt them to sign in
+   - Do not attempt any actions that require authentication without first checking
 
-**Content validation in migration:**
-```sql
-DO $$
-DECLARE
-    missing_users TEXT;
-BEGIN
-    -- Find users in memberships but NOT in user_roles
-    SELECT STRING_AGG(user_id::text, ', ') INTO missing_users
-    FROM (
-        SELECT DISTINCT user_id
-        FROM memberships
-        WHERE role_name = 'platform_admin' AND deleted_at IS NULL
-        EXCEPT
-        SELECT user_id
-        FROM user_roles
-        WHERE role_name = 'platform_admin' AND deleted_at IS NULL
-    ) missing;
+   ## Job Search
+   - When users describe job preferences, extract structured parameters
+   - Always show the top results with key details (title, company, location, work arrangement)
+   - If results are empty, suggest broadening the search
 
-    IF missing_users IS NOT NULL THEN
-        RAISE EXCEPTION 'Missing platform admins in user_roles: %', missing_users;
-    END IF;
-END $$;
-```
+   ## Applications
+   - NEVER set confirmed=true on the first call
+   - Always show the full application summary and ask for explicit confirmation
+   - After submission, show the confirmation and application ID
 
-**Detection:**
-- Post-migration query comparing user IDs between tables shows mismatches
-- Known admin user reports access denied
-- Manual audit of user_roles shows unexpected user IDs
+   ## Error Handling
+   - If rate limited, tell the user to wait and specify how long
+   - If authentication fails, prompt re-authentication
+   - If data is not found, explain clearly and suggest alternatives
+   ```
+2. Test the GPT with 20+ diverse conversation scenarios before publishing
+3. Version the instructions (store in `docs/gpt/05_GPT_Instructions_Template.md` and track changes)
 
-**Code location affected:**
-- Migration script validation block
+**Phase impact:** Phase 6 (GPT Configuration) -- iterative testing required
 
-**Phase impact:** Phase 2 (Data Migration) — Add content validation to migration script
+**Confidence:** MEDIUM -- Based on training data about GPT instruction engineering.
 
 ---
 
-### Pitfall 10: Migration Runs Twice Accidentally (Non-Idempotent)
+### Pitfall 12: Missing Privacy Policy and Terms URLs
 
-**What goes wrong:** Migration script runs twice (deployment retry, manual rerun), causing duplicate data or constraint violations.
+**What goes wrong:** GPT Store submission is rejected because required legal URLs are missing or point to placeholder pages.
 
 **Why it happens:**
-- Deployment pipeline retries failed migrations
-- DBA manually reruns migration to debug
-- No idempotency guards (IF NOT EXISTS, ON CONFLICT)
-- Migration framework doesn't track completed migrations
-
-**Consequences:**
-- Duplicate platform_admin rows in user_roles (if no unique constraint)
-- Migration fails on second run (if unique constraint exists — safe failure)
-- Confusion about whether migration completed successfully
-- Must manually clean up duplicate data
+- GPT Actions with OAuth REQUIRE privacy policy and terms of service URLs
+- URLs point to the corporate marketing site but the pages don't exist yet
+- Privacy policy doesn't mention AI/GPT data processing
+- Terms don't cover the GPT-specific usage scenarios
 
 **Prevention:**
+1. Create privacy policy and terms pages BEFORE GPT configuration
+2. Privacy policy must specifically address:
+   - What data the GPT accesses (job listings, user profile, applications)
+   - How conversation data is handled (OpenAI retains conversations)
+   - How authentication data is stored (GPT tokens, refresh tokens)
+   - Data retention and deletion rights
+3. Terms of service must address:
+   - AI-assisted actions (applications submitted via GPT)
+   - Confirmation requirement for write actions
+   - Rate limits and usage restrictions
+   - Disclaimer about AI interpretation accuracy
+4. Host on `apps/corporate` (marketing site) at stable URLs:
+   - `https://applicant.network/privacy`
+   - `https://applicant.network/terms`
 
-**Idempotent INSERTs:** Use `ON CONFLICT DO NOTHING` or `WHERE NOT EXISTS`
-```sql
-INSERT INTO user_roles (user_id, role_name, role_entity_id, role_entity_type, ...)
-SELECT DISTINCT user_id, 'platform_admin', NULL, NULL, ...
-FROM memberships
-WHERE role_name = 'platform_admin'
-ON CONFLICT (user_id, role_name, COALESCE(role_entity_id, '00000000-0000-0000-0000-000000000000'::uuid))
-DO NOTHING;
-```
+**Phase impact:** Phase 6 (GPT Configuration) -- must be ready before GPT Store submission
 
-**Detection:**
-- Second migration run completes with "0 rows inserted" (ON CONFLICT caught it)
-- Unique constraint violation on second run
-- Migration tracking table shows migration already completed
-
-**Code location affected:**
-- Migration script
-- Supabase migrations framework (tracks completed migrations via migrations table)
-
-**Phase impact:** Phase 2 (Data Migration) — Use idempotent patterns from the start
+**Confidence:** MEDIUM -- Based on training data about GPT Store requirements.
 
 ---
 
-### Pitfall 11: Rollback Strategy Undefined Before Migration
+### Pitfall 13: CORS Configuration Missing for ChatGPT Origins
 
-**What goes wrong:** Migration fails partway through. Team scrambles to figure out how to rollback. Manual SQL scripts written under pressure introduce new bugs.
+**What goes wrong:** OAuth token exchange fails because the browser-based request from ChatGPT is blocked by CORS policy.
 
 **Why it happens:**
-- "We'll handle rollback if needed" (no plan documented)
-- Migration reversibility not tested
-- Complex multi-step migration with no clear inverse
-- Time pressure during incident response
-
-**Consequences:**
-- Extended downtime while rollback strategy debated
-- Manual rollback introduces new data corruption
-- Restored from backup (lose recent production data)
-- Loss of confidence in migration safety
+- The api-gateway CORS configuration allows portal/candidate app origins but not ChatGPT origins
+- Production CORS uses `CORS_ORIGIN` env var (line 39 in api-gateway/src/index.ts) -- ChatGPT origins must be added
+- ChatGPT uses multiple origins: `https://chat.openai.com`, `https://chatgpt.com`, potentially others
+- Preflight OPTIONS requests for the token endpoint are rejected
+- The OAuth endpoints are not in the api-gateway (they're in gpt-service) -- CORS must be configured there too
 
 **Prevention:**
+1. Add ChatGPT origins to CORS configuration:
+   - `https://chat.openai.com`
+   - `https://chatgpt.com`
+   - Verify current OpenAI documentation for any additional origins
+2. If gpt-service has its own Fastify instance (nano-service pattern), configure CORS there too
+3. Ensure preflight OPTIONS requests are handled for OAuth endpoints
+4. In development, allow all origins for testing but restrict in production
 
-**Write rollback script BEFORE migration:**
-```sql
--- ROLLBACK: If migration needs reverting
-BEGIN;
-
--- Find platform org ID (needed for restoration)
-DO $$
-DECLARE
-    platform_org_id UUID;
-BEGIN
-    SELECT id INTO platform_org_id FROM organizations WHERE type = 'platform';
-
-    -- Restore platform_admin to memberships
-    INSERT INTO memberships (user_id, role_name, organization_id, company_id, created_at, updated_at)
-    SELECT
-        user_id,
-        'platform_admin',
-        platform_org_id,
-        NULL,
-        created_at,
-        updated_at
-    FROM user_roles
-    WHERE role_name = 'platform_admin';
-
-    -- Remove from user_roles
-    DELETE FROM user_roles WHERE role_name = 'platform_admin';
-
-    -- Restore role_entity_id NOT NULL constraint
-    ALTER TABLE user_roles ALTER COLUMN role_entity_id SET NOT NULL;
-    ALTER TABLE user_roles ALTER COLUMN role_entity_type SET NOT NULL;
-
-    RAISE NOTICE 'Rollback complete';
-END $$;
-
-COMMIT;
-```
+**Warning signs:**
+- Browser console shows "CORS policy: No 'Access-Control-Allow-Origin' header"
+- OAuth flow works in Postman but fails in actual ChatGPT
+- OPTIONS requests return 404 or 403
 
 **Detection:**
-- Rollback needed but no documented procedure
-- Team debates rollback approach during incident
-- Rollback script fails with errors
+- Test OAuth flow from actual ChatGPT (not just Postman/curl)
+- Monitor for CORS-related errors in browser console
+- Check api-gateway/gpt-service logs for blocked OPTIONS requests
 
-**Code location affected:**
-- Migration documentation (should be in same file as migration)
-- Incident response runbook
+**Existing project risk:** The api-gateway CORS config (line 38-43 in index.ts) only allows configured origins in production. ChatGPT origins MUST be added to the `CORS_ORIGIN` environment variable.
 
-**Phase impact:** Phase 0 (Planning) — Write rollback script before starting migration
+**Phase impact:** Phase 2 (OAuth2 Implementation)
+
+**Confidence:** HIGH -- Based on direct analysis of api-gateway CORS configuration.
+
+---
+
+### Pitfall 14: GPT Token Format Conflicts with Existing Auth Middleware
+
+**What goes wrong:** GPT tokens arrive at the api-gateway, but the existing Clerk JWT verification middleware rejects them because they're not Clerk-issued JWTs.
+
+**Why it happens:**
+- The api-gateway auth middleware (`auth.ts`) tries to verify ALL Bearer tokens against Clerk secret keys
+- GPT tokens are NOT Clerk JWTs -- they're custom tokens issued by gpt-service
+- The middleware loops through all Clerk clients, fails on each, and returns "Token verification failed"
+- No path exists in the middleware to handle non-Clerk tokens
+
+**Consequences:**
+- All GPT API calls return 401 Unauthorized
+- GPT appears broken even though tokens are valid
+- Confusing error: "Token verification failed" when the GPT token IS valid
+
+**Prevention:**
+1. Add GPT token recognition in the auth middleware BEFORE Clerk verification:
+   ```typescript
+   // In api-gateway auth hook
+   if (request.url.startsWith('/api/v1/gpt/')) {
+     // GPT routes use custom token verification, skip Clerk auth
+     // gpt-service handles its own token verification
+     return;
+   }
+   ```
+2. Alternatively, use a token prefix convention: GPT tokens start with `gpt_` and Clerk JWTs start with `eyJ`. Route based on prefix.
+3. The api-gateway should pass GPT requests to gpt-service WITHOUT Clerk verification. gpt-service handles its own auth.
+4. Add gpt-service to the service registry in api-gateway:
+   ```typescript
+   services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
+   ```
+
+**Warning signs:**
+- All GPT Action requests return 401
+- api-gateway logs show "Token verification failed with all Clerk clients" for GPT requests
+- GPT tokens are valid JWTs but not Clerk-issued
+
+**Detection:**
+- Test: send a GPT token to `/api/v1/gpt/jobs` -- should NOT go through Clerk verification
+- Check api-gateway auth hook for GPT route exclusion
+- Monitor 401 error rate on GPT endpoints
+
+**Existing project risk:** The auth middleware already has several bypass paths (webhooks, public endpoints, internal service keys -- see lines 283-377 in index.ts). Adding a GPT bypass follows this established pattern.
+
+**Phase impact:** Phase 2 (OAuth2/Infrastructure) -- must be addressed when routing GPT traffic through api-gateway
+
+**Confidence:** HIGH -- Based on direct analysis of api-gateway auth middleware.
+
+---
+
+### Pitfall 15: OpenAPI Schema Drift from Actual API Implementation
+
+**What goes wrong:** The OpenAPI schema uploaded to GPT Builder diverges from the actual gpt-service implementation. The GPT sends requests that the backend doesn't expect, or the backend returns responses the GPT doesn't understand.
+
+**Why it happens:**
+- Schema is maintained as a separate YAML file (`04_OpenAPI_Starter.yaml`)
+- Backend endpoints are modified but schema is not updated (or vice versa)
+- Schema uses placeholder types during development and is never corrected
+- No automated validation that schema matches implementation
+- Copy-paste errors between schema and route definitions
+
+**Prevention:**
+1. Generate the OpenAPI schema FROM the Fastify route definitions (Fastify has built-in schema support with `@fastify/swagger`):
+   ```typescript
+   // gpt-service route with inline schema
+   app.get('/v1/gpt/jobs', {
+     schema: {
+       querystring: { /* ... */ },
+       response: { 200: { /* ... */ } }
+     }
+   }, handler);
+   ```
+2. Export the generated schema as a build artifact: `GET /v1/gpt/openapi.json`
+3. Use the generated schema for GPT Builder configuration (not a hand-maintained YAML)
+4. Add a CI check: compare generated schema against last-known-good schema, fail on unexpected differences
+5. If hand-maintaining the schema: add a test that imports the YAML and validates each operation against the actual route handlers
+
+**Warning signs:**
+- GPT sends parameters the backend doesn't accept
+- Backend returns fields the GPT doesn't display
+- Schema defines endpoints that don't exist yet (or no longer exist)
+- Swagger UI shows different endpoints than GPT Builder
+
+**Detection:**
+- Automated test: parse OpenAPI YAML, for each operationId verify a matching route exists in gpt-service
+- Compare `@fastify/swagger` output against the uploaded GPT schema
+- Version the schema file and require review for changes
+
+**Phase impact:** Ongoing -- establish schema generation in Phase 1 to prevent drift
+
+**Confidence:** HIGH -- Based on existing Fastify swagger usage in the project (api-gateway already uses `@fastify/swagger`).
 
 ---
 
 ## PHASE-SPECIFIC WARNINGS
 
 | Phase Topic | Likely Pitfall | Mitigation |
-|-------------|----------------|------------|
-| **Phase 1: Schema Changes** | #5 NOT NULL constraint blocks INSERT | ALTER TABLE role_entity_id to nullable FIRST |
-| **Phase 2: Data Migration** | #1 Losing admin access | Atomic transaction, validation before DELETE |
-| | #4 Orphaned memberships | DELETE in same transaction as INSERT |
-| | #6 Duplicate user handling | Use DISTINCT ON or ON CONFLICT DO NOTHING |
-| | #9 Wrong users migrated | Validate user IDs not just counts |
-| | #10 Non-idempotent migration | Use ON CONFLICT for idempotency |
-| **Phase 3: Code Deployment** | #3 Race condition | Deploy dual-read code before data migration |
-| | #7 Stale service instances | Rolling restart or dual-read period |
-| **Phase 4: Cleanup** | #2 FK violations deleting platform org | Check FK references before DELETE |
-| **Phase 5: Validation** | #8 Frontend cache | Test with active sessions, add 403 refresh |
-| **Phase 6: Rollback Readiness** | #11 No rollback plan | Write and test rollback script in Phase 0 |
+|-------------|---------------|------------|
+| **Phase 1: OpenAPI Schema** | #1 Schema rejected by GPT parser | Use 3.0.x, add descriptions on everything, test in GPT Builder immediately |
+| | #6 NL-to-query mapping failures | Design granular parameters with enum values and mapping guidance |
+| | #15 Schema drift | Generate schema from Fastify routes, not hand-maintained YAML |
+| **Phase 2: OAuth2 Implementation** | #2 Token exchange failure | Raw OAuth2 response format (no data envelope), log every step |
+| | #9 Redirect URI mismatch | Accept and validate OpenAI's redirect_uri, don't hardcode |
+| | #7 Clerk/GPT token lifecycle mismatch | Short-lived tokens, Clerk webhook integration for revocation |
+| | #14 Auth middleware rejects GPT tokens | Add GPT route bypass in api-gateway auth hook |
+| | #13 CORS blocks ChatGPT origins | Add OpenAI origins to CORS configuration |
+| | #8 Rate limiting conflicts | Separate GPT rate limit tier with per-endpoint limits |
+| **Phase 3: Read Endpoints** | #3 Cross-user data leakage | resolveAccessContext on every request, candidate-scoped queries |
+| | #5 Timeout on resume analysis | Async processing pattern with polling endpoint |
+| | #10 Response format issues | GPT-friendly DTOs with human-readable values |
+| **Phase 4: Write Endpoints** | #4 Confirmation pattern bypass | Two-call pattern with rich summary data and server-side dedup |
+| | #3 Data leakage on writes | Verify candidate owns the application/resume being acted upon |
+| **Phase 5: Hardening** | #8 Rate limiting tuning | Monitor and adjust per-endpoint limits based on real usage |
+| | #7 Token revocation | Verify Clerk webhook -> GPT token invalidation works |
+| **Phase 6: GPT Configuration** | #11 Instructions too vague | Comprehensive instructions covering all scenarios |
+| | #12 Missing legal URLs | Privacy policy and terms must exist before store submission |
 
 ---
 
-## ROLLBACK STRATEGY
+## GPT STORE REVIEW CONSIDERATIONS
 
-### Automated Rollback (Within Migration Transaction)
+If this GPT is eventually submitted to the GPT Store (noted as out of scope for v5.0 but relevant for future), these are common rejection reasons to design against now:
 
-If migration fails during execution:
-```sql
--- Entire migration wrapped in transaction
-BEGIN;
+| Rejection Reason | Prevention | Phase to Address |
+|-----------------|------------|-----------------|
+| Missing or broken OAuth | Full E2E testing of auth flow | Phase 2 |
+| Privacy policy missing or inadequate | Create GPT-specific privacy policy | Phase 6 |
+| Actions that don't work | Test every operationId individually | All phases |
+| Misleading GPT description | Accurate, honest description of capabilities | Phase 6 |
+| Unsafe write actions | Confirmation pattern, rate limiting | Phase 4 |
+| Data privacy concerns | Tenant isolation, scoped tokens, audit logging | Phase 3-4 |
+| Poor error handling | Informative error messages GPT can relay | All phases |
 
--- Migration steps here...
-
--- Validation fails → automatic ROLLBACK
-DO $$
-BEGIN
-    IF [validation condition fails] THEN
-        RAISE EXCEPTION 'Migration validation failed, rolling back';
-    END IF;
-END $$;
-
-COMMIT;
-```
-
-### Manual Rollback (After Migration Completes)
-
-If issues discovered post-deployment:
-
-1. **Stop new traffic**: Route to maintenance page (prevent new admin actions)
-2. **Restore platform_admin to memberships**: (See Pitfall 11 for script)
-3. **Deploy old resolveAccessContext code**: Reads memberships for platform_admin
-4. **Verify admin access restored**: Smoke test known admin user
-5. **Clean up user_roles**: DELETE platform_admin rows (leave recruiter/candidate intact)
-6. **Restore NOT NULL constraints**: ALTER TABLE user_roles (if needed)
-
-### Rollback Triggers
-
-Execute rollback if:
-- Zero platform admins after migration (validation shows count = 0)
-- Known test admin cannot access admin endpoints
-- More than 5 authorization failures logged in first 5 minutes post-deployment
-- Migration transaction fails (automatic rollback)
-
-### No-Rollback Zone
-
-After 24 hours and validation passes, rollback becomes impractical:
-- New platform_admin assignments in user_roles (would lose recent data)
-- Memberships table may have new data (forward progress)
-- Forward-fix only: manually correct role assignments in user_roles
+**Confidence:** LOW -- GPT Store review criteria may have changed since training data. Verify against current OpenAI guidelines before submission.
 
 ---
 
@@ -702,49 +883,62 @@ After 24 hours and validation passes, rollback becomes impractical:
 
 | Category | Confidence | Source |
 |----------|------------|--------|
-| Current role architecture | HIGH | Direct codebase analysis (`packages/shared-access-context`, `services/identity-service`) |
-| Foreign key constraints | HIGH | `supabase/migrations/20240101000000_baseline.sql` examination |
-| Service dependencies | HIGH | Grep results showing 50+ isPlatformAdmin checks across 7+ services |
-| Migration patterns | HIGH | Reference migration `20260212000001_split_user_roles_into_memberships.sql` |
-| Postgres transaction semantics | HIGH | Training data on Postgres ACID properties, NULL handling |
-| Microservice deployment | MEDIUM | Training data on K8s rolling deployments, general patterns |
-| Frontend caching behavior | MEDIUM | Code inspection of `user-profile-context.tsx`, assumed caching patterns |
+| OpenAPI schema requirements | MEDIUM | Training data (May 2025). OpenAI may have updated GPT Actions parser. Verify with official docs. |
+| OAuth2 flow specifics | MEDIUM | Training data. Verify supported grant types and token_exchange_method with current docs. |
+| GPT Actions timeout limits | LOW | Training data (~45s). This may have changed. Must verify. |
+| Clerk integration pitfalls | HIGH | Direct codebase analysis of auth middleware, webhook handlers, and resolveAccessContext |
+| API gateway routing/CORS | HIGH | Direct code inspection of api-gateway/src/index.ts, auth.ts |
+| Rate limiting conflicts | HIGH | Direct code inspection of api-gateway rate limiter (lines 178-200) |
+| Response format issues | MEDIUM | Training data for GPT interpretation behavior; HIGH for project envelope pattern analysis |
+| Write-action safety | HIGH | Architecture decisions documented in PROJECT.md; standard pattern design |
+| Data leakage risks | HIGH | Direct analysis of AccessContext and role-based filtering patterns |
+| GPT Store review criteria | LOW | Training data. May be outdated. |
 
-**Overall confidence:** HIGH — Pitfalls grounded in actual codebase inspection and proven migration patterns.
+**Overall confidence:** MEDIUM -- Codebase-specific integration pitfalls are HIGH confidence. OpenAI-specific GPT Actions behavior is MEDIUM-LOW confidence due to reliance on training data without web verification.
 
 ---
 
-## WHAT TO VALIDATE
+## WHAT TO VALIDATE BEFORE IMPLEMENTATION
 
-Before executing migration, verify:
+Before starting Phase 1, verify these items against current OpenAI documentation:
 
-1. **Platform organization exists**: Query `SELECT id, name FROM organizations WHERE type = 'platform'`
-2. **Current platform admin count**: Query `SELECT COUNT(DISTINCT user_id) FROM memberships WHERE role_name = 'platform_admin'`
-3. **FK references to platform org**: Check companies.identity_organization_id and invitations.organization_id
-4. **Test user for smoke testing**: Identify known platform_admin user_id for post-migration validation
-5. **Service restart windows**: Confirm deployment schedule allows rolling restarts without downtime
+1. **OpenAPI spec version support:** Confirm GPT Actions still requires 3.0.x (not 3.1)
+2. **OAuth2 grant type:** Confirm Authorization Code with PKCE is the required/supported flow
+3. **Action timeout limit:** Confirm the HTTP request timeout (was ~45s in training data)
+4. **Maximum operations per GPT:** Confirm the limit on number of actions
+5. **Token exchange method:** Confirm `basic` vs `post` for client credentials
+6. **Redirect URI format:** Get the exact OpenAI redirect URI during GPT creation
+7. **CORS origins:** Confirm current ChatGPT domain origins for CORS configuration
+8. **GPT Store submission requirements:** Review current guidelines if store listing is planned
+
+**Recommended approach:** Before writing any code, create the GPT in GPT Builder with a minimal schema (1 endpoint) and test the full OAuth flow. This validates items 1-7 with real data.
 
 ---
 
 ## SOURCES
 
-**Codebase Analysis (HIGH Confidence):**
-- `packages/shared-access-context/src/index.ts` — resolveAccessContext implementation, lines 66-162
-- `services/identity-service/src/v2/memberships/service.ts` — platform admin authorization checks
-- `services/identity-service/src/v2/user-roles/service.ts` — entity role management
-- `supabase/migrations/20260211000003_create_user_roles_table.sql` — user_roles schema with NOT NULL constraint
-- `supabase/migrations/20260212000001_split_user_roles_into_memberships.sql` — reference migration showing validation patterns
-- `supabase/migrations/20240101000000_baseline.sql` — organizations table with FK constraints
-- `.planning/PROJECT.md` — milestone context and requirements
-- 20+ service files with isPlatformAdmin checks across microservices
+**Codebase Analysis (HIGH confidence):**
+- `services/api-gateway/src/index.ts` -- Rate limiter config (lines 178-200), CORS config (lines 38-43), auth hook (lines 283-377), service registry (lines 384-395)
+- `services/api-gateway/src/auth.ts` -- Clerk JWT verification, multi-client loop (lines 86-134), user caching (lines 145-163)
+- `services/api-gateway/src/middleware/auth.ts` -- requireAuth/optionalAuth middleware
+- `packages/shared-access-context/src/index.ts` -- resolveAccessContext, role extraction, candidateId (line 142)
+- `docs/gpt/01_PRD_Custom_GPT.md` -- Product requirements and rollout plan
+- `docs/gpt/02_Architecture_Custom_GPT.md` -- Auth flow, write safety pattern
+- `docs/gpt/03_Technical_Specification.md` -- Error contract, rate limiting, versioning
+- `docs/gpt/04_OpenAPI_Starter.yaml` -- Existing schema (incomplete response schemas identified)
+- `docs/gpt/05_GPT_Instructions_Template.md` -- Current instructions template (too minimal)
+- `.planning/PROJECT.md` -- v5.0 milestone context, constraints, key decisions
 
-**Domain Knowledge (MEDIUM Confidence):**
-- Postgres transaction semantics and NULL handling in unique indexes
-- Kubernetes rolling deployment patterns and health checks
-- Microservice authorization caching and race conditions
-- Database migration best practices (idempotency, validation, rollback)
+**Training Data (MEDIUM confidence):**
+- OpenAI GPT Actions documentation (as of May 2025 training cutoff)
+- OAuth2 Authorization Code Grant with PKCE (RFC 7636)
+- OpenAPI 3.0 specification requirements
+- GPT parameter mapping and response interpretation behavior
+- GPT Store submission requirements
 
-**Assumptions (LOW Confidence — require validation):**
-- Platform organization ID is consistent/known (need to query production)
-- No external systems cache platform_admin status (assumed internal only)
-- Frontend profile refresh behavior (need to test actual caching strategy)
+**Assumptions (LOW confidence -- require validation):**
+- GPT Actions HTTP timeout is ~45 seconds
+- GPT Actions requires OpenAPI 3.0.x specifically (not 3.1)
+- Maximum ~30 operations per GPT for reasonable performance
+- ChatGPT CORS origins are `https://chat.openai.com` and `https://chatgpt.com`
+- GPT Store review criteria have not significantly changed since May 2025

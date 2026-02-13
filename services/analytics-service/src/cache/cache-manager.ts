@@ -7,11 +7,17 @@ const logger = createLogger('CacheManager');
 export class CacheManager {
     private redis: Redis;
 
-    constructor(redisConfig: { host: string; port: number; password?: string }) {
+    constructor(redisConfig: {
+        host: string;
+        port: number;
+        password?: string;
+        db?: number;
+    }) {
         this.redis = new Redis({
             host: redisConfig.host,
             port: redisConfig.port,
             password: redisConfig.password || undefined,
+            db: redisConfig.db,
             retryStrategy: (times) => {
                 const delay = Math.min(times * 50, 2000);
                 return delay;

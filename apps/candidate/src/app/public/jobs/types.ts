@@ -18,6 +18,8 @@ export interface Job {
     salary_max?: number | null;
     department?: string | null;
     open_to_relocation?: boolean;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     show_salary_range?: boolean;
     guarantee_days?: number | null;
     status?: string;
@@ -44,6 +46,36 @@ export interface JobFilters {
 }
 
 // ===== CONSTANTS =====
+
+export const COMMUTE_TYPE_LABELS: Record<string, string> = {
+    remote: "Remote",
+    hybrid_1: "Hybrid (1 day)",
+    hybrid_2: "Hybrid (2 days)",
+    hybrid_3: "Hybrid (3 days)",
+    hybrid_4: "Hybrid (4 days)",
+    in_office: "In Office",
+};
+
+export const JOB_LEVEL_LABELS: Record<string, string> = {
+    entry: "Entry Level",
+    mid: "Mid Level",
+    senior: "Senior",
+    lead: "Lead",
+    manager: "Manager",
+    director: "Director",
+    vp: "VP",
+    c_suite: "C-Suite",
+};
+
+export function formatCommuteTypes(types?: string[] | null): string | null {
+    if (!types || types.length === 0) return null;
+    return types.map((t) => COMMUTE_TYPE_LABELS[t] || t).join(", ");
+}
+
+export function formatJobLevel(level?: string | null): string | null {
+    if (!level) return null;
+    return JOB_LEVEL_LABELS[level] || level;
+}
 
 export const EMPLOYMENT_TYPES = [
     { value: "full_time", label: "Full Time" },

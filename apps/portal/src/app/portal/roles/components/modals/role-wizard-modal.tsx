@@ -60,6 +60,8 @@ export default function RoleWizardModal({
         guarantee_days: 0,
         employment_type: "full_time",
         open_to_relocation: false,
+        commute_types: [],
+        job_level: "",
 
         // Step 3
         recruiter_description: "",
@@ -125,6 +127,8 @@ export default function RoleWizardModal({
                     guarantee_days: job.guarantee_days || 90,
                     employment_type: job.employment_type || "full_time",
                     open_to_relocation: job.open_to_relocation || false,
+                    commute_types: job.commute_types || [],
+                    job_level: job.job_level || "",
                     recruiter_description: job.recruiter_description || "",
                     candidate_description: job.candidate_description || "",
                     mandatory_requirements:
@@ -287,6 +291,8 @@ export default function RoleWizardModal({
                 guarantee_days: 0,
                 employment_type: "full_time",
                 open_to_relocation: false,
+                commute_types: [],
+                job_level: "",
                 recruiter_description: "",
                 candidate_description: "",
                 mandatory_requirements: [],
@@ -357,6 +363,8 @@ export default function RoleWizardModal({
                 payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max)
                 payload.salary_max = parseInt(formData.salary_max);
+            if (formData.commute_types.length > 0) payload.commute_types = formData.commute_types;
+            if (formData.job_level) payload.job_level = formData.job_level;
 
             let targetJobId: string;
 

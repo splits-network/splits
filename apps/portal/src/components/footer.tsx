@@ -176,7 +176,15 @@ export function Footer() {
                                     href="/public/press"
                                     className="link link-hover text-base-content/70 hover:text-base-content"
                                 >
-                                    Press Kit
+                                    Press
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/public/brand"
+                                    className="link link-hover text-base-content/70 hover:text-base-content"
+                                >
+                                    Brand Kit
                                 </Link>
                             </li>
                             <li>

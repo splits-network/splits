@@ -30,6 +30,8 @@ interface Job {
     recruiter_description?: string | null;
     candidate_description?: string | null;
     open_to_relocation?: boolean | null;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     show_salary_range?: boolean | null;
     created_at: string | null;
     requirements?: JobRequirement[];

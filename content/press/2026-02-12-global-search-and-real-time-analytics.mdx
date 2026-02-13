@@ -1,0 +1,54 @@
+---
+title: "Global Search and Real-Time Analytics"
+date: "2026-02-12"
+summary: "A powerful new search bar lets you find candidates, jobs, and companies instantly from anywhere in the platform. Plus, real-time analytics via WebSocket and new dashboard widgets for billing, candidates, and role distribution."
+tags: ["new-feature", "search", "analytics", "portal", "ats"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release introduces two major capabilities: a platform-wide search system and real-time analytics infrastructure. Whether you're looking for a specific candidate, tracking your team's placement activity, or monitoring billing at a glance, these updates make your day-to-day workflow significantly faster.
+
+## New Features
+
+### Global Search
+
+You can now search across candidates, jobs, and companies directly from the header bar on every page. The new search bar features a dropdown with keyboard navigation, so you can type a name or keyword and jump straight to the result without leaving your current workflow.
+
+Behind the scenes, we built a dedicated search engine using full-text indexing. Candidate profiles, job listings, and company records are automatically synced to a unified search index, meaning results are always up to date as your data changes. Recruiter search has also been upgraded from basic text matching to full-text search, delivering faster and more accurate results.
+
+### Real-Time Analytics
+
+We've launched an analytics gateway that streams dashboard data over WebSocket connections. This lays the groundwork for live-updating charts, counters, and activity feeds across the platform — no more refreshing to see the latest numbers.
+
+### Candidate Dashboard
+
+A new candidate-focused dashboard gives you a consolidated view of your candidate pipeline. See where candidates stand across active applications, track progress at a glance, and take action without navigating between multiple screens.
+
+### Billing Summary
+
+Company administrators now have a billing summary widget that surfaces key billing data directly on the dashboard. Monitor your subscription status, upcoming charges, and payment history without digging through settings.
+
+### Role Distribution Chart
+
+A new doughnut chart on the admin dashboard visualizes how roles are distributed across your organization. Quickly spot whether your open positions are balanced across departments or concentrated in one area.
+
+### Enhanced Application Details
+
+Application rows now display AI fit scores and accepted dates inline, giving you richer context when scanning your pipeline. Combined with improved messaging and detail actions in the toolbar, managing applications requires fewer clicks.
+
+### Connection Management
+
+Companies can now manage recruiter connections directly through the invitations system. Accept, review, and organize incoming partnership requests from a single interface.
+
+### Navigation Improvements
+
+We've added a "My Recruiters" quick link to the navigation bar, making it faster to access your recruiter network. The portal header has also been streamlined with a cleaner mobile layout and refreshed user dropdown.
+
+## Under the Hood
+
+We migrated recruiter search from basic pattern matching to full-text vector search, improving both speed and relevance of results. Theme colors and the user dropdown component have also been refined for a more polished look.
+
+## What's Next
+
+With the search infrastructure in place, expect expanded search capabilities including filters, saved searches, and search suggestions in upcoming releases.

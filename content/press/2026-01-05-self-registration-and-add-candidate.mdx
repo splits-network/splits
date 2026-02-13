@@ -1,0 +1,38 @@
+---
+title: "Self-Registration, Add Candidate Modal, and Smarter Sign-In"
+date: "2026-01-05"
+summary: "Users can now self-register on the platform, recruiters can add candidates directly from a modal, and sign-in flows handle invitation links more reliably."
+tags: ["new-feature", "improvement", "onboarding"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release removes friction from getting started on the platform. New users can register themselves, recruiters can add candidates without leaving their workflow, and authentication flows are smarter about where to send you.
+
+## New Features
+
+### Self-Registration
+
+New users can now register on Splits Network without requiring an invitation. The self-registration flow creates your account, sets up your profile, and routes you to the appropriate onboarding experience based on your role. Whether you're a recruiter looking to join the marketplace or a hiring company exploring the platform, you can get started immediately.
+
+### Add Candidate Modal
+
+Recruiters can now add new candidates directly from a modal dialog without navigating away from their current page. The modal includes form validation and error handling, so you get immediate feedback if required fields are missing. Add a candidate, close the modal, and continue working.
+
+### Smarter Sign-In and Sign-Up Flows
+
+Sign-in and sign-up pages now use redirect URLs to handle invitation links properly. If you click an invitation link while signed out, the platform remembers where you were headed and takes you there after authentication. No more landing on a generic dashboard when you expected to see a specific invitation.
+
+## Improvements
+
+### Silent Notification Handling
+
+The notification bell now fails silently when it encounters errors instead of displaying disruptive error messages. If notifications can't load temporarily, the rest of your interface remains unaffected. Notifications resume automatically when connectivity is restored.
+
+### Standardized API Endpoints
+
+User data retrieval, recruiter profile fetching, and cookie consent handling now use standardized endpoints across the platform. This consistency means fewer edge cases and more predictable behavior as you navigate between different sections of the app.
+
+### Cookie Consent Improvements
+
+The cookie consent banner now communicates with the backend using authenticated API calls, ensuring your preferences are saved to your account rather than just your browser. Switch devices and your consent choice follows you.

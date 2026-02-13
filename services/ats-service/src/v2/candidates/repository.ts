@@ -625,6 +625,15 @@ export class CandidateRepository {
             throw new Error(`Failed to set primary resume: ${updateError.message}`);
         }
 
+        // If the resume has structured data from AI extraction, sync it to the candidate
+        const structuredData = updatedResume.metadata?.structured_data;
+        if (structuredData) {
+            await this.supabase
+                .from('candidates')
+                .update({ resume_metadata: structuredData })
+                .eq('id', candidateId);
+        }
+
         return {
             ...updatedResume,
             is_primary: true
@@ -665,6 +674,12 @@ export class CandidateRepository {
 
             await Promise.all(updates);
         }
+
+        // Clear resume_metadata from candidate when primary is cleared
+        await this.supabase
+            .from('candidates')
+            .update({ resume_metadata: null })
+            .eq('id', candidateId);
     }
 
     /**

@@ -1,0 +1,50 @@
+---
+title: "Proposals Workflow, Escrow Management, and Analytics Service"
+date: "2026-01-14"
+summary: "A new proposals workflow lets you track and manage proposals through their lifecycle. Escrow holds and payout schedules bring financial transparency, and a dedicated analytics service delivers platform-wide stats."
+tags: ["new-feature", "improvement", "billing", "analytics", "proposals"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release introduces major new capabilities for managing proposals, handling payments, and understanding platform performance. These features bring Splits Network closer to a complete end-to-end recruiting marketplace.
+
+## New Features
+
+### Proposals Workflow
+
+You can now manage proposals through a structured workflow with a dedicated UI and backend automation. Track each proposal from submission through review, acceptance, and completion. The proposals table displays dates in a more readable format, and the entire lifecycle is visible from a single interface.
+
+### Escrow Holds and Payout Schedules
+
+The billing service now supports escrow hold management and payout scheduling. When a placement is made, funds can be held in escrow until conditions are met, then released on a defined schedule. This brings financial transparency and trust to every transaction on the platform. All payout and escrow actions are logged for audit purposes.
+
+### Analytics Service
+
+A dedicated analytics service is now live, providing platform-wide statistics through access-controlled routes. Depending on your role, you see stats relevant to your scope: recruiters see their placement metrics, companies see hiring analytics, and platform administrators see the full picture. The service uses its own access context resolution to ensure you only see data you're authorized to view.
+
+### Edit Role Modal
+
+You can now edit existing roles using a modal dialog instead of navigating to a separate page. Open the role, make your changes, and save without losing your place. The previous standalone edit page has been replaced with this more streamlined approach.
+
+### Public Status Page Layout
+
+The public status page now has a proper layout with metadata for better discoverability. Anyone can check platform health without needing to sign in.
+
+## Improvements
+
+### Smarter Invitation Resending
+
+Resending an invitation now includes a status check to prevent resending invitations that are no longer in a valid state. You get clear feedback if an invitation can't be resent, rather than a silent failure.
+
+### Improved Application Detail Navigation
+
+The application detail page now passes the correct identifiers when navigating, eliminating edge cases where the page could load with missing data. Prop handling has been tightened to ensure the right information displays every time.
+
+### Refined Company Dashboard
+
+The company dashboard has been updated with adjusted padding and improved chart types for a cleaner layout. Charts are easier to read and the overall page feels more spacious and organized.
+
+### Readable Date Formatting
+
+The proposals table now formats dates using a custom utility that produces more human-readable output. Instead of raw timestamps, you see dates formatted for quick scanning.

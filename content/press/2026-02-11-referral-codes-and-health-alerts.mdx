@@ -1,0 +1,46 @@
+---
+title: "Recruiter Referral Codes and Health Alerts"
+date: "2026-02-11"
+summary: "Recruiters can now share referral codes to grow their network, while automated health alerts and improved onboarding keep the platform running smoothly for everyone."
+tags: ["new-feature", "improvement", "recruiters", "monitoring", "onboarding"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release introduces a referral system for recruiters, automated health alerting, and a series of onboarding and authentication improvements.
+
+## New Features
+
+### Recruiter Referral Codes
+
+Recruiters can now generate and share personal referral codes. When a new recruiter signs up using your code, both parties benefit from the connection. This makes it easy to grow your recruiting network organically and reward the partners who bring in new talent.
+
+### Automated Health Alerts
+
+The platform now sends automated email alerts when a service experiences issues. Alerts are dispatched through the messaging queue and include environment context, so your operations team knows exactly which system needs attention and in which environment. When a service recovers, the system automatically cleans up orphaned notifications so your dashboard stays accurate.
+
+### User Roles Management
+
+Administrators can now manage user roles directly through the identity service. Assign, modify, and revoke roles with full audit tracking, ensuring your team's access permissions are always up to date.
+
+## Improvements
+
+### Smoother Onboarding
+
+The onboarding process now retrieves existing user data earlier in the flow, pre-filling forms and reducing redundant data entry. Your onboarding status is tracked and updated automatically, so if you leave and come back, you pick up right where you left off.
+
+### Improved Authentication Flow
+
+Sign-in and sign-up pages now include fallback redirect URLs, ensuring you always land in the right place after authenticating -- even if the original destination is temporarily unavailable. The platform also handles race conditions during SSO sign-up more gracefully, eliminating edge cases where new SSO users could see brief errors.
+
+### Cleaner Modals
+
+All modals across the platform have been migrated to use the native dialog element with updated styling. This improves accessibility, keyboard navigation, and visual consistency throughout the application.
+
+### Enhanced View Details
+
+The actions toolbar across multiple sections now includes a dedicated "View Details" button, making it faster to jump from a list or grid view into the full detail page for any record.
+
+### Improved Message Page Layout
+
+The messages page now uses a consistent page title component, aligning its header treatment with the rest of the platform for a more cohesive feel.

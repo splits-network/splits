@@ -1,0 +1,42 @@
+---
+title: "User Profile Context, Standardized List Views, and Recruiter Dashboard"
+date: "2026-01-06"
+summary: "A new user profile context powers role management across the app. Standardized list components bring consistent pagination and search to every browse page, and the recruiter dashboard surfaces better data."
+tags: ["new-feature", "improvement", "recruiter", "portal"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+Today's release establishes foundational patterns that make the entire platform more consistent and reliable. Role management, data browsing, and recruiter insights all get meaningful upgrades.
+
+## New Features
+
+### User Profile Context
+
+A unified user profile context now powers role management and onboarding across the portal. Your current role, permissions, and organization context are available everywhere in the app, which means smoother transitions between admin, recruiter, and hiring views. The platform knows who you are and what you can do on every page.
+
+### Standardized List Components
+
+Every browse page in the platform now uses standardized list components with consistent pagination, search, sorting, and filtering. Whether you're browsing jobs, candidates, or applications, the controls work the same way. Search fields, page sizes, and sort options are predictable across every list view.
+
+### /me Endpoint for Quick Profile Access
+
+A new endpoint delivers your user data along with enriched access context in a single call. The platform loads your profile, role, and permissions faster, which means quicker page loads and fewer loading spinners when you first sign in.
+
+### Enhanced Candidate Filtering for Recruiters
+
+Recruiters now see candidates scoped to their access level automatically. If you're assigned to specific roles or companies, your candidate list reflects that scope without manual filtering. This prevents information overload and keeps your pipeline focused on the candidates that matter to you.
+
+## Improvements
+
+### Recruiter Dashboard and Stats
+
+The recruiter dashboard now fetches data more efficiently with improved logging and error handling. Stats load faster and reflect accurate counts, giving you a clearer picture of your pipeline at a glance.
+
+### Smarter Notification Handling
+
+The notification bell has been rebuilt with better error handling and data fetching patterns. Notifications load more reliably, and the component handles edge cases like empty states and network issues gracefully.
+
+### Pending Applications View
+
+A dedicated pending applications component gives you a focused view of applications awaiting action. Instead of scanning through a mixed list, you can quickly identify which applications need your attention right now.

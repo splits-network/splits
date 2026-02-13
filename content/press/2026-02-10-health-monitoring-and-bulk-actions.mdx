@@ -1,0 +1,54 @@
+---
+title: "Health Monitoring, Bulk Actions, and Application Wizard"
+date: "2026-02-10"
+summary: "A new health monitoring dashboard tracks platform status in real time, bulk notification management saves admin time, and an application wizard guides candidates through submissions."
+tags: ["new-feature", "improvement", "monitoring", "notifications", "applications"]
+version: "0.1.0"
+author: "Splits Network"
+---
+
+This release introduces platform health monitoring for administrators, expands notification management capabilities, and adds a guided application submission experience.
+
+## New Features
+
+### Platform Health Monitoring
+
+A new health monitoring service continuously tracks the status of all platform components, including the database and cache layers. Administrators can now see at a glance which services are running smoothly and which need attention -- without waiting for user reports to discover issues.
+
+### Application Submission Wizard
+
+Candidates now have a guided, multi-step wizard for submitting applications. The process walks through document upload, profile review, and final submission confirmation. Each step validates that the required information is complete before moving forward, reducing incomplete or error-prone submissions.
+
+### Bulk Notification Management
+
+Platform administrators can now delete site notifications in bulk from the admin panel. When cleaning up expired announcements or resolving incident alerts, you can select multiple notifications and remove them in one action instead of deleting them one at a time.
+
+### Expanded Notification Severity Levels
+
+Notifications now support additional severity options -- primary, secondary, accent, and neutral -- alongside the existing warning and error levels. This gives you more nuanced control over how alerts appear to users, from informational updates to urgent action items.
+
+### Stripe Webhook Event Storage
+
+All Stripe webhook events are now stored for audit and debugging purposes. If a billing question arises, your team can review the complete event history to trace exactly what happened and when.
+
+### Recruiter Invite Modal
+
+The recruiter actions toolbar now includes a dedicated invite modal. When you find a recruiter you'd like to work with, send them an invitation directly from their profile without navigating away.
+
+## Improvements
+
+### Bulk Job Requirements and Pre-Screen Questions
+
+You can now replace all requirements or pre-screen questions on a job listing in a single operation. Instead of editing items one by one, upload a complete set and the platform handles the swap -- saving significant time when restructuring a job's criteria.
+
+### Improved User Authentication Handling
+
+The user profile system now handles signed-in and signed-out states more intelligently, preventing unnecessary profile loading for unauthenticated visitors and improving page load performance on public pages.
+
+### For Recruiters Page Refresh
+
+The "For Recruiters" marketing page has received an image and layout update for a more polished presentation.
+
+### Smarter Notification Delivery
+
+The notification service now limits its deployment to a single instance, preventing duplicate emails when multiple copies of the service are running. You receive exactly one notification per event, every time.

@@ -63,6 +63,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.link_requested');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.sourcer_assignment_requested');
 
+            // Bind to resume metadata extraction events from AI service
+            await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
+
             this.logger.info('V2 ATS domain consumer connected to RabbitMQ');
 
             // Start consuming
@@ -115,6 +118,10 @@ export class DomainEventConsumer {
 
                 case 'candidate.sourcer_assignment_requested':
                     await this.handleSourcerAssignment(event);
+                    break;
+
+                case 'resume.metadata.extracted':
+                    await this.handleResumeMetadataExtracted(event);
                     break;
 
                 default:
@@ -495,6 +502,76 @@ export class DomainEventConsumer {
             );
 
             throw error; // Re-throw to trigger nack/requeue
+        }
+    }
+
+    /**
+     * Handle resume.metadata.extracted event from AI service
+     * If the document is the candidate's primary resume, sync structured data to candidate
+     */
+    private async handleResumeMetadataExtracted(event: DomainEvent): Promise<void> {
+        const { document_id, entity_id, structured_data_available } = event.payload;
+
+        if (!structured_data_available) {
+            this.logger.debug({ document_id }, 'Structured data not available, skipping sync');
+            return;
+        }
+
+        try {
+            // Check if this document is the primary resume for the candidate
+            const supabase = this.candidateRepository.getSupabase();
+
+            const { data: candidate, error: candidateError } = await supabase
+                .from('candidates')
+                .select('id, primary_resume_id')
+                .eq('id', entity_id)
+                .single();
+
+            if (candidateError || !candidate) {
+                this.logger.debug({ document_id, entity_id }, 'Candidate not found for resume metadata sync');
+                return;
+            }
+
+            if (candidate.primary_resume_id !== document_id) {
+                this.logger.debug(
+                    { document_id, candidate_id: candidate.id, primary_resume_id: candidate.primary_resume_id },
+                    'Document is not primary resume, skipping sync'
+                );
+                return;
+            }
+
+            // Fetch structured data from the document
+            const { data: doc, error: docError } = await supabase
+                .from('documents')
+                .select('metadata')
+                .eq('id', document_id)
+                .single();
+
+            if (docError || !doc?.metadata?.structured_data) {
+                this.logger.warn({ document_id }, 'Could not read structured data from document');
+                return;
+            }
+
+            // Sync to candidate
+            const { error: updateError } = await supabase
+                .from('candidates')
+                .update({ resume_metadata: doc.metadata.structured_data })
+                .eq('id', candidate.id);
+
+            if (updateError) {
+                throw updateError;
+            }
+
+            this.logger.info(
+                { candidate_id: candidate.id, document_id },
+                'Synced resume structured data to candidate from extracted event'
+            );
+        } catch (error: any) {
+            this.logger.error(
+                { err: error, document_id, entity_id, error_message: error.message },
+                'Failed to sync resume metadata to candidate'
+            );
+            // Don't rethrow - this is a non-critical sync operation
         }
     }
 

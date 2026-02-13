@@ -1,4 +1,4 @@
-import { Job } from "./types";
+import { Job, formatCommuteTypes, formatJobLevel } from "./types";
 
 interface RoleListItemProps {
     item: Job;
@@ -63,6 +63,19 @@ export default function RoleListItem({
                     </span>
                 )}
             </div>
+            {(formatCommuteTypes(item.commute_types) || formatJobLevel(item.job_level)) && (
+                <div className="flex items-center gap-1.5 text-xs text-base-content/50 mt-0.5">
+                    {formatCommuteTypes(item.commute_types) && (
+                        <span className="truncate">{formatCommuteTypes(item.commute_types)}</span>
+                    )}
+                    {formatCommuteTypes(item.commute_types) && formatJobLevel(item.job_level) && (
+                        <span className="text-base-content/30">·</span>
+                    )}
+                    {formatJobLevel(item.job_level) && (
+                        <span className="shrink-0">{formatJobLevel(item.job_level)}</span>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

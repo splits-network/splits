@@ -13,6 +13,8 @@ import {
 } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 
 interface NavItem {
     href: string;
@@ -24,6 +26,7 @@ interface NavItem {
     mobileDock?: boolean;
     children?: NavItem[];
     expandable?: boolean;
+    shortcut?: string; // Key letter for Ctrl+Shift+<key> shortcut
 }
 
 // Navigation items organized by section
@@ -42,6 +45,7 @@ const navItems: NavItem[] = [
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "main",
         mobileDock: true,
+        shortcut: "H",
     },
     {
         href: "/portal/roles",
@@ -50,6 +54,7 @@ const navItems: NavItem[] = [
         roles: ["all"],
         section: "management",
         mobileDock: true,
+        shortcut: "R",
     },
 
     // Management section (recruiter/company focused)
@@ -106,6 +111,7 @@ const navItems: NavItem[] = [
                 ],
                 section: "management",
                 mobileDock: false,
+                shortcut: "C",
             },
             {
                 href: "/portal/invitations",
@@ -161,6 +167,7 @@ const navItems: NavItem[] = [
         roles: ["company_admin", "hiring_manager", "recruiter"],
         section: "management",
         mobileDock: true,
+        shortcut: "A",
     },
     {
         href: "/portal/messages",
@@ -169,6 +176,7 @@ const navItems: NavItem[] = [
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
         mobileDock: true,
+        shortcut: "M",
     },
     {
         href: "/portal/placements",
@@ -182,6 +190,7 @@ const navItems: NavItem[] = [
         ],
         section: "management",
         mobileDock: false,
+        shortcut: "P",
     },
 
     // Settings section
@@ -192,6 +201,7 @@ const navItems: NavItem[] = [
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "settings",
         mobileDock: false,
+        shortcut: "U",
     },
 
     {
@@ -277,6 +287,13 @@ function NavItem({
             </span>
 
             <span className="flex-1">{item.label}</span>
+
+            {/* Keyboard shortcut hint */}
+            {item.shortcut && (
+                <kbd className="kbd kbd-sm bg-base-100">
+                    Alt+{item.shortcut}
+                </kbd>
+            )}
 
             {/* Badge for counts */}
             {badge !== undefined && badge > 0 && (
@@ -558,6 +575,39 @@ export function Sidebar() {
         };
     }, [isAdmin, isRecruiter, isCompanyUser]);
 
+    // Keyboard shortcuts
+    const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+    const handleHelpToggle = useCallback(
+        () => setShowShortcutsHelp((prev) => !prev),
+        [],
+    );
+
+    // Flatten all filtered items (including children) that have shortcuts
+    const shortcutItems = useMemo(() => {
+        const flat: { href: string; label: string; shortcut: string; section?: string }[] = [];
+        const collect = (items: NavItem[]) => {
+            for (const item of items) {
+                if (item.shortcut) {
+                    flat.push({
+                        href: item.href,
+                        label: item.label,
+                        shortcut: item.shortcut,
+                        section: item.section,
+                    });
+                }
+                if (item.children) collect(item.children);
+            }
+        };
+        collect([
+            ...groupedItems.main,
+            ...groupedItems.management,
+            ...groupedItems.settings,
+        ]);
+        return flat;
+    }, [groupedItems]);
+
+    useKeyboardShortcuts(shortcutItems, handleHelpToggle);
+
     return (
         <>
             <div className="drawer-side z-30 overflow-visible hidden md:block bg-base-200 h-[calc(100vh-4rem)]">
@@ -725,6 +775,13 @@ export function Sidebar() {
                     })()}
                 </div>
             </div>
+
+            {/* Keyboard shortcuts help modal */}
+            <KeyboardShortcutsModal
+                open={showShortcutsHelp}
+                onClose={() => setShowShortcutsHelp(false)}
+                items={shortcutItems}
+            />
         </>
     );
 }

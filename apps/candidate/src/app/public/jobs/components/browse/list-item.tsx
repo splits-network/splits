@@ -7,6 +7,8 @@ import {
     getCompanyInitials,
     getCompanyName,
     shouldShowSalary,
+    formatCommuteTypes,
+    formatJobLevel,
 } from "../../types";
 
 interface ListItemProps {
@@ -69,6 +71,9 @@ export default function ListItem({
                 </div>
                 <p className="text-xs text-base-content/60 truncate">
                     {companyName} - {item.location || "Location not specified"}
+                    {formatCommuteTypes(item.commute_types) && (
+                        <> · {formatCommuteTypes(item.commute_types)}</>
+                    )}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-xs text-accent">

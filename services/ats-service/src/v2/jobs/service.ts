@@ -10,6 +10,9 @@ import { PaginationResponse, buildPaginationResponse, validatePaginationParams }
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+const VALID_COMMUTE_TYPES = ['remote', 'hybrid_1', 'hybrid_2', 'hybrid_3', 'hybrid_4', 'in_office'];
+const VALID_JOB_LEVELS = ['entry', 'mid', 'senior', 'lead', 'manager', 'director', 'vp', 'c_suite'];
+
 export class JobServiceV2 {
     private accessResolver: AccessContextResolver;
 
@@ -68,6 +71,22 @@ export class JobServiceV2 {
         }
         if (!data.company_id) {
             throw new Error('Company ID is required');
+        }
+
+        // Validate commute_types
+        if (data.commute_types) {
+            if (!Array.isArray(data.commute_types)) {
+                throw new Error('commute_types must be an array');
+            }
+            const invalid = data.commute_types.filter((t: string) => !VALID_COMMUTE_TYPES.includes(t));
+            if (invalid.length > 0) {
+                throw new Error(`Invalid commute_types: ${invalid.join(', ')}. Valid values: ${VALID_COMMUTE_TYPES.join(', ')}`);
+            }
+        }
+
+        // Validate job_level
+        if (data.job_level && !VALID_JOB_LEVELS.includes(data.job_level)) {
+            throw new Error(`Invalid job_level: ${data.job_level}. Valid values: ${VALID_JOB_LEVELS.join(', ')}`);
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
@@ -148,6 +167,22 @@ export class JobServiceV2 {
             if (currentJob.salary_min > updates.salary_max) {
                 throw new Error('salary_min cannot exceed salary_max');
             }
+        }
+
+        // Validate commute_types
+        if (updates.commute_types) {
+            if (!Array.isArray(updates.commute_types)) {
+                throw new Error('commute_types must be an array');
+            }
+            const invalid = updates.commute_types.filter((t: string) => !VALID_COMMUTE_TYPES.includes(t));
+            if (invalid.length > 0) {
+                throw new Error(`Invalid commute_types: ${invalid.join(', ')}. Valid values: ${VALID_COMMUTE_TYPES.join(', ')}`);
+            }
+        }
+
+        // Validate job_level
+        if (updates.job_level && !VALID_JOB_LEVELS.includes(updates.job_level)) {
+            throw new Error(`Invalid job_level: ${updates.job_level}. Valid values: ${VALID_JOB_LEVELS.join(', ')}`);
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);

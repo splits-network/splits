@@ -1,401 +1,609 @@
-# Feature Landscape: Role Model Restructure
+# Feature Landscape: Custom GPT Actions Backend (Applicant.Network)
 
-**Domain:** SaaS multi-tenant RBAC with system-level, org-scoped, and entity-linked roles
+**Domain:** Custom GPT with Actions for a recruiting/job marketplace (candidate-facing)
 **Researched:** 2026-02-13
-**Confidence:** HIGH (based on codebase analysis)
+**Confidence:** MEDIUM-HIGH (based on codebase analysis + training knowledge of OpenAI GPT Actions; WebSearch/WebFetch unavailable for verification of latest GPT Actions API changes)
 
 ## Executive Summary
 
-This research documents features required to successfully move `platform_admin` from the org-scoped `memberships` table to the entity-linked `user_roles` table with nullable entity fields. The restructure affects database schema, access resolution logic, identity service APIs, and frontend authorization checks.
+This document maps the feature landscape for a gpt-service microservice that powers a Custom GPT in the OpenAI GPT Store. The GPT is candidate-facing (Applicant.Network), allowing job seekers to search jobs, analyze resumes, check application status, and submit applications through natural language in ChatGPT.
 
-**Current state:**
-- `memberships`: org-scoped roles (platform_admin, company_admin, hiring_manager) — organization_id NOT NULL
-- `user_roles`: entity-linked roles (recruiter, candidate) — role_entity_id NOT NULL
-- Synthetic "platform" organization exists solely for platform admin membership rows
+The existing platform provides all underlying capabilities (job search, AI fit analysis, application management, document storage, RBAC). The gpt-service is a **translation layer** that bridges OpenAI's GPT Actions protocol with these existing services.
 
-**Target state:**
-- `memberships`: org-scoped roles (company_admin, hiring_manager) — organization_id NOT NULL
-- `user_roles`: all non-org roles (platform_admin, recruiter, candidate) — role_entity_id nullable
-- No synthetic platform organization
+**Key insight:** The GPT does not need new domain logic. It needs (1) an OAuth2 provider flow to authenticate candidates, (2) GPT-optimized API endpoints that accept natural language parameters and return GPT-friendly responses, and (3) a confirmation safety pattern for all write operations.
 
 ---
 
 ## Table Stakes
 
-Features that MUST work correctly after the restructure. Missing any of these means the system is broken.
+Features users expect. Missing any of these means the GPT is non-functional or unusable in the GPT Store.
 
-### TS-1: Schema Migration Safety
-**What:** Database migration that makes role_entity_id nullable, moves platform_admin rows, removes platform org
-**Why Expected:** Zero-downtime requirement. Cannot break existing platform admin sessions or access checks.
+### TS-1: OpenAPI 3.0 Action Schema
+
+**What:** A complete OpenAPI 3.0.1 YAML specification defining all GPT Actions, their parameters, response schemas, and authentication requirements.
+**Why Expected:** OpenAI requires a valid OpenAPI spec to register Actions. Without it, the GPT cannot call any endpoints. This is the literal contract between ChatGPT and the backend.
 **Complexity:** Medium
+**Dependencies:** All endpoint designs must be finalized first
+**Notes:**
+- Must use OpenAPI 3.0.1 (not 3.1 -- GPT Actions parser has historically been strict about this)
+- Each action needs an `operationId` that GPT uses to select which action to call
+- `description` fields on operations and parameters are critical -- GPT reads these to decide when and how to call actions
+- Existing starter at `docs/gpt/04_OpenAPI_Starter.yaml` is skeletal; needs full expansion
+- Response schemas must be fully specified (GPT needs them to format answers)
+- Maximum ~30 actions per GPT (practical limit, not hard limit)
+- Parameters should use descriptive names and enums where possible to help GPT map natural language correctly
+
+**Confidence:** HIGH for OpenAPI 3.0.1 requirement. MEDIUM for 3.0 vs 3.1 strictness (based on training data, could not verify current state).
+
+---
+
+### TS-2: OAuth2 Provider Flow (Account Linking)
+
+**What:** Backend acts as an OAuth2 authorization code provider. GPT initiates OAuth flow, backend redirects to Clerk login, validates session, issues short-lived GPT access token and refresh token.
+**Why Expected:** GPT Actions require OAuth2 for authenticated endpoints. Without this, the GPT can only access public data (active job listings). All personalized features (my applications, submit application, resume analysis linked to profile) require authentication.
+**Complexity:** High
+**Dependencies:** Clerk authentication infrastructure (existing)
+**Notes:**
+- **Flow:** GPT sends user to `/oauth/authorize` -> backend redirects to Clerk Hosted Login -> Clerk returns session -> backend issues GPT-specific JWT tokens
+- **Token format:** Short-lived access tokens (15-30 min), longer refresh tokens (7-30 days)
+- **Token storage:** `gpt_tokens` table in Supabase with columns: token_id, clerk_user_id, candidate_id, access_token_hash, refresh_token_hash, scopes, expires_at, created_at, revoked_at
+- **Scopes:** `candidate:read` (view jobs, applications), `candidate:write` (submit applications), `candidate:resume` (upload/analyze resumes)
+- **Required endpoints:** `GET /oauth/authorize`, `POST /oauth/token` (grant_type=authorization_code and grant_type=refresh_token), `POST /oauth/revoke`
+- **Per-user isolation:** Every token is linked to a specific candidate_id. All data queries are scoped to that candidate's data only.
+- OpenAI GPT Actions OAuth requires specific callback URL format: `https://chat.openai.com/aip/<plugin_id>/oauth/callback`
+
+**Confidence:** HIGH that OAuth2 authorization code flow is required. MEDIUM on exact callback URL format (based on training knowledge, could not verify latest OpenAI docs).
+
+---
+
+### TS-3: Job Search via Natural Language
+
+**What:** GPT Action endpoint that accepts natural language search parameters and returns structured job listings. Maps free-text queries ("remote React jobs in Austin paying over $120k") to structured filters against existing job search infrastructure.
+**Why Expected:** Job search is the primary use case for a candidate-facing GPT. This is the reason a candidate would install the GPT.
+**Complexity:** Medium
+**Dependencies:** Existing `GET /api/v2/jobs` endpoint with search, commute_type, job_level, location, employment_type filters
+**Notes:**
+- **Endpoint:** `GET /api/v1/gpt/jobs`
+- **Parameters the GPT can extract and send:**
+  - `keywords` (string) -- free text search terms, maps to `search` parameter on jobs endpoint (uses PostgreSQL full-text search via `search_vector` column)
+  - `location` (string) -- city, state, or "remote"
+  - `commute_type` (enum: remote, hybrid_1, hybrid_2, hybrid_3, hybrid_4, in_office) -- maps directly to existing `commute_type` filter
+  - `job_level` (enum: entry, mid, senior, lead, manager, director, vp, c_suite) -- maps directly to existing `job_level` filter
+  - `employment_type` (string) -- full_time, part_time, contract, etc.
+  - `salary_min` (number) -- minimum salary filter (requires post-query filtering since salary fields are on the job record, not indexed for range queries in current implementation)
+  - `page` (number), `limit` (number) -- pagination
+- **Response format:** GPT-optimized (condensed) job listings with: title, company name, location, salary range, commute type, job level, short description snippet, job_id for follow-up actions
+- **Key design:** Do NOT try to parse natural language server-side. Let GPT do the NLP work -- it will extract structured parameters from the user's natural language and send them as query parameters. The OpenAPI schema descriptions guide GPT on what to extract.
+- **Unauthenticated access:** Job search should work without OAuth (public data). Jobs with `status: 'active'` are already publicly visible in the existing endpoint when no clerkUserId is provided.
+
+**Existing infrastructure to leverage:**
+- `JobRepository.findJobs()` already supports: full-text search, location ilike, employment_type, commute_type overlaps, job_level, pagination, sorting
+- `search_vector` tsvector column with websearch config
+- Company join for company name/logo
+
+**Confidence:** HIGH. Fully verified through codebase analysis.
+
+---
+
+### TS-4: Application Status Lookup
+
+**What:** GPT Action endpoint that lets authenticated candidates check their application statuses. Returns current stage, job details, and recent activity for their applications.
+**Why Expected:** Candidates asking "what's the status of my applications?" or "did I hear back from [company]?" is a core use case. Without this, the GPT cannot provide personalized value.
+**Complexity:** Low
+**Dependencies:** Existing `GET /api/v2/applications` endpoint, OAuth2 authentication (TS-2)
+**Notes:**
+- **Endpoint:** `GET /api/v1/gpt/applications`
+- **Parameters:**
+  - `status` (enum: active, all) -- "active" filters out terminal stages (rejected, withdrawn, expired, hired)
+  - `job_id` (string, optional) -- filter to specific job
+  - `page`, `limit` -- pagination
+- **Response format:** Application list with: job_title, company_name, current_stage (human-readable), applied_date, last_updated, ai_review_summary (if exists)
+- **Stage mapping:** Map internal stages to human-readable labels:
+  - `draft` -> "Draft (not submitted)"
+  - `ai_review` -> "Under AI review"
+  - `ai_reviewed` -> "AI review complete - ready to submit"
+  - `recruiter_proposed` -> "Proposed by recruiter (pending your response)"
+  - `recruiter_review` -> "Under recruiter review"
+  - `screen` -> "Screening"
+  - `submitted` -> "Submitted to company"
+  - `company_review` -> "Under company review"
+  - `company_feedback` -> "Company provided feedback"
+  - `interview` -> "Interview stage"
+  - `offer` -> "Offer received"
+  - `hired` -> "Hired"
+  - `rejected` -> "Not selected"
+  - `withdrawn` -> "Withdrawn"
+  - `expired` -> "Expired"
+- **Data scoping:** Query MUST be scoped to the authenticated candidate's applications only. Use `candidateId` from the GPT token to filter.
+
+**Existing infrastructure to leverage:**
+- `ApplicationServiceV2.getApplications()` with role-based scoping
+- `ApplicationFilters.candidate_id` for per-candidate filtering
+- Application includes: `ai_review`, `documents` via include parameter
+
+**Confidence:** HIGH. Fully verified through codebase analysis.
+
+---
+
+### TS-5: Application Submission with Confirmation Safety
+
+**What:** GPT Action endpoint that creates a new application for a job. MUST require explicit `confirmed: true` flag. First call without confirmation returns a summary for user review; second call with `confirmed: true` executes the submission.
+**Why Expected:** This is the core write action. Without the confirmation pattern, OpenAI would likely reject the GPT for safety reasons, and candidates could accidentally apply to jobs. The confirmation pattern is a standard requirement for Custom GPTs with consequential actions.
+**Complexity:** Medium
+**Dependencies:** Existing `POST /api/v2/applications` endpoint, OAuth2 authentication (TS-2), candidate profile with resume
+**Notes:**
+- **Endpoint:** `POST /api/v1/gpt/applications`
+- **Request body:**
+  - `job_id` (string, required) -- the job to apply for
+  - `cover_letter` (string, optional) -- cover letter text
+  - `resume_id` (string, optional) -- specific resume to use (defaults to primary resume)
+  - `confirmed` (boolean, required) -- safety flag
+- **Two-phase flow:**
+  1. **Phase 1 (confirmed=false or missing):** Return HTTP 200 with `action_required: "confirmation"` response containing: job title, company name, candidate's resume being used, cover letter preview, list of pre-screen questions (if any). GPT presents this to the user.
+  2. **Phase 2 (confirmed=true):** Execute the application creation. Return the created application with status.
+- **Error contract:**
+  ```json
+  {
+    "error_code": "CONFIRMATION_REQUIRED",
+    "message": "Please confirm you want to apply to [Job Title] at [Company].",
+    "summary": {
+      "job_title": "...",
+      "company": "...",
+      "resume": "...",
+      "has_pre_screen_questions": true
+    }
+  }
+  ```
+- **Pre-screen questions:** If the job has pre-screen questions, the confirmation summary must include them so the GPT can collect answers from the candidate before final submission.
+- **Duplicate prevention:** Check for existing active application for this candidate-job pair before creating.
+- **Initial stage:** Applications created via GPT should start at `draft` or `ai_review` stage (following existing flow where direct candidates go to ai_review).
+
+**Existing infrastructure to leverage:**
+- `ApplicationServiceV2.createApplication()` already handles: candidate_id resolution, recruiter auto-lookup, document linking, pre-screen answer saving, audit logging, event publishing
+- `ApplicationServiceV2.triggerAIReview()` for kicking off AI review after creation
+- Duplicate check logic already exists in `proposeJobToCandidate`
+
+**Confidence:** HIGH for two-phase confirmation pattern. MEDIUM on exact OpenAI `x-openai-isConsequential` header behavior (training knowledge, could not verify current spec).
+
+**Important note on consequential flag:** OpenAI's GPT Actions support an `x-openai-isConsequential` extension in the OpenAPI spec. When set to `true` on a POST/PUT/DELETE operation, GPT will always ask the user for confirmation before calling the endpoint. When set to `false`, GPT may skip confirmation. For application submission, this MUST be `true`. However, the backend should ALSO enforce the `confirmed` flag as defense-in-depth -- do not rely solely on GPT-side confirmation.
+
+---
+
+### TS-6: GPT Instructions Document
+
+**What:** A carefully crafted system prompt (instructions) for the Custom GPT that defines its personality, capabilities, rules, and behavioral constraints.
+**Why Expected:** Without instructions, the GPT will not know how to use the actions effectively, when to ask for confirmation, how to present data, or what not to do. This is the "brain" configuration.
+**Complexity:** Medium (writing, iteration, testing)
+**Dependencies:** All endpoint designs finalized
+**Notes:**
+- Existing template at `docs/gpt/05_GPT_Instructions_Template.md` is minimal; needs full expansion
+- Must cover:
+  - Identity: "You are the Applicant.Network AI Assistant"
+  - Capabilities: What actions are available and when to use them
+  - Authentication guidance: When to prompt for account linking
+  - Confirmation rules: Always summarize before write actions, never assume confirmation
+  - Data presentation: How to format job listings, application status, fit scores
+  - Limitations: What the GPT cannot do (modify existing applications, access recruiter data, process payments)
+  - Privacy: Never expose internal IDs, never share data between different users
+  - Error handling: How to respond when actions fail
+  - Tone: Professional but approachable, recruiting-domain appropriate
+- **Token budget:** GPT instructions count against context window. Keep under ~2000 tokens while being comprehensive.
+
+**Confidence:** HIGH. This is standard Custom GPT configuration.
+
+---
+
+### TS-7: GPT-Friendly Error Responses
+
+**What:** Standardized error response format that GPT can interpret and present to users in natural language. Different from the existing API error format.
+**Why Expected:** GPT reads error responses and converts them to conversational text. If errors are machine-oriented (stack traces, internal codes), the GPT will present confusing messages to users.
+**Complexity:** Low
 **Dependencies:** None
 **Notes:**
-- Migration must be idempotent and reversible
-- Preserve all platform_admin assignments during migration
-- Validate counts before and after (source rows = migrated rows)
-- Handle edge cases: null fields, duplicate assignments, soft-deleted rows
+- **Error format:**
+  ```json
+  {
+    "error_code": "HUMAN_READABLE_CODE",
+    "message": "A sentence the GPT can relay to the user",
+    "details": { ... }  // Optional structured data
+  }
+  ```
+- **Standard error codes:**
+  - `AUTHENTICATION_REQUIRED` -- OAuth not connected
+  - `CONFIRMATION_REQUIRED` -- Write action needs confirmation
+  - `NOT_FOUND` -- Resource not found
+  - `ALREADY_EXISTS` -- Duplicate application
+  - `VALIDATION_ERROR` -- Invalid input
+  - `RATE_LIMITED` -- Too many requests
+  - `INTERNAL_ERROR` -- Server error (hide details)
+- **Key principle:** Error `message` should be a complete sentence that GPT can present directly. No jargon, no UUIDs, no stack traces.
 
-**Acceptance Criteria:**
-- Migration runs without errors on existing data
-- All platform admin users retain their role
-- No orphaned rows in either table
-- All NOT NULL constraints valid after migration
-
----
-
-### TS-2: Access Context Resolution Correctness
-**What:** `resolveAccessContext()` finds platform_admin in user_roles instead of memberships
-**Why Expected:** Core authorization primitive. Every service uses this 119+ times.
-**Complexity:** Low
-**Dependencies:** TS-1 (schema migration must complete first)
-**Notes:**
-- `resolveAccessContext()` currently queries both memberships + user_roles
-- Must continue returning `isPlatformAdmin: boolean` (backward compatible)
-- Query performance must not degrade (single round-trip maintained)
-- Other context fields (organizationIds, roles[], etc.) unchanged
-
-**Acceptance Criteria:**
-- `isPlatformAdmin` correctly true for users with platform_admin in user_roles
-- Query still uses single Supabase round-trip (nested select)
-- All 119 downstream consumers work without changes
-- No performance regression (measure with EXPLAIN ANALYZE)
+**Confidence:** HIGH. Standard API design practice.
 
 ---
 
-### TS-3: Platform Admin Assignment via API
-**What:** identity-service can create/delete platform_admin role assignments via user_roles table
-**Why Expected:** Must be able to grant/revoke platform admin access programmatically.
-**Complexity:** Low
-**Dependencies:** TS-1, TS-2
-**Notes:**
-- Currently uses MembershipServiceV2.createMembership() with synthetic platform org
-- Must migrate to UserRoleServiceV2.createUserRole() with nullable entity fields
-- Only platform_admin users can assign platform_admin (self-check before assignment)
-- Events: `user_role.created` and `user_role.deleted` for audit trail
+### TS-8: Per-User Data Isolation
 
-**Acceptance Criteria:**
-- POST /v2/user-roles creates platform_admin with role_entity_id=null
-- DELETE /v2/user-roles/:id soft-deletes platform_admin assignment
-- Authorization check: caller must be platform_admin
-- Events published for audit trail
+**What:** Every GPT request is scoped to the authenticated candidate's data only. A candidate cannot see another candidate's applications, resumes, or personal information through the GPT.
+**Why Expected:** Security fundamental. Multi-tenant data isolation is non-negotiable for a recruiting platform.
+**Complexity:** Low (leverage existing RBAC)
+**Dependencies:** OAuth2 authentication (TS-2), existing `resolveAccessContext`
+**Notes:**
+- GPT tokens contain `candidate_id` claim (set during OAuth flow)
+- Every gpt-service endpoint extracts `candidate_id` from the token and passes it to downstream queries
+- **No admin or recruiter scope:** GPT tokens are scoped to `candidate` role only. Even if the Clerk user has recruiter/admin roles on the portal, the GPT token should only grant candidate-level access.
+- Leverage existing `resolveAccessContext()` for RBAC, but the gpt-service should additionally enforce `candidateId` scoping as defense-in-depth
+- **Audit logging:** All GPT-originated actions should be tagged with `source: 'gpt'` in audit logs for forensics
+
+**Existing infrastructure to leverage:**
+- `resolveAccessContext()` already returns `candidateId` and scopes queries per role
+- `ApplicationRepository.findApplications()` already filters by `candidate_id`
+- `JobRepository.findJobs()` already scopes job visibility by role
+
+**Confidence:** HIGH. Fully verified through codebase analysis.
 
 ---
 
-### TS-4: Frontend Authorization Guards
-**What:** Portal admin routes and components check `is_platform_admin` from user profile
-**Why Expected:** 13 frontend files depend on isPlatformAdmin checks. All must work correctly.
+### TS-9: Rate Limiting (GPT-Specific)
+
+**What:** Per-user throttle policies specifically for GPT Action endpoints, separate from portal rate limits.
+**Why Expected:** GPTs can make rapid sequential calls. Without GPT-specific rate limiting, a single user (or abuse pattern) could overload backend services. OpenAI also expects backends to handle rate limiting gracefully.
 **Complexity:** Low
-**Dependencies:** TS-2 (access context must resolve correctly)
+**Dependencies:** Existing rate limiting infrastructure (if any in api-gateway)
 **Notes:**
-- `/apps/portal/src/app/portal/admin/layout.tsx` blocks non-admins
-- UserProfileContext exposes `isAdmin` computed from `profile.is_platform_admin`
-- No frontend changes needed if backend returns correct data structure
-- Test: admin routes accessible to admins, blocked for non-admins
+- **Suggested limits:**
+  - Job search: 30 requests/minute per user
+  - Application status: 20 requests/minute per user
+  - Application submission: 5 requests/minute per user
+  - Resume analysis: 10 requests/minute per user
+- Return HTTP 429 with `Retry-After` header and GPT-friendly error message
+- Rate limits keyed on `candidate_id` from GPT token, not IP address
+- Consider separate rate limit buckets for read vs write operations
 
-**Acceptance Criteria:**
-- Admin layout redirects non-admins to /portal/dashboard
-- UserProfileContext.isAdmin reflects platform_admin status
-- No console errors or broken UI in admin pages
-- Dev debug panel shows correct role information
-
----
-
-### TS-5: Unique Constraint Validation
-**What:** Prevent duplicate platform_admin assignments to same user
-**Why Expected:** Data integrity. Each user can only have platform_admin once.
-**Complexity:** Low
-**Dependencies:** TS-1
-**Notes:**
-- Current memberships table: unique index on (user_id, role_name, org_id, company_id)
-- user_roles must enforce: unique (user_id, role_name, role_entity_id) where deleted_at IS NULL
-- Platform admin: role_entity_id=null, so index covers (user_id, 'platform_admin', null)
-- Postgres treats NULL as distinct, so COALESCE may be needed in unique index
-
-**Acceptance Criteria:**
-- Attempting to create duplicate platform_admin for same user fails with unique constraint error
-- Index name: `uq_user_role_entity_assignment`
-- Query plan shows index usage for insert validation
-
----
-
-### TS-6: Soft Delete Consistency
-**What:** Soft-deleted platform_admin rows excluded from access resolution
-**Why Expected:** Revoking platform admin must immediately block access.
-**Complexity:** Low
-**Dependencies:** TS-1, TS-2
-**Notes:**
-- user_roles has deleted_at TIMESTAMPTZ column
-- resolveAccessContext filters: `.is('user_roles.deleted_at', null)`
-- Soft delete sets deleted_at = now(), leaving row in table
-- Unique index excludes deleted rows: `WHERE deleted_at IS NULL`
-
-**Acceptance Criteria:**
-- Soft-deleted platform_admin no longer appears in resolveAccessContext
-- User immediately loses admin access after soft delete
-- Unique constraint allows re-granting same role after soft delete
-
----
-
-### TS-7: Event Audit Trail
-**What:** user_role.created and user_role.deleted events logged for platform_admin changes
-**Why Expected:** Compliance and security. Granting/revoking platform admin must be auditable.
-**Complexity:** Low
-**Dependencies:** TS-3
-**Notes:**
-- EventPublisherV2 publishes to RabbitMQ
-- notification-service may send email alerts on platform admin changes
-- Events include: user_role_id, user_id, role_name, role_entity_id, timestamp
-
-**Acceptance Criteria:**
-- Creating platform_admin publishes `user_role.created` event
-- Soft-deleting platform_admin publishes `user_role.deleted` event
-- Events visible in RabbitMQ management UI
-- Event payload includes all required fields
-
----
-
-### TS-8: Remove Synthetic Platform Organization
-**What:** Delete the organization row where type='platform' after migration
-**Why Expected:** Cleanup artificial scaffolding. No business logic should depend on platform org.
-**Complexity:** Low
-**Dependencies:** TS-1 (migration must move all memberships first)
-**Notes:**
-- Verify no foreign key references remain before deletion
-- Check: no jobs, applications, invitations, or other entities linked to platform org
-- Deletion should be final migration step after all memberships moved
-
-**Acceptance Criteria:**
-- Platform organization row deleted from organizations table
-- No foreign key constraint violations
-- No business logic breaks (search for "platform" org references in code)
+**Confidence:** HIGH. Standard API practice.
 
 ---
 
 ## Differentiators
 
-Features that improve the role model beyond the minimum required for platform_admin migration. Nice-to-have, not blocking.
+Features that set the GPT apart from competitors. Not expected, but provide significant value.
 
-### DIFF-1: Role Definition Validation
-**What:** Enforce allowed role_name values via foreign key to roles table
-**Why Valuable:** Type safety at database level. Prevents typos and invalid role assignments.
-**Complexity:** Low
-**Notes:**
-- user_roles.role_name references roles.name (already exists)
-- roles table defines: platform_admin, company_admin, hiring_manager, recruiter, candidate
-- Foreign key constraint prevents inserting invalid role names
-- Already implemented in current schema
+### DIFF-1: Resume Analysis and Job Fit Scoring
 
-**Implementation:** Already exists — no additional work needed.
-
----
-
-### DIFF-2: Role-Entity Type Validation
-**What:** Database check constraint: if role_entity_id is NOT NULL, role_name must be recruiter or candidate
-**Why Valuable:** Prevents invalid combinations like platform_admin with entity_id.
+**What:** GPT Action endpoint that analyzes a candidate's resume against specific job postings, returning fit scores, matched/missing skills, strengths, and concerns. Leverages existing ai-service.
+**Why Valuable:** This is the "killer feature" that makes the GPT more than a search tool. Candidates can ask "how well does my resume match this job?" and get detailed, actionable feedback. Most job board GPTs only do search.
 **Complexity:** Medium
+**Dependencies:** Existing ai-service with AI review capabilities, document-service for resume access, OAuth2 authentication (TS-2)
 **Notes:**
-- Check constraint: `(role_entity_id IS NULL AND role_name IN ('platform_admin')) OR (role_entity_id IS NOT NULL AND role_name IN ('recruiter', 'candidate'))`
-- Org-scoped roles (company_admin, hiring_manager) stay in memberships, so not included in user_roles constraint
-- Provides compile-time-like guarantees at database level
+- **Endpoint:** `POST /api/v1/gpt/resume/analyze`
+- **Request body:**
+  - `job_id` (string, required) -- job to analyze fit against
+  - `resume_id` (string, optional) -- specific resume (defaults to primary)
+- **Response:** Fit score (0-100), recommendation (strong_fit/good_fit/fair_fit/poor_fit), strengths array, concerns array, matched_skills, missing_skills, overall_summary
+- **Implementation:** Create a lightweight wrapper around `AIReviewServiceV2.createReview()` that:
+  1. Resolves candidate's primary resume from document-service
+  2. Fetches job details with requirements
+  3. Calls the existing AI analysis pipeline
+  4. Returns GPT-formatted results
+- **NOT an application submission:** This is purely advisory. The candidate reviews the analysis and then separately decides to apply.
+- **Cost consideration:** Each analysis calls OpenAI API (gpt-4o-mini). Should track per-candidate analysis count and potentially limit to prevent abuse.
 
-**Recommendation:** Implement during migration — adds robustness with minimal complexity.
+**Existing infrastructure to leverage:**
+- `AIReviewServiceV2.createReview()` -- full AI analysis pipeline
+- `AIReviewServiceV2.enrichApplicationData()` -- fetches job requirements, candidate resume text
+- `CandidateServiceV2.getCandidatePrimaryResume()` -- finds candidate's primary resume
+- Document metadata includes `extracted_text` for resume text extraction
+
+**Confidence:** HIGH. Fully verified through codebase -- this infrastructure already exists and works.
 
 ---
 
-### DIFF-3: Migration Rollback Plan
-**What:** Documented rollback procedure if migration causes production issues
-**Why Valuable:** Risk mitigation. Enables quick recovery if unforeseen issues arise.
+### DIFF-2: Job Detail Deep Dive
+
+**What:** GPT Action endpoint that returns comprehensive details about a specific job, including requirements, pre-screen questions, company info, and candidate fit analysis (if authenticated).
+**Why Valuable:** Candidates can ask "tell me more about this job" after seeing search results. Provides the full picture without leaving ChatGPT.
 **Complexity:** Low
+**Dependencies:** Existing `GET /api/v2/jobs/:id` with include parameters
 **Notes:**
-- Save pre-migration snapshot of memberships and user_roles tables
-- Documented SQL to reverse migration: move platform_admin back to memberships, restore platform org
-- Test rollback procedure in staging before production deployment
+- **Endpoint:** `GET /api/v1/gpt/jobs/{job_id}`
+- **Response includes:**
+  - Full job description and responsibilities
+  - Requirements (mandatory and preferred, from `job_requirements` table)
+  - Pre-screen questions (from `job_pre_screen_questions` table)
+  - Company info (name, industry, location, description, website)
+  - Salary range (if available)
+  - Commute type, job level, employment type
+  - Whether the candidate has already applied (if authenticated)
+- **Unauthenticated:** Returns job details without candidate-specific info
+- **Authenticated:** Additionally checks for existing application
 
-**Recommendation:** Document in migration comments — standard best practice.
+**Existing infrastructure to leverage:**
+- `JobRepository.findJob()` with `include` parameter supports: requirements, pre_screen_questions, applications
+
+**Confidence:** HIGH. Straightforward wrapper around existing functionality.
 
 ---
 
-### DIFF-4: Service-Level Role Assignment Abstraction
-**What:** Shared helper function: `assignSystemRole(userId, roleName)` for platform_admin grants
-**Why Valuable:** Simplifies service code. Single place to enforce assignment rules.
-**Complexity:** Low
-**Notes:**
-- Centralizes validation: caller must be platform_admin, target user exists, no duplicate assignment
-- Used by identity-service, potentially by automation-service for automated role grants
-- Returns standardized error codes for common failure cases
+### DIFF-3: Smart Job Recommendations
 
-**Recommendation:** Defer to post-migration cleanup — not required for initial migration.
+**What:** GPT endpoint that recommends jobs based on the candidate's profile and resume, without requiring a specific search query. "Show me jobs I'd be a good fit for."
+**Why Valuable:** Proactive recommendations are higher engagement than reactive search. Differentiates from simple search GPTs.
+**Complexity:** High
+**Dependencies:** Candidate profile, primary resume, ai-service
+**Notes:**
+- **Endpoint:** `GET /api/v1/gpt/jobs/recommended`
+- **Implementation approach:**
+  1. Fetch candidate's primary resume extracted text
+  2. Extract key skills, experience level, location preferences from resume
+  3. Use these as search parameters against the jobs endpoint
+  4. Optionally run lightweight fit scoring on top N results
+- **Simpler V1 approach:** Extract keywords from resume text, use them as search terms against the full-text search index. No AI required for basic version.
+- **Future V2:** Use embedding similarity between resume and job descriptions for semantic matching.
+- **Performance:** Must be fast enough for GPT (< 10 seconds). Pre-computing candidate profiles/embeddings would help but adds complexity.
+
+**Confidence:** MEDIUM. The concept is sound but implementation complexity varies significantly based on approach chosen. The simpler keyword-extraction approach is feasible with existing infrastructure.
 
 ---
 
-### DIFF-5: Admin Activity Dashboard
-**What:** Frontend view showing recent platform_admin role grants/revokes with audit trail
-**Why Valuable:** Transparency and governance. Admins can see who granted admin access and when.
+### DIFF-4: Conversational Application Builder
+
+**What:** Multi-turn conversation flow where the GPT helps the candidate build their application step by step: select resume, answer pre-screen questions, write cover letter, review, and submit.
+**Why Valuable:** Transforms the GPT from a "single action" tool to a guided workflow assistant. Significantly better UX than the portal form for candidates who prefer conversation.
+**Complexity:** Low (from backend perspective -- GPT handles the multi-turn logic)
+**Dependencies:** TS-3 (job search), TS-5 (application submission), DIFF-2 (job details)
+**Notes:**
+- This is primarily a **GPT Instructions** feature, not a backend feature. The backend provides:
+  1. Job details with pre-screen questions (DIFF-2)
+  2. Candidate's available resumes (`GET /api/v1/gpt/resumes`)
+  3. Application submission with confirmation (TS-5)
+- The GPT instructions guide the conversation:
+  1. "Which job?" -> Search and select
+  2. "Here are the pre-screen questions" -> Collect answers
+  3. "Would you like to add a cover letter?" -> Optional
+  4. "Here's your application summary" -> Review
+  5. "Confirm to submit" -> Execute
+- **Backend endpoint needed:** `GET /api/v1/gpt/resumes` -- lists candidate's uploaded resumes (name, date, size) so GPT can ask which to use
+- This differentiator is "free" if the other table-stakes features are built correctly
+
+**Confidence:** HIGH. This is a GPT Instructions design pattern that the backend naturally supports.
+
+---
+
+### DIFF-5: Application Progress Notifications via GPT
+
+**What:** When a candidate starts a conversation, the GPT proactively mentions any recent application status changes ("Since we last spoke, your application to [Company] moved to Interview stage").
+**Why Valuable:** Makes the GPT feel like a personal recruiting assistant, not just a query tool.
 **Complexity:** Medium
+**Dependencies:** TS-4 (application status), application audit log
 **Notes:**
-- Queries user_roles with role_name='platform_admin', joins to users table for names
-- Shows: granted_to, granted_by, granted_at, revoked_at
-- Requires tracking "granted_by" user_id in user_roles table (new column)
+- **Endpoint:** `GET /api/v1/gpt/notifications`
+- **Implementation:** Query `application_audit_log` for recent stage changes for this candidate's applications since last GPT interaction
+- **Tracking "last interaction":** Store `last_gpt_interaction_at` on the GPT token record. Update on each authenticated request.
+- **Response:** Array of recent changes: `{ job_title, company, old_stage, new_stage, changed_at }`
+- GPT instructions: "At the start of each conversation, call getNotifications. If there are updates, mention them before asking how to help."
 
-**Recommendation:** Defer to future milestone — nice governance feature but not essential for migration.
+**Confidence:** MEDIUM. Implementation is straightforward but "last interaction" tracking adds state management complexity.
+
+---
+
+### DIFF-6: Pre-Screen Question Answering via GPT
+
+**What:** GPT collects pre-screen question answers conversationally and includes them in the application submission.
+**Why Valuable:** Pre-screen questions are a common friction point in job applications. Answering them in a conversation feels more natural than filling out a form.
+**Complexity:** Low
+**Dependencies:** TS-5 (application submission), DIFF-2 (job details with pre-screen questions)
+**Notes:**
+- No separate endpoint needed. Pre-screen questions come from the job details endpoint (DIFF-2). Answers are submitted with the application (TS-5).
+- Application submission body includes: `pre_screen_answers: [{ question_id, answer }]`
+- GPT instructions handle the conversational flow of asking questions one by one
+- Existing `ApplicationServiceV2.createApplication()` already saves pre-screen answers
+
+**Confidence:** HIGH. Existing infrastructure fully supports this.
 
 ---
 
 ## Anti-Features
 
-Features to explicitly NOT build during this restructure. Common mistakes to avoid.
+Features to explicitly NOT build. Common mistakes in GPT backend development.
 
-### ANTI-1: Migrating Company Admin to user_roles
-**What:** Moving company_admin and hiring_manager to user_roles alongside platform_admin
-**Why Avoid:** company_admin and hiring_manager are legitimately org-scoped. They require organization_id context.
-**What to Do Instead:** Leave them in memberships table. Only platform_admin moves to user_roles.
-**Consequences if Built:** Breaks org-scoped access control. Would need to add organization_id back to user_roles, defeating the purpose.
+### ANTI-1: Server-Side Natural Language Processing
 
----
-
-### ANTI-2: Making role_entity_id NOT NULL
-**What:** Keeping role_entity_id as NOT NULL and requiring platform_admin to reference a fake entity
-**Why Avoid:** Creates artificial data (fake "system" entity). Nullable is semantically correct for system roles.
-**What to Do Instead:** Make role_entity_id nullable. platform_admin has role_entity_id=null.
-**Consequences if Built:** Technical debt. Another synthetic entity to maintain (like platform org currently).
+**What:** Building NLP/intent parsing on the backend to convert natural language queries to structured filters.
+**Why Avoid:** The GPT itself IS the NLP layer. ChatGPT excels at extracting structured data from natural language. Adding a second NLP layer on the backend creates confusion, latency, and maintenance burden.
+**What to Do Instead:** Design the OpenAPI schema with clear parameter descriptions and enums. Let GPT extract structured parameters from user input. The backend receives clean, typed parameters.
+**Consequences if Built:** Double interpretation errors (GPT misunderstands AND backend misunderstands), increased latency, wasted development time, harder debugging.
 
 ---
 
-### ANTI-3: Separate System Roles Table
-**What:** Creating a third table (system_roles) for platform_admin only
-**Why Avoid:** Adds complexity. Now three tables for roles instead of two. Access context query becomes more complex.
-**What to Do Instead:** Use existing user_roles table with nullable entity fields. Simple and fits existing patterns.
-**Consequences if Built:** More code to maintain, slower queries (three-way join), harder to reason about.
+### ANTI-2: Exposing Raw Internal API Responses
+
+**What:** Returning the exact same response format from gpt-service as the internal V2 endpoints return.
+**Why Avoid:** Internal API responses contain UUIDs, internal status codes, database column names, and nested objects that are meaningless to GPT. The GPT will attempt to present all of this to the user, creating confusing output.
+**What to Do Instead:** Create GPT-optimized response DTOs that contain only human-meaningful data. Map internal fields to user-friendly names. Truncate long descriptions. Exclude internal IDs (or move them to a separate `_metadata` field).
+**Consequences if Built:** GPT outputs like "Your application with ID 550e8400-e29b-41d4-a716-446655440000 is in stage recruiter_review for job_id 123..." instead of "Your application to Senior React Developer at TechCorp is under recruiter review."
 
 ---
 
-### ANTI-4: Removing isPlatformAdmin Flag from AccessContext
-**What:** Forcing consumers to check `roles.includes('platform_admin')` instead of `isPlatformAdmin` boolean
-**Why Avoid:** Breaks 119 downstream consumers. Violates backward compatibility requirement.
-**What to Do Instead:** Keep `isPlatformAdmin` computed field in AccessContext. Internal implementation changes, interface stable.
-**Consequences if Built:** Massive refactor across all services. High risk of introducing authorization bugs.
+### ANTI-3: Recruiter/Admin Features in V1
+
+**What:** Building recruiter search, candidate search, split opportunities, outreach drafting in the Applicant.Network GPT.
+**Why Avoid:** The v5.0 milestone scope is explicitly candidate-facing (Applicant.Network). Recruiter features (Splits.Network) are a separate future milestone. Mixing audiences in one GPT creates confused UX and complex authorization.
+**What to Do Instead:** Build candidate features only. Recruiter features get their own GPT in a future milestone.
+**Consequences if Built:** Scope creep, delayed launch, confused GPT behavior (is it helping candidates or recruiters?), complex token scoping.
 
 ---
 
-### ANTI-5: Runtime Role Hierarchy System
-**What:** Implementing role inheritance or permission composition (e.g., platform_admin inherits company_admin permissions)
-**Why Avoid:** Out of scope. Current system uses explicit role checks, not computed permissions.
-**What to Do Instead:** Maintain existing explicit role checks. Permissions JSONB in roles table is unused (future feature).
-**Consequences if Built:** Scope creep. Would require rewriting all authorization checks across all services.
+### ANTI-4: File Upload Through GPT Actions
+
+**What:** Building resume upload functionality through GPT Actions (having GPT send a file to the backend).
+**Why Avoid:** GPT Actions have limited support for file uploads. The standard GPT Actions protocol sends JSON payloads, not multipart form data. While GPT can read files a user uploads to the chat, passing file content through an Action is unreliable and may hit size limits.
+**What to Do Instead:** For V1, use the candidate's already-uploaded resumes from the document-service. Provide a `GET /api/v1/gpt/resumes` endpoint to list available resumes. If no resume exists, instruct the GPT to direct the candidate to upload one on Applicant.Network web portal.
+**Consequences if Built:** Unreliable file transfer, size limit failures, complex multipart handling in the OpenAPI spec, potential rejection from GPT Store review.
+
+**Confidence:** MEDIUM. GPT Actions file handling capabilities may have evolved since training cutoff. Flag for verification before implementation.
 
 ---
 
-### ANTI-6: Eager Loading All Role Details
-**What:** Joining to roles table in resolveAccessContext to include display_name, description, permissions
-**Why Avoid:** Performance. resolveAccessContext is called on every API request. Must stay fast.
-**What to Do Instead:** Return only role_name strings as array. Services can fetch role details separately if needed.
-**Consequences if Built:** Slower access context resolution. Increased database load. No clear benefit.
+### ANTI-5: Autonomous Multi-Step Workflows
+
+**What:** GPT automatically chains actions without user input (e.g., search jobs -> analyze fit -> submit application in one turn).
+**Why Avoid:** Violates the confirmation safety pattern. Each write action must have explicit user confirmation. Autonomous workflows bypass this safety net and could result in unwanted applications.
+**What to Do Instead:** Design the GPT instructions to pause for user input between steps. The GPT presents options, the user chooses, the GPT executes (with confirmation for writes).
+**Consequences if Built:** Candidates accidentally applying to jobs, potential GPT Store rejection for unsafe write behavior, user trust erosion.
+
+---
+
+### ANTI-6: Caching GPT Responses
+
+**What:** Building a response cache layer in gpt-service to cache job search results or application status.
+**Why Avoid:** Job data and application statuses change frequently. Cached responses lead to stale data, which is worse than slightly slower responses. The existing Supabase queries are already fast enough.
+**What to Do Instead:** Rely on database query performance (which is already good -- full-text search with tsvector, indexed columns). If performance becomes an issue, add Redis caching at the repository layer, not the GPT layer.
+**Consequences if Built:** Stale job listings (job already filled), wrong application status, cache invalidation complexity, debugging nightmare ("why does the GPT show different data than the portal?").
+
+---
+
+### ANTI-7: Custom Chat History/Memory
+
+**What:** Building a server-side conversation history system for the GPT to remember past interactions.
+**Why Avoid:** ChatGPT already manages conversation context within a session. Cross-session memory is handled by ChatGPT's memory feature. Building a parallel system is redundant and creates consistency issues.
+**What to Do Instead:** Use the `last_gpt_interaction_at` timestamp (DIFF-5) for "since last time" notifications only. Do not store conversation content.
+**Consequences if Built:** Privacy concerns (storing conversation content), GDPR complications, redundant with ChatGPT's built-in memory, storage costs, sync issues.
 
 ---
 
 ## Feature Dependencies
 
 ```
-Migration Flow:
+Authentication Foundation:
+  TS-2 (OAuth2 Provider) -- all authenticated features depend on this
 
-TS-1 (Schema Migration)
-  ↓
-TS-2 (Access Context Resolution)
-  ↓
-TS-3 (API Assignment) + TS-4 (Frontend Guards) + TS-5 (Unique Constraint)
-  ↓
-TS-6 (Soft Delete) + TS-7 (Event Audit) + TS-8 (Remove Platform Org)
+Read Operations (can parallelize):
+  TS-3 (Job Search) -- independent, works without auth too
+  TS-4 (Application Status) -- requires TS-2
+  DIFF-2 (Job Details) -- independent, works without auth too
 
-Optional Enhancements (post-migration):
+Write Operations (require auth + read features):
+  TS-5 (Application Submission) -- requires TS-2, TS-3 (find job), DIFF-2 (job details for confirmation)
 
-DIFF-2 (Role-Entity Validation) — during TS-1
-DIFF-3 (Rollback Plan) — before production deployment
-DIFF-4 (Role Assignment Helper) — after TS-3
-DIFF-5 (Admin Dashboard) — future milestone
+AI Features (require auth + existing services):
+  DIFF-1 (Resume Analysis) -- requires TS-2, existing ai-service + document-service
+
+Configuration (requires all endpoints):
+  TS-1 (OpenAPI Schema) -- requires all endpoint designs finalized
+  TS-6 (GPT Instructions) -- requires all endpoints + understanding of flows
+
+Cross-cutting:
+  TS-7 (Error Responses) -- implement alongside each endpoint
+  TS-8 (Data Isolation) -- implement in auth middleware
+  TS-9 (Rate Limiting) -- implement in api-gateway routing
+
+Conversational Features (require table stakes):
+  DIFF-4 (Application Builder) -- requires TS-3, TS-5, DIFF-2, DIFF-6
+  DIFF-5 (Notifications) -- requires TS-4
+  DIFF-6 (Pre-Screen Q&A) -- requires DIFF-2, TS-5
+
+Recommendations (require AI + search):
+  DIFF-3 (Smart Recommendations) -- requires TS-2, TS-3, document-service
 ```
 
-**Critical Path:** TS-1 → TS-2 → TS-3/TS-4 must complete in order. Others can be done in parallel once dependencies met.
-
-**Validation Checkpoints:**
-1. After TS-1: Run data validation query to confirm all platform_admin rows migrated
-2. After TS-2: Run test suite against resolveAccessContext with platform_admin users
-3. After TS-3: Manually test creating/deleting platform_admin via API
-4. After TS-4: Manually test admin portal access with admin and non-admin users
+**Critical path:** TS-2 (OAuth) -> TS-3 + TS-4 + DIFF-2 (read endpoints) -> TS-5 + DIFF-1 (write + AI endpoints) -> TS-1 + TS-6 (schema + instructions)
 
 ---
 
 ## MVP Recommendation
 
-For MVP (minimum viable migration), prioritize:
+For MVP (minimum viable GPT Store listing), prioritize:
 
-1. **TS-1: Schema Migration Safety** — Foundation. Must be bulletproof.
-2. **TS-2: Access Context Resolution** — Core authorization. Everything depends on this.
-3. **TS-3: Platform Admin Assignment** — Must be able to manage admins programmatically.
-4. **TS-4: Frontend Authorization Guards** — User-facing. Must work correctly.
-5. **TS-5: Unique Constraint Validation** — Data integrity. Prevents bad states.
-6. **TS-6: Soft Delete Consistency** — Security. Revoked access must be immediate.
-7. **DIFF-2: Role-Entity Type Validation** — Low complexity, high value. Do during migration.
-8. **DIFF-3: Migration Rollback Plan** — Risk mitigation. Document before production.
+### Must Ship (Table Stakes)
 
-**Defer to post-MVP:**
-- TS-7: Event Audit Trail (nice-to-have, not blocking)
-- TS-8: Remove Platform Org (cleanup, can wait)
-- DIFF-4: Service-Level Abstraction (code quality, not functional)
-- DIFF-5: Admin Dashboard (governance feature, future milestone)
+1. **TS-2: OAuth2 Provider** -- Foundation for all authenticated features
+2. **TS-3: Job Search** -- Primary use case, works without auth too
+3. **TS-4: Application Status** -- Core personalized feature
+4. **TS-5: Application Submission** -- Core write action with confirmation
+5. **TS-1: OpenAPI Schema** -- Required for GPT Store listing
+6. **TS-6: GPT Instructions** -- Required for GPT to function correctly
+7. **TS-7: Error Responses** -- Required for usable GPT
+8. **TS-8: Data Isolation** -- Security fundamental
+9. **TS-9: Rate Limiting** -- Protection against abuse
 
-**Estimated complexity:**
-- Total table stakes: 6 low + 2 medium = ~3-5 days implementation + testing
-- Recommended differentiators: 1 low + 1 medium = +1 day
-- **MVP timeline: ~1 week** (includes migration testing, staging validation, production deployment)
+### Should Ship (High-Value Differentiators)
+
+10. **DIFF-1: Resume Analysis** -- Killer feature, leverages existing AI infrastructure
+11. **DIFF-2: Job Detail Deep Dive** -- Very low complexity, high value
+12. **DIFF-6: Pre-Screen Q&A** -- Free if DIFF-2 and TS-5 are built
+
+### Defer to Post-MVP
+
+- **DIFF-3: Smart Recommendations** -- High complexity, significant design work needed
+- **DIFF-4: Conversational Application Builder** -- GPT Instructions optimization, not backend work
+- **DIFF-5: Application Notifications** -- Nice but not critical for launch
+
+### Estimated Complexity by Phase
+
+| Phase | Features | Complexity | Notes |
+|-------|----------|------------|-------|
+| Phase 1: Auth | TS-2, TS-8 | High | OAuth2 provider is the hardest part |
+| Phase 2: Read | TS-3, TS-4, DIFF-2 | Low-Medium | Thin wrappers around existing endpoints |
+| Phase 3: Write + AI | TS-5, DIFF-1 | Medium | Confirmation pattern, AI integration |
+| Phase 4: Schema + Config | TS-1, TS-6, TS-7, TS-9 | Medium | Finalize OpenAPI spec and instructions |
+
+**MVP timeline estimate:** 2-3 weeks for a single developer, assuming all underlying services are stable.
 
 ---
 
-## Risk Assessment
+## OpenAI GPT Actions: Key Constraints and Capabilities
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Migration fails mid-execution | Low | Critical | Idempotent migration, transaction boundaries, rollback plan |
-| Access context query performance degrades | Low | High | Profile queries, EXPLAIN ANALYZE, index validation |
-| Downstream service breaks due to schema change | Medium | High | Backward compatible interface (isPlatformAdmin stays), comprehensive testing |
-| Platform org deletion cascades unexpectedly | Low | Medium | Check foreign keys before deletion, dry-run in staging |
-| Duplicate platform_admin assignments created | Low | Low | Unique constraint at database level |
-| Soft delete not respected in some code paths | Medium | High | Grep for user_roles queries, ensure deleted_at filters everywhere |
+Summary of GPT Actions platform constraints that affect feature design.
 
-**Highest risk items:**
-1. **Access context resolution correctness** — 119 consumers depend on this working correctly
-2. **Migration data integrity** — Cannot lose or corrupt platform_admin assignments
-3. **Soft delete consistency** — Security vulnerability if forgotten in any query
+| Constraint | Impact | Mitigation |
+|------------|--------|------------|
+| OpenAPI 3.0.1 required | Must author valid spec | Use existing starter, expand incrementally |
+| ~30 actions practical limit | Cannot expose every endpoint | Group related operations, prioritize |
+| JSON request/response only | No file upload via actions | Use existing uploaded resumes |
+| OAuth2 authorization code only | Must implement full OAuth provider | Backend-as-OAuth-provider pattern |
+| GPT reads operation descriptions | Descriptions are critical for correct action selection | Write detailed, unambiguous descriptions |
+| Consequential flag (x-openai-isConsequential) | Controls whether GPT asks confirmation | Set true for all POST endpoints, defense-in-depth with confirmed flag |
+| Response size practical limit ~100KB | Large responses may be truncated | Paginate, summarize, limit response size |
+| GPT may call actions multiple times | Idempotent design important | Duplicate checks on write operations |
+| No server-sent events/streaming | Cannot push updates to GPT | Polling-based design only |
+| No webhook callbacks | GPT cannot receive async notifications | All operations must be synchronous |
 
-**Recommended pre-production testing:**
-- Run migration on staging database with production-like data volume
-- Load test access context resolution with 1000+ concurrent requests
-- Manual QA: admin user can access admin pages, non-admin redirected
-- Negative test: soft-deleted platform_admin immediately loses access
+**Confidence:** MEDIUM overall. These constraints are based on training knowledge (pre-May 2025). OpenAI frequently updates GPT Actions capabilities. Flag for verification against current documentation before implementation.
 
 ---
 
 ## Sources
 
-**PRIMARY SOURCES (codebase analysis):**
+**PRIMARY SOURCES (codebase analysis -- HIGH confidence):**
 
-- `packages/shared-access-context/src/index.ts` — resolveAccessContext implementation (HIGH confidence)
-- `supabase/migrations/20260212000001_split_user_roles_into_memberships.sql` — current schema (HIGH confidence)
-- `supabase/migrations/20260211000003_create_user_roles_table.sql` — user_roles table definition (HIGH confidence)
-- `supabase/migrations/20260211000002_create_roles_table.sql` — roles table with permissions (HIGH confidence)
-- `services/identity-service/src/v2/memberships/service.ts` — membership management (HIGH confidence)
-- `services/identity-service/src/v2/user-roles/service.ts` — user role management (HIGH confidence)
-- `apps/portal/src/contexts/user-profile-context.tsx` — frontend authorization (HIGH confidence)
-- `apps/portal/src/app/portal/admin/layout.tsx` — admin route guards (HIGH confidence)
-- `.planning/PROJECT.md` — migration requirements and context (HIGH confidence)
+- `services/ats-service/src/v2/jobs/` -- Job service, repository, routes, types
+- `services/ats-service/src/v2/applications/` -- Application service, repository, routes, types
+- `services/ats-service/src/v2/candidates/` -- Candidate service with resume management
+- `services/ai-service/src/v2/reviews/` -- AI review service with fit analysis
+- `services/document-service/src/v2/documents/` -- Document storage and metadata
+- `services/search-service/src/v2/search/` -- Search service with typeahead
+- `services/api-gateway/src/auth.ts` -- Clerk multi-app authentication
+- `services/api-gateway/src/middleware/auth.ts` -- Auth middleware patterns
+- `packages/shared-access-context/` -- resolveAccessContext for RBAC
+- `packages/shared-types/` -- Shared type definitions
+- `docs/gpt/` -- Existing GPT documentation (PRD, architecture, tech spec, OpenAPI starter, instructions template)
+- `.planning/PROJECT.md` -- v5.0 milestone context and constraints
 
-**ARCHITECTURAL PATTERNS:**
+**TRAINING KNOWLEDGE (MEDIUM confidence -- could not verify with WebSearch/WebFetch):**
 
-- Multi-tenant RBAC with three role scopes: system (platform_admin), org (company_admin/hiring_manager), entity (recruiter/candidate)
-- Single database with two role tables: memberships (org-scoped), user_roles (entity-linked)
-- Access resolution via nested Supabase query joining users → memberships + user_roles
-- Soft delete pattern with deleted_at column and WHERE filters
-- Event-driven audit trail via RabbitMQ (EventPublisherV2)
+- OpenAI GPT Actions OAuth2 flow specifics
+- OpenAPI 3.0.1 vs 3.1 strictness
+- `x-openai-isConsequential` extension behavior
+- GPT Actions file upload capabilities
+- GPT Store listing requirements
+- Practical limits on action count and response size
+- OAuth callback URL format
 
-**CONFIDENCE ASSESSMENT:**
+**GAPS (need verification before implementation):**
 
-All features derived from direct codebase analysis. No external sources required. Architectural patterns validated by examining actual implementation files and database schemas. **Overall confidence: HIGH**.
+- Current GPT Actions API documentation (may have changed since training cutoff)
+- Exact OAuth callback URL format OpenAI expects
+- Whether GPT Actions now support file uploads natively
+- Whether OpenAPI 3.1 is now accepted
+- Latest rate limiting best practices from OpenAI
+- GPT Store review criteria for consequential actions

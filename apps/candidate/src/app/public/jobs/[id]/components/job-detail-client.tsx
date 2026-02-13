@@ -6,6 +6,7 @@ import { formatSalary, formatDate, formatRelativeTime } from "@/lib/utils";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { JobAnalyticsChart } from "@/components/ui/charts/job-analytics-chart";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { COMMUTE_TYPE_LABELS, JOB_LEVEL_LABELS, formatCommuteTypes, formatJobLevel } from "../../types";
 
 interface JobRequirement {
     id: string;
@@ -30,6 +31,8 @@ interface Job {
     salary_max?: number;
     employment_type?: string;
     open_to_relocation?: boolean;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     updated_at?: string;
     created_at?: string;
     status?: string;
@@ -165,6 +168,18 @@ export default function JobDetailClient({
                                                 )}
                                             </span>
                                         )}
+                                        {formatCommuteTypes(job.commute_types) && (
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-building-user"></i>
+                                                {formatCommuteTypes(job.commute_types)}
+                                            </span>
+                                        )}
+                                        {formatJobLevel(job.job_level) && (
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-signal"></i>
+                                                {formatJobLevel(job.job_level)}
+                                            </span>
+                                        )}
                                         {job.updated_at && (
                                             <span className="flex items-center gap-2">
                                                 <i className="fa-duotone fa-regular fa-calendar"></i>
@@ -257,6 +272,36 @@ export default function JobDetailClient({
                                                                     1,
                                                                 )}
                                                         </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Work Type */}
+                                        {formatCommuteTypes(job.commute_types) && (
+                                            <div className="flex items-start gap-3">
+                                                <i className="fa-duotone fa-regular fa-building-user text-base-content/70 mt-1 shrink-0"></i>
+                                                <div className="min-w-0">
+                                                    <div className="text-xs text-base-content/70">
+                                                        Work Type
+                                                    </div>
+                                                    <div className="font-semibold break-words">
+                                                        {formatCommuteTypes(job.commute_types)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Job Level */}
+                                        {formatJobLevel(job.job_level) && (
+                                            <div className="flex items-start gap-3">
+                                                <i className="fa-duotone fa-regular fa-signal text-base-content/70 mt-1 shrink-0"></i>
+                                                <div className="min-w-0">
+                                                    <div className="text-xs text-base-content/70">
+                                                        Level
+                                                    </div>
+                                                    <div className="font-semibold break-words">
+                                                        {formatJobLevel(job.job_level)}
                                                     </div>
                                                 </div>
                                             </div>
