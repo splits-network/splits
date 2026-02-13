@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 14 of 15 (OpenAPI Schema + GPT Configuration)
-Plan: 1 of 2 (OpenAPI Schema)
-Status: In progress
-Last activity: 2026-02-13 -- Completed 14-01-PLAN.md (OpenAPI Schema)
+Plan: 2 of 2 (GPT Builder Configuration)
+Status: Phase complete
+Last activity: 2026-02-13 -- Completed 14-02-PLAN.md (GPT Instructions & Builder Listing)
 
-Progress: [████████░░] ~93% (14/~15 v5.0 plans)
+Progress: [█████████░] ~100% (15/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [████████░░] ~93% (14/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 14
-- Average duration: 3.2 min
-- Total execution time: ~46 minutes
+- Total plans completed: 15
+- Average duration: 3.1 min
+- Total execution time: ~48 minutes
 
 **Cumulative:**
-- Total plans completed: 32
-- Average duration: 3.4 min
-- Total execution time: ~110 minutes
+- Total plans completed: 33
+- Average duration: 3.3 min
+- Total execution time: ~112 minutes
 
 ## Accumulated Context
 
@@ -92,6 +92,13 @@ Progress: [████████░░] ~93% (14/~15 v5.0 plans)
 - x-openai-isConsequential: true on submitApplication, false on analyzeResume (Phase 14-01)
 - Public schema endpoints (no auth) for GPT Builder import (Phase 14-01)
 - Load schema at module initialization for performance (Phase 14-01)
+- GPT Instructions structured as 13 sections covering identity, all action flows, error handling, privacy, formatting, boundaries, guided workflows, and examples (Phase 14-02)
+- Four example conversation snippets demonstrate job search, application submission with two-step confirmation, resume analysis, and application status (Phase 14-02)
+- Applicant Network branding exclusively in GPT (no Splits Network mentions) (Phase 14-02)
+- No emoji in GPT responses for professional and clean formatting (Phase 14-02)
+- Empathy-first error handling pattern: acknowledge -> explain briefly -> offer solution (Phase 14-02)
+- Pre-screen questions presented one at a time conversationally (not all at once) (Phase 14-02)
+- Prompt injection defense with explicit stay-in-role instructions (Phase 14-02)
 
 ### Pending Todos
 
@@ -118,16 +125,22 @@ None.
 - User must configure GPT Builder with OAuth URLs and add `GPT_REDIRECT_URI` from OpenAI.
 - User must add GitHub environment secrets: GPT_CLIENT_ID, GPT_CLIENT_SECRET, GPT_EC_PRIVATE_KEY, GPT_REDIRECT_URI.
 
+**From v5.0 (Phase 14):**
+- User must manually configure GPT Builder (platform.openai.com/gpts) with Instructions, OAuth, and Actions (see 14-02-SUMMARY.md for full setup steps).
+- User must provide profile picture for GPT.
+- User must configure privacy policy URL.
+- GPT_REDIRECT_URI catch-22: Need to create GPT to get redirect URI, but need redirect URI to configure OAuth (resolve by creating GPT first, getting redirect URI, then updating environment).
+
 **v5.0 Research Flags:**
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 14-01-PLAN.md (OpenAPI Schema)
+Stopped at: Completed Phase 14 (OpenAPI Schema + GPT Configuration) -- all 2 plans
 Resume file: None
-Next: Phase 14-02 (GPT Builder Configuration) or Phase 15 planning
+Next: Phase 15 planning (Testing & Deployment) or v5.0 completion review
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (14-01 complete)*
+*Last updated: 2026-02-13 (Phase 14 complete)*
