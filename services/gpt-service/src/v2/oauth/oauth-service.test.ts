@@ -481,7 +481,9 @@ describe('OAuthService', () => {
 
             const result = await oauthService.hasExistingConsent('user_123', ['jobs:read', 'applications:read']);
 
-            expect(result).toBe(true);
+            expect(result.hasConsent).toBe(true);
+            expect(result.sessionCount).toBe(1);
+            expect(result.existingScopes).toEqual(['jobs:read', 'applications:read', 'applications:write']);
         });
 
         it('should return false when no superset scopes exist', async () => {
@@ -497,7 +499,9 @@ describe('OAuthService', () => {
 
             const result = await oauthService.hasExistingConsent('user_123', ['applications:write']);
 
-            expect(result).toBe(false);
+            expect(result.hasConsent).toBe(false);
+            expect(result.sessionCount).toBe(0);
+            expect(result.existingScopes).toEqual([]);
         });
     });
 });

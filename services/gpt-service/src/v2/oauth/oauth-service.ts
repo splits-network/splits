@@ -505,15 +505,24 @@ export class OAuthService {
     /**
      * Check if user has existing consent for requested scopes
      */
-    async hasExistingConsent(clerkUserId: string, requestedScopes: string[]): Promise<{ hasConsent: boolean; sessionCount: number }> {
+    async hasExistingConsent(clerkUserId: string, requestedScopes: string[]): Promise<{ hasConsent: boolean; sessionCount: number; existingScopes: string[] }> {
         const { data, error } = await this.supabase
             .from('gpt_sessions')
             .select('granted_scopes')
             .eq('clerk_user_id', clerkUserId);
 
         if (error || !data || data.length === 0) {
-            return { hasConsent: false, sessionCount: 0 };
+            return { hasConsent: false, sessionCount: 0, existingScopes: [] };
         }
+
+        // Collect all unique scopes ever granted across all sessions
+        const allGrantedScopes = new Set<string>();
+        data.forEach(session => {
+            const grantedScopes = session.granted_scopes || [];
+            grantedScopes.forEach(scope => allGrantedScopes.add(scope));
+        });
+
+        const existingScopes = Array.from(allGrantedScopes);
 
         // Check if any session has granted_scopes that is a superset of requestedScopes
         const hasConsent = data.some(session => {
@@ -524,6 +533,7 @@ export class OAuthService {
         return {
             hasConsent,
             sessionCount: data.length,
+            existingScopes,
         };
     }
 

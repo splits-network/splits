@@ -95,9 +95,10 @@ export function ConsentClient() {
             }
 
             const result = await response.json();
-            const { hasConsent, sessionCount: count } = result.data;
+            const { hasConsent, sessionCount: count, existingScopes: existing } = result.data;
 
             setSessionCount(count);
+            setExistingScopes(existing || []);
 
             if (count >= 5) {
                 setError("session_limit");
