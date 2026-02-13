@@ -4,6 +4,7 @@ import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
 import { EventPublisher } from './shared/events';
 import { registerOAuthRoutes } from './oauth/routes';
+import { registerWebhookRoutes } from './oauth/webhook-handler';
 import { OAuthService } from './oauth/oauth-service';
 
 interface RegisterConfig {
@@ -29,6 +30,9 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     // Register OAuth routes
     registerOAuthRoutes(app, { oauthService });
+
+    // Register webhook routes
+    registerWebhookRoutes(app, { oauthService, logger: app.log as Logger });
 
     // GPT proxy routes will be registered in Phase 13
 }
