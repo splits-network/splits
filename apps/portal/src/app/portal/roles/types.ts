@@ -35,6 +35,8 @@ export interface Job {
     // Job details
     employment_type?: EmploymentType | string;
     open_to_relocation?: boolean;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     show_salary_range?: boolean;
     guarantee_days?: number;
     is_remote?: boolean;
@@ -77,5 +79,7 @@ export interface UnifiedJobFilters {
     // Additional filters
     employment_type?: string;
     is_remote?: boolean;
+    commute_type?: string;
+    job_level?: string;
     company_id?: string;
 }

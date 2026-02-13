@@ -43,6 +43,8 @@ interface Job {
     salary_currency?: string | null;
     show_salary_range?: boolean | null;
     open_to_relocation?: boolean | null;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     fee_percentage: number | null;
     status: "active" | "paused" | "filled" | "closed" | string | null;
     // Role assignment fields (for payout calculator auto-detection)
@@ -94,6 +96,26 @@ interface JobPreScreenQuestion {
 }
 
 // ===== HELPER UTILITIES =====
+
+const COMMUTE_TYPE_LABELS: Record<string, string> = {
+    remote: 'Remote',
+    hybrid_1: 'Hybrid (1 day in office)',
+    hybrid_2: 'Hybrid (2 days in office)',
+    hybrid_3: 'Hybrid (3 days in office)',
+    hybrid_4: 'Hybrid (4 days in office)',
+    in_office: 'In Office',
+};
+
+const JOB_LEVEL_LABELS: Record<string, string> = {
+    entry: 'Entry Level',
+    mid: 'Mid Level',
+    senior: 'Senior',
+    lead: 'Lead',
+    manager: 'Manager',
+    director: 'Director',
+    vp: 'VP',
+    c_suite: 'C-Suite',
+};
 
 function getQuestionTypeIcon(type: string): string {
     const iconMap: Record<string, string> = {
@@ -476,6 +498,32 @@ function QuickStatsSection({ job, compact }: { job: Job; compact: boolean }) {
                         {job.employment_type?.replace("_", " ") || "Full Time"}
                     </div>
                 </div>
+
+                {/* Commute Types Card */}
+                {job.commute_types && job.commute_types.length > 0 && (
+                    <div className="bg-base-200/50 p-3 rounded-lg">
+                        <div className=" text-base-content/60 mb-1">
+                            <i className="fa-duotone fa-building-user mr-1" />
+                            Work Arrangement
+                        </div>
+                        <div className="font-medium text-sm">
+                            {job.commute_types.map(ct => COMMUTE_TYPE_LABELS[ct] || ct).join(', ')}
+                        </div>
+                    </div>
+                )}
+
+                {/* Job Level Card */}
+                {job.job_level && (
+                    <div className="bg-base-200/50 p-3 rounded-lg">
+                        <div className=" text-base-content/60 mb-1">
+                            <i className="fa-duotone fa-signal mr-1" />
+                            Job Level
+                        </div>
+                        <div className="font-medium text-sm">
+                            {JOB_LEVEL_LABELS[job.job_level] || job.job_level}
+                        </div>
+                    </div>
+                )}
 
                 {/* Department Card */}
                 {job.department && (
