@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -12,6 +13,14 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export default function AuthorizeErrorPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-base-200"><span className="loading loading-spinner loading-lg"></span></div>}>
+            <AuthorizeErrorContent />
+        </Suspense>
+    );
+}
+
+function AuthorizeErrorContent() {
     const searchParams = useSearchParams();
 
     const error = searchParams.get("error");
@@ -32,9 +41,7 @@ export default function AuthorizeErrorPage() {
                     <i className="fa-duotone fa-regular fa-circle-exclamation text-error text-6xl mb-4"></i>
 
                     {/* Logo / Branding */}
-                    <div className="text-xl font-bold text-primary mb-2">
-                        Applicant.Network
-                    </div>
+                    <img src="/logo.png" alt="Applicant Network" className="h-8 mx-auto mb-2" />
 
                     {/* Error Title */}
                     <h1 className="text-2xl font-bold mb-4">

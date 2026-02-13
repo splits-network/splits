@@ -50,9 +50,7 @@ export default function AuthorizeSuccessPage() {
                     <i className="fa-duotone fa-regular fa-circle-check text-success text-7xl mb-4"></i>
 
                     {/* Logo / Branding */}
-                    <div className="text-xl font-bold text-primary mb-2">
-                        Applicant.Network
-                    </div>
+                    <img src="/logo.png" alt="Applicant Network" className="h-8 mx-auto mb-2" />
 
                     {/* Success Message */}
                     <h1 className="text-3xl font-bold mb-4">Connected!</h1>

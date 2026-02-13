@@ -8,9 +8,7 @@ export default function LearnMorePage() {
                     <div className="card-body">
                         {/* Header */}
                         <div className="text-center mb-6">
-                            <div className="text-2xl font-bold text-primary mb-2">
-                                Applicant.Network
-                            </div>
+                            <img src="/logo.png" alt="Applicant Network" className="h-10 mx-auto mb-2" />
                             <h1 className="text-3xl font-bold">
                                 About AI Job Copilot
                             </h1>
