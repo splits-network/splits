@@ -49,7 +49,7 @@
 
 | Feature | Reason |
 |---------|--------|
-| Splits.Network GPT features (recruiter search, candidate search, split opportunities) | Future milestone — separate audience, separate GPT |
+| Splits.Network GPT features (recruiter search, candidate search, split opportunities) | Future milestone -- separate audience, separate GPT |
 | Contract execution via GPT | Too risky for v1 |
 | Payment processing via GPT | Too risky for v1 |
 | Fully autonomous submissions | All writes require explicit confirmation |
@@ -65,37 +65,37 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| AUTH-04 | TBD | Pending |
-| AUTH-05 | TBD | Pending |
-| AUTH-06 | TBD | Pending |
-| AUTH-07 | TBD | Pending |
-| ENDP-01 | TBD | Pending |
-| ENDP-02 | TBD | Pending |
-| ENDP-03 | TBD | Pending |
-| ENDP-04 | TBD | Pending |
-| ENDP-05 | TBD | Pending |
-| ENDP-06 | TBD | Pending |
-| ENDP-07 | TBD | Pending |
-| CONF-01 | TBD | Pending |
-| CONF-02 | TBD | Pending |
-| CONF-03 | TBD | Pending |
-| CONF-04 | TBD | Pending |
-| HARD-01 | TBD | Pending |
-| HARD-02 | TBD | Pending |
-| HARD-03 | TBD | Pending |
-| HARD-04 | TBD | Pending |
+| INFRA-01 | Phase 11 | Pending |
+| INFRA-02 | Phase 11 | Pending |
+| INFRA-03 | Phase 11 | Pending |
+| AUTH-01 | Phase 12 | Pending |
+| AUTH-02 | Phase 12 | Pending |
+| AUTH-03 | Phase 12 | Pending |
+| AUTH-04 | Phase 12 | Pending |
+| AUTH-05 | Phase 12 | Pending |
+| AUTH-06 | Phase 12 | Pending |
+| AUTH-07 | Phase 12 | Pending |
+| ENDP-01 | Phase 13 | Pending |
+| ENDP-02 | Phase 13 | Pending |
+| ENDP-03 | Phase 13 | Pending |
+| ENDP-04 | Phase 13 | Pending |
+| ENDP-05 | Phase 13 | Pending |
+| ENDP-06 | Phase 13 | Pending |
+| ENDP-07 | Phase 13 | Pending |
+| CONF-01 | Phase 14 | Pending |
+| CONF-02 | Phase 14 | Pending |
+| CONF-03 | Phase 14 | Pending |
+| CONF-04 | Phase 14 | Pending |
+| HARD-01 | Phase 15 | Pending |
+| HARD-02 | Phase 15 | Pending |
+| HARD-03 | Phase 15 | Pending |
+| HARD-04 | Phase 15 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
-- Mapped to phases: 0 (awaiting roadmap)
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation (phase assignments added)*

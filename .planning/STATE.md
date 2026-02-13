@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
-**Current focus:** v5.0 Custom GPT (Applicant Network)
+**Current focus:** v5.0 Custom GPT -- Phase 11 (Service Foundation)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-13 — Milestone v5.0 started
+Phase: 11 of 15 (Service Foundation)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-13 -- Roadmap created for v5.0
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 - New gpt-service microservice (nano-service philosophy)
 - Applicant.Network features first (candidate-facing)
 - Confirmation safety pattern for all write actions
+- Opaque tokens over JWTs (instant revocation, DB lookup fast enough at GPT scale)
 
 ### Pending Todos
 
@@ -63,13 +64,17 @@ None.
 - User must apply migration `20260217000001_add_commute_types_and_job_level.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
 - User must apply migration `20260218000001_search_index_add_commute_and_level.sql` to update search index triggers.
 
+**v5.0 Research Flags:**
+- Phase 12 (OAuth): HIGH priority -- must validate Clerk redirect mechanism, OpenAI callback URL format, PKCE requirement, and token_exchange_method before writing production code.
+- Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
+
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Milestone v5.0 initialization
+Stopped at: Roadmap created for v5.0 Custom GPT
 Resume file: None
-Next: Research or requirements definition
+Next: Plan Phase 11 (Service Foundation)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (v5.0 milestone started)*
+*Last updated: 2026-02-13 (v5.0 roadmap created)*
