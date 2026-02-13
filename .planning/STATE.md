@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 10 of 10 (Frontend & Search)
-Plan: 3 of 5 in current phase
+Plan: 1 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-13 — Completed 10-03-PLAN.md
+Last activity: 2026-02-13 — Completed 10-01-PLAN.md
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 21%
 
 ## Performance Metrics
 
@@ -29,14 +29,14 @@ Progress: [██░░░░░░░░] 20%
 - Total execution time: ~19 minutes
 
 **Velocity (v4.0):**
-- Total plans completed: 3
-- Average duration: 1.6 min
-- Total execution time: ~4.9 minutes
+- Total plans completed: 4
+- Average duration: 2.2 min
+- Total execution time: ~8.9 minutes
 
 **Cumulative:**
-- Total plans completed: 16
-- Average duration: 3.5 min
-- Total execution time: ~55 minutes
+- Total plans completed: 17
+- Average duration: 3.4 min
+- Total execution time: ~59 minutes
 
 ## Accumulated Context
 
@@ -53,6 +53,8 @@ Progress: [██░░░░░░░░] 20%
 - commute_type filter supports both top-level query param and nested filters object
 - Search index metadata stores commute_types as JSONB array via to_jsonb()
 - Search context includes array values via array_to_string() for full-text matching
+- Job wizard uses checkbox group (flex-wrap) for commute types, dropdown for job level
+- Conditional payload inclusion: only send commute_types/job_level if set (preserves null on edit)
 
 ### Pending Todos
 
@@ -73,10 +75,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 10-03-PLAN.md (Search Index)
+Stopped at: Completed 10-01-PLAN.md (Job Wizard UI)
 Resume file: None
-Next: /gsd:plan-phase 10 (continue with remaining plans)
+Next: Continue Phase 10 with remaining plans (02-05)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 10 in progress - Plan 03 complete)*
+*Last updated: 2026-02-13 (Phase 10 in progress - Plan 01 complete)*
