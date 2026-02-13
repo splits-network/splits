@@ -8,6 +8,7 @@ import NotificationBell from "@/components/notification-bell";
 import { PlanBadge } from "@/components/plan-badge";
 import { useUser } from "@clerk/nextjs";
 import { UserDropdown } from "./user-dropdown";
+import { GlobalSearchBar } from "@/components/global-search";
 
 export function PortalHeader() {
     const { user } = useUser();
@@ -68,20 +69,25 @@ export function PortalHeader() {
                     </Link>
                 </div>
 
-                {/* Page title & subtitle */}
-                <div className="flex-1 ml-0 lg:pl-40 min-w-0 px-2">
+                {/* Search bar - centered in header */}
+                <div className="flex-1 ml-0 lg:pl-40 min-w-0 px-2 flex items-center gap-4">
+                    {/* Page title (hidden on smaller screens when search is prominent) */}
                     {title && (
-                        <div className="flex flex-col items-start gap-0">
-                            <h1 className="text-base lg:text-lg font-semibold truncate w-full">
+                        <div className="hidden xl:flex flex-col items-start gap-0 shrink-0 max-w-xs">
+                            <h1 className="text-base font-semibold truncate w-full">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <span className="text-xs lg:text-sm text-base-content/60 truncate w-full">
+                                <span className="text-xs text-base-content/60 truncate w-full">
                                     {subtitle}
                                 </span>
                             )}
                         </div>
                     )}
+                    {/* Global search */}
+                    <div className="flex-1 max-w-lg">
+                        <GlobalSearchBar />
+                    </div>
                 </div>
 
                 {/* User controls */}
