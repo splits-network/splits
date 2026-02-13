@@ -2,7 +2,16 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-const CONTENT_DIR = path.join(process.cwd(), "content", "press");
+// In dev mode cwd is apps/portal; in build mode cwd is monorepo root
+function resolveContentDir(): string {
+    const fromCwd = path.join(process.cwd(), "content", "press");
+    if (fs.existsSync(fromCwd)) return fromCwd;
+    const fromMonorepoRoot = path.resolve(process.cwd(), "..", "..", "content", "press");
+    if (fs.existsSync(fromMonorepoRoot)) return fromMonorepoRoot;
+    return fromCwd;
+}
+
+const CONTENT_DIR = resolveContentDir();
 
 export interface PressArticleMeta {
     slug: string;

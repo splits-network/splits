@@ -16,6 +16,5 @@ export const metadata: Metadata = {
 
 export default function PressKitPage() {
     const articles = getAllArticles();
-    console.log(`[press] getAllArticles returned ${articles.length} articles, cwd=${process.cwd()}`);
     return <PressContent articles={articles} />;
 }
