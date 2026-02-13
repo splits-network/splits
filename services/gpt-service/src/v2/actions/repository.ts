@@ -46,8 +46,7 @@ export class GptActionRepository {
             `,
                 { count: 'exact' }
             )
-            .eq('status', 'active')
-            .is('deleted_at', null);
+            .eq('status', 'active');
 
         // Apply filters
         if (keywords) {
