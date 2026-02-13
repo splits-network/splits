@@ -5,15 +5,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://api.splits.network
+  - url: https://api.applicant.network
     description: Production API Gateway
-
-security:
-  - oauth2:
-      - jobs:read
-      - applications:read
-      - applications:write
-      - resume:read
 
 paths:
   /api/v1/gpt/jobs/search:
@@ -225,11 +218,9 @@ paths:
       operationId: submitApplication
       summary: Submit a job application
       description: >-
-        Two-step application submission with confirmation safety. First call (confirmed omitted or false):
-        validates the job, checks for duplicates, validates pre-screen answers, and returns a confirmation
-        summary with a token. Second call (confirmed=true with token): executes the submission. IMPORTANT:
-        Always show the confirmation summary to the candidate and wait for their explicit approval before
-        making the second call.
+        Two-step submission with confirmation. First call (confirmed omitted/false): validates job,
+        checks duplicates, returns confirmation summary with token. Second call (confirmed=true with
+        token): executes submission. Always show confirmation to candidate before the second call.
       x-openai-isConsequential: true
       requestBody:
         required: true
@@ -336,11 +327,9 @@ paths:
       operationId: analyzeResume
       summary: Analyze resume fit against a job
       description: >-
-        Analyze how well the candidate's resume matches a specific job posting. Returns a fit score (0-100),
-        strengths, gaps, and actionable recommendations. The candidate can paste resume text directly in chat
-        (passed via resume_text parameter) or use their stored profile resume. Use this when the candidate
-        asks about their fit for a job, wants resume feedback, or you want to proactively suggest a fit check
-        after showing job details.
+        Analyze how well the candidate's resume matches a job. Returns fit score (0-100), strengths,
+        gaps, and recommendations. Candidate can paste resume text (resume_text) or use stored profile
+        resume. Use when candidate asks about fit or wants resume feedback.
       x-openai-isConsequential: false
       requestBody:
         required: true
@@ -392,19 +381,6 @@ paths:
                 $ref: '#/components/schemas/GptErrorResponse'
 
 components:
-  securitySchemes:
-    oauth2:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://api.splits.network/api/v1/gpt/oauth/authorize
-          tokenUrl: https://api.splits.network/api/v1/gpt/oauth/token
-          scopes:
-            jobs:read: Search and view job listings
-            applications:read: View your application status
-            applications:write: Submit job applications
-            resume:read: Analyze resume fit against jobs
-
   schemas:
     GptJobSearchResult:
       type: object
