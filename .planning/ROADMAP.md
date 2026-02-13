@@ -12,7 +12,7 @@ This milestone restructures platform admin from an organization-scoped role (sto
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 4: Schema & Data Migration** - Make user_roles support platform_admin, migrate data atomically
+- [x] **Phase 4: Schema & Data Migration** - Make user_roles support platform_admin, migrate data atomically
 - [ ] **Phase 5: Access Integration** - Update resolveAccessContext and identity-service APIs
 - [ ] **Phase 6: Cleanup & Validation** - Remove platform org, validate all consumers
 
@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 04-01-PLAN.md — Schema change (nullable role_entity_id), index restructuring, platform_admin data migration with atomic validation
+- [x] 04-01-PLAN.md — Schema change (nullable role_entity_id), index restructuring, platform_admin data migration with atomic validation
 
 ### Phase 5: Access Integration
 **Goal**: All backend services and frontend checks use user_roles for platform_admin authorization
@@ -70,6 +70,6 @@ Phases execute in numeric order: 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. Schema & Data Migration | 0/1 | Not started | - |
+| 4. Schema & Data Migration | 1/1 | Complete | 2026-02-13 |
 | 5. Access Integration | 0/TBD | Not started | - |
 | 6. Cleanup & Validation | 0/TBD | Not started | - |

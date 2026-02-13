@@ -37,9 +37,9 @@
 
 | REQ | Phase | Status |
 |-----|-------|--------|
-| SCHEMA-01 | Phase 4 | Pending |
-| SCHEMA-02 | Phase 4 | Pending |
-| SCHEMA-03 | Phase 4 | Pending |
+| SCHEMA-01 | Phase 4 | Complete |
+| SCHEMA-02 | Phase 4 | Complete |
+| SCHEMA-03 | Phase 4 | Complete |
 | ACCESS-01 | Phase 5 | Pending |
 | ACCESS-02 | Phase 5 | Pending |
 | ACCESS-03 | Phase 5 | Pending |
