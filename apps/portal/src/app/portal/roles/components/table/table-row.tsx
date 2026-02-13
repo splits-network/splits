@@ -10,7 +10,7 @@ import {
     ExpandedDetailItem,
     ExpandedDetailSection,
 } from "@/components/ui/tables";
-import { Job } from "../../types";
+import { Job, formatCommuteTypes, formatJobLevel } from "../../types";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 
 // ===== TYPES =====
@@ -231,12 +231,26 @@ export function TableRow({
                     value={job.application_count || 0}
                 />
                 <ExpandedDetailItem
+                    icon="fa-building-user"
+                    label="Work Type"
+                    value={formatCommuteTypes(job.commute_types) || "Not specified"}
+                />
+                <ExpandedDetailItem
+                    icon="fa-signal"
+                    label="Level"
+                    value={formatJobLevel(job.job_level) || "Not specified"}
+                />
+            </ExpandedDetailGrid>
+
+            {/* Third Row - Meta */}
+            <ExpandedDetailGrid cols={4}>
+                <ExpandedDetailItem
                     icon="fa-calendar"
                     label="Posted"
                     value={formatRelativeTime(job.created_at)}
                 />
                 <ExpandedDetailItem
-                    icon="fa-signal"
+                    icon="fa-circle-info"
                     label="Status"
                     value={
                         <span

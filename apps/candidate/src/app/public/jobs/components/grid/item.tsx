@@ -16,6 +16,8 @@ import {
     getCompanyIndustry,
     shouldShowSalary,
     formatEmploymentType,
+    formatCommuteTypes,
+    formatJobLevel,
 } from "../../types";
 
 interface ItemProps {
@@ -115,6 +117,20 @@ export default function Item({ item, onViewDetails }: ItemProps) {
                                   : "Not specified"
                         }
                     />
+                    {formatCommuteTypes(item.commute_types) && (
+                        <DataRow
+                            label="Work Type"
+                            icon="fa-building-user"
+                            value={formatCommuteTypes(item.commute_types)!}
+                        />
+                    )}
+                    {formatJobLevel(item.job_level) && (
+                        <DataRow
+                            label="Level"
+                            icon="fa-signal"
+                            value={formatJobLevel(item.job_level)!}
+                        />
+                    )}
                     <DataRow
                         label="Department"
                         icon="fa-building"

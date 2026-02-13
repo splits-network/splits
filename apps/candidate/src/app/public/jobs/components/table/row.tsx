@@ -10,6 +10,8 @@ import {
     getCompanyIndustry,
     shouldShowSalary,
     formatEmploymentType,
+    formatCommuteTypes,
+    formatJobLevel,
 } from "../../types";
 
 interface RowProps {
@@ -102,6 +104,9 @@ export default function Row({ item, onViewDetails }: RowProps) {
                 </div>
                 <div className="text-xs text-base-content/60">
                     {formatEmploymentType(item.employment_type)}
+                    {formatCommuteTypes(item.commute_types) && (
+                        <> · {formatCommuteTypes(item.commute_types)}</>
+                    )}
                 </div>
             </td>
 

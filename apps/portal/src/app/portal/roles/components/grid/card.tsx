@@ -11,7 +11,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { getRoleBadges } from "@/lib/utils/role-badges";
 import { getJobStatusBadge, getJobStatus } from "@/lib/utils/badge-styles";
 import RoleActionsToolbar from "../shared/actions-toolbar";
-import { Job } from "../../types";
+import { Job, formatCommuteTypes, formatJobLevel } from "../../types";
 
 // Re-export for backward compatibility
 
@@ -161,6 +161,20 @@ export function RoleCard({
                         label="Placement Fee"
                         value={`${job.fee_percentage}%`}
                     />
+                    {formatCommuteTypes(job.commute_types) && (
+                        <DataRow
+                            icon="fa-building-user"
+                            label="Work Type"
+                            value={formatCommuteTypes(job.commute_types)!}
+                        />
+                    )}
+                    {formatJobLevel(job.job_level) && (
+                        <DataRow
+                            icon="fa-signal"
+                            label="Level"
+                            value={formatJobLevel(job.job_level)!}
+                        />
+                    )}
                     <DataRow
                         icon="fa-users"
                         label="Applicants"
