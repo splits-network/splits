@@ -1,10 +1,11 @@
 import type {
     Candidate as BaseCandidate,
     MarketplaceProfile,
+    ResumeMetadata,
     RecruiterCandidateWithCandidate,
 } from "@splits-network/shared-types";
 
-export type { MarketplaceProfile };
+export type { MarketplaceProfile, ResumeMetadata };
 
 export type CandidateScope = "mine" | "all";
 

@@ -2,12 +2,16 @@ import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { AIReviewServiceV2 } from './v2/reviews/service';
+import { ResumeExtractionService } from './v2/resume-extraction/service';
+import { ResumeExtractionRepository } from './v2/resume-extraction/repository';
+import { EventPublisher } from './v2/shared/events';
 
 /**
  * Domain Event Consumer for AI Service
- * 
- * Listens for application.stage_changed events and triggers AI reviews
- * when applications transition to the 'ai_review' stage.
+ *
+ * Listens for:
+ * - application.stage_changed / application.created → triggers AI reviews
+ * - document.processed → triggers structured resume metadata extraction
  */
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -18,6 +22,9 @@ export class DomainEventConsumer {
     constructor(
         private rabbitMqUrl: string,
         private aiReviewService: AIReviewServiceV2,
+        private resumeExtractionService: ResumeExtractionService,
+        private resumeExtractionRepository: ResumeExtractionRepository,
+        private eventPublisher: EventPublisher | undefined,
         private logger: Logger
     ) {}
 
@@ -38,11 +45,13 @@ export class DomainEventConsumer {
             // Listen for application stage changes (specifically when stage becomes 'ai_review')
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
+            // Listen for processed documents to extract structured resume metadata
+            await this.channel.bindQueue(this.queue, this.exchange, 'document.processed');
 
             this.logger.info({
                 exchange: this.exchange,
                 queue: this.queue,
-                bindings: ['application.stage_changed', 'application.created']
+                bindings: ['application.stage_changed', 'application.created', 'document.processed']
             }, 'AI service connected to RabbitMQ and bound to events');
 
             await this.startConsuming();
@@ -66,12 +75,13 @@ export class DomainEventConsumer {
 
                 try {
                     const event: DomainEvent = JSON.parse(msg.content.toString());
-                    
+
                     this.logger.info({
                         event_type: event.event_type,
                         event_id: event.event_id,
                         payload_summary: {
                             application_id: event.payload.application_id,
+                            document_id: event.payload.document_id,
                             stage: event.payload.stage || event.payload.new_stage,
                         }
                     }, 'Received event');
@@ -113,6 +123,9 @@ export class DomainEventConsumer {
                 break;
             case 'application.stage_changed':
                 await this.handleApplicationStageChanged(event);
+                break;
+            case 'document.processed':
+                await this.handleDocumentProcessed(event);
                 break;
             default:
                 this.logger.debug({ event_type: event.event_type }, 'Unhandled event type');
@@ -218,6 +231,104 @@ export class DomainEventConsumer {
                 new_stage
             }, 'Failed to trigger AI review for stage transition');
             throw error;
+        }
+    }
+
+    /**
+     * Handle document.processed events
+     * Extract structured metadata from resume documents using AI
+     */
+    private async handleDocumentProcessed(event: DomainEvent): Promise<void> {
+        const { document_id, entity_type, entity_id, processing_status } = event.payload;
+
+        // Only process successfully processed documents
+        if (processing_status !== 'processed') {
+            this.logger.debug({ document_id, processing_status }, 'Document not successfully processed, skipping extraction');
+            return;
+        }
+
+        try {
+            // Fetch document to check type and get extracted text
+            const document = await this.resumeExtractionRepository.getDocument(document_id);
+            if (!document) {
+                this.logger.warn({ document_id }, 'Document not found for structured extraction');
+                return;
+            }
+
+            // Only extract from resume documents attached to candidates
+            if (document.document_type !== 'resume' || document.entity_type !== 'candidate') {
+                this.logger.debug(
+                    { document_id, document_type: document.document_type, entity_type: document.entity_type },
+                    'Not a candidate resume, skipping structured extraction'
+                );
+                return;
+            }
+
+            const extractedText = document.metadata?.extracted_text;
+            if (!extractedText || typeof extractedText !== 'string' || extractedText.length < 50) {
+                this.logger.warn({ document_id, text_length: extractedText?.length }, 'Insufficient extracted text for structured extraction');
+                return;
+            }
+
+            // Check if structured data already exists (avoid re-processing)
+            if (document.metadata?.structured_data) {
+                this.logger.debug({ document_id }, 'Structured data already exists, skipping');
+                return;
+            }
+
+            this.logger.info({ document_id, entity_id, text_length: extractedText.length }, 'Starting structured resume extraction');
+
+            // Extract structured metadata using AI
+            const structuredData = await this.resumeExtractionService.extractStructuredData(extractedText, document_id);
+
+            // Write structured data to document metadata
+            await this.resumeExtractionRepository.writeStructuredData(document_id, structuredData);
+
+            // Publish event for downstream consumers (ats-service will sync to candidate if primary)
+            if (this.eventPublisher) {
+                await this.eventPublisher.publish('resume.metadata.extracted', {
+                    document_id,
+                    entity_type: document.entity_type,
+                    entity_id: document.entity_id,
+                    structured_data_available: true,
+                    skills_count: structuredData.skills_count,
+                    experience_count: structuredData.experience.length,
+                    education_count: structuredData.education.length,
+                });
+            }
+
+            this.logger.info(
+                {
+                    document_id,
+                    entity_id: document.entity_id,
+                    skills_count: structuredData.skills_count,
+                    experience_count: structuredData.experience.length,
+                },
+                'Structured resume extraction completed and event published'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, document_id, entity_type, entity_id },
+                'Failed to extract structured resume metadata (non-fatal)'
+            );
+
+            // Publish failure event so downstream knows extraction didn't work
+            if (this.eventPublisher) {
+                try {
+                    await this.eventPublisher.publish('resume.metadata.extracted', {
+                        document_id,
+                        entity_type,
+                        entity_id,
+                        structured_data_available: false,
+                        error: error instanceof Error ? error.message : String(error),
+                    });
+                } catch (publishError) {
+                    this.logger.error({ publishError, document_id }, 'Failed to publish extraction failure event');
+                }
+            }
+
+            // Don't rethrow - structured extraction failure should not nack the message
+            // The document was processed successfully, we just couldn't extract structured data
         }
     }
 

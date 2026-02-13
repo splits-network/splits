@@ -17,6 +17,8 @@ import { registerV2Routes } from "./v2/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { AIReviewRepository } from "./v2/reviews/repository";
 import { AIReviewServiceV2 } from "./v2/reviews/service";
+import { ResumeExtractionService } from "./v2/resume-extraction/service";
+import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
 import * as Sentry from "@sentry/node";
 
 async function main() {
@@ -132,12 +134,19 @@ async function main() {
         aiReviewService, // Pass the service instance so routes use the same one
     });
 
-    // Initialize domain event consumer (listens for application events)
+    // Initialize resume extraction service and repository
+    const resumeExtractionService = new ResumeExtractionService(logger);
+    const resumeExtractionRepository = new ResumeExtractionRepository(supabaseClient, logger);
+
+    // Initialize domain event consumer (listens for application + document events)
     let domainConsumer: DomainEventConsumer | null = null;
     try {
         domainConsumer = new DomainEventConsumer(
             rabbitConfig.url,
             aiReviewService,
+            resumeExtractionService,
+            resumeExtractionRepository,
+            eventPublisher || undefined,
             logger,
         );
         await domainConsumer.connect();

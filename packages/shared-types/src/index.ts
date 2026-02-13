@@ -45,4 +45,12 @@ export type {
     // Job attribute types
     CommuteType,
     JobLevel,
+    // Resume metadata types
+    ResumeMetadata,
+    ResumeExperience,
+    ResumeEducation,
+    ResumeSkill,
+    ResumeCertification,
+    SkillProficiency,
+    DegreeLevel,
 } from './models';

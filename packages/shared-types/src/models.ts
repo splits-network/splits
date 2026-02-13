@@ -230,6 +230,66 @@ export interface JobPreScreenQuestion {
     updated_at: Date;
 }
 
+// ============================================================================
+// Resume Metadata Types (AI-extracted from candidate resumes, no PII)
+// ============================================================================
+
+export type SkillProficiency = 'expert' | 'advanced' | 'intermediate' | 'beginner';
+export type DegreeLevel = 'doctorate' | 'masters' | 'bachelors' | 'associates' | 'none';
+
+export interface ResumeExperience {
+    title: string;
+    company: string;
+    location?: string;
+    start_date: string;           // YYYY-MM format
+    end_date: string | null;      // null = current position
+    is_current: boolean;
+    description?: string;
+    highlights?: string[];
+}
+
+export interface ResumeEducation {
+    institution: string;
+    degree?: string;
+    field_of_study?: string;
+    start_date?: string;          // YYYY-MM format
+    end_date?: string;            // YYYY-MM format
+    gpa?: string;
+}
+
+export interface ResumeSkill {
+    name: string;
+    category?: string;            // programming_language, framework, devops, soft_skill, etc.
+    proficiency?: SkillProficiency;
+    years_used?: number;
+}
+
+export interface ResumeCertification {
+    name: string;
+    issuer?: string;
+    date_obtained?: string;       // YYYY-MM format
+    expiry_date?: string;         // YYYY-MM format
+}
+
+export interface ResumeMetadata {
+    // Extraction provenance
+    extracted_at: string;           // ISO 8601
+    source_document_id: string;     // UUID of the document that was extracted
+    extraction_confidence: number;  // 0-1
+
+    // Structured data (no PII - no name, email, phone, address)
+    professional_summary?: string;
+    experience: ResumeExperience[];
+    education: ResumeEducation[];
+    skills: ResumeSkill[];
+    certifications: ResumeCertification[];
+
+    // Computed totals for fast filtering
+    total_years_experience?: number;
+    highest_degree?: DegreeLevel;
+    skills_count?: number;
+}
+
 export type CandidateVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 
 export interface Candidate {
@@ -266,6 +326,9 @@ export interface Candidate {
     open_to_remote?: boolean;
     open_to_relocation?: boolean;
     availability?: string;
+
+    // AI-extracted resume metadata (from primary resume)
+    resume_metadata?: ResumeMetadata;
 
     created_at: Date;
     updated_at: Date;
