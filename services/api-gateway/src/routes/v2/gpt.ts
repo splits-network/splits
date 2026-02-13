@@ -140,6 +140,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
             const correlationId = getCorrelationId(request);
             const authHeader = request.headers['authorization'];
             const clerkUserIdHeader = request.headers['x-gpt-clerk-user-id'];
+            const clerkUserIdDirect = request.headers['x-clerk-user-id'];
 
             // Extract path after /api/v1/gpt/
             const fullPath = request.url.split('?')[0];
@@ -153,6 +154,9 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
             }
             if (clerkUserIdHeader) {
                 headers['x-gpt-clerk-user-id'] = clerkUserIdHeader as string;
+            }
+            if (clerkUserIdDirect) {
+                headers['x-clerk-user-id'] = clerkUserIdDirect as string;
             }
 
             try {
