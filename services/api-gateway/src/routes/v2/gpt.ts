@@ -8,6 +8,10 @@ import { buildQueryString, getCorrelationId } from './common';
  * These routes bypass Clerk authentication as they use GPT-issued OAuth tokens.
  * The gpt-service handles its own token validation.
  *
+ * Rate limits (per-user, keyed by Bearer token suffix):
+ * - Read endpoints (GET, OAuth): 30 requests/min
+ * - Write/expensive endpoints (POST wildcard): 10 requests/min
+ *
  * Routes:
  * - GET /api/v1/gpt/oauth/authorize - OAuth authorization endpoint
  * - POST /api/v1/gpt/oauth/token - OAuth token endpoint
@@ -17,10 +21,37 @@ import { buildQueryString, getCorrelationId } from './common';
 export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const gptService = () => services.get('gpt');
 
+    // GPT read endpoints: 30 requests/min per user
+    const gptReadRateLimit = {
+        rateLimit: {
+            max: 30,
+            timeWindow: '1 minute',
+            keyGenerator: (request: any) => {
+                const auth = request.headers['authorization'];
+                if (auth) return `gpt-read:${auth.slice(-16)}`;
+                return `gpt-read:${request.ip}`;
+            },
+        },
+    };
+
+    // GPT write/expensive endpoints: 10 requests/min per user
+    const gptWriteRateLimit = {
+        rateLimit: {
+            max: 10,
+            timeWindow: '1 minute',
+            keyGenerator: (request: any) => {
+                const auth = request.headers['authorization'];
+                if (auth) return `gpt-write:${auth.slice(-16)}`;
+                return `gpt-write:${request.ip}`;
+            },
+        },
+    };
+
     // OAuth authorization endpoint
     // GET /api/v1/gpt/oauth/authorize -> gpt-service /api/v2/oauth/authorize
     app.get(
         '/api/v1/gpt/oauth/authorize',
+        { config: gptReadRateLimit },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
@@ -42,6 +73,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
     // POST /api/v1/gpt/oauth/token -> gpt-service /api/v2/oauth/token
     app.post(
         '/api/v1/gpt/oauth/token',
+        { config: gptReadRateLimit },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
 
@@ -66,6 +98,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
     // POST /api/v1/gpt/oauth/revoke -> gpt-service /api/v2/oauth/revoke
     app.post(
         '/api/v1/gpt/oauth/revoke',
+        { config: gptReadRateLimit },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeader = request.headers['authorization'];
@@ -96,6 +129,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
     // GET /api/v1/gpt/:path(*) -> gpt-service /api/v2/:path
     app.get(
         '/api/v1/gpt/*',
+        { config: gptReadRateLimit },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeader = request.headers['authorization'];
@@ -131,6 +165,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
     // POST /api/v1/gpt/:path(*) -> gpt-service /api/v2/:path
     app.post(
         '/api/v1/gpt/*',
+        { config: gptWriteRateLimit },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeader = request.headers['authorization'];
