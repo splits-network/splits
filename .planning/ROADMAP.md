@@ -5,7 +5,7 @@
 - v2.0 Global Search (Phases 1-3) -- shipped 2026-02-13
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
-- v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
+- v5.0 Custom GPT / Applicant Network (Phases 11-15) -- SHIPPED 2026-02-13
 
 ## Phases
 
@@ -116,7 +116,7 @@ Plans:
 - [x] **Phase 12: OAuth2 Provider** - OAuth2 authorization code flow, gateway integration, token validation
 - [x] **Phase 13: GPT API Endpoints** - Job search, job details, application status, application submission, resume analysis
 - [x] **Phase 14: OpenAPI Schema + GPT Configuration** - OpenAPI 3.0.1 schema, schema serving endpoint, GPT Instructions document
-- [ ] **Phase 15: Production Hardening** - Kubernetes deployment, rate limiting, token cleanup, audit logging
+- [x] **Phase 15: Production Hardening** - Kubernetes deployment, rate limiting, token cleanup, audit logging
 
 ### Phase 11: Service Foundation
 **Goal**: gpt-service microservice exists with database tables and configuration, ready for OAuth and endpoint development
@@ -200,7 +200,7 @@ Plans:
 Plans:
 - [x] 15-01-PLAN.md — Deployment hardening, token cleanup CronJob, Clerk webhook signature verification
 - [x] 15-02-PLAN.md — GPT-specific per-user tiered rate limiting in api-gateway
-- [ ] 15-03-PLAN.md — Gap closure: fix gateway header forwarding, query string bug, and K8s env vars
+- [x] 15-03-PLAN.md — Gap closure: fix gateway header forwarding, query string bug, and K8s env vars
 
 ## Progress
 
@@ -223,8 +223,8 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 12. OAuth2 Provider | v5.0 | 6/6 | Complete | 2026-02-13 |
 | 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
 | 14. OpenAPI Schema + GPT Configuration | v5.0 | 2/2 | Complete | 2026-02-13 |
-| 15. Production Hardening | v5.0 | 2/3 | Gap Closure | 2026-02-13 |
+| 15. Production Hardening | v5.0 | 3/3 | Complete | 2026-02-13 |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-13 (Phase 15 gap closure plan added)*
+*Last updated: 2026-02-13 (Phase 15 complete, v5.0 milestone complete)*
