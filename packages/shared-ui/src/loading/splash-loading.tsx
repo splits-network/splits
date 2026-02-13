@@ -111,9 +111,6 @@ export function SplashLoading({
         return <div className={outerClasses} style={{ opacity: 0 }} />;
     }
 
-    const lineGradient =
-        'linear-gradient(90deg, transparent, oklch(var(--color-primary) / 0.18) 12%, oklch(var(--color-primary) / 0.18) 88%, transparent)';
-
     return (
         <div
             className={outerClasses}
@@ -132,12 +129,12 @@ export function SplashLoading({
             >
                 {/* Upper split line */}
                 <div
+                    className="bg-gradient-to-r from-transparent via-primary/20 to-transparent"
                     style={{
                         position: 'absolute',
                         inset: '50% 0 auto 0',
                         height: 1.5,
                         marginTop: -0.75,
-                        background: lineGradient,
                         transformOrigin: 'center',
                         overflow: 'hidden',
                         animation:
@@ -146,14 +143,12 @@ export function SplashLoading({
                 >
                     {/* Teal energy pulse sweeping right */}
                     <div
+                        className="rounded-sm bg-gradient-to-r from-transparent via-secondary/70 to-transparent"
                         style={{
                             position: 'absolute',
                             top: -1,
                             width: 70,
                             height: 3.5,
-                            borderRadius: 2,
-                            background:
-                                'linear-gradient(90deg, transparent 0%, oklch(var(--color-secondary) / 0.6) 35%, oklch(var(--color-secondary) / 0.8) 50%, oklch(var(--color-secondary) / 0.35) 75%, transparent)',
                             animation:
                                 'sn-sweep-r 2.6s ease-in-out 1.1s infinite',
                         }}
@@ -162,12 +157,12 @@ export function SplashLoading({
 
                 {/* Lower split line */}
                 <div
+                    className="bg-gradient-to-r from-transparent via-primary/20 to-transparent"
                     style={{
                         position: 'absolute',
                         inset: '50% 0 auto 0',
                         height: 1.5,
                         marginTop: -0.75,
-                        background: lineGradient,
                         transformOrigin: 'center',
                         overflow: 'hidden',
                         animation:
@@ -176,14 +171,12 @@ export function SplashLoading({
                 >
                     {/* Accent energy pulse sweeping left */}
                     <div
+                        className="rounded-sm bg-gradient-to-r from-transparent via-accent/50 to-transparent"
                         style={{
                             position: 'absolute',
                             top: -1,
                             width: 70,
                             height: 3.5,
-                            borderRadius: 2,
-                            background:
-                                'linear-gradient(90deg, transparent 0%, oklch(var(--color-accent) / 0.4) 25%, oklch(var(--color-accent) / 0.55) 50%, oklch(var(--color-accent) / 0.25) 80%, transparent)',
                             animation:
                                 'sn-sweep-l 3.0s ease-in-out 1.5s infinite',
                         }}
@@ -192,6 +185,7 @@ export function SplashLoading({
 
                 {/* Center glow behind logo */}
                 <div
+                    className="rounded-full bg-radial from-secondary/12 to-transparent"
                     style={{
                         position: 'absolute',
                         top: '50%',
@@ -200,17 +194,15 @@ export function SplashLoading({
                         height: resolvedSize * 1.8,
                         marginTop: -(resolvedSize * 0.9),
                         marginLeft: -(resolvedSize * 1.2),
-                        borderRadius: '50%',
-                        background:
-                            'radial-gradient(ellipse, oklch(var(--color-secondary) / 0.12) 0%, transparent 70%)',
+                        pointerEvents: 'none',
                         animation:
                             'sn-reveal 0.5s ease-out 0.55s both, sn-glow-pulse 3.5s ease-in-out 1.4s infinite',
-                        pointerEvents: 'none',
                     }}
                 />
 
                 {/* Logo */}
                 <div
+                    className="drop-shadow-md"
                     style={{
                         position: 'absolute',
                         top: '50%',
@@ -228,13 +220,7 @@ export function SplashLoading({
                         alt="Loading"
                         width={resolvedSize}
                         height={resolvedSize}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'contain',
-                            filter: 'drop-shadow(0 1px 8px oklch(var(--color-primary) / 0.12))',
-                        }}
+                        className="block w-full h-full object-contain"
                     />
                 </div>
             </div>
@@ -242,13 +228,9 @@ export function SplashLoading({
             {/* Message */}
             {message && (
                 <p
-                    className="text-base-content/40"
+                    className="text-base-content/40 text-xs tracking-widest uppercase font-light"
                     style={{
                         marginTop: 28,
-                        fontSize: '0.7rem',
-                        letterSpacing: '0.12em',
-                        fontWeight: 300,
-                        textTransform: 'uppercase' as const,
                         animation: 'sn-text-in 0.5s ease-out 0.9s both',
                     }}
                 >
