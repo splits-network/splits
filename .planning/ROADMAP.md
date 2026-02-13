@@ -143,7 +143,15 @@ Plans:
   3. Expired access tokens can be refreshed via refresh token endpoint (with token rotation)
   4. Refresh tokens can be revoked, immediately preventing further token issuance
   5. api-gateway routes /api/v1/gpt/* requests to gpt-service, bypassing Clerk auth, and gpt-service validates its own opaque tokens extracting clerk_user_id
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 12-01-PLAN.md -- Schema migration (scopes columns) + shared-config ES256 update
+- [ ] 12-02-PLAN.md -- OAuth core service (TDD): auth code flow, PKCE, JWT ES256, token rotation, replay detection
+- [ ] 12-03-PLAN.md -- api-gateway GPT routing with Clerk auth bypass
+- [ ] 12-04-PLAN.md -- OAuth route handlers + JWT validation middleware in gpt-service
+- [ ] 12-05-PLAN.md -- Consent page, error page, success flash, learn-more page (candidate app)
+- [ ] 12-06-PLAN.md -- Connected Apps management on profile page + Clerk webhook handler
 
 ### Phase 13: GPT API Endpoints
 **Goal**: GPT can search jobs, view job details, check application status, submit applications with confirmation safety, and analyze resume fit -- all with candidate-scoped data isolation
@@ -197,7 +205,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 9. Backend & Filtering | v4.0 | 2/2 | Complete | 2026-02-13 |
 | 10. Portal UI | v4.0 | 2/2 | Complete | 2026-02-13 |
 | 11. Service Foundation | v5.0 | 3/3 | Complete | 2026-02-13 |
-| 12. OAuth2 Provider | v5.0 | 0/TBD | Not started | - |
+| 12. OAuth2 Provider | v5.0 | 0/6 | Not started | - |
 | 13. GPT API Endpoints | v5.0 | 0/TBD | Not started | - |
 | 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/TBD | Not started | - |
 | 15. Production Hardening | v5.0 | 0/TBD | Not started | - |
