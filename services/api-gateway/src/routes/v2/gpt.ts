@@ -57,8 +57,14 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
             const queryString = buildQueryString(request.query as Record<string, any>);
             const path = queryString ? `/api/v2/oauth/authorize?${queryString}` : '/api/v2/oauth/authorize';
 
+            const clerkUserIdHeader = request.headers['x-clerk-user-id'];
+            const headers: Record<string, string> = {};
+            if (clerkUserIdHeader) {
+                headers['x-clerk-user-id'] = clerkUserIdHeader as string;
+            }
+
             try {
-                const data = await gptService().get(path, undefined, correlationId, {});
+                const data = await gptService().get(path, undefined, correlationId, headers);
                 return reply.send(data);
             } catch (error: any) {
                 request.log.error({ error, correlationId }, 'Failed to proxy GPT OAuth authorize request');
@@ -136,7 +142,7 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
             const clerkUserIdHeader = request.headers['x-gpt-clerk-user-id'];
 
             // Extract path after /api/v1/gpt/
-            const fullPath = request.url;
+            const fullPath = request.url.split('?')[0];
             const gptPath = fullPath.replace(/^\/api\/v1\/gpt\//, '');
             const queryString = buildQueryString(request.query as Record<string, any>);
             const path = queryString ? `/api/v2/${gptPath}?${queryString}` : `/api/v2/${gptPath}`;
