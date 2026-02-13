@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
-**Current focus:** v5.0 Custom GPT -- Phase 12 (OAuth2 Provider)
+**Current focus:** v5.0 Custom GPT -- Phase 13 (GPT API Endpoints)
 
 ## Current Position
 
-Phase: 12 of 15 (OAuth2 Provider)
-Plan: 04 of TBD
-Status: In progress
-Last activity: 2026-02-13 -- Completed 12-04-PLAN.md (OAuth Routes and Middleware)
+Phase: 13 of 15 (GPT API Endpoints)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-13 -- Completed Phase 12 (OAuth2 Provider) -- all 6 plans
 
-Progress: [███░░░░░░░] ~40% (7/~15 v5.0 plans)
+Progress: [██████░░░░] ~60% (9/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [███░░░░░░░] ~40% (7/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 7
-- Average duration: 3.4 min
-- Total execution time: ~23 minutes
+- Total plans completed: 9
+- Average duration: 3.6 min
+- Total execution time: ~32 minutes
 
 **Cumulative:**
-- Total plans completed: 25
-- Average duration: 3.4 min
-- Total execution time: ~86 minutes
+- Total plans completed: 27
+- Average duration: 3.5 min
+- Total execution time: ~96 minutes
 
 ## Accumulated Context
 
@@ -67,6 +67,9 @@ Progress: [███░░░░░░░] ~40% (7/~15 v5.0 plans)
 - Replay detection revokes ALL user sessions on rotated token usage (security-first approach) (Phase 12-02)
 - Dual-auth pattern: GPT Bearer tokens OR x-gpt-clerk-user-id header for sessions/revoke endpoints (Phase 12-04)
 - KeyLike type from jose instead of CryptoKey for cross-platform ES256 key handling (Phase 12-04)
+- Authorize endpoint returns JSON (not 302 redirect) because consent page uses fetch() (Phase 12-05)
+- Direct Clerk webhook endpoint in gpt-service for user.deleted events (Phase 12-06)
+- Deferred webhook signature verification to Phase 15 (Phase 12-06)
 
 ### Pending Todos
 
@@ -90,18 +93,19 @@ None.
 **From v5.0 (Phase 12):**
 - User must apply migration `20260221000001_add_scopes_to_gpt_oauth_tables.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
 - User must add `GPT_EC_PRIVATE_KEY` environment variable (base64-encoded EC private key PEM) for ES256 JWT signing.
+- User must configure GPT Builder with OAuth URLs and add `GPT_REDIRECT_URI` from OpenAI.
+- User must add GitHub environment secrets: GPT_CLIENT_ID, GPT_CLIENT_SECRET, GPT_EC_PRIVATE_KEY, GPT_REDIRECT_URI.
 
 **v5.0 Research Flags:**
-- Phase 12 (OAuth): HIGH priority -- must validate Clerk redirect mechanism, OpenAI callback URL format, PKCE requirement, and token_exchange_method before writing production code.
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 12-04-PLAN.md (OAuth Routes and Middleware)
+Stopped at: Completed Phase 12 (OAuth2 Provider) -- all 6 plans
 Resume file: None
-Next: 12-05 (Consent UI) or 13-01 (GPT API endpoints)
+Next: Phase 13 (GPT API Endpoints) -- /gsd:discuss-phase 13 or /gsd:plan-phase 13
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (12-04 OAuth routes and middleware complete)*
+*Last updated: 2026-02-13 (Phase 12 complete)*
