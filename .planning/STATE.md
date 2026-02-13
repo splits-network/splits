@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 14 of 15 (OpenAPI Schema + GPT Configuration)
-Plan: 2 of 2 (GPT Builder Configuration)
-Status: Phase complete
-Last activity: 2026-02-13 -- Completed 14-02-PLAN.md (GPT Instructions & Builder Listing)
+Phase: 15 of 15 (Production Hardening)
+Plan: 2 of 2 (GPT Rate Limiting)
+Status: In progress
+Last activity: 2026-02-13 -- Completed 15-02-PLAN.md (GPT Rate Limiting)
 
-Progress: [█████████░] ~100% (15/~15 v5.0 plans)
+Progress: [██████████] ~100% (17/~17 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [█████████░] ~100% (15/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 3.1 min
-- Total execution time: ~48 minutes
+- Total execution time: ~51 minutes
 
 **Cumulative:**
-- Total plans completed: 33
+- Total plans completed: 34
 - Average duration: 3.3 min
-- Total execution time: ~112 minutes
+- Total execution time: ~115 minutes
 
 ## Accumulated Context
 
@@ -99,6 +99,9 @@ Progress: [█████████░] ~100% (15/~15 v5.0 plans)
 - Empathy-first error handling pattern: acknowledge -> explain briefly -> offer solution (Phase 14-02)
 - Pre-screen questions presented one at a time conversationally (not all at once) (Phase 14-02)
 - Prompt injection defense with explicit stay-in-role instructions (Phase 14-02)
+- Route-level @fastify/rate-limit config overrides for tiered GPT rate limiting (Phase 15-02)
+- Bearer token suffix keying for per-user rate limit buckets with gpt-read:/gpt-write: prefixes (Phase 15-02)
+- OAuth endpoints classified as read tier (30/min) since not computationally expensive (Phase 15-02)
 
 ### Pending Todos
 
@@ -137,10 +140,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed Phase 14 (OpenAPI Schema + GPT Configuration) -- all 2 plans
+Stopped at: Completed 15-02-PLAN.md (GPT Rate Limiting)
 Resume file: None
-Next: Phase 15 (Production Hardening) -- /gsd:discuss-phase 15 or /gsd:plan-phase 15
+Next: Phase 15 remaining plans (if any) or v5.0 complete
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 14 complete)*
+*Last updated: 2026-02-13 (Phase 15, plan 02 complete)*
