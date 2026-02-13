@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 ## Current Position
 
 Phase: 1 of 4 (Search Infrastructure)
-Plan: 1 of TBD in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-13 — Completed 01-01-PLAN.md (Search Infrastructure Foundation)
+Last activity: 2026-02-13 — Completed 01-02-PLAN.md (Entity Sync Triggers)
 
-Progress: [█░░░░░░░░░] ~10%
+Progress: [██░░░░░░░░] ~20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 2 min
-- Total execution time: 2 minutes
+- Total plans completed: 2
+- Average duration: 1.5 min
+- Total execution time: 3 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-search-infrastructure | 1 | 2min | 2min |
+| 01-search-infrastructure | 2 | 3min | 1.5min |
 
 **Recent Trend:**
-- Last 5 plans: 2min
-- Trend: Starting execution phase
+- Last 5 plans: 2min, 1min
+- Trend: Accelerating (faster execution with established patterns)
 
 *Updated after each plan completion*
 
@@ -47,6 +47,8 @@ Recent decisions affecting current work:
 - Use textSearch() with websearch type: Allows natural language queries, handles quoted phrases and operators automatically (01-01)
 - UNIQUE constraint on (entity_type, entity_id): Enables ON CONFLICT DO UPDATE pattern for trigger-based sync (01-01)
 - Keep specialization ILIKE filter separate: Discrete filter for specific field, not part of full-text search (01-01)
+- Reuse search_vector from jobs/companies tables: Avoids duplicating complex requirements-aware logic; AFTER triggers read NEW.search_vector already populated by BEFORE triggers (01-02)
+- Company cascade trigger: Updates job search_index entries when company name/industry/location changes to maintain denormalized data consistency (01-02)
 
 ### Pending Todos
 
@@ -56,12 +58,12 @@ None yet.
 
 ~~**Phase 1 prerequisite:** Recruiters table needs ILIKE→tsvector migration before trigger sync can be implemented. This is part of INFRA-09 and must be completed early in Phase 1.~~ **RESOLVED** (01-01): Recruiters now using tsvector search.
 
-**Next:** Ready for Plan 02 (Entity Sync Triggers) - all entity tables now use tsvector consistently, search.search_index table ready for trigger-based sync.
+**Next:** Ready for Plan 03 (Relational Entity Triggers) - trigger pattern established, TG_ARGV delete pattern ready for reuse with applications, placements, recruiter_candidates.
 
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-01-PLAN.md (Search Infrastructure Foundation)
+Stopped at: Completed 01-02-PLAN.md (Entity Sync Triggers)
 Resume file: None
 
 ---
