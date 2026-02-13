@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 11 of 15 (Service Foundation)
-Plan: 01 and 02 of 3 complete
-Status: In progress
-Last activity: 2026-02-13 -- Completed 11-01-PLAN.md (gpt-service scaffold)
+Plan: 03 of 3 complete -- Phase 11 COMPLETE
+Status: Phase complete
+Last activity: 2026-02-13 -- Completed 11-03-PLAN.md (Audit event consumer)
 
-Progress: [██░░░░░░░░] ~13% (2/~15 v5.0 plans)
+Progress: [███░░░░░░░] ~20% (3/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -33,10 +33,15 @@ Progress: [██░░░░░░░░] ~13% (2/~15 v5.0 plans)
 - Average duration: 2.7 min
 - Total execution time: ~13.5 minutes
 
+**Velocity (v5.0):**
+- Total plans completed: 3
+- Average duration: 2.7 min
+- Total execution time: ~8 minutes
+
 **Cumulative:**
-- Total plans completed: 18
-- Average duration: 3.5 min
-- Total execution time: ~63.5 minutes
+- Total plans completed: 21
+- Average duration: 3.4 min
+- Total execution time: ~71.5 minutes
 
 ## Accumulated Context
 
@@ -49,6 +54,8 @@ Progress: [██░░░░░░░░] ~13% (2/~15 v5.0 plans)
 - Opaque tokens over JWTs (instant revocation, DB lookup fast enough at GPT scale)
 - Used registerHealthCheck + HealthCheckers from shared-fastify for gpt-service (standardized health check pattern)
 - gpt-service scaffold: no Swagger/Sentry -- minimal for Phase 11, add as needed later
+- Nack without requeue (requeue: false) on audit consumer failures to prevent poison message loops
+- Bind gpt.oauth.# and gpt.action.# routing keys upfront for future extensibility
 
 ### Pending Todos
 
@@ -76,10 +83,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 11-01-PLAN.md (gpt-service scaffold)
+Stopped at: Completed 11-03-PLAN.md (Audit event consumer) -- Phase 11 complete
 Resume file: None
-Next: Execute 11-03-PLAN.md (Audit event consumer)
+Next: Phase 12 (OAuth Flow)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (11-01 gpt-service scaffold complete)*
+*Last updated: 2026-02-13 (11-03 audit event consumer complete, Phase 11 complete)*
