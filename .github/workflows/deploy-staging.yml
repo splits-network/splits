@@ -47,6 +47,8 @@ jobs:
                       path: services/chat-service
                     - name: search-service
                       path: services/search-service
+                    - name: gpt-service
+                      path: services/gpt-service
                     - name: health-monitor
                       path: services/health-monitor
                     - name: portal
@@ -268,6 +270,14 @@ jobs:
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
+                  kubectl create secret generic gpt-secrets \
+                    --from-literal=gpt-client-id=${{ secrets.GPT_CLIENT_ID }} \
+                    --from-literal=gpt-client-secret=${{ secrets.GPT_CLIENT_SECRET }} \
+                    --from-literal=gpt-ec-private-key=${{ secrets.GPT_EC_PRIVATE_KEY }} \
+                    --from-literal=gpt-redirect-uri=${{ secrets.GPT_REDIRECT_URI }} \
+                    --namespace=${{ env.NAMESPACE }} \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
             - name: Update image tags in manifests
               run: |
                   export IMAGE_TAG=${{ github.sha }}
@@ -312,7 +322,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway analytics-gateway chat-service health-monitor"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway analytics-gateway chat-service gpt-service health-monitor"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
@@ -341,6 +351,7 @@ jobs:
                   kubectl rollout status deployment/analytics-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/chat-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/health-monitor --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/gpt-service --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
               run: |
