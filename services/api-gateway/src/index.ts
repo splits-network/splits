@@ -34,9 +34,12 @@ async function main() {
         password: redisConfig.password || undefined,
     });
 
+    // ChatGPT origins for GPT API access
+    const GPT_ORIGINS = ['https://chat.openai.com', 'https://chatgpt.com'];
+
     // CORS configuration - stricter in production
     const allowedOrigins = baseConfig.nodeEnv === 'production'
-        ? (process.env.CORS_ORIGIN || '').split(',').filter(Boolean)
+        ? [...(process.env.CORS_ORIGIN || '').split(',').filter(Boolean), ...GPT_ORIGINS]
         : true;
 
     if (baseConfig.nodeEnv === 'production' && (!allowedOrigins || (allowedOrigins as string[]).length === 0)) {
