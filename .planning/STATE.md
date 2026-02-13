@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Platform admin is a system-level role assigned directly to a user — no organization membership required.
-**Current focus:** Phase 4 - Schema & Data Migration
+**Current focus:** Phase 5 - Access Integration
 
 ## Current Position
 
-Phase: 4 of 6 (Schema & Data Migration)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-13 — Completed 04-01-PLAN.md (Schema & Data Migration)
+Phase: 5 of 6 (Access Integration)
+Plan: 1 of 2 in current phase
+Status: Phase in progress
+Last activity: 2026-02-13 — Completed 05-01-PLAN.md (Update resolveAccessContext)
 
-Progress: [█░░░░░░░░░] 17% (1/6 phases complete)
+Progress: [██░░░░░░░░] 20% (2/10 plans complete)
 
 ## Performance Metrics
 
@@ -24,19 +24,20 @@ Progress: [█░░░░░░░░░] 17% (1/6 phases complete)
 - Total execution time: ~31 minutes
 
 **v3.0 Velocity:**
-- Total plans completed: 1
-- Average duration: 3.0 min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: 4.0 min
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 4 | 1 | 3min | 3min |
+| Phase 5 | 1 | 5min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 3min
-- Trend: Excellent start (single-task migration plan)
+- Last 5 plans: 3min, 5min (avg: 4min)
+- Trend: Consistent fast execution on focused integration tasks
 
 *Updated after each plan completion*
 
@@ -52,6 +53,8 @@ Recent decisions affecting current work:
 - Remove platform organization entirely — Clean break. No synthetic data in the system.
 - Split unique index strategy (04-01) — Two partial indexes instead of one: entity-linked (WHERE role_entity_id IS NOT NULL) and platform_admin (WHERE role_name = 'platform_admin') to handle NULL values correctly.
 - Atomic validation approach (04-01) — RAISE EXCEPTION in DO block aborts entire transaction if migration count mismatch detected.
+- Minimal code change approach (05-01) — Made EntityRoleRow.role_entity_id nullable (string | null). Existing deduplicated roles union already supports dual-read.
+- Zero downstream impact (05-01) — EntityRoleRow is internal (not exported). AccessContext interface unchanged, 119+ consumers unaffected.
 
 ### Pending Todos
 
@@ -64,7 +67,7 @@ None yet.
 - ~~NOT NULL constraint blocking INSERT if schema not updated first~~ — RESOLVED: Migration sequences ALTER TABLE before data migration
 
 **Phase 5 Risks:**
-- Race condition during deployment if some services read old table — mitigate with dual-read deployment strategy
+- ~~Race condition during deployment if some services read old table~~ — RESOLVED: Dual-read implemented in 05-01 (checks both user_roles and memberships)
 
 **Phase 6 Risks:**
 - Foreign key violations preventing platform org deletion — check FK references before deletion
@@ -75,9 +78,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 04-01-PLAN.md (Schema & Data Migration)
+Stopped at: Completed 05-01-PLAN.md (Update resolveAccessContext)
 Resume file: None
-Next: Phase 5 (Access Integration) - Update resolveAccessContext and identity-service
+Next: 05-02-PLAN.md (Update identity-service role assignment endpoints)
 
 ---
 *Created: 2026-02-12*
