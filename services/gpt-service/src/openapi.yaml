@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.1
 info:
   title: Applicant Network Career Copilot API
   description: API for Career Copilot GPT -- search jobs, check applications, submit applications, and analyze resume fit.
@@ -448,8 +448,9 @@ components:
           format: date
           description: Date the job was posted (YYYY-MM-DD)
         salary_range:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
           description: >-
             Salary range in format '$80k-$120k', '$80k+', 'Up to $120k', or null when not disclosed
         job_level:
@@ -545,12 +546,14 @@ components:
                   type: string
                   description: Company headquarters location
                 website:
-                  type: string
-                  nullable: true
+                  type:
+                    - string
+                    - 'null'
                   description: Company website URL
                 description:
-                  type: string
-                  nullable: true
+                  type:
+                    - string
+                    - 'null'
                   description: Company description
 
     GptApplicationStatus:
