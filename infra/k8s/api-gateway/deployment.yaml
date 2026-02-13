@@ -27,7 +27,7 @@ spec:
                       - name: SENTRY_DSN
                         value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
                       - name: CORS_ORIGIN
-                        value: "https://splits.network,https://www.splits.network,https://applicant.network,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com"
+                        value: "https://splits.network,https://www.splits.network,https://applicant.network,https://www.applicant.network,https://employment-networks.com,https://www.employment-networks.com,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com"
                       - name: SUPABASE_URL
                         valueFrom:
                             secretKeyRef:
