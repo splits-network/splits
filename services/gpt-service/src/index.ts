@@ -3,6 +3,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
 import formbody from '@fastify/formbody';
 import { EventPublisher } from './v2/shared/events';
+import { AuditEventConsumer } from './v2/shared/audit-consumer';
 import { registerV2Routes } from './v2/routes';
 
 async function main() {
@@ -46,6 +47,22 @@ async function main() {
         throw error;
     }
 
+    // Initialize AuditEventConsumer to write gpt.oauth.* and gpt.action.* events to DB
+    const auditConsumer = new AuditEventConsumer(
+        rabbitConfig.url,
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        logger
+    );
+
+    try {
+        await auditConsumer.connect();
+        logger.info('RabbitMQ AuditEventConsumer connected successfully');
+    } catch (error) {
+        logger.error({ err: error }, 'Failed to connect RabbitMQ AuditEventConsumer on startup');
+        throw error;
+    }
+
     // Register V2 routes
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
@@ -74,6 +91,7 @@ async function main() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
+        await auditConsumer.disconnect();
         await eventPublisher.close();
         await app.close();
         process.exit(0);
@@ -85,6 +103,7 @@ async function main() {
         logger.info(`gpt-service listening on port ${baseConfig.port}`);
     } catch (err) {
         logger.error(err);
+        await auditConsumer.disconnect();
         await eventPublisher.close();
         process.exit(1);
     }
