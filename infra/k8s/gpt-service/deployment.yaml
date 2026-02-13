@@ -67,6 +67,11 @@ spec:
                             secretKeyRef:
                                 name: gpt-secrets
                                 key: gpt-clerk-webhook-secret
+                      - name: INTERNAL_SERVICE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: internal-service-secrets
+                                key: internal-service-key
                   resources:
                       requests:
                           cpu: 100m
