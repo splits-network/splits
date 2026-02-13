@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 12 of 15 (OAuth2 Provider)
-Plan: 03 of TBD in progress
+Plan: 02 of TBD
 Status: In progress
-Last activity: 2026-02-13 -- Completed 12-03-PLAN.md (API Gateway GPT Routing)
+Last activity: 2026-02-13 -- Completed 12-02-PLAN.md (OAuth2 Core Service)
 
 Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
 
@@ -34,14 +34,14 @@ Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 5
-- Average duration: 2.4 min
-- Total execution time: ~12 minutes
+- Total plans completed: 6
+- Average duration: 3.3 min
+- Total execution time: ~19 minutes
 
 **Cumulative:**
-- Total plans completed: 23
-- Average duration: 3.2 min
-- Total execution time: ~75.5 minutes
+- Total plans completed: 24
+- Average duration: 3.3 min
+- Total execution time: ~82.5 minutes
 
 ## Accumulated Context
 
@@ -62,6 +62,9 @@ Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
 - /api/v1/gpt/* prefix for OAuth routes to distinguish from Clerk-authenticated v2 routes (Phase 12)
 - Forward Authorization and x-gpt-clerk-user-id headers for token validation and Connected Apps (Phase 12)
 - ChatGPT origins merged with CORS_ORIGIN for production flexibility (Phase 12)
+- jose library for ES256 JWT signing over jsonwebtoken (ESM-compatible, native ES256 support) (Phase 12-02)
+- Token prefixes (gpt_at_, gpt_rt_) for operational visibility in logs (Phase 12-02)
+- Replay detection revokes ALL user sessions on rotated token usage (security-first approach) (Phase 12-02)
 
 ### Pending Todos
 
@@ -93,10 +96,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 12-03-PLAN.md (API Gateway GPT Routing)
+Stopped at: Completed 12-02-PLAN.md (OAuth2 Core Service)
 Resume file: None
-Next: 12-04 (OAuth endpoints)
+Next: 12-03 (OAuth routes)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (12-03 API gateway GPT routing complete)*
+*Last updated: 2026-02-13 (12-02 OAuth2 core service complete)*
