@@ -59,10 +59,11 @@ Plans:
   3. Platform admin user can access admin routes in frontend (smoke test passed)
   4. resolveAccessContext returns isPlatformAdmin=true for test admin (backend smoke test passed)
   5. No foreign key violations during platform org deletion
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — Create cleanup migration (delete platform org + legacy memberships), update TypeScript types and JSDoc
+- [ ] 06-02-PLAN.md — Apply migration and smoke test platform admin access (frontend + backend verification)
 
 ## Progress
 
@@ -73,4 +74,4 @@ Phases execute in numeric order: 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 4. Schema & Data Migration | 1/1 | Complete | 2026-02-13 |
 | 5. Access Integration | 2/2 | Complete | 2026-02-13 |
-| 6. Cleanup & Validation | 0/TBD | Not started | - |
+| 6. Cleanup & Validation | 0/2 | Not started | - |
