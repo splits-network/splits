@@ -4,19 +4,19 @@
 
 ### Schema & Data Migration
 
-- [ ] **SCHEMA-01**: Migration makes role_entity_id and role_entity_type nullable in user_roles table with zero downtime and reversibility
-- [ ] **SCHEMA-02**: Partial unique index prevents duplicate platform_admin rows per user (handles NULL correctly)
-- [ ] **SCHEMA-03**: Revoking platform_admin role immediately blocks access via deleted_at filtering in queries
+- [x] **SCHEMA-01**: Migration makes role_entity_id and role_entity_type nullable in user_roles table with zero downtime and reversibility
+- [x] **SCHEMA-02**: Partial unique index prevents duplicate platform_admin rows per user (handles NULL correctly)
+- [x] **SCHEMA-03**: Revoking platform_admin role immediately blocks access via deleted_at filtering in queries
 
 ### Access Control Integration
 
-- [ ] **ACCESS-01**: resolveAccessContext() finds platform_admin in user_roles table and returns isPlatformAdmin: true (119+ downstream consumers unchanged)
-- [ ] **ACCESS-02**: identity-service creates and deletes platform_admin via POST/DELETE /v2/user-roles with nullable entity fields
-- [ ] **ACCESS-03**: All 13 frontend files checking isPlatformAdmin continue working without modification
+- [x] **ACCESS-01**: resolveAccessContext() finds platform_admin in user_roles table and returns isPlatformAdmin: true (119+ downstream consumers unchanged)
+- [x] **ACCESS-02**: identity-service creates and deletes platform_admin via POST/DELETE /v2/user-roles with nullable entity fields
+- [x] **ACCESS-03**: All 13 frontend files checking isPlatformAdmin continue working without modification
 
 ### Audit & Cleanup
 
-- [ ] **AUDIT-01**: Platform admin grant/revoke publishes user_role.created/deleted events via RabbitMQ
+- [x] **AUDIT-01**: Platform admin grant/revoke publishes user_role.created/deleted events via RabbitMQ
 - [ ] **AUDIT-02**: Synthetic platform organization (type='platform') and related memberships are deleted after migration
 
 ## Future Requirements
@@ -40,10 +40,10 @@
 | SCHEMA-01 | Phase 4 | Complete |
 | SCHEMA-02 | Phase 4 | Complete |
 | SCHEMA-03 | Phase 4 | Complete |
-| ACCESS-01 | Phase 5 | Pending |
-| ACCESS-02 | Phase 5 | Pending |
-| ACCESS-03 | Phase 5 | Pending |
-| AUDIT-01 | Phase 5 | Pending |
+| ACCESS-01 | Phase 5 | Complete |
+| ACCESS-02 | Phase 5 | Complete |
+| ACCESS-03 | Phase 5 | Complete |
+| AUDIT-01 | Phase 5 | Complete |
 | AUDIT-02 | Phase 6 | Pending |
 
 ---
