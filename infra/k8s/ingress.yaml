@@ -72,20 +72,6 @@ spec:
         - host: api.applicant.network
           http:
               paths:
-                  - path: /ws/chat
-                    pathType: Prefix
-                    backend:
-                        service:
-                            name: chat-gateway
-                            port:
-                                number: 80
-                  - path: /ws/analytics
-                    pathType: Prefix
-                    backend:
-                        service:
-                            name: analytics-gateway
-                            port:
-                                number: 80
                   - path: /
                     pathType: Prefix
                     backend:
