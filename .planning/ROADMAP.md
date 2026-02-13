@@ -45,10 +45,10 @@ Add commute type (multi-select) and job level (single-select) fields to the jobs
   2. Both columns default to NULL and existing jobs are unaffected by the migration
   3. TypeScript union types for commute type values and job level values exist in shared-types
   4. Job model, CreateJobDTO, and JobDTO include the new fields as optional properties
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 08-01: Database migration and TypeScript types
+- [ ] 08-01-PLAN.md -- Database migration adding commute_types/job_level columns + TypeScript union types and DTO updates
 
 ### Phase 9: API
 **Goal**: The ATS service accepts, persists, returns, and filters by commute types and job levels
