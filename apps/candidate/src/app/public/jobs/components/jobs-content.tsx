@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode, type ViewMode } from "@/hooks/use-view-mode";
-import { LoadingState } from "@/components/standard-lists/loading-state";
 import type { PaginationResponse } from "@splits-network/shared-types";
 import type { Job } from "../types";
 import { FilterProvider, useFilter } from "../contexts/filter-context";
@@ -35,9 +34,7 @@ export default function JobsContent({
 }
 
 function JobsPageContent() {
-    const { viewMode, setViewMode, isLoaded } = useViewMode(
-        "publicJobsViewMode",
-    );
+    const { viewMode, setViewMode } = useViewMode("publicJobsViewMode");
     const router = useRouter();
     const pathname = usePathname();
 
@@ -61,10 +58,6 @@ function JobsPageContent() {
         },
         [router, pathname, setViewMode],
     );
-
-    if (!isLoaded) {
-        return <LoadingState message="Loading jobs..." />;
-    }
 
     return (
         <>

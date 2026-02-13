@@ -28,6 +28,7 @@ export interface RedisConfig {
     host: string;
     port: number;
     password?: string;
+    db?: number;
 }
 
 export interface RabbitMQConfig {
@@ -104,6 +105,25 @@ export function loadDatabaseConfig(): DatabaseConfig {
  * Load Redis configuration
  */
 export function loadRedisConfig(): RedisConfig {
+    if (process.env.REDIS_URL) {
+        try {
+            const parsed = new URL(process.env.REDIS_URL);
+            const dbValue = parsed.pathname?.slice(1);
+            const db = dbValue ? parseInt(dbValue, 10) : undefined;
+
+            return {
+                host: parsed.hostname,
+                port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+                password: parsed.password
+                    ? decodeURIComponent(parsed.password)
+                    : process.env.REDIS_PASSWORD,
+                db: Number.isFinite(db) ? db : undefined,
+            };
+        } catch {
+            // Fall back to host/port if REDIS_URL is malformed.
+        }
+    }
+
     return {
         host: getEnvOrDefault('REDIS_HOST', 'localhost'),
         port: parseInt(getEnvOrDefault('REDIS_PORT', '6379'), 10),
