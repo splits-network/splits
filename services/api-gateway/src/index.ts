@@ -76,6 +76,21 @@ async function main() {
         }
     );
 
+    // Parse application/x-www-form-urlencoded bodies (used by OAuth2 token exchange)
+    app.addContentTypeParser(
+        'application/x-www-form-urlencoded',
+        { parseAs: 'string' },
+        (req, body, done) => {
+            try {
+                const parsed = Object.fromEntries(new URLSearchParams(body as string));
+                done(null, parsed);
+            } catch (err: any) {
+                err.statusCode = 400;
+                done(err, undefined);
+            }
+        }
+    );
+
     // Allow multipart/form-data requests to pass through without parsing
     // This is needed for proxying file uploads to downstream services (document-service)
     // The downstream services have their own multipart parsing configured
