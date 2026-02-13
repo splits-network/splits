@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 8 of 10 (Schema & Types)
+Phase: 9 of 10 (API)
 Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-02-13 — Completed 08-01-PLAN.md
+Last activity: 2026-02-13 — Completed 09-01-PLAN.md
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -29,14 +29,14 @@ Progress: [█░░░░░░░░░] 10%
 - Total execution time: ~19 minutes
 
 **Velocity (v4.0):**
-- Total plans completed: 1
-- Average duration: 1.4 min
-- Total execution time: ~1.4 minutes
+- Total plans completed: 2
+- Average duration: 2.0 min
+- Total execution time: ~3.9 minutes
 
 **Cumulative:**
-- Total plans completed: 14
-- Average duration: 3.7 min
-- Total execution time: ~51 minutes
+- Total plans completed: 15
+- Average duration: 3.6 min
+- Total execution time: ~54 minutes
 
 ## Accumulated Context
 
@@ -48,6 +48,9 @@ Progress: [█░░░░░░░░░] 10%
 - Keep open_to_relocation as-is (orthogonal to commute type)
 - Inline literal types in dtos.ts (no model imports in that file)
 - commute_types placed after open_to_relocation in Job interface (semantic grouping)
+- Used Supabase .overlaps() (Postgres &&) for commute_type any-match filtering
+- Self-contained VALID_COMMUTE_TYPES/VALID_JOB_LEVELS const arrays in service.ts (no shared-types coupling)
+- commute_type filter supports both top-level query param and nested filters object
 
 ### Pending Todos
 
@@ -67,10 +70,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 08-01-PLAN.md (Schema & Types)
+Stopped at: Completed 09-01-PLAN.md (API)
 Resume file: None
-Next: /gsd:plan-phase 9
+Next: /gsd:plan-phase 10
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 8 complete)*
+*Last updated: 2026-02-13 (Phase 9 complete)*
