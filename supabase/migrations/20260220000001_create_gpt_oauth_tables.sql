@@ -31,10 +31,10 @@ CREATE INDEX idx_gpt_refresh_tokens_hash
 CREATE INDEX idx_gpt_refresh_tokens_clerk_user_id
     ON public.gpt_refresh_tokens (clerk_user_id);
 
--- Fast lookup for valid active tokens only
+-- Fast lookup for non-revoked tokens (expiry checked at query time)
 CREATE INDEX idx_gpt_refresh_tokens_active
     ON public.gpt_refresh_tokens (token_hash)
-    WHERE revoked_at IS NULL AND expires_at > now();
+    WHERE revoked_at IS NULL;
 
 -- ============================================================================
 -- Table 2: gpt_authorization_codes
@@ -60,10 +60,10 @@ CREATE INDEX idx_gpt_auth_codes_code
 CREATE INDEX idx_gpt_auth_codes_clerk_user_id
     ON public.gpt_authorization_codes (clerk_user_id);
 
--- Fast lookup for valid unused codes only
+-- Fast lookup for unused codes (expiry checked at query time)
 CREATE INDEX idx_gpt_auth_codes_active
     ON public.gpt_authorization_codes (code)
-    WHERE used_at IS NULL AND expires_at > now();
+    WHERE used_at IS NULL;
 
 -- ============================================================================
 -- Table 3: gpt_sessions
