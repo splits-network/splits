@@ -91,7 +91,9 @@ export function ConsentClient() {
             );
 
             if (!response.ok) {
-                throw new Error("Failed to check consent");
+                // API unavailable or error — fall through to show consent UI
+                setLoading(false);
+                return;
             }
 
             const result = await response.json();
@@ -255,9 +257,7 @@ export function ConsentClient() {
                 <div className="card-body">
                     {/* Logo / Branding */}
                     <div className="text-center mb-4">
-                        <div className="text-2xl font-bold text-primary">
-                            Applicant.Network
-                        </div>
+                        <img src="/logo.png" alt="Applicant Network" className="h-10 mx-auto" />
                     </div>
 
                     {/* Title */}

@@ -517,17 +517,17 @@ export class OAuthService {
 
         // Collect all unique scopes ever granted across all sessions
         const allGrantedScopes = new Set<string>();
-        data.forEach(session => {
-            const grantedScopes = session.granted_scopes || [];
-            grantedScopes.forEach(scope => allGrantedScopes.add(scope));
+        data.forEach((session: { granted_scopes: string[] | null }) => {
+            const grantedScopes: string[] = session.granted_scopes || [];
+            grantedScopes.forEach((s: string) => allGrantedScopes.add(s));
         });
 
         const existingScopes = Array.from(allGrantedScopes);
 
         // Check if any session has granted_scopes that is a superset of requestedScopes
-        const hasConsent = data.some(session => {
-            const grantedScopes = session.granted_scopes || [];
-            return requestedScopes.every(scope => grantedScopes.includes(scope));
+        const hasConsent = data.some((session: { granted_scopes: string[] | null }) => {
+            const grantedScopes: string[] = session.granted_scopes || [];
+            return requestedScopes.every((s: string) => grantedScopes.includes(s));
         });
 
         return {

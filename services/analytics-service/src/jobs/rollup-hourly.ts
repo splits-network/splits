@@ -26,6 +26,7 @@ export async function rollupHourlyMetrics(supabase: SupabaseClient): Promise<voi
     try {
         // Find the last processed hour
         const { data: lastMetric } = await supabase
+            .schema('analytics')
             .from('metrics_hourly')
             .select('time_value')
             .order('time_value', { ascending: false })
@@ -44,6 +45,7 @@ export async function rollupHourlyMetrics(supabase: SupabaseClient): Promise<voi
 
         // Query events since last processed time
         const { data: events, error } = await supabase
+            .schema('analytics')
             .from('events')
             .select('*')
             .gte('created_at', lastProcessedTime.toISOString())
@@ -68,6 +70,7 @@ export async function rollupHourlyMetrics(supabase: SupabaseClient): Promise<voi
         let insertedCount = 0;
         for (const metrics of metricsByHour) {
             const { error: insertError } = await supabase
+                .schema('analytics')
                 .from('metrics_hourly')
                 .upsert(metrics, {
                     onConflict: 'metric_type,time_value,dimension_user_id,dimension_company_id,dimension_recruiter_id',

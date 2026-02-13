@@ -101,37 +101,31 @@ export function registerOAuthRoutes(app: FastifyInstance, config: RegisterOAuthC
             try {
                 // Validate response_type
                 if (response_type !== 'code') {
-                    const errorUrl = new URL(redirect_uri);
-                    errorUrl.searchParams.set('error', 'unsupported_response_type');
-                    errorUrl.searchParams.set('error_description', 'Only "code" response type is supported');
-                    if (state) errorUrl.searchParams.set('state', state);
-                    return reply.status(302).redirect(errorUrl.toString());
+                    return reply.status(400).send({
+                        error: 'unsupported_response_type',
+                        error_description: 'Only "code" response type is supported',
+                    });
                 }
 
-                // Validate client_id (handled by OAuthService, but we can do early check)
-                // The service will validate against gptConfig.clientId
-
                 // Parse scopes
-                const scopes = scope.split(' ').filter(s => s.length > 0);
+                const scopes = scope.split(' ').filter((s: string) => s.length > 0);
 
                 // Validate scopes
-                const invalidScopes = scopes.filter(s => !GPT_SCOPES.includes(s as any));
+                const invalidScopes = scopes.filter((s: string) => !GPT_SCOPES.includes(s as any));
                 if (invalidScopes.length > 0) {
-                    const errorUrl = new URL(redirect_uri);
-                    errorUrl.searchParams.set('error', 'invalid_scope');
-                    errorUrl.searchParams.set('error_description', `Invalid scopes: ${invalidScopes.join(', ')}`);
-                    if (state) errorUrl.searchParams.set('state', state);
-                    return reply.status(302).redirect(errorUrl.toString());
+                    return reply.status(400).send({
+                        error: 'invalid_scope',
+                        error_description: `Invalid scopes: ${invalidScopes.join(', ')}`,
+                    });
                 }
 
                 // Read clerk_user_id from header (set by consent page after Clerk auth)
                 const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
                 if (!clerkUserId) {
-                    const errorUrl = new URL(redirect_uri);
-                    errorUrl.searchParams.set('error', 'access_denied');
-                    errorUrl.searchParams.set('error_description', 'User not authenticated');
-                    if (state) errorUrl.searchParams.set('state', state);
-                    return reply.status(302).redirect(errorUrl.toString());
+                    return reply.status(401).send({
+                        error: 'access_denied',
+                        error_description: 'User not authenticated',
+                    });
                 }
 
                 // Generate authorization code
@@ -144,29 +138,23 @@ export function registerOAuthRoutes(app: FastifyInstance, config: RegisterOAuthC
                     codeChallengeMethod: code_challenge_method,
                 });
 
-                // Redirect back to ChatGPT with code
-                const successUrl = new URL(redirect_uri);
-                successUrl.searchParams.set('code', result.code);
-                if (state) successUrl.searchParams.set('state', state);
-
-                return reply.status(302).redirect(successUrl.toString());
+                // Return authorization code as JSON (consent page handles redirect)
+                return reply.status(200).send({
+                    data: { code: result.code },
+                });
             } catch (error) {
-                // OAuth error - redirect with error params
                 if (error instanceof OAuthError) {
-                    const errorUrl = new URL(redirect_uri);
-                    errorUrl.searchParams.set('error', error.code);
-                    errorUrl.searchParams.set('error_description', error.message);
-                    if (state) errorUrl.searchParams.set('state', state);
-                    return reply.status(302).redirect(errorUrl.toString());
+                    return reply.status(400).send({
+                        error: error.code,
+                        error_description: error.message,
+                    });
                 }
 
-                // Unexpected error - redirect with generic error
                 request.log.error({ err: error }, 'Unexpected error in authorize endpoint');
-                const errorUrl = new URL(redirect_uri);
-                errorUrl.searchParams.set('error', 'server_error');
-                errorUrl.searchParams.set('error_description', 'Internal server error');
-                if (state) errorUrl.searchParams.set('state', state);
-                return reply.status(302).redirect(errorUrl.toString());
+                return reply.status(500).send({
+                    error: 'server_error',
+                    error_description: 'Internal server error',
+                });
             }
         }
     );
