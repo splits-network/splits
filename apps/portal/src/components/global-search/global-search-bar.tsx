@@ -149,13 +149,13 @@ export function GlobalSearchBar() {
           </button>
         ) : (
           <div className="flex items-center gap-2 w-full">
-            <div className="relative flex-1">
-              <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50"></i>
+            <label className="input input-sm flex-1">
+              <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50"></i>
               <input
                 ref={inputRef}
-                type="text"
+                type="search"
+                className="grow"
                 placeholder="Search..."
-                className="input input-sm w-full pl-9 pr-8"
                 value={query}
                 onChange={handleInputChange}
                 onFocus={handleInputFocus}
@@ -164,14 +164,14 @@ export function GlobalSearchBar() {
               {query && (
                 <button
                   type="button"
-                  className="btn btn-ghost btn-xs btn-circle absolute right-1 top-1/2 -translate-y-1/2"
+                  className="btn btn-ghost btn-xs btn-circle"
                   onClick={handleClearClick}
                   aria-label="Clear search"
                 >
-                  <i className="fa-duotone fa-regular fa-times text-sm"></i>
+                  <i className="fa-duotone fa-regular fa-xmark text-sm"></i>
                 </button>
               )}
-            </div>
+            </label>
             <button
               type="button"
               className="btn btn-ghost btn-sm btn-circle"
@@ -182,41 +182,46 @@ export function GlobalSearchBar() {
               }}
               aria-label="Close search"
             >
-              <i className="fa-duotone fa-regular fa-times"></i>
+              <i className="fa-duotone fa-regular fa-xmark"></i>
             </button>
           </div>
         )}
       </div>
 
       {/* Desktop: full search input */}
-      <div className="hidden lg:block relative">
-        <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50"></i>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search... (Cmd+K)"
-          className="input input-sm w-full pl-9 pr-8"
-          value={query}
-          onChange={handleInputChange}
-          onFocus={handleInputFocus}
-          onKeyDown={handleKeyDown}
-        />
-        {query && (
-          <button
-            type="button"
-            className="btn btn-ghost btn-xs btn-circle absolute right-1 top-1/2 -translate-y-1/2"
-            onClick={handleClearClick}
-            aria-label="Clear search"
-          >
-            <i className="fa-duotone fa-regular fa-times text-sm"></i>
-          </button>
-        )}
+      <div className="hidden lg:block">
+        <label className="input input-sm w-full">
+          <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50"></i>
+          <input
+            ref={inputRef}
+            type="search"
+            className="grow"
+            placeholder="Search... (Cmd+K)"
+            value={query}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            onKeyDown={handleKeyDown}
+          />
+          {query && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs btn-circle"
+              onClick={handleClearClick}
+              aria-label="Clear search"
+            >
+              <i className="fa-duotone fa-regular fa-xmark text-sm"></i>
+            </button>
+          )}
+          {!query && (
+            <kbd className="kbd kbd-sm">Ctrl+K</kbd>
+          )}
+        </label>
       </div>
 
       {/* Dropdown */}
       {showDropdown && (
         <div
-          className="absolute top-full left-0 right-0 lg:left-auto lg:right-auto lg:w-96 mt-2 bg-base-100 shadow-lg border border-base-300 rounded-box z-50 max-h-96 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-base-100 shadow-lg border border-base-300 rounded-box z-50 max-h-96 overflow-y-auto"
           onMouseDown={(e) => e.preventDefault()} // Prevent blur when clicking dropdown
         >
           {/* Loading state */}

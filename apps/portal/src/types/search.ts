@@ -31,61 +31,62 @@ export interface TypeaheadResponse {
 export interface EntityTypeConfig {
   label: string;
   icon: string;
-  routePrefix: string;
+  route: string;
+  queryParam: string;
 }
 
 export const ENTITY_TYPE_CONFIG: Record<SearchableEntityType, EntityTypeConfig> = {
   candidate: {
     label: 'Candidates',
     icon: 'fa-user',
-    routePrefix: '/portal/candidates',
+    route: '/portal/candidates',
+    queryParam: 'candidateId',
   },
   job: {
     label: 'Jobs',
     icon: 'fa-briefcase',
-    routePrefix: '/portal/roles', // Jobs displayed at /portal/roles/:id
+    route: '/portal/roles',
+    queryParam: 'roleId',
   },
   company: {
     label: 'Companies',
     icon: 'fa-building',
-    routePrefix: '/portal/companies',
+    route: '/portal/companies',
+    queryParam: 'companyId',
   },
   recruiter: {
     label: 'Recruiters',
     icon: 'fa-id-badge',
-    routePrefix: '/portal/marketplace/recruiters',
+    route: '/portal/marketplace/recruiters',
+    queryParam: 'recruiterId',
   },
   application: {
     label: 'Applications',
     icon: 'fa-file-lines',
-    routePrefix: '/portal/applications',
+    route: '/portal/applications',
+    queryParam: 'applicationId',
   },
   placement: {
     label: 'Placements',
     icon: 'fa-handshake',
-    routePrefix: '/portal/placements',
+    route: '/portal/placements',
+    queryParam: 'placementId',
   },
   recruiter_candidate: {
     label: 'Recruiter Candidates',
     icon: 'fa-people-arrows',
-    routePrefix: '/portal/candidates', // Maps to candidate detail view
+    route: '/portal/candidates',
+    queryParam: 'candidateId',
   },
 };
 
 /**
- * Get entity URL for navigation
+ * Get entity URL for navigation using deep link query parameters
  * @param entityType Entity type from search result
- * @param entityId Entity ID (ignored for recruiter list view)
- * @returns Full portal URL for the entity
+ * @param entityId Entity ID
+ * @returns Full portal URL with query parameter (e.g. /portal/candidates?candidateId=abc123)
  */
 export function getEntityUrl(entityType: SearchableEntityType, entityId: string): string {
   const config = ENTITY_TYPE_CONFIG[entityType];
-
-  // Recruiter list has no detail view - return list URL only
-  if (entityType === 'recruiter') {
-    return config.routePrefix;
-  }
-
-  // All other entity types have detail views
-  return `${config.routePrefix}/${entityId}`;
+  return `${config.route}?${config.queryParam}=${entityId}`;
 }

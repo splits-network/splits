@@ -144,24 +144,39 @@ export class SearchRepository {
     }
 
     /**
-     * Apply role-based access control filters to a query
+     * Apply role-based access control filters to a query.
+     *
+     * Access model:
+     * - Platform admin: see everything
+     * - Marketplace entities (candidate, job, company, recruiter): visible to all users
+     * - Company-scoped entities (application, placement): filtered by company_id or organization_id
+     * - Org-wide users (membership without company_id): see all entities in their orgs
+     * - Company-scoped users (membership with company_id): see only their company's entities
      */
     private applyAccessControl(
         queryBuilder: any,
         context: AccessContext
     ): any {
-        // Platform admin: no filter (see all)
         if (context.isPlatformAdmin) {
             return queryBuilder;
         }
 
-        // Has organizationIds (company users): see org-scoped entities + null-org entities + all jobs/companies
-        if (context.organizationIds.length > 0) {
-            const orgIds = context.organizationIds.join(',');
-            return queryBuilder.or(`organization_id.in.(${orgIds}),organization_id.is.null,entity_type.in.(job,company)`);
+        // Build OR filter clauses
+        const filters: string[] = [
+            // Everyone sees marketplace entities (candidates, jobs, companies, recruiters)
+            'entity_type.in.(candidate,job,company,recruiter)',
+        ];
+
+        // Org-wide access: see all entities in those orgs (applications, placements, etc.)
+        if (context.orgWideOrganizationIds && context.orgWideOrganizationIds.length > 0) {
+            filters.push(`organization_id.in.(${context.orgWideOrganizationIds.join(',')})`);
         }
 
-        // No organizationIds (recruiter/candidate): see null-org entities + all jobs/companies
-        return queryBuilder.or(`organization_id.is.null,entity_type.in.(job,company)`);
+        // Company-scoped access: see entities for specific companies
+        if (context.companyIds.length > 0) {
+            filters.push(`company_id.in.(${context.companyIds.join(',')})`);
+        }
+
+        return queryBuilder.or(filters.join(','));
     }
 }
