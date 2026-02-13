@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 10 of 10 (Frontend & Search)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-13 — Completed 10-01-PLAN.md
+Last activity: 2026-02-13 — Completed 10-02-PLAN.md
 
-Progress: [███░░░░░░░] 21%
+Progress: [███░░░░░░░] 22%
 
 ## Performance Metrics
 
@@ -29,14 +29,14 @@ Progress: [███░░░░░░░] 21%
 - Total execution time: ~19 minutes
 
 **Velocity (v4.0):**
-- Total plans completed: 4
-- Average duration: 2.2 min
-- Total execution time: ~8.9 minutes
+- Total plans completed: 5
+- Average duration: 2.6 min
+- Total execution time: ~13.3 minutes
 
 **Cumulative:**
-- Total plans completed: 17
-- Average duration: 3.4 min
-- Total execution time: ~59 minutes
+- Total plans completed: 18
+- Average duration: 3.5 min
+- Total execution time: ~63 minutes
 
 ## Accumulated Context
 
@@ -55,6 +55,8 @@ Progress: [███░░░░░░░] 21%
 - Search context includes array values via array_to_string() for full-text matching
 - Job wizard uses checkbox group (flex-wrap) for commute types, dropdown for job level
 - Conditional payload inclusion: only send commute_types/job_level if set (preserves null on edit)
+- Job detail views use label maps for human-readable display (COMMUTE_TYPE_LABELS, JOB_LEVEL_LABELS)
+- Single-select dropdowns for commute_type and job_level filters (matches API any-match semantics)
 
 ### Pending Todos
 
@@ -75,10 +77,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 10-01-PLAN.md (Job Wizard UI)
+Stopped at: Completed 10-02-PLAN.md (Job Detail Display & Filters)
 Resume file: None
-Next: Continue Phase 10 with remaining plans (02-05)
+Next: Continue Phase 10 with remaining plans (03-05)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 10 in progress - Plan 01 complete)*
+*Last updated: 2026-02-13 (Phase 10 in progress - Plan 02 complete)*
