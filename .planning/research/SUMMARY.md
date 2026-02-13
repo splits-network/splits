@@ -1,309 +1,217 @@
-# Research Summary: Global Search Features
+# Project Research Summary
 
-**Domain:** Global/Universal Search in Recruiting Marketplace SaaS
-**Researched:** 2026-02-12
-**Overall confidence:** MEDIUM (Features) / HIGH (Stack & Architecture)
+**Project:** Splits Network v3.0 Platform Admin Restructure
+**Domain:** Database schema refactoring - Role-based access control (RBAC)
+**Researched:** 2026-02-13
+**Confidence:** HIGH
 
 ## Executive Summary
 
-Global search in a recruiting marketplace must query across 6-7 entity types (candidates, jobs, companies, recruiters, applications, placements) with role-based access control, delivering both real-time typeahead results (<200ms) and full paginated search results. The feature landscape divides into **table stakes** (typeahead dropdown, multi-entity results, keyboard navigation, ranked results) and **differentiators** (natural language parsing, fuzzy matching, relationship context boosting). The existing codebase already has the necessary infrastructure: PostgreSQL full-text search with tsvector columns and GIN indexes on 7 tables, V2 API pattern with resolveAccessContext, and SearchInput component with debouncing.
+Platform admin is currently stored in the `memberships` table with a synthetic "platform" organization that has no business meaning. This restructure moves `platform_admin` to the `user_roles` table with nullable entity fields, accurately modeling it as a system-level role rather than an org-scoped role. The migration is straightforward: make `role_entity_id` and `role_entity_type` nullable, migrate platform_admin rows atomically, remove the synthetic platform organization, and update the existing `resolveAccessContext()` function to read from the correct table.
 
-The critical architectural decision is to extend the existing ATS service (not create a new search service) and use parallel Postgres queries with in-memory merging (not UNION ALL) to leverage existing GIN indexes and simplify role-based filtering. The main pitfalls to avoid are: (1) access control leakage (filtering after query vs during query), (2) using LIKE instead of full-text search, (3) no debouncing on typeahead, (4) incomparable ts_rank scores across entity types, and (5) missing prerequisites (recruiters table still uses ILIKE, jobs search_vector excludes salary).
+This is a low-risk, high-value cleanup using the project's existing stack (Postgres, Fastify, Vitest) and established migration patterns. The migration requires atomic transaction safety with count validation to prevent losing admin access, careful deployment sequencing (schema → code → data), and coordination with 119+ downstream consumers of `resolveAccessContext()`. No new technologies needed—all tooling already exists.
 
-**Strategic recommendation:** Build v1 with table stakes features only. Defer differentiators (natural language parsing, fuzzy matching, synonym expansion) to v2 after gathering usage data. Focus on correctness (access control, input sanitization) and performance (debouncing, parallel queries, per-entity LIMIT) over advanced features.
+The primary risk is losing all platform admin access during migration if transaction boundaries aren't properly enforced. Mitigation: single BEGIN/COMMIT block with validation before deletion, dual-read deployment strategy, and documented rollback procedure. With proper validation gates and rollback readiness, this is a one-day migration with zero production downtime.
 
 ## Key Findings
 
-**Stack:** PostgreSQL Full-Text Search (existing infrastructure, no new services needed)
-- Existing: search_vector tsvector columns on 7 tables, GIN indexes, ts_rank scoring
-- Add: API Gateway route, ATS SearchRepository, frontend GlobalSearchInput component
-- No new infrastructure: No Elasticsearch, no Algolia, no separate search service
+### Recommended Stack
 
-**Architecture:** Extend ATS service with parallel queries + in-memory merge
-- Pattern: Execute 6-7 separate SELECT queries via Promise.all(), merge in application code
-- Access control: Apply resolveAccessContext filters in SQL WHERE clauses (not post-query)
-- Caching: Redis for access context (1 min TTL) and typeahead results (30s TTL, optional)
-- Integration: Reuse existing V2 API pattern, shared-access-context, shared-ui components
+**No stack changes required.** This is a database restructure within the existing Postgres/Fastify/Vitest ecosystem. All necessary tooling already exists in the project.
 
-**Features:** Typeahead dropdown + full search page are table stakes
-- Must have: Real-time typeahead (<200ms), multi-entity results, ranked by ts_rank, keyboard navigation
-- Should have: Highlighted matches, context snippets (ts_headline), entity type grouping
-- Defer: Natural language parsing, fuzzy/typo tolerance, synonym expansion, saved searches
+**Core technologies:**
+- **Supabase Postgres**: Single database, already supports nullable columns and transactional migrations — no version changes needed
+- **Fastify**: Backend services (identity-service handles user-roles APIs) — existing V2 pattern applies
+- **Vitest**: Unit testing with mocked repositories — existing test patterns sufficient
+- **@supabase/supabase-js**: Database client already used by all services — no changes
 
-**Critical pitfall:** Access control applied after query instead of during query
-- Leaks information (result counts reveal private entities)
-- Performance collapse (fetch 10K rows, filter to 50)
-- Must pass role parameters to Postgres function, apply WHERE clauses in SQL
+**Migration approach:**
+- Single SQL migration file with transaction safety (existing pattern from 20260212000001_split_user_roles_into_memberships.sql)
+- Multi-step: schema change (DROP NOT NULL) → data migration (INSERT/DELETE) → validation (count check) → cleanup (remove platform org)
+- Rollback script prepared before production deploy (reverse all steps)
+
+### Expected Features
+
+**Must have (table stakes):**
+- **TS-1: Schema Migration Safety** — Zero-downtime migration with idempotency and reversibility
+- **TS-2: Access Context Resolution** — `resolveAccessContext()` finds platform_admin in user_roles with single query
+- **TS-3: Platform Admin Assignment API** — identity-service can create/delete platform_admin via POST /v2/user-roles
+- **TS-4: Frontend Authorization Guards** — 13 frontend files checking `isPlatformAdmin` continue working
+- **TS-5: Unique Constraint Validation** — Prevent duplicate platform_admin per user (partial unique index)
+- **TS-6: Soft Delete Consistency** — Revoking admin immediately blocks access (deleted_at filtering)
+
+**Should have (competitive):**
+- **DIFF-2: Role-Entity Type Validation** — Database check constraint preventing invalid combinations (platform_admin with entity_id)
+- **DIFF-3: Migration Rollback Plan** — Documented procedure for emergency reversal with tested SQL
+- **TS-7: Event Audit Trail** — user_role.created/deleted events for platform_admin changes (RabbitMQ)
+- **TS-8: Remove Platform Organization** — Delete synthetic org row after migration (cleanup)
+
+**Defer (v2+):**
+- **DIFF-4: Service-Level Abstraction** — Shared helper `assignSystemRole()` for centralized validation
+- **DIFF-5: Admin Activity Dashboard** — Frontend view showing grant/revoke audit trail with granted_by tracking
+
+### Architecture Approach
+
+The restructure affects three layers: database schema (user_roles table), backend services (identity-service and shared-access-context), and frontend authorization checks (admin layout guards). The migration follows the project's established V2 service pattern with repository-based data access, event-driven audit trail, and role-based access filtering. No new components needed—extend existing identity-service with updated user-roles repository logic.
+
+**Major components:**
+1. **Database Migration** — Single SQL file: ALTER TABLE (nullable columns) → INSERT (migrate rows) → DELETE (cleanup memberships) → validation block
+2. **shared-access-context Package** — Update `resolveAccessContext()` to query user_roles for platform_admin instead of memberships (119+ downstream consumers depend on this)
+3. **identity-service UserRoleServiceV2** — Handle platform_admin creation/deletion with nullable entity_id fields (POST/DELETE /v2/user-roles)
+4. **Frontend Authorization Guards** — No changes needed if backend returns correct `is_platform_admin` in user profile
+
+**Integration pattern:**
+- Migration runs first (backward compatible—doesn't break existing code)
+- Deploy updated shared-access-context (can read from either table during transition)
+- Deploy identity-service with updated user-roles logic
+- Frontend requires no changes (authorization data structure unchanged)
+
+### Critical Pitfalls
+
+1. **Losing All Platform Admin Access** — Migration fails after deleting from memberships but before inserting into user_roles → complete admin lockout. **Prevention:** Atomic transaction with validation before deletion, verify count match, hard fail if mismatch, keep at least one admin.
+
+2. **Foreign Key Constraint Violations** — Deleting platform organization fails because FK constraints prevent deletion when memberships/companies/invitations reference it. **Prevention:** Check FK references first, delete memberships before org, use conditional DELETE with NOT IN subquery.
+
+3. **Race Condition During Deployment** — Migration completes but some service instances read old schema (memberships) while data already moved → intermittent 403 errors. **Prevention:** Dual-read deployment (union of both tables), then data migration, then remove dual-read.
+
+4. **NOT NULL Constraint Blocks INSERT** — Migration attempts INSERT with role_entity_id=NULL but column has NOT NULL constraint → immediate failure. **Prevention:** ALTER TABLE to DROP NOT NULL before data migration in same transaction.
+
+5. **Unique Constraint Handling** — Postgres treats NULL as distinct in unique indexes, allowing duplicate platform_admin rows. **Prevention:** Add partial unique index `(user_id, role_name) WHERE role_name='platform_admin'`.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on research, this restructure decomposes into 4 sequential phases with clear dependencies:
 
-### Phase 0: Prerequisites (CRITICAL - must complete first)
-**Rationale:** Global search requires all entities to have tsvector columns. Two tables incomplete.
+### Phase 1: Schema & Repository Updates
+**Rationale:** Database schema changes must happen before data migration. Repository code can deploy alongside schema (backward compatible).
 
-**Addresses:**
-- Recruiters table migration to search_vector (currently uses ILIKE)
-- Jobs table enhancement (add salary to search_vector for "120k" searches)
+**Delivers:**
+- Migration file: make role_entity_id/role_entity_type nullable
+- Add partial unique index for platform_admin uniqueness
+- Update identity-service UserRoleRepositoryV2 to handle nullable fields
+- Unit tests for nullable entity_id scenarios
 
-**Avoids:**
-- Pitfall #4: Missing search_vector causing performance collapse (ILIKE = full table scan)
-- Pitfall #5: Salary not searchable (user searches "120000", gets zero results)
+**Addresses:** TS-5 (Unique Constraint), avoids Pitfall #4 (NOT NULL constraint), avoids Pitfall #5 (duplicate detection)
 
-**Phase ordering rationale:** Cannot build global search until all entity tables have FTS infrastructure. Attempting to proceed without prerequisites creates performance bottleneck (ILIKE blocks entire UNION ALL query) and feature gaps (salary searches don't work).
-
----
-
-### Phase 1: Database Function (Core Foundation)
-**Rationale:** Establish normalized result schema, access control, and ranking strategy before building API.
-
-**Addresses:**
-- Normalized result schema across 7 entity types (id, result_title, result_subtitle, entity_type, relevance)
-- Role-based WHERE clauses in Postgres function (not application layer)
-- Ranking strategy (entity type grouping OR boost factors)
-- Per-entity LIMIT before UNION ALL (prevent full table scans)
-
-**Avoids:**
-- Pitfall #1: UNION ALL schema mismatch (column count/type errors)
-- Pitfall #2: ts_rank not comparable across entities (jobs always rank higher than candidates)
-- Pitfall #3: Access control after query (information leakage, performance collapse)
-- Pitfall #9: UNION ALL without LIMIT (scan 10K rows to return 20)
-
-**Deliverable:** `global_search(p_query, p_user_role, p_organization_ids, p_recruiter_id, p_limit)` function returning normalized results.
+**Research needed:** No—straightforward ALTER TABLE and repository method updates
 
 ---
 
-### Phase 2: API Endpoint (Backend Integration)
-**Rationale:** Bridge database function to frontend, add validation and sanitization.
+### Phase 2: Data Migration with Validation
+**Rationale:** After schema supports nullable columns, migrate data atomically with validation gates.
 
-**Addresses:**
-- Input sanitization (prevent query injection)
-- Entity type enum consistency (shared-types)
-- API response format ({ data: { results, total } })
-- Error handling (to_tsquery errors, database timeouts)
+**Delivers:**
+- Transactional migration: INSERT platform_admin → validate counts → DELETE from memberships
+- Validation block: verify user_id matching, not just counts
+- Idempotent INSERT with ON CONFLICT DO NOTHING
+- Verification queries for post-migration smoke test
 
-**Avoids:**
-- Pitfall #6: Query injection via unsanitized input
-- Pitfall #11: Inconsistent entity type values (database returns 'job', frontend expects 'jobs')
+**Addresses:** TS-1 (Migration Safety), TS-6 (Soft Delete), avoids Pitfall #1 (admin lockout), Pitfall #3 (race condition), Pitfall #9 (content validation)
 
-**Deliverable:** `GET /v2/search?q=query&mode=typeahead&limit=5` endpoint in api-gateway, proxied to ATS service.
+**Research needed:** No—follows existing migration patterns from 20260212000001
 
 ---
 
-### Phase 3: Frontend Typeahead (MVP User-Facing Feature)
-**Rationale:** Deliver minimum viable search experience (typeahead in header).
+### Phase 3: Access Context & Service Integration
+**Rationale:** After data migrated, update resolveAccessContext and identity-service APIs to read from user_roles.
 
-**Addresses:**
-- Debounced search input (300ms per project standard)
-- Keyboard navigation (arrow keys, Enter, Esc)
-- Loading states (spinner during search)
-- Match highlighting (bold matching terms)
-- Entity type icons (visual distinction)
+**Delivers:**
+- Update shared-access-context to query user_roles for platform_admin
+- Update identity-service POST/DELETE /v2/user-roles for platform_admin assignment
+- Event publishing: user_role.created/deleted for audit trail
+- API tests for platform_admin creation via identity-service
 
-**Avoids:**
-- Pitfall #7: No debouncing (36 API calls for typing "software engineer")
-- Pitfall #8: No min query length (searching "a" scans entire database)
-- Pitfall #13: Empty state flicker (show loading during debounce)
-- Pitfall #14: Keyboard navigation missing (accessibility failure)
-- Pitfall #15: No match highlighting (user doesn't see relevance)
+**Addresses:** TS-2 (Access Context), TS-3 (API Assignment), TS-7 (Event Audit), avoids Pitfall #3 (race condition)
 
-**Deliverable:** GlobalSearchInput component in PortalHeader, navigates to entity detail pages on selection.
-
-**MVP recommendation:** Stop here for v1. Typeahead in header is sufficient for initial launch.
+**Research needed:** No—extends existing V2 service pattern
 
 ---
 
-### Phase 4: Full Search Page (Optional for v1, Recommended for v1.1)
-**Rationale:** Support exploratory search when typeahead shows "50+ results".
+### Phase 4: Cleanup & Validation
+**Rationale:** After code deployed and validated, remove synthetic platform organization and verify all downstream consumers.
 
-**Addresses:**
-- Dedicated /search?q=query page
-- Pagination (25 results per page)
-- Entity type filtering (Jobs only, Candidates only)
-- Sort options (relevance, date)
+**Delivers:**
+- Delete platform organization after FK reference check
+- Frontend smoke test: admin user can access admin routes
+- Backend smoke test: resolveAccessContext returns isPlatformAdmin=true
+- Rollback documentation and tested rollback script
 
-**Avoids:**
-- Pitfall #12: Pagination consistency (offset-based acceptable for MVP)
+**Addresses:** TS-4 (Frontend Guards), TS-8 (Remove Platform Org), DIFF-3 (Rollback Plan), avoids Pitfall #2 (FK violations), Pitfall #11 (no rollback plan)
 
-**Deliverable:** /portal/search route with filters, pagination, full result list.
-
-**Defer if tight timeline:** Typeahead is table stakes, full search page is "nice to have" for v1.
+**Research needed:** No—validation and cleanup
 
 ---
 
-### Phase 5: Monitoring & Optimization (Post-Launch)
-**Rationale:** Detect performance issues, index bloat, access control violations in production.
+### Phase Ordering Rationale
 
-**Addresses:**
-- Index bloat monitoring (GIN index size > 2x data size)
-- Query latency alerts (p95 > 500ms)
-- Error rate alerts (>1% to_tsquery errors)
-- Cache hit rate monitoring (<80% indicates TTL too short)
+- **Schema before data:** Cannot INSERT NULL into NOT NULL column—must ALTER TABLE first
+- **Validation gates between phases:** Each phase verifies correctness before proceeding (prevents cascading failures)
+- **Dual-read deployment:** Code can read from both tables during transition (avoids race conditions)
+- **Cleanup last:** Removing platform org only after all services updated (prevents FK violations)
 
-**Avoids:**
-- Pitfall #10: GIN index bloat from frequent updates (applications, placements)
+**Deployment sequence:**
+1. Phase 1 (schema + repository) → backward compatible, doesn't break existing code
+2. Phase 2 (data migration) → can run against updated schema, validates before committing
+3. Phase 3 (access context + service) → activates new behavior, dual-read prevents 403s
+4. Phase 4 (cleanup + validation) → removes scaffolding, confirms system health
 
-**Deliverable:** Datadog/Grafana dashboards, alerts for performance degradation.
+### Research Flags
 
-**Defer to post-MVP:** Not required for launch, but critical for scaling beyond 1K users.
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1:** Standard ALTER TABLE and repository updates—well-documented Postgres DDL
+- **Phase 2:** Follows existing migration patterns (20260212000001)—no novel techniques
+- **Phase 3:** Extends existing V2 service pattern—no new architecture
+- **Phase 4:** Cleanup and validation—straightforward verification queries
 
----
-
-## Research Flags for Phases
-
-**Phase 0 (Prerequisites):** Standard migration, unlikely to need research
-- Recruiters search_vector follows existing pattern (candidates, jobs migrations)
-- Jobs salary formatting is implementation detail (include as TEXT in tsvector)
-
-**Phase 1 (Database Function):** May need research on ranking strategy
-- Choosing between entity type grouping vs boost factors vs normalization
-- Requires user testing to validate relevance quality
-- Flag for **deeper research**: ts_rank normalization across heterogeneous entities
-
-**Phase 2 (API Endpoint):** Standard patterns, unlikely to need research
-- Input sanitization is well-established (regex, length limits)
-- API response format follows existing V2 envelope pattern
-
-**Phase 3 (Frontend Typeahead):** Standard React patterns, unlikely to need research
-- Debouncing, keyboard navigation, loading states are established UX patterns
-- Existing SearchInput component provides starting point
-
-**Phase 4 (Full Search Page):** May need UX research on filters/sort options
-- What filters are most valuable? (Entity type, date range, status, location?)
-- What sort options? (Relevance only? Date? Alphabetical?)
-- Flag for **user research**: Survey recruiting platform users on preferred filters
-
-**Phase 5 (Monitoring):** Standard observability, unlikely to need research
-- Database metrics (index size, query latency) are well-understood
-- Alert thresholds may need tuning based on production traffic
-
----
+**All phases can proceed directly to planning.** No deeper research needed—all patterns established in codebase.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| **Stack** | HIGH | Existing codebase has all necessary infrastructure (FTS, GIN indexes, API Gateway, V2 pattern) |
-| **Features** | MEDIUM | Table stakes features based on established SaaS patterns (training data), not 2026-verified with WebSearch |
-| **Architecture** | HIGH | Parallel queries + in-memory merge is proven pattern, fits existing V2 architecture perfectly |
-| **Pitfalls** | HIGH | Grounded in project's actual codebase patterns (access control, FTS usage) + Postgres FTS domain knowledge |
+| Stack | HIGH | No new technologies—uses existing Postgres, Fastify, Vitest. Migration pattern proven in 15+ existing migrations. |
+| Features | HIGH | All features derived from codebase analysis. Table stakes identified via grep of isPlatformAdmin usage (119 occurrences). |
+| Architecture | HIGH | Direct inspection of shared-access-context and identity-service. Integration points documented in CLAUDE.md. |
+| Pitfalls | HIGH | Critical pitfalls grounded in existing migrations (20260212000001) and Postgres transaction semantics. FK constraints verified in baseline.sql. |
 
-**Confidence boosters:**
-- Codebase already has 7 tables with search_vector columns (verified via grep)
-- V2 repositories already use resolveAccessContext for role-based filtering (verified via code analysis)
-- ARCHITECTURE.md file already exists with comprehensive parallel query pattern
-- PITFALLS.md file already exists with project-specific anti-patterns
+**Overall confidence:** HIGH
 
-**Confidence gaps:**
-- Unable to verify 2026 current best practices (WebSearch denied)
-- No user research data on what features recruiters/hiring managers value most
-- No performance benchmarks from existing per-entity search (baseline latency unknown)
-- Assumption that <200ms typeahead latency is target (should validate with product team)
+### Gaps to Address
 
----
+- **Platform organization UUID:** Must query production to confirm platform org ID before migration (likely `SELECT id FROM organizations WHERE type='platform'`)
+- **Current admin count:** Verify how many platform admins exist in production (affects validation thresholds)
+- **FK references to platform org:** Check if companies.identity_organization_id or invitations.organization_id reference platform org (determines if org deletion is safe)
+- **Deployment coordination:** Confirm Kubernetes rolling restart timing to avoid stale service instances reading wrong table
 
-## Gaps to Address
-
-### Research gaps (couldn't resolve during this session):
-1. **Current 2026 best practices for global search UX** - WebSearch unavailable, relying on training data (Jan 2025)
-2. **Competitor analysis** - Unable to verify what Greenhouse, Lever, Ashby actually do in 2026
-3. **Latest Postgres FTS optimizations** - Training data current through Jan 2025, may be newer techniques
-4. **Browser support for keyboard shortcuts** - Assumed Cmd+K works in all modern browsers (should verify)
-
-### Project-specific validation needed:
-1. **Recruiters search_vector status** - Baseline.sql has `build_recruiters_search_vector()` function, but need to verify:
-   - Does trigger exist to auto-update search_vector?
-   - Does GIN index exist on recruiters.search_vector?
-   - Or is migration truly incomplete?
-
-2. **Jobs salary searchability** - Verify jobs.search_vector does NOT include salary fields currently
-   - Check `build_jobs_search_vector()` function source
-   - Confirm salary_min, salary_max are excluded from tsvector
-
-3. **Performance baseline** - Run EXPLAIN ANALYZE on existing per-entity searches to establish current latency
-   - Candidates search with 10K rows
-   - Jobs search with 5K rows
-   - Applications search with 50K rows
-   - Use as baseline for global search (should be similar if parallel queries work)
-
-4. **Target latency** - Confirm <200ms for typeahead, <500ms for full search with product/UX team
-   - Is this acceptable for business use case?
-   - What's the priority: fast results vs comprehensive results?
-
-5. **Entity type URL mapping** - Verify routing conventions:
-   - Jobs: `/portal/roles/` or `/portal/jobs/`?
-   - Recruiters: `/portal/recruiters/` or `/portal/users/recruiters/`?
-   - Affects EntityType → route mapping in shared-types
-
-### Topics needing phase-specific research later:
-1. **Ranking strategy validation (Phase 1)** - After implementing database function, need user testing:
-   - Do entity type boosts (candidates 1.2x, jobs 1.0x, companies 0.9x) produce sensible ordering?
-   - Or should we use entity type grouping (top 5 candidates, top 5 jobs)?
-   - Requires real user feedback on search result quality
-
-2. **Filters/sort options (Phase 4)** - If building full search page, research what filters users want:
-   - Survey recruiting platform users: "What filters would you use in global search?"
-   - Options: Entity type, date range, status (active/archived), location, salary range, remote/onsite
-   - Prioritize based on survey results
-
-3. **Caching strategy tuning (Phase 5)** - After launch, monitor cache hit rates:
-   - Is 1-minute TTL for access context too short? (invalidated too often)
-   - Is 30-second TTL for typeahead results too long? (stale results shown)
-   - Tune based on actual usage patterns
-
----
-
-## Recommended Next Steps
-
-1. **Validate prerequisites:**
-   - Check recruiters table: Does search_vector column exist? Is it populated? Is GIN index created?
-   - Check jobs search_vector: Does it include salary fields? (run `SELECT build_jobs_search_vector(id) FROM jobs LIMIT 1;` and inspect)
-
-2. **Establish performance baseline:**
-   - Run EXPLAIN ANALYZE on existing per-entity searches (candidates, jobs, companies)
-   - Record p50, p95, p99 latency for 10K row tables
-   - Set target: global search should be <2x slowest per-entity search
-
-3. **Define entity type enum:**
-   - Create `packages/shared-types/src/search/types.ts`
-   - Define EntityType enum with EXACT values database will return ('candidate', 'job', not 'candidates', 'jobs')
-   - Define ENTITY_TYPE_ROUTES mapping to URL paths
-   - Share with all phases (database function, API, frontend)
-
-4. **Design database function signature:**
-   - Decide ranking strategy: Entity type grouping? Boost factors? Normalization?
-   - Prototype with SQL query, test with sample data
-   - Validate with stakeholders: "Does this ordering make sense for recruiters/hiring managers?"
-
-5. **Create Phase 0 roadmap:**
-   - If recruiters migration incomplete: Create detailed migration plan (function, trigger, index, backfill)
-   - If jobs salary exclusion confirmed: Create migration to add salary to search_vector
-   - Estimate effort: 2-3 days for each migration
-   - Block Phase 1 until Phase 0 complete
-
----
+**Resolution during planning:**
+- Phase 1 planning: Query staging database for platform org details
+- Phase 2 planning: Document current admin count for validation
+- Phase 4 planning: Script FK reference check before org deletion
 
 ## Sources
 
-**HIGH confidence sources:**
-- **Project codebase:** `.planning/PROJECT.md`, `.planning/ARCHITECTURE.md`, `.planning/PITFALLS.md`
-- **Database schema:** `supabase/migrations/20240101000000_baseline.sql`, search-related migrations
-- **Service implementations:** `services/ats-service/src/v2/*/repository.ts`, existing search patterns
-- **Frontend components:** `apps/portal/src/components/standard-lists/search-input.tsx`
-- **PostgreSQL documentation:** ts_rank, ts_headline, GIN indexes, full-text search (training data current through Jan 2025)
+### Primary (HIGH confidence)
+- `packages/shared-access-context/src/index.ts` — resolveAccessContext implementation (lines 66-162, 119-122, 152)
+- `services/identity-service/src/v2/memberships/service.ts` — platform admin authorization checks
+- `services/identity-service/src/v2/user-roles/service.ts` — entity role management patterns
+- `supabase/migrations/20260211000003_create_user_roles_table.sql` — user_roles schema with NOT NULL constraints
+- `supabase/migrations/20260212000001_split_user_roles_into_memberships.sql` — reference migration showing validation patterns, transaction safety
+- `supabase/migrations/20240101000000_baseline.sql` — organizations table, FK constraints
+- `.planning/PROJECT.md` — milestone context and requirements
+- `CLAUDE.md` — V2 architecture rules, no HTTP between services, single database
 
-**MEDIUM confidence sources (training data, not 2026-verified):**
-- SaaS global search patterns (Slack, Notion, Linear, GitHub command palette)
-- Recruiting ATS patterns (Greenhouse, Lever, Ashby search features)
-- React UX patterns (debouncing, keyboard navigation, loading states)
+### Secondary (MEDIUM confidence)
+- PostgreSQL documentation (ALTER TABLE, NULL handling in unique indexes, transaction semantics)
+- Kubernetes rolling deployment patterns (service restart coordination)
+- Vitest mocking patterns (identity-service/tests/unit/invitations.service.test.ts as template)
 
-**Unable to verify (WebSearch denied):**
-- 2026 current best practices for global search UX
-- Latest Postgres FTS optimizations (post-Jan 2025)
-- Current browser support for keyboard shortcuts
-- Recent accessibility standards (WCAG 2.2+ for search typeahead)
+### Tertiary (LOW confidence - needs validation)
+- Platform organization ID (assumed to exist, must verify in production)
+- Current count of platform admins (unknown, must query before migration)
+- FK references to platform org (baseline.sql shows structure, but runtime data unknown)
 
-**Recommendation:** Treat MEDIUM confidence items as hypotheses. Validate with:
-- User testing (do recruiters actually want these features?)
-- Performance testing (are latency targets achievable?)
-- Browser testing (do keyboard shortcuts work across all targets?)
+---
+
+**Research completed:** 2026-02-13
+**Ready for roadmap:** Yes
+**Recommended timeline:** 1 week (4 phases, ~1-2 days each with testing/validation)
