@@ -1,4 +1,32 @@
-# Project Milestones: Global Search
+# Project Milestones: Splits Network
+
+## v3.0 Platform Admin Restructure (Shipped: 2026-02-13)
+
+**Delivered:** Platform admin restructured from org-scoped role (memberships + synthetic platform org) to system-level role (user_roles with nullable entity_id), with zero downstream consumer impact and full cleanup of legacy data.
+
+**Phases completed:** 4-7 (6 plans total)
+
+**Key accomplishments:**
+
+- Nullable role_entity_id in user_roles with split partial unique indexes handling NULL correctly
+- Atomic data migration from memberships to user_roles with RAISE EXCEPTION validation gate (zero data loss)
+- resolveAccessContext reads platform_admin from user_roles via existing deduplicated roles union — zero code logic changes needed
+- Identity-service SYSTEM_ROLES conditional validation for system-level vs entity-linked roles
+- FK-safe cleanup migration removing synthetic platform organization and legacy memberships
+- Full TypeScript type alignment across shared-types, shared-clients, shared-access-context
+
+**Stats:**
+
+- 8 code files created/modified
+- 275 lines of TypeScript + SQL
+- 4 phases, 6 plans
+- ~19 minutes execution time (2026-02-13)
+
+**Git range:** `47f0e22e` → `d4b88fa2`
+
+**What's next:** TBD — next milestone
+
+---
 
 ## v2.0 Global Search (Shipped: 2026-02-13)
 
