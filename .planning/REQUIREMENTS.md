@@ -37,14 +37,14 @@
 
 | REQ | Phase | Status |
 |-----|-------|--------|
-| SCHEMA-01 | — | Pending |
-| SCHEMA-02 | — | Pending |
-| SCHEMA-03 | — | Pending |
-| ACCESS-01 | — | Pending |
-| ACCESS-02 | — | Pending |
-| ACCESS-03 | — | Pending |
-| AUDIT-01 | — | Pending |
-| AUDIT-02 | — | Pending |
+| SCHEMA-01 | Phase 4 | Pending |
+| SCHEMA-02 | Phase 4 | Pending |
+| SCHEMA-03 | Phase 4 | Pending |
+| ACCESS-01 | Phase 5 | Pending |
+| ACCESS-02 | Phase 5 | Pending |
+| ACCESS-03 | Phase 5 | Pending |
+| AUDIT-01 | Phase 5 | Pending |
+| AUDIT-02 | Phase 6 | Pending |
 
 ---
 *Created: 2026-02-13*
