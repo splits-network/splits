@@ -115,7 +115,7 @@ Plans:
 - [x] **Phase 11: Service Foundation** - gpt-service scaffold, database tables, environment configuration
 - [x] **Phase 12: OAuth2 Provider** - OAuth2 authorization code flow, gateway integration, token validation
 - [x] **Phase 13: GPT API Endpoints** - Job search, job details, application status, application submission, resume analysis
-- [ ] **Phase 14: OpenAPI Schema + GPT Configuration** - OpenAPI 3.0.1 schema, schema serving endpoint, GPT Instructions document
+- [x] **Phase 14: OpenAPI Schema + GPT Configuration** - OpenAPI 3.0.1 schema, schema serving endpoint, GPT Instructions document
 - [ ] **Phase 15: Production Hardening** - Kubernetes deployment, rate limiting, token cleanup, audit logging
 
 ### Phase 11: Service Foundation
@@ -183,8 +183,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — OpenAPI 3.0.1 schema file and serving endpoint
-- [ ] 14-02-PLAN.md — GPT Instructions document and Builder listing copy
+- [x] 14-01-PLAN.md — OpenAPI 3.0.1 schema file and serving endpoint
+- [x] 14-02-PLAN.md — GPT Instructions document and Builder listing copy
 
 ### Phase 15: Production Hardening
 **Goal**: gpt-service is production-ready with deployment infrastructure, rate limiting, token lifecycle management, and observability
@@ -217,9 +217,9 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 11. Service Foundation | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 12. OAuth2 Provider | v5.0 | 6/6 | Complete | 2026-02-13 |
 | 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
-| 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/2 | Not started | - |
+| 14. OpenAPI Schema + GPT Configuration | v5.0 | 2/2 | Complete | 2026-02-13 |
 | 15. Production Hardening | v5.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-13 (Phase 14 planned)*
+*Last updated: 2026-02-13 (Phase 14 complete)*

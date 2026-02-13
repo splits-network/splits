@@ -33,10 +33,10 @@
 
 ### Configuration
 
-- [ ] **CONF-01**: OpenAPI 3.0.1 schema defining all GPT Actions with operationIds, descriptions, and OAuth2 security scheme
-- [ ] **CONF-02**: OpenAPI schema served at /api/v1/gpt/openapi.yaml endpoint
-- [ ] **CONF-03**: GPT Instructions document covering all action scenarios, confirmation rules, and error handling
-- [ ] **CONF-04**: x-openai-isConsequential annotation on all write action operations
+- [x] **CONF-01**: OpenAPI 3.0.1 schema defining all GPT Actions with operationIds, descriptions, and OAuth2 security scheme
+- [x] **CONF-02**: OpenAPI schema served at /api/v1/gpt/openapi.yaml endpoint
+- [x] **CONF-03**: GPT Instructions document covering all action scenarios, confirmation rules, and error handling
+- [x] **CONF-04**: x-openai-isConsequential annotation on all write action operations
 
 ### Hardening
 
@@ -82,10 +82,10 @@
 | ENDP-05 | Phase 13 | Complete |
 | ENDP-06 | Phase 13 | Complete |
 | ENDP-07 | Phase 13 | Complete |
-| CONF-01 | Phase 14 | Pending |
-| CONF-02 | Phase 14 | Pending |
-| CONF-03 | Phase 14 | Pending |
-| CONF-04 | Phase 14 | Pending |
+| CONF-01 | Phase 14 | Complete |
+| CONF-02 | Phase 14 | Complete |
+| CONF-03 | Phase 14 | Complete |
+| CONF-04 | Phase 14 | Complete |
 | HARD-01 | Phase 15 | Pending |
 | HARD-02 | Phase 15 | Pending |
 | HARD-03 | Phase 15 | Pending |
@@ -98,4 +98,4 @@
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after roadmap creation (phase assignments added)*
+*Last updated: 2026-02-13 (Phase 14 complete)*

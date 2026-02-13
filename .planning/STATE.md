@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
-**Current focus:** v5.0 Custom GPT -- Phase 14 (OpenAPI Schema + GPT Configuration)
+**Current focus:** v5.0 Custom GPT -- Phase 15 (Production Hardening)
 
 ## Current Position
 
@@ -139,7 +139,7 @@ None.
 Last session: 2026-02-13
 Stopped at: Completed Phase 14 (OpenAPI Schema + GPT Configuration) -- all 2 plans
 Resume file: None
-Next: Phase 15 planning (Testing & Deployment) or v5.0 completion review
+Next: Phase 15 (Production Hardening) -- /gsd:discuss-phase 15 or /gsd:plan-phase 15
 
 ---
 *Created: 2026-02-12*
