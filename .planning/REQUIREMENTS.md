@@ -7,15 +7,15 @@
 
 ### Schema
 
-- [ ] **SCHM-01**: jobs table has `commute_types TEXT[]` column with CHECK constraint limiting values to `remote`, `hybrid_1`, `hybrid_2`, `hybrid_3`, `hybrid_4`, `in_office`
-- [ ] **SCHM-02**: jobs table has `job_level TEXT` column with CHECK constraint limiting values to `entry`, `mid`, `senior`, `lead`, `manager`, `director`, `vp`, `c_suite`
-- [ ] **SCHM-03**: Both columns default to NULL (optional fields on existing jobs)
+- [x] **SCHM-01**: jobs table has `commute_types TEXT[]` column with CHECK constraint limiting values to `remote`, `hybrid_1`, `hybrid_2`, `hybrid_3`, `hybrid_4`, `in_office`
+- [x] **SCHM-02**: jobs table has `job_level TEXT` column with CHECK constraint limiting values to `entry`, `mid`, `senior`, `lead`, `manager`, `director`, `vp`, `c_suite`
+- [x] **SCHM-03**: Both columns default to NULL (optional fields on existing jobs)
 
 ### Types
 
-- [ ] **TYPE-01**: shared-types Job model includes `commute_types` and `job_level` fields
-- [ ] **TYPE-02**: DTOs (CreateJobDTO, JobDTO) include new fields
-- [ ] **TYPE-03**: TypeScript union types defined for commute type values and job level values
+- [x] **TYPE-01**: shared-types Job model includes `commute_types` and `job_level` fields
+- [x] **TYPE-02**: DTOs (CreateJobDTO, JobDTO) include new fields
+- [x] **TYPE-03**: TypeScript union types defined for commute type values and job level values
 
 ### API
 
@@ -51,12 +51,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHM-01 | Phase 8 | Pending |
-| SCHM-02 | Phase 8 | Pending |
-| SCHM-03 | Phase 8 | Pending |
-| TYPE-01 | Phase 8 | Pending |
-| TYPE-02 | Phase 8 | Pending |
-| TYPE-03 | Phase 8 | Pending |
+| SCHM-01 | Phase 8 | Complete |
+| SCHM-02 | Phase 8 | Complete |
+| SCHM-03 | Phase 8 | Complete |
+| TYPE-01 | Phase 8 | Complete |
+| TYPE-02 | Phase 8 | Complete |
+| TYPE-03 | Phase 8 | Complete |
 | API-01 | Phase 9 | Pending |
 | API-02 | Phase 9 | Pending |
 | API-03 | Phase 9 | Pending |
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after roadmap creation*
+*Last updated: 2026-02-13 after Phase 8 complete*

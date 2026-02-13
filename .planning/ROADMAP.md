@@ -30,7 +30,7 @@ See MILESTONES.md for details.
 
 Add commute type (multi-select) and job level (single-select) fields to the jobs system. Work flows from database schema and TypeScript types, through the ATS service API layer, to the portal frontend and search index. Three phases covering foundation, API, and consumer layers.
 
-- [ ] **Phase 8: Schema & Types** - Database columns and TypeScript type definitions
+- [x] **Phase 8: Schema & Types** - Database columns and TypeScript type definitions (completed 2026-02-13)
 - [ ] **Phase 9: API** - ATS service CRUD and filtering support
 - [ ] **Phase 10: Frontend & Search** - Job form UI, detail display, list filtering, and search index
 
@@ -48,7 +48,7 @@ Add commute type (multi-select) and job level (single-select) fields to the jobs
 **Plans**: 1 plan
 
 Plans:
-- [ ] 08-01-PLAN.md -- Database migration adding commute_types/job_level columns + TypeScript union types and DTO updates
+- [x] 08-01-PLAN.md -- Database migration adding commute_types/job_level columns + TypeScript union types and DTO updates
 
 ### Phase 9: API
 **Goal**: The ATS service accepts, persists, returns, and filters by commute types and job levels
@@ -86,7 +86,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 8. Schema & Types | v4.0 | 0/1 | Not started | - |
+| 8. Schema & Types | v4.0 | 1/1 | Complete | 2026-02-13 |
 | 9. API | v4.0 | 0/1 | Not started | - |
 | 10. Frontend & Search | v4.0 | 0/3 | Not started | - |
 
