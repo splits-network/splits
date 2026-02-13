@@ -90,7 +90,7 @@ const SPECIALTY_OPTIONS = [
 ];
 
 export default function ProfilePage() {
-    const { getToken } = useAuth();
+    const { getToken, userId } = useAuth();
     const toast = useToast();
     const { user: clerkUser } = useUser();
     const [settings, setSettings] = useState<CandidateSettings | null>(null);
@@ -119,6 +119,18 @@ export default function ProfilePage() {
     }
     const [activeRecruiters, setActiveRecruiters] = useState<RecruiterRelationship[]>([]);
     const [recruitersLoading, setRecruitersLoading] = useState(true);
+
+    // GPT Sessions state
+    interface GptSession {
+        id: string;
+        created_at: string;
+        last_active: string;
+        scopes: string[];
+        refresh_token_expires_at: string;
+    }
+    const [gptSessions, setGptSessions] = useState<GptSession[]>([]);
+    const [gptSessionsLoading, setGptSessionsLoading] = useState(true);
+    const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
 
     // Calculate profile completeness
     const completeness = useMemo(() => {
@@ -156,6 +168,8 @@ export default function ProfilePage() {
     useEffect(() => {
         loadSettings();
         loadActiveRecruiters();
+        loadGptSessions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadActiveRecruiters = async () => {
@@ -175,6 +189,60 @@ export default function ProfilePage() {
             console.error('Failed to load recruiter relationships:', err);
         } finally {
             setRecruitersLoading(false);
+        }
+    };
+
+    const loadGptSessions = async () => {
+        try {
+            setGptSessionsLoading(true);
+            const token = await getToken();
+            if (!token || !userId) return;
+
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${API_BASE}/api/v1/gpt/oauth/sessions`, {
+                headers: {
+                    'x-gpt-clerk-user-id': userId,
+                },
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setGptSessions(result.data || []);
+            }
+        } catch (err) {
+            console.error('Failed to load GPT sessions:', err);
+        } finally {
+            setGptSessionsLoading(false);
+        }
+    };
+
+    const revokeGptSession = async (sessionId: string) => {
+        try {
+            setRevokingSessionId(sessionId);
+            const token = await getToken();
+            if (!token || !userId) return;
+
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${API_BASE}/api/v1/gpt/oauth/revoke`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-gpt-clerk-user-id': userId,
+                },
+                body: JSON.stringify({ session_id: sessionId }),
+            });
+
+            if (response.ok) {
+                setGptSessions(prev => prev.filter(s => s.id !== sessionId));
+                toast.success('Session revoked successfully');
+            } else {
+                throw new Error('Failed to revoke session');
+            }
+        } catch (err) {
+            console.error('Failed to revoke GPT session:', err);
+            toast.error('Failed to revoke session');
+        } finally {
+            setRevokingSessionId(null);
         }
     };
 
@@ -1277,6 +1345,66 @@ export default function ProfilePage() {
                                     <p className="mt-1">
                                         Recruiters will invite you when they
                                         start representing you for opportunities.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Connected Apps Card */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title">
+                                <i className="fa-duotone fa-regular fa-plug"></i>
+                                Connected Apps
+                            </h2>
+                            <p className="text-sm text-base-content/70">
+                                Manage apps connected to your account
+                            </p>
+
+                            {gptSessionsLoading ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                </div>
+                            ) : gptSessions.length > 0 ? (
+                                <div className="space-y-3 mt-2">
+                                    {gptSessions.map(session => (
+                                        <div key={session.id} className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
+                                            <div className="shrink-0 mt-1">
+                                                <i className="fa-duotone fa-regular fa-robot text-primary text-lg"></i>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-semibold text-sm">AI Job Copilot</div>
+                                                <div className="text-xs text-base-content/60 space-y-0.5">
+                                                    <div>Connected {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                                    <div>Last active {new Date(session.last_active).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                                    <div>Expires {new Date(session.refresh_token_expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                    {session.scopes.map(scope => (
+                                                        <span key={scope} className="badge badge-xs badge-outline">{scope}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="btn btn-xs btn-error btn-outline shrink-0"
+                                                onClick={() => revokeGptSession(session.id)}
+                                                disabled={revokingSessionId === session.id}
+                                            >
+                                                {revokingSessionId === session.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    'Revoke'
+                                                )}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-sm text-base-content/60 mt-2">
+                                    <p>No connected apps.</p>
+                                    <p className="mt-1">
+                                        Apps you authorize will appear here.
                                     </p>
                                 </div>
                             )}
