@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 4: Schema & Data Migration** - Make user_roles support platform_admin, migrate data atomically
 - [x] **Phase 5: Access Integration** - Update resolveAccessContext and identity-service APIs
-- [ ] **Phase 6: Cleanup & Validation** - Remove platform org, validate all consumers
+- [x] **Phase 6: Cleanup & Validation** - Remove platform org, validate all consumers
 
 ## Phase Details
 
@@ -62,8 +62,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Create cleanup migration (delete platform org + legacy memberships), update TypeScript types and JSDoc
-- [ ] 06-02-PLAN.md — Apply migration and smoke test platform admin access (frontend + backend verification)
+- [x] 06-01-PLAN.md — Create cleanup migration (delete platform org + legacy memberships), update TypeScript types and JSDoc
+- [x] 06-02-PLAN.md — Apply migration and smoke test platform admin access (frontend + backend verification)
 
 ## Progress
 
@@ -74,4 +74,4 @@ Phases execute in numeric order: 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 4. Schema & Data Migration | 1/1 | Complete | 2026-02-13 |
 | 5. Access Integration | 2/2 | Complete | 2026-02-13 |
-| 6. Cleanup & Validation | 0/2 | Not started | - |
+| 6. Cleanup & Validation | 2/2 | Complete | 2026-02-13 |

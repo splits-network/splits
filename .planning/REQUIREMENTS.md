@@ -17,7 +17,7 @@
 ### Audit & Cleanup
 
 - [x] **AUDIT-01**: Platform admin grant/revoke publishes user_role.created/deleted events via RabbitMQ
-- [ ] **AUDIT-02**: Synthetic platform organization (type='platform') and related memberships are deleted after migration
+- [x] **AUDIT-02**: Synthetic platform organization (type='platform') and related memberships are deleted after migration
 
 ## Future Requirements
 
@@ -44,7 +44,7 @@
 | ACCESS-02 | Phase 5 | Complete |
 | ACCESS-03 | Phase 5 | Complete |
 | AUDIT-01 | Phase 5 | Complete |
-| AUDIT-02 | Phase 6 | Pending |
+| AUDIT-02 | Phase 6 | Complete |
 
 ---
 *Created: 2026-02-13*
