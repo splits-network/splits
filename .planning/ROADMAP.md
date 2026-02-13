@@ -61,10 +61,11 @@ Plans:
   6. Recent searches (last 5) appear in dropdown when input is empty
   7. Loading spinner shows while searching and empty state message shows when no results found
   8. Clear button (X) resets search input and closes dropdown
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: [TBD during phase planning]
+- [ ] 03-01-PLAN.md — Search hook and types: useGlobalSearch hook with debounced API calls, recent searches, entity URL resolver
+- [ ] 03-02-PLAN.md — GlobalSearchBar component and header integration: dropdown UI, keyboard navigation, highlighted matches, Cmd+K shortcut
 
 ### Phase 4: Full Search Page
 **Goal**: Dedicated search page with filtering, sorting, and pagination
@@ -89,7 +90,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Search Infrastructure | 3/3 | **Complete** | 2026-02-13 |
 | 2. Search API | 2/2 | **Complete** | 2026-02-13 |
-| 3. Typeahead Search | 0/TBD | Not started | - |
+| 3. Typeahead Search | 0/2 | Not started | - |
 | 4. Full Search Page | 0/TBD | Not started | - |
 
 ---
