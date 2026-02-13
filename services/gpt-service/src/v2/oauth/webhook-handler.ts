@@ -1,9 +1,10 @@
-import { FastifyInstance, FastifyBaseLogger } from 'fastify';
+import { FastifyInstance } from 'fastify';
+import { Logger } from '@splits-network/shared-logging';
 import { OAuthService } from './oauth-service';
 
 export function registerWebhookRoutes(
     app: FastifyInstance,
-    deps: { oauthService: OAuthService; logger: FastifyBaseLogger }
+    deps: { oauthService: OAuthService; logger: Logger }
 ) {
     app.post('/api/v2/webhooks/clerk', async (request, reply) => {
         const { oauthService, logger } = deps;
