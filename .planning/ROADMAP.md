@@ -11,7 +11,7 @@ Build full-stack global search from database infrastructure through API to real-
 
 - [x] **Phase 1: Search Infrastructure** - Dedicated search schema with trigger-based sync from all entity tables
 - [x] **Phase 2: Search API** - Backend search endpoints with access control and validation
-- [ ] **Phase 3: Typeahead Search** - Real-time search bar in portal header with keyboard navigation
+- [x] **Phase 3: Typeahead Search** - Real-time search bar in portal header with keyboard navigation
 - [ ] **Phase 4: Full Search Page** - Dedicated search page with filtering and pagination
 
 ## Phase Details
@@ -64,8 +64,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Search hook and types: useGlobalSearch hook with debounced API calls, recent searches, entity URL resolver
-- [ ] 03-02-PLAN.md — GlobalSearchBar component and header integration: dropdown UI, keyboard navigation, highlighted matches, Cmd+K shortcut
+- [x] 03-01-PLAN.md — Search hook and types: useGlobalSearch hook with debounced API calls, recent searches, entity URL resolver
+- [x] 03-02-PLAN.md — GlobalSearchBar component and header integration: dropdown UI, keyboard navigation, highlighted matches, Cmd+K shortcut
 
 ### Phase 4: Full Search Page
 **Goal**: Dedicated search page with filtering, sorting, and pagination
@@ -90,9 +90,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Search Infrastructure | 3/3 | **Complete** | 2026-02-13 |
 | 2. Search API | 2/2 | **Complete** | 2026-02-13 |
-| 3. Typeahead Search | 0/2 | Not started | - |
+| 3. Typeahead Search | 2/2 | **Complete** | 2026-02-13 |
 | 4. Full Search Page | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13*
+*Last updated: 2026-02-14*

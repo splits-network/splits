@@ -27,14 +27,14 @@ Requirements for milestone v2.0. Each maps to roadmap phases.
 
 ### Typeahead
 
-- [ ] **TYPE-01**: Real-time typeahead dropdown in portal header showing top results per entity type
-- [ ] **TYPE-02**: Results grouped by entity type with count and icon (Candidates, Jobs, Companies, etc.)
-- [ ] **TYPE-03**: Keyboard navigation (arrow keys to select, Enter to navigate, Esc to close dropdown)
-- [ ] **TYPE-04**: Loading states while searching and empty state messaging when no results found
-- [ ] **TYPE-05**: Highlighted matches (bold matching terms in result text)
-- [ ] **TYPE-06**: Context snippets showing match context (subtitle/secondary text from search_index)
-- [ ] **TYPE-07**: Click any result to navigate to entity detail page
-- [ ] **TYPE-08**: Clear button (X) to reset search input and close dropdown
+- [x] **TYPE-01**: Real-time typeahead dropdown in portal header showing top results per entity type
+- [x] **TYPE-02**: Results grouped by entity type with count and icon (Candidates, Jobs, Companies, etc.)
+- [x] **TYPE-03**: Keyboard navigation (arrow keys to select, Enter to navigate, Esc to close dropdown)
+- [x] **TYPE-04**: Loading states while searching and empty state messaging when no results found
+- [x] **TYPE-05**: Highlighted matches (bold matching terms in result text)
+- [x] **TYPE-06**: Context snippets showing match context (subtitle/secondary text from search_index)
+- [x] **TYPE-07**: Click any result to navigate to entity detail page
+- [x] **TYPE-08**: Clear button (X) to reset search input and close dropdown
 
 ### Full Search Page
 
@@ -45,8 +45,8 @@ Requirements for milestone v2.0. Each maps to roadmap phases.
 
 ### Platform Integration
 
-- [ ] **INT-01**: Cmd+K (Mac) / Ctrl+K (Windows) keyboard shortcut opens/focuses search from any page
-- [ ] **INT-02**: Recent searches stored in localStorage, shown in dropdown when input is empty (last 5)
+- [x] **INT-01**: Cmd+K (Mac) / Ctrl+K (Windows) keyboard shortcut opens/focuses search from any page
+- [x] **INT-02**: Recent searches stored in localStorage, shown in dropdown when input is empty (last 5)
 
 ## v2 Requirements
 
@@ -104,20 +104,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-01 | Phase 2 | **Complete** (02-01) |
 | API-02 | Phase 2 | **Complete** (02-01) |
 | API-03 | Phase 2 | **Complete** (02-01) |
-| TYPE-01 | Phase 3 | Pending |
-| TYPE-02 | Phase 3 | Pending |
-| TYPE-03 | Phase 3 | Pending |
-| TYPE-04 | Phase 3 | Pending |
-| TYPE-05 | Phase 3 | Pending |
-| TYPE-06 | Phase 3 | Pending |
-| TYPE-07 | Phase 3 | Pending |
-| TYPE-08 | Phase 3 | Pending |
+| TYPE-01 | Phase 3 | **Complete** (03-02) |
+| TYPE-02 | Phase 3 | **Complete** (03-02) |
+| TYPE-03 | Phase 3 | **Complete** (03-02) |
+| TYPE-04 | Phase 3 | **Complete** (03-02) |
+| TYPE-05 | Phase 3 | **Complete** (03-02) |
+| TYPE-06 | Phase 3 | **Complete** (03-02) |
+| TYPE-07 | Phase 3 | **Complete** (03-02) |
+| TYPE-08 | Phase 3 | **Complete** (03-02) |
 | PAGE-01 | Phase 4 | Pending |
 | PAGE-02 | Phase 4 | Pending |
 | PAGE-03 | Phase 4 | Pending |
 | PAGE-04 | Phase 4 | Pending |
-| INT-01 | Phase 3 | Pending |
-| INT-02 | Phase 3 | Pending |
+| INT-01 | Phase 3 | **Complete** (03-01) |
+| INT-02 | Phase 3 | **Complete** (03-01) |
 
 **Coverage:**
 - v1 requirements: 25 total
@@ -126,4 +126,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-12*
-*Last updated: 2026-02-12 after roadmap creation*
+*Last updated: 2026-02-14 after Phase 3 completion*
