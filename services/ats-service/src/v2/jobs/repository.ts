@@ -159,6 +159,17 @@ export class JobRepository {
         if (companyIdFilter) {
             query = query.eq('company_id', companyIdFilter);
         }
+        const commuteTypeFilter = filters.commute_type || params.commute_type;
+        if (commuteTypeFilter) {
+            const types = Array.isArray(commuteTypeFilter)
+                ? commuteTypeFilter
+                : [commuteTypeFilter];
+            query = query.overlaps('commute_types', types);
+        }
+        const jobLevelFilter = filters.job_level || params.job_level;
+        if (jobLevelFilter) {
+            query = query.eq('job_level', jobLevelFilter);
+        }
 
         // Apply sorting - relevance-based when searching, otherwise by sort_by parameter
         if (useRelevanceSort) {
