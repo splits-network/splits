@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useEffect, useState } from 'react';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 
 interface Application {
     id: string;
@@ -10,6 +11,7 @@ interface Application {
 interface ActivityHeatmapProps {
     applications: Application[];
     loading?: boolean;
+    compact?: boolean;
 }
 
 interface DayData {
@@ -54,6 +56,7 @@ function getIntensityColor(count: number): string {
 export default function ActivityHeatmap({
     applications,
     loading,
+    compact,
 }: ActivityHeatmapProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [numDays, setNumDays] = useState(120); // Default to 120 days
@@ -169,22 +172,20 @@ export default function ActivityHeatmap({
 
     // Loading state
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-32">
-                <span className="loading loading-spinner loading-sm text-primary"></span>
-            </div>
-        );
+        return <ChartLoadingState height={128} />;
     }
 
     return (
         <div ref={containerRef} className="space-y-2">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-base-content/80">Activity ({numDays} days)</h3>
-                <span className="text-xs text-base-content/50">
-                    {activityData.totalApplications} apps
-                </span>
-            </div>
+            {/* Header — hidden in compact/elevation mode */}
+            {!compact && (
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-base-content/80">Activity ({numDays} days)</h3>
+                    <span className="text-xs text-base-content/50">
+                        {activityData.totalApplications} apps
+                    </span>
+                </div>
+            )}
 
             {/* Month labels */}
             <div className="flex gap-0.5 w-full">

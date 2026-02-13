@@ -11,6 +11,7 @@ import {
 } from "@/lib/utils/profile-completeness";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import Link from "next/link";
 
 interface CandidateSettings {
     id: string;
@@ -106,6 +107,19 @@ export default function ProfilePage() {
     const [submitting, setSubmitting] = useState(false);
     const [nameSuccess, setNameSuccess] = useState("");
 
+    // Recruiter relationships state
+    interface RecruiterRelationship {
+        id: string;
+        recruiter_name: string;
+        recruiter_email: string;
+        status: string;
+        relationship_start_date: string;
+        relationship_end_date: string;
+        days_until_expiry?: number;
+    }
+    const [activeRecruiters, setActiveRecruiters] = useState<RecruiterRelationship[]>([]);
+    const [recruitersLoading, setRecruitersLoading] = useState(true);
+
     // Calculate profile completeness
     const completeness = useMemo(() => {
         if (!settings)
@@ -141,7 +155,28 @@ export default function ProfilePage() {
 
     useEffect(() => {
         loadSettings();
+        loadActiveRecruiters();
     }, []);
+
+    const loadActiveRecruiters = async () => {
+        try {
+            setRecruitersLoading(true);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/recruiter-candidates');
+            const allRelationships = response.data || [];
+            const active = allRelationships.filter(
+                (rel: RecruiterRelationship) => rel.status === 'active'
+            );
+            setActiveRecruiters(active);
+        } catch (err) {
+            console.error('Failed to load recruiter relationships:', err);
+        } finally {
+            setRecruitersLoading(false);
+        }
+    };
 
     const loadSettings = async () => {
         try {
@@ -328,7 +363,8 @@ export default function ProfilePage() {
             await client.patch(`/candidates/${candidateId}`, {
                 full_name: name.trim(),
             });
-            await client.patch(`/users/${settings?.user?.id}`, {
+            // Update user record via /me endpoint (triggers Clerk name sync in identity service)
+            await client.patch(`/users/me`, {
                 name: name.trim(),
             });
 
@@ -1167,6 +1203,83 @@ export default function ProfilePage() {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* My Recruiter Card */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <div className="flex items-center justify-between">
+                                <h2 className="card-title">
+                                    <i className="fa-duotone fa-regular fa-user-tie"></i>
+                                    My Recruiter
+                                </h2>
+                                <Link
+                                    href="/portal/recruiters"
+                                    className="btn btn-ghost btn-xs"
+                                >
+                                    View All
+                                </Link>
+                            </div>
+
+                            {recruitersLoading ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                </div>
+                            ) : activeRecruiters.length > 0 ? (
+                                <div className="space-y-3 mt-2">
+                                    {activeRecruiters.map((rel) => {
+                                        const formatDate = (d: string) =>
+                                            new Date(d).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                            });
+                                        const expiresSoon =
+                                            rel.days_until_expiry !== undefined &&
+                                            rel.days_until_expiry <= 30;
+
+                                        return (
+                                            <div
+                                                key={rel.id}
+                                                className="flex items-center gap-3"
+                                            >
+                                                <div className="avatar avatar-placeholder">
+                                                    <div className="bg-primary text-primary-content rounded-full w-10">
+                                                        <span>
+                                                            {rel.recruiter_name
+                                                                .charAt(0)
+                                                                .toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-semibold truncate">
+                                                        {rel.recruiter_name}
+                                                    </div>
+                                                    <div className="text-xs text-base-content/60">
+                                                        {formatDate(rel.relationship_start_date)} -{' '}
+                                                        {formatDate(rel.relationship_end_date)}
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    className={`badge badge-sm ${expiresSoon ? 'badge-warning' : 'badge-success'}`}
+                                                >
+                                                    {expiresSoon ? 'Expires Soon' : 'Active'}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-sm text-base-content/60 mt-2">
+                                    <p>No active recruiter relationship.</p>
+                                    <p className="mt-1">
+                                        Recruiters will invite you when they
+                                        start representing you for opportunities.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -23,18 +23,18 @@ function getColorCache() {
         if (typeof document === 'undefined') {
 
             return {
-                primaryHex: '#0000ff',
-                secondaryHex: '#ff00ff',
-                accentHex: '#00ffff',
+                primaryHex: '#233876',
+                secondaryHex: '#0f9d8a',
+                accentHex: '#db2777',
                 neutralHex: '#888888',
-                infoHex: '#0066ff',
-                successHex: '#00bb00',
-                warningHex: '#ffaa00',
-                errorHex: '#ff0000',
+                infoHex: '#0ea5e9',
+                successHex: '#16a34a',
+                warningHex: '#d97706',
+                errorHex: '#ef4444',
                 base100Hex: '#ffffff',
-                base200Hex: '#f0f0f0',
-                base300Hex: '#e0e0e0',
-                baseContentHex: '#ffffff',
+                base200Hex: '#f4f4f5',
+                base300Hex: '#e4e4e7',
+                baseContentHex: '#18181b',
             };
         }
         // Client-side: read actual colors
