@@ -1,12 +1,23 @@
-# Platform Admin Restructure
+# Splits Network Platform
 
 ## What This Is
 
-A restructuring of how platform admin roles are modeled in the Splits Network. Platform admin is now a system-level role stored in the `user_roles` table (with nullable `role_entity_id`), no longer requiring a synthetic "platform" organization in `memberships`. All downstream consumers (resolveAccessContext, identity-service, frontend) work seamlessly with the new model.
+A split-fee recruiting marketplace connecting recruiters, hiring companies, and candidates. The platform includes job management, candidate tracking, role-based access control, and global search across all entities.
 
 ## Core Value
 
-Platform admin is a system-level role assigned directly to a user — no organization membership required.
+Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements.
+
+## Current Milestone: v4.0 Commute Types & Job Levels
+
+**Goal:** Add work arrangement (commute types) and seniority level fields to the jobs table, with full-stack support from database through API to UI.
+
+**Target features:**
+- Multi-select commute types per job (remote, hybrid 1-4 days, in-office)
+- Single-select job seniority level (entry through c-suite)
+- Job form UI for setting commute types and job level
+- Filtering jobs by commute type and job level
+- Display commute types and job level on job detail views
 
 ## Requirements
 
@@ -34,7 +45,16 @@ Platform admin is a system-level role assigned directly to a user — no organiz
 
 ### Active
 
-(None — next milestone TBD)
+<!-- v4.0 Commute Types & Job Levels -->
+
+- [ ] commute_types TEXT[] column on jobs table with CHECK constraint
+- [ ] job_level TEXT column on jobs table with CHECK constraint
+- [ ] TypeScript types updated (shared-types, DTOs, models)
+- [ ] ats-service repository and service support for new fields
+- [ ] Job creation/edit form UI with commute type multi-select and job level dropdown
+- [ ] Job detail display showing commute types and job level
+- [ ] Job list filtering by commute type and job level
+- [ ] Search index updated to include new fields
 
 ### Out of Scope
 
@@ -80,5 +100,10 @@ Platform admin is a system-level role assigned directly to a user — no organiz
 | SYSTEM_ROLES constant | Explicit array defining system-level roles. Extensible for future system roles. | ✓ Good |
 | Event enrichment for audit | user_role.deleted event includes full context (user_id, role_name, role_entity_id). | ✓ Good |
 
+| commute_types as TEXT[] array | Multi-select per job. Postgres arrays are queryable (`@>` operator), filterable, and simpler than junction tables for a small fixed value set. | — Pending |
+| Hybrid granularity: hybrid_1 through hybrid_4 | Full granularity (1-4 days in office) matches real job postings. Values encode both type and detail in one string. | — Pending |
+| job_level as TEXT with CHECK constraint | Single-select, 8 levels (entry → c_suite). Text with CHECK over enum for easier future extension. | — Pending |
+| Keep open_to_relocation as-is | Relocation is orthogonal to commute type — a remote role can still prefer candidates willing to relocate. | — Pending |
+
 ---
-*Last updated: 2026-02-13 after v3.0 milestone complete*
+*Last updated: 2026-02-13 after v4.0 milestone started*

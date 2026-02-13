@@ -4,14 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-13)
 
-**Core value:** Platform admin is a system-level role assigned directly to a user — no organization membership required.
-**Current focus:** Planning next milestone
+**Core value:** Jobs accurately describe work arrangements and seniority level
+**Current focus:** v4.0 Commute Types & Job Levels
 
 ## Current Position
 
-Phase: Ready for next milestone
-Status: v3.0 complete, archived
-Last activity: 2026-02-13 — v3.0 Platform Admin Restructure milestone complete
+Phase: 8 of 10 (Schema & Types)
+Plan: 0 of 1 in current phase
+Status: Ready to plan
+Last activity: 2026-02-13 — Roadmap created for v4.0
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -34,7 +37,10 @@ Last activity: 2026-02-13 — v3.0 Platform Admin Restructure milestone complete
 
 ### Decisions
 
-All v3.0 decisions archived in PROJECT.md Key Decisions table.
+- commute_types as TEXT[] array (multi-select, Postgres array with @> filtering)
+- Hybrid granularity: hybrid_1 through hybrid_4 (1-4 days in office)
+- job_level as TEXT with CHECK constraint (8 levels: entry -> c_suite)
+- Keep open_to_relocation as-is (orthogonal to commute type)
 
 ### Pending Todos
 
@@ -51,9 +57,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: v3.0 milestone complete and archived
+Stopped at: Roadmap created for v4.0 milestone
 Resume file: None
-Next: `/gsd:new-milestone` to start next milestone
+Next: /gsd:plan-phase 8
 
 ---
 *Created: 2026-02-12*
