@@ -15,6 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Schema & Data Migration** - Make user_roles support platform_admin, migrate data atomically
 - [x] **Phase 5: Access Integration** - Update resolveAccessContext and identity-service APIs
 - [x] **Phase 6: Cleanup & Validation** - Remove platform org, validate all consumers
+- [ ] **Phase 7: Type Alignment** - Fix nullable role_entity_id in DTOs and client types
 
 ## Phase Details
 
@@ -65,13 +66,27 @@ Plans:
 - [x] 06-01-PLAN.md — Create cleanup migration (delete platform org + legacy memberships), update TypeScript types and JSDoc
 - [x] 06-02-PLAN.md — Apply migration and smoke test platform admin access (frontend + backend verification)
 
+### Phase 7: Type Alignment
+**Goal**: All TypeScript types reflect nullable role_entity_id for platform_admin system roles
+**Depends on**: Phase 6
+**Requirements**: None (tech debt closure from audit)
+**Success Criteria** (what must be TRUE):
+  1. UserRoleDTO.role_entity_id is `string | null`
+  2. IdentityClient.createUserRole accepts optional/nullable role_entity_id
+  3. All affected packages build cleanly
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md — Fix nullable role_entity_id in UserRoleDTO and IdentityClient createUserRole
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 6
+Phases execute in numeric order: 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 4. Schema & Data Migration | 1/1 | Complete | 2026-02-13 |
 | 5. Access Integration | 2/2 | Complete | 2026-02-13 |
 | 6. Cleanup & Validation | 2/2 | Complete | 2026-02-13 |
+| 7. Type Alignment | 0/1 | Not started | - |
