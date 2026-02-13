@@ -23,13 +23,13 @@
 
 ### Endpoints
 
-- [ ] **ENDP-01**: Job search endpoint accepts keywords, location, commute type, job level and returns GPT-formatted results
-- [ ] **ENDP-02**: Job details endpoint returns comprehensive job info including requirements, pre-screen questions, and company details
-- [ ] **ENDP-03**: Application status endpoint returns candidate's applications with human-readable status and job context
-- [ ] **ENDP-04**: Application submission endpoint with confirmation safety pattern (CONFIRMATION_REQUIRED on first call, executes on confirmed=true)
-- [ ] **ENDP-05**: Application submission accepts pre-screen question answers collected conversationally by GPT
-- [ ] **ENDP-06**: Resume analysis endpoint parses candidate resume and scores fit against a specific job posting
-- [ ] **ENDP-07**: All endpoints use resolveAccessContext() with candidate-scoped data isolation
+- [x] **ENDP-01**: Job search endpoint accepts keywords, location, commute type, job level and returns GPT-formatted results
+- [x] **ENDP-02**: Job details endpoint returns comprehensive job info including requirements, pre-screen questions, and company details
+- [x] **ENDP-03**: Application status endpoint returns candidate's applications with human-readable status and job context
+- [x] **ENDP-04**: Application submission endpoint with confirmation safety pattern (CONFIRMATION_REQUIRED on first call, executes on confirmed=true)
+- [x] **ENDP-05**: Application submission accepts pre-screen question answers collected conversationally by GPT
+- [x] **ENDP-06**: Resume analysis endpoint parses candidate resume and scores fit against a specific job posting
+- [x] **ENDP-07**: All endpoints use resolveAccessContext() with candidate-scoped data isolation
 
 ### Configuration
 
@@ -75,13 +75,13 @@
 | AUTH-05 | Phase 12 | Complete |
 | AUTH-06 | Phase 12 | Complete |
 | AUTH-07 | Phase 12 | Complete |
-| ENDP-01 | Phase 13 | Pending |
-| ENDP-02 | Phase 13 | Pending |
-| ENDP-03 | Phase 13 | Pending |
-| ENDP-04 | Phase 13 | Pending |
-| ENDP-05 | Phase 13 | Pending |
-| ENDP-06 | Phase 13 | Pending |
-| ENDP-07 | Phase 13 | Pending |
+| ENDP-01 | Phase 13 | Complete |
+| ENDP-02 | Phase 13 | Complete |
+| ENDP-03 | Phase 13 | Complete |
+| ENDP-04 | Phase 13 | Complete |
+| ENDP-05 | Phase 13 | Complete |
+| ENDP-06 | Phase 13 | Complete |
+| ENDP-07 | Phase 13 | Complete |
 | CONF-01 | Phase 14 | Pending |
 | CONF-02 | Phase 14 | Pending |
 | CONF-03 | Phase 14 | Pending |
