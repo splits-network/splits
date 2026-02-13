@@ -6,6 +6,9 @@ on:
             - main
     workflow_dispatch:
 
+env:
+    NAMESPACE: splits-network
+
 jobs:
     build-and-push:
         name: Build and Push Images
