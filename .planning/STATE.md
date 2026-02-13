@@ -139,7 +139,10 @@ None.
 - GPT_REDIRECT_URI catch-22: Need to create GPT to get redirect URI, but need redirect URI to configure OAuth (resolve by creating GPT first, getting redirect URI, then updating environment).
 
 **From v5.0 (Phase 15):**
-- User must add `CLERK_WEBHOOK_SECRET` GitHub environment secret (from Clerk Dashboard -> Webhooks -> Signing Secret).
+- User must create a NEW Clerk webhook endpoint in Clerk Dashboard (separate from identity-service webhook).
+  - URL: `https://<api-domain>/api/v1/gpt/webhooks/clerk`
+  - Events: `user.deleted` only
+  - Copy the signing secret (`whsec_...`) → add as `CLERK_WEBHOOK_SECRET` GitHub environment secret.
 
 **v5.0 Research Flags:**
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.

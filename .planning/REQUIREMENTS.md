@@ -40,10 +40,10 @@
 
 ### Hardening
 
-- [ ] **HARD-01**: Kubernetes deployment manifest for gpt-service
-- [ ] **HARD-02**: GPT-specific rate limiting per user in api-gateway
-- [ ] **HARD-03**: Token cleanup job expiring old authorization codes and revoked refresh tokens
-- [ ] **HARD-04**: Audit logging for all GPT OAuth events and action executions via RabbitMQ
+- [x] **HARD-01**: Kubernetes deployment manifest for gpt-service
+- [x] **HARD-02**: GPT-specific rate limiting per user in api-gateway
+- [x] **HARD-03**: Token cleanup job expiring old authorization codes and revoked refresh tokens
+- [x] **HARD-04**: Audit logging for all GPT OAuth events and action executions via RabbitMQ
 
 ## Out of Scope
 
@@ -86,10 +86,10 @@
 | CONF-02 | Phase 14 | Complete |
 | CONF-03 | Phase 14 | Complete |
 | CONF-04 | Phase 14 | Complete |
-| HARD-01 | Phase 15 | Pending |
-| HARD-02 | Phase 15 | Pending |
-| HARD-03 | Phase 15 | Pending |
-| HARD-04 | Phase 15 | Pending |
+| HARD-01 | Phase 15 | Complete |
+| HARD-02 | Phase 15 | Complete |
+| HARD-03 | Phase 15 | Complete |
+| HARD-04 | Phase 15 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
@@ -98,4 +98,4 @@
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 (Phase 14 complete)*
+*Last updated: 2026-02-13 (Phase 15 complete, all requirements met)*
