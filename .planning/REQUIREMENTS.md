@@ -7,9 +7,9 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: gpt-service microservice scaffold (Fastify, TypeScript, health check, shared packages)
-- [ ] **INFRA-02**: Database migration with OAuth tables (gpt_authorization_codes, gpt_refresh_tokens, gpt_oauth_events)
-- [ ] **INFRA-03**: Environment configuration (GPT_CLIENT_ID, GPT_CLIENT_SECRET, GPT_JWT_SECRET, token expiry settings)
+- [x] **INFRA-01**: gpt-service microservice scaffold (Fastify, TypeScript, health check, shared packages)
+- [x] **INFRA-02**: Database migration with OAuth tables (gpt_authorization_codes, gpt_refresh_tokens, gpt_oauth_events)
+- [x] **INFRA-03**: Environment configuration (GPT_CLIENT_ID, GPT_CLIENT_SECRET, GPT_JWT_SECRET, token expiry settings)
 
 ### Authentication
 
@@ -65,9 +65,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 11 | Pending |
-| INFRA-02 | Phase 11 | Pending |
-| INFRA-03 | Phase 11 | Pending |
+| INFRA-01 | Phase 11 | Complete |
+| INFRA-02 | Phase 11 | Complete |
+| INFRA-03 | Phase 11 | Complete |
 | AUTH-01 | Phase 12 | Pending |
 | AUTH-02 | Phase 12 | Pending |
 | AUTH-03 | Phase 12 | Pending |

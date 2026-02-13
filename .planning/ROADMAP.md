@@ -112,7 +112,7 @@ Plans:
 - Integer phases (11, 12, 13, ...): Planned milestone work
 - Decimal phases (12.1, 12.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 11: Service Foundation** - gpt-service scaffold, database tables, environment configuration
+- [x] **Phase 11: Service Foundation** - gpt-service scaffold, database tables, environment configuration
 - [ ] **Phase 12: OAuth2 Provider** - OAuth2 authorization code flow, gateway integration, token validation
 - [ ] **Phase 13: GPT API Endpoints** - Job search, job details, application status, application submission, resume analysis
 - [ ] **Phase 14: OpenAPI Schema + GPT Configuration** - OpenAPI 3.0.1 schema, schema serving endpoint, GPT Instructions document
@@ -129,9 +129,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Service scaffold, GPT config loader, health check, EventPublisher
-- [ ] 11-02-PLAN.md — Database migration with 4 GPT OAuth tables and indexes
-- [ ] 11-03-PLAN.md — Audit event consumer for end-to-end RabbitMQ flow
+- [x] 11-01-PLAN.md — Service scaffold, GPT config loader, health check, EventPublisher
+- [x] 11-02-PLAN.md — Database migration with 4 GPT OAuth tables and indexes
+- [x] 11-03-PLAN.md — Audit event consumer for end-to-end RabbitMQ flow
 
 ### Phase 12: OAuth2 Provider
 **Goal**: Candidates can authenticate via Clerk through the GPT OAuth flow and receive scoped access tokens that gpt-service validates
@@ -196,7 +196,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 8. Schema & Types | v4.0 | 1/1 | Complete | 2026-02-13 |
 | 9. Backend & Filtering | v4.0 | 2/2 | Complete | 2026-02-13 |
 | 10. Portal UI | v4.0 | 2/2 | Complete | 2026-02-13 |
-| 11. Service Foundation | v5.0 | 0/3 | Not started | - |
+| 11. Service Foundation | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 12. OAuth2 Provider | v5.0 | 0/TBD | Not started | - |
 | 13. GPT API Endpoints | v5.0 | 0/TBD | Not started | - |
 | 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/TBD | Not started | - |
