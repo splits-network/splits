@@ -9,7 +9,7 @@ Build full-stack global search from database infrastructure through API to real-
 **Phase Numbering:**
 - Integer phases (1, 2, 3, 4): Planned milestone work
 
-- [ ] **Phase 1: Search Infrastructure** - Dedicated search schema with trigger-based sync from all entity tables
+- [x] **Phase 1: Search Infrastructure** - Dedicated search schema with trigger-based sync from all entity tables
 - [ ] **Phase 2: Search API** - Backend search endpoints with access control and validation
 - [ ] **Phase 3: Typeahead Search** - Real-time search bar in portal header with keyboard navigation
 - [ ] **Phase 4: Full Search Page** - Dedicated search page with filtering and pagination
@@ -29,9 +29,9 @@ Build full-stack global search from database infrastructure through API to real-
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Foundation: fix recruiters ILIKE->tsvector, create search schema + search_index table + GIN index
-- [ ] 01-02-PLAN.md — Core entity triggers: candidates, jobs, companies sync to search_index
-- [ ] 01-03-PLAN.md — Relational entity triggers: recruiters, applications, placements, recruiter_candidates sync to search_index
+- [x] 01-01-PLAN.md — Foundation: fix recruiters ILIKE->tsvector, create search schema + search_index table + GIN index
+- [x] 01-02-PLAN.md — Core entity triggers: candidates, jobs, companies sync to search_index
+- [x] 01-03-PLAN.md — Relational entity triggers: recruiters, applications, placements, recruiter_candidates sync to search_index
 
 ### Phase 2: Search API
 **Goal**: Backend search endpoints ready with access control and input validation
@@ -86,11 +86,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Search Infrastructure | 0/3 | Planned | - |
+| 1. Search Infrastructure | 3/3 | **Complete** | 2026-02-13 |
 | 2. Search API | 0/TBD | Not started | - |
 | 3. Typeahead Search | 0/TBD | Not started | - |
 | 4. Full Search Page | 0/TBD | Not started | - |
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-12*
+*Last updated: 2026-02-13*

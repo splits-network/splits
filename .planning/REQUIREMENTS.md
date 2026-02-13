@@ -9,15 +9,15 @@ Requirements for milestone v2.0. Each maps to roadmap phases.
 
 ### Search Infrastructure
 
-- [ ] **INFRA-01**: Dedicated `search` schema with unified `search_index` table (entity_type, entity_id, title, subtitle, context, search_vector, metadata, organization_id)
-- [ ] **INFRA-02**: Trigger-based sync from candidates table to search_index (near-real-time, same transaction)
-- [ ] **INFRA-03**: Trigger-based sync from jobs table to search_index
-- [ ] **INFRA-04**: Trigger-based sync from companies table to search_index
-- [ ] **INFRA-05**: Trigger-based sync from recruiters table to search_index
-- [ ] **INFRA-06**: Trigger-based sync from applications table to search_index
-- [ ] **INFRA-07**: Trigger-based sync from placements table to search_index
-- [ ] **INFRA-08**: GIN index on search_index.search_vector with ts_rank scoring
-- [ ] **INFRA-09**: Recruiters table migrated from ILIKE to tsvector search (prerequisite for trigger sync)
+- [x] **INFRA-01**: Dedicated `search` schema with unified `search_index` table (entity_type, entity_id, title, subtitle, context, search_vector, metadata, organization_id)
+- [x] **INFRA-02**: Trigger-based sync from candidates table to search_index (near-real-time, same transaction)
+- [x] **INFRA-03**: Trigger-based sync from jobs table to search_index
+- [x] **INFRA-04**: Trigger-based sync from companies table to search_index
+- [x] **INFRA-05**: Trigger-based sync from recruiters table to search_index
+- [x] **INFRA-06**: Trigger-based sync from applications table to search_index
+- [x] **INFRA-07**: Trigger-based sync from placements table to search_index
+- [x] **INFRA-08**: GIN index on search_index.search_vector with ts_rank scoring
+- [x] **INFRA-09**: Recruiters table migrated from ILIKE to tsvector search (prerequisite for trigger sync)
 
 ### API
 
@@ -92,13 +92,38 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| INFRA-01 | Phase 1 | **Complete** (01-01) |
+| INFRA-02 | Phase 1 | **Complete** (01-02) |
+| INFRA-03 | Phase 1 | **Complete** (01-02) |
+| INFRA-04 | Phase 1 | **Complete** (01-02) |
+| INFRA-05 | Phase 1 | **Complete** (01-03) |
+| INFRA-06 | Phase 1 | **Complete** (01-03) |
+| INFRA-07 | Phase 1 | **Complete** (01-03) |
+| INFRA-08 | Phase 1 | **Complete** (01-01) |
+| INFRA-09 | Phase 1 | **Complete** (01-01) |
+| API-01 | Phase 2 | Pending |
+| API-02 | Phase 2 | Pending |
+| API-03 | Phase 2 | Pending |
+| TYPE-01 | Phase 3 | Pending |
+| TYPE-02 | Phase 3 | Pending |
+| TYPE-03 | Phase 3 | Pending |
+| TYPE-04 | Phase 3 | Pending |
+| TYPE-05 | Phase 3 | Pending |
+| TYPE-06 | Phase 3 | Pending |
+| TYPE-07 | Phase 3 | Pending |
+| TYPE-08 | Phase 3 | Pending |
+| PAGE-01 | Phase 4 | Pending |
+| PAGE-02 | Phase 4 | Pending |
+| PAGE-03 | Phase 4 | Pending |
+| PAGE-04 | Phase 4 | Pending |
+| INT-01 | Phase 3 | Pending |
+| INT-02 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-12*
-*Last updated: 2026-02-12 after initial definition*
+*Last updated: 2026-02-12 after roadmap creation*
