@@ -275,6 +275,7 @@ jobs:
                     --from-literal=gpt-client-secret="${{ secrets.GPT_CLIENT_SECRET }}" \
                     --from-literal=gpt-ec-private-key="${{ secrets.GPT_EC_PRIVATE_KEY }}" \
                     --from-literal=gpt-redirect-uri="${{ secrets.GPT_REDIRECT_URI }}" \
+                    --from-literal=clerk-webhook-secret="${{ secrets.CLERK_WEBHOOK_SECRET }}" \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 
@@ -339,6 +340,7 @@ jobs:
                   kubectl apply -f infra/k8s/chat-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/health-monitor/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gpt-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/gpt-service/cronjobs/ --namespace=splits-network
                   kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=splits-network
                   kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=splits-network
 
