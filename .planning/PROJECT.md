@@ -2,31 +2,21 @@
 
 ## What This Is
 
-A split-fee recruiting marketplace connecting recruiters, hiring companies, and candidates. The platform includes job management, candidate tracking, role-based access control, and global search across all entities.
+A split-fee recruiting marketplace connecting recruiters, hiring companies, and candidates. The platform includes job management, candidate tracking, role-based access control, global search across all entities, and a Custom GPT backend enabling candidates to interact with Applicant.Network via natural language in ChatGPT.
 
 ## Core Value
 
 Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements.
 
-## Current Milestone: v5.0 Custom GPT (Applicant Network)
+## Current State
 
-**Goal:** Build a Custom GPT backend that allows candidates to interact with Applicant.Network via natural language in ChatGPT — search jobs, analyze resumes, check application status, and submit applications.
-
-**Target features:**
-- New gpt-service microservice with GPT-specific API endpoints
-- OAuth2 provider flow (backend issues scoped GPT tokens, Clerk handles identity)
-- Job search via natural language
-- Resume analysis (parsing and job fit scoring)
-- Application status lookup
-- Application submission with confirmation safety pattern
-- OpenAPI 3.0 schema for GPT Actions
-- GPT Instructions document
+v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features implemented: OAuth2 authentication, job search, resume analysis, application submission with confirmation safety, and production deployment infrastructure.
 
 ## Requirements
 
 ### Validated
 
-<!-- From previous milestones -->
+<!-- v2.0 -->
 
 - Per-entity full-text search with tsvector columns on 7 tables — existing
 - Unified search.search_index table with trigger-based sync — v2.0
@@ -57,19 +47,21 @@ Connecting recruiters and companies through a marketplace model with transparent
 - Job list filtering by commute type and job level — v4.0
 - Search index includes commute_types and job_level for full-text matching — v4.0
 
+<!-- v5.0 -->
+
+- New gpt-service microservice following nano-service architecture — v5.0
+- OAuth2 provider endpoints (authorize, token, revoke) with Clerk identity — v5.0
+- GPT-scoped short-lived access tokens with per-user isolation — v5.0
+- Job search endpoint for GPT Actions (natural language query to structured results) — v5.0
+- Resume analysis endpoint (parse uploaded resume, score against job postings) — v5.0
+- Application status lookup endpoint — v5.0
+- Application submission endpoint with confirmation safety pattern — v5.0
+- OpenAPI 3.0.1 schema defining all GPT Actions — v5.0
+- GPT Instructions document for Custom GPT configuration — v5.0
+
 ### Active
 
-<!-- v5.0 Custom GPT (Applicant Network) -->
-
-- [ ] New gpt-service microservice following nano-service architecture
-- [ ] OAuth2 provider endpoints (authorize, token, revoke) with Clerk identity
-- [ ] GPT-scoped short-lived access tokens with per-user isolation
-- [ ] Job search endpoint for GPT Actions (natural language query → structured results)
-- [ ] Resume analysis endpoint (parse uploaded resume, score against job postings)
-- [ ] Application status lookup endpoint
-- [ ] Application submission endpoint with confirmation safety pattern
-- [ ] OpenAPI 3.0 schema defining all GPT Actions
-- [ ] GPT Instructions document for Custom GPT configuration
+(No active requirements — next milestone not yet defined)
 
 ### Out of Scope
 
@@ -84,20 +76,14 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Context
 
-**GPT Actions architecture:**
-- ChatGPT → Custom GPT → OpenAPI Action → gpt-service → existing services (ats-service, ai-service, document-service)
-- gpt-service is an OAuth2 provider: GPT sends OAuth request → backend redirects to Clerk login → validates session → issues short-lived GPT access token
-- Clerk = identity provider, backend = OAuth provider, GPT = OAuth client
-- All write actions require `confirmed: true` flag, return `CONFIRMATION_REQUIRED` error if missing
-
-**Existing guidance docs:**
-- `docs/gpt/01_PRD_Custom_GPT.md` — Product requirements
-- `docs/gpt/02_Architecture_Custom_GPT.md` — Architecture overview
-- `docs/gpt/03_Technical_Specification.md` — Technical spec
-- `docs/gpt/04_OpenAPI_Starter.yaml` — OpenAPI starter schema
-- `docs/gpt/05_GPT_Instructions_Template.md` — GPT instructions template
+**Current codebase:**
+- ~17,000+ lines added across v5.0 milestone
+- Tech stack: Fastify, TypeScript, Supabase Postgres, Next.js 16, jose (ES256 JWT), svix (webhook verification)
+- 16 microservices including gpt-service
+- gpt-service: OAuth2 provider, 5 GPT action endpoints, OpenAPI schema, audit pipeline
 
 **Key integration points:**
+- `services/gpt-service/` — Custom GPT OAuth2 + action endpoints
 - `services/ats-service/` — Jobs, applications data
 - `services/ai-service/` — AI-powered fit analysis
 - `services/document-service/` — Resume file storage
@@ -106,11 +92,11 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Constraints
 
-- **Nano-service**: gpt-service is a dedicated microservice, routes through api-gateway
-- **No direct DB queries for domain data**: gpt-service calls existing services' repositories or uses shared database access patterns
-- **Write-action safety**: All mutations require confirmed flag — no exceptions
+- **Nano-service**: Each service focused on one purpose, routes through api-gateway
+- **No direct DB queries for domain data**: gpt-service uses shared database access patterns
+- **Write-action safety**: All GPT mutations require confirmed flag — no exceptions
 - **Token scoping**: GPT tokens are scoped to candidate actions only, not recruiter/admin
-- **Rate limiting**: Per-user GPT-specific throttle policies
+- **Rate limiting**: Per-user GPT-specific throttle policies (30 reads/min, 10 writes/min)
 - **Tech stack**: Fastify, TypeScript, Supabase Postgres, existing V2 service patterns
 
 ## Key Decisions
@@ -128,10 +114,16 @@ Connecting recruiters and companies through a marketplace model with transparent
 | commute_types as TEXT[] array | Multi-select per job. Postgres arrays with @> filtering. | ✓ Good |
 | Hybrid granularity: hybrid_1 through hybrid_4 | Full granularity (1-4 days in office) matches real job postings. | ✓ Good |
 | job_level as TEXT with CHECK constraint | Single-select, 8 levels. Text with CHECK over enum for easier extension. | ✓ Good |
-| Backend as OAuth provider for GPT | Full control over token scoping, GPT-specific permissions, clean revocation, multi-tenant awareness. Clerk handles identity only. | — Pending |
-| New gpt-service microservice | Follows nano-service philosophy. Keeps GPT concerns isolated from domain services. | — Pending |
-| Applicant.Network features first | Candidate-facing features are simpler, lower risk. Splits.Network recruiter features in future milestone. | — Pending |
-| Confirmation safety pattern | All write actions require confirmed flag. Prevents AI misuse of write endpoints. | — Pending |
+| Backend as OAuth provider for GPT | Full control over token scoping, GPT-specific permissions, clean revocation, multi-tenant awareness. Clerk handles identity only. | ✓ Good |
+| New gpt-service microservice | Follows nano-service philosophy. Keeps GPT concerns isolated from domain services. | ✓ Good |
+| Applicant.Network features first | Candidate-facing features are simpler, lower risk. Splits.Network recruiter features in future milestone. | ✓ Good |
+| Confirmation safety pattern | All write actions require confirmed flag. Prevents AI misuse of write endpoints. | ✓ Good |
+| ES256 asymmetric JWT signing | More secure than symmetric (HS256). jose library is ESM-compatible with native ES256 support. | ✓ Good |
+| PKCE with SHA-256 | Required for public clients (GPT). Prevents authorization code interception attacks. | ✓ Good |
+| Token rotation with replay detection | Rotated token usage revokes ALL sessions — security-first approach indicates compromise. | ✓ Good |
+| OpenAPI 3.0.1 (not 3.1) | GPT Builder only supports 3.0.x. Avoids compatibility issues. | ✓ Good |
+| Dual-auth pattern | GPT Bearer tokens for ChatGPT, x-gpt-clerk-user-id header for candidate profile page. Both supported. | ✓ Good |
+| In-memory confirmation token store | 15-min TTL, tokens regenerated easily. Simple for MVP, migrate to Redis if needed later. | ✓ Good |
 
 ---
-*Last updated: 2026-02-13 after v4.0 milestone complete, v5.0 milestone started*
+*Last updated: 2026-02-13 after v5.0 milestone complete*
