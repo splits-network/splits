@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-14)
+See: .planning/PROJECT.md (updated 2026-02-13)
 
-**Core value:** Users find anything in the platform by typing natural language queries and getting ranked, cross-entity results in real-time.
-**Current focus:** Planning next milestone
+**Core value:** Platform admin is a system-level role assigned directly to a user — no organization membership required.
+**Current focus:** Defining requirements for v3.0
 
 ## Current Position
 
-Phase: Complete (v2.0 shipped)
-Plan: N/A
-Status: Between milestones
-Last activity: 2026-02-14 — v2.0 Global Search milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-13 — Milestone v3.0 Platform Admin Restructure started
 
-Progress: [██████████] 100% (v2.0)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -23,19 +23,13 @@ Progress: [██████████] 100% (v2.0)
 - Average duration: 4.4 min
 - Total execution time: ~31 minutes
 
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-search-infrastructure | 3 | 11min | 3.7min |
-| 02-search-api | 2 | 5min | 2.5min |
-| 03-typeahead-search | 2 | 15min | 7.5min |
-
 ## Accumulated Context
 
 ### Decisions
 
-All decisions documented in PROJECT.md Key Decisions table.
+- Nullable role_entity_id — platform admins have no entity to link to
+- Only platform_admin moves to user_roles — company_admin/hiring_manager stay in memberships
+- Remove synthetic platform organization entirely
 
 ### Pending Todos
 
@@ -43,14 +37,14 @@ None.
 
 ### Blockers/Concerns
 
-**Reminder:** User must run migration `20260214000001_search_index_company_access_control.sql` in Supabase and rebuild search-service Docker container for access control to take effect.
+**Reminder:** User must run migration `20260214000001_search_index_company_access_control.sql` in Supabase and rebuild search-service Docker container for v2.0 access control to take effect.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: v2.0 milestone completed and archived
+Last session: 2026-02-13
+Stopped at: Defining requirements for v3.0
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-14*
+*Last updated: 2026-02-13*
