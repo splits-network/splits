@@ -8,6 +8,7 @@ interface SearchResultItemProps {
   result: SearchResult;
   query: string;
   isActive: boolean;
+  isTopResult?: boolean;
   onClick: () => void;
 }
 
@@ -40,6 +41,7 @@ export function SearchResultItem({
   result,
   query,
   isActive,
+  isTopResult,
   onClick,
 }: SearchResultItemProps) {
   const config = ENTITY_TYPE_CONFIG[result.entity_type];
@@ -74,6 +76,13 @@ export function SearchResultItem({
           </div>
         )}
       </div>
+
+      {/* Top result Enter hint */}
+      {isTopResult && (
+        <div className="shrink-0">
+          <kbd className="kbd kbd-xs opacity-50">Enter</kbd>
+        </div>
+      )}
     </div>
   );
 }

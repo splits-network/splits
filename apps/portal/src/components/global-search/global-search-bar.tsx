@@ -88,8 +88,9 @@ export function GlobalSearchBar() {
       event.preventDefault();
       if (activeIndex >= 0 && allResults[activeIndex]) {
         handleResultClick(allResults[activeIndex]);
+      } else if (allResults.length > 0) {
+        handleResultClick(allResults[0]);
       }
-      // Note: Phase 4 will add navigation to full search page when activeIndex is -1
     } else if (event.key === 'Escape') {
       event.preventDefault();
       setIsOpen(false);
@@ -262,6 +263,7 @@ export function GlobalSearchBar() {
                           result={result}
                           query={query}
                           isActive={activeIndex === globalIndex}
+                          isTopResult={globalIndex === 0 && activeIndex === -1}
                           onClick={() => handleResultClick(result)}
                         />
                       );
