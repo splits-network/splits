@@ -3,7 +3,7 @@ import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { createClient } from "@supabase/supabase-js";
-import { loadConfig } from "@splits-network/shared-config";
+import { loadConfig, loadRedisConfig } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { CacheManager } from "./cache/cache-manager";
 import { CacheInvalidator } from "./cache/invalidation";
@@ -29,33 +29,7 @@ const supabase: any = createClient(
     },
 );
 
-const defaultRedisConfig = {
-    host: process.env.REDIS_HOST || "localhost",
-    port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD,
-    db: undefined as number | undefined,
-};
-
-const buildRedisConfig = () => {
-    if (!process.env.REDIS_URL) {
-        return defaultRedisConfig;
-    }
-
-    const parsed = new URL(process.env.REDIS_URL);
-    const dbValue = parsed.pathname?.slice(1);
-    const db = dbValue ? Number(dbValue) : undefined;
-
-    return {
-        host: parsed.hostname,
-        port: parsed.port ? Number(parsed.port) : 6379,
-        password: parsed.password
-            ? decodeURIComponent(parsed.password)
-            : undefined,
-        db: Number.isFinite(db) ? db : undefined,
-    };
-};
-
-const redisConfig = buildRedisConfig();
+const redisConfig = loadRedisConfig();
 
 // Initialize Redis cache
 const cache = new CacheManager(redisConfig);

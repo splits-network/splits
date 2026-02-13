@@ -28,6 +28,7 @@ export interface RedisConfig {
     host: string;
     port: number;
     password?: string;
+    db?: number;
 }
 
 export interface RabbitMQConfig {
@@ -104,6 +105,25 @@ export function loadDatabaseConfig(): DatabaseConfig {
  * Load Redis configuration
  */
 export function loadRedisConfig(): RedisConfig {
+    if (process.env.REDIS_URL) {
+        try {
+            const parsed = new URL(process.env.REDIS_URL);
+            const dbValue = parsed.pathname?.slice(1);
+            const db = dbValue ? parseInt(dbValue, 10) : undefined;
+
+            return {
+                host: parsed.hostname,
+                port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+                password: parsed.password
+                    ? decodeURIComponent(parsed.password)
+                    : process.env.REDIS_PASSWORD,
+                db: Number.isFinite(db) ? db : undefined,
+            };
+        } catch {
+            // Fall back to host/port if REDIS_URL is malformed.
+        }
+    }
+
     return {
         host: getEnvOrDefault('REDIS_HOST', 'localhost'),
         port: parseInt(getEnvOrDefault('REDIS_PORT', '6379'), 10),
@@ -221,6 +241,32 @@ export async function loadResendConfigFromVault(): Promise<ResendConfig> {
     return {
         apiKey: await getSecret('resend_api_key'),
         fromEmail: getEnvOrDefault('RESEND_FROM_EMAIL', 'notifications@updates.splits.network'),
+    };
+}
+
+export interface GptConfig {
+    clientId: string;
+    clientSecret: string;
+    jwtSecret: string;
+    redirectUri: string;
+    accessTokenExpiry: number;  // seconds
+    refreshTokenExpiry: number; // seconds
+    authCodeExpiry: number;     // seconds
+}
+
+/**
+ * Load GPT OAuth configuration
+ * Used by gpt-service for Custom GPT OAuth2 provider
+ */
+export function loadGptConfig(): GptConfig {
+    return {
+        clientId: getEnvOrThrow('GPT_CLIENT_ID'),
+        clientSecret: getEnvOrThrow('GPT_CLIENT_SECRET'),
+        jwtSecret: getEnvOrThrow('GPT_JWT_SECRET'),
+        redirectUri: getEnvOrThrow('GPT_REDIRECT_URI'),
+        accessTokenExpiry: parseInt(getEnvOrDefault('GPT_ACCESS_TOKEN_EXPIRY', '3600'), 10),
+        refreshTokenExpiry: parseInt(getEnvOrDefault('GPT_REFRESH_TOKEN_EXPIRY', '2592000'), 10),
+        authCodeExpiry: parseInt(getEnvOrDefault('GPT_AUTH_CODE_EXPIRY', '600'), 10),
     };
 }
 

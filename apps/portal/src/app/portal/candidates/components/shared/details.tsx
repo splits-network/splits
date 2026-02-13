@@ -270,7 +270,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     />
                 )}
                 {activeTab === "resume" && (
-                    <ResumeTab resumeMetadata={candidate.resume_metadata} />
+                    <ResumeTab resumeMetadata={(candidate.resume_metadata as ResumeMetadata | null) ?? undefined} />
                 )}
                 {activeTab === "applications" && (
                     <ApplicationsTab
