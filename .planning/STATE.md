@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
-**Current focus:** v5.0 Custom GPT -- Phase 11 (Service Foundation)
+**Current focus:** v5.0 Custom GPT -- Phase 12 (OAuth2 Provider)
 
 ## Current Position
 
-Phase: 11 of 15 (Service Foundation)
-Plan: 03 of 3 complete -- Phase 11 COMPLETE
-Status: Phase complete
-Last activity: 2026-02-13 -- Completed 11-03-PLAN.md (Audit event consumer)
+Phase: 12 of 15 (OAuth2 Provider)
+Plan: 01 of TBD in progress
+Status: In progress
+Last activity: 2026-02-13 -- Completed 12-01-PLAN.md (Schema & Config Foundation)
 
-Progress: [███░░░░░░░] ~20% (3/~15 v5.0 plans)
+Progress: [███░░░░░░░] ~27% (4/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [███░░░░░░░] ~20% (3/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 3
-- Average duration: 2.7 min
-- Total execution time: ~8 minutes
+- Total plans completed: 4
+- Average duration: 2.5 min
+- Total execution time: ~10 minutes
 
 **Cumulative:**
-- Total plans completed: 21
-- Average duration: 3.4 min
-- Total execution time: ~71.5 minutes
+- Total plans completed: 22
+- Average duration: 3.3 min
+- Total execution time: ~73.5 minutes
 
 ## Accumulated Context
 
@@ -56,6 +56,9 @@ Progress: [███░░░░░░░] ~20% (3/~15 v5.0 plans)
 - gpt-service scaffold: no Swagger/Sentry -- minimal for Phase 11, add as needed later
 - Nack without requeue (requeue: false) on audit consumer failures to prevent poison message loops
 - Bind gpt.oauth.# and gpt.action.# routing keys upfront for future extensibility
+- ES256 asymmetric signing replaces symmetric jwtSecret (Phase 12)
+- Access token TTL reduced to 15 min (900s) for tighter security (Phase 12)
+- Auth code TTL reduced to 5 min (300s) per OAuth best practices (Phase 12)
 
 ### Pending Todos
 
@@ -76,6 +79,10 @@ None.
 **From v5.0 (Phase 11):**
 - User must apply migration `20260220000001_create_gpt_oauth_tables.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
 
+**From v5.0 (Phase 12):**
+- User must apply migration `20260221000001_add_scopes_to_gpt_oauth_tables.sql` and run `supabase gen types typescript` to regenerate database.types.ts.
+- User must add `GPT_EC_PRIVATE_KEY` environment variable (base64-encoded EC private key PEM) for ES256 JWT signing.
+
 **v5.0 Research Flags:**
 - Phase 12 (OAuth): HIGH priority -- must validate Clerk redirect mechanism, OpenAI callback URL format, PKCE requirement, and token_exchange_method before writing production code.
 - Phase 14 (OpenAPI): MEDIUM priority -- verify x-openai-isConsequential behavior, OpenAPI 3.0 vs 3.1 support, action count limits.
@@ -83,10 +90,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 11-03-PLAN.md (Audit event consumer) -- Phase 11 complete
+Stopped at: Completed 12-01-PLAN.md (Schema & Config Foundation)
 Resume file: None
-Next: Phase 12 (OAuth Flow)
+Next: 12-02 (OAuth endpoints)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (11-03 audit event consumer complete, Phase 11 complete)*
+*Last updated: 2026-02-13 (12-01 schema & config foundation complete)*
