@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { EntityCard, DataRow, VerticalDataRow, InteractiveDataRow, DataList } from '@/components/ui/cards';
 import { MarketplaceProfile } from '@splits-network/shared-types';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 import RecruiterReputation from './recruiter-reputation';
 
 interface MarketplaceRecruiter {
@@ -115,9 +116,13 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
             <EntityCard.Body>
                 <DataList>
                     <VerticalDataRow label="Bio" icon='fa-user-circle'>
-                        <span className="w-full text-sm text-base-content/80 line-clamp-3">
-                            {recruiter.bio ? (recruiter.bio.length > 100 ? recruiter.bio.substring(0, 100) + '...' : recruiter.bio) : 'Not provided'}
-                        </span>
+                        <div className="w-full text-sm text-base-content/80 line-clamp-3">
+                            {recruiter.marketplace_profile?.bio_rich || recruiter.bio ? (
+                                <MarkdownRenderer content={recruiter.marketplace_profile?.bio_rich || recruiter.bio || ''} />
+                            ) : (
+                                <span>Not provided</span>
+                            )}
+                        </div>
                     </VerticalDataRow>
                     <DataRow label="Location" icon='fa-location-dot' value={recruiter.location || 'Not provided'} />
                     <DataRow label="Years Experience" icon='fa-hourglass-half' value={recruiter.years_experience !== undefined ? `${recruiter.years_experience}+ years` : 'Not specified'} />
