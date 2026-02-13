@@ -180,7 +180,11 @@ Plans:
   2. Schema is served at /api/v1/gpt/openapi.yaml and is accepted by GPT Builder's schema validator
   3. GPT Instructions document covers all action scenarios, confirmation rules, error handling, and conversational patterns
   4. All write action operations are annotated with x-openai-isConsequential: true
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — OpenAPI 3.0.1 schema file and serving endpoint
+- [ ] 14-02-PLAN.md — GPT Instructions document and Builder listing copy
 
 ### Phase 15: Production Hardening
 **Goal**: gpt-service is production-ready with deployment infrastructure, rate limiting, token lifecycle management, and observability
@@ -213,9 +217,9 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 11. Service Foundation | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 12. OAuth2 Provider | v5.0 | 6/6 | Complete | 2026-02-13 |
 | 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
-| 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/TBD | Not started | - |
+| 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/2 | Not started | - |
 | 15. Production Hardening | v5.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-13 (Phase 13 complete)*
+*Last updated: 2026-02-13 (Phase 14 planned)*
