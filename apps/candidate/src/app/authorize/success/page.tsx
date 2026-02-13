@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function AuthorizeSuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-base-200"><span className="loading loading-spinner loading-lg"></span></div>}>
+            <AuthorizeSuccessContent />
+        </Suspense>
+    );
+}
+
+function AuthorizeSuccessContent() {
     const searchParams = useSearchParams();
     const [redirecting, setRedirecting] = useState(false);
 
