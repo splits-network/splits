@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from './oauth/routes';
 import { registerWebhookRoutes } from './oauth/webhook-handler';
 import { OAuthService } from './oauth/oauth-service';
 import { GptActionRepository } from './actions/repository';
+import { registerActionRoutes } from './actions/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -39,6 +40,6 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     // Register webhook routes
     registerWebhookRoutes(app, { oauthService, logger: app.log as Logger });
 
-    // GPT Action routes will be registered in Plans 02-04
-    // actionRepository is ready for use in those plans
+    // Register GPT Action routes
+    registerActionRoutes(app, { repository: actionRepository, oauthService });
 }
