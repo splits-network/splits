@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 13 of 15 (GPT API Endpoints)
-Plan: 02 of ~4
+Plan: 04 of ~4
 Status: In progress
-Last activity: 2026-02-13 -- Completed 13-02-PLAN.md (Read-Only GPT Endpoints)
+Last activity: 2026-02-13 -- Completed 13-04-PLAN.md (Resume Analysis Endpoint)
 
-Progress: [███████░░░] ~67% (11/~15 v5.0 plans)
+Progress: [███████░░░] ~73% (12/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [███████░░░] ~67% (11/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 3.2 min
-- Total execution time: ~36 minutes
+- Total execution time: ~39 minutes
 
 **Cumulative:**
-- Total plans completed: 29
+- Total plans completed: 30
 - Average duration: 3.4 min
-- Total execution time: ~100 minutes
+- Total execution time: ~103 minutes
 
 ## Accumulated Context
 
@@ -78,6 +78,10 @@ Progress: [███████░░░] ~67% (11/~15 v5.0 plans)
 - UUID regex validation for job ID parameter (Phase 13-02)
 - Include company data in job detail response for GPT context (Phase 13-02)
 - 10 applications per page vs 5 jobs per page (different pagination limits) (Phase 13-02)
+- Resume text priority: GPT-provided > stored resume > error (enables chat-based resume upload) (Phase 13-04)
+- Use concerns field from ai-service as gaps (more descriptive than missing_skills) (Phase 13-04)
+- Synthetic application_id with timestamp for GPT analysis tracking (Phase 13-04)
+- ai-service URL defaults to port 3009 (http://ai-service:3009) (Phase 13-04)
 
 ### Pending Todos
 
@@ -110,10 +114,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 13-02-PLAN.md (Read-Only GPT Endpoints)
+Stopped at: Completed 13-04-PLAN.md (Resume Analysis Endpoint)
 Resume file: None
-Next: Continue Phase 13 with Plans 03-04 (application submission, resume analysis endpoints)
+Next: Continue Phase 13 with Plan 03 (application submission with confirmation) or Phase 14 (OpenAPI schema)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 13 Plans 01-02 complete)*
+*Last updated: 2026-02-13 (Phase 13 Plans 01-02, 04 complete)*
