@@ -42,10 +42,11 @@ Plans:
   2. GET /v2/search?q=query&mode=full endpoint returns paginated results with standard { data, pagination } envelope
   3. Search results respect role-based access control (company users only see their candidates/jobs, recruiters see assigned entities)
   4. Malformed queries (empty string, special characters, SQL injection attempts) return validation errors without crashing
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: [TBD during phase planning]
+- [ ] 02-01-PLAN.md — Create search-service: repository, service, types, and route handler with access control and validation
+- [ ] 02-02-PLAN.md — Wire search-service into API gateway with proxy routes and service registration
 
 ### Phase 3: Typeahead Search
 **Goal**: Real-time search bar in portal header with keyboard navigation and result navigation
@@ -87,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Search Infrastructure | 3/3 | **Complete** | 2026-02-13 |
-| 2. Search API | 0/TBD | Not started | - |
+| 2. Search API | 0/2 | Not started | - |
 | 3. Typeahead Search | 0/TBD | Not started | - |
 | 4. Full Search Page | 0/TBD | Not started | - |
 
