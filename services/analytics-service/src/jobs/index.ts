@@ -1,18 +1,20 @@
 import cron from 'node-cron';
 import { SupabaseClient } from '@supabase/supabase-js';
+import Redis from 'ioredis';
 import { createLogger } from '@splits-network/shared-logging';
 import { CacheManager } from '../cache/cache-manager';
 import { rollupHourlyMetrics } from './rollup-hourly';
 import { rollupDailyMetrics } from './rollup-daily';
 import { rollupMonthlyMetrics } from './rollup-monthly';
 import { computeMarketplaceHealth } from './marketplace-health';
+import { rollupActivitySnapshot } from './rollup-activity';
 
 const logger = createLogger('BackgroundJobs');
 
 /**
  * Start all background aggregation jobs
  */
-export function startBackgroundJobs(supabase: SupabaseClient, cache: CacheManager) {
+export function startBackgroundJobs(supabase: SupabaseClient, cache: CacheManager, redis?: Redis) {
     logger.info('Starting background aggregation jobs...');
 
     // Hourly rollup at :05 past every hour
@@ -59,6 +61,17 @@ export function startBackgroundJobs(supabase: SupabaseClient, cache: CacheManage
             logger.error({ error }, 'Marketplace health computation failed');
         }
     });
+
+    // Activity snapshot every 5 minutes (stores online counts in DB for historical trends)
+    if (redis) {
+        cron.schedule('*/5 * * * *', async () => {
+            try {
+                await rollupActivitySnapshot(redis, supabase);
+            } catch (error) {
+                logger.error({ error }, 'Activity snapshot rollup failed');
+            }
+        });
+    }
 
     logger.info('Background jobs scheduled successfully');
 }

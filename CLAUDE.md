@@ -48,7 +48,12 @@ services/                 # Backend APIs (Fastify + TypeScript)
 ├─ notification-service/  # Event-driven email (Resend)
 ├─ automation-service/    # AI matching, fraud detection
 ├─ ai-service/            # AI-powered candidate-job fit analysis
-└─ document-service/      # File storage (Supabase Storage)
+├─ document-service/      # File storage (Supabase Storage)
+├─ analytics-service/     # Stats, charts, metrics aggregation
+├─ analytics-gateway/     # WebSocket fan-out for real-time dashboard events
+├─ chat-service/          # Conversations, messages, presence queries
+├─ chat-gateway/          # WebSocket fan-out for real-time messaging
+└─ health-monitor/        # System health monitoring
 
 packages/                 # Shared code (NOT directly deployable)
 ├─ shared-types/          # Domain types, DTOs
@@ -69,6 +74,7 @@ packages/                 # Shared code (NOT directly deployable)
 3. **Single Supabase Postgres database** - only 'public' and 'analytics' schemas, no separate DBs per service
 4. **Frontend calls `api-gateway` only** - never individual domain services
 5. **Server-side pagination/filtering** - client-side filtering does NOT scale
+6. **Nano-service philosophy** - services should be focused in purpose and do one thing well. If a new purpose is identified, it should get its own service. Small, focused services are cheaper to run and easier to maintain than bloated multi-purpose ones.
 
 ### V2 API Pattern (Use for Most Services)
 

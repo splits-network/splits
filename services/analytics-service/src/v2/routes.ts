@@ -13,6 +13,8 @@ import { registerChartRoutes } from './charts/routes';
 import { ProposalStatsRepository } from './proposal-stats/repository';
 import { ProposalStatsService } from './proposal-stats/service';
 import { registerProposalStatsRoutes } from './proposal-stats/routes';
+import { ActivityService } from './activity/service';
+import { registerActivityRoutes } from './activity/routes';
 
 // Domain route imports (will be created)
 // import { marketplaceHealthRoutes } from './marketplace-health/routes';
@@ -64,12 +66,18 @@ export async function registerV2Routes(
     const proposalStatsRepository = new ProposalStatsRepository(supabase);
     const proposalStatsService = new ProposalStatsService(proposalStatsRepository, cache, supabase);
 
+    // Initialize activity service (uses Redis for real-time presence tracking)
+    const activityService = redis ? new ActivityService(redis) : null;
+
     // Register domain routes
     registerStatsRoutes(app, { statsService });
     registerMarketplaceMetricsRoutes(app, { marketplaceMetricsService });
     registerChartRoutes(app, { chartService });
     registerProposalStatsRoutes(app, proposalStatsService);
+    if (activityService) {
+        registerActivityRoutes(app, { activityService });
+    }
 
-    // TODO: Register marketplace health routes when implemented
-    // await app.register(marketplaceHealthRoutes, { prefix: '/marketplace-health', supabase, cache });
+    // Expose activityService on the app instance for the publisher to use
+    (app as any).activityService = activityService;
 }

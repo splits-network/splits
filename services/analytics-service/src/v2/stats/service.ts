@@ -1,5 +1,5 @@
 import { StatsRepository } from './repository';
-import { StatsQueryParams, StatsRange, StatsResponse } from './types';
+import { StatsQueryParams, StatsRange, StatsResponse, PlatformActivityEvent, TopPerformer } from './types';
 
 function startOfYear(date: Date) {
     return new Date(date.getFullYear(), 0, 1);
@@ -146,6 +146,22 @@ export class StatsServiceV2 {
             default:
                 throw new Error(`Invalid stats scope: ${scope}`);
         }
+    }
+
+    async getPlatformActivity(clerkUserId: string): Promise<PlatformActivityEvent[]> {
+        const accessContext = await this.repository.getAccessContext(clerkUserId);
+        if (!accessContext.isPlatformAdmin) {
+            throw new Error('Platform admin access required');
+        }
+        return this.repository.getPlatformActivity();
+    }
+
+    async getTopPerformers(clerkUserId: string): Promise<TopPerformer[]> {
+        const accessContext = await this.repository.getAccessContext(clerkUserId);
+        if (!accessContext.isPlatformAdmin) {
+            throw new Error('Platform admin access required');
+        }
+        return this.repository.getTopPerformers();
     }
 
     private normalizeScope(scope: string): 'recruiter' | 'candidate' | 'company' | 'platform' {

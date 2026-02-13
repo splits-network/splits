@@ -11,6 +11,8 @@ import { registerV2Routes } from "./v2/routes";
 import { DomainEventConsumer } from "./consumers/domain-consumer";
 import { DashboardEventPublisher } from "./v2/shared/dashboard-events";
 import { startBackgroundJobs } from "./jobs";
+import { ActivityService } from "./v2/activity/service";
+import { ActivityPublisher } from "./v2/activity/publisher";
 import Redis from "ioredis";
 
 const logger = createLogger("AnalyticsService");
@@ -105,15 +107,24 @@ app.get("/health", async (request, reply) => {
     });
 });
 
+// Create a Redis data client for presence queries (reads presence:user:* keys set by chat-gateway)
+const redisData = new Redis({
+    host: process.env.REDIS_HOST || "localhost",
+    port: Number(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+});
+
 // Register V2 routes (routes include full /api/v2 paths since API Gateway forwards them)
 app.register(registerV2Routes, {
     supabase,
     cache,
     config,
+    redis: redisData,
 });
 
-// Initialize event consumer
+// Initialize event consumer and activity publisher
 let eventConsumer: DomainEventConsumer | null = null;
+let activityPublisher: ActivityPublisher | null = null;
 
 async function startServer() {
     try {
@@ -143,8 +154,16 @@ async function startServer() {
         logger.info("Event consumer started and listening for domain events");
 
         // Start background jobs
-        startBackgroundJobs(supabase, cache);
+        startBackgroundJobs(supabase, cache, redisData);
         logger.info("Background aggregation jobs started");
+
+        // Start activity publisher (15s interval pushing online counts via WebSocket)
+        const activityService = (app as any).activityService as ActivityService | null;
+        if (activityService) {
+            activityPublisher = new ActivityPublisher(activityService, pubRedis);
+            activityPublisher.start();
+            logger.info("Activity publisher started");
+        }
     } catch (error) {
         logger.error({ error }, "Failed to start analytics service");
         process.exit(1);
@@ -156,6 +175,12 @@ async function shutdown() {
     logger.info("Shutting down analytics service...");
 
     try {
+        // Stop activity publisher
+        if (activityPublisher) {
+            activityPublisher.stop();
+            logger.info("Activity publisher stopped");
+        }
+
         // Close event consumer
         if (eventConsumer) {
             await eventConsumer.close();

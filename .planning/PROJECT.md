@@ -13,7 +13,8 @@ Users find anything in the platform by typing natural language queries and getti
 **Goal:** Build full-stack global search from database functions through API to real-time UI
 
 **Target features:**
-- Postgres global search function querying all entity tables via UNION ALL with ts_rank scoring
+- Dedicated `search` schema with unified `search_index` table (CQRS pattern — isolate search reads from live tables)
+- Trigger-based near-real-time sync from source tables to search index
 - Search API endpoints in api-gateway (typeahead + full results)
 - Real-time typeahead dropdown in portal header (top 5 results as user types)
 - Full search results page with entity type filtering and pagination
@@ -31,7 +32,7 @@ Users find anything in the platform by typing natural language queries and getti
 
 ### Active
 
-- [ ] Global search function in Postgres querying all searchable tables with relevance ranking
+- [ ] Unified search.search_index table with trigger-based sync from all entity tables
 - [ ] Search API endpoints (typeahead and full search) in api-gateway
 - [ ] Real-time typeahead search bar in portal header with top 5 results dropdown
 - [ ] Full search results page with entity type filtering and pagination
@@ -57,7 +58,10 @@ Users find anything in the platform by typing natural language queries and getti
 - `docs/search/scalable-search-architecture.md` documents current FTS patterns
 
 **Architecture:**
-- Single Supabase Postgres database (public schema)
+- Single Supabase Postgres database (public + analytics + search schemas)
+- Global search queries `search.search_index` (isolated from live read/write tables)
+- Triggers on source tables sync to search_index in same transaction (near-real-time)
+- Per-entity list search stays on live tables (tsvector + GIN, already fast)
 - API Gateway (Fastify) proxies to domain services
 - Access context resolves user roles/permissions for filtering
 - Portal header at `apps/portal/src/components/portal-header.tsx` — integration point for search bar
@@ -83,7 +87,8 @@ Users find anything in the platform by typing natural language queries and getti
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Postgres UNION ALL function vs parallel HTTP queries | Single DB round-trip, Postgres optimizes query plan, avoids N service calls | — Pending |
+| Dedicated search schema vs querying live tables | Isolates search reads from live write tables; scales without impacting CRUD performance; single unified table instead of 6-7 parallel queries | ✓ search schema with search_index table |
+| Trigger-based sync vs materialized view refresh | Triggers give sub-second freshness in same transaction; materialized views have refresh delay and lock during rebuild | ✓ Triggers |
 | Search routes in api-gateway vs new search service | Read-only aggregation, not a domain service; keeps it simple | — Pending |
 | Typeahead + full search as same endpoint with different limits | DRY; same function, different parameters | — Pending |
 

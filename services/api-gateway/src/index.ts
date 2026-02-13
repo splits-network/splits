@@ -173,10 +173,25 @@ async function main() {
     });
 
     // Register rate limiting
+    // Authenticated users get a higher limit since SPAs with dashboards
+    // can easily fire 10+ requests on page load across multiple widgets
     await app.register(rateLimit as any, {
-        max: 100,
+        max: async (request: any) => {
+            const hasAuth = request.headers['authorization'];
+            return hasAuth ? 500 : 100;
+        },
         timeWindow: '1 minute',
         redis,
+        keyGenerator: (request: any) => {
+            // Use bearer token hash for authenticated users so different users
+            // on the same IP don't share a rate limit bucket
+            const auth = request.headers['authorization'];
+            if (auth) {
+                // Use last 16 chars of token as key (unique per session, avoids storing full JWT)
+                return `auth:${auth.slice(-16)}`;
+            }
+            return request.ip;
+        },
         allowList: async (request: any) => {
             const url = request.raw?.url || request.url || '';
             if (url.startsWith('/api/v2/chat')) return true;
@@ -206,6 +221,7 @@ async function main() {
             request.url.includes('/docs') ||
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||
+            request.url.includes('/activity/heartbeat') ||
             request.method === 'OPTIONS') {
             return;
         }
@@ -230,6 +246,7 @@ async function main() {
             request.url.includes('/docs') ||
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||
+            request.url.includes('/activity/heartbeat') ||
             request.method === 'OPTIONS') {
             return;
         }

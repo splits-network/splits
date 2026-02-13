@@ -50,7 +50,12 @@ export type ChartType =
     | 'recruitment-funnel'
     | 'reputation-radar'
     | 'hiring-pipeline'
-    | 'company-health-radar';
+    | 'company-health-radar'
+    | 'recruiter-growth-trends'
+    | 'platform-revenue-trends'
+    | 'marketplace-health-radar'
+    | 'platform-pipeline'
+    | 'user-growth-by-type';
 
 export interface AnalyticsChartProps {
     type: ChartType;
