@@ -114,9 +114,9 @@ app.addHook("onRequest", async (request, reply) => {
     if (request.url === "/health" || request.url.includes("/docs")) {
         request.log = {
             ...request.log,
-            info: () => {},
-            debug: () => {},
-            trace: () => {},
+            info: () => { },
+            debug: () => { },
+            trace: () => { },
         } as any;
     }
 });
