@@ -8,6 +8,7 @@ const baseAccess: AccessContext = {
     candidateId: null,
     recruiterId: null,
     organizationIds: [],
+    orgWideOrganizationIds: [],
     companyIds: [],
     roles: [],
     isPlatformAdmin: false,

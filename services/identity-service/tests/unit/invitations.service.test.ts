@@ -9,6 +9,7 @@ const companyAdmin: AccessContext = {
     candidateId: null,
     recruiterId: null,
     organizationIds: ['org-1'],
+    orgWideOrganizationIds: [],
     companyIds: ['company-1'],
     roles: ['company_admin'],
     isPlatformAdmin: false,

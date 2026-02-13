@@ -51,6 +51,7 @@ const billingAdminAccess: AccessContext = {
     candidateId: null,
     recruiterId: null,
     organizationIds: [],
+    orgWideOrganizationIds: [],
     companyIds: [],
     roles: ['platform_admin'],
     isPlatformAdmin: true,
