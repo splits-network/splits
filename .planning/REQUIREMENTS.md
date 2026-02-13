@@ -19,11 +19,11 @@
 
 ### API
 
-- [ ] **API-01**: ats-service accepts `commute_types` and `job_level` on job creation (POST /v2/jobs)
-- [ ] **API-02**: ats-service accepts `commute_types` and `job_level` on job update (PATCH /v2/jobs/:id)
-- [ ] **API-03**: ats-service returns `commute_types` and `job_level` in job responses
-- [ ] **API-04**: ats-service supports filtering jobs by `commute_type` (any match in array)
-- [ ] **API-05**: ats-service supports filtering jobs by `job_level`
+- [x] **API-01**: ats-service accepts `commute_types` and `job_level` on job creation (POST /v2/jobs)
+- [x] **API-02**: ats-service accepts `commute_types` and `job_level` on job update (PATCH /v2/jobs/:id)
+- [x] **API-03**: ats-service returns `commute_types` and `job_level` in job responses
+- [x] **API-04**: ats-service supports filtering jobs by `commute_type` (any match in array)
+- [x] **API-05**: ats-service supports filtering jobs by `job_level`
 
 ### Frontend
 
@@ -57,11 +57,11 @@
 | TYPE-01 | Phase 8 | Complete |
 | TYPE-02 | Phase 8 | Complete |
 | TYPE-03 | Phase 8 | Complete |
-| API-01 | Phase 9 | Pending |
-| API-02 | Phase 9 | Pending |
-| API-03 | Phase 9 | Pending |
-| API-04 | Phase 9 | Pending |
-| API-05 | Phase 9 | Pending |
+| API-01 | Phase 9 | Complete |
+| API-02 | Phase 9 | Complete |
+| API-03 | Phase 9 | Complete |
+| API-04 | Phase 9 | Complete |
+| API-05 | Phase 9 | Complete |
 | UI-01 | Phase 10 | Pending |
 | UI-02 | Phase 10 | Pending |
 | UI-03 | Phase 10 | Pending |
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after Phase 8 complete*
+*Last updated: 2026-02-13 after Phase 9 complete*
