@@ -29,12 +29,36 @@ const supabase: any = createClient(
     },
 );
 
-// Initialize Redis cache
-const cache = new CacheManager({
+const defaultRedisConfig = {
     host: process.env.REDIS_HOST || "localhost",
     port: Number(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD,
-});
+    db: undefined as number | undefined,
+};
+
+const buildRedisConfig = () => {
+    if (!process.env.REDIS_URL) {
+        return defaultRedisConfig;
+    }
+
+    const parsed = new URL(process.env.REDIS_URL);
+    const dbValue = parsed.pathname?.slice(1);
+    const db = dbValue ? Number(dbValue) : undefined;
+
+    return {
+        host: parsed.hostname,
+        port: parsed.port ? Number(parsed.port) : 6379,
+        password: parsed.password
+            ? decodeURIComponent(parsed.password)
+            : undefined,
+        db: Number.isFinite(db) ? db : undefined,
+    };
+};
+
+const redisConfig = buildRedisConfig();
+
+// Initialize Redis cache
+const cache = new CacheManager(redisConfig);
 
 // Initialize cache invalidator
 const cacheInvalidator = new CacheInvalidator(cache);
@@ -108,11 +132,7 @@ app.get("/health", async (request, reply) => {
 });
 
 // Create a Redis data client for presence queries (reads presence:user:* keys set by chat-gateway)
-const redisData = new Redis({
-    host: process.env.REDIS_HOST || "localhost",
-    port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
-});
+const redisData = new Redis(redisConfig);
 
 // Create ActivityService at the top level so it's accessible outside the plugin scope
 const activityService = new ActivityService(redisData);
@@ -146,11 +166,7 @@ async function startServer() {
         );
 
         // Wire dashboard event publisher for real-time WebSocket updates
-        const pubRedis = new Redis({
-            host: process.env.REDIS_HOST || "localhost",
-            port: Number(process.env.REDIS_PORT) || 6379,
-            password: process.env.REDIS_PASSWORD || undefined,
-        });
+        const pubRedis = new Redis(redisConfig);
         eventConsumer.setDashboardPublisher(new DashboardEventPublisher(pubRedis));
 
         await eventConsumer.connect();

@@ -18,6 +18,8 @@ export interface Job {
     salary_max?: number | null;
     department?: string | null;
     open_to_relocation?: boolean;
+    commute_types?: string[] | null;
+    job_level?: string | null;
     show_salary_range?: boolean;
     guarantee_days?: number | null;
     status?: string;

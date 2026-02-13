@@ -71,6 +71,41 @@ export interface Job {
 /**
  * Unified filter interface for all view modes (browse, grid, table)
  */
+// ===== LABEL MAPS =====
+
+export const COMMUTE_TYPE_LABELS: Record<string, string> = {
+    remote: "Remote",
+    hybrid_1: "Hybrid (1 day)",
+    hybrid_2: "Hybrid (2 days)",
+    hybrid_3: "Hybrid (3 days)",
+    hybrid_4: "Hybrid (4 days)",
+    in_office: "In Office",
+};
+
+export const JOB_LEVEL_LABELS: Record<string, string> = {
+    entry: "Entry Level",
+    mid: "Mid Level",
+    senior: "Senior",
+    lead: "Lead",
+    manager: "Manager",
+    director: "Director",
+    vp: "VP",
+    c_suite: "C-Suite",
+};
+
+export function formatCommuteTypes(types?: string[] | null): string | null {
+    if (!types || types.length === 0) return null;
+    return types.map((t) => COMMUTE_TYPE_LABELS[t] || t).join(", ");
+}
+
+export function formatJobLevel(level?: string | null): string | null {
+    if (!level) return null;
+    return JOB_LEVEL_LABELS[level] || level;
+}
+
+/**
+ * Unified filter interface for all view modes (browse, grid, table)
+ */
 export interface UnifiedJobFilters {
     // Common filters
     status?: string;
