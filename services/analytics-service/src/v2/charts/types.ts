@@ -21,7 +21,12 @@ export type ChartType =
     | 'recruitment-funnel'
     | 'reputation-radar'
     | 'hiring-pipeline'
-    | 'company-health-radar';
+    | 'company-health-radar'
+    | 'recruiter-growth-trends'
+    | 'platform-revenue-trends'
+    | 'marketplace-health-radar'
+    | 'platform-pipeline'
+    | 'user-growth-by-type';
 
 /**
  * Chart.js compatible dataset structure
@@ -85,4 +90,9 @@ export const CHART_METRIC_MAPPING: Record<ChartType, string[]> = {
     'reputation-radar': ['reputation_metrics'],
     'hiring-pipeline': ['hiring_stage_counts'],
     'company-health-radar': ['company_health_metrics'],
+    'recruiter-growth-trends': ['recruiter_signups'],
+    'platform-revenue-trends': ['platform_revenue'],
+    'marketplace-health-radar': ['marketplace_health_metrics'],
+    'platform-pipeline': ['platform_stage_counts'],
+    'user-growth-by-type': ['user_signups_by_type'],
 };

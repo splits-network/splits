@@ -6,6 +6,7 @@ import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
+import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -141,6 +142,7 @@ export default async function RootLayout({
                             <CookieConsent />
                         </ToastProvider>
                         <DevDebugPanel />
+                        <PortalActivityTrackerWrapper />
                     </UserProfileProvider>
 
                     {/* HelpNinja widget loaded after page becomes interactive */}

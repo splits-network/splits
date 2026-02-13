@@ -51,6 +51,7 @@ const recruiterAccess: AccessContext = {
     candidateId: null,
     recruiterId: 'rec-1',
     organizationIds: [],
+    orgWideOrganizationIds: [],
     companyIds: [],
     roles: ['recruiter'],
     isPlatformAdmin: false,

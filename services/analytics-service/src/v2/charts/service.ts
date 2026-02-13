@@ -120,6 +120,21 @@ export class ChartServiceV2 {
             case 'company-health-radar': {
                 return this.computeCompanyHealthRadar(filters);
             }
+            case 'recruiter-growth-trends': {
+                return this.computeRecruiterGrowthTrends(labels, timeRange);
+            }
+            case 'platform-revenue-trends': {
+                return this.computePlatformRevenueTrends(labels, timeRange);
+            }
+            case 'marketplace-health-radar': {
+                return this.computeMarketplaceHealthRadar();
+            }
+            case 'platform-pipeline': {
+                return this.computePlatformPipeline();
+            }
+            case 'user-growth-by-type': {
+                return this.computeUserGrowthByType(labels, timeRange);
+            }
             default: {
                 // Return empty chart for unhandled types
                 return { labels, datasets: [{ label: 'Data', data: labels.map(() => 0), borderWidth: 2, fill: false }] };
@@ -795,6 +810,253 @@ export class ChartServiceV2 {
                 borderWidth: 2,
                 fill: true,
             }],
+        };
+    }
+
+    /**
+     * Recruiter growth: new recruiter signups bucketed by month.
+     */
+    private async computeRecruiterGrowthTrends(
+        labels: string[],
+        timeRange: { start: Date; end: Date }
+    ): Promise<ChartData> {
+        const { data: recruiters } = await this.supabase
+            .from('recruiters')
+            .select('created_at')
+            .gte('created_at', timeRange.start.toISOString())
+            .lte('created_at', timeRange.end.toISOString());
+
+        const monthCounts = this.bucketByMonth(recruiters || [], 'created_at', labels);
+
+        return {
+            labels,
+            datasets: [{
+                label: 'New Recruiters',
+                data: monthCounts,
+                backgroundColor: 'rgb(54, 162, 235)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1,
+                fill: false,
+            }],
+        };
+    }
+
+    /**
+     * Platform revenue trends: sum of platform_share from placements by month.
+     */
+    private async computePlatformRevenueTrends(
+        labels: string[],
+        timeRange: { start: Date; end: Date }
+    ): Promise<ChartData> {
+        const { data: placements } = await this.supabase
+            .from('placements')
+            .select('created_at, platform_share')
+            .in('state', ['hired', 'active', 'completed'])
+            .gte('created_at', timeRange.start.toISOString())
+            .lte('created_at', timeRange.end.toISOString());
+
+        // Bucket revenue by month (sum, not count)
+        const monthRevenue = new Map<string, number>();
+        labels.forEach(l => monthRevenue.set(l, 0));
+
+        for (const p of (placements || [])) {
+            const monthKey = this.formatMonthLabel(new Date(p.created_at));
+            if (monthRevenue.has(monthKey)) {
+                monthRevenue.set(monthKey, (monthRevenue.get(monthKey) || 0) + Number(p.platform_share || 0));
+            }
+        }
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Revenue ($)',
+                data: labels.map(l => Math.round(monthRevenue.get(l) || 0)),
+                backgroundColor: 'rgb(75, 192, 192)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 2,
+                fill: false,
+            }],
+        };
+    }
+
+    /**
+     * Marketplace health radar: 5-axis platform health metrics (0-100).
+     */
+    private async computeMarketplaceHealthRadar(): Promise<ChartData> {
+        const labels = ['Recruiter Activity', 'Company Engagement', 'Time-to-Fill', 'Fill Rate', 'Candidate Quality'];
+
+        const [recruitersResult, companiesResult, jobsResult, appsResult, placementsResult] = await Promise.all([
+            this.supabase.from('recruiters').select('status'),
+            this.supabase.from('companies').select('id, identity_organization_id'),
+            this.supabase.from('jobs').select('id, status, created_at'),
+            this.supabase.from('applications').select('stage')
+                .in('stage', ['submitted', 'screen', 'interview', 'offer', 'accepted', 'hired']),
+            this.supabase.from('placements').select('id, application_id')
+                .in('state', ['hired', 'active', 'completed']),
+        ]);
+
+        const recruiters = recruitersResult.data || [];
+        const totalRecruiters = recruiters.length;
+        const activeRecruiters = recruiters.filter(r => r.status === 'active').length;
+
+        const companies = companiesResult.data || [];
+        const activeCompanies = companies.filter(c => c.identity_organization_id).length;
+
+        const jobs = jobsResult.data || [];
+        const activeJobs = jobs.filter(j => j.status === 'active');
+
+        const apps = appsResult.data || [];
+        const totalApps = apps.length;
+
+        const placements = placementsResult.data || [];
+
+        // 1. Recruiter Activity: active/total ratio (0-100)
+        const recruiterActivity = totalRecruiters > 0
+            ? Math.min(100, Math.round((activeRecruiters / totalRecruiters) * 100))
+            : 0;
+
+        // 2. Company Engagement: active companies / total companies ratio
+        const companyEngagement = companies.length > 0
+            ? Math.min(100, Math.round((activeCompanies / companies.length) * 100))
+            : 0;
+
+        // 3. Time-to-Fill: inverse of avg days open (faster = higher, capped at 90 days)
+        const now = new Date();
+        const avgDaysOpen = activeJobs.length > 0
+            ? activeJobs.reduce((sum, j) => {
+                const days = (now.getTime() - new Date(j.created_at).getTime()) / (1000 * 60 * 60 * 24);
+                return sum + days;
+            }, 0) / activeJobs.length
+            : 0;
+        const timeToFill = Math.max(0, Math.min(100, Math.round(100 - (avgDaysOpen / 90 * 100))));
+
+        // 4. Fill Rate: roles with placements / total active roles
+        const placementAppIds = new Set(placements.map(p => p.application_id));
+        // We'd need to check which jobs have hires, but we can approximate
+        const hiredApps = apps.filter(a => a.stage === 'hired');
+        const jobsWithHires = new Set<string>(); // can't track job_id from stage-only select, use ratio
+        const fillRate = activeJobs.length > 0
+            ? Math.min(100, Math.round((placements.length / Math.max(1, activeJobs.length)) * 100))
+            : 0;
+
+        // 5. Candidate Quality: hired / total applications ratio
+        const hiredCount = hiredApps.length;
+        const candidateQuality = totalApps > 0
+            ? Math.min(100, Math.round((hiredCount / totalApps) * 100 * 5)) // Scale up since hire rates are typically low
+            : 0;
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Marketplace Health',
+                data: [recruiterActivity, companyEngagement, timeToFill, Math.min(100, fillRate), Math.min(100, candidateQuality)],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 2,
+                fill: true,
+            }],
+        };
+    }
+
+    /**
+     * Platform pipeline: application counts by stage across the entire platform.
+     */
+    private async computePlatformPipeline(): Promise<ChartData> {
+        const stages = ['submitted', 'screen', 'interview', 'offer', 'hired'];
+
+        const { data: apps } = await this.supabase
+            .from('applications')
+            .select('stage')
+            .in('stage', stages);
+
+        const stageCounts = new Map<string, number>();
+        stages.forEach(s => stageCounts.set(s, 0));
+
+        if (apps) {
+            for (const app of apps) {
+                stageCounts.set(app.stage, (stageCounts.get(app.stage) || 0) + 1);
+            }
+        }
+
+        const stageLabels: Record<string, string> = {
+            submitted: 'Applied',
+            screen: 'Screen',
+            interview: 'Interview',
+            offer: 'Offer',
+            hired: 'Hired',
+        };
+
+        const labels = stages.map(s => stageLabels[s] || s);
+        const data = stages.map(s => stageCounts.get(s) || 0);
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Candidates',
+                data,
+                backgroundColor: [
+                    'rgb(54, 162, 235)',   // Blue - Applied
+                    'rgb(56, 189, 248)',   // Light blue - Screen
+                    'rgb(168, 85, 247)',   // Purple - Interview
+                    'rgb(251, 191, 36)',   // Amber - Offer
+                    'rgb(34, 197, 94)',    // Green - Hired
+                ],
+                borderWidth: 0,
+            }],
+        };
+    }
+
+    /**
+     * User growth by type - stacked bar showing recruiters, candidates, companies by month.
+     */
+    private async computeUserGrowthByType(
+        labels: string[],
+        timeRange: { start: Date; end: Date }
+    ): Promise<ChartData> {
+        const [recruitersResult, candidatesResult, companiesResult] = await Promise.all([
+            this.supabase.from('recruiters')
+                .select('created_at')
+                .gte('created_at', timeRange.start.toISOString())
+                .lte('created_at', timeRange.end.toISOString()),
+            this.supabase.from('candidates')
+                .select('created_at')
+                .gte('created_at', timeRange.start.toISOString())
+                .lte('created_at', timeRange.end.toISOString()),
+            this.supabase.from('companies')
+                .select('created_at')
+                .gte('created_at', timeRange.start.toISOString())
+                .lte('created_at', timeRange.end.toISOString()),
+        ]);
+
+        const recruiterCounts = this.bucketByMonth(recruitersResult.data || [], 'created_at', labels);
+        const candidateCounts = this.bucketByMonth(candidatesResult.data || [], 'created_at', labels);
+        const companyCounts = this.bucketByMonth(companiesResult.data || [], 'created_at', labels);
+
+        return {
+            labels,
+            datasets: [
+                {
+                    label: 'Recruiters',
+                    data: recruiterCounts,
+                    backgroundColor: 'rgb(139, 92, 246)',
+                    borderColor: 'rgb(139, 92, 246)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'Candidates',
+                    data: candidateCounts,
+                    backgroundColor: 'rgb(56, 189, 248)',
+                    borderColor: 'rgb(56, 189, 248)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'Companies',
+                    data: companyCounts,
+                    backgroundColor: 'rgb(251, 146, 60)',
+                    borderColor: 'rgb(251, 146, 60)',
+                    borderWidth: 1,
+                },
+            ],
         };
     }
 

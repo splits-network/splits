@@ -1,422 +1,402 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useUserProfile } from '@/contexts';
-import { getActivityIcon, getAlertClass, getHealthScore } from '@/lib/utils';
-import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
-import { TrendBadge } from '@/components/ui';
+import { usePlatformStats } from '../hooks/use-platform-stats';
+import { usePlatformPipeline } from '../hooks/use-platform-pipeline';
+import { useMarketplaceHealth } from '../hooks/use-marketplace-health';
+import { usePlatformActivity } from '../hooks/use-platform-activity';
+import { useTopPerformers } from '../hooks/use-top-performers';
+import { usePlatformFinancials } from '../hooks/use-platform-financials';
+import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
+import { StatCard, StatCardGrid } from '@/components/ui/cards';
+import { AnalyticsChart } from '@/components/charts/analytics-chart';
+import { PageTitle } from '@/components/page-title';
+import { TrendPeriodSelector } from '@/components/charts/trend-period-selector';
+import PlatformAlertsBar from './admin/platform-alerts-bar';
+import PlatformPipelineFunnel from './admin/platform-pipeline-funnel';
+import MarketplaceHealthRadar from './admin/marketplace-health-radar';
+import PlatformActivityTable from './admin/platform-activity-table';
+import TopPerformers from './admin/top-performers';
+import PendingActionsCard from './admin/pending-actions-card';
+import RoleDistributionDoughnut from './admin/role-distribution-doughnut';
+import RecruiterStatusBreakdown from './admin/recruiter-status-breakdown';
+import FinancialSummaryCard from './admin/financial-summary-card';
+import SubscriptionOverview from './admin/subscription-overview';
+import OnlineActivityChart, { type ActivitySnapshot } from './admin/online-activity-chart';
 
-interface PlatformStats {
-    total_active_roles: number;
-    total_applications: number;
-    total_active_recruiters: number;
-    total_companies: number;
-    placements_this_month: number;
-    placements_this_year: number;
-    total_platform_revenue_ytd: number;
-    pending_payouts: number;
-    pending_approvals: number;
-    fraud_alerts: number;
-    trends?: {
-        roles?: number;
-        recruiters?: number;
-        placements?: number;
-    };
-}
-
-interface MarketplaceHealth {
-    recruiter_satisfaction: number;
-    company_satisfaction: number;
-    avg_time_to_first_candidate_days: number;
-    avg_time_to_placement_days: number;
-    fill_rate_percentage: number;
-}
-
-interface RecentActivity {
-    id: string;
-    type: 'placement_created' | 'company_joined' | 'recruiter_joined' | 'role_created' | 'payout_processed' | 'alert';
-    message: string;
-    timestamp: string;
-    link?: string;
-    severity?: 'info' | 'warning' | 'error';
-}
-
-interface Alert {
-    id: string;
-    type: 'payout_approval' | 'fraud_signal' | 'automation_review' | 'system';
-    message: string;
-    count?: number;
-    link: string;
-    severity: 'info' | 'warning' | 'error';
+function formatCurrency(value: number): string {
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}k`;
+    return `$${value.toLocaleString()}`;
 }
 
 export default function AdminDashboard() {
-    const { getToken } = useAuth();
-    const { profile } = useUserProfile();
-    const [stats, setStats] = useState<PlatformStats | null>(null);
-    const [health, setHealth] = useState<MarketplaceHealth | null>(null);
-    const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-    const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { userId } = useAuth();
+    const [trendPeriod, setTrendPeriod] = useState(6);
+    const [chartRefreshKey, setChartRefreshKey] = useState(0);
+    const [activitySnapshot, setActivitySnapshot] = useState<ActivitySnapshot | null>(null);
 
-    useEffect(() => {
-        loadDashboardData();
+    // ── Independent data hooks ──
+    const { stats, loading: statsLoading, refresh: refreshStats } = usePlatformStats();
+    const { stages, loading: pipelineLoading, refresh: refreshPipeline } = usePlatformPipeline();
+    const { health, loading: healthLoading, refresh: refreshHealth } = useMarketplaceHealth();
+    const { events, loading: activityLoading, refresh: refreshActivity } = usePlatformActivity();
+    const { performers, loading: performersLoading, refresh: refreshPerformers } = useTopPerformers();
+    const { financials, loading: financialsLoading } = usePlatformFinancials(stats, statsLoading);
+
+    // ── Real-time WebSocket updates ──
+    const handleStatsUpdate = useCallback(() => {
+        refreshStats();
+    }, [refreshStats]);
+
+    const handleChartsUpdate = useCallback(() => {
+        setChartRefreshKey((k) => k + 1);
     }, []);
 
-    const loadDashboardData = async () => {
-        setLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) return;
+    const handleReconnect = useCallback(() => {
+        refreshStats();
+        refreshPipeline();
+        refreshHealth();
+        refreshActivity();
+        refreshPerformers();
+        setChartRefreshKey((k) => k + 1);
+    }, [refreshStats, refreshPipeline, refreshHealth, refreshActivity, refreshPerformers]);
 
-            const api = createAuthenticatedClient(token);
+    const handleActivityUpdate = useCallback((snapshot: ActivitySnapshot) => {
+        setActivitySnapshot(snapshot);
+    }, []);
 
-            // Load platform stats from V2 analytics endpoint
-            const statsResponse: any = await api.get('/stats', {
-                params: {
-                    scope: 'platform',
-                }
-            });
-            // Extract metrics from the nested response structure
-            const platformStats =
-                statsResponse?.data?.metrics ||
-                statsResponse?.data ||
-                statsResponse ||
-                null;
-            setStats(platformStats);
+    useDashboardRealtime({
+        enabled: !!userId,
+        userId: userId || undefined,
+        onStatsUpdate: handleStatsUpdate,
+        onChartsUpdate: handleChartsUpdate,
+        onReconnect: handleReconnect,
+        onActivityUpdate: handleActivityUpdate,
+        extraChannels: ['dashboard:activity'],
+    });
 
-            // TODO: Marketplace health metrics - endpoint not yet implemented
-            // When /marketplace-metrics endpoint is available, fetch health data here
-
-            // TODO: Activity and alerts endpoints not yet implemented
-            // Load recent activity (endpoint: /admin/portal/dashboard/activity)
-            // Load alerts (endpoint: /admin/portal/dashboard/alerts)
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="space-y-6 animate-fade-in">
-                {/* Welcome skeleton */}
-                <div className="h-28 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 skeleton"></div>
-                {/* Stats skeleton */}
-                <StatCardGrid>
-                    {[1, 2, 3, 4].map((i) => (
-                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
-                    ))}
-                </StatCardGrid>
-            </div>
-        );
-    }
+    // ── 60s polling for aggregate freshness ──
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshStats();
+            refreshActivity();
+            refreshPerformers();
+        }, 60_000);
+        return () => clearInterval(interval);
+    }, [refreshStats, refreshActivity, refreshPerformers]);
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Welcome Section - Enhanced gradient card */}
-            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-xl">
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4"></div>
-                </div>
+        <div className="space-y-8 animate-fade-in">
+            <PageTitle
+                title="Platform Command Center"
+                subtitle="Real-time marketplace administration and insights"
+            >
+                <TrendPeriodSelector
+                    trendPeriod={trendPeriod}
+                    onTrendPeriodChange={setTrendPeriod}
+                />
+                <div className="hidden lg:block w-px h-6 bg-base-300" />
+                <Link href="/portal/admin/recruiters" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-user-tie w-3.5"></i>
+                    Recruiters
+                </Link>
+                <Link href="/portal/admin/payouts" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-money-bill-transfer w-3.5"></i>
+                    Payouts
+                </Link>
+                <Link href="/portal/admin/fraud" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-shield-exclamation w-3.5"></i>
+                    Fraud
+                </Link>
+                <Link href="/portal/admin/metrics" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-chart-line w-3.5"></i>
+                    Metrics
+                </Link>
+            </PageTitle>
 
-                <div className="relative p-6 md:p-8">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">Platform Administration</h2>
-                            <p className="text-lg opacity-90 mt-1">
-                                Monitor marketplace health and manage platform operations.
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <Link href="/portal/admin/metrics" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
-                                <i className="fa-duotone fa-regular fa-chart-bar"></i>
-                                View Metrics
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* ── Section 0: Platform Alerts Bar (conditional) ── */}
+            {!statsLoading && <PlatformAlertsBar stats={stats} />}
 
-            {/* Alerts Section - Enhanced styling */}
-            {alerts.length > 0 && (
-                <div className="space-y-3">
-                    {alerts.map((alert) => (
-                        <div key={alert.id} className={`alert ${getAlertClass(alert.severity)} shadow-sm rounded-xl`}>
-                            <div className={`
-                                w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                                ${alert.severity === 'error' ? 'bg-error/20' :
-                                    alert.severity === 'warning' ? 'bg-warning/20' : 'bg-info/20'}
-                            `}>
-                                <i className={`fa-duotone fa-regular fa-bell ${alert.severity === 'error' ? 'text-error' :
-                                    alert.severity === 'warning' ? 'text-warning' : 'text-info'
-                                    }`}></i>
-                            </div>
-                            <div className="flex-1">
-                                <span className="font-semibold">{alert.message}</span>
-                                {alert.count && <span className="ml-2 badge badge-sm badge-ghost">{alert.count}</span>}
-                            </div>
-                            <Link href={alert.link} className="btn btn-sm">
-                                Review
-                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                            </Link>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* ── Live Activity (real-time online users) ── */}
+            <OnlineActivityChart snapshot={activitySnapshot} />
 
-            {/* Key Platform Stats - Using new StatCard component */}
-            <StatCardGrid>
-                <StatCard
-                    title="Active Roles"
-                    value={stats?.total_active_roles || 0}
-                    description="Platform-wide"
-                    icon="fa-briefcase"
-                    color="primary"
-                    trend={stats?.trends?.roles}
-                    href="/portal/admin/roles"
-                />
-                <StatCard
-                    title="Active Recruiters"
-                    value={stats?.total_active_recruiters || 0}
-                    description={`${stats?.total_companies || 0} companies`}
-                    icon="fa-network-wired"
-                    color="secondary"
-                    trend={stats?.trends?.recruiters}
-                    href="/portal/admin/users?role=recruiter"
-                />
-                <StatCard
-                    title="Applications"
-                    value={stats?.total_applications || 0}
-                    description="In pipeline"
-                    icon="fa-users"
-                    color="accent"
-                    href="/portal/admin/applications"
-                />
-                <StatCard
-                    title="Placements YTD"
-                    value={stats?.placements_this_year || 0}
-                    description="This year"
-                    icon="fa-trophy"
-                    color="success"
-                    trend={stats?.trends?.placements}
-                    href="/portal/admin/placements"
-                />
+            {/* ── Section 1: KPI Strip (7 cards) ── */}
+            <StatCardGrid className="shadow-lg w-full">
+                {statsLoading ? (
+                    [1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
+                    ))
+                ) : (
+                    <>
+                        <StatCard
+                            title="Active jobs"
+                            value={stats.active_jobs}
+                            description={`${stats.total_jobs.toLocaleString()} total`}
+                            icon="fa-briefcase"
+                            color="primary"
+                            trend={stats.trends?.active_jobs}
+                            href="/portal/admin/jobs"
+                        />
+                        <StatCard
+                            title="Active recruiters"
+                            value={stats.active_recruiters}
+                            description={`${stats.active_companies} companies`}
+                            icon="fa-user-tie"
+                            color="secondary"
+                            trend={stats.trends?.active_recruiters}
+                            href="/portal/admin/recruiters"
+                        />
+                        <StatCard
+                            title="Candidates"
+                            value={stats.total_candidates}
+                            description={`${stats.new_signups_mtd} new this month`}
+                            icon="fa-id-card"
+                            color="accent"
+                            href="/portal/admin/candidates"
+                        />
+                        <StatCard
+                            title="Applications"
+                            value={stats.total_applications}
+                            description="In pipeline"
+                            icon="fa-file-lines"
+                            color="info"
+                            trend={stats.trends?.total_applications}
+                            href="/portal/admin/applications"
+                        />
+                        <StatCard
+                            title="Placements YTD"
+                            value={stats.total_placements}
+                            description={`${stats.placements_this_month} this month`}
+                            icon="fa-trophy"
+                            color="success"
+                            trend={stats.trends?.total_placements}
+                            href="/portal/admin/placements"
+                        />
+                        <StatCard
+                            title="Revenue YTD"
+                            value={formatCurrency(stats.total_revenue)}
+                            description="Platform share"
+                            icon="fa-sack-dollar"
+                            color="warning"
+                            trend={stats.trends?.total_revenue}
+                            href="/portal/admin/metrics"
+                        />
+                        <StatCard
+                            title="Pending payouts"
+                            value={formatCurrency(stats.pending_payouts_amount)}
+                            description={`${stats.pending_payouts_count} awaiting`}
+                            icon="fa-money-bill-transfer"
+                            color="error"
+                            href="/portal/admin/payouts"
+                        />
+                    </>
+                )}
             </StatCardGrid>
 
-            {/* Revenue & Payouts - Enhanced cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ContentCard
-                    title="Platform Revenue YTD"
-                    icon="fa-chart-line"
-                    headerActions={
-                        <Link href="/portal/admin/revenue" className="btn btn-sm btn-ghost text-success">
-                            View Report
-                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                        </Link>
-                    }
-                >
-                    <div className="flex items-baseline gap-3 mt-2">
-                        <div className="text-4xl font-bold text-success">
-                            ${((stats?.total_platform_revenue_ytd || 0) / 1000000).toFixed(2)}M
-                        </div>
-                        {stats?.trends?.placements && stats.trends.placements > 0 && (
-                            <TrendBadge value={stats.trends.placements} />
-                        )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
-                        <div className="flex-1">
-                            <div className="text-sm text-base-content/60">This Month</div>
-                            <div className="text-xl font-semibold">{stats?.placements_this_month || 0} placements</div>
-                        </div>
-                    </div>
-                </ContentCard>
-
-                <ContentCard
-                    title="Pending Payouts"
-                    icon="fa-money-bill-transfer"
-                    headerActions={
-                        <Link href="/admin/payouts" className="btn btn-sm btn-ghost text-primary">
-                            Review
-                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                        </Link>
-                    }
-                >
-                    <div className="flex items-baseline gap-3 mt-2">
-                        <div className="text-4xl font-bold text-primary">
-                            ${((stats?.pending_payouts || 0) / 1000).toFixed(1)}k
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
-                        <div className="flex items-center gap-2 text-sm">
-                            {(stats?.pending_approvals || 0) > 0 && (
-                                <span className="badge badge-warning badge-sm gap-1">
-                                    <i className="fa-duotone fa-regular fa-clock text-xs"></i>
-                                    {stats?.pending_approvals || 0} awaiting approval
-                                </span>
-                            )}
-                            {(stats?.fraud_alerts || 0) > 0 && (
-                                <span className="badge badge-error badge-sm gap-1">
-                                    <i className="fa-duotone fa-regular fa-shield-halved text-xs"></i>
-                                    {stats?.fraud_alerts || 0} alerts
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </ContentCard>
+            {/* ── Section 2: Hero — Asymmetric 7/5 split ── */}
+            <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-7">
+                    <PlatformPipelineFunnel
+                        stages={stages}
+                        loading={pipelineLoading}
+                    />
+                </div>
+                <div className="col-span-12 lg:col-span-5">
+                    <MarketplaceHealthRadar
+                        health={health}
+                        loading={healthLoading}
+                    />
+                </div>
             </div>
 
-            {/* Marketplace Health - Enhanced card */}
-            <ContentCard
-                title="Marketplace Health"
-                icon="fa-heart-pulse"
-                headerActions={
-                    <Link href="/admin/metrics" className="btn btn-sm btn-ghost">
-                        View Detailed Metrics
-                        <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                    </Link>
-                }
-            >
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mt-4">
-                    <div className="text-center">
-                        <div className="radial-progress text-primary mx-auto" style={{ "--value": health?.recruiter_satisfaction || 0, "--size": "5rem" } as any}>
-                            <span className="text-lg font-bold">{health?.recruiter_satisfaction || 0}%</span>
-                        </div>
-                        <p className="text-sm font-medium mt-3">Recruiter Satisfaction</p>
-                    </div>
-                    <div className="text-center">
-                        <div className="radial-progress text-secondary mx-auto" style={{ "--value": health?.company_satisfaction || 0, "--size": "5rem" } as any}>
-                            <span className="text-lg font-bold">{health?.company_satisfaction || 0}%</span>
-                        </div>
-                        <p className="text-sm font-medium mt-3">Company Satisfaction</p>
-                    </div>
-                    <div className="text-center">
-                        <div className={`text-4xl font-bold ${getHealthScore({ response_time: health?.avg_time_to_first_candidate_days || 0 }).color}`}>
-                            {health?.avg_time_to_first_candidate_days || 0}
-                        </div>
-                        <p className="text-sm font-medium mt-3">Days to First Candidate</p>
-                    </div>
-                    <div className="text-center">
-                        <div className={`text-4xl font-bold ${getHealthScore({ response_time: health?.avg_time_to_placement_days || 0 }).color}`}>
-                            {health?.avg_time_to_placement_days || 0}
-                        </div>
-                        <p className="text-sm font-medium mt-3">Avg Time to Placement</p>
-                    </div>
-                    <div className="text-center">
-                        <div className="radial-progress text-success mx-auto" style={{ "--value": health?.fill_rate_percentage || 0, "--size": "5rem" } as any}>
-                            <span className="text-lg font-bold">{health?.fill_rate_percentage || 0}%</span>
-                        </div>
-                        <p className="text-sm font-medium mt-3">Fill Rate</p>
-                    </div>
-                </div>
-            </ContentCard>
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Recent Platform Activity */}
-                <div className="lg:col-span-2">
-                    <ContentCard
-                        title="Recent Platform Activity"
-                        icon="fa-clock-rotate-left"
-                        headerActions={
-                            recentActivity.length > 10 && (
-                                <Link href="/admin/activity" className="btn btn-sm btn-ghost">
-                                    View all
-                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                                </Link>
-                            )
-                        }
-                    >
-                        {recentActivity.length === 0 ? (
-                            <EmptyState
-                                icon="fa-inbox"
-                                title="No recent activity"
-                                description="Platform activity will appear here"
-                            />
+            {/* ── Section 3: Trend Charts (3-column, elevation pattern) ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Recruiter Growth -- Bar chart */}
+                <div className="card bg-base-200 overflow-hidden">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
                         ) : (
-                            <div className="space-y-1 -mx-2">
-                                {recentActivity.slice(0, 10).map((activity) => (
-                                    <div
-                                        key={activity.id}
-                                        className="flex items-start gap-4 p-3 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer"
-                                    >
-                                        <div className={`
-                                            w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                                            ${activity.type === 'placement_created' ? 'bg-success/10 text-success' :
-                                                activity.type === 'payout_processed' ? 'bg-primary/10 text-primary' :
-                                                    activity.type === 'company_joined' ? 'bg-secondary/10 text-secondary' :
-                                                        activity.type === 'alert' ? 'bg-error/10 text-error' :
-                                                            'bg-info/10 text-info'}
-                                        `}>
-                                            <i className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}></i>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium">{activity.message}</p>
-                                            <p className="text-sm text-base-content/60 mt-0.5">{activity.timestamp}</p>
-                                        </div>
-                                        {activity.link && (
-                                            <Link href={activity.link} className="btn btn-ghost btn-sm btn-square">
-                                                <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
-                                            </Link>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+                            <StatCard
+                                title="Recruiter growth"
+                                icon="fa-user-plus"
+                                color="secondary"
+                                description="New recruiter signups"
+                                value={stats.total_recruiters}
+                                trend={stats.trends?.active_recruiters}
+                            />
                         )}
-                    </ContentCard>
+                    </div>
+                    <div className="px-4 pb-4 pt-2">
+                        <AnalyticsChart
+                            key={`recruiter-growth-trends-${chartRefreshKey}`}
+                            type="recruiter-growth-trends"
+                            chartComponent="bar"
+                            showPeriodSelector={false}
+                            showLegend={false}
+                            scope="platform"
+                            height={140}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                        />
+                    </div>
                 </div>
 
-                {/* Admin Tools Sidebar */}
-                <div className="space-y-6">
-                    {/* Phase 3 Tools - Enhanced styling */}
-                    <ContentCard title="Phase 3 Tools" icon="fa-bolt">
-                        <div className="flex flex-col gap-2">
-                            <Link href="/admin/payouts" className="btn btn-primary w-full justify-start gap-3">
-                                <i className="fa-duotone fa-regular fa-money-bill-transfer w-4"></i>
-                                Payout Management
-                            </Link>
-                            <Link href="/admin/automation" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-robot w-4"></i>
-                                Automation Controls
-                            </Link>
-                            <Link href="/admin/fraud" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-shield-halved w-4"></i>
-                                Fraud Detection
-                            </Link>
-                            <Link href="/admin/decision-log" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-clipboard-list w-4"></i>
-                                Decision Log
-                            </Link>
-                        </div>
-                    </ContentCard>
+                {/* Application Volume -- Line chart */}
+                <div className="card bg-base-200 overflow-hidden">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                        ) : (
+                            <StatCard
+                                title="Application volume"
+                                icon="fa-file-lines"
+                                color="info"
+                                description="Total applications in pipeline"
+                                value={stats.total_applications}
+                                trend={stats.trends?.total_applications}
+                            />
+                        )}
+                    </div>
+                    <div className="px-4 pb-4 pt-2">
+                        <AnalyticsChart
+                            key={`application-trends-${chartRefreshKey}`}
+                            type="application-trends"
+                            chartComponent="line"
+                            showPeriodSelector={false}
+                            showLegend={false}
+                            scope="platform"
+                            height={140}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                        />
+                    </div>
+                </div>
 
-                    {/* Core Admin Tools - Enhanced styling */}
-                    <ContentCard title="Platform Management" icon="fa-cog">
-                        <div className="flex flex-col gap-2">
-                            <Link href="/portal/admin/users" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-users w-4"></i>
-                                Users
-                            </Link>
-                            <Link href="/portal/admin/companies" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-building w-4"></i>
-                                Companies
-                            </Link>
-                            <Link href="/portal/admin/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
-                                All Roles
-                            </Link>
-                            <Link href="/portal/admin/metrics" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-duotone fa-regular fa-chart-bar w-4"></i>
-                                Metrics
-                            </Link>
-                        </div>
-                    </ContentCard>
+                {/* Revenue Trend -- Line chart */}
+                <div className="card bg-base-200 overflow-hidden md:col-span-2 lg:col-span-1">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                        ) : (
+                            <StatCard
+                                title="Revenue trend"
+                                icon="fa-sack-dollar"
+                                color="warning"
+                                description="Platform revenue year to date"
+                                value={formatCurrency(stats.total_revenue)}
+                                trend={stats.trends?.total_revenue}
+                            />
+                        )}
+                    </div>
+                    <div className="px-4 pb-4 pt-2">
+                        <AnalyticsChart
+                            key={`platform-revenue-trends-${chartRefreshKey}`}
+                            type="platform-revenue-trends"
+                            chartComponent="line"
+                            showPeriodSelector={false}
+                            showLegend={false}
+                            scope="platform"
+                            height={140}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Section 3b: User Growth by Type (full width, elevation pattern) ── */}
+            <div className="card bg-base-200 overflow-hidden">
+                <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                    {statsLoading ? (
+                        <StatCard title="" value={0} icon="fa-spinner" loading />
+                    ) : (
+                        <StatCard
+                            title="User growth by type"
+                            icon="fa-users"
+                            color="accent"
+                            description="Recruiters, candidates, and companies over time"
+                            value={stats.total_users}
+                        />
+                    )}
+                </div>
+                <div className="px-4 pb-4 pt-2">
+                    <AnalyticsChart
+                        key={`user-growth-by-type-${chartRefreshKey}`}
+                        type="user-growth-by-type"
+                        chartComponent="bar"
+                        showPeriodSelector={false}
+                        showLegend={true}
+                        legendPosition="top"
+                        scope="platform"
+                        height={220}
+                        trendPeriod={trendPeriod}
+                        onTrendPeriodChange={setTrendPeriod}
+                    />
+                </div>
+            </div>
+
+            {/* ── Section 4: Activity + Sidebar (7/5 split) ── */}
+            <div className="grid grid-cols-12 gap-6">
+                {/* Left 7/12 -- Platform Activity Feed */}
+                <div className="col-span-12 lg:col-span-7">
+                    <PlatformActivityTable
+                        events={events}
+                        loading={activityLoading}
+                    />
+                </div>
+
+                {/* Right 5/12 -- Top Performers + Pending Actions */}
+                <div className="col-span-12 lg:col-span-5 space-y-6">
+                    <TopPerformers
+                        performers={performers}
+                        loading={performersLoading}
+                    />
+                    <PendingActionsCard
+                        stats={stats}
+                        loading={statsLoading}
+                    />
+                </div>
+            </div>
+
+            {/* ── Section 5: Distribution Charts (7/5 split) ── */}
+            <div className="grid grid-cols-12 gap-6">
+                {/* Left 7/12 -- User & Recruiter Breakdown */}
+                <div className="col-span-12 lg:col-span-7">
+                    <RecruiterStatusBreakdown
+                        stats={stats}
+                        loading={statsLoading}
+                    />
+                </div>
+
+                {/* Right 5/12 -- Job Distribution Doughnut */}
+                <div className="col-span-12 lg:col-span-5">
+                    <RoleDistributionDoughnut
+                        stats={stats}
+                        loading={statsLoading}
+                    />
+                </div>
+            </div>
+
+            {/* ── Section 6: Financial Overview (7/5 split) ── */}
+            <div className="grid grid-cols-12 gap-6">
+                {/* Left 7/12 -- Financial Summary */}
+                <div className="col-span-12 lg:col-span-7">
+                    <FinancialSummaryCard
+                        financials={financials}
+                        loading={financialsLoading}
+                    />
+                </div>
+
+                {/* Right 5/12 -- Subscription Overview */}
+                <div className="col-span-12 lg:col-span-5">
+                    <SubscriptionOverview
+                        financials={financials}
+                        loading={financialsLoading}
+                    />
                 </div>
             </div>
         </div>

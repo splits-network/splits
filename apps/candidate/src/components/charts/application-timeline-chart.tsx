@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useEffect } from 'react';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -14,16 +15,7 @@ import {
 import { dataset, registerChart } from './chart-options';
 import { Line } from 'react-chartjs-2';
 
-// Register Chart.js components
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Tooltip,
-    Legend,
-    Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
 interface Application {
     id: string;
@@ -36,9 +28,9 @@ interface ApplicationTimelineChartProps {
     loading?: boolean;
     trendPeriod: number;
     onTrendPeriodChange: (period: number) => void;
+    compact?: boolean;
 }
 
-// Time period options
 export const TIME_PERIODS = [
     { value: 3, label: '3M' },
     { value: 6, label: '6M' },
@@ -46,7 +38,6 @@ export const TIME_PERIODS = [
     { value: 24, label: '2Y' },
 ] as const;
 
-// Generate last N months labels
 function getLastNMonths(n: number): string[] {
     const months = [];
     const now = new Date();
@@ -62,10 +53,10 @@ export default function ApplicationTimelineChart({
     loading,
     trendPeriod,
     onTrendPeriodChange,
+    compact,
 }: ApplicationTimelineChartProps) {
     const chartRef = useRef<any>(null);
 
-    // Register chart when it's created
     useEffect(() => {
         if (chartRef.current) {
             const cleanup = registerChart(chartRef.current);
@@ -73,13 +64,11 @@ export default function ApplicationTimelineChart({
         }
     }, []);
 
-    // Generate trend data from applications
     const trendData = useMemo(() => {
         const months = trendPeriod;
         const labels = getLastNMonths(months);
         const now = new Date();
 
-        // Initialize arrays for each month
         const totalApps = new Array(months).fill(0);
         const interviewingApps = new Array(months).fill(0);
         const offerApps = new Array(months).fill(0);
@@ -89,7 +78,6 @@ export default function ApplicationTimelineChart({
             const monthDiff = (now.getFullYear() - createdDate.getFullYear()) * 12 +
                 (now.getMonth() - createdDate.getMonth());
 
-            // Count applications created in each month
             if (monthDiff >= 0 && monthDiff < months) {
                 const index = months - 1 - monthDiff;
                 totalApps[index]++;
@@ -103,15 +91,9 @@ export default function ApplicationTimelineChart({
             }
         });
 
-        return {
-            labels,
-            totalApps,
-            interviewingApps,
-            offerApps,
-        };
+        return { labels, totalApps, interviewingApps, offerApps };
     }, [applications, trendPeriod]);
 
-    // Chart data configuration
     const chartData = useMemo(() => ({
         labels: trendData.labels,
         datasets: [
@@ -123,44 +105,50 @@ export default function ApplicationTimelineChart({
                 borderWidth: 2,
                 tension: 0.4,
                 pointRadius: 0,
-                pointHoverRadius: 6,
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: dataset.primaryBorderColor,
-                pointHoverBorderColor: '#fff',
+                pointHoverBorderColor: dataset.base100BorderColor,
                 pointHoverBorderWidth: 2,
-                fill: false,
+                fill: true,
             },
             {
                 label: 'Interviewing',
                 data: trendData.interviewingApps,
                 borderColor: dataset.infoBorderColor,
-                backgroundColor: dataset.infoBackgroundColor,
-                borderWidth: 2,
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
                 tension: 0.4,
                 pointRadius: 0,
-                pointHoverRadius: 6,
+                pointHoverRadius: 4,
                 pointHoverBackgroundColor: dataset.infoBorderColor,
-                pointHoverBorderColor: '#fff',
+                pointHoverBorderColor: dataset.base100BorderColor,
                 pointHoverBorderWidth: 2,
+                borderDash: [4, 2],
                 fill: false,
             },
             {
                 label: 'Offers',
                 data: trendData.offerApps,
                 borderColor: dataset.warningBorderColor,
-                backgroundColor: dataset.warningBackgroundColor,
-                borderWidth: 2,
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
                 tension: 0.4,
                 pointRadius: 0,
-                pointHoverRadius: 6,
+                pointHoverRadius: 4,
                 pointHoverBackgroundColor: dataset.warningBorderColor,
-                pointHoverBorderColor: '#fff',
+                pointHoverBorderColor: dataset.base100BorderColor,
                 pointHoverBorderWidth: 2,
+                borderDash: [4, 2],
                 fill: false,
             },
         ],
     }), [trendData]);
 
-    // Chart options - minimal clean style
+    // Limit x-axis labels in compact mode to prevent overflow
+    const maxTicksLimit = compact
+        ? (trendPeriod <= 6 ? trendPeriod : Math.min(6, Math.ceil(trendPeriod / 3)))
+        : undefined;
+
     const chartOptions = useMemo(() => ({
         responsive: true,
         maintainAspectRatio: false,
@@ -168,17 +156,18 @@ export default function ApplicationTimelineChart({
             mode: 'index' as const,
             intersect: false,
         },
+        layout: {
+            padding: { top: 4, bottom: 0, left: 0, right: 0 },
+        },
         plugins: {
-            legend: {
-                display: false,
-            },
+            legend: { display: false },
             tooltip: {
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                titleColor: '#374151',
-                bodyColor: '#374151',
-                borderColor: '#e5e7eb',
+                backgroundColor: dataset.base100BorderColor,
+                titleColor: dataset.baseContentBorderColor,
+                bodyColor: dataset.baseContentBorderColor,
+                borderColor: dataset.base300BorderColor,
                 borderWidth: 1,
-                padding: 12,
+                padding: 10,
                 cornerRadius: 8,
                 displayColors: true,
                 boxPadding: 4,
@@ -192,61 +181,69 @@ export default function ApplicationTimelineChart({
         },
         scales: {
             x: {
-                grid: {
-                    display: false,
-                },
-                border: {
-                    display: false,
-                },
+                grid: { display: false },
+                border: { display: false },
                 ticks: {
                     color: dataset.baseContentBorderColor,
-                    font: {
-                        size: 11,
-                    },
+                    font: { size: 10 },
+                    maxTicksLimit,
+                    maxRotation: 0,
                 },
             },
             y: {
-                grid: {
-                    display: false,
-                },
-                border: {
-                    display: false,
-                },
-                ticks: {
-                    display: false,
-                },
+                grid: { display: false },
+                border: { display: false },
+                ticks: { display: false },
                 beginAtZero: true,
             },
         },
-    }), []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [maxTicksLimit]);
 
-    // Loading state
     if (loading) {
+        return <ChartLoadingState height={compact ? 200 : 240} />;
+    }
+
+    if (applications.length === 0) {
         return (
-            <div className="flex items-center justify-center h-40">
-                <span className="loading loading-spinner loading-md text-primary"></span>
+            <div className={`flex flex-col items-center justify-center ${compact ? 'h-[200px]' : 'h-60'} text-base-content/60`}>
+                <i className="fa-duotone fa-regular fa-chart-line text-2xl mb-2"></i>
+                <p className="text-sm">No trend data yet</p>
             </div>
         );
     }
 
-    // Empty state
-    if (applications.length === 0) {
+    if (compact) {
         return (
-            <div className="flex flex-col items-center justify-center h-40 text-base-content/60">
-                <i className="fa-duotone fa-regular fa-chart-line text-2xl mb-2"></i>
-                <p className="text-sm">No application data yet</p>
+            <div className="space-y-2">
+                {/* Legend */}
+                <div className="flex items-center gap-4 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.primaryBorderColor }}></span>
+                        <span className="text-base-content/60">Total</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.infoBorderColor }}></span>
+                        <span className="text-base-content/60">Interviewing</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.warningBorderColor }}></span>
+                        <span className="text-base-content/60">Offers</span>
+                    </div>
+                </div>
+
+                {/* Chart — sized to match sibling cards */}
+                <div className="h-[180px]">
+                    <Line ref={chartRef} data={chartData} options={chartOptions} />
+                </div>
             </div>
         );
     }
 
     return (
         <div className="space-y-3">
-            {/* Header with custom legend */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                    <h3 className="text-sm font-medium text-base-content/80">Application Trends</h3>
-                </div>
-                {/* Time period dropdown */}
+                <h3 className="text-sm font-medium text-base-content/80">Application Trends</h3>
                 <div className="dropdown dropdown-end">
                     <div
                         tabIndex={0}
@@ -271,7 +268,6 @@ export default function ApplicationTimelineChart({
                 </div>
             </div>
 
-            {/* Custom Legend */}
             <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.primaryBorderColor }}></span>
@@ -287,8 +283,7 @@ export default function ApplicationTimelineChart({
                 </div>
             </div>
 
-            {/* Chart */}
-            <div className="h-32">
+            <div className="h-[200px]">
                 <Line ref={chartRef} data={chartData} options={chartOptions} />
             </div>
         </div>

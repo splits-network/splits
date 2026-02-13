@@ -8,6 +8,7 @@ import NotificationBell from "@/components/notification-bell";
 import { PlanBadge } from "@/components/plan-badge";
 import { useUser } from "@clerk/nextjs";
 import { UserDropdown } from "./user-dropdown";
+import { GlobalSearchBar } from "@/components/global-search";
 
 export function PortalHeader() {
     const { user } = useUser();
@@ -56,8 +57,8 @@ export function PortalHeader() {
 
     return (
         <div className="sticky top-0 z-40">
-            <header className="navbar bg-base-100 border-b border-base-300 min-h-16 px-4">
-                {/* Logo */}
+            <header className="navbar bg-base-100 border-b border-base-300 min-h-16 px-4 relative">
+                {/* Logo — left */}
                 <div className="flex-none">
                     <Link href="/" className="">
                         <img
@@ -68,24 +69,15 @@ export function PortalHeader() {
                     </Link>
                 </div>
 
-                {/* Page title & subtitle */}
-                <div className="flex-1 ml-0 lg:pl-40 min-w-0 px-2">
-                    {title && (
-                        <div className="flex flex-col items-start gap-0">
-                            <h1 className="text-base lg:text-lg font-semibold truncate w-full">
-                                {title}
-                            </h1>
-                            {subtitle && (
-                                <span className="text-xs lg:text-sm text-base-content/60 truncate w-full">
-                                    {subtitle}
-                                </span>
-                            )}
-                        </div>
-                    )}
+                {/* Global search — truly centered on page */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-full max-w-lg px-4 pointer-events-auto">
+                        <GlobalSearchBar />
+                    </div>
                 </div>
 
-                {/* User controls */}
-                <div className="flex-none flex items-center gap-1">
+                {/* User controls — right */}
+                <div className="flex-none flex items-center gap-1 ml-auto">
                     {/* Plan indicator badge */}
                     <PlanBadge />
 
@@ -109,10 +101,26 @@ export function PortalHeader() {
                 </div>
             </header>
 
-            {/* Conditional toolbar row — only renders when a page provides titleChildren */}
-            {titleChildren && (
-                <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-base-300 bg-base-100 lg:justify-end">
-                    {titleChildren}
+            {/* Bottom bar — page title + optional toolbar actions */}
+            {(title || titleChildren) && (
+                <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-base-300 bg-base-100">
+                    {title && (
+                        <div className="flex flex-col items-start gap-0 mr-auto">
+                            <h1 className="text-base font-semibold truncate">
+                                {title}
+                            </h1>
+                            {subtitle && (
+                                <span className="text-xs text-base-content/60 truncate">
+                                    {subtitle}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                    {titleChildren && (
+                        <div className="flex flex-wrap items-center gap-2 ml-auto">
+                            {titleChildren}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

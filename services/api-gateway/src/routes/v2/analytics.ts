@@ -144,6 +144,51 @@ export function registerAnalyticsRoutes(
         }
     );
 
+    // Activity heartbeat - PUBLIC endpoint (no auth required)
+    // Receives heartbeats from all 3 apps (portal, candidate, corporate)
+    app.post(
+        '/api/public/activity/heartbeat',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+
+            try {
+                const response = await analyticsClient().post<any>(
+                    '/api/public/activity/heartbeat',
+                    request.body,
+                    correlationId,
+                );
+                return reply.code(204).send();
+            } catch (error: any) {
+                return reply.status(error.statusCode || 500).send({
+                    error: { message: error.message || 'Internal server error' },
+                });
+            }
+        }
+    );
+
+    // Activity online snapshot - GET /api/v2/activity/online (admin only)
+    app.get(
+        '/api/v2/activity/online',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+
+            try {
+                const response = await analyticsClient().get<any>(
+                    '/api/v2/activity/online',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(response);
+            } catch (error: any) {
+                return reply.status(error.statusCode || 500).send({
+                    error: { message: error.message || 'Internal server error' },
+                });
+            }
+        }
+    );
+
     // Proposal statistics endpoint - GET /api/v2/proposal-stats/summary
     app.get(
         '/api/v2/proposal-stats/summary',

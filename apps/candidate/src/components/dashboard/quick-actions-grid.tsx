@@ -57,7 +57,7 @@ export default function QuickActionsGrid({
             {/* Profile - highlighted if incomplete */}
             <Link
                 href="/portal/profile"
-                className={`btn ${needsProfileCompletion ? "btn-outline" : "btn-soft"} btn-soft btn-warning btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
+                className={`btn ${needsProfileCompletion ? "btn-outline btn-warning" : "btn-soft btn-warning"} btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
             >
                 {needsProfileCompletion && (
                     <span className="badge badge-warning badge-xs absolute -top-1 -right-1">

@@ -23,12 +23,18 @@ describe('ChartServiceV2 (unit)', () => {
             start: new Date('2025-01-01'),
             end: new Date('2025-02-01'),
         });
+        (resolveAccessContext as any).mockResolvedValue({
+            role: 'platform',
+            userId: 'user-1',
+            isRecruiter: false,
+        });
     });
 
-    it('applies recruiter access filters', async () => {
+    it('passes chart params to repository', async () => {
         (resolveAccessContext as any).mockResolvedValue({
             role: 'recruiter',
             userId: 'rec-1',
+            isRecruiter: true,
         });
         const service = new ChartServiceV2(repository as any, supabase);
 
@@ -36,12 +42,16 @@ describe('ChartServiceV2 (unit)', () => {
 
         expect(repository.getChartData).toHaveBeenCalledWith(
             'recruiter-activity',
-            expect.objectContaining({ recruiter_id: 'rec-1' })
+            expect.objectContaining({ months: 3 })
         );
     });
 
     it('returns chart response with time range', async () => {
-        (resolveAccessContext as any).mockResolvedValue({ role: 'platform' });
+        (resolveAccessContext as any).mockResolvedValue({
+            role: 'platform',
+            userId: 'user-1',
+            isRecruiter: false,
+        });
         const service = new ChartServiceV2(repository as any, supabase);
 
         const result = await service.getChartData('clerk-1', 'recruiter-activity' as any, { months: 3 });

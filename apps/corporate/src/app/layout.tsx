@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { ServiceStatusBanner, ActivityTracker } from "@splits-network/shared-ui";
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -110,6 +110,7 @@ export default function RootLayout({
                 <Header />
                 <main className="flex-grow">{children}</main>
                 <Footer />
+                <ActivityTracker app="corporate" />
 
                 {clarityId ? (
                     <Script

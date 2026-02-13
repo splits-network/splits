@@ -6,6 +6,7 @@ import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
 import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
+import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
 import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
@@ -153,6 +154,7 @@ export default function RootLayout({
                         {/* <CookieConsent /> */}
                     </ToastProvider>
                     <DevDebugPanel />
+                    <CandidateActivityTrackerWrapper />
 
                     {/* Analytics scripts loaded after page becomes interactive */}
                     <Script

@@ -105,6 +105,8 @@ spec:
                         value: "http://chat-gateway:80"
                       - name: CHAT_SERVICE_URL
                         value: "http://chat-service:80"
+                      - name: SEARCH_SERVICE_URL
+                        value: "http://search-service:80"
                   resources:
                       requests:
                           cpu: 200m

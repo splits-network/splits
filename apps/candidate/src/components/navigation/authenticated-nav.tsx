@@ -29,6 +29,12 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
+                            <Link href="/portal/recruiters">
+                                <i className="fa-duotone fa-regular fa-user-tie"></i>
+                                My Recruiters
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/portal/messages">
                                 <i className="fa-duotone fa-regular fa-messages"></i>
                                 Messages

@@ -183,7 +183,7 @@ export default function DetailSidebar({
                                     job={job}
                                     variant="descriptive"
                                     layout="horizontal"
-                                    size="md"
+                                    size="sm"
                                     onRefresh={handleRefresh}
                                     onViewPipeline={onViewPipeline}
                                     showActions={{

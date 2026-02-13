@@ -331,6 +331,8 @@ describe('ensureUserAndCandidateInDatabase', () => {
     });
 
     it('suppresses 404 and 500 errors on initial user check without logging warning', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        
         vi.mocked(getCachedCurrentUserProfile).mockRejectedValue({ response: { status: 500 } });
         mockClient.post.mockResolvedValueOnce({ data: mockUser });
         mockClient.get.mockResolvedValueOnce({ data: mockCandidate });
@@ -339,7 +341,9 @@ describe('ensureUserAndCandidateInDatabase', () => {
 
         expect(result.success).toBe(true);
         // console.warn should NOT be called for 404/500
-        expect(console.warn).not.toHaveBeenCalled();
+        expect(warnSpy).not.toHaveBeenCalled();
+        
+        warnSpy.mockRestore();
     });
 });
 

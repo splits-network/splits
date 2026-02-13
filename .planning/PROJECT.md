@@ -1,68 +1,74 @@
-# Pricing Page Redesign
+# Platform Admin Restructure
 
 ## What This Is
 
-Redesign the portal's public pricing page to match the updated landing page design, and add an interactive RTI (Return on Investment) calculator that shows recruiters exactly how upgrading their subscription tier increases their payout on placements.
+A restructuring of how platform admin roles are modeled in the Splits Network. Currently, platform admins must be assigned via the `memberships` table which requires a synthetic "platform" organization. This milestone moves platform admin to the `user_roles` table (with nullable entity fields), removes the artificial platform organization, and updates all downstream consumers (resolveAccessContext, identity-service, frontend).
 
 ## Core Value
 
-Recruiters see concrete dollar amounts showing how upgrading pays for itself with a single placement.
+Platform admin is a system-level role assigned directly to a user — no organization membership required.
 
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+<!-- From previous milestones -->
+
+- Per-entity full-text search with tsvector columns on 7 tables — existing
+- Unified search.search_index table with trigger-based sync — v2.0
+- Real-time typeahead search bar in portal header — v2.0
+- Role-based filtering via resolveAccessContext() — v2.0
+- Keyboard navigation (Cmd/Ctrl+K) for global search — v2.0
+- Org-scoped roles (company_admin, hiring_manager) via memberships table — existing
+- Entity-linked roles (recruiter, candidate) via user_roles table — existing
 
 ### Active
 
-- [ ] Pricing page visual design matches landing page (GSAP animations, scroll triggers, same component patterns)
-- [ ] RTI calculator lets recruiters input placement fee amount (or salary + fee %)
-- [ ] RTI calculator lets recruiters select their role(s) in a deal (multi-select: Candidate Recruiter, Job Owner, Company Recruiter, Candidate Sourcer, Company Sourcer)
-- [ ] Calculator shows side-by-side payout comparison across all three tiers (Free, Paid $99, Premium $249)
-- [ ] Calculator highlights the upgrade value (difference in dollars between tiers)
-- [ ] Animated number counters for payout amounts (matching landing page style)
-- [ ] Mobile-responsive calculator interface
+- [ ] Make role_entity_id and role_entity_type nullable in user_roles
+- [ ] Migrate platform_admin rows from memberships to user_roles
+- [ ] Remove synthetic "platform" organization (type='platform')
+- [ ] Update resolveAccessContext to find platform_admin in user_roles
+- [ ] Update identity-service platform admin assignment/lookup
+- [ ] Update frontend admin checks if affected
 
 ### Out of Scope
 
-- [ ] Backend changes — calculator is purely frontend, uses hardcoded commission rates
-- [ ] Stripe integration changes — this is just the pricing display page
-- [ ] Authentication — this is a public page
+- Restructuring company_admin/hiring_manager roles — they're legitimately org-scoped, stay in memberships
+- Fine-grained permissions system — future milestone
+- Role UI/admin panel redesign — just the data model change
+- Elasticsearch/external search engine — Postgres FTS is sufficient for current scale
+- Search analytics/tracking — defer to future milestone
 
 ## Context
 
-**Existing codebase:**
-- Landing page at `apps/portal/src/app/page.tsx` with GSAP animations
-- Current pricing page at `apps/portal/src/app/public/pricing/page.tsx` — static, no animations
-- Landing sections use shared animation utilities from `components/landing/shared/animation-utils.ts`
-- DaisyUI theme with semantic colors (primary, secondary, accent)
+**Current role architecture:**
+- `memberships` table: org-scoped roles (platform_admin, company_admin, hiring_manager) — requires organization_id NOT NULL
+- `user_roles` table: entity-linked roles (recruiter, candidate) — requires role_entity_id NOT NULL
+- A synthetic "platform" organization (type='platform') exists solely so platform admins can have a memberships row
+- `resolveAccessContext()` joins both tables to build AccessContext with `isPlatformAdmin` flag
 
-**Commission structure (from docs/flows/):**
+**Problem:** Platform admin is a system-level concept, not an org-level one. The platform organization is artificial scaffolding that shouldn't exist.
 
-| Role | Premium ($249) | Paid ($99) | Free ($0) |
-|------|----------------|------------|----------|
-| Candidate Recruiter | 40% | 30% | 20% |
-| Job Owner | 20% | 15% | 10% |
-| Company Recruiter | 20% | 15% | 10% |
-| Candidate Sourcer | 10% | 8% | 6% |
-| Company Sourcer | 10% | 8% | 6% |
-| **Platform Take** | **0%** | **24%** | **48%** |
-
-Recruiters can hold multiple roles in a single deal (e.g., Candidate Recruiter + Candidate Sourcer).
+**Key files:**
+- `packages/shared-access-context/src/index.ts` — resolveAccessContext
+- `services/identity-service/src/v2/` — user/role management
+- `apps/portal/src/contexts/user-profile-context.tsx` — frontend role checks
+- `supabase/migrations/` — schema definitions
 
 ## Constraints
 
-- **Tech stack**: Next.js 16, React 19, GSAP, DaisyUI — must use existing patterns
-- **Design language**: Must match landing page animations and visual style
-- **Public page**: No authentication required, SEO-friendly
+- **Backward compatible**: resolveAccessContext must continue returning `isPlatformAdmin: boolean` — downstream consumers unchanged
+- **Zero downtime**: Migration must handle existing platform admin data without breaking active sessions
+- **Tech stack**: Postgres migrations, Supabase, existing V2 service patterns
+- **Scope**: Only platform_admin moves — company_admin and hiring_manager stay in memberships
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Frontend-only calculator | Commission rates are fixed, no need for API calls | — Pending |
-| Multi-role selection | Recruiters often hold multiple roles in a deal | — Pending |
+| Nullable role_entity_id in user_roles | Platform admins don't link to an entity (recruiter/candidate). Nullable is simplest change. | — Pending |
+| Only platform_admin moves | company_admin and hiring_manager are legitimately org-scoped. No reason to change them. | — Pending |
+| Remove platform organization entirely | Clean break. No synthetic data in the system. | — Pending |
 
 ---
-*Last updated: 2026-01-31 after initialization*
+*Last updated: 2026-02-13 after v3.0 milestone start*

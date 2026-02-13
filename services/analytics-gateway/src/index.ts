@@ -268,6 +268,11 @@ async function handleClientMessage(
                 await subscribeChannel(channel, socket);
                 continue;
             }
+            // Allow activity broadcast channel (aggregate counts, not sensitive)
+            if (channel === 'dashboard:activity') {
+                await subscribeChannel(channel, socket);
+                continue;
+            }
             logger.debug({ channel }, 'Subscription denied: unrecognized channel pattern');
         }
     }

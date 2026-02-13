@@ -11,7 +11,8 @@ export type ServiceName =
     | 'notification'
     | 'identity'
     | 'document'
-    | 'automation';
+    | 'automation'
+    | 'search';
 
 export interface ResourceDefinition {
     name: string;

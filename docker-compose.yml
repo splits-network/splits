@@ -576,6 +576,27 @@ services:
     command:
       ["pnpm", "--filter", "@splits-network/document-processing-service", "dev"]
 
+  search-service:
+    build:
+      context: .
+      dockerfile: services/search-service/Dockerfile
+      target: development
+    container_name: splits-search-service
+    ports:
+      - "3013:3013"
+    environment:
+      NODE_ENV: development
+      PORT: 3013
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./services/search-service/src:/app/services/search-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+
   api-gateway:
     build:
       context: .
@@ -603,6 +624,7 @@ services:
       AI_SERVICE_URL: http://ai-service:3009
       ANALYTICS_SERVICE_URL: http://analytics-service:3010
       CHAT_SERVICE_URL: http://chat-service:3011
+      SEARCH_SERVICE_URL: http://search-service:3013
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

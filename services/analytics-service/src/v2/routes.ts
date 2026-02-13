@@ -13,6 +13,8 @@ import { registerChartRoutes } from './charts/routes';
 import { ProposalStatsRepository } from './proposal-stats/repository';
 import { ProposalStatsService } from './proposal-stats/service';
 import { registerProposalStatsRoutes } from './proposal-stats/routes';
+import { ActivityService } from './activity/service';
+import { registerActivityRoutes } from './activity/routes';
 
 // Domain route imports (will be created)
 // import { marketplaceHealthRoutes } from './marketplace-health/routes';
@@ -21,6 +23,8 @@ interface RouteOptions extends FastifyPluginOptions {
     supabase: SupabaseClient;
     cache: CacheManager;
     config: any;
+    redis?: import('ioredis').default;
+    activityService?: ActivityService;
 }
 
 /**
@@ -30,7 +34,7 @@ export async function registerV2Routes(
     app: FastifyInstance,
     options: RouteOptions
 ) {
-    const { supabase, cache, redis, config } = options;
+    const { supabase, cache, config, activityService } = options;
 
     // Root V2 endpoint
     app.get('/', async (request, reply) => {
@@ -69,7 +73,7 @@ export async function registerV2Routes(
     registerMarketplaceMetricsRoutes(app, { marketplaceMetricsService });
     registerChartRoutes(app, { chartService });
     registerProposalStatsRoutes(app, proposalStatsService);
-
-    // TODO: Register marketplace health routes when implemented
-    // await app.register(marketplaceHealthRoutes, { prefix: '/marketplace-health', supabase, cache });
+    if (activityService) {
+        registerActivityRoutes(app, { activityService });
+    }
 }

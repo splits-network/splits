@@ -12,6 +12,7 @@ import { registerDocumentRoutes } from './documents';
 import { registerAutomationRoutes } from './automation';
 import { registerChatRoutes } from './chat';
 import { registerPresenceRoutes } from './presence';
+import { registerSearchRoutes } from './search';
 import { registerStatusRoutes } from './status';
 import { registerSystemHealthRoutes } from './system-health';
 import { registerSiteNotificationRoutes } from './site-notifications';
@@ -36,6 +37,7 @@ export function registerV2GatewayRoutes(
     registerNetworkRoutes(app, services);
     registerNotificationRoutes(app, services);
     registerPresenceRoutes(app, services);
+    registerSearchRoutes(app, services);
     registerStatusRoutes(app, options?.eventPublisher || null);
 
     if (options?.redis && options?.supabase) {

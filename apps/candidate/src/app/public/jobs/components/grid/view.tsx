@@ -10,8 +10,7 @@ import Item from "./item";
 import Sidebar from "../shared/sidebar";
 
 export default function GridView() {
-    const { data, loading, pagination, page, goToPage, setLimit } =
-        useFilter();
+    const { data, loading, pagination, page, goToPage, setLimit } = useFilter();
     const [sidebarItem, setSidebarItem] = useState<Job | null>(null);
 
     if (loading && data.length === 0) {
@@ -28,7 +27,7 @@ export default function GridView() {
                         description="Try adjusting your filters or search terms"
                     />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                         {data.map((item) => (
                             <Item
                                 key={item.id}
@@ -52,10 +51,7 @@ export default function GridView() {
                 )}
             </div>
 
-            <Sidebar
-                item={sidebarItem}
-                onClose={() => setSidebarItem(null)}
-            />
+            <Sidebar item={sidebarItem} onClose={() => setSidebarItem(null)} />
         </>
     );
 }

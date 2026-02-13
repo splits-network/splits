@@ -80,4 +80,72 @@ export function registerStatsRoutes(app: FastifyInstance, config: RegisterStatsR
             }
         }
     );
+
+    /**
+     * GET /v2/stats/platform-activity
+     * Get recent platform activity events (admin only)
+     */
+    app.get(
+        '/api/v2/stats/platform-activity',
+        {
+            schema: {
+                tags: ['Stats'],
+                description: 'Get recent platform activity events',
+                response: {
+                    200: {
+                        type: 'object',
+                        properties: {
+                            data: { type: 'array', items: { type: 'object', additionalProperties: true } },
+                        },
+                    },
+                },
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const activity = await config.statsService.getPlatformActivity(clerkUserId);
+                return reply.send({ data: activity });
+            } catch (error: any) {
+                console.error('[PlatformActivity Error]', error?.message || error);
+                return reply
+                    .code(error?.message?.includes('required') ? 403 : 400)
+                    .send({ error: { message: error?.message || 'Failed to load activity' } });
+            }
+        }
+    );
+
+    /**
+     * GET /v2/stats/top-performers
+     * Get top performing recruiters this month (admin only)
+     */
+    app.get(
+        '/api/v2/stats/top-performers',
+        {
+            schema: {
+                tags: ['Stats'],
+                description: 'Get top performing recruiters by placements',
+                response: {
+                    200: {
+                        type: 'object',
+                        properties: {
+                            data: { type: 'array', items: { type: 'object', additionalProperties: true } },
+                        },
+                    },
+                },
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const performers = await config.statsService.getTopPerformers(clerkUserId);
+                return reply.send({ data: performers });
+            } catch (error: any) {
+                console.error('[TopPerformers Error]', error?.message || error);
+                return reply
+                    .code(error?.message?.includes('required') ? 403 : 400)
+                    .send({ error: { message: error?.message || 'Failed to load performers' } });
+            }
+        }
+    );
 }
