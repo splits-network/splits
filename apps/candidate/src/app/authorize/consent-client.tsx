@@ -26,7 +26,7 @@ const SCOPE_DISPLAY: Record<string, { label: string; icon: string }> = {
 };
 
 export function ConsentClient() {
-    const { isSignedIn, userId } = useAuth();
+    const { isSignedIn, isLoaded, userId } = useAuth();
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -60,6 +60,9 @@ export function ConsentClient() {
         !responseType || !clientId || !redirectUri || !scope || !state;
 
     useEffect(() => {
+        // Wait for Clerk to finish loading before checking auth
+        if (!isLoaded) return;
+
         // Redirect to sign-in if not authenticated
         if (!isSignedIn) {
             const currentQuery = searchParams.toString();
@@ -71,7 +74,7 @@ export function ConsentClient() {
         // Check for consent
         checkConsent();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isSignedIn, userId]);
+    }, [isLoaded, isSignedIn, userId]);
 
     const checkConsent = async () => {
         if (!userId || !scope) {
