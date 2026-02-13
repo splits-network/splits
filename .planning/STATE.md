@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 14 of 15 (OpenAPI Schema + GPT Configuration)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-13 -- Completed Phase 13 (GPT API Endpoints) -- all 4 plans
+Plan: 1 of 2 (OpenAPI Schema)
+Status: In progress
+Last activity: 2026-02-13 -- Completed 14-01-PLAN.md (OpenAPI Schema)
 
-Progress: [████████░░] ~87% (13/~15 v5.0 plans)
+Progress: [████████░░] ~93% (14/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [████████░░] ~87% (13/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 3.2 min
-- Total execution time: ~43 minutes
+- Total execution time: ~46 minutes
 
 **Cumulative:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 3.4 min
-- Total execution time: ~107 minutes
+- Total execution time: ~110 minutes
 
 ## Accumulated Context
 
@@ -87,6 +87,11 @@ Progress: [████████░░] ~87% (13/~15 v5.0 plans)
 - Use concerns field from ai-service as gaps (more descriptive than missing_skills) (Phase 13-04)
 - Synthetic application_id with timestamp for GPT analysis tracking (Phase 13-04)
 - ai-service URL defaults to port 3009 (http://ai-service:3009) (Phase 13-04)
+- OpenAPI 3.0.1 (not 3.1) for GPT Builder compatibility (Phase 14-01)
+- Static hand-crafted schema with rich behavioral descriptions (not auto-generated) (Phase 14-01)
+- x-openai-isConsequential: true on submitApplication, false on analyzeResume (Phase 14-01)
+- Public schema endpoints (no auth) for GPT Builder import (Phase 14-01)
+- Load schema at module initialization for performance (Phase 14-01)
 
 ### Pending Todos
 
@@ -119,10 +124,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed Phase 13 (GPT API Endpoints) -- all 4 plans
+Stopped at: Completed 14-01-PLAN.md (OpenAPI Schema)
 Resume file: None
-Next: Phase 14 (OpenAPI Schema + GPT Configuration) -- /gsd:discuss-phase 14 or /gsd:plan-phase 14
+Next: Phase 14-02 (GPT Builder Configuration) or Phase 15 planning
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 13 complete)*
+*Last updated: 2026-02-13 (14-01 complete)*
