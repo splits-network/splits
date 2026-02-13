@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Candidates interact with Applicant.Network via natural language through a Custom GPT
-**Current focus:** v5.0 Custom GPT -- Phase 13 (GPT API Endpoints)
+**Current focus:** v5.0 Custom GPT -- Phase 14 (OpenAPI Schema + GPT Configuration)
 
 ## Current Position
 
-Phase: 13 of 15 (GPT API Endpoints)
+Phase: 14 of 15 (OpenAPI Schema + GPT Configuration)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-13 -- Completed Phase 12 (OAuth2 Provider) -- all 6 plans
+Last activity: 2026-02-13 -- Completed Phase 13 (GPT API Endpoints) -- all 4 plans
 
-Progress: [██████░░░░] ~60% (9/~15 v5.0 plans)
+Progress: [████████░░] ~87% (13/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [██████░░░░] ~60% (9/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 9
-- Average duration: 3.6 min
-- Total execution time: ~32 minutes
+- Total plans completed: 13
+- Average duration: 3.2 min
+- Total execution time: ~43 minutes
 
 **Cumulative:**
-- Total plans completed: 27
-- Average duration: 3.5 min
-- Total execution time: ~96 minutes
+- Total plans completed: 31
+- Average duration: 3.4 min
+- Total execution time: ~107 minutes
 
 ## Accumulated Context
 
@@ -70,6 +70,23 @@ Progress: [██████░░░░] ~60% (9/~15 v5.0 plans)
 - Authorize endpoint returns JSON (not 302 redirect) because consent page uses fetch() (Phase 12-05)
 - Direct Clerk webhook endpoint in gpt-service for user.deleted events (Phase 12-06)
 - Deferred webhook signature verification to Phase 15 (Phase 12-06)
+- In-memory confirmation token store (15-minute expiry, crypto.randomUUID with gpt_confirm_ prefix) (Phase 13-01)
+- Hardcoded 5 results per page for job search (keeps GPT responses concise) (Phase 13-01)
+- Active application stages filter by default (9 active stages vs 2 inactive) (Phase 13-01)
+- Salary range formatting: $XXk-$XXk, $XXk+, Up to $XXk, or null (Phase 13-01)
+- Return 200 with empty array for job search with no results (not 404) (Phase 13-02)
+- UUID regex validation for job ID parameter (Phase 13-02)
+- Include company data in job detail response for GPT context (Phase 13-02)
+- 10 applications per page vs 5 jobs per page (different pagination limits) (Phase 13-02)
+- Two-step confirmation prevents accidental AI-driven submissions (Phase 13-03)
+- Required pre-screen questions block submission until answered (Phase 13-03)
+- Duplicate check includes original application date in error message (Phase 13-03)
+- Confirmation token validated for user ownership (security) (Phase 13-03)
+- Event publishing failures logged but don't fail request (Phase 13-03)
+- Resume text priority: GPT-provided > stored resume > error (enables chat-based resume upload) (Phase 13-04)
+- Use concerns field from ai-service as gaps (more descriptive than missing_skills) (Phase 13-04)
+- Synthetic application_id with timestamp for GPT analysis tracking (Phase 13-04)
+- ai-service URL defaults to port 3009 (http://ai-service:3009) (Phase 13-04)
 
 ### Pending Todos
 
@@ -102,10 +119,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed Phase 12 (OAuth2 Provider) -- all 6 plans
+Stopped at: Completed Phase 13 (GPT API Endpoints) -- all 4 plans
 Resume file: None
-Next: Phase 13 (GPT API Endpoints) -- /gsd:discuss-phase 13 or /gsd:plan-phase 13
+Next: Phase 14 (OpenAPI Schema + GPT Configuration) -- /gsd:discuss-phase 14 or /gsd:plan-phase 14
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (Phase 12 complete)*
+*Last updated: 2026-02-13 (Phase 13 complete)*

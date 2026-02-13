@@ -114,7 +114,7 @@ Plans:
 
 - [x] **Phase 11: Service Foundation** - gpt-service scaffold, database tables, environment configuration
 - [x] **Phase 12: OAuth2 Provider** - OAuth2 authorization code flow, gateway integration, token validation
-- [ ] **Phase 13: GPT API Endpoints** - Job search, job details, application status, application submission, resume analysis
+- [x] **Phase 13: GPT API Endpoints** - Job search, job details, application status, application submission, resume analysis
 - [ ] **Phase 14: OpenAPI Schema + GPT Configuration** - OpenAPI 3.0.1 schema, schema serving endpoint, GPT Instructions document
 - [ ] **Phase 15: Production Hardening** - Kubernetes deployment, rate limiting, token cleanup, audit logging
 
@@ -163,7 +163,13 @@ Plans:
   3. Application status endpoint returns the authenticated candidate's applications with human-readable status labels and job context
   4. Application submission returns CONFIRMATION_REQUIRED with summary on first call, and executes submission (with pre-screen answers) only when confirmed=true on second call
   5. Resume analysis endpoint parses candidate's existing resume and returns fit score against a specific job posting
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [x] 13-01-PLAN.md — Foundation layer: types, repository, error helpers, confirmation token store
+- [x] 13-02-PLAN.md — Read endpoints: job search, job details, application status
+- [x] 13-03-PLAN.md — Write endpoint: application submission with confirmation safety pattern
+- [x] 13-04-PLAN.md — Resume analysis endpoint with ai-service integration
 
 ### Phase 14: OpenAPI Schema + GPT Configuration
 **Goal**: Complete OpenAPI schema and GPT Instructions document enable configuring a functional Custom GPT in OpenAI's GPT Builder
@@ -206,10 +212,10 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15
 | 10. Portal UI | v4.0 | 2/2 | Complete | 2026-02-13 |
 | 11. Service Foundation | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 12. OAuth2 Provider | v5.0 | 6/6 | Complete | 2026-02-13 |
-| 13. GPT API Endpoints | v5.0 | 0/TBD | Not started | - |
+| 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
 | 14. OpenAPI Schema + GPT Configuration | v5.0 | 0/TBD | Not started | - |
 | 15. Production Hardening | v5.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-13 (v5.0 phases added)*
+*Last updated: 2026-02-13 (Phase 13 complete)*

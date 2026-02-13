@@ -6,12 +6,15 @@ import { EventPublisher } from './shared/events';
 import { registerOAuthRoutes } from './oauth/routes';
 import { registerWebhookRoutes } from './oauth/webhook-handler';
 import { OAuthService } from './oauth/oauth-service';
+import { GptActionRepository } from './actions/repository';
+import { registerActionRoutes } from './actions/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
     gptConfig: GptConfig;
     eventPublisher?: EventPublisher;
+    actionRepository?: GptActionRepository;
 }
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
@@ -28,11 +31,15 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
         app.log as Logger
     );
 
+    // Instantiate GptActionRepository
+    const actionRepository = new GptActionRepository(supabaseUrl, supabaseKey);
+
     // Register OAuth routes
     registerOAuthRoutes(app, { oauthService });
 
     // Register webhook routes
     registerWebhookRoutes(app, { oauthService, logger: app.log as Logger });
 
-    // GPT proxy routes will be registered in Phase 13
+    // Register GPT Action routes
+    registerActionRoutes(app, { repository: actionRepository, oauthService, eventPublisher });
 }

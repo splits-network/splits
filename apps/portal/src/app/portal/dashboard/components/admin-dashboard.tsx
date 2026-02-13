@@ -1,30 +1,33 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { usePlatformStats } from '../hooks/use-platform-stats';
-import { usePlatformPipeline } from '../hooks/use-platform-pipeline';
-import { useMarketplaceHealth } from '../hooks/use-marketplace-health';
-import { usePlatformActivity } from '../hooks/use-platform-activity';
-import { useTopPerformers } from '../hooks/use-top-performers';
-import { usePlatformFinancials } from '../hooks/use-platform-financials';
-import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
-import { StatCard, StatCardGrid } from '@/components/ui/cards';
-import { AnalyticsChart } from '@/components/charts/analytics-chart';
-import { PageTitle } from '@/components/page-title';
-import { TrendPeriodSelector } from '@/components/charts/trend-period-selector';
-import PlatformAlertsBar from './admin/platform-alerts-bar';
-import PlatformPipelineFunnel from './admin/platform-pipeline-funnel';
-import MarketplaceHealthRadar from './admin/marketplace-health-radar';
-import PlatformActivityTable from './admin/platform-activity-table';
-import TopPerformers from './admin/top-performers';
-import PendingActionsCard from './admin/pending-actions-card';
-import RoleDistributionDoughnut from './admin/role-distribution-doughnut';
-import RecruiterStatusBreakdown from './admin/recruiter-status-breakdown';
-import FinancialSummaryCard from './admin/financial-summary-card';
-import SubscriptionOverview from './admin/subscription-overview';
-import OnlineActivityChart, { type ActivitySnapshot } from './admin/online-activity-chart';
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { usePlatformStats } from "../hooks/use-platform-stats";
+import { usePlatformPipeline } from "../hooks/use-platform-pipeline";
+import { useMarketplaceHealth } from "../hooks/use-marketplace-health";
+import { usePlatformActivity } from "../hooks/use-platform-activity";
+import { useTopPerformers } from "../hooks/use-top-performers";
+import { usePlatformFinancials } from "../hooks/use-platform-financials";
+import { useOnlineActivity } from "../hooks/use-online-activity";
+import { useDashboardRealtime } from "../hooks/use-dashboard-realtime";
+import { StatCard, StatCardGrid } from "@/components/ui/cards";
+import { AnalyticsChart } from "@/components/charts/analytics-chart";
+import { PageTitle } from "@/components/page-title";
+import { TrendPeriodSelector } from "@/components/charts/trend-period-selector";
+import PlatformAlertsBar from "./admin/platform-alerts-bar";
+import PlatformPipelineFunnel from "./admin/platform-pipeline-funnel";
+import MarketplaceHealthRadar from "./admin/marketplace-health-radar";
+import PlatformActivityTable from "./admin/platform-activity-table";
+import TopPerformers from "./admin/top-performers";
+import PendingActionsCard from "./admin/pending-actions-card";
+import RoleDistributionDoughnut from "./admin/role-distribution-doughnut";
+import RecruiterStatusBreakdown from "./admin/recruiter-status-breakdown";
+import FinancialSummaryCard from "./admin/financial-summary-card";
+import SubscriptionOverview from "./admin/subscription-overview";
+import OnlineActivityChart, {
+    type ActivitySnapshot,
+} from "./admin/online-activity-chart";
 
 function formatCurrency(value: number): string {
     if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
@@ -36,15 +39,45 @@ export default function AdminDashboard() {
     const { userId } = useAuth();
     const [trendPeriod, setTrendPeriod] = useState(6);
     const [chartRefreshKey, setChartRefreshKey] = useState(0);
-    const [activitySnapshot, setActivitySnapshot] = useState<ActivitySnapshot | null>(null);
 
     // ── Independent data hooks ──
-    const { stats, loading: statsLoading, refresh: refreshStats } = usePlatformStats();
-    const { stages, loading: pipelineLoading, refresh: refreshPipeline } = usePlatformPipeline();
-    const { health, loading: healthLoading, refresh: refreshHealth } = useMarketplaceHealth();
-    const { events, loading: activityLoading, refresh: refreshActivity } = usePlatformActivity();
-    const { performers, loading: performersLoading, refresh: refreshPerformers } = useTopPerformers();
-    const { financials, loading: financialsLoading } = usePlatformFinancials(stats, statsLoading);
+    const {
+        stats,
+        loading: statsLoading,
+        refresh: refreshStats,
+    } = usePlatformStats();
+    const {
+        stages,
+        loading: pipelineLoading,
+        refresh: refreshPipeline,
+    } = usePlatformPipeline();
+    const {
+        health,
+        loading: healthLoading,
+        refresh: refreshHealth,
+    } = useMarketplaceHealth();
+    const {
+        events,
+        loading: activityLoading,
+        refresh: refreshActivity,
+    } = usePlatformActivity();
+    const {
+        performers,
+        loading: performersLoading,
+        refresh: refreshPerformers,
+    } = useTopPerformers();
+    const { financials, loading: financialsLoading } = usePlatformFinancials(
+        stats,
+        statsLoading,
+    );
+
+    // ── Online activity data (API call + WebSocket updates) ──
+    const {
+        snapshot: activitySnapshot,
+        loading: activitySnapshotLoading,
+        refresh: refreshActivitySnapshot,
+        setSnapshot: setActivitySnapshot,
+    } = useOnlineActivity();
 
     // ── Real-time WebSocket updates ──
     const handleStatsUpdate = useCallback(() => {
@@ -61,12 +94,23 @@ export default function AdminDashboard() {
         refreshHealth();
         refreshActivity();
         refreshPerformers();
+        refreshActivitySnapshot();
         setChartRefreshKey((k) => k + 1);
-    }, [refreshStats, refreshPipeline, refreshHealth, refreshActivity, refreshPerformers]);
+    }, [
+        refreshStats,
+        refreshPipeline,
+        refreshHealth,
+        refreshActivity,
+        refreshPerformers,
+        refreshActivitySnapshot,
+    ]);
 
-    const handleActivityUpdate = useCallback((snapshot: ActivitySnapshot) => {
-        setActivitySnapshot(snapshot);
-    }, []);
+    const handleActivityUpdate = useCallback(
+        (snapshot: ActivitySnapshot) => {
+            setActivitySnapshot(snapshot);
+        },
+        [setActivitySnapshot],
+    );
 
     useDashboardRealtime({
         enabled: !!userId,
@@ -75,7 +119,7 @@ export default function AdminDashboard() {
         onChartsUpdate: handleChartsUpdate,
         onReconnect: handleReconnect,
         onActivityUpdate: handleActivityUpdate,
-        extraChannels: ['dashboard:activity'],
+        extraChannels: ["dashboard:activity"],
     });
 
     // ── 60s polling for aggregate freshness ──
@@ -84,9 +128,15 @@ export default function AdminDashboard() {
             refreshStats();
             refreshActivity();
             refreshPerformers();
+            refreshActivitySnapshot();
         }, 60_000);
         return () => clearInterval(interval);
-    }, [refreshStats, refreshActivity, refreshPerformers]);
+    }, [
+        refreshStats,
+        refreshActivity,
+        refreshPerformers,
+        refreshActivitySnapshot,
+    ]);
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -99,19 +149,31 @@ export default function AdminDashboard() {
                     onTrendPeriodChange={setTrendPeriod}
                 />
                 <div className="hidden lg:block w-px h-6 bg-base-300" />
-                <Link href="/portal/admin/recruiters" className="btn btn-ghost btn-sm gap-2">
+                <Link
+                    href="/portal/admin/recruiters"
+                    className="btn btn-ghost btn-sm gap-2"
+                >
                     <i className="fa-duotone fa-regular fa-user-tie w-3.5"></i>
                     Recruiters
                 </Link>
-                <Link href="/portal/admin/payouts" className="btn btn-ghost btn-sm gap-2">
+                <Link
+                    href="/portal/admin/payouts"
+                    className="btn btn-ghost btn-sm gap-2"
+                >
                     <i className="fa-duotone fa-regular fa-money-bill-transfer w-3.5"></i>
                     Payouts
                 </Link>
-                <Link href="/portal/admin/fraud" className="btn btn-ghost btn-sm gap-2">
+                <Link
+                    href="/portal/admin/fraud"
+                    className="btn btn-ghost btn-sm gap-2"
+                >
                     <i className="fa-duotone fa-regular fa-shield-exclamation w-3.5"></i>
                     Fraud
                 </Link>
-                <Link href="/portal/admin/metrics" className="btn btn-ghost btn-sm gap-2">
+                <Link
+                    href="/portal/admin/metrics"
+                    className="btn btn-ghost btn-sm gap-2"
+                >
                     <i className="fa-duotone fa-regular fa-chart-line w-3.5"></i>
                     Metrics
                 </Link>
@@ -121,13 +183,22 @@ export default function AdminDashboard() {
             {!statsLoading && <PlatformAlertsBar stats={stats} />}
 
             {/* ── Live Activity (real-time online users) ── */}
-            <OnlineActivityChart snapshot={activitySnapshot} />
+            <OnlineActivityChart
+                snapshot={activitySnapshot}
+                loading={activitySnapshotLoading}
+            />
 
             {/* ── Section 1: KPI Strip (7 cards) ── */}
             <StatCardGrid className="shadow-lg w-full">
                 {statsLoading ? (
                     [1, 2, 3, 4, 5, 6, 7].map((i) => (
-                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
+                        <StatCard
+                            key={i}
+                            title=""
+                            value={0}
+                            icon="fa-spinner"
+                            loading
+                        />
                     ))
                 ) : (
                     <>
@@ -218,7 +289,12 @@ export default function AdminDashboard() {
                 <div className="card bg-base-200 overflow-hidden">
                     <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
                         {statsLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <StatCard
+                                title=""
+                                value={0}
+                                icon="fa-spinner"
+                                loading
+                            />
                         ) : (
                             <StatCard
                                 title="Recruiter growth"
@@ -249,7 +325,12 @@ export default function AdminDashboard() {
                 <div className="card bg-base-200 overflow-hidden">
                     <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
                         {statsLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <StatCard
+                                title=""
+                                value={0}
+                                icon="fa-spinner"
+                                loading
+                            />
                         ) : (
                             <StatCard
                                 title="Application volume"
@@ -280,7 +361,12 @@ export default function AdminDashboard() {
                 <div className="card bg-base-200 overflow-hidden md:col-span-2 lg:col-span-1">
                     <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
                         {statsLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <StatCard
+                                title=""
+                                value={0}
+                                icon="fa-spinner"
+                                loading
+                            />
                         ) : (
                             <StatCard
                                 title="Revenue trend"
@@ -312,7 +398,12 @@ export default function AdminDashboard() {
             <div className="card bg-base-200 overflow-hidden">
                 <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
                     {statsLoading ? (
-                        <StatCard title="" value={0} icon="fa-spinner" loading />
+                        <StatCard
+                            title=""
+                            value={0}
+                            icon="fa-spinner"
+                            loading
+                        />
                     ) : (
                         <StatCard
                             title="User growth by type"
@@ -355,10 +446,7 @@ export default function AdminDashboard() {
                         performers={performers}
                         loading={performersLoading}
                     />
-                    <PendingActionsCard
-                        stats={stats}
-                        loading={statsLoading}
-                    />
+                    <PendingActionsCard stats={stats} loading={statsLoading} />
                 </div>
             </div>
 
