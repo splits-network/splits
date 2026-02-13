@@ -59,10 +59,10 @@ Plans:
   2. PATCH /v2/jobs/:id accepts commute_types and job_level and updates them
   3. GET /v2/jobs and GET /v2/jobs/:id return commute_types and job_level in the response
   4. Job list endpoint supports filtering by commute_type (any-match against array) and job_level
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 09-01: ATS service repository, service, and route updates
+- [ ] 09-01-PLAN.md -- ATS service types, repository filtering, and service validation for commute_types and job_level
 
 ### Phase 10: Frontend & Search
 **Goal**: Users can set, view, and filter by commute types and job levels in the portal
