@@ -43,6 +43,11 @@ ENV SUPABASE_URL=$SUPABASE_URL
 ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+# Clerk redirect URLs - static values inlined at build time for client-side SDK
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/portal/dashboard
+ENV NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/portal/dashboard
 COPY --from=dependencies /app ./
 # Copy package source files (needed for Next.js transpilePackages)
 COPY packages/shared-api-client ./packages/shared-api-client

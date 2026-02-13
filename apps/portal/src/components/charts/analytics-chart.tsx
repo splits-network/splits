@@ -48,7 +48,9 @@ export type ChartType =
     | 'time-to-place-trends'
     | 'commission-breakdown'
     | 'recruitment-funnel'
-    | 'reputation-radar';
+    | 'reputation-radar'
+    | 'hiring-pipeline'
+    | 'company-health-radar';
 
 export interface AnalyticsChartProps {
     type: ChartType;

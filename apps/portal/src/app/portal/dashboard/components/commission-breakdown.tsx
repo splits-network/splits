@@ -25,7 +25,7 @@ interface CommissionBreakdownProps {
  */
 function getThemeChartColors(): string[] {
     if (typeof window === 'undefined') {
-        return ['#0ea5e9', '#233876', '#d97706', '#9333ea', '#16a34a'];
+        return ['#0f9d8a', '#233876', '#eab308', '#945769', '#0ea5e9'];
     }
     const style = getComputedStyle(document.documentElement);
     const read = (prop: string, fallback: string) => {
@@ -33,17 +33,17 @@ function getThemeChartColors(): string[] {
         return val || fallback;
     };
     return [
-        read('--color-secondary', '#0ea5e9'),   // Teal — Closer
+        read('--color-secondary', '#0f9d8a'),   // Teal — Closer
         read('--color-primary', '#233876'),      // Brand — BD
-        read('--color-warning', '#d97706'),      // Amber — Discovery
-        read('--color-accent', '#db2777'),       // Accent — Specs Owner
+        read('--color-warning', '#eab308'),      // Amber — Discovery
+        read('--color-accent', '#945769'),       // Accent — Specs Owner
         read('--color-info', '#0ea5e9'),         // Info — Company Sourcer
     ];
 }
 
 function getThemeTextColor(): string {
-    if (typeof window === 'undefined') return '#18181b';
-    return getComputedStyle(document.documentElement).getPropertyValue('--color-base-content').trim() || '#18181b';
+    if (typeof window === 'undefined') return '#111827';
+    return getComputedStyle(document.documentElement).getPropertyValue('--color-base-content').trim() || '#111827';
 }
 
 function getThemeSurfaceColor(): string {

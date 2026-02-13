@@ -4,6 +4,17 @@ import { clerkMiddleware } from '@clerk/nextjs/server';
 export default clerkMiddleware(async (auth, request) => {
     const path = request.nextUrl.pathname;
 
+    // Public routes - Clerk context available but auth not required
+    const isPublicRoute =
+        path === '/' ||
+        path.startsWith('/sign-in') ||
+        path.startsWith('/sign-up') ||
+        path.startsWith('/sso-callback');
+
+    if (isPublicRoute) {
+        return;
+    }
+
     // Protected routes that require authentication
     const isProtectedRoute = path.startsWith('/portal/') ||
         path.startsWith('/api/v2/') ||
@@ -18,6 +29,12 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
     matcher: [
+        // Root and auth routes (for auth-based redirect and Clerk context)
+        '/',
+        '/sign-in(.*)',
+        '/sign-up(.*)',
+        '/sso-callback(.*)',
+
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
         '/public/jobs/(.*)',       // Job pages (auth optional for personalization)

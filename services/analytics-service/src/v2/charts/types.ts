@@ -19,7 +19,9 @@ export type ChartType =
     | 'time-to-place-trends'
     | 'commission-breakdown'
     | 'recruitment-funnel'
-    | 'reputation-radar';
+    | 'reputation-radar'
+    | 'hiring-pipeline'
+    | 'company-health-radar';
 
 /**
  * Chart.js compatible dataset structure
@@ -81,4 +83,6 @@ export const CHART_METRIC_MAPPING: Record<ChartType, string[]> = {
     'commission-breakdown': ['commission_by_role'],
     'recruitment-funnel': ['funnel_stage_counts'],
     'reputation-radar': ['reputation_metrics'],
+    'hiring-pipeline': ['hiring_stage_counts'],
+    'company-health-radar': ['company_health_metrics'],
 };

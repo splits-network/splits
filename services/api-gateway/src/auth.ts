@@ -27,8 +27,19 @@ interface ClerkClientEntry {
     secretKey: string;
 }
 
+interface CachedUser {
+    clerkUserId: string;
+    email: string;
+    name: string;
+    sourceApp: 'portal' | 'candidate';
+    cachedAt: number;
+}
+
+const USER_CACHE_TTL_MS = 60_000; // 60 seconds
+
 export class AuthMiddleware {
     private clerkClients: ClerkClientEntry[];
+    private userCache = new Map<string, CachedUser>();
 
     /**
      * Create AuthMiddleware with multiple Clerk applications
@@ -71,10 +82,10 @@ export class AuthMiddleware {
 
         // Try each Clerk client until one succeeds
         let lastError: Error | null = null;
-        
+
         for (const entry of this.clerkClients) {
             try {
-                // Verify the token with this Clerk client
+                // Verify the token with this Clerk client (local JWT verification)
                 const verified = await verifyToken(token, {
                     secretKey: entry.secretKey,
                 });
@@ -83,14 +94,27 @@ export class AuthMiddleware {
                     continue; // Try next client
                 }
 
-                // Get user details from Clerk
+                // Check cache before calling Clerk API
+                const cached = this.getCachedUser(verified.sub);
+                if (cached) {
+                    return {
+                        userId: '',
+                        clerkUserId: cached.clerkUserId,
+                        email: cached.email,
+                        name: cached.name,
+                        memberships: [],
+                        sourceApp: cached.sourceApp,
+                    };
+                }
+
+                // Get user details from Clerk API
                 const user = await entry.client.users.getUser(verified.sub);
 
                 if (!user) {
                     continue; // Try next client
                 }
 
-                return {
+                const authContext: AuthContext = {
                     userId: '', // Will be filled by identity service
                     clerkUserId: user.id,
                     email: user.emailAddresses[0]?.emailAddress || '',
@@ -98,6 +122,11 @@ export class AuthMiddleware {
                     memberships: [], // Will be filled when resolving user context
                     sourceApp: entry.name,
                 };
+
+                // Cache the user for subsequent requests
+                this.cacheUser(verified.sub, authContext);
+
+                return authContext;
             } catch (error: any) {
                 lastError = error;
                 // Continue to try next client
@@ -109,8 +138,28 @@ export class AuthMiddleware {
             err: lastError,
             message: lastError?.message,
         }, 'Token verification failed with all Clerk clients');
-        
+
         throw new UnauthorizedError('Token verification failed');
+    }
+
+    private getCachedUser(clerkUserId: string): CachedUser | null {
+        const cached = this.userCache.get(clerkUserId);
+        if (!cached) return null;
+        if (Date.now() - cached.cachedAt > USER_CACHE_TTL_MS) {
+            this.userCache.delete(clerkUserId);
+            return null;
+        }
+        return cached;
+    }
+
+    private cacheUser(clerkUserId: string, context: AuthContext): void {
+        this.userCache.set(clerkUserId, {
+            clerkUserId: context.clerkUserId,
+            email: context.email,
+            name: context.name,
+            sourceApp: context.sourceApp || 'portal',
+            cachedAt: Date.now(),
+        });
     }
 
     createMiddleware() {

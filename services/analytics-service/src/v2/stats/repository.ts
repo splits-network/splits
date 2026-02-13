@@ -38,6 +38,8 @@ const DEFAULT_COMPANY_STATS: CompanyStatsMetrics = {
     placements_this_year: 0,
     avg_time_to_hire_days: 0,
     active_recruiters: 0,
+    stale_roles: 0,
+    applications_mtd: 0,
 };
 
 const DEFAULT_PLATFORM_STATS: PlatformStatsMetrics = {
@@ -334,8 +336,22 @@ export class StatsRepository {
     }
     
     /**
-     * Calculate company stats in real-time from ATS data
-     * Used as fallback when pre-aggregated metrics aren't available
+     * Calculate company stats in real-time from ATS data.
+     * Used as fallback when pre-aggregated metrics aren't available.
+     *
+     * Strategy: fetch company jobs ONCE up front, then run independent
+     * queries in parallel via Promise.all to minimize round-trips.
+     *
+     * Key design decisions:
+     * - `placements_this_year` and `placements_this_month` always use
+     *   calendar-year / calendar-month boundaries, not the caller's `range`.
+     *   This ensures the stat cards show YTD numbers regardless of whether
+     *   the dashboard passes range=ytd, range=30d, etc.
+     * - `total_applications`, `interviews_scheduled`, `offers_extended` are
+     *   scoped to the caller's range (so the main KPI strip reflects the
+     *   selected time window).
+     * - Application queries push `job_id IN (...)` to Supabase to avoid
+     *   fetching platform-wide rows and filtering client-side.
      */
     private async calculateCompanyStatsRealtime(
         organizationIds: string[],
@@ -343,118 +359,177 @@ export class StatsRepository {
     ): Promise<CompanyStatsMetrics> {
         try {
             const stats = { ...DEFAULT_COMPANY_STATS };
-            
-            // First, get company IDs from organization IDs
+
+            // ── Step 0: Resolve organization IDs to company IDs ──
             const { data: companies, error: companiesError } = await this.supabase
                 .from('companies')
                 .select('id')
                 .in('identity_organization_id', organizationIds);
-            
+
             if (companiesError) {
                 console.error('[CompanyStats] Error fetching companies:', companiesError);
                 return stats;
             }
-            
+
             const companyIds = companies?.map(c => c.id) || [];
-            
+
             if (companyIds.length === 0) {
                 console.log('[CompanyStats] No companies found for organizations');
                 return stats;
             }
 
-            // Active roles
-            const { count: activeRolesCount } = await this.supabase
+            // ── Step 1: Fetch ALL company jobs ONCE (reused everywhere) ──
+            const { data: allCompanyJobs } = await this.supabase
                 .from('jobs')
-                .select('*', { count: 'exact', head: true })
-                .in('company_id', companyIds)
-                .eq('status', 'active');
-            stats.active_roles = activeRolesCount || 0;
+                .select('id, created_at, status')
+                .in('company_id', companyIds);
 
-            // Total applications (in visible stages)
-            const { data: applications } = await this.supabase
-                .from('applications')
-                .select('id, stage, created_at, job_id')
-                .in('stage', ['submitted', 'screen', 'interview', 'offer', 'accepted', 'hired'])
-                .gte('created_at', range.from.toISOString())
-                .lte('created_at', range.to.toISOString());
-
-            if (applications && applications.length > 0) {
-                
-                // Filter to company jobs
-                const { data: companyJobs } = await this.supabase
-                    .from('jobs')
-                    .select('id')
-                    .in('company_id', companyIds);
-                
-                const companyJobIds = new Set(companyJobs?.map(j => j.id) || []);
-                
-                const companyApplications = applications.filter(app => companyJobIds.has(app.job_id));
-
-                stats.total_applications = companyApplications.length;
-                stats.interviews_scheduled = companyApplications.filter(a => a.stage === 'interview').length;
-                stats.offers_extended = companyApplications.filter(a => a.stage === 'offer' || a.stage === 'accepted').length;
+            const companyJobsList = allCompanyJobs || [];
+            if (companyJobsList.length === 0) {
+                return stats;
             }
 
-            // Placements
-            const { data: placements } = await this.supabase
-                .from('placements')
-                .select('id, created_at, application_id')
-                .gte('created_at', range.from.toISOString())
-                .lte('created_at', range.to.toISOString());
+            const allCompanyJobIds = new Set(companyJobsList.map(j => j.id));
+            const allCompanyJobIdArray = [...allCompanyJobIds];
 
-            if (placements && placements.length > 0) {
-                
-                // Filter to company placements
-                const { data: companyJobs } = await this.supabase
-                    .from('jobs')
-                    .select('id')
-                    .in('company_id', companyIds);
-                
-                const companyJobIds = new Set(companyJobs?.map(j => j.id) || []);
-                
-                const { data: placementApplications } = await this.supabase
+            // Active roles (computed in-memory from already-fetched jobs)
+            stats.active_roles = companyJobsList.filter(j => j.status === 'active').length;
+
+            // ── Step 2: Prepare date boundaries ──
+            const now = new Date();
+            const yearStart = new Date(now.getFullYear(), 0, 1);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const staleCutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+            const visibleStages = ['submitted', 'screen', 'interview', 'offer', 'accepted', 'hired'];
+
+            // Identify stale-eligible jobs for the stale_roles query
+            const staleEligibleJobs = companyJobsList.filter(
+                j => j.status === 'active' && new Date(j.created_at) < staleCutoff
+            );
+            const staleJobIds = staleEligibleJobs.map(j => j.id);
+
+            // ── Step 3: Run independent queries in parallel ──
+            const [
+                applicationsResult,
+                placementsResult,
+                assignmentsResult,
+                staleAppsResult,
+                mtdAppsResult,
+            ] = await Promise.all([
+                // 1. Applications for company jobs in the requested date range
+                this.supabase
                     .from('applications')
-                    .select('id, job_id')
-                    .in('id', placements.map(p => p.application_id));
-                
-                const companyPlacements = placements.filter(p => {
-                    const app = placementApplications?.find(a => a.id === p.application_id);
-                    return app && companyJobIds.has(app.job_id);
-                });
+                    .select('id, stage, created_at, job_id')
+                    .in('job_id', allCompanyJobIdArray)
+                    .in('stage', visibleStages)
+                    .gte('created_at', range.from.toISOString())
+                    .lte('created_at', range.to.toISOString()),
 
-                stats.placements_this_year = companyPlacements.length;
+                // 2. Placements YTD (always year boundaries, not caller's range)
+                this.supabase
+                    .from('placements')
+                    .select('id, created_at, application_id')
+                    .gte('created_at', yearStart.toISOString())
+                    .lte('created_at', now.toISOString()),
 
-                // This month
-                const now = new Date();
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                stats.placements_this_month = companyPlacements.filter(
-                    p => new Date(p.created_at) >= monthStart
-                ).length;
-                
-            }
+                // 3. Active recruiters assigned to company jobs
+                this.supabase
+                    .from('role_assignments')
+                    .select('recruiter_id, job_id')
+                    .in('job_id', allCompanyJobIdArray),
 
-            // Active recruiters (unique recruiters with assignments)
-            const { data: assignments } = await this.supabase
-                .from('role_assignments')
-                .select('recruiter_id, job_id');
+                // 4. Stale roles: applications for stale-eligible jobs
+                staleJobIds.length > 0
+                    ? this.supabase
+                        .from('applications')
+                        .select('job_id')
+                        .in('job_id', staleJobIds)
+                        .in('stage', visibleStages)
+                    : Promise.resolve({ data: [] as { job_id: string }[], error: null }),
 
-            if (assignments && assignments.length > 0) {
-                const { data: companyJobs } = await this.supabase
-                    .from('jobs')
+                // 5. Applications MTD for company jobs
+                this.supabase
+                    .from('applications')
                     .select('id')
-                    .in('company_id', companyIds);
-                
-                const companyJobIds = new Set(companyJobs?.map(j => j.id) || []);
-                const activeRecruiterIds = new Set(
-                    assignments
-                        .filter(a => companyJobIds.has(a.job_id))
-                        .map(a => a.recruiter_id)
-                );
-                stats.active_recruiters = activeRecruiterIds.size;
+                    .in('job_id', allCompanyJobIdArray)
+                    .in('stage', visibleStages)
+                    .gte('created_at', monthStart.toISOString())
+                    .lte('created_at', now.toISOString()),
+            ]);
+
+            // ── Process applications ──
+            const companyApplications = applicationsResult.data || [];
+            stats.total_applications = companyApplications.length;
+            stats.interviews_scheduled = companyApplications.filter(a => a.stage === 'interview').length;
+            stats.offers_extended = companyApplications.filter(
+                a => a.stage === 'offer' || a.stage === 'accepted'
+            ).length;
+
+            // ── Process placements (filter to company via application -> job chain) ──
+            const placements = placementsResult.data || [];
+            if (placements.length > 0) {
+                const placementAppIds = placements.map(p => p.application_id).filter(Boolean);
+                if (placementAppIds.length > 0) {
+                    const { data: placementApps } = await this.supabase
+                        .from('applications')
+                        .select('id, job_id, created_at')
+                        .in('id', placementAppIds);
+
+                    const validAppIds = new Set(
+                        (placementApps || [])
+                            .filter(a => allCompanyJobIds.has(a.job_id))
+                            .map(a => a.id)
+                    );
+
+                    const companyPlacements = placements.filter(
+                        p => validAppIds.has(p.application_id)
+                    );
+                    stats.placements_this_year = companyPlacements.length;
+                    stats.placements_this_month = companyPlacements.filter(
+                        p => new Date(p.created_at) >= monthStart
+                    ).length;
+
+                    // ── Avg time to hire (application created_at -> placement created_at) ──
+                    if (companyPlacements.length > 0) {
+                        const appDateMap = new Map(
+                            (placementApps || []).map(a => [a.id, new Date(a.created_at)])
+                        );
+                        let totalDays = 0;
+                        let count = 0;
+                        for (const p of companyPlacements) {
+                            const appDate = appDateMap.get(p.application_id);
+                            if (appDate) {
+                                const days = (new Date(p.created_at).getTime() - appDate.getTime()) / (1000 * 60 * 60 * 24);
+                                totalDays += Math.max(0, days);
+                                count += 1;
+                            }
+                        }
+                        stats.avg_time_to_hire_days = count > 0
+                            ? Math.round(totalDays / count)
+                            : 0;
+                    }
+                }
             }
 
-            // Average time to hire - skip for now (requires complex calculation)
-            stats.avg_time_to_hire_days = 0;
+            // ── Process active recruiters ──
+            const companyAssignments = assignmentsResult.data || [];
+            const activeRecruiterIds = new Set(companyAssignments.map(a => a.recruiter_id));
+            stats.active_recruiters = activeRecruiterIds.size;
+
+            // ── Process stale roles ──
+            if (staleEligibleJobs.length > 0) {
+                const staleApps = staleAppsResult.data || [];
+                const appCountByJob = new Map<string, number>();
+                for (const app of staleApps) {
+                    appCountByJob.set(app.job_id, (appCountByJob.get(app.job_id) || 0) + 1);
+                }
+                stats.stale_roles = staleEligibleJobs.filter(
+                    j => (appCountByJob.get(j.id) || 0) < 5
+                ).length;
+            }
+
+            // ── Process applications MTD ──
+            stats.applications_mtd = (mtdAppsResult.data || []).length;
 
             return stats;
         } catch (error) {

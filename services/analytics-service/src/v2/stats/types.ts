@@ -45,6 +45,13 @@ export interface CompanyStatsMetrics {
     placements_this_year: number;
     avg_time_to_hire_days: number;
     active_recruiters: number;
+    stale_roles: number;
+    applications_mtd: number;
+    trends?: {
+        active_roles?: number;
+        total_applications?: number;
+        placements_this_year?: number;
+    };
 }
 
 export interface PlatformStatsMetrics {

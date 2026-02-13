@@ -24,7 +24,7 @@ function getDaysInStage(updatedAt: string): number {
 
 /** Returns a contextual icon for how long a candidate has been in stage */
 function getDaysIndicator(days: number): { icon: string; className: string } {
-    if (days > 14) return { icon: 'fa-triangle-exclamation', className: 'text-warning font-bold' };
+    if (days > 14) return { icon: 'fa-triangle-exclamation', className: 'text-warning font-semibold' };
     if (days > 7) return { icon: 'fa-clock', className: 'text-base-content/70 font-medium' };
     return { icon: '', className: 'text-base-content/50' };
 }
@@ -50,7 +50,7 @@ export default function PipelineActivity({ onRefresh }: PipelineActivityProps) {
     if (loading) {
         return (
             <ContentCard
-                title="Pipeline Activity"
+                title="Pipeline activity"
                 icon="fa-inbox"
                 className="bg-base-200"
                 headerActions={headerActions}
@@ -62,7 +62,7 @@ export default function PipelineActivity({ onRefresh }: PipelineActivityProps) {
 
     return (
         <ContentCard
-            title="Pipeline Activity"
+            title="Pipeline activity"
             icon="fa-inbox"
             className="bg-base-200"
             headerActions={headerActions}
@@ -79,10 +79,10 @@ export default function PipelineActivity({ onRefresh }: PipelineActivityProps) {
                     <table className="table table-sm">
                         <thead>
                             <tr className="border-b border-base-300/50">
-                                <th className="bg-transparent text-[11px] font-semibold uppercase tracking-wider text-base-content/40">Candidate</th>
-                                <th className="bg-transparent text-[11px] font-semibold uppercase tracking-wider text-base-content/40">Role</th>
-                                <th className="bg-transparent text-center text-[11px] font-semibold uppercase tracking-wider text-base-content/40">Stage</th>
-                                <th className="bg-transparent text-center text-[11px] font-semibold uppercase tracking-wider text-base-content/40">Days</th>
+                                <th className="bg-transparent text-xs font-medium uppercase tracking-wider text-base-content/60">Candidate</th>
+                                <th className="bg-transparent text-xs font-medium uppercase tracking-wider text-base-content/60">Role</th>
+                                <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">Stage</th>
+                                <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">Days</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,7 +98,7 @@ export default function PipelineActivity({ onRefresh }: PipelineActivityProps) {
                                         <td>
                                             <Link
                                                 href={`/portal/applications/${app.id}`}
-                                                className="font-semibold text-sm hover:text-primary transition-colors"
+                                                className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors"
                                             >
                                                 {app.candidate_name || 'Unknown'}
                                             </Link>

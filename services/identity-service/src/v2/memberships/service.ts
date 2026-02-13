@@ -113,8 +113,27 @@ export class MembershipServiceV2 {
             throw new Error('Organization ID is required');
         }
 
-        // Authorize: company_admin for their org or platform_admin
-        await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, membershipData.organization_id);
+        // Allow self-bootstrap: user creating their own first membership for a new org
+        const access = await this.resolveAccessContext(clerkUserId);
+        const isSelfAssignment = access.identityUserId === membershipData.user_id;
+
+        if (isSelfAssignment) {
+            const existing = await this.repository.findMemberships({
+                organization_id: membershipData.organization_id,
+                page: 1,
+                limit: 1,
+            });
+            if (existing.total === 0) {
+                this.logger.info(
+                    { clerkUserId, organization_id: membershipData.organization_id },
+                    'Self-bootstrap: first membership for new organization'
+                );
+            } else {
+                await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, membershipData.organization_id);
+            }
+        } else {
+            await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, membershipData.organization_id);
+        }
 
         const membership = await this.repository.createMembership({
             id: uuidv4(),

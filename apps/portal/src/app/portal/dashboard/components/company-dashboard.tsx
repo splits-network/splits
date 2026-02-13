@@ -1,775 +1,344 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import { useUserProfile } from "@/contexts";
-import { getActivityIcon, getJobStatusBadge } from "@/lib/utils";
+import { useCallback, useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
+import { useUserProfile } from '@/contexts';
+import { useCompanyStats } from '../hooks/use-company-stats';
+import { useCompanyActivity } from '../hooks/use-company-activity';
+import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
 import {
     StatCard,
     StatCardGrid,
     ContentCard,
     EmptyState,
-} from "@/components/ui/cards";
-import { AnalyticsChart } from "@/components/charts/analytics-chart";
-import { TrendBadge } from "@/components/ui";
-import RoleWizardModal from "../../roles/components/modals/role-wizard-modal";
-import RoleActionsToolbar from "../../roles/components/shared/actions-toolbar";
-import { CompanyBillingPrompt } from "../../billing/components/company-billing-prompt";
+} from '@/components/ui/cards';
+import { AnalyticsChart } from '@/components/charts/analytics-chart';
+import { PageTitle } from '@/components/page-title';
+import { TrendPeriodSelector } from '@/components/charts/trend-period-selector';
+import HiringPipeline from './hiring-pipeline';
+import CompanyHealthRadar from './company-health-radar';
+import CompanyUrgencyBar from './company-urgency-bar';
+import CompanyRolesTable from './company-roles-table';
+import BillingSummary from './billing-summary';
+import RoleWizardModal from '../../roles/components/modals/role-wizard-modal';
+import { SkeletonList } from '@splits-network/shared-ui';
 
-interface CompanyStats {
-    active_roles: number;
-    total_applications: number;
-    interviews_scheduled: number;
-    offers_extended: number;
-    placements_this_month: number;
-    placements_this_year: number;
-    avg_time_to_hire_days: number;
-    active_recruiters: number;
-    trends?: {
-        active_roles?: number;
-        total_applications?: number;
-        placements_this_month?: number;
-    };
-}
+const STAGE_ICONS: Record<string, string> = {
+    submitted: 'fa-paper-plane',
+    screen: 'fa-eye',
+    interview: 'fa-comments',
+    offer: 'fa-handshake',
+    hired: 'fa-trophy',
+    company_review: 'fa-building',
+};
 
-interface RoleBreakdown {
-    id: string;
-    title: string;
-    location: string;
-    status: string;
-    applications_count: number;
-    interview_count: number;
-    offer_count: number;
-    hire_count: number;
-    days_open: number;
-}
+const STAGE_COLORS: Record<string, string> = {
+    submitted: 'bg-primary/10 text-primary',
+    screen: 'bg-info/10 text-info',
+    interview: 'bg-accent/10 text-accent',
+    offer: 'bg-warning/10 text-warning',
+    hired: 'bg-success/10 text-success',
+    company_review: 'bg-secondary/10 text-secondary',
+};
 
-interface RecentActivity {
-    id: string;
-    type:
-        | "application_received"
-        | "interview_scheduled"
-        | "offer_extended"
-        | "placement_completed"
-        | "role_created";
-    message: string;
-    role_title?: string;
-    timestamp: string;
-    link?: string;
-}
-
-interface BillingProfileSummary {
-    billing_terms: string;
-    billing_email: string | null;
+function timeAgo(dateStr: string): string {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
 }
 
 export default function CompanyDashboard() {
-    const { getToken } = useAuth();
+    const { userId } = useAuth();
     const { profile } = useUserProfile();
-    const [stats, setStats] = useState<CompanyStats | null>(null);
-    const [roleBreakdown, setRoleBreakdown] = useState<RoleBreakdown[]>([]);
-    const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [trendPeriod, setTrendPeriod] = useState(6);
+    const [chartRefreshKey, setChartRefreshKey] = useState(0);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [allApplications, setAllApplications] = useState<any[]>([]);
-    const [allJobs, setAllJobs] = useState<any[]>([]);
-    const [placements, setPlacements] = useState<any[]>([]);
-    const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
-    const [billingProfile, setBillingProfile] =
-        useState<BillingProfileSummary | null>(null);
-    const [billingStatus, setBillingStatus] = useState<"not_started" | "incomplete" | "ready">("ready");
 
-    useEffect(() => {
-        loadDashboardData();
+    // Independent data hooks
+    const { stats, loading: statsLoading, refresh: refreshStats } = useCompanyStats();
+    const { activities, loading: activityLoading } = useCompanyActivity();
+
+    // Real-time WebSocket updates
+    const handleStatsUpdate = useCallback(() => {
+        refreshStats();
+    }, [refreshStats]);
+
+    const handleChartsUpdate = useCallback(() => {
+        setChartRefreshKey(k => k + 1);
     }, []);
 
-    const loadDashboardData = async () => {
-        setLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) {
-                console.error("[Dashboard] No token available - aborting");
-                return;
-            }
+    const handleReconnect = useCallback(() => {
+        refreshStats();
+        setChartRefreshKey(k => k + 1);
+    }, [refreshStats]);
 
-            const api = createAuthenticatedClient(token);
-
-            const statsResponse: any = await api.get("/stats", {
-                params: {
-                    scope: "company",
-                },
-            });
-
-            // V2 API response format: { data: { scope, range, metrics: {...} } }
-            const companyStats = statsResponse?.data?.metrics || null;
-            setStats(companyStats);
-
-            // Load role breakdown using V2 API
-            // This will automatically filter to company's roles based on access context
-            const rolesResponse: any = await api.get("/jobs", {
-                params: {
-                    status: "active",
-                    limit: 100, // Get top 100 active roles
-                },
-            });
-
-            const rolesData = rolesResponse.data || [];
-
-            // Fetch applications for all roles to calculate counts
-            const breakdown: RoleBreakdown[] = await Promise.all(
-                rolesData.map(async (job: any) => {
-                    const createdDate = new Date(job.created_at);
-                    const now = new Date();
-                    const daysOpen = Math.floor(
-                        (now.getTime() - createdDate.getTime()) /
-                            (1000 * 60 * 60 * 24),
-                    );
-
-                    // Get applications for this job to calculate stage counts
-                    let applicationsCount = 0;
-                    let interviewCount = 0;
-                    let offerCount = 0;
-                    let hireCount = 0;
-
-                    try {
-                        // Fetch all applications with pagination
-                        const allApplications: any[] = [];
-                        let page = 1;
-                        let hasMore = true;
-                        const visibleStages = [
-                            "submitted",
-                            "interview",
-                            "offer",
-                            "accepted",
-                            "hired",
-                        ];
-
-                        while (hasMore) {
-                            const response: any = await api.get(
-                                "/applications",
-                                {
-                                    params: {
-                                        job_id: job.id,
-                                        page,
-                                        limit: 100,
-                                    },
-                                },
-                            );
-
-                            const pageData = response.data || [];
-                            // Filter to only applications in visible stages
-                            const filtered = pageData.filter((app: any) =>
-                                visibleStages.includes(app.stage),
-                            );
-                            allApplications.push(...filtered);
-
-                            // Check if there are more pages
-                            const pagination = response.pagination;
-                            hasMore =
-                                pagination && page < pagination.total_pages;
-                            page++;
-                        }
-
-                        applicationsCount = allApplications.length;
-                        interviewCount = allApplications.filter(
-                            (app: any) => app.stage === "interview",
-                        ).length;
-                        offerCount = allApplications.filter(
-                            (app: any) => app.stage === "offer",
-                        ).length;
-                        hireCount = allApplications.filter(
-                            (app: any) => app.stage === "hired",
-                        ).length;
-                    } catch (err) {
-                        console.warn(
-                            `Failed to fetch applications for job ${job.id}:`,
-                            err,
-                        );
-                    }
-
-                    return {
-                        id: job.id,
-                        title: job.title,
-                        location: job.location || "Remote",
-                        status: job.status,
-                        applications_count: applicationsCount,
-                        interview_count: interviewCount,
-                        offer_count: offerCount,
-                        hire_count: hireCount,
-                        days_open: daysOpen,
-                    };
-                }),
-            );
-
-            setRoleBreakdown(breakdown);
-
-            // Load all applications for trends chart
-            const allAppsResponse: any = await api.get("/applications", {
-                params: {
-                    limit: 1000, // Get enough data for trends
-                    sort_by: "created_at",
-                    sort_order: "desc",
-                },
-            });
-            setAllApplications(allAppsResponse.data || []);
-
-            // Store all jobs for trends chart
-            setAllJobs(rolesData);
-
-            // Load placements with application data for time-to-hire chart
-            const placementsResponse: any = await api.get("/placements", {
-                params: {
-                    limit: 1000,
-                    include: "application",
-                    sort_by: "created_at",
-                    sort_order: "desc",
-                },
-            });
-            setPlacements(placementsResponse.data || []);
-
-            // Load company billing profile (if available and user has permission)
-            if (profile?.organization_ids?.length) {
-                try {
-                    const companiesResponse: any = await api.get("/companies", {
-                        params: { limit: 50 },
-                    });
-                    const companies = companiesResponse?.data || [];
-                    const company = companies.find(
-                        (c: any) =>
-                            c.identity_organization_id ===
-                            profile.organization_ids[0],
-                    );
-                    const companyId = company?.id;
-                    if (companyId) {
-                        const billingResponse: any = await api.get(
-                            `/company-billing-profiles/${companyId}`,
-                        );
-                        setBillingProfile(billingResponse?.data || null);
-
-                        // Fetch billing readiness status
-                        const readinessResponse: any = await api.get(
-                            `/company-billing-profiles/${companyId}/billing-readiness`,
-                        );
-                        if (readinessResponse?.data?.status) {
-                            setBillingStatus(readinessResponse.data.status);
-                        }
-                    }
-                } catch (billingError: any) {
-                    // Billing data not available (likely insufficient permissions)
-                    // This is expected for non-billing users (e.g., hiring_manager)
-                    console.log(
-                        "[Dashboard] Billing data not available for this user:",
-                        billingError?.response?.data?.error?.message ||
-                            billingError.message,
-                    );
-                    setBillingProfile(null);
-                }
-            }
-
-            // TODO: Load recent activity - will need a V2 endpoint
-            setRecentActivity([]);
-        } catch (error) {
-            console.error(
-                "[Dashboard] ===== ERROR IN LOAD DASHBOARD DATA =====",
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="space-y-6 animate-fade-in">
-                {/* Welcome skeleton */}
-                <div className="h-28 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 skeleton"></div>
-                {/* Stats skeleton */}
-                <StatCardGrid>
-                    {[1, 2, 3, 4].map((i) => (
-                        <StatCard
-                            key={i}
-                            title=""
-                            value={0}
-                            icon="fa-spinner"
-                            loading
-                        />
-                    ))}
-                </StatCardGrid>
-            </div>
-        );
-    }
-
-    function refresh() {
-        loadDashboardData();
-    }
+    useDashboardRealtime({
+        enabled: !!userId,
+        userId: userId || undefined,
+        onStatsUpdate: handleStatsUpdate,
+        onChartsUpdate: handleChartsUpdate,
+        onReconnect: handleReconnect,
+    });
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Welcome Section - Enhanced gradient card */}
-            <div className="">
-                <div className="relative p-4 md:p-4">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">
-                                Hiring Dashboard
-                            </h2>
-                            <p className="text-sm text-base-content/60 mt-1">
-                                Track your recruiting pipeline and hiring
-                                performance.
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="btn btn-primary"
-                            >
-                                <i className="fa-duotone fa-regular fa-plus"></i>
-                                Post Role
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div className="space-y-8 animate-fade-in">
+            <PageTitle
+                title={`Welcome back, ${profile?.name || 'there'}!`}
+                subtitle="Track your recruiting pipeline and hiring performance."
+            >
+                <TrendPeriodSelector
+                    trendPeriod={trendPeriod}
+                    onTrendPeriodChange={setTrendPeriod}
+                />
+                <div className="hidden lg:block w-px h-6 bg-base-300" />
+                <button onClick={() => setShowAddModal(true)} className="btn btn-primary btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-plus w-3.5"></i>
+                    Post Role
+                </button>
+                <Link href="/portal/roles" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-briefcase w-3.5"></i>
+                    Manage Roles
+                </Link>
+                <Link href="/portal/candidates" className="btn btn-ghost btn-sm gap-2">
+                    <i className="fa-duotone fa-regular fa-users w-3.5"></i>
+                    Candidates
+                </Link>
+            </PageTitle>
 
-            {/* Billing Setup Prompt */}
-            <CompanyBillingPrompt status={billingStatus} />
+            {/* ── Section 0: Urgency Bar (conditional) ── */}
+            {!statsLoading && <CompanyUrgencyBar stats={stats} />}
 
-            {/* Key Stats Grid - Using new StatCard component */}
-            <div className="card bg-base-200">
-                <StatCardGrid className="m-2 shadow-lg">
-                    <StatCard
-                        title="Active Roles"
-                        value={stats?.active_roles || 0}
-                        description="Open positions"
-                        icon="fa-briefcase"
-                        color="primary"
-                        trend={stats?.trends?.active_roles}
-                        href="/portal/roles"
-                    />
-                    <StatCard
-                        title="Total Candidates"
-                        value={stats?.total_applications || 0}
-                        description="In pipeline"
-                        icon="fa-users"
-                        color="secondary"
-                        trend={stats?.trends?.total_applications}
-                        href="/portal/application"
-                    />
-                    <StatCard
-                        title="Interviews"
-                        value={stats?.interviews_scheduled || 0}
-                        description="Scheduled"
-                        icon="fa-calendar-check"
-                        color="accent"
-                        href="/portal/application?stage=interview"
-                    />
-                    <StatCard
-                        title="Hires YTD"
-                        value={stats?.placements_this_year || 0}
-                        description="Successful placements"
-                        icon="fa-trophy"
-                        color="success"
-                        href="/portal/placements"
-                    />
-                </StatCardGrid>
-                <div className="p-4 pt-0">
-                    <AnalyticsChart
-                        type="placement-trends"
-                        title="Placement Trends"
-                        chartComponent="line"
-                        showLegend={true}
-                        legendPosition="bottom"
-                        scope="company"
-                        height={200}
-                        trendPeriod={trendPeriod}
-                        onTrendPeriodChange={setTrendPeriod}
-                    />
-                </div>
-            </div>
-
-            {/* Performance Metrics - Enhanced cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="card bg-base-200">
-                    <div className="m-2 shadow-lg rounded-xl bg-base-100">
+            {/* ── Section 1: KPI Strip (5 cards) ── */}
+            <StatCardGrid className="shadow-lg w-full">
+                {statsLoading ? (
+                    [1, 2, 3, 4, 5].map((i) => (
+                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
+                    ))
+                ) : (
+                    <>
                         <StatCard
-                            title="Time to Hire"
-                            icon="fa-clock"
-                            color="info"
-                            description="Average days to hire"
-                            value={stats?.avg_time_to_hire_days || 0}
+                            title="Active roles"
+                            value={stats.active_roles}
+                            description="Open positions accepting candidates"
+                            icon="fa-briefcase"
+                            color="primary"
+                            trend={stats.trends?.active_roles}
+                            href="/portal/roles"
                         />
-                    </div>
-                    <div className="p-4 pt-0">
-                        <AnalyticsChart
-                            scope="company"
-                            height={150}
-                            trendPeriod={trendPeriod}
-                            onTrendPeriodChange={setTrendPeriod}
-                            type="time-to-hire-trends"
-                            title={"Time to Hire Trends"}
-                            chartComponent="line"
-                            showLegend={true}
-                            legendPosition="bottom"
-                        />
-                    </div>
-                </div>
-
-                <div className="card bg-base-200">
-                    <div className="m-2 shadow-lg rounded-xl bg-base-100">
                         <StatCard
-                            title="Recruiter Activity"
-                            icon="fa-network-wired"
+                            title="Candidates"
+                            value={stats.total_applications}
+                            description="Total candidates in pipeline"
+                            icon="fa-users"
+                            color="secondary"
+                            trend={stats.trends?.total_applications}
+                            href="/portal/applications"
+                        />
+                        <StatCard
+                            title="Interviews"
+                            value={stats.interviews_scheduled}
+                            description="Candidates at interview stage"
+                            icon="fa-calendar-check"
+                            color="accent"
+                            href="/portal/applications?stage=interview"
+                        />
+                        <StatCard
+                            title="Offers"
+                            value={stats.offers_extended}
+                            description="Offers extended to candidates"
+                            icon="fa-handshake"
                             color="warning"
-                            description="Active recruiters"
-                            value={stats?.active_recruiters || 0}
+                            href="/portal/applications?stage=offer"
                         />
+                        <StatCard
+                            title="Hires YTD"
+                            value={stats.placements_this_year}
+                            description="Successful hires this year"
+                            icon="fa-trophy"
+                            color="success"
+                            trend={stats.trends?.placements_this_year}
+                            href="/portal/placements"
+                        />
+                    </>
+                )}
+            </StatCardGrid>
+
+            {/* ── Section 2: Hero — Asymmetric 7/5 split ── */}
+            <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-7">
+                    <HiringPipeline trendPeriod={trendPeriod} refreshKey={chartRefreshKey} />
+                </div>
+                <div className="col-span-12 lg:col-span-5">
+                    <CompanyHealthRadar refreshKey={chartRefreshKey} />
+                </div>
+            </div>
+
+            {/* ── Section 3: Trend Charts (3-column, elevation pattern) ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Time to Hire — Line chart */}
+                <div className="card bg-base-200 overflow-hidden">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                        ) : (
+                            <StatCard
+                                title="Time to hire"
+                                icon="fa-clock"
+                                color="info"
+                                description="Average days from application to hire"
+                                value={`${stats.avg_time_to_hire_days || 0}d`}
+                            />
+                        )}
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="px-4 pb-4 pt-2">
                         <AnalyticsChart
+                            key={`time-to-hire-${chartRefreshKey}`}
+                            type="time-to-hire-trends"
+                            chartComponent="line"
+                            showPeriodSelector={false}
+                            showLegend={false}
                             scope="company"
-                            height={150}
+                            height={140}
                             trendPeriod={trendPeriod}
                             onTrendPeriodChange={setTrendPeriod}
-                            type="application-trends"
-                            title={"Application Trends"}
-                            chartComponent="bar"
-                            showLegend={true}
-                            legendPosition="bottom"
                         />
                     </div>
                 </div>
-                <div className="card bg-base-200">
-                    <div className="m-2 shadow-lg rounded-xl bg-base-100">
-                        <StatCard
-                            title="Offers Extended This Month"
-                            icon="fa-chart-line"
-                            color="success"
-                            description={
-                                (stats?.offers_extended || 0) +
-                                " offers extended"
-                            }
-                            value={stats?.trends?.placements_this_month || 0}
-                        />
+
+                {/* Application Volume — Bar chart */}
+                <div className="card bg-base-200 overflow-hidden">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                        ) : (
+                            <StatCard
+                                title="Application volume"
+                                icon="fa-inbox"
+                                color="secondary"
+                                description="Applications received this month"
+                                value={stats.applications_mtd ?? 0}
+                            />
+                        )}
                     </div>
-                    <div className="p-4 pt-0">
+                    <div className="px-4 pb-4 pt-2">
                         <AnalyticsChart
+                            key={`application-trends-${chartRefreshKey}`}
+                            type="application-trends"
+                            chartComponent="bar"
+                            showPeriodSelector={false}
+                            showLegend={false}
                             scope="company"
-                            height={150}
+                            height={140}
                             trendPeriod={trendPeriod}
                             onTrendPeriodChange={setTrendPeriod}
-                            type="recruiter-activity"
-                            chartComponent="bar"
-                            showLegend={true}
-                            legendPosition="bottom"
+                        />
+                    </div>
+                </div>
+
+                {/* Placement Rate — Line chart with area fill */}
+                <div className="card bg-base-200 overflow-hidden md:col-span-2 lg:col-span-1">
+                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                        {statsLoading ? (
+                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                        ) : (
+                            <StatCard
+                                title="Placement trend"
+                                icon="fa-trophy"
+                                color="success"
+                                description="Successful placements year to date"
+                                value={stats.placements_this_year}
+                                trend={stats.trends?.placements_this_year}
+                            />
+                        )}
+                    </div>
+                    <div className="px-4 pb-4 pt-2">
+                        <AnalyticsChart
+                            key={`placement-trends-${chartRefreshKey}`}
+                            type="placement-trends"
+                            chartComponent="line"
+                            showPeriodSelector={false}
+                            showLegend={false}
+                            scope="company"
+                            height={140}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
                 </div>
             </div>
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Role Breakdown - Larger section */}
-                <div className="lg:col-span-2 space-y-6">
-                    <ContentCard
-                        title="Active Roles Pipeline"
-                        icon="fa-list-check"
-                        headerActions={
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="btn btn-primary"
-                            >
-                                <i className="fa-duotone fa-regular fa-plus"></i>
-                                Post New Role
-                            </button>
-                        }
-                        className="bg-base-200"
-                    >
-                        {roleBreakdown.length === 0 ? (
-                            <EmptyState
-                                icon="fa-briefcase"
-                                title="No active roles"
-                                description="Create your first role to start receiving candidates"
-                                action={
-                                    <button
-                                        onClick={() => setShowAddModal(true)}
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-plus mr-2"></i>
-                                        Create Role
-                                    </button>
-                                }
-                            />
-                        ) : (
-                            <div className="overflow-x-auto -mx-4 sm:-mx-6">
-                                <table className="table table-sm">
-                                    <thead>
-                                        <tr className="border-b border-base-200">
-                                            <th className="bg-transparent text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Role
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Applications
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Interviews
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Offers
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Hires
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Days Open
-                                            </th>
-                                            <th className="bg-transparent text-center text-xs font-medium uppercase tracking-wider text-base-content/60">
-                                                Status
-                                            </th>
-                                            <th className="bg-transparent"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {roleBreakdown.map((role) => (
-                                            <tr
-                                                key={role.id}
-                                                className="hover:bg-base-200/50 transition-colors"
-                                            >
-                                                <td>
-                                                    <div className="font-semibold text-sm">
-                                                        {role.title}
-                                                    </div>
-                                                    <div className="text-xs text-base-content/60 flex items-center gap-1">
-                                                        <i className="fa-duotone fa-regular fa-location-dot text-[10px]"></i>
-                                                        {role.location}
-                                                    </div>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span className="badge badge-sm badge-ghost">
-                                                        {
-                                                            role.applications_count
-                                                        }
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span className="badge badge-sm badge-info badge-outline">
-                                                        {role.interview_count}
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span className="badge badge-sm badge-success badge-outline">
-                                                        {role.offer_count}
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span className="badge badge-sm badge-primary badge-outline">
-                                                        {role.hire_count}
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span
-                                                        className={`text-sm ${role.days_open > 60 ? "text-warning font-semibold" : "text-base-content/70"}`}
-                                                    >
-                                                        {role.days_open}
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">
-                                                    <span
-                                                        className={`badge badge-sm ${getJobStatusBadge(role.status)}`}
-                                                    >
-                                                        {role.status}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="flex gap-1 justify-end">
-                                                        <RoleActionsToolbar
-                                                            job={{
-                                                                id: role.id,
-                                                                title: role.title,
-                                                                company_id: "",
-                                                                status: role.status as any,
-                                                            }}
-                                                            variant="icon-only"
-                                                            layout="horizontal"
-                                                            size="xs"
-                                                            onRefresh={
-                                                                loadDashboardData
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </ContentCard>
 
-                    {/* Insights & Recommendations */}
-                    {roleBreakdown.some(
-                        (r) => r.days_open > 60 && r.applications_count < 5,
-                    ) && (
-                        <div className="alert bg-warning/10 border-warning/20 shadow-sm">
-                            <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center shrink-0">
-                                <i className="fa-duotone fa-regular fa-lightbulb text-warning"></i>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-warning">
-                                    Hiring Insights
-                                </h4>
-                                <p className="text-sm mt-1 text-base-content/70">
-                                    Some roles have been open for 60+ days with
-                                    low candidate flow. Consider expanding
-                                    recruiter assignments or adjusting role
-                                    requirements.
-                                </p>
-                            </div>
-                        </div>
-                    )}
+            {/* ── Section 4: Activity + Sidebar (7/5 split) ── */}
+            <div className="grid grid-cols-12 gap-6">
+                {/* Left 7/12 — Roles Pipeline Table */}
+                <div className="col-span-12 lg:col-span-7">
+                    <CompanyRolesTable
+                        refreshKey={chartRefreshKey}
+                        onPostRole={() => setShowAddModal(true)}
+                    />
                 </div>
 
-                {/* Right Sidebar */}
-                <div className="space-y-6">
+                {/* Right 5/12 — Billing + Activity */}
+                <div className="col-span-12 lg:col-span-5 space-y-6">
                     {/* Billing Summary */}
-                    <ContentCard
-                        title="Billing Terms"
-                        icon="fa-file-invoice-dollar"
-                        className="bg-base-200"
-                    >
-                        <div className="space-y-3">
-                            <div>
-                                <p className="text-sm text-base-content/70">
-                                    Payment Terms
-                                </p>
-                                <p className="font-semibold capitalize">
-                                    {billingProfile?.billing_terms?.replace(
-                                        "_",
-                                        " ",
-                                    ) || "Not set"}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-base-content/70">
-                                    Billing Email
-                                </p>
-                                <p className="font-medium">
-                                    {billingProfile?.billing_email || "Not set"}
-                                </p>
-                            </div>
-                            <Link
-                                href="/portal/company/settings"
-                                className="btn btn-outline w-full"
-                            >
-                                Manage Billing
-                            </Link>
-                        </div>
-                    </ContentCard>
+                    <BillingSummary />
 
-                    {/* Quick Actions - Enhanced buttons */}
+                    {/* Recent Activity */}
                     <ContentCard
-                        title="Quick Actions"
-                        icon="fa-bolt"
-                        className="bg-base-200"
-                    >
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="btn btn-primary"
-                            >
-                                <i className="fa-duotone fa-regular fa-plus w-4"></i>
-                                Post New Role
-                            </button>
-                            <Link
-                                href="/portal/roles"
-                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
-                            >
-                                <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
-                                Manage Roles
-                            </Link>
-                            <Link
-                                href="/portal/candidates"
-                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
-                            >
-                                <i className="fa-duotone fa-regular fa-users w-4"></i>
-                                View Candidates
-                            </Link>
-                            <Link
-                                href="/portal/placements"
-                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
-                            >
-                                <i className="fa-duotone fa-regular fa-trophy w-4"></i>
-                                Placements
-                            </Link>
-                        </div>
-                    </ContentCard>
-
-                    {/* Recent Activity - Enhanced styling */}
-                    <ContentCard
-                        title="Recent Activity"
+                        title="Recent activity"
                         icon="fa-clock-rotate-left"
-                        headerActions={
-                            recentActivity.length > 5 && (
-                                <Link
-                                    href="/activity"
-                                    className="btn btn-sm btn-ghost"
-                                >
-                                    View all
-                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                                </Link>
-                            )
-                        }
                         className="bg-base-200"
+                        headerActions={
+                            <Link href="/portal/applications" className="btn btn-sm btn-ghost text-xs">
+                                View all
+                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
+                            </Link>
+                        }
                     >
-                        {recentActivity.length === 0 ? (
+                        {activityLoading ? (
+                            <SkeletonList count={4} variant="text-block" gap="gap-3" />
+                        ) : activities.length === 0 ? (
                             <EmptyState
                                 icon="fa-inbox"
                                 title="No recent activity"
-                                description="Activity will appear here as candidates apply"
+                                description="Activity will appear here as candidates are submitted to your roles."
                                 size="sm"
                             />
                         ) : (
                             <div className="space-y-1 -mx-2">
-                                {recentActivity.slice(0, 6).map((activity) => (
-                                    <div
-                                        key={activity.id}
-                                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer"
-                                    >
-                                        <div
-                                            className={`
-                                            w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm
-                                            ${
-                                                activity.type ===
-                                                "placement_completed"
-                                                    ? "bg-success/10 text-success"
-                                                    : activity.type ===
-                                                        "offer_extended"
-                                                      ? "bg-accent/10 text-accent"
-                                                      : activity.type ===
-                                                          "interview_scheduled"
-                                                        ? "bg-info/10 text-info"
-                                                        : "bg-primary/10 text-primary"
-                                            }
-                                        `}
+                                {activities.slice(0, 6).map((activity) => {
+                                    const icon = STAGE_ICONS[activity.stage] || 'fa-circle';
+                                    const colorClasses = STAGE_COLORS[activity.stage] || 'bg-base-300/10 text-base-content/60';
+
+                                    return (
+                                        <Link
+                                            key={activity.id}
+                                            href={`/portal/applications/${activity.id}`}
+                                            className="flex items-start gap-3 p-3 rounded-xl hover:bg-base-300/50 transition-all group"
                                         >
-                                            <i
-                                                className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}
-                                            ></i>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium line-clamp-2">
-                                                {activity.message}
-                                            </p>
-                                            {activity.role_title && (
-                                                <p className="text-xs text-primary mt-0.5">
-                                                    {activity.role_title}
+                                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm ${colorClasses}`}>
+                                                <i className={`fa-duotone fa-regular ${icon}`}></i>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+                                                    {activity.candidate_name || 'Candidate'}
                                                 </p>
-                                            )}
-                                            <p className="text-xs text-base-content/50 mt-0.5">
-                                                {activity.timestamp}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                                                <p className="text-xs text-base-content/60 line-clamp-1 mt-0.5">
+                                                    {activity.job_title} &middot; <span className="capitalize">{activity.stage?.replace('_', ' ')}</span>
+                                                </p>
+                                                <p className="text-xs text-base-content/40 mt-0.5 tabular-nums">
+                                                    {timeAgo(activity.updated_at)}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </ContentCard>
@@ -783,7 +352,7 @@ export default function CompanyDashboard() {
                     onClose={() => setShowAddModal(false)}
                     onSuccess={() => {
                         setShowAddModal(false);
-                        refresh(); // Refresh the list
+                        refreshStats();
                     }}
                 />
             )}

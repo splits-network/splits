@@ -35,8 +35,8 @@ export class ChartServiceV2 {
         // Resolve access context
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // Apply access-based filters
-        const effectiveFilters = this.applyAccessFilters(context, filters);
+        // Apply access-based filters (async — resolves org→company when needed)
+        const effectiveFilters = await this.applyAccessFilters(context, filters);
         const months = effectiveFilters.months || 12;
         const timeRange = this.repository.getTimeRange(months);
 
@@ -114,6 +114,12 @@ export class ChartServiceV2 {
             case 'reputation-radar': {
                 return this.computeReputationRadar(filters);
             }
+            case 'hiring-pipeline': {
+                return this.computeHiringPipeline(filters);
+            }
+            case 'company-health-radar': {
+                return this.computeCompanyHealthRadar(filters);
+            }
             default: {
                 // Return empty chart for unhandled types
                 return { labels, datasets: [{ label: 'Data', data: labels.map(() => 0), borderWidth: 2, fill: false }] };
@@ -126,6 +132,19 @@ export class ChartServiceV2 {
         timeRange: { start: Date; end: Date },
         filters: ChartFilters
     ): Promise<ChartData> {
+        // When company_id is set, fetch company job IDs first and push the
+        // filter down to the DB (via .in('job_id', ...)) instead of fetching
+        // ALL applications system-wide and filtering in JS.
+        let companyJobIds: string[] | null = null;
+        if (filters.company_id) {
+            const { data: companyJobs } = await this.supabase
+                .from('jobs').select('id').eq('company_id', filters.company_id);
+            companyJobIds = companyJobs?.map(j => j.id) || [];
+            if (companyJobIds.length === 0) {
+                return { labels, datasets: [{ label: 'Submissions', data: labels.map(() => 0), backgroundColor: 'rgb(54, 162, 235)', borderColor: 'rgb(54, 162, 235)', borderWidth: 2, fill: false }] };
+            }
+        }
+
         let query = this.supabase
             .from('applications')
             .select('created_at')
@@ -136,7 +155,12 @@ export class ChartServiceV2 {
             query = query.eq('candidate_recruiter_id', filters.recruiter_id);
         }
 
+        if (companyJobIds) {
+            query = query.in('job_id', companyJobIds);
+        }
+
         const { data: apps } = await query;
+
         const monthCounts = this.bucketByMonth(apps || [], 'created_at', labels);
 
         return {
@@ -159,7 +183,7 @@ export class ChartServiceV2 {
     ): Promise<ChartData> {
         let query = this.supabase
             .from('placements')
-            .select('created_at, candidate_recruiter_id, company_recruiter_id, job_owner_recruiter_id, candidate_sourcer_recruiter_id, company_sourcer_recruiter_id')
+            .select('created_at, application_id, candidate_recruiter_id, company_recruiter_id, job_owner_recruiter_id, candidate_sourcer_recruiter_id, company_sourcer_recruiter_id')
             .gte('created_at', timeRange.start.toISOString())
             .lte('created_at', timeRange.end.toISOString())
             .in('state', ['hired', 'active', 'completed']);
@@ -176,6 +200,22 @@ export class ChartServiceV2 {
                 p.candidate_sourcer_recruiter_id === filters.recruiter_id ||
                 p.company_sourcer_recruiter_id === filters.recruiter_id
             );
+        }
+
+        // Filter to company if scoped -- run the two lookups in parallel
+        if (filters.company_id && filtered.length > 0) {
+            const appIds = filtered.map(p => p.application_id).filter(Boolean);
+            if (appIds.length > 0) {
+                const [placementAppsResult, companyJobsResult] = await Promise.all([
+                    this.supabase.from('applications').select('id, job_id').in('id', appIds),
+                    this.supabase.from('jobs').select('id').eq('company_id', filters.company_id),
+                ]);
+                const jobIds = new Set(companyJobsResult.data?.map(j => j.id) || []);
+                const validAppIds = new Set(
+                    (placementAppsResult.data || []).filter(a => jobIds.has(a.job_id)).map(a => a.id)
+                );
+                filtered = filtered.filter(p => validAppIds.has(p.application_id));
+            }
         }
 
         const monthCounts = this.bucketByMonth(filtered, 'created_at', labels);
@@ -387,6 +427,22 @@ export class ChartServiceV2 {
             );
         }
 
+        // Filter to company if scoped -- run the two lookups in parallel
+        if (filters.company_id && filtered.length > 0) {
+            const companyAppIds = filtered.map(p => p.application_id).filter(Boolean);
+            if (companyAppIds.length > 0) {
+                const [placementAppsResult, companyJobsResult] = await Promise.all([
+                    this.supabase.from('applications').select('id, job_id').in('id', companyAppIds),
+                    this.supabase.from('jobs').select('id').eq('company_id', filters.company_id),
+                ]);
+                const jobIds = new Set(companyJobsResult.data?.map(j => j.id) || []);
+                const validAppIds = new Set(
+                    (placementAppsResult.data || []).filter(a => jobIds.has(a.job_id)).map(a => a.id)
+                );
+                filtered = filtered.filter(p => validAppIds.has(p.application_id));
+            }
+        }
+
         if (filtered.length === 0) {
             return { labels, datasets: [{ label: 'Avg Days to Place', data: labels.map(() => 0), borderWidth: 2, fill: false }] };
         }
@@ -592,6 +648,157 @@ export class ChartServiceV2 {
     }
 
     /**
+     * Hiring pipeline: application counts by stage for the company.
+     * Similar to recruitment funnel but filtered by company_id via jobs.
+     */
+    private async computeHiringPipeline(filters: ChartFilters): Promise<ChartData> {
+        if (!filters.company_id) {
+            return { labels: [], datasets: [{ label: 'Pipeline', data: [], borderWidth: 0 }] };
+        }
+
+        // Get company's job IDs
+        const { data: companyJobs } = await this.supabase
+            .from('jobs')
+            .select('id')
+            .eq('company_id', filters.company_id)
+            .eq('status', 'active');
+
+        const jobIds = companyJobs?.map(j => j.id) || [];
+        if (jobIds.length === 0) {
+            return { labels: [], datasets: [{ label: 'Pipeline', data: [], borderWidth: 0 }] };
+        }
+
+        const stages = ['screen', 'submitted', 'interview', 'offer', 'hired'];
+        const { data: apps } = await this.supabase
+            .from('applications')
+            .select('stage')
+            .in('job_id', jobIds)
+            .in('stage', stages);
+
+        const stageCounts = new Map<string, number>();
+        stages.forEach(s => stageCounts.set(s, 0));
+
+        if (apps) {
+            for (const app of apps) {
+                stageCounts.set(app.stage, (stageCounts.get(app.stage) || 0) + 1);
+            }
+        }
+
+        const stageLabels: Record<string, string> = {
+            screen: 'Screen',
+            submitted: 'Submitted',
+            interview: 'Interview',
+            offer: 'Offer',
+            hired: 'Hired',
+        };
+
+        const labels = stages.map(s => stageLabels[s] || s);
+        const data = stages.map(s => stageCounts.get(s) || 0);
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Candidates',
+                data,
+                backgroundColor: [
+                    'rgb(54, 162, 235)',   // Blue
+                    'rgb(75, 192, 192)',   // Teal
+                    'rgb(255, 206, 86)',   // Yellow
+                    'rgb(255, 159, 64)',   // Orange
+                    'rgb(75, 192, 75)',    // Green
+                ],
+                borderWidth: 0,
+            }],
+        };
+    }
+
+    /**
+     * Company health radar: 5-axis performance metrics normalized to 0-100.
+     * Axes: Time-to-Fill, Candidate Flow, Interview Rate, Offer Rate, Fill Rate
+     */
+    private async computeCompanyHealthRadar(filters: ChartFilters): Promise<ChartData> {
+        const labels = ['Time-to-Fill', 'Candidate Flow', 'Interview Rate', 'Offer Rate', 'Fill Rate'];
+        const emptyData = { labels, datasets: [{ label: 'Health', data: [0, 0, 0, 0, 0], borderWidth: 2 }] };
+
+        if (!filters.company_id) {
+            return emptyData;
+        }
+
+        // Get company's active jobs with created_at
+        const { data: companyJobs } = await this.supabase
+            .from('jobs')
+            .select('id, created_at, status')
+            .eq('company_id', filters.company_id);
+
+        if (!companyJobs || companyJobs.length === 0) {
+            return emptyData;
+        }
+
+        const activeJobs = companyJobs.filter(j => j.status === 'active');
+        const activeJobIdSet = new Set(activeJobs.map(j => j.id));
+        const allJobIds = companyJobs.map(j => j.id);
+
+        // Get all applications for company's jobs
+        const { data: apps } = await this.supabase
+            .from('applications')
+            .select('id, stage, job_id, created_at')
+            .in('job_id', allJobIds)
+            .in('stage', ['screen', 'submitted', 'interview', 'offer', 'accepted', 'hired']);
+
+        const allApps = apps || [];
+        const totalApps = allApps.length;
+
+        // 1. Time-to-Fill: inverse of avg days active jobs have been open (lower = better)
+        // Cap at 90 days, score = 100 - (avgDays / 90 * 100)
+        const now = new Date();
+        const avgDaysOpen = activeJobs.length > 0
+            ? activeJobs.reduce((sum, j) => {
+                const days = (now.getTime() - new Date(j.created_at).getTime()) / (1000 * 60 * 60 * 24);
+                return sum + days;
+            }, 0) / activeJobs.length
+            : 0;
+        const timeToFill = Math.max(0, Math.min(100, Math.round(100 - (avgDaysOpen / 90 * 100))));
+
+        // 2. Candidate Flow: avg applications per active role (cap at 20 = 100)
+        // Use Set lookup (O(1)) instead of .some() linear scan (O(N*M))
+        const appsPerRole = activeJobs.length > 0
+            ? allApps.filter(a => activeJobIdSet.has(a.job_id)).length / activeJobs.length
+            : 0;
+        const candidateFlow = Math.min(100, Math.round((appsPerRole / 20) * 100));
+
+        // 3. Interview Rate: % of applications reaching interview stage
+        const interviewApps = allApps.filter(a => ['interview', 'offer', 'accepted', 'hired'].includes(a.stage));
+        const interviewRate = totalApps > 0
+            ? Math.min(100, Math.round((interviewApps.length / totalApps) * 100))
+            : 0;
+
+        // 4. Offer Rate: % of interviews reaching offer stage
+        const offerApps = allApps.filter(a => ['offer', 'accepted', 'hired'].includes(a.stage));
+        const offerRate = interviewApps.length > 0
+            ? Math.min(100, Math.round((offerApps.length / interviewApps.length) * 100))
+            : 0;
+
+        // 5. Fill Rate: % of active roles with at least one hire
+        const hiredApps = allApps.filter(a => a.stage === 'hired');
+        const jobsWithHires = new Set(hiredApps.map(a => a.job_id));
+        const fillRate = activeJobs.length > 0
+            ? Math.min(100, Math.round((jobsWithHires.size / activeJobs.length) * 100))
+            : 0;
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Company Health',
+                data: [timeToFill, candidateFlow, interviewRate, offerRate, fillRate],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 2,
+                fill: true,
+            }],
+        };
+    }
+
+    /**
      * Bucket records by month using a date field, aligned to the provided labels.
      */
     private bucketByMonth(records: any[], dateField: string, labels: string[]): number[] {
@@ -610,21 +817,47 @@ export class ChartServiceV2 {
     }
 
     /**
-     * Apply access-based filtering
+     * Apply access-based filtering.
+     *
+     * Maps the resolved AccessContext (from shared-access-context) onto
+     * the chart filter fields so downstream queries are correctly scoped.
+     *
+     * AccessContext shape:
+     *   recruiterId: string | null
+     *   companyIds: string[]        (from memberships)
+     *   roles: string[]             (e.g. ['recruiter'], ['company_admin'])
+     *   isPlatformAdmin: boolean
      */
-    private applyAccessFilters(context: any, filters: ChartFilters): ChartFilters {
+    private async applyAccessFilters(context: any, filters: ChartFilters): Promise<ChartFilters> {
         const effectiveFilters = { ...filters };
 
-        // Recruiters can only see their own data
-        if (context.role === 'recruiter' && context.userId) {
-            effectiveFilters.recruiter_id = context.userId;
+        // Platform admins can see everything -- no additional filters needed
+        if (context.isPlatformAdmin) {
+            return effectiveFilters;
         }
 
-        // Company users can only see their company data
-        if (context.isCompanyUser && context.accessibleCompanyIds?.length > 0) {
-            // Use first accessible company if not specified
-            if (!effectiveFilters.company_id) {
-                effectiveFilters.company_id = context.accessibleCompanyIds[0];
+        // Recruiters can only see their own data
+        if (context.recruiterId && !effectiveFilters.recruiter_id) {
+            effectiveFilters.recruiter_id = context.recruiterId;
+        }
+
+        // Company users can only see their company data.
+        // AccessContext exposes `companyIds` (from memberships.company_id).
+        if (context.companyIds?.length > 0 && !effectiveFilters.company_id) {
+            effectiveFilters.company_id = context.companyIds[0];
+        }
+
+        // Fallback: resolve company from organizationIds when companyIds is empty.
+        // Many company users only have organization_id on their membership, not company_id.
+        if (!effectiveFilters.company_id && context.organizationIds?.length > 0) {
+            const { data: companies } = await this.supabase
+                .from('companies')
+                .select('id')
+                .in('identity_organization_id', context.organizationIds)
+                .limit(1);
+
+            if (companies && companies.length > 0) {
+                effectiveFilters.company_id = companies[0].id;
             }
         }
 
