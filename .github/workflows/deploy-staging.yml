@@ -229,52 +229,52 @@ jobs:
             - name: Create secrets
               run: |
                   kubectl create secret generic supabase-secrets \
-                    --from-literal=supabase-url=${{ secrets.SUPABASE_URL }} \
-                    --from-literal=supabase-anon-key=${{ secrets.SUPABASE_ANON_KEY }} \
-                    --from-literal=supabase-service-role-key=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
+                    --from-literal=supabase-url="${{ secrets.SUPABASE_URL }}" \
+                    --from-literal=supabase-anon-key="${{ secrets.SUPABASE_ANON_KEY }}" \
+                    --from-literal=supabase-service-role-key="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   # Clerk secrets for API Gateway (both portal and candidate app credentials)
                   kubectl create secret generic clerk-secrets \
-                    --from-literal=splits-clerk-publishable-key=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
-                    --from-literal=splits-clerk-secret-key=${{ secrets.SPLITS_CLERK_SECRET_KEY }} \
-                    --from-literal=splits-clerk-jwks-url=${{ secrets.SPLITS_CLERK_JWKS_URL }} \
-                    --from-literal=splits-clerk-webhook-secret=${{ secrets.SPLITS_CLERK_WEBHOOK_SECRET }} \
-                    --from-literal=app-clerk-publishable-key=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
-                    --from-literal=app-clerk-secret-key=${{ secrets.APP_CLERK_SECRET_KEY }} \
-                    --from-literal=app-clerk-jwks-url=${{ secrets.APP_CLERK_JWKS_URL }} \
-                    --from-literal=app-clerk-webhook-secret=${{ secrets.APP_CLERK_WEBHOOK_SECRET }} \
+                    --from-literal=splits-clerk-publishable-key="${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }}" \
+                    --from-literal=splits-clerk-secret-key="${{ secrets.SPLITS_CLERK_SECRET_KEY }}" \
+                    --from-literal=splits-clerk-jwks-url="${{ secrets.SPLITS_CLERK_JWKS_URL }}" \
+                    --from-literal=splits-clerk-webhook-secret="${{ secrets.SPLITS_CLERK_WEBHOOK_SECRET }}" \
+                    --from-literal=app-clerk-publishable-key="${{ secrets.APP_CLERK_PUBLISHABLE_KEY }}" \
+                    --from-literal=app-clerk-secret-key="${{ secrets.APP_CLERK_SECRET_KEY }}" \
+                    --from-literal=app-clerk-jwks-url="${{ secrets.APP_CLERK_JWKS_URL }}" \
+                    --from-literal=app-clerk-webhook-secret="${{ secrets.APP_CLERK_WEBHOOK_SECRET }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic stripe-secrets \
-                    --from-literal=stripe-secret-key=${{ secrets.STRIPE_SECRET_KEY }} \
-                    --from-literal=stripe-webhook-secret=${{ secrets.STRIPE_WEBHOOK_SECRET }} \
-                    --from-literal=stripe-publishable-key=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
+                    --from-literal=stripe-secret-key="${{ secrets.STRIPE_SECRET_KEY }}" \
+                    --from-literal=stripe-webhook-secret="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+                    --from-literal=stripe-publishable-key="${{ secrets.STRIPE_PUBLISHABLE_KEY }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic resend-secrets \
-                    --from-literal=resend-api-key=${{ secrets.RESEND_API_KEY }} \
+                    --from-literal=resend-api-key="${{ secrets.RESEND_API_KEY }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic openai-secrets \
-                    --from-literal=openai-api-key=${{ secrets.OPENAI_API_KEY }} \
+                    --from-literal=openai-api-key="${{ secrets.OPENAI_API_KEY }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic internal-service-secrets \
-                    --from-literal=internal-service-key=${{ secrets.INTERNAL_SERVICE_KEY }} \
+                    --from-literal=internal-service-key="${{ secrets.INTERNAL_SERVICE_KEY }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic gpt-secrets \
-                    --from-literal=gpt-client-id=${{ secrets.GPT_CLIENT_ID }} \
-                    --from-literal=gpt-client-secret=${{ secrets.GPT_CLIENT_SECRET }} \
-                    --from-literal=gpt-ec-private-key=${{ secrets.GPT_EC_PRIVATE_KEY }} \
-                    --from-literal=gpt-redirect-uri=${{ secrets.GPT_REDIRECT_URI }} \
+                    --from-literal=gpt-client-id="${{ secrets.GPT_CLIENT_ID }}" \
+                    --from-literal=gpt-client-secret="${{ secrets.GPT_CLIENT_SECRET }}" \
+                    --from-literal=gpt-ec-private-key="${{ secrets.GPT_EC_PRIVATE_KEY }}" \
+                    --from-literal=gpt-redirect-uri="${{ secrets.GPT_REDIRECT_URI }}" \
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
