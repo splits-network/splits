@@ -44,6 +44,8 @@ export function HeaderFilters({
         setFilter("status", undefined);
         setFilter("employment_type", undefined);
         setFilter("is_remote", undefined);
+        setFilter("commute_type", undefined);
+        setFilter("job_level", undefined);
         // Keep job_owner_filter as it may be role-specific default
     }, [setFilter]);
 
@@ -52,6 +54,8 @@ export function HeaderFilters({
         filters.status,
         filters.employment_type,
         filters.is_remote,
+        filters.commute_type,
+        filters.job_level,
     ].filter(Boolean).length;
 
     return (
@@ -190,6 +194,44 @@ export function HeaderFilters({
                             <option value="contract">Contract</option>
                             <option value="parttime">Part-time</option>
                             <option value="freelance">Freelance</option>
+                        </select>
+                    </fieldset>
+
+                    {/* Commute Type Filter */}
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Commute Type</legend>
+                        <select
+                            className="select select-sm w-full"
+                            value={filters.commute_type || ""}
+                            onChange={(e) => setFilter("commute_type", e.target.value || undefined)}
+                        >
+                            <option value="">All Commute Types</option>
+                            <option value="remote">Remote</option>
+                            <option value="hybrid_1">Hybrid (1 day)</option>
+                            <option value="hybrid_2">Hybrid (2 days)</option>
+                            <option value="hybrid_3">Hybrid (3 days)</option>
+                            <option value="hybrid_4">Hybrid (4 days)</option>
+                            <option value="in_office">In Office</option>
+                        </select>
+                    </fieldset>
+
+                    {/* Job Level Filter */}
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Job Level</legend>
+                        <select
+                            className="select select-sm w-full"
+                            value={filters.job_level || ""}
+                            onChange={(e) => setFilter("job_level", e.target.value || undefined)}
+                        >
+                            <option value="">All Levels</option>
+                            <option value="entry">Entry Level</option>
+                            <option value="mid">Mid Level</option>
+                            <option value="senior">Senior</option>
+                            <option value="lead">Lead</option>
+                            <option value="manager">Manager</option>
+                            <option value="director">Director</option>
+                            <option value="vp">VP</option>
+                            <option value="c_suite">C-Suite</option>
                         </select>
                     </fieldset>
 
