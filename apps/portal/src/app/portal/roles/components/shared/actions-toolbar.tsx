@@ -60,7 +60,8 @@ export default function RoleActionsToolbar({
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, manageableCompanyIds } = useUserProfile();
+    const { profile, isAdmin, isRecruiter, manageableCompanyIds } =
+        useUserProfile();
     const filterContext = useRolesFilterOptional();
     const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
@@ -83,7 +84,11 @@ export default function RoleActionsToolbar({
         if (isCompanyAdmin) return true;
 
         // Recruiter with can_manage_company_jobs for this job's company
-        if (isRecruiter && job.company_id && manageableCompanyIds.includes(job.company_id)) {
+        if (
+            isRecruiter &&
+            job.company_id &&
+            manageableCompanyIds.includes(job.company_id)
+        ) {
             return true;
         }
 
@@ -399,9 +404,13 @@ export default function RoleActionsToolbar({
                     {renderQuickStatusButton()}
 
                     {/* Divider before View Pipeline */}
-                    {actions.viewPipeline && (actions.submitCandidate || actions.edit || actions.share || actions.statusActions) && (
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                    )}
+                    {actions.viewPipeline &&
+                        (actions.submitCandidate ||
+                            actions.edit ||
+                            actions.share ||
+                            actions.statusActions) && (
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                        )}
 
                     {/* View Pipeline */}
                     {actions.viewPipeline && (
@@ -488,7 +497,7 @@ export default function RoleActionsToolbar({
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        Edit Role
+                        Edit
                     </button>
                 )}
 
@@ -496,7 +505,7 @@ export default function RoleActionsToolbar({
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        className={`btn ${getSizeClass()} btn-circle gap-2`}
                         disabled={isSharing}
                     >
                         {isSharing ? (
@@ -504,7 +513,6 @@ export default function RoleActionsToolbar({
                         ) : (
                             <i className="fa-duotone fa-regular fa-share-nodes" />
                         )}
-                        Share Job
                     </button>
                 )}
 
@@ -512,9 +520,13 @@ export default function RoleActionsToolbar({
                 {renderStatusButtons()}
 
                 {/* Divider before View Pipeline */}
-                {actions.viewPipeline && (actions.submitCandidate || actions.edit || actions.share || actions.statusActions) && (
-                    <div className="divider divider-horizontal mx-0" />
-                )}
+                {actions.viewPipeline &&
+                    (actions.submitCandidate ||
+                        actions.edit ||
+                        actions.share ||
+                        actions.statusActions) && (
+                        <div className="divider divider-horizontal mx-0" />
+                    )}
 
                 {/* View Pipeline */}
                 {actions.viewPipeline && (
@@ -523,7 +535,7 @@ export default function RoleActionsToolbar({
                         className={`btn ${getSizeClass()} btn-outline gap-2`}
                     >
                         <i className="fa-duotone fa-regular fa-users-line" />
-                        View Pipeline
+                        Pipeline
                     </button>
                 )}
 
@@ -572,7 +584,7 @@ export default function RoleActionsToolbar({
                             job.company?.name || job.company_id || undefined
                         }
                         onClose={() => setShowSubmitModal(false)}
-                            onSuccess={refresh}
+                        onSuccess={refresh}
                     />
                 )}
             </ModalPortal>
