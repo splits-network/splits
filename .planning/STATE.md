@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 12 of 15 (OAuth2 Provider)
-Plan: 02 of TBD
+Plan: 04 of TBD
 Status: In progress
-Last activity: 2026-02-13 -- Completed 12-02-PLAN.md (OAuth2 Core Service)
+Last activity: 2026-02-13 -- Completed 12-04-PLAN.md (OAuth Routes and Middleware)
 
-Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
+Progress: [███░░░░░░░] ~40% (7/~15 v5.0 plans)
 
 ## Performance Metrics
 
@@ -34,14 +34,14 @@ Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
 - Total execution time: ~13.5 minutes
 
 **Velocity (v5.0):**
-- Total plans completed: 6
-- Average duration: 3.3 min
-- Total execution time: ~19 minutes
+- Total plans completed: 7
+- Average duration: 3.4 min
+- Total execution time: ~23 minutes
 
 **Cumulative:**
-- Total plans completed: 24
-- Average duration: 3.3 min
-- Total execution time: ~82.5 minutes
+- Total plans completed: 25
+- Average duration: 3.4 min
+- Total execution time: ~86 minutes
 
 ## Accumulated Context
 
@@ -65,6 +65,8 @@ Progress: [███░░░░░░░] ~33% (5/~15 v5.0 plans)
 - jose library for ES256 JWT signing over jsonwebtoken (ESM-compatible, native ES256 support) (Phase 12-02)
 - Token prefixes (gpt_at_, gpt_rt_) for operational visibility in logs (Phase 12-02)
 - Replay detection revokes ALL user sessions on rotated token usage (security-first approach) (Phase 12-02)
+- Dual-auth pattern: GPT Bearer tokens OR x-gpt-clerk-user-id header for sessions/revoke endpoints (Phase 12-04)
+- KeyLike type from jose instead of CryptoKey for cross-platform ES256 key handling (Phase 12-04)
 
 ### Pending Todos
 
@@ -96,10 +98,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 12-02-PLAN.md (OAuth2 Core Service)
+Stopped at: Completed 12-04-PLAN.md (OAuth Routes and Middleware)
 Resume file: None
-Next: 12-03 (OAuth routes)
+Next: 12-05 (Consent UI) or 13-01 (GPT API endpoints)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (12-02 OAuth2 core service complete)*
+*Last updated: 2026-02-13 (12-04 OAuth routes and middleware complete)*
