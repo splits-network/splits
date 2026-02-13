@@ -17,6 +17,7 @@ export async function rollupDailyMetrics(supabase: SupabaseClient): Promise<void
     try {
         // Find the last processed day
         const { data: lastMetric } = await supabase
+            .schema('analytics')
             .from('metrics_daily')
             .select('time_value')
             .order('time_value', { ascending: false })
@@ -36,6 +37,7 @@ export async function rollupDailyMetrics(supabase: SupabaseClient): Promise<void
 
         // Query hourly metrics since last processed date
         const { data: hourlyMetrics, error } = await supabase
+            .schema('analytics')
             .from('metrics_hourly')
             .select('*')
             .gte('time_value', lastProcessedDate.toISOString())
@@ -59,6 +61,7 @@ export async function rollupDailyMetrics(supabase: SupabaseClient): Promise<void
         let insertedCount = 0;
         for (const metric of dailyMetrics) {
             const { error: insertError } = await supabase
+                .schema('analytics')
                 .from('metrics_daily')
                 .upsert(metric, {
                     onConflict: 'metric_type,time_value,dimension_user_id,dimension_company_id,dimension_recruiter_id',

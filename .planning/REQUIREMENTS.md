@@ -13,13 +13,13 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: OAuth2 authorize endpoint redirects to Clerk login and issues authorization code
-- [ ] **AUTH-02**: OAuth2 token endpoint exchanges authorization code for access token + refresh token
-- [ ] **AUTH-03**: OAuth2 token refresh endpoint issues new access token from refresh token (with rotation)
-- [ ] **AUTH-04**: OAuth2 token revocation endpoint invalidates refresh tokens
-- [ ] **AUTH-05**: api-gateway routes /api/v1/gpt/* to gpt-service with Clerk auth bypass
-- [ ] **AUTH-06**: gpt-service validates GPT access tokens and extracts clerk_user_id
-- [ ] **AUTH-07**: CORS configuration allows ChatGPT origins for OAuth endpoints
+- [x] **AUTH-01**: OAuth2 authorize endpoint redirects to Clerk login and issues authorization code
+- [x] **AUTH-02**: OAuth2 token endpoint exchanges authorization code for access token + refresh token
+- [x] **AUTH-03**: OAuth2 token refresh endpoint issues new access token from refresh token (with rotation)
+- [x] **AUTH-04**: OAuth2 token revocation endpoint invalidates refresh tokens
+- [x] **AUTH-05**: api-gateway routes /api/v1/gpt/* to gpt-service with Clerk auth bypass
+- [x] **AUTH-06**: gpt-service validates GPT access tokens and extracts clerk_user_id
+- [x] **AUTH-07**: CORS configuration allows ChatGPT origins for OAuth endpoints
 
 ### Endpoints
 
@@ -68,13 +68,13 @@
 | INFRA-01 | Phase 11 | Complete |
 | INFRA-02 | Phase 11 | Complete |
 | INFRA-03 | Phase 11 | Complete |
-| AUTH-01 | Phase 12 | Pending |
-| AUTH-02 | Phase 12 | Pending |
-| AUTH-03 | Phase 12 | Pending |
-| AUTH-04 | Phase 12 | Pending |
-| AUTH-05 | Phase 12 | Pending |
-| AUTH-06 | Phase 12 | Pending |
-| AUTH-07 | Phase 12 | Pending |
+| AUTH-01 | Phase 12 | Complete |
+| AUTH-02 | Phase 12 | Complete |
+| AUTH-03 | Phase 12 | Complete |
+| AUTH-04 | Phase 12 | Complete |
+| AUTH-05 | Phase 12 | Complete |
+| AUTH-06 | Phase 12 | Complete |
+| AUTH-07 | Phase 12 | Complete |
 | ENDP-01 | Phase 13 | Pending |
 | ENDP-02 | Phase 13 | Pending |
 | ENDP-03 | Phase 13 | Pending |

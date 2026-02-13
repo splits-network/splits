@@ -597,6 +597,35 @@ services:
     networks:
       - splits-network
 
+  gpt-service:
+    build:
+      context: .
+      dockerfile: services/gpt-service/Dockerfile
+      target: development
+    container_name: splits-gpt-service
+    ports:
+      - "3014:3014"
+    environment:
+      NODE_ENV: development
+      PORT: 3014
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      GPT_CLIENT_ID: ${GPT_CLIENT_ID:-gpt-dev-client-id}
+      GPT_CLIENT_SECRET: ${GPT_CLIENT_SECRET:-gpt-dev-client-secret}
+      GPT_EC_PRIVATE_KEY: ${GPT_EC_PRIVATE_KEY}
+      GPT_REDIRECT_URI: ${GPT_REDIRECT_URI:-https://chat.openai.com/aip/g-xxx/oauth/callback}
+    volumes:
+      - ./services/gpt-service/src:/app/services/gpt-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   api-gateway:
     build:
       context: .
@@ -625,6 +654,7 @@ services:
       ANALYTICS_SERVICE_URL: http://analytics-service:3010
       CHAT_SERVICE_URL: http://chat-service:3011
       SEARCH_SERVICE_URL: http://search-service:3013
+      GPT_SERVICE_URL: http://gpt-service:3014
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

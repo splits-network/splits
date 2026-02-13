@@ -67,6 +67,7 @@ async function main() {
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        gptConfig,
         eventPublisher,
     });
 

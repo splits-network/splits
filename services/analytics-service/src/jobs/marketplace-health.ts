@@ -70,6 +70,7 @@ export async function computeMarketplaceHealth(supabase: SupabaseClient): Promis
 
         // Insert or update health metric
         const { error } = await supabase
+            .schema('analytics')
             .from('marketplace_health_daily')
             .upsert(healthMetric, { onConflict: 'metric_date' });
 

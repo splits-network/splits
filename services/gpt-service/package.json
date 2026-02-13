@@ -7,7 +7,8 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc -b",
         "start": "node dist/index.js",
-        "clean": "rm -rf dist *.tsbuildinfo"
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "test": "vitest run"
     },
     "dependencies": {
         "@fastify/formbody": "^8.0.2",
@@ -18,12 +19,14 @@
         "@splits-network/shared-types": "workspace:*",
         "@supabase/supabase-js": "^2.86.2",
         "amqplib": "^0.10.9",
-        "fastify": "^5.6.2"
+        "fastify": "^5.6.2",
+        "jose": "^5.9.6"
     },
     "devDependencies": {
         "@types/amqplib": "^0.10.5",
         "@types/node": "^24.10.1",
         "tsx": "^4.19.2",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vitest": "^3.0.0"
     }
 }

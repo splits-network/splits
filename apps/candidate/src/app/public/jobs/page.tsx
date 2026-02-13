@@ -80,25 +80,80 @@ async function buildJobsParams(
     };
 }
 
-function JobsLoading() {
+function formatEmploymentType(type?: string | null): string {
+    if (!type) return "Not specified";
+    return type
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ");
+}
+
+function formatSalaryRange(min?: number | null, max?: number | null): string | null {
+    if (!min && !max) return null;
+    const fmt = (n: number) =>
+        n >= 1000 ? `$${Math.round(n / 1000)}k` : `$${n}`;
+    if (min && max) return `${fmt(min)} - ${fmt(max)}`;
+    if (min) return `From ${fmt(min)}`;
+    return `Up to ${fmt(max!)}`;
+}
+
+function StaticJobsList({ jobs }: { jobs: any[] }) {
     return (
         <div>
-            <div className="mb-8">
-                <div className="h-10 w-64 bg-base-300 animate-pulse rounded mb-2" />
-                <div className="h-6 w-96 bg-base-300 animate-pulse rounded" />
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold">Browse Jobs</h1>
+                <p className="text-base-content/70 mt-1">
+                    Search thousands of open roles and apply with one click
+                </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {[...Array(4)].map((_, i) => (
-                    <div key={i} className="stats bg-base-100 shadow">
-                        <div className="stat">
-                            <div className="h-16 bg-base-300 animate-pulse rounded" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-            <div className="flex justify-center items-center min-h-[400px]">
-                <span className="loading loading-spinner loading-lg" />
-            </div>
+            {jobs.length === 0 ? (
+                <p>No jobs found. Check back soon for new opportunities.</p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {jobs.map((job) => (
+                        <article
+                            key={job.id}
+                            className="card bg-base-100 shadow-sm border border-base-300"
+                        >
+                            <div className="card-body p-4">
+                                <h2 className="card-title text-md">
+                                    <a href={`/public/jobs/${job.id}`}>
+                                        {job.title}
+                                    </a>
+                                </h2>
+                                <p className="text-sm text-base-content/70">
+                                    {job.company?.name || job.company_name || "Company"}
+                                </p>
+                                {job.location && (
+                                    <p className="text-sm">{job.location}</p>
+                                )}
+                                <p className="text-sm">
+                                    {formatEmploymentType(job.employment_type)}
+                                </p>
+                                {job.show_salary_range !== false &&
+                                    formatSalaryRange(job.salary_min, job.salary_max) && (
+                                        <p className="text-sm font-medium">
+                                            {formatSalaryRange(job.salary_min, job.salary_max)}
+                                        </p>
+                                    )}
+                                <p className="text-sm line-clamp-3 text-base-content/80">
+                                    {(
+                                        job.candidate_description ||
+                                        job.description ||
+                                        "No description provided"
+                                    ).substring(0, 200)}
+                                </p>
+                                <a
+                                    href={`/public/jobs/${job.id}`}
+                                    className="btn btn-primary btn-sm mt-2"
+                                >
+                                    View Details
+                                </a>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -149,7 +204,9 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     return (
         <div className="container-fluid mx-auto px-4 py-4 space-y-8">
             <JsonLd data={jobListJsonLd} id="jobs-jsonld" />
-            <Suspense fallback={<JobsLoading />}>
+            <Suspense
+                fallback={<StaticJobsList jobs={initialData || []} />}
+            >
                 <JobsContent
                     initialData={initialData}
                     initialPagination={initialPagination}

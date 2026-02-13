@@ -247,7 +247,7 @@ export async function loadResendConfigFromVault(): Promise<ResendConfig> {
 export interface GptConfig {
     clientId: string;
     clientSecret: string;
-    jwtSecret: string;
+    ecPrivateKeyBase64: string; // base64-encoded PEM EC private key for ES256 JWT signing
     redirectUri: string;
     accessTokenExpiry: number;  // seconds
     refreshTokenExpiry: number; // seconds
@@ -262,11 +262,11 @@ export function loadGptConfig(): GptConfig {
     return {
         clientId: getEnvOrThrow('GPT_CLIENT_ID'),
         clientSecret: getEnvOrThrow('GPT_CLIENT_SECRET'),
-        jwtSecret: getEnvOrThrow('GPT_JWT_SECRET'),
+        ecPrivateKeyBase64: getEnvOrThrow('GPT_EC_PRIVATE_KEY'),
         redirectUri: getEnvOrThrow('GPT_REDIRECT_URI'),
-        accessTokenExpiry: parseInt(getEnvOrDefault('GPT_ACCESS_TOKEN_EXPIRY', '3600'), 10),
+        accessTokenExpiry: parseInt(getEnvOrDefault('GPT_ACCESS_TOKEN_EXPIRY', '900'), 10),
         refreshTokenExpiry: parseInt(getEnvOrDefault('GPT_REFRESH_TOKEN_EXPIRY', '2592000'), 10),
-        authCodeExpiry: parseInt(getEnvOrDefault('GPT_AUTH_CODE_EXPIRY', '600'), 10),
+        authCodeExpiry: parseInt(getEnvOrDefault('GPT_AUTH_CODE_EXPIRY', '300'), 10),
     };
 }
 

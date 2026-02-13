@@ -13,7 +13,7 @@ export async function rollupActivitySnapshot(
     const activityService = new ActivityService(redis);
     const snapshot = await activityService.getSnapshot();
 
-    const { error } = await supabase.from('activity_snapshots').insert({
+    const { error } = await supabase.schema('analytics').from('activity_snapshots').insert({
         total_online: snapshot.total_online,
         portal_online: snapshot.by_app.portal,
         candidate_online: snapshot.by_app.candidate,

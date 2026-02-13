@@ -34,9 +34,12 @@ async function main() {
         password: redisConfig.password || undefined,
     });
 
+    // ChatGPT origins for GPT API access
+    const GPT_ORIGINS = ['https://chat.openai.com', 'https://chatgpt.com'];
+
     // CORS configuration - stricter in production
     const allowedOrigins = baseConfig.nodeEnv === 'production'
-        ? (process.env.CORS_ORIGIN || '').split(',').filter(Boolean)
+        ? [...(process.env.CORS_ORIGIN || '').split(',').filter(Boolean), ...GPT_ORIGINS]
         : true;
 
     if (baseConfig.nodeEnv === 'production' && (!allowedOrigins || (allowedOrigins as string[]).length === 0)) {
@@ -297,6 +300,11 @@ async function main() {
             return;
         }
 
+        // Skip auth for GPT routes (gpt-service handles its own token validation)
+        if (request.url.startsWith('/api/v1/gpt/')) {
+            return;
+        }
+
         // Skip auth for internal service calls (authenticated by service key)
         const internalServiceKey = request.headers['x-internal-service-key'] as string;
         if (internalServiceKey) {
@@ -393,6 +401,7 @@ async function main() {
     services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
     services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
     services.register('search', process.env.SEARCH_SERVICE_URL || 'http://localhost:3013');
+    services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

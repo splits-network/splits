@@ -17,6 +17,7 @@ export async function rollupMonthlyMetrics(supabase: SupabaseClient): Promise<vo
     try {
         // Find the last processed month
         const { data: lastMetric } = await supabase
+            .schema('analytics')
             .from('metrics_monthly')
             .select('time_value')
             .order('time_value', { ascending: false })
@@ -36,6 +37,7 @@ export async function rollupMonthlyMetrics(supabase: SupabaseClient): Promise<vo
 
         // Query daily metrics since last processed date
         const { data: dailyMetrics, error } = await supabase
+            .schema('analytics')
             .from('metrics_daily')
             .select('*')
             .gte('time_value', lastProcessedDate.toISOString().split('T')[0])
@@ -59,6 +61,7 @@ export async function rollupMonthlyMetrics(supabase: SupabaseClient): Promise<vo
         let insertedCount = 0;
         for (const metric of monthlyMetrics) {
             const { error: insertError } = await supabase
+                .schema('analytics')
                 .from('metrics_monthly')
                 .upsert(metric, {
                     onConflict: 'metric_type,time_value,dimension_user_id,dimension_company_id,dimension_recruiter_id',
