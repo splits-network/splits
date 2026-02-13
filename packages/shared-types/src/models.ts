@@ -107,7 +107,7 @@ export interface OnboardingMetadata {
 export interface Organization {
     id: string;
     name: string;
-    type: 'company' | 'platform' | 'recruiter';
+    type: 'company' | 'recruiter';
     created_at: Date;
     updated_at: Date;
 }
