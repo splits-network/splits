@@ -4,7 +4,7 @@
 
 - [x] **v2.0 Global Search** - Phases 1-3 (shipped 2026-02-13)
 - [x] **v3.0 Platform Admin Restructure** - Phases 4-7 (shipped 2026-02-13)
-- [ ] **v4.0 Commute Types & Job Levels** - Phases 8-10 (in progress)
+- [x] **v4.0 Commute Types & Job Levels** - Phases 8-10 (shipped 2026-02-13)
 
 ## Phases
 
@@ -32,7 +32,7 @@ Add commute type (multi-select) and job level (single-select) fields to the jobs
 
 - [x] **Phase 8: Schema & Types** - Database columns and TypeScript type definitions (completed 2026-02-13)
 - [x] **Phase 9: API** - ATS service CRUD and filtering support (completed 2026-02-13)
-- [ ] **Phase 10: Frontend & Search** - Job form UI, detail display, list filtering, and search index
+- [x] **Phase 10: Frontend & Search** - Job form UI, detail display, list filtering, and search index (completed 2026-02-13)
 
 ## Phase Details
 
@@ -76,9 +76,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md -- Wizard form commute type checkboxes and job level dropdown with modal state wiring
-- [ ] 10-02-PLAN.md -- Job detail display cards and list filter controls for commute type and job level
-- [ ] 10-03-PLAN.md -- Search index trigger update to include commute_types and job_level in metadata and context
+- [x] 10-01-PLAN.md -- Wizard form commute type checkboxes and job level dropdown with modal state wiring
+- [x] 10-02-PLAN.md -- Job detail display cards and list filter controls for commute type and job level
+- [x] 10-03-PLAN.md -- Search index trigger update to include commute_types and job_level in metadata and context
 
 ## Progress
 
@@ -88,8 +88,8 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 8. Schema & Types | v4.0 | 1/1 | Complete | 2026-02-13 |
 | 9. API | v4.0 | 1/1 | Complete | 2026-02-13 |
-| 10. Frontend & Search | v4.0 | 0/3 | Not started | - |
+| 10. Frontend & Search | v4.0 | 3/3 | Complete | 2026-02-13 |
 
 ---
 *Created: 2026-02-13*
-*Last updated: 2026-02-13*
+*Last updated: 2026-02-13 (Phase 10 complete, v4.0 milestone complete)*

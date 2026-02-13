@@ -27,16 +27,16 @@
 
 ### Frontend
 
-- [ ] **UI-01**: Job create/edit form includes commute type multi-select (checkboxes)
-- [ ] **UI-02**: Job create/edit form includes job level dropdown (single-select)
-- [ ] **UI-03**: Job detail view displays commute types with human-readable labels
-- [ ] **UI-04**: Job detail view displays job level with human-readable label
-- [ ] **UI-05**: Job list supports filtering by commute type
-- [ ] **UI-06**: Job list supports filtering by job level
+- [x] **UI-01**: Job create/edit form includes commute type multi-select (checkboxes)
+- [x] **UI-02**: Job create/edit form includes job level dropdown (single-select)
+- [x] **UI-03**: Job detail view displays commute types with human-readable labels
+- [x] **UI-04**: Job detail view displays job level with human-readable label
+- [x] **UI-05**: Job list supports filtering by commute type
+- [x] **UI-06**: Job list supports filtering by job level
 
 ### Search
 
-- [ ] **SRCH-01**: Search index includes commute_types and job_level for job entities
+- [x] **SRCH-01**: Search index includes commute_types and job_level for job entities
 
 ## Out of Scope
 
@@ -62,13 +62,13 @@
 | API-03 | Phase 9 | Complete |
 | API-04 | Phase 9 | Complete |
 | API-05 | Phase 9 | Complete |
-| UI-01 | Phase 10 | Pending |
-| UI-02 | Phase 10 | Pending |
-| UI-03 | Phase 10 | Pending |
-| UI-04 | Phase 10 | Pending |
-| UI-05 | Phase 10 | Pending |
-| UI-06 | Phase 10 | Pending |
-| SRCH-01 | Phase 10 | Pending |
+| UI-01 | Phase 10 | Complete |
+| UI-02 | Phase 10 | Complete |
+| UI-03 | Phase 10 | Complete |
+| UI-04 | Phase 10 | Complete |
+| UI-05 | Phase 10 | Complete |
+| UI-06 | Phase 10 | Complete |
+| SRCH-01 | Phase 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 18 total
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after Phase 9 complete*
+*Last updated: 2026-02-13 after Phase 10 complete — all requirements complete*
