@@ -27,6 +27,8 @@ export interface FormData {
     guarantee_days: number;
     employment_type: 'full_time' | 'contract' | 'temporary';
     open_to_relocation: boolean;
+    commute_types: string[];
+    job_level: string;
 
     // Step 3: Descriptions
     recruiter_description: string;

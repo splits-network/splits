@@ -1,5 +1,25 @@
 import { FormData } from "./types";
 
+const COMMUTE_TYPE_OPTIONS = [
+    { value: 'remote', label: 'Remote' },
+    { value: 'hybrid_1', label: 'Hybrid (1 day in office)' },
+    { value: 'hybrid_2', label: 'Hybrid (2 days in office)' },
+    { value: 'hybrid_3', label: 'Hybrid (3 days in office)' },
+    { value: 'hybrid_4', label: 'Hybrid (4 days in office)' },
+    { value: 'in_office', label: 'In Office' },
+] as const;
+
+const JOB_LEVEL_OPTIONS = [
+    { value: 'entry', label: 'Entry Level' },
+    { value: 'mid', label: 'Mid Level' },
+    { value: 'senior', label: 'Senior' },
+    { value: 'lead', label: 'Lead' },
+    { value: 'manager', label: 'Manager' },
+    { value: 'director', label: 'Director' },
+    { value: 'vp', label: 'VP' },
+    { value: 'c_suite', label: 'C-Suite' },
+] as const;
+
 interface Step2CompensationProps {
     formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
@@ -148,6 +168,59 @@ export default function Step2Compensation({
                     <option value="part_time">Part Time</option>
                     <option value="contract">Contract</option>
                     <option value="temporary">Temporary</option>
+                </select>
+            </fieldset>
+
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Commute Type</legend>
+                <div className="flex flex-wrap gap-4">
+                    {COMMUTE_TYPE_OPTIONS.map((option) => (
+                        <label
+                            key={option.value}
+                            className="label cursor-pointer gap-2"
+                        >
+                            <input
+                                type="checkbox"
+                                className="checkbox checkbox-sm"
+                                checked={formData.commute_types.includes(
+                                    option.value,
+                                )}
+                                onChange={(e) => {
+                                    const value = option.value;
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        commute_types: e.target.checked
+                                            ? [...prev.commute_types, value]
+                                            : prev.commute_types.filter(
+                                                  (t) => t !== value,
+                                              ),
+                                    }));
+                                }}
+                            />
+                            <span className="label-text">{option.label}</span>
+                        </label>
+                    ))}
+                </div>
+            </fieldset>
+
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Job Level</legend>
+                <select
+                    className="select w-full"
+                    value={formData.job_level}
+                    onChange={(e) =>
+                        setFormData((prev) => ({
+                            ...prev,
+                            job_level: e.target.value,
+                        }))
+                    }
+                >
+                    <option value="">Select Level</option>
+                    {JOB_LEVEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </select>
             </fieldset>
 
