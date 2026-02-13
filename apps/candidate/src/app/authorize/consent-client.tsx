@@ -140,9 +140,11 @@ export function ConsentClient() {
                 redirect_uri: redirectUri!,
                 scope: scope!,
                 state: state!,
-                code_challenge: codeChallenge || "",
-                code_challenge_method: codeChallengeMethod || "",
             });
+            if (codeChallenge) {
+                params.set("code_challenge", codeChallenge);
+                params.set("code_challenge_method", codeChallengeMethod || "S256");
+            }
 
             const response = await fetch(
                 `${apiUrl}/api/v1/gpt/oauth/authorize?${params.toString()}`,
