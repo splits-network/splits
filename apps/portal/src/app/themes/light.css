@@ -3,25 +3,34 @@
 @plugin "daisyui/theme" {
     name: "splits-light";
     color-scheme: light;
+    default: true;
+    prefersdark: false;
 
     /* Brand */
     --color-primary: #233876;
     --color-primary-content: #f9fafb;
 
-    --color-secondary: #0f9d8a; /* teal */
+    --color-secondary: #0f9d8a;
+    /* teal */
     --color-secondary-content: #f9fafb;
 
-    --color-accent: #db2777; /* pink-700 / deep magenta */
+    --color-accent: #db2777;
+    /* pink-700 / deep magenta */
     --color-accent-content: #f9fafb;
 
-    --color-neutral: #18181b; /* zinc-900 */
+    --color-neutral: #18181b;
+    /* zinc-900 */
     --color-neutral-content: #fafafa;
 
     /* Base surfaces */
-    --color-base-100: #ffffff; /* page background */
-    --color-base-200: #f4f4f5; /* zinc-100 – subtle surfaces */
-    --color-base-300: #e4e4e7; /* zinc-200 – borders / muted surfaces */
-    --color-base-content: #18181b; /* zinc-900 – main text */
+    --color-base-100: #ffffff;
+    /* page background */
+    --color-base-200: #f4f4f5;
+    /* zinc-100 – subtle surfaces */
+    --color-base-300: #e4e4e7;
+    /* zinc-200 – borders / muted surfaces */
+    --color-base-content: #18181b;
+    /* zinc-900 – main text */
 
     /* Semantic */
     --color-info: #0ea5e9;
@@ -30,14 +39,21 @@
     --color-success: #16a34a;
     --color-success-content: #f9fafb;
 
-    --color-warning: #d97706; /* amber-600 */
+    --color-warning: #d97706;
+    /* amber-600 */
     --color-warning-content: #f9fafb;
 
-    --color-error: #ef4444; /* red-500 */
+    --color-error: #ef4444;
+    /* red-500 */
     --color-error-content: #f9fafb;
 
     /* Radii / sizing tokens used by DaisyUI */
-    --radius-selector: 0.25rem;
-    --radius-field: 0.75rem;
-    --radius-box: 1rem;
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
 }
