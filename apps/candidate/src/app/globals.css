@@ -1,7 +1,11 @@
 @layer base;
 
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+    //themes: splits-light --default, splits-dark --prefers-dark;
+    themes: false;
+}
 
 @import "./themes/light.css";
 @import "./themes/dark.css";

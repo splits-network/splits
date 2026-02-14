@@ -57,6 +57,7 @@ COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/di
 COPY --from=build /app/packages/shared-fastify/dist ./packages/shared-fastify/dist
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 COPY --from=build /app/services/gpt-service/dist ./services/gpt-service/dist
+COPY --from=build /app/services/gpt-service/src/openapi.yaml ./services/gpt-service/dist/openapi.yaml
 
 EXPOSE 3014
 CMD ["node", "services/gpt-service/dist/index.js"]
