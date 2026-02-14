@@ -272,9 +272,11 @@ function NavItem({
     const itemContent = (
         <>
             {/* Active indicator bar */}
-            {isActive && level === 0 && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
-            )}
+            <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full transition-opacity duration-200 ${
+                    isActive && level === 0 ? "opacity-100" : "opacity-0"
+                }`}
+            />
 
             <span
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
