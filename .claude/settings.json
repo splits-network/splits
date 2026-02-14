@@ -1,4 +1,23 @@
 {
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Edit(/apps/corporate/src/app/landing/**/*)",
+      "Edit(/apps/corporate/src/app/articles/**/*)",
+      "Edit(/apps/corporate/src/app/lists/**/*)",
+      "Edit(/apps/corporate/src/app/modals/**/*)",
+      "Edit(/apps/corporate/src/app/dashboards/**/*)",
+      "Edit(/apps/corporate/src/app/messages/**/*)",
+      "Write(/apps/corporate/src/app/articles/**/*)",
+      "Write(/apps/corporate/src/app/lists/**/*)",
+      "Write(/apps/corporate/src/app/modals/**/*)",
+      "Write(/apps/corporate/src/app/dashboards/**/*)",
+      "Write(/apps/corporate/src/app/messages/**/*)",
+      "Bash(ls -la apps/corporate/src/app/landing/*)",
+      "Bash(find apps/corporate/src/app/landing -name \"*.tsx\")",
+      "Bash(npx tsc:*)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

@@ -108,23 +108,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
             path === ""
                 ? "weekly"
                 : yearlyPages.has(path)
-                  ? "yearly"
-                  : weeklyPages.has(path)
-                    ? "weekly"
-                    : "monthly",
+                    ? "yearly"
+                    : weeklyPages.has(path)
+                        ? "weekly"
+                        : "monthly",
         priority:
             path === ''
                 ? 1
                 : legalPages.has(path)
-                  ? 0.3
-                  : path === "/public/status"
-                    ? 0.4
-                    : corePages.has(path)
-                      ? 0.9
-                      : path.startsWith("/public/press/")
-                        ? 0.6
-                        : path.startsWith("/public/documentation")
-                          ? 0.7
-                          : 0.7,
+                    ? 0.3
+                    : path === "/public/status"
+                        ? 0.4
+                        : corePages.has(path)
+                            ? 0.9
+                            : path.startsWith("/public/press/")
+                                ? 0.6
+                                : path.startsWith("/public/documentation")
+                                    ? 0.7
+                                    : 0.7,
     }));
 }
