@@ -104,8 +104,10 @@ export default function RootLayout({
                 <Script
                     src="https://kit.fontawesome.com/728c8ddec8.js"
                     crossOrigin="anonymous"
-                    strategy="beforeInteractive"
-                />
+                    async
+                    data-auto-replace-svg="nest"
+                    strategy="afterInteractive"
+                ></Script>
             </head>
             <body className="antialiased flex flex-col min-h-screen">
                 <ServiceStatusBanner statusHref="/status" />
