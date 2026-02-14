@@ -142,15 +142,26 @@ export default function RootLayout({
 
                     {/* Preconnect to critical origins for faster API/auth requests */}
                     <link rel="preconnect" href="https://api.splits.network" />
-                    <link rel="dns-prefetch" href="https://api.splits.network" />
-                    <link rel="preconnect" href="https://clerk.applicant.network" />
-                    <link rel="dns-prefetch" href="https://clerk.applicant.network" />
+                    <link
+                        rel="dns-prefetch"
+                        href="https://api.splits.network"
+                    />
+                    <link
+                        rel="preconnect"
+                        href="https://clerk.applicant.network"
+                    />
+                    <link
+                        rel="dns-prefetch"
+                        href="https://clerk.applicant.network"
+                    />
 
                     <Script
                         src="https://kit.fontawesome.com/728c8ddec8.js"
                         crossOrigin="anonymous"
+                        async
+                        data-auto-replace-svg="nest"
                         strategy="afterInteractive"
-                    />
+                    ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <ServiceStatusBanner statusHref="/status" />
