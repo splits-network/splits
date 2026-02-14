@@ -277,7 +277,7 @@ export default function Header() {
                                                 className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg"
                                                 onClick={closeAllDropdowns}
                                             >
-                                                <i className="fa-duotone fa-regular fa-trending-up text-accent text-lg mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-display-chart-up text-accent text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">
                                                         Industry Trends

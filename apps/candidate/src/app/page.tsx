@@ -388,11 +388,13 @@ export default async function CandidateHomePage() {
                             <svg
                                 className="absolute left-8 top-0 h-full hidden md:block"
                                 width="4"
+                                viewBox="0 0 4 100"
+                                preserveAspectRatio="none"
                                 style={{ overflow: "visible" }}
                             >
                                 <path
                                     className="timeline-line"
-                                    d="M2,0 L2,100%"
+                                    d="M2,0 L2,100"
                                     stroke="url(#timelineGradient)"
                                     strokeWidth="4"
                                     fill="none"
