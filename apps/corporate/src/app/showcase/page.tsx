@@ -63,6 +63,13 @@ export default function ShowcasePage() {
     { label: "Modals", path: "modals" },
     { label: "Dashboard", path: "dashboards" },
     { label: "Messages", path: "messages" },
+    { label: "Headers", path: "headers" },
+    { label: "Footers", path: "footers" },
+    { label: "Forms", path: "forms" },
+    { label: "Details", path: "details" },
+    { label: "Cards", path: "cards" },
+    { label: "Search", path: "search" },
+    { label: "Empty", path: "empty" },
   ];
 
   return (
@@ -72,7 +79,7 @@ export default function ShowcasePage() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-4">Design System Showcase</h1>
           <p className="text-xl opacity-70">
-            10 Unique Design Variants × 6 Page Types = 60 Pages
+            10 Unique Design Variants × 13 Page Types = 130 Pages
           </p>
         </div>
 
@@ -119,11 +126,11 @@ export default function ShowcasePage() {
             </div>
             <div className="stat">
               <div className="stat-title">Page Types</div>
-              <div className="stat-value">6</div>
+              <div className="stat-value">13</div>
             </div>
             <div className="stat">
               <div className="stat-title">Total Pages</div>
-              <div className="stat-value">60</div>
+              <div className="stat-value">130</div>
             </div>
           </div>
         </div>
