@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { ServiceStatusBanner, ActivityTracker } from "@splits-network/shared-ui";
+import {
+    ServiceStatusBanner,
+    ActivityTracker,
+} from "@splits-network/shared-ui";
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -92,17 +95,16 @@ export default function RootLayout({
         <html lang="en" data-theme="splits-light">
             <head>
                 <JsonLd data={organizationJsonLd} id="corporate-org-jsonld" />
-                <JsonLd data={softwareAppJsonLd} id="corporate-software-jsonld" />
-                <JsonLd data={websiteJsonLd} id="corporate-website-jsonld" />
-                <link
-                    rel="preload"
-                    as="style"
-                    href="https://kit.fontawesome.com/728c8ddec8.css"
+                <JsonLd
+                    data={softwareAppJsonLd}
+                    id="corporate-software-jsonld"
                 />
-                <link
-                    rel="stylesheet"
-                    href="https://kit.fontawesome.com/728c8ddec8.css"
+                <JsonLd data={websiteJsonLd} id="corporate-website-jsonld" />
+
+                <Script
+                    src="https://kit.fontawesome.com/728c8ddec8.js"
                     crossOrigin="anonymous"
+                    strategy="beforeInteractive"
                 />
             </head>
             <body className="antialiased flex flex-col min-h-screen">
