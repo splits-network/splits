@@ -235,9 +235,11 @@ function AdminNavItemComponent({
                 }
             `}
         >
-            {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
-            )}
+            <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full transition-opacity duration-200 ${
+                    isActive ? "opacity-100" : "opacity-0"
+                }`}
+            />
             <i
                 className={`fa-duotone fa-regular ${item.icon} w-4 text-center`}
             ></i>
