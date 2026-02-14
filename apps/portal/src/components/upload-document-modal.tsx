@@ -85,7 +85,7 @@ export default function UploadDocumentModal({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">Upload Document</h3>
 

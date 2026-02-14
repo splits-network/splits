@@ -519,7 +519,7 @@ export default function RoleWizardModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-3xl">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">

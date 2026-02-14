@@ -576,7 +576,7 @@ export default function TeamManagementContent({
 
             {/* Confirmation Modal */}
             {confirmModal && (
-                <dialog className="modal modal-open" open>
+                <dialog className="modal modal-open">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">
                             {confirmModal.title}

@@ -70,7 +70,7 @@ export function DeclineModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-times-circle text-error"></i>{" "}

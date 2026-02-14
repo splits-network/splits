@@ -69,7 +69,7 @@ export default function VerificationModal({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box">
                 <form onSubmit={handleSubmit}>
                     <h3 className="text-lg font-bold mb-4">

@@ -51,7 +51,7 @@ export function ReleaseModal({ hold, onClose, onConfirm }: ReleaseModalProps) {
 
     return (
         <>
-            <dialog className="modal modal-open" open>
+            <dialog className="modal modal-open">
                 <div className="modal-box max-w-2xl">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">

@@ -126,7 +126,7 @@ export default function ApproveGateModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-circle-check text-success mr-2"></i>

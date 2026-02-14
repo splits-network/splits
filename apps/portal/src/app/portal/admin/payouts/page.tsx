@@ -192,11 +192,15 @@ export default function PayoutsAdminPage() {
                             <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-semibold">Payout Schedules</h3>
-                                    {!badgeCounts.loading && badgeCounts.pending_schedules > 0 && (
-                                        <span className="badge badge-warning badge-sm">
-                                            {badgeCounts.pending_schedules}
-                                        </span>
-                                    )}
+                                    <span
+                                        className={`badge badge-warning badge-sm transition-opacity duration-200 ${
+                                            !badgeCounts.loading && badgeCounts.pending_schedules > 0
+                                                ? "opacity-100"
+                                                : "opacity-0 w-0"
+                                        }`}
+                                    >
+                                        {badgeCounts.pending_schedules || 0}
+                                    </span>
                                 </div>
                                 <p className="text-sm text-base-content/60">Automated payout scheduling</p>
                             </div>
@@ -214,11 +218,15 @@ export default function PayoutsAdminPage() {
                             <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-semibold">Escrow Holds</h3>
-                                    {!badgeCounts.loading && badgeCounts.active_holds > 0 && (
-                                        <span className="badge badge-warning badge-sm">
-                                            {badgeCounts.active_holds}
-                                        </span>
-                                    )}
+                                    <span
+                                        className={`badge badge-warning badge-sm transition-opacity duration-200 ${
+                                            !badgeCounts.loading && badgeCounts.active_holds > 0
+                                                ? "opacity-100"
+                                                : "opacity-0 w-0"
+                                        }`}
+                                    >
+                                        {badgeCounts.active_holds || 0}
+                                    </span>
                                 </div>
                                 <p className="text-sm text-base-content/60">Guarantee period fund holds</p>
                             </div>

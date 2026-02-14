@@ -197,13 +197,15 @@ if (loading) {
 </button>
 
 // Modal loading
-<dialog open={isOpen} className="modal">
-    <div className="modal-box">
-        <ModalLoadingOverlay loading={loading}>
-            <FormContent />
-        </ModalLoadingOverlay>
-    </div>
-</dialog>
+{isOpen && (
+    <dialog className="modal modal-open">
+        <div className="modal-box">
+            <ModalLoadingOverlay loading={loading}>
+                <FormContent />
+            </ModalLoadingOverlay>
+        </div>
+    </dialog>
+)}
 
 // Chart loading
 if (loading) {
@@ -226,3 +228,100 @@ if (loading) {
 **Never manually create loading spinners.** Use standardized components for consistency.
 
 See [docs/guidance/loading-patterns-usage-guide.md](./docs/guidance/loading-patterns-usage-guide.md) for complete documentation.
+
+### React 19 Patterns (CRITICAL)
+
+**React 19 is stricter about DOM manipulation during animations.** Follow these patterns to prevent `insertBefore` crashes:
+
+#### Modals: Use SafeModal Component
+
+**NEVER use the `open` attribute on `<dialog>` elements.** It conflicts with React's reconciliation.
+
+```tsx
+// ❌ BAD: Causes insertBefore errors
+<dialog className="modal" open={isOpen}>
+    <div className="modal-box">...</div>
+</dialog>
+
+// ✅ GOOD: Use SafeModal from @splits-network/shared-ui
+import { SafeModal, SafeModalHeader, SafeModalActions } from "@splits-network/shared-ui";
+
+<SafeModal isOpen={showModal} onClose={() => setShowModal(false)} size="lg">
+    <SafeModalHeader title="Edit Profile" onClose={() => setShowModal(false)} />
+    <div className="space-y-4">
+        {/* Modal content */}
+    </div>
+    <SafeModalActions>
+        <button className="btn btn-ghost" onClick={() => setShowModal(false)}>
+            Cancel
+        </button>
+        <button className="btn btn-primary" onClick={handleSubmit}>
+            Save
+        </button>
+    </SafeModalActions>
+</SafeModal>
+
+// ✅ ALTERNATIVE: Manual conditional rendering
+{showModal && (
+    <dialog className="modal modal-open">
+        <div className="modal-box">...</div>
+    </dialog>
+)}
+```
+
+#### Badges: Stable DOM Structure
+
+**NEVER conditionally render badges during animations.** Use CSS visibility instead.
+
+```tsx
+// ❌ BAD: Conditional rendering during animations
+{count > 0 && (
+    <span className="badge badge-warning">
+        {count}
+    </span>
+)}
+
+// ✅ GOOD: Always render, hide with CSS
+<span
+    className={`badge badge-warning transition-opacity duration-200 ${
+        count > 0 ? "opacity-100" : "opacity-0 w-0"
+    }`}
+>
+    {count || 0}
+</span>
+```
+
+#### State Updates: Use useTransition for Non-Urgent Updates
+
+**Wrap non-urgent state updates in `useTransition`** to prevent conflicts with animations.
+
+```tsx
+import { useTransition } from "react";
+
+const [isPending, startTransition] = useTransition();
+const [badges, setBadges] = useState({});
+
+// ✅ GOOD: Non-urgent badge updates
+startTransition(() => {
+    setBadges({ recruiters: 5, payouts: 3 });
+});
+
+// ✅ GOOD: Auto-expand sections
+startTransition(() => {
+    setOpenSections((prev) => {
+        const combined = new Set([...prev, sectionId]);
+        if (combined.size === prev.size) return prev; // Guard against no-op updates
+        return combined;
+    });
+});
+```
+
+#### Key Principles
+
+1. **Stable DOM structure** - Avoid creating/destroying elements during animations
+2. **CSS for visibility** - Use `opacity-0 w-0` instead of conditional rendering
+3. **useTransition for async updates** - Mark non-urgent updates to defer them
+4. **Conditional rendering at component level** - `{isOpen && <Component />}` not `<Component open={isOpen} />`
+5. **No `open` attribute on dialogs** - Use `modal-open` class with conditional rendering
+
+See commit history (Feb 2025) for examples of fixing these patterns across 37+ modals.

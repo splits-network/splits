@@ -139,7 +139,7 @@ export default function EditCandidateModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-xl">Edit Candidate</h3>
