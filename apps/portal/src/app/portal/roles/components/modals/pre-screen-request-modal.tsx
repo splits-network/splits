@@ -108,7 +108,7 @@ export default function PreScreenRequestModal({
         : null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-lg">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-user-check mr-2"></i>

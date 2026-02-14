@@ -117,7 +117,7 @@ export function ProposalResponseWizard({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="mb-6">

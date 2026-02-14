@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useTransition } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
@@ -242,15 +242,16 @@ function AdminNavItemComponent({
                 className={`fa-duotone fa-regular ${item.icon} w-4 text-center`}
             ></i>
             <span className="flex-1">{item.label}</span>
-            {item.badge !== undefined &&
-                item.badge !== "loading" &&
-                item.badge > 0 && (
-                    <span className="badge badge-xs badge-warning">
-                        {item.badge}
-                    </span>
-                )}
-            {item.badge === "loading" && (
+            {item.badge === "loading" ? (
                 <span className="loading loading-spinner loading-xs"></span>
+            ) : (
+                <span
+                    className={`badge badge-xs badge-warning transition-opacity duration-200 ${
+                        item.badge && item.badge > 0 ? "opacity-100" : "opacity-0 w-0"
+                    }`}
+                >
+                    {item.badge || 0}
+                </span>
             )}
         </Link>
     );
@@ -296,11 +297,13 @@ function AdminNavSectionComponent({
                     className={`fa-duotone fa-regular ${section.icon} w-4 text-center`}
                 ></i>
                 <span className="flex-1 text-left">{section.title}</span>
-                {sectionBadgeCount > 0 && (
-                    <span className="badge badge-xs badge-warning mr-1">
-                        {sectionBadgeCount}
-                    </span>
-                )}
+                <span
+                    className={`badge badge-xs badge-warning mr-1 transition-opacity duration-200 ${
+                        sectionBadgeCount > 0 ? "opacity-100" : "opacity-0 w-0 mr-0"
+                    }`}
+                >
+                    {sectionBadgeCount || 0}
+                </span>
                 <i
                     className={`fa-duotone fa-regular fa-chevron-down text-xs transition-transform duration-200 ${
                         isOpen ? "rotate-180" : ""
@@ -333,6 +336,7 @@ function AdminNavSectionComponent({
 export function AdminSidebar() {
     const pathname = usePathname();
     const { getToken } = useAuth();
+    const [isPending, startTransition] = useTransition();
     const [badges, setBadges] = useState<Record<string, number | "loading">>(
         {},
     );
@@ -347,6 +351,7 @@ export function AdminSidebar() {
 
     // Auto-expand section containing active item
     useEffect(() => {
+        const sectionsToOpen = new Set<string>();
         ADMIN_NAV_SECTIONS.forEach((section) => {
             const hasActiveItem = section.items.some(
                 (item) =>
@@ -355,10 +360,22 @@ export function AdminSidebar() {
                         pathname.startsWith(item.href + "/")),
             );
             if (hasActiveItem) {
-                setOpenSections((prev) => new Set([...prev, section.id]));
+                sectionsToOpen.add(section.id);
             }
         });
-    }, [pathname]);
+
+        // Only update if there are new sections to open
+        if (sectionsToOpen.size > 0) {
+            startTransition(() => {
+                setOpenSections((prev) => {
+                    const combined = new Set([...prev, ...sectionsToOpen]);
+                    // Only update if the set actually changed
+                    if (combined.size === prev.size) return prev;
+                    return combined;
+                });
+            });
+        }
+    }, [pathname, startTransition]);
 
     // Close mobile drawer on navigation
     useEffect(() => {
@@ -372,15 +389,17 @@ export function AdminSidebar() {
 
             const client = createAuthenticatedClient(token);
 
-            // Set loading state
-            setBadges((prev) => ({
-                ...prev,
-                "/portal/admin/recruiters": "loading",
-                "/portal/admin/fraud": "loading",
-                "/portal/admin/payouts": "loading",
-                "/portal/admin/payouts/escrow": "loading",
-                "/portal/admin/notifications": "loading",
-            }));
+            // Set loading state (non-urgent update)
+            startTransition(() => {
+                setBadges((prev) => ({
+                    ...prev,
+                    "/portal/admin/recruiters": "loading",
+                    "/portal/admin/fraud": "loading",
+                    "/portal/admin/payouts": "loading",
+                    "/portal/admin/payouts/escrow": "loading",
+                    "/portal/admin/notifications": "loading",
+                }));
+            });
 
             // Fetch counts in parallel
             const [recruitersRes, fraudRes, payoutsRes, escrowRes, notificationsRes] =
@@ -392,27 +411,29 @@ export function AdminSidebar() {
                     client.get("/site-notifications/all?is_active=true&limit=1"),
                 ]);
 
-            setBadges({
-                "/portal/admin/recruiters":
-                    recruitersRes.status === "fulfilled"
-                        ? (recruitersRes.value?.pagination?.total ?? 0)
-                        : 0,
-                "/portal/admin/fraud":
-                    fraudRes.status === "fulfilled"
-                        ? (fraudRes.value?.pagination?.total ?? 0)
-                        : 0,
-                "/portal/admin/payouts":
-                    payoutsRes.status === "fulfilled"
-                        ? (payoutsRes.value?.pagination?.total ?? 0)
-                        : 0,
-                "/portal/admin/payouts/escrow":
-                    escrowRes.status === "fulfilled"
-                        ? (escrowRes.value?.pagination?.total ?? 0)
-                        : 0,
-                "/portal/admin/notifications":
-                    notificationsRes.status === "fulfilled"
-                        ? (notificationsRes.value?.pagination?.total ?? 0)
-                        : 0,
+            startTransition(() => {
+                setBadges({
+                    "/portal/admin/recruiters":
+                        recruitersRes.status === "fulfilled"
+                            ? (recruitersRes.value?.pagination?.total ?? 0)
+                            : 0,
+                    "/portal/admin/fraud":
+                        fraudRes.status === "fulfilled"
+                            ? (fraudRes.value?.pagination?.total ?? 0)
+                            : 0,
+                    "/portal/admin/payouts":
+                        payoutsRes.status === "fulfilled"
+                            ? (payoutsRes.value?.pagination?.total ?? 0)
+                            : 0,
+                    "/portal/admin/payouts/escrow":
+                        escrowRes.status === "fulfilled"
+                            ? (escrowRes.value?.pagination?.total ?? 0)
+                            : 0,
+                    "/portal/admin/notifications":
+                        notificationsRes.status === "fulfilled"
+                            ? (notificationsRes.value?.pagination?.total ?? 0)
+                            : 0,
+                });
             });
         } catch (error) {
             console.error("Failed to fetch badge counts:", error);

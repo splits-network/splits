@@ -296,11 +296,13 @@ function NavItem({
             )}
 
             {/* Badge for counts */}
-            {badge !== undefined && badge > 0 && (
-                <span className="badge badge-sm badge-primary">
-                    {badge > 99 ? "99+" : badge}
-                </span>
-            )}
+            <span
+                className={`badge badge-sm badge-primary transition-opacity duration-200 ${
+                    badge !== undefined && badge > 0 ? "opacity-100" : "opacity-0 w-0"
+                }`}
+            >
+                {badge && badge > 99 ? "99+" : badge || 0}
+            </span>
 
             {/* Expand/collapse icon */}
             {hasChildren && item.expandable && (

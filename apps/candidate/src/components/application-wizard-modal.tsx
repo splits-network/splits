@@ -397,7 +397,7 @@ export default function ApplicationWizardModal({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-base-300">

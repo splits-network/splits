@@ -206,7 +206,7 @@ export default function SubmitToJobWizard({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="flex justify-between items-start mb-4">
                     <div>

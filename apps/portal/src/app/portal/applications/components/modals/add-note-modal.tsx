@@ -30,7 +30,7 @@ export default function AddNoteModal({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-note-sticky mr-2"></i>

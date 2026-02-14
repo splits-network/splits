@@ -425,7 +425,7 @@ export default function TeamsPage() {
 
             {/* Create Team Modal */}
             {showCreateModal && (
-                <dialog className="modal modal-open" open>
+                <dialog className="modal modal-open">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg mb-4">
                             Create New Team

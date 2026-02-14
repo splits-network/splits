@@ -668,11 +668,9 @@ export default function NotificationsAdminPage() {
             )}
 
             {/* Create/Edit Modal */}
-            <dialog
-                className="modal"
-                open={showModal}
-            >
-                <div className="modal-box max-w-lg">
+            {showModal && (
+                <dialog className="modal modal-open">
+                    <div className="modal-box max-w-lg">
                     <h3 className="font-bold text-lg mb-4">
                         {editingNotification
                             ? "Edit Notification"
@@ -857,10 +855,11 @@ export default function NotificationsAdminPage() {
                         </button>
                     </div>
                 </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setShowModal(false)}>close</button>
-                </form>
-            </dialog>
+                    <form method="dialog" className="modal-backdrop">
+                        <button onClick={() => setShowModal(false)}>close</button>
+                    </form>
+                </dialog>
+            )}
         </div>
     );
 }

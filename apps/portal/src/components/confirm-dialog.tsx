@@ -59,7 +59,7 @@ export default function ConfirmDialog({
     };
 
     return (
-        <dialog className="modal modal-open" open>
+        <dialog className="modal modal-open">
             <div className="modal-box">
                 <div className="flex items-start gap-4">
                     <div className={`text-2xl ${getIconColor()}`}>

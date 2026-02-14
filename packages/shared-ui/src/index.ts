@@ -78,6 +78,14 @@ export {
 // Portal components
 export { ModalPortal } from './portal/modal-portal';
 
+// Safe Modal components (React 19 compatible)
+export {
+    SafeModal,
+    SafeModalHeader,
+    SafeModalActions,
+    type SafeModalProps,
+} from './components/SafeModal';
+
 // Note: DevDebugPanel moved to apps/portal/src/components/dev-debug-panel.tsx
 // because it depends on Clerk hooks which cause duplicate-instance issues
 // when imported cross-package via transpilePackages.

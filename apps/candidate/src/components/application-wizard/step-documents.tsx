@@ -436,7 +436,7 @@ export default function StepDocuments({
 
             {/* Delete Confirmation Modal */}
             {confirmDelete && (
-                <dialog open className="modal modal-open">
+                <dialog className="modal modal-open">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">Delete Document</h3>
                         <p className="py-4">
