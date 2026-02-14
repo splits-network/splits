@@ -3,8 +3,8 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-    //themes: splits-light --default, splits-dark --prefers-dark;
-    themes: false;
+    themes: splits-light --default, splits-dark --prefers-dark;
+    //themes: false;
 }
 
 @import "./themes/light.css";
