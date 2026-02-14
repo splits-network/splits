@@ -574,25 +574,33 @@ export default async function CandidateHomePage() {
                         </div>
 
                         <div className="faq-items max-w-3xl mx-auto space-y-4">
-                            {candidateFaqs.map((faq, index) => (
-                                <div
-                                    key={index}
-                                    className="faq-item collapse collapse-plus bg-base-200 rounded-xl opacity-0"
-                                >
-                                    <input
-                                        type="radio"
-                                        name="landing-faq"
-                                    />
-                                    <div className="collapse-title font-semibold text-lg pr-4">
-                                        {faq.question}
+                            {candidateFaqs.map((faq, index) => {
+                                const faqId = `landing-faq-${index}`;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="faq-item collapse collapse-plus bg-base-200 rounded-xl opacity-0"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="landing-faq"
+                                            id={faqId}
+                                            aria-label={faq.question}
+                                        />
+                                        <label
+                                            htmlFor={faqId}
+                                            className="collapse-title font-semibold text-lg pr-4 cursor-pointer"
+                                        >
+                                            {faq.question}
+                                        </label>
+                                        <div className="collapse-content">
+                                            <p className="text-base-content/70 leading-relaxed">
+                                                {faq.answer}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="collapse-content">
-                                        <p className="text-base-content/70 leading-relaxed">
-                                            {faq.answer}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </section>

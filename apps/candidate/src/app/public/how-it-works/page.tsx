@@ -256,26 +256,34 @@ export default function HowItWorksPage() {
                         Frequently Asked Questions
                     </h2>
                     <div className="max-w-3xl mx-auto space-y-4">
-                        {faqItems.map((faq, index) => (
-                            <div
-                                key={index}
-                                className="collapse collapse-plus bg-base-200"
-                            >
-                                <input
-                                    type="radio"
-                                    name="faq-accordion"
-                                    defaultChecked={index === 0}
-                                />
-                                <div className="collapse-title text-xl font-medium">
-                                    {faq.question}
+                        {faqItems.map((faq, index) => {
+                            const faqId = `faq-accordion-${index}`;
+                            return (
+                                <div
+                                    key={index}
+                                    className="collapse collapse-plus bg-base-200"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="faq-accordion"
+                                        id={faqId}
+                                        defaultChecked={index === 0}
+                                        aria-label={faq.question}
+                                    />
+                                    <label
+                                        htmlFor={faqId}
+                                        className="collapse-title text-xl font-medium cursor-pointer"
+                                    >
+                                        {faq.question}
+                                    </label>
+                                    <div className="collapse-content">
+                                        <p className="text-base-content/80">
+                                            {faq.answer}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="collapse-content">
-                                    <p className="text-base-content/80">
-                                        {faq.answer}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                     <div className="text-center mt-8">
                         <Link href="/help" className="btn btn-outline">

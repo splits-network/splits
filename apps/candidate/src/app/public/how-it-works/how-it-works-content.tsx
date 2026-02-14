@@ -403,19 +403,31 @@ export function HowItWorksContent() {
             <section ref={faqRef} className="mb-16 overflow-hidden">
                 <h2 className="section-heading text-4xl font-bold text-center mb-12">Frequently Asked Questions</h2>
                 <div className="max-w-3xl mx-auto space-y-4">
-                    {faqItems.map((faq, index) => (
-                        <div key={index} className="faq-item collapse collapse-plus bg-base-200">
-                            <input type="radio" name="faq-accordion" defaultChecked={index === 0} />
-                            <div className="collapse-title text-xl font-medium">
-                                {faq.question}
+                    {faqItems.map((faq, index) => {
+                        const faqId = `how-it-works-faq-${index}`;
+                        return (
+                            <div key={index} className="faq-item collapse collapse-plus bg-base-200">
+                                <input
+                                    type="radio"
+                                    name="faq-accordion"
+                                    id={faqId}
+                                    defaultChecked={index === 0}
+                                    aria-label={faq.question}
+                                />
+                                <label
+                                    htmlFor={faqId}
+                                    className="collapse-title text-xl font-medium cursor-pointer"
+                                >
+                                    {faq.question}
+                                </label>
+                                <div className="collapse-content">
+                                    <p className="text-base-content/80">
+                                        {faq.answer}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="collapse-content">
-                                <p className="text-base-content/80">
-                                    {faq.answer}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
                 <div className="faq-cta text-center mt-8">
                     <Link href="/help" className="btn btn-outline">
