@@ -347,8 +347,8 @@ export default function ThreadPanel({
         if (!oldestMessageId) return;
 
         setIsLoadingMore(true);
-        const prevScrollHeight = container.scrollHeight;
-        const prevScrollTop = container.scrollTop;
+        // Batch layout reads before any writes
+        const { scrollHeight: prevScrollHeight, scrollTop: prevScrollTop } = container;
 
         try {
             const token = await getToken();
@@ -382,12 +382,14 @@ export default function ThreadPanel({
                     };
                 });
 
+                // Use requestAnimationFrame to batch DOM operations
                 requestAnimationFrame(() => {
                     const updated = messagesRef.current;
                     if (!updated) return;
+                    // Read layout property first
                     const newScrollHeight = updated.scrollHeight;
-                    updated.scrollTop =
-                        prevScrollTop + (newScrollHeight - prevScrollHeight);
+                    // Then write (prevents read-write-read pattern)
+                    updated.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight);
                 });
             }
         } finally {
@@ -398,14 +400,15 @@ export default function ThreadPanel({
     const handleScroll = useCallback(() => {
         const container = messagesRef.current;
         if (!container) return;
+
+        // Batch layout reads to prevent forced reflows
+        const { scrollHeight, scrollTop, clientHeight } = container;
         const threshold = 80;
-        const distanceFromBottom =
-            container.scrollHeight -
-            container.scrollTop -
-            container.clientHeight;
+        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
         setIsAtBottom(distanceFromBottom <= threshold);
 
-        if (container.scrollTop <= 40) {
+        if (scrollTop <= 40) {
             loadOlderMessages();
         }
     }, [loadOlderMessages]);

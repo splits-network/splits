@@ -37,20 +37,22 @@ function getColorCache() {
                 baseContentHex: '#18181b',
             };
         }
-        // Client-side: read actual colors
+        // Client-side: batch all CSS reads to prevent forced reflows
+        // Use single getComputedStyle call instead of 12 separate calls
+        const style = getComputedStyle(document.documentElement);
         colorCache = {
-            primaryHex: getCssVar("--color-primary"),
-            secondaryHex: getCssVar("--color-secondary"),
-            accentHex: getCssVar("--color-accent"),
-            neutralHex: getCssVar("--color-neutral"),
-            infoHex: getCssVar("--color-info"),
-            successHex: getCssVar("--color-success"),
-            warningHex: getCssVar("--color-warning"),
-            errorHex: getCssVar("--color-error"),
-            base100Hex: getCssVar("--color-base-100"),
-            base200Hex: getCssVar("--color-base-200"),
-            base300Hex: getCssVar("--color-base-300"),
-            baseContentHex: getCssVar("--color-base-content"),
+            primaryHex: style.getPropertyValue("--color-primary").trim(),
+            secondaryHex: style.getPropertyValue("--color-secondary").trim(),
+            accentHex: style.getPropertyValue("--color-accent").trim(),
+            neutralHex: style.getPropertyValue("--color-neutral").trim(),
+            infoHex: style.getPropertyValue("--color-info").trim(),
+            successHex: style.getPropertyValue("--color-success").trim(),
+            warningHex: style.getPropertyValue("--color-warning").trim(),
+            errorHex: style.getPropertyValue("--color-error").trim(),
+            base100Hex: style.getPropertyValue("--color-base-100").trim(),
+            base200Hex: style.getPropertyValue("--color-base-200").trim(),
+            base300Hex: style.getPropertyValue("--color-base-300").trim(),
+            baseContentHex: style.getPropertyValue("--color-base-content").trim(),
         };
     }
     return colorCache;
@@ -87,18 +89,25 @@ export const dataset = (() => {
 })();
 
 export function applyThemeToChart(chart: any) {
-    const primaryHex = getCssVar("--color-primary");
-    const secondaryHex = getCssVar("--color-secondary");
-    const accentHex = getCssVar("--color-accent");
-    const neutralHex = getCssVar("--color-neutral");
-    const infoHex = getCssVar("--color-info");
-    const successHex = getCssVar("--color-success");
-    const warningHex = getCssVar("--color-warning");
-    const errorHex = getCssVar("--color-error");
-    const base100Hex = getCssVar("--color-base-100");
-    const base200Hex = getCssVar("--color-base-200");
-    const base300Hex = getCssVar("--color-base-300");
-    const baseContentHex = getCssVar("--color-base-content");
+    // Batch all CSS reads to prevent forced reflows (12 reads → 1 call)
+    const style = typeof document !== 'undefined'
+        ? getComputedStyle(document.documentElement)
+        : null;
+
+    if (!style) return; // SSR guard
+
+    const primaryHex = style.getPropertyValue("--color-primary").trim();
+    const secondaryHex = style.getPropertyValue("--color-secondary").trim();
+    const accentHex = style.getPropertyValue("--color-accent").trim();
+    const neutralHex = style.getPropertyValue("--color-neutral").trim();
+    const infoHex = style.getPropertyValue("--color-info").trim();
+    const successHex = style.getPropertyValue("--color-success").trim();
+    const warningHex = style.getPropertyValue("--color-warning").trim();
+    const errorHex = style.getPropertyValue("--color-error").trim();
+    const base100Hex = style.getPropertyValue("--color-base-100").trim();
+    const base200Hex = style.getPropertyValue("--color-base-200").trim();
+    const base300Hex = style.getPropertyValue("--color-base-300").trim();
+    const baseContentHex = style.getPropertyValue("--color-base-content").trim();
 
     chart.data.datasets.forEach((ds: any) => {
         ds.primaryBorderColor = primaryHex;

@@ -257,26 +257,34 @@ export default function HelpPage() {
                                         </h2>
                                     </div>
                                     <div className="space-y-3">
-                                        {category.faqs.map((faq, index) => (
-                                            <div
-                                                key={index}
-                                                className="collapse collapse-plus bg-base-100 shadow"
-                                                data-faq-item={`${faq.question} ${faq.answer}`.toLowerCase()}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name={`faq-${category.id}`}
-                                                />
-                                                <div className="collapse-title text-lg font-semibold">
-                                                    {faq.question}
+                                        {category.faqs.map((faq, index) => {
+                                            const faqId = `faq-${category.id}-${index}`;
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="collapse collapse-plus bg-base-100 shadow"
+                                                    data-faq-item={`${faq.question} ${faq.answer}`.toLowerCase()}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name={`faq-${category.id}`}
+                                                        id={faqId}
+                                                        aria-label={faq.question}
+                                                    />
+                                                    <label
+                                                        htmlFor={faqId}
+                                                        className="collapse-title text-lg font-semibold cursor-pointer"
+                                                    >
+                                                        {faq.question}
+                                                    </label>
+                                                    <div className="collapse-content">
+                                                        <p className="text-base-content/80 leading-relaxed">
+                                                            {faq.answer}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="collapse-content">
-                                                    <p className="text-base-content/80 leading-relaxed">
-                                                        {faq.answer}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
