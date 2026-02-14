@@ -140,10 +140,16 @@ export default function RootLayout({
                         id="applicant-website-jsonld"
                     />
 
+                    {/* Preconnect to critical origins for faster API/auth requests */}
+                    <link rel="preconnect" href="https://api.splits.network" />
+                    <link rel="dns-prefetch" href="https://api.splits.network" />
+                    <link rel="preconnect" href="https://clerk.applicant.network" />
+                    <link rel="dns-prefetch" href="https://clerk.applicant.network" />
+
                     <Script
                         src="https://kit.fontawesome.com/728c8ddec8.js"
                         crossOrigin="anonymous"
-                        strategy="beforeInteractive"
+                        strategy="afterInteractive"
                     />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
@@ -157,10 +163,10 @@ export default function RootLayout({
                     <DevDebugPanel />
                     <CandidateActivityTrackerWrapper />
 
-                    {/* Analytics scripts loaded after page becomes interactive */}
+                    {/* Analytics scripts loaded after everything else (non-critical) */}
                     <Script
                         id="microsoft-clarity"
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                         dangerouslySetInnerHTML={{
                             __html: `
                                 (function(c,l,a,r,i,t,y){
@@ -174,12 +180,12 @@ export default function RootLayout({
 
                     <Script
                         src="https://www.googletagmanager.com/gtag/js?id=G-9F24GB9QJQ"
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                     />
 
                     <Script
                         id="google-analytics"
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                         dangerouslySetInnerHTML={{
                             __html: `
                                 window.dataLayer = window.dataLayer || [];
