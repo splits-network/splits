@@ -82,7 +82,10 @@ export default function RootLayout({
             name: "Employment Networks",
             url: "https://employment-networks.com",
             logo: `${appUrl}/logo.png`,
-            sameAs: ["https://employment-networks.com", "https://splits.network"],
+            sameAs: [
+                "https://employment-networks.com",
+                "https://splits.network",
+            ],
         },
         featureList: [
             "Job search",
@@ -132,17 +135,15 @@ export default function RootLayout({
                         }}
                     />
                     <JsonLd data={webAppJsonLd} id="applicant-webapp-jsonld" />
-                    <JsonLd data={websiteJsonLd} id="applicant-website-jsonld" />
-
-                    <link
-                        rel="preload"
-                        as="style"
-                        href="https://kit.fontawesome.com/728c8ddec8.css"
+                    <JsonLd
+                        data={websiteJsonLd}
+                        id="applicant-website-jsonld"
                     />
-                    <link
-                        rel="stylesheet"
-                        href="https://kit.fontawesome.com/728c8ddec8.css"
+
+                    <Script
+                        src="https://kit.fontawesome.com/728c8ddec8.js"
                         crossOrigin="anonymous"
+                        strategy="beforeInteractive"
                     />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
