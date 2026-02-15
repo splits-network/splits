@@ -5,269 +5,232 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+if (typeof window !== "undefined") { gsap.registerPlugin(ScrollTrigger); }
 
-/* ─── Card Data ───────────────────────────────────────────────────────────── */
+/* ─── Data ───────────────────────────────────────────────────────────────── */
 
-const categories = ["All", "Engineering", "Design", "Product", "Marketing", "Data", "Sales"];
+type CardCategory = "all" | "jobs" | "recruiters" | "companies" | "candidates";
+
+const categories: { value: CardCategory; label: string; icon: string }[] = [
+    { value: "all", label: "All", icon: "fa-duotone fa-regular fa-grid-2" },
+    { value: "jobs", label: "Jobs", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "recruiters", label: "Recruiters", icon: "fa-duotone fa-regular fa-user-tie" },
+    { value: "companies", label: "Companies", icon: "fa-duotone fa-regular fa-building" },
+    { value: "candidates", label: "Candidates", icon: "fa-duotone fa-regular fa-user" },
+];
 
 const jobCards = [
-    { id: 1, title: "Senior Product Designer", company: "Stripe", location: "San Francisco, CA", salary: "USD 150k-200k", type: "full-time", department: "Design", level: "senior", featured: true, hot: true, applicants: 127, tags: ["Figma", "Design Systems", "Payments"], avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100", recruiter: "Sarah Chen" },
-    { id: 2, title: "Staff Software Engineer", company: "Notion", location: "Remote (US)", salary: "USD 180k-240k", type: "remote", department: "Engineering", level: "senior", featured: true, hot: false, applicants: 203, tags: ["Go", "Python", "Distributed Systems"], avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100", recruiter: "Michael Torres" },
-    { id: 3, title: "Marketing Manager", company: "Figma", location: "New York, NY", salary: "USD 120k-160k", type: "full-time", department: "Marketing", level: "mid", featured: false, hot: false, applicants: 89, tags: ["B2B", "SaaS", "Events"], avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100", recruiter: "Jessica Park" },
-    { id: 4, title: "Data Scientist", company: "Airbnb", location: "Seattle, WA", salary: "USD 140k-180k", type: "full-time", department: "Data", level: "mid", featured: true, hot: true, applicants: 156, tags: ["Python", "ML", "A/B Testing"], avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100", recruiter: "David Kim" },
-    { id: 5, title: "Frontend Engineer", company: "Linear", location: "Remote (EU)", salary: "EUR 90k-130k", type: "remote", department: "Engineering", level: "mid", featured: true, hot: false, applicants: 241, tags: ["React", "TypeScript", "GSAP"], avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100", recruiter: "Emma Schmidt" },
-    { id: 6, title: "Head of Customer Success", company: "Webflow", location: "San Francisco, CA", salary: "USD 160k-210k", type: "full-time", department: "Sales", level: "executive", featured: true, hot: false, applicants: 47, tags: ["Leadership", "SaaS", "CS"], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", recruiter: "Robert Johnson" },
-    { id: 7, title: "ML Engineer", company: "OpenAI", location: "San Francisco, CA", salary: "USD 200k-300k", type: "full-time", department: "Engineering", level: "senior", featured: true, hot: true, applicants: 876, tags: ["PyTorch", "LLMs", "Python"], avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100", recruiter: "Dr. Priya Patel" },
-    { id: 8, title: "Product Manager", company: "Superhuman", location: "San Francisco, CA", salary: "USD 140k-180k", type: "full-time", department: "Product", level: "mid", featured: false, hot: false, applicants: 134, tags: ["PM", "SaaS", "Email"], avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100", recruiter: "Lisa Wang" },
-    { id: 9, title: "DevOps Engineer", company: "GitLab", location: "Remote (Global)", salary: "USD 110k-150k", type: "remote", department: "Engineering", level: "mid", featured: false, hot: false, applicants: 178, tags: ["Kubernetes", "Docker", "AWS"], avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100", recruiter: "Alex Martinez" },
+    { id: "j1", title: "Senior Full-Stack Engineer", company: "TechCorp", initials: "TC", location: "Remote", salary: "$180k-$220k", split: "20%", urgency: "high", tags: ["React", "Node.js", "AWS"], applicants: 34, featured: true },
+    { id: "j2", title: "VP of Engineering", company: "DataFlow", initials: "DF", location: "San Francisco", salary: "$250k-$300k", split: "25%", urgency: "urgent", tags: ["Leadership", "Scale"], applicants: 12, featured: true },
+    { id: "j3", title: "Product Manager", company: "InnovateCo", initials: "IC", location: "Remote", salary: "$160k-$185k", split: "20%", urgency: "normal", tags: ["B2B SaaS", "PLG"], applicants: 28, featured: false },
+    { id: "j4", title: "Data Scientist", company: "AnalyticsPro", initials: "AP", location: "Austin, TX", salary: "$150k-$190k", split: "18%", urgency: "normal", tags: ["Python", "ML"], applicants: 19, featured: false },
+    { id: "j5", title: "DevOps Engineer", company: "CloudScale", initials: "CS", location: "Remote", salary: "$170k-$210k", split: "20%", urgency: "high", tags: ["Kubernetes", "Terraform"], applicants: 15, featured: false },
+    { id: "j6", title: "UX Designer", company: "DesignLab", initials: "DL", location: "New York", salary: "$140k-$170k", split: "20%", urgency: "low", tags: ["Figma", "Research"], applicants: 42, featured: false },
 ];
 
 const recruiterCards = [
-    { name: "Sarah Chen", agency: "TechHire Partners", placements: 87, rating: 4.9, specialty: "Design & Product", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200" },
-    { name: "Michael Torres", agency: "Scale Recruiting", placements: 124, rating: 4.8, specialty: "Engineering", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200" },
-    { name: "Dr. Priya Patel", agency: "AI Talent Partners", placements: 45, rating: 5.0, specialty: "AI/ML", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200" },
+    { id: "r1", name: "Sarah Kim", initials: "SK", specialty: "Engineering", placements: 47, rating: 4.9, location: "San Francisco", online: true, featured: true },
+    { id: "r2", name: "Marcus Chen", initials: "MC", specialty: "Executive", placements: 31, rating: 4.8, location: "New York", online: true, featured: false },
+    { id: "r3", name: "Elena Volkov", initials: "EV", specialty: "Data & AI", placements: 28, rating: 4.7, location: "Remote", online: false, featured: false },
+    { id: "r4", name: "James Rivera", initials: "JR", specialty: "Product", placements: 22, rating: 4.6, location: "Austin, TX", online: true, featured: true },
 ];
 
 const companyCards = [
-    { name: "Stripe", industry: "Fintech", openRoles: 12, logo: "fa-duotone fa-regular fa-credit-card" },
-    { name: "Notion", industry: "Productivity", openRoles: 8, logo: "fa-duotone fa-regular fa-note-sticky" },
-    { name: "OpenAI", industry: "AI Research", openRoles: 23, logo: "fa-duotone fa-regular fa-brain" },
-    { name: "Linear", industry: "Developer Tools", openRoles: 6, logo: "fa-duotone fa-regular fa-diagram-project" },
+    { id: "c1", name: "TechCorp", initials: "TC", industry: "Enterprise Software", openRoles: 12, size: "500-1000", stage: "Series C", featured: true },
+    { id: "c2", name: "DataFlow Inc", initials: "DF", industry: "Data Analytics", openRoles: 8, size: "200-500", stage: "Series B", featured: false },
+    { id: "c3", name: "InnovateCo", initials: "IC", industry: "SaaS", openRoles: 5, size: "50-200", stage: "Series A", featured: false },
 ];
 
-/* ─── Page ────────────────────────────────────────────────────────────────── */
+const candidateCards = [
+    { id: "ca1", name: "Alex Novak", initials: "AN", role: "Full-Stack Engineer", experience: "7 years", skills: ["React", "Node.js", "Go"], status: "Active", match: 95 },
+    { id: "ca2", name: "Diana Wu", initials: "DW", role: "Product Manager", experience: "5 years", skills: ["Strategy", "Analytics", "B2B"], status: "Active", match: 88 },
+    { id: "ca3", name: "Robert Tanaka", initials: "RT", role: "Data Scientist", experience: "4 years", skills: ["Python", "ML", "SQL"], status: "Passive", match: 82 },
+];
 
-export default function CardsOnePage() {
+/* ─── Page ───────────────────────────────────────────────────────────────── */
+
+export default function CardsOne() {
     const mainRef = useRef<HTMLElement>(null);
-    const [activeCategory, setActiveCategory] = useState("All");
+    const [filter, setFilter] = useState<CardCategory>("all");
 
-    const filteredJobs = activeCategory === "All"
-        ? jobCards
-        : jobCards.filter((j) => j.department === activeCategory);
+    useGSAP(() => {
+        if (!mainRef.current) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const $ = (s: string) => mainRef.current!.querySelectorAll(s);
+        const $1 = (s: string) => mainRef.current!.querySelector(s);
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        tl.fromTo($1(".cards-kicker"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 })
+          .fromTo($(".cards-title-word"), { opacity: 0, y: 60, rotateX: 30 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.1 }, "-=0.3")
+          .fromTo($1(".cards-desc"), { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.4");
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        $(".cards-section").forEach((section) => {
+            gsap.fromTo(section, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", scrollTrigger: { trigger: section, start: "top 85%" } });
+        });
+    }, { scope: mainRef });
 
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            heroTl
-                .fromTo($1(".hero-kicker"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 })
-                .fromTo($(".hero-headline-word"), { opacity: 0, y: 80, rotateX: 40 }, { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.12 }, "-=0.3")
-                .fromTo($1(".hero-body"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
-
-            $(".card-section").forEach((section) => {
-                gsap.fromTo(section, { opacity: 0, y: 40 }, {
-                    opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
-                    scrollTrigger: { trigger: section, start: "top 80%" },
-                });
-            });
-        },
-        { scope: mainRef },
-    );
+    const urgencyColors: Record<string, string> = { low: "text-base-content/40", normal: "text-info", high: "text-warning", urgent: "text-error" };
 
     return (
-        <main ref={mainRef} className="overflow-hidden bg-base-100 min-h-screen">
-            {/* ═══════════════════ HERO ═══════════════════ */}
+        <main ref={mainRef} className="min-h-screen bg-base-100">
+            {/* Header */}
             <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/10" style={{ clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)" }} />
+                <div className="relative z-10 container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
-                            <i className="fa-duotone fa-regular fa-grid-2 mr-2"></i>Card Patterns
-                        </p>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-6">
-                            <span className="hero-headline-word inline-block opacity-0">Card</span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">design</span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0">system.</span>
+                        <p className="cards-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">Marketplace</p>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
+                            <span className="cards-title-word inline-block opacity-0">Browse the</span>{" "}
+                            <span className="cards-title-word inline-block opacity-0 text-primary">network.</span>
                         </h1>
-                        <p className="hero-body text-lg text-neutral-content/60 leading-relaxed max-w-xl opacity-0">
-                            Multiple card variants for jobs, recruiters, and
-                            companies. Filterable, interactive, and responsive.
-                        </p>
-                    </div>
-                </div>
-                <div className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block" style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}></div>
-            </section>
-
-            {/* ═══════════════════ FEATURED CARDS — Large Hero Cards ═══════════════════ */}
-            <section className="card-section py-16 opacity-0">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="flex items-center gap-4 mb-8">
-                        <span className="text-4xl font-black tracking-tighter text-base-content/10">01</span>
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Featured Roles</p>
-                            <h2 className="text-2xl font-black tracking-tight">Hero cards</h2>
-                        </div>
-                    </div>
-
-                    <div className="grid lg:grid-cols-2 gap-6">
-                        {jobCards.filter((j) => j.hot).map((job) => (
-                            <div key={job.id} className="group border-2 border-base-300 hover:border-primary transition-colors cursor-pointer">
-                                <div className="bg-primary text-primary-content px-6 py-3 flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.3em]">
-                                        <i className="fa-duotone fa-regular fa-fire mr-1"></i>Hot Role
-                                    </span>
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-content/60">{job.applicants} applicants</span>
-                                </div>
-                                <div className="p-6 lg:p-8">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div>
-                                            <h3 className="text-2xl font-black tracking-tight leading-tight mb-1 group-hover:text-primary transition-colors">{job.title}</h3>
-                                            <p className="text-sm text-base-content/50">{job.company} &middot; {job.location}</p>
-                                        </div>
-                                        <span className="text-lg font-black text-primary">{job.salary}</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        {job.tags.map((tag, i) => (
-                                            <span key={i} className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-1 font-bold">{tag}</span>
-                                        ))}
-                                    </div>
-                                    <div className="flex items-center justify-between pt-4 border-t border-base-200">
-                                        <div className="flex items-center gap-2">
-                                            <img src={job.avatar} alt={job.recruiter} className="w-6 h-6 object-cover" />
-                                            <span className="text-xs text-base-content/50">{job.recruiter}</span>
-                                        </div>
-                                        <span className="text-[10px] uppercase tracking-wider text-base-content/30 capitalize">{job.type} &middot; {job.level}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl opacity-0">Jobs, recruiters, companies, and candidates in one connected ecosystem.</p>
                     </div>
                 </div>
             </section>
 
-            {/* ═══════════════════ JOB CARDS — Filterable Grid ═══════════════════ */}
-            <section className="card-section py-16 bg-base-200 opacity-0">
+            {/* Filters */}
+            <section className="bg-base-200 border-b border-base-300 py-4">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="flex items-center gap-4 mb-8">
-                        <span className="text-4xl font-black tracking-tighter text-base-content/10">02</span>
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">All Roles</p>
-                            <h2 className="text-2xl font-black tracking-tight">Standard cards</h2>
-                        </div>
-                    </div>
-
-                    {/* Filter tabs */}
-                    <div className="flex flex-wrap gap-2 mb-8">
+                    <div className="flex flex-wrap gap-2">
                         {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${
-                                    activeCategory === cat
-                                        ? "bg-primary text-primary-content"
-                                        : "bg-base-100 text-base-content/50 hover:text-base-content"
-                                }`}
-                            >
-                                {cat}
+                            <button key={cat.value} onClick={() => setFilter(cat.value)}
+                                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all ${
+                                    filter === cat.value ? "bg-primary text-primary-content" : "bg-base-100 text-base-content/60 hover:text-base-content border border-base-300"
+                                }`}>
+                                <i className={`${cat.icon} text-xs`} />{cat.label}
                             </button>
                         ))}
                     </div>
-
-                    {/* Grid */}
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {filteredJobs.map((job) => (
-                            <div key={job.id} className="group bg-base-100 border-2 border-base-300 hover:border-primary/30 transition-colors cursor-pointer p-6">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        {job.featured && <i className="fa-duotone fa-regular fa-star text-primary text-xs"></i>}
-                                        <span className="text-[9px] uppercase tracking-wider text-base-content/30 capitalize">{job.type}</span>
-                                    </div>
-                                    <span className="text-[10px] uppercase tracking-wider text-success font-bold">Open</span>
-                                </div>
-                                <h3 className="text-lg font-black tracking-tight leading-tight mb-1 group-hover:text-primary transition-colors">{job.title}</h3>
-                                <p className="text-sm text-base-content/50 mb-3">{job.company}</p>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/40 mb-4">
-                                    <span><i className="fa-duotone fa-regular fa-location-dot mr-1"></i>{job.location}</span>
-                                    <span className="capitalize"><i className="fa-duotone fa-regular fa-signal mr-1"></i>{job.level}</span>
-                                </div>
-                                <p className="text-base font-black text-primary tracking-tight mb-4">{job.salary}</p>
-                                <div className="flex flex-wrap gap-1 mb-4">
-                                    {job.tags.slice(0, 3).map((tag, i) => (
-                                        <span key={i} className="text-[8px] uppercase tracking-wider bg-base-200 text-base-content/40 px-2 py-0.5">{tag}</span>
-                                    ))}
-                                </div>
-                                <div className="flex items-center justify-between pt-3 border-t border-base-200">
-                                    <div className="flex items-center gap-2">
-                                        <img src={job.avatar} alt={job.recruiter} className="w-5 h-5 object-cover" />
-                                        <span className="text-[10px] text-base-content/40">{job.recruiter}</span>
-                                    </div>
-                                    <span className="text-[10px] text-base-content/30"><i className="fa-duotone fa-regular fa-users mr-1"></i>{job.applicants}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </section>
 
-            {/* ═══════════════════ RECRUITER CARDS ═══════════════════ */}
-            <section className="card-section py-16 opacity-0">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="flex items-center gap-4 mb-8">
-                        <span className="text-4xl font-black tracking-tighter text-base-content/10">03</span>
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-secondary">Top Recruiters</p>
-                            <h2 className="text-2xl font-black tracking-tight">Profile cards</h2>
+            <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+                {/* Featured Jobs */}
+                {(filter === "all" || filter === "jobs") && (
+                    <div className="cards-section opacity-0 mb-14">
+                        <div className="flex items-center justify-between mb-6">
+                            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">Featured</p><h2 className="text-2xl font-black tracking-tight">Hot Roles</h2></div>
+                            <a href="#" className="text-sm text-primary font-semibold hover:underline flex items-center gap-1">View all <i className="fa-solid fa-arrow-right text-xs" /></a>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4 mb-8">
+                            {jobCards.filter((j) => j.featured).map((job) => (
+                                <div key={job.id} className="border-l-4 border-primary bg-base-200 p-6 hover:bg-base-300/50 transition-colors group">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-11 h-11 bg-primary text-primary-content flex items-center justify-center font-bold text-sm">{job.initials}</div>
+                                            <div><h3 className="font-bold text-lg group-hover:text-primary transition-colors">{job.title}</h3><p className="text-sm text-base-content/50">{job.company}</p></div>
+                                        </div>
+                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">Featured</span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm text-base-content/60 mb-3">
+                                        <span className="flex items-center gap-1"><i className="fa-duotone fa-regular fa-location-dot text-xs" />{job.location}</span>
+                                        <span className="flex items-center gap-1"><i className="fa-duotone fa-regular fa-dollar-sign text-xs" />{job.salary}</span>
+                                        <span className={`flex items-center gap-1 font-semibold ${urgencyColors[job.urgency]}`}><i className="fa-duotone fa-regular fa-bolt text-xs" />{job.urgency}</span>
+                                        <span className="flex items-center gap-1"><i className="fa-duotone fa-regular fa-users text-xs" />{job.applicants} applicants</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex gap-1.5">{job.tags.map((t) => <span key={t} className="px-2 py-0.5 bg-base-300 text-[10px] font-semibold text-base-content/50">{t}</span>)}</div>
+                                        <span className="text-sm font-bold text-primary">{job.split} fee</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {/* Regular job cards grid */}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {jobCards.filter((j) => !j.featured).map((job) => (
+                                <div key={job.id} className="bg-base-200 p-5 border border-base-300 hover:border-primary/50 transition-all group cursor-pointer">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-9 h-9 bg-secondary text-secondary-content flex items-center justify-center font-bold text-xs">{job.initials}</div>
+                                        <div><h3 className="font-bold text-sm group-hover:text-primary transition-colors">{job.title}</h3><p className="text-xs text-base-content/40">{job.company}</p></div>
+                                    </div>
+                                    <div className="space-y-1 text-xs text-base-content/50 mb-3">
+                                        <div className="flex justify-between"><span>{job.location}</span><span className="font-semibold text-primary">{job.salary}</span></div>
+                                        <div className="flex justify-between"><span>{job.applicants} applicants</span><span>{job.split} fee</span></div>
+                                    </div>
+                                    <div className="flex gap-1">{job.tags.map((t) => <span key={t} className="px-2 py-0.5 bg-base-100 text-[10px] font-semibold text-base-content/40">{t}</span>)}</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
+                )}
 
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {recruiterCards.map((rec, i) => (
-                            <div key={i} className="group bg-base-100 border-2 border-base-300 hover:border-secondary/30 transition-colors cursor-pointer text-center p-8">
-                                <img src={rec.avatar} alt={rec.name} className="w-20 h-20 object-cover mx-auto mb-4" />
-                                <h3 className="text-xl font-black tracking-tight mb-0.5">{rec.name}</h3>
-                                <p className="text-sm text-base-content/50 mb-1">{rec.agency}</p>
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-4">{rec.specialty}</p>
-                                <div className="grid grid-cols-2 gap-[2px] bg-base-300 mb-4">
-                                    <div className="bg-base-100 p-3">
-                                        <p className="text-lg font-black">{rec.placements}</p>
-                                        <p className="text-[9px] uppercase tracking-wider text-base-content/30">Placements</p>
+                {/* Recruiters */}
+                {(filter === "all" || filter === "recruiters") && (
+                    <div className="cards-section opacity-0 mb-14">
+                        <div className="flex items-center justify-between mb-6">
+                            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">Top Performers</p><h2 className="text-2xl font-black tracking-tight">Recruiters</h2></div>
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {recruiterCards.map((r) => (
+                                <div key={r.id} className={`p-5 border hover:border-primary/50 transition-all cursor-pointer ${r.featured ? "bg-base-200 border-l-4 border-l-primary border-t-0 border-r border-b border-base-300" : "bg-base-200 border-base-300"}`}>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="relative">
+                                            <div className="w-11 h-11 bg-primary text-primary-content flex items-center justify-center font-bold text-sm">{r.initials}</div>
+                                            {r.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success border-2 border-base-200 rounded-full" />}
+                                        </div>
+                                        <div><h3 className="font-bold text-sm">{r.name}</h3><p className="text-xs text-base-content/40">{r.specialty}</p></div>
                                     </div>
-                                    <div className="bg-base-100 p-3">
-                                        <p className="text-lg font-black text-primary">{rec.rating}</p>
-                                        <p className="text-[9px] uppercase tracking-wider text-base-content/30">Rating</p>
+                                    <div className="grid grid-cols-2 gap-2 text-center mb-3">
+                                        <div className="bg-base-100 p-2"><div className="text-lg font-black text-primary">{r.placements}</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Placements</div></div>
+                                        <div className="bg-base-100 p-2"><div className="text-lg font-black text-secondary">{r.rating}</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Rating</div></div>
                                     </div>
+                                    <p className="text-xs text-base-content/40 flex items-center gap-1"><i className="fa-duotone fa-regular fa-location-dot" />{r.location}</p>
                                 </div>
-                                <button className="btn btn-outline btn-sm w-full text-xs font-bold uppercase tracking-wider">View Profile</button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════ COMPANY CARDS — Compact ═══════════════════ */}
-            <section className="card-section py-16 bg-neutral text-neutral-content opacity-0">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="flex items-center gap-4 mb-8">
-                        <span className="text-4xl font-black tracking-tighter text-neutral-content/10">04</span>
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Hiring Now</p>
-                            <h2 className="text-2xl font-black tracking-tight">Company cards</h2>
+                            ))}
                         </div>
                     </div>
+                )}
 
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        {companyCards.map((comp, i) => (
-                            <div key={i} className="group border border-neutral-content/10 hover:border-primary/30 transition-colors cursor-pointer p-6">
-                                <div className="w-12 h-12 bg-neutral-content/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                                    <i className={`${comp.logo} text-xl text-primary`}></i>
+                {/* Companies */}
+                {(filter === "all" || filter === "companies") && (
+                    <div className="cards-section opacity-0 mb-14">
+                        <div className="flex items-center justify-between mb-6">
+                            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-1">Hiring Now</p><h2 className="text-2xl font-black tracking-tight">Companies</h2></div>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {companyCards.map((c) => (
+                                <div key={c.id} className={`p-6 border hover:border-secondary/50 transition-all cursor-pointer ${c.featured ? "border-t-4 border-t-secondary bg-base-200 border-x border-b border-base-300" : "bg-base-200 border-base-300"}`}>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-12 h-12 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg">{c.initials}</div>
+                                        <div><h3 className="font-bold">{c.name}</h3><p className="text-xs text-base-content/40">{c.industry}</p></div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                                        <div><div className="text-xl font-black text-secondary">{c.openRoles}</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Open Roles</div></div>
+                                        <div><div className="text-sm font-bold">{c.size}</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Employees</div></div>
+                                        <div><div className="text-sm font-bold">{c.stage}</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Stage</div></div>
+                                    </div>
+                                    <button className="btn btn-secondary btn-sm w-full">View Open Roles <i className="fa-duotone fa-regular fa-arrow-right" /></button>
                                 </div>
-                                <h3 className="text-lg font-black tracking-tight mb-0.5">{comp.name}</h3>
-                                <p className="text-xs text-neutral-content/40 mb-3">{comp.industry}</p>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-black text-primary">{comp.openRoles} roles</span>
-                                    <i className="fa-duotone fa-regular fa-arrow-right text-xs text-neutral-content/20 group-hover:text-primary transition-colors"></i>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Candidates */}
+                {(filter === "all" || filter === "candidates") && (
+                    <div className="cards-section opacity-0">
+                        <div className="flex items-center justify-between mb-6">
+                            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent mb-1">Matched</p><h2 className="text-2xl font-black tracking-tight">Candidates</h2></div>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {candidateCards.map((c) => (
+                                <div key={c.id} className="bg-base-200 p-5 border border-base-300 hover:border-accent/50 transition-all cursor-pointer">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-11 h-11 bg-accent text-accent-content flex items-center justify-center font-bold text-sm">{c.initials}</div>
+                                            <div><h3 className="font-bold text-sm">{c.name}</h3><p className="text-xs text-base-content/40">{c.role}</p></div>
+                                        </div>
+                                        <div className="text-right"><div className="text-xl font-black text-accent">{c.match}%</div><div className="text-[9px] uppercase tracking-wider text-base-content/40">Match</div></div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-base-content/50 mb-3">
+                                        <span>{c.experience}</span><span className="text-base-content/20">|</span>
+                                        <span className={c.status === "Active" ? "text-success font-semibold" : "text-base-content/40"}>{c.status}</span>
+                                    </div>
+                                    <div className="flex gap-1">{c.skills.map((s) => <span key={s} className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-semibold">{s}</span>)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </section>
         </main>
     );

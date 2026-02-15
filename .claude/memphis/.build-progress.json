@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "currentPhase": "setup",
+  "startedAt": "2026-02-14T00:00:00Z",
+  "lastCheckpoint": "2026-02-14T00:00:00Z",
+  "targetApp": null,
+  "phases": {
+    "setup": {
+      "status": "in_progress",
+      "startedAt": "2026-02-14T00:00:00Z",
+      "tasks": [
+        {
+          "id": "create-memphis-infrastructure",
+          "type": "setup",
+          "description": "Create Memphis command system infrastructure",
+          "status": "in_progress",
+          "startedAt": "2026-02-14T00:00:00Z"
+        }
+      ]
+    },
+    "planning": {
+      "status": "pending",
+      "tasks": []
+    },
+    "migration": {
+      "status": "pending",
+      "tasks": []
+    },
+    "validation": {
+      "status": "pending",
+      "tasks": []
+    },
+    "cleanup": {
+      "status": "pending",
+      "tasks": []
+    }
+  },
+  "statistics": {
+    "totalTasks": 1,
+    "completedTasks": 0,
+    "failedTasks": 0,
+    "blockedTasks": 0
+  },
+  "errors": []
+}

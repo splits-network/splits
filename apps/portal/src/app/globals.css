@@ -3,12 +3,13 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-    themes: splits-light --default, splits-dark --prefers-dark;
+    themes: splits-light --default, splits-dark --prefers-dark, memphis;
     //themes: false;
 }
 
 @import "./themes/light.css";
 @import "./themes/dark.css";
+@import "./themes/memphis.css";
 
 /* Cookie Consent Banner Animation */
 @keyframes slide-up {

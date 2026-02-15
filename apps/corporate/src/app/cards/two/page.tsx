@@ -9,268 +9,198 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Data ───────────────────────────────────────────────────────────────────── */
 
-const categories = ["All", "Engineering", "Product", "Design", "Marketing", "Sales", "Operations"];
+type CardCategory = "all" | "jobs" | "recruiters" | "candidates" | "companies";
 
-const jobCards = [
-    { id: 1, title: "Staff Frontend Engineer", company: "Meridian Corp", location: "San Francisco, CA", type: "Hybrid", salary: "$200k - $260k", split: "50/50", category: "Engineering", applicants: 34, daysAgo: 2, featured: true, urgent: false, skills: ["React", "TypeScript", "GraphQL"] },
-    { id: 2, title: "Product Manager", company: "Helix Dynamics", location: "Remote", type: "Remote", salary: "$160k - $200k", split: "60/40", category: "Product", applicants: 22, daysAgo: 5, featured: false, urgent: true, skills: ["Strategy", "Analytics", "Agile"] },
-    { id: 3, title: "Senior UX Designer", company: "Cirrus Technologies", location: "New York, NY", type: "Onsite", salary: "$140k - $180k", split: "50/50", category: "Design", applicants: 18, daysAgo: 1, featured: true, urgent: false, skills: ["Figma", "Research", "Design Systems"] },
-    { id: 4, title: "DevOps Lead", company: "Quantum Financial", location: "Austin, TX", type: "Hybrid", salary: "$180k - $230k", split: "50/50", category: "Engineering", applicants: 11, daysAgo: 7, featured: false, urgent: false, skills: ["Kubernetes", "AWS", "Terraform"] },
-    { id: 5, title: "Growth Marketing Manager", company: "Apex Robotics", location: "Los Angeles, CA", type: "Remote", salary: "$130k - $160k", split: "60/40", category: "Marketing", applicants: 29, daysAgo: 3, featured: false, urgent: false, skills: ["SEO", "Paid Media", "Analytics"] },
-    { id: 6, title: "VP of Engineering", company: "Meridian Corp", location: "San Francisco, CA", type: "Onsite", salary: "$280k - $350k", split: "50/50", category: "Engineering", applicants: 8, daysAgo: 10, featured: true, urgent: true, skills: ["Leadership", "Architecture", "Go"] },
-    { id: 7, title: "Sales Director, Enterprise", company: "Helix Dynamics", location: "Chicago, IL", type: "Hybrid", salary: "$200k - $250k", split: "70/30", category: "Sales", applicants: 15, daysAgo: 4, featured: false, urgent: false, skills: ["Enterprise", "SaaS", "Negotiation"] },
-    { id: 8, title: "Data Engineer", company: "Cirrus Technologies", location: "Remote", type: "Remote", salary: "$150k - $190k", split: "50/50", category: "Engineering", applicants: 20, daysAgo: 6, featured: false, urgent: false, skills: ["Python", "Spark", "SQL"] },
-    { id: 9, title: "Head of Operations", company: "Quantum Financial", location: "New York, NY", type: "Onsite", salary: "$170k - $220k", split: "60/40", category: "Operations", applicants: 12, daysAgo: 8, featured: false, urgent: false, skills: ["Strategy", "Process", "Analytics"] },
+const categories: { value: CardCategory; label: string; icon: string }[] = [
+    { value: "all", label: "All", icon: "fa-duotone fa-regular fa-grid-2" },
+    { value: "jobs", label: "Jobs", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "recruiters", label: "Recruiters", icon: "fa-duotone fa-regular fa-user-tie" },
+    { value: "candidates", label: "Candidates", icon: "fa-duotone fa-regular fa-user" },
+    { value: "companies", label: "Companies", icon: "fa-duotone fa-regular fa-building" },
 ];
 
-const recruiterCards = [
-    { name: "Sarah Chen", specialty: "Frontend & Full-Stack", placements: 47, rating: 4.9, initials: "SC", location: "San Francisco, CA" },
-    { name: "Marcus Rivera", specialty: "Product & Design", placements: 32, rating: 4.8, initials: "MR", location: "New York, NY" },
-    { name: "Diana Foster", specialty: "Engineering Leadership", placements: 61, rating: 5.0, initials: "DF", location: "Austin, TX" },
-    { name: "James Park", specialty: "Data & ML", placements: 28, rating: 4.7, initials: "JP", location: "Remote" },
+const featuredJob = {
+    title: "VP of Engineering", company: "Meridian Corp", initials: "MC", location: "San Francisco, CA",
+    type: "Full-time", salary: "$300k\u2013$400k", splitFee: "25%", splitModel: "50/50", urgency: "Critical",
+    skills: ["Leadership", "System Design", "TypeScript", "AWS"], applicants: 12, daysLeft: 8,
+    description: "Lead a 50-person engineering organization through a critical growth phase. Define technical strategy and build world-class engineering culture.",
+};
+
+const jobs = [
+    { id: 1, title: "Staff Frontend Engineer", company: "Quantum Financial", initials: "QF", location: "Remote", type: "Full-time", salary: "$200k\u2013$260k", splitFee: "20%", skills: ["React", "TypeScript"], applicants: 28, featured: false, urgency: "Standard" },
+    { id: 2, title: "Senior Backend Engineer", company: "Cirrus Technologies", initials: "CT", location: "New York, NY", type: "Full-time", salary: "$180k\u2013$240k", splitFee: "20%", skills: ["Go", "Kubernetes"], applicants: 15, featured: false, urgency: "Urgent" },
+    { id: 3, title: "Data Engineering Lead", company: "Apex Robotics", initials: "AR", location: "Austin, TX", type: "Hybrid", salary: "$190k\u2013$250k", splitFee: "22%", skills: ["Python", "Spark"], applicants: 9, featured: false, urgency: "Standard" },
+    { id: 4, title: "DevOps Architect", company: "Helix Dynamics", initials: "HD", location: "Seattle, WA", type: "Remote", salary: "$210k\u2013$270k", splitFee: "20%", skills: ["Terraform", "AWS"], applicants: 21, featured: false, urgency: "Standard" },
 ];
 
-/* ─── Component ──────────────────────────────────────────────────────────────── */
+const recruiters = [
+    { id: 1, name: "Diana Foster", initials: "DF", title: "Technical Recruiter", company: "Foster Talent Group", specialization: "Engineering", placements: 47, rating: 4.9, online: true },
+    { id: 2, name: "Tom Bradley", initials: "TB", title: "Executive Recruiter", company: "Bradley & Associates", specialization: "Leadership", placements: 82, rating: 4.8, online: false },
+    { id: 3, name: "Lisa Okafor", initials: "LO", title: "Senior Recruiter", company: "Okafor Search", specialization: "Data & AI", placements: 35, rating: 4.7, online: true },
+];
 
-export default function CardsTwo() {
+const candidates = [
+    { id: 1, name: "James Park", initials: "JP", title: "Staff Software Engineer", company: "Currently at Stripe", skills: ["TypeScript", "Go", "Kubernetes"], experience: "12 years", openTo: "Staff+ roles", status: "Active" },
+    { id: 2, name: "Sarah Chen", initials: "SC", title: "Principal Engineer", company: "Currently at Netflix", skills: ["Python", "ML", "System Design"], experience: "15 years", openTo: "CTO/VP Eng", status: "Passive" },
+];
+
+const companies = [
+    { id: 1, name: "Meridian Corp", initials: "MC", industry: "Enterprise SaaS", size: "500\u20131000", openRoles: 8, avgFee: "22%", location: "San Francisco, CA" },
+    { id: 2, name: "Quantum Financial", initials: "QF", industry: "Fintech", size: "200\u2013500", openRoles: 5, avgFee: "20%", location: "New York, NY" },
+];
+
+export default function CardsTwoPage() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [activeCategory, setActiveCategory] = useState("All");
-
-    const filteredJobs = activeCategory === "All"
-        ? jobCards
-        : jobCards.filter((j) => j.category === activeCategory);
+    const [activeCategory, setActiveCategory] = useState<CardCategory>("all");
 
     useGSAP(() => {
-        gsap.from("[data-page-title]", {
-            y: 40, opacity: 0, duration: 0.9, stagger: 0.12, ease: "power3.out",
-        });
-        gsap.from("[data-filter-btn]", {
-            y: 15, opacity: 0, duration: 0.5, stagger: 0.05, ease: "power2.out", delay: 0.3,
-        });
-        gsap.utils.toArray<HTMLElement>("[data-divider]").forEach((line) => {
-            gsap.from(line, {
-                scaleX: 0, transformOrigin: "left center", duration: 1, ease: "power2.inOut",
-                scrollTrigger: { trigger: line, start: "top 90%" },
-            });
-        });
-        gsap.from("[data-card]", {
-            y: 30, opacity: 0, duration: 0.7, stagger: 0.08, ease: "power2.out", delay: 0.4,
-        });
-        gsap.from("[data-recruiter-card]", {
-            y: 30, opacity: 0, duration: 0.7, stagger: 0.1, ease: "power2.out",
-            scrollTrigger: { trigger: "[data-recruiters]", start: "top 80%" },
-        });
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        gsap.from("[data-page-hdr]", { y: -30, opacity: 0, duration: 0.7, ease: "power3.out" });
+        gsap.from("[data-cat-btn]", { y: -10, opacity: 0, duration: 0.4, stagger: 0.05, ease: "power2.out", delay: 0.2 });
+        gsap.from("[data-featured]", { y: 30, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.3 });
+        gsap.from("[data-card]", { y: 30, opacity: 0, duration: 0.5, stagger: 0.06, ease: "power2.out", scrollTrigger: { trigger: "[data-grid]", start: "top 85%" } });
     }, { scope: containerRef });
 
+    const showJobs = activeCategory === "all" || activeCategory === "jobs";
+    const showRecruiters = activeCategory === "all" || activeCategory === "recruiters";
+    const showCandidates = activeCategory === "all" || activeCategory === "candidates";
+    const showCompanies = activeCategory === "all" || activeCategory === "companies";
+
     return (
-        <div ref={containerRef} className="overflow-hidden min-h-screen bg-base-100">
-            {/* ─── Header ────────────────────────────────────────────── */}
-            <section className="bg-neutral text-neutral-content py-16 md:py-24">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <p data-page-title className="text-sm uppercase tracking-[0.3em] text-secondary font-medium mb-4">
-                        Marketplace
-                    </p>
-                    <h1 data-page-title className="text-4xl md:text-6xl font-bold tracking-tight leading-[0.95] mb-4">
-                        Open<br />Positions
-                    </h1>
-                    <p data-page-title className="text-lg text-neutral-content/60 max-w-xl leading-relaxed">
-                        Browse split-fee opportunities across the network.
-                        Filter by department, review terms, and submit candidates.
-                    </p>
+        <div ref={containerRef} className="min-h-screen bg-base-100">
+            <div data-page-hdr className="border-b border-base-300">
+                <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-base-content/30 font-semibold mb-2">Marketplace</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-base-content">Browse the Network</h1>
                 </div>
-            </section>
+            </div>
 
-            {/* ─── Filter Bar ─────────────────────────────────────────── */}
-            <section className="bg-base-200 border-b border-base-300">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
-                    <div className="flex items-center gap-2 overflow-x-auto">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                data-filter-btn
-                                onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 text-xs uppercase tracking-[0.15em] font-medium whitespace-nowrap transition-colors ${
-                                    activeCategory === cat
-                                        ? "bg-secondary text-secondary-content"
-                                        : "text-base-content/50 hover:text-base-content hover:bg-base-300"
-                                }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                        <span className="ml-auto text-xs text-base-content/40 uppercase tracking-wider whitespace-nowrap">
-                            {filteredJobs.length} result{filteredJobs.length !== 1 ? "s" : ""}
-                        </span>
+            <div className="border-b border-base-200">
+                <div className="max-w-7xl mx-auto px-6 md:px-10 flex gap-1 overflow-x-auto py-2">
+                    {categories.map((cat) => (
+                        <button key={cat.value} data-cat-btn onClick={() => setActiveCategory(cat.value)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeCategory === cat.value ? "bg-base-content text-base-100" : "text-base-content/40 hover:text-base-content/60 hover:bg-base-200/50"}`}>
+                            <i className={`${cat.icon} text-xs`} />{cat.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 md:py-12 space-y-12">
+                {/* Featured */}
+                {showJobs && (
+                    <div data-featured className="border border-base-200 rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                        <div className="absolute top-4 right-4"><span className="px-2.5 py-1 bg-warning/10 text-warning text-[9px] font-bold uppercase tracking-[0.1em] rounded-full"><i className="fa-duotone fa-regular fa-fire text-[8px] mr-0.5" /> {featuredJob.urgency}</span></div>
+                        <p className="text-[10px] uppercase tracking-[0.4em] text-secondary font-semibold mb-3">Featured Role</p>
+                        <div className="flex flex-col md:flex-row md:items-start gap-6">
+                            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-xl font-bold text-primary shrink-0">{featuredJob.initials}</div>
+                            <div className="flex-1">
+                                <h2 className="text-xl md:text-2xl font-bold text-base-content mb-1">{featuredJob.title}</h2>
+                                <p className="text-sm text-base-content/50 mb-3">{featuredJob.company} &middot; {featuredJob.location} &middot; {featuredJob.type}</p>
+                                <p className="text-sm text-base-content/50 leading-relaxed mb-4 max-w-2xl">{featuredJob.description}</p>
+                                <div className="flex flex-wrap gap-2 mb-4">{featuredJob.skills.map((s) => <span key={s} className="px-2.5 py-1 rounded-full border border-base-300 text-[11px] font-medium text-base-content/50">{s}</span>)}</div>
+                                <div className="flex flex-wrap items-center gap-6 text-sm">
+                                    <span className="font-bold text-base-content">{featuredJob.salary}</span>
+                                    <span className="text-secondary font-semibold">{featuredJob.splitFee} fee</span>
+                                    <span className="text-base-content/40">{featuredJob.applicants} applicants</span>
+                                    <span className="text-base-content/40">{featuredJob.daysLeft} days left</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                )}
 
-            {/* ─── Featured Cards ─────────────────────────────────────── */}
-            <section className="py-16 md:py-20">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    {/* Featured section */}
-                    {filteredJobs.some((j) => j.featured) && (
-                        <>
-                            <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Featured Positions</p>
-                            <div data-divider className="h-px bg-base-300 mb-8" />
-
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
-                                {filteredJobs.filter((j) => j.featured).map((job) => (
-                                    <div key={job.id} data-card className="border border-base-300 p-6 md:p-8 hover:border-secondary/40 transition-colors group cursor-pointer relative">
-                                        {/* Featured badge */}
-                                        <div className="absolute top-0 right-6 bg-secondary text-secondary-content px-3 py-1 text-[10px] uppercase tracking-wider font-semibold">
-                                            Featured
+                {/* Jobs Grid */}
+                {showJobs && (
+                    <div>
+                        <div className="flex items-center justify-between mb-5"><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold">Open Roles</h3><span className="text-xs text-base-content/30">{jobs.length} roles</span></div>
+                        <div data-grid className="grid md:grid-cols-2 gap-4">
+                            {jobs.map((j) => (
+                                <a key={j.id} href="#" data-card className="p-5 border border-base-200 rounded-xl hover:border-base-300 transition-all group">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{j.initials}</div>
+                                            <div><p className="text-sm font-bold text-base-content group-hover:text-secondary transition-colors">{j.title}</p><p className="text-xs text-base-content/40">{j.company}</p></div>
                                         </div>
-
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-base-content group-hover:text-secondary transition-colors tracking-tight">
-                                                    {job.title}
-                                                </h3>
-                                                <p className="text-sm text-base-content/50 mt-1">
-                                                    {job.company} &middot; {job.location}
-                                                </p>
-                                            </div>
-                                            {job.urgent && (
-                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-warning/10 text-warning shrink-0">
-                                                    Urgent
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-wrap gap-2 mb-5">
-                                            {job.skills.map((s) => (
-                                                <span key={s} className="px-2 py-1 text-[10px] uppercase tracking-wider font-medium border border-base-300 text-base-content/50">
-                                                    {s}
-                                                </span>
-                                            ))}
-                                        </div>
-
-                                        <div className="h-px bg-base-300 mb-4" />
-
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-4">
-                                                <span className="font-semibold text-primary">{job.salary}</span>
-                                                <span className="text-base-content/40">{job.split} split</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-xs text-base-content/40">
-                                                <span>{job.applicants} applicants</span>
-                                                <span>&middot;</span>
-                                                <span>{job.daysAgo}d ago</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 mt-4">
-                                            <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium ${
-                                                job.type === "Remote" ? "bg-success/10 text-success"
-                                                : job.type === "Hybrid" ? "bg-info/10 text-info"
-                                                : "bg-base-200 text-base-content/50"
-                                            }`}>
-                                                {job.type}
-                                            </span>
-                                            <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium bg-base-200 text-base-content/50">
-                                                {job.category}
-                                            </span>
-                                        </div>
+                                        {j.urgency === "Urgent" && <span className="px-2 py-0.5 bg-error/10 text-error text-[9px] font-bold uppercase rounded-full"><i className="fa-duotone fa-regular fa-bolt text-[8px] mr-0.5" />Urgent</span>}
                                     </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
-
-                    {/* All Cards */}
-                    <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">All Positions</p>
-                    <div data-divider className="h-px bg-base-300 mb-8" />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredJobs.filter((j) => !j.featured).map((job) => (
-                            <div key={job.id} data-card className="border border-base-300 p-6 hover:border-secondary/40 transition-colors group cursor-pointer">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium ${
-                                        job.type === "Remote" ? "bg-success/10 text-success"
-                                        : job.type === "Hybrid" ? "bg-info/10 text-info"
-                                        : "bg-base-200 text-base-content/50"
-                                    }`}>
-                                        {job.type}
-                                    </span>
-                                    {job.urgent && (
-                                        <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-warning/10 text-warning">
-                                            Urgent
-                                        </span>
-                                    )}
-                                </div>
-
-                                <h3 className="text-lg font-bold text-base-content group-hover:text-secondary transition-colors tracking-tight mb-1">
-                                    {job.title}
-                                </h3>
-                                <p className="text-sm text-base-content/50 mb-4">
-                                    {job.company} &middot; {job.location}
-                                </p>
-
-                                <div className="flex flex-wrap gap-1.5 mb-4">
-                                    {job.skills.map((s) => (
-                                        <span key={s} className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium border border-base-300 text-base-content/50">
-                                            {s}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <div className="h-px bg-base-300 mb-3" />
-
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="font-semibold text-primary">{job.salary}</span>
-                                    <span className="text-xs text-base-content/40">{job.split}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between mt-3 text-xs text-base-content/40">
-                                    <span>{job.applicants} applicants</span>
-                                    <span>{job.daysAgo}d ago</span>
-                                </div>
-                            </div>
-                        ))}
+                                    <div className="flex flex-wrap gap-1.5 mb-3">{j.skills.map((s) => <span key={s} className="px-2 py-0.5 rounded-full bg-base-200/60 text-[10px] font-medium text-base-content/40">{s}</span>)}</div>
+                                    <div className="flex items-center justify-between text-xs text-base-content/40">
+                                        <span>{j.location} &middot; {j.type}</span>
+                                        <div className="flex items-center gap-3"><span className="font-semibold text-base-content/60">{j.salary}</span><span className="text-secondary font-semibold">{j.splitFee}</span></div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                )}
 
-            {/* ─── Recruiter Cards ────────────────────────────────────── */}
-            <section className="bg-neutral text-neutral-content py-16 md:py-24" data-recruiters>
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Top Recruiters</p>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10">Network partners</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {recruiterCards.map((rec) => (
-                            <div key={rec.name} data-recruiter-card className="border border-neutral-content/10 p-6 hover:border-secondary/40 transition-colors group cursor-pointer text-center">
-                                <div className="w-14 h-14 bg-neutral-content/10 flex items-center justify-center mx-auto mb-4 text-lg font-bold text-neutral-content/60 group-hover:text-secondary group-hover:bg-secondary/10 transition-colors">
-                                    {rec.initials}
-                                </div>
-                                <h3 className="font-bold text-neutral-content group-hover:text-secondary transition-colors mb-1">{rec.name}</h3>
-                                <p className="text-xs text-neutral-content/50 mb-4">{rec.specialty}</p>
-
-                                <div className="h-px bg-neutral-content/10 mb-4" />
-
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="text-neutral-content/40">{rec.placements} placements</span>
-                                    <span className="flex items-center gap-1 text-secondary">
-                                        <i className="fa-solid fa-star text-[10px]" />
-                                        {rec.rating}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-neutral-content/30 mt-2">{rec.location}</p>
-                            </div>
-                        ))}
+                {/* Recruiters */}
+                {showRecruiters && (
+                    <div>
+                        <div className="flex items-center justify-between mb-5"><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold">Top Recruiters</h3><span className="text-xs text-base-content/30">{recruiters.length} recruiters</span></div>
+                        <div data-grid className="grid md:grid-cols-3 gap-4">
+                            {recruiters.map((r) => (
+                                <a key={r.id} href="#" data-card className="p-5 border border-base-200 rounded-xl hover:border-base-300 transition-all text-center group">
+                                    <div className="relative inline-block mb-3">
+                                        <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center text-base font-bold text-secondary mx-auto">{r.initials}</div>
+                                        {r.online && <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-base-100" />}
+                                    </div>
+                                    <p className="text-sm font-bold text-base-content group-hover:text-secondary transition-colors">{r.name}</p>
+                                    <p className="text-xs text-base-content/40 mb-3">{r.title}</p>
+                                    <div className="flex justify-center gap-4 text-xs text-base-content/40 mb-3">
+                                        <span><span className="font-bold text-base-content/60">{r.placements}</span> placements</span>
+                                        <span><i className="fa-solid fa-star text-warning text-[9px] mr-0.5" />{r.rating}</span>
+                                    </div>
+                                    <span className="inline-block px-2.5 py-1 rounded-full bg-base-200/60 text-[10px] font-semibold text-base-content/40">{r.specialization}</span>
+                                </a>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                )}
 
-            {/* ─── Colophon ──────────────────────────────────────────── */}
-            <section className="bg-base-200 py-12">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
-                    <p className="text-sm text-base-content/40 uppercase tracking-[0.2em]">
-                        Splits Network &middot; Cards Grid &middot; Magazine Editorial
-                    </p>
-                </div>
-            </section>
+                {/* Candidates */}
+                {showCandidates && (
+                    <div>
+                        <div className="flex items-center justify-between mb-5"><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold">Candidates</h3></div>
+                        <div data-grid className="grid md:grid-cols-2 gap-4">
+                            {candidates.map((c) => (
+                                <a key={c.id} href="#" data-card className="p-5 border border-base-200 rounded-xl hover:border-base-300 transition-all group">
+                                    <div className="flex items-start gap-3 mb-3">
+                                        <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-sm font-bold text-accent">{c.initials}</div>
+                                        <div><p className="text-sm font-bold text-base-content group-hover:text-secondary transition-colors">{c.name}</p><p className="text-xs text-base-content/40">{c.title}</p><p className="text-[11px] text-base-content/30">{c.company}</p></div>
+                                        <span className={`ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${c.status === "Active" ? "bg-success/10 text-success" : "bg-base-200 text-base-content/30"}`}>{c.status}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5 mb-3">{c.skills.map((s) => <span key={s} className="px-2 py-0.5 rounded-full bg-base-200/60 text-[10px] font-medium text-base-content/40">{s}</span>)}</div>
+                                    <div className="flex items-center gap-3 text-xs text-base-content/40"><span>{c.experience}</span><span className="w-1 h-1 bg-base-content/15 rounded-full" /><span>Open to: {c.openTo}</span></div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Companies */}
+                {showCompanies && (
+                    <div>
+                        <div className="flex items-center justify-between mb-5"><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold">Companies</h3></div>
+                        <div data-grid className="grid md:grid-cols-2 gap-4">
+                            {companies.map((co) => (
+                                <a key={co.id} href="#" data-card className="p-5 border border-base-200 rounded-xl hover:border-base-300 transition-all group">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">{co.initials}</div>
+                                        <div><p className="text-sm font-bold text-base-content group-hover:text-secondary transition-colors">{co.name}</p><p className="text-xs text-base-content/40">{co.industry} &middot; {co.location}</p></div>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-xs text-base-content/40">
+                                        <span><span className="font-bold text-base-content/60">{co.openRoles}</span> open roles</span>
+                                        <span>{co.size} employees</span>
+                                        <span className="text-secondary font-semibold">{co.avgFee} avg fee</span>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

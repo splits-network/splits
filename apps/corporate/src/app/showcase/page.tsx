@@ -70,6 +70,23 @@ export default function ShowcasePage() {
     { label: "Cards", path: "cards" },
     { label: "Search", path: "search" },
     { label: "Empty", path: "empty" },
+    { label: "Profiles", path: "profiles" },
+    { label: "Settings", path: "settings" },
+    { label: "Onboarding", path: "onboarding" },
+    { label: "Tables", path: "tables" },
+    { label: "Pricing", path: "pricing" },
+    { label: "Auth", path: "auth" },
+    { label: "Notifications", path: "notifications" },
+  ];
+
+  // Designer Six Prototypes (Memphis only)
+  const designerSixPrototypes = [
+    { label: "Notifications UI", path: "notifications-ui" },
+    { label: "Tabs", path: "tabs" },
+    { label: "Timelines", path: "timelines" },
+    { label: "Calendars", path: "calendars" },
+    { label: "Testimonials", path: "testimonials" },
+    { label: "FAQs", path: "faqs" },
   ];
 
   return (
@@ -79,7 +96,10 @@ export default function ShowcasePage() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-4">Design System Showcase</h1>
           <p className="text-xl opacity-70">
-            10 Unique Design Variants × 13 Page Types = 130 Pages
+            10 Unique Design Variants × 20 Page Types = 200 Pages
+          </p>
+          <p className="text-sm opacity-60 mt-2">
+            + 6 Memphis Prototypes (Notifications UI, Tabs, Timelines, Calendars, Testimonials, FAQs)
           </p>
         </div>
 
@@ -112,6 +132,25 @@ export default function ShowcasePage() {
                     </Link>
                   ))}
                 </div>
+
+                {/* Designer Six Prototypes */}
+                {designer.number === "six" && (
+                  <div className="mt-6">
+                    <div className="divider">Memphis Prototypes</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                      {designerSixPrototypes.map((pageType) => (
+                        <Link
+                          key={pageType.path}
+                          href={`/${pageType.path}/${designer.number}`}
+                          className="btn btn-outline btn-secondary hover:btn-primary transition-all"
+                        >
+                          <i className="fa-regular fa-sparkles mr-2"></i>
+                          {pageType.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -126,11 +165,11 @@ export default function ShowcasePage() {
             </div>
             <div className="stat">
               <div className="stat-title">Page Types</div>
-              <div className="stat-value">13</div>
+              <div className="stat-value">20</div>
             </div>
             <div className="stat">
               <div className="stat-title">Total Pages</div>
-              <div className="stat-value">130</div>
+              <div className="stat-value">200</div>
             </div>
           </div>
         </div>

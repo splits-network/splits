@@ -1,318 +1,135 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Mock Data ──────────────────────────────────────────────────────────────── */
+/* ─── Data ───────────────────────────────────────────────────────────────────── */
 
 const job = {
-    title: "Staff Frontend Engineer",
-    company: "Meridian Corp",
-    location: "San Francisco, CA",
-    locationType: "Hybrid",
-    department: "Engineering",
-    employmentType: "Full-Time",
-    experienceLevel: "Staff",
-    salary: "$200,000 - $260,000",
-    splitFee: "50/50",
-    posted: "February 3, 2026",
-    deadline: "March 15, 2026",
-    status: "Open",
-    applicants: 34,
-    views: 1287,
-    recruiterAssigned: 6,
-    skills: ["React", "TypeScript", "Node.js", "GraphQL", "AWS", "Team Leadership"],
-    description: `We are looking for a Staff Frontend Engineer to lead the evolution of our customer-facing platform. You will define frontend architecture decisions, mentor a team of six engineers, and ship features that directly impact revenue.
-
-This role sits at the intersection of deep technical work and cross-functional leadership. You will partner closely with Product, Design, and Backend Engineering to deliver cohesive user experiences at scale.`,
-    requirements: [
-        "8+ years of professional frontend development experience",
-        "Deep expertise in React, TypeScript, and modern build tooling",
-        "Experience leading or mentoring engineering teams",
-        "Track record of improving performance, accessibility, and developer experience",
-        "Strong communication skills and comfort working cross-functionally",
-        "Experience with design systems and component libraries",
-    ],
+    title: "Staff Software Engineer", company: "Meridian Corp", companyInitials: "MC", department: "Engineering",
+    location: "San Francisco, CA", locationType: "Hybrid", employmentType: "Full-time", experienceLevel: "Staff",
+    salaryMin: 220000, salaryMax: 280000, postedDate: "February 10, 2026", closingDate: "March 15, 2026",
+    status: "Active", urgency: "Urgent", applicants: 34, views: 1247, splitFee: "20%", splitModel: "50/50", featured: true,
+    description: "We are looking for a Staff Software Engineer to lead our platform migration from a monolithic architecture to microservices. You will work closely with the VP of Engineering and a team of 12 engineers to design, build, and ship scalable systems that power Meridian's core products.\n\nThis is a high-impact role where you will define technical direction, mentor senior engineers, and drive decisions that affect millions of users.",
+    requirements: ["10+ years of professional software engineering experience", "Deep expertise in distributed systems and service-oriented architecture", "Strong proficiency in TypeScript, Go, or similar languages", "Experience with Kubernetes, Docker, and cloud infrastructure (AWS/GCP)", "Track record of leading large-scale platform migrations", "Excellent communication and mentoring skills"],
+    niceToHave: ["Experience with event-driven architectures (Kafka, RabbitMQ)", "Familiarity with GraphQL and API gateway patterns", "Previous experience in fintech or high-traffic consumer products"],
     benefits: [
-        "Competitive equity package with 4-year vesting",
-        "Comprehensive health, dental, and vision coverage",
-        "Unlimited PTO with a 3-week minimum encouraged",
-        "Annual $5,000 professional development budget",
-        "Hybrid schedule: 3 days in-office, 2 remote",
-        "401(k) with 4% company match",
+        { icon: "fa-duotone fa-regular fa-heart-pulse", label: "Premium health, dental, and vision" },
+        { icon: "fa-duotone fa-regular fa-chart-line-up", label: "Significant equity with 4-year vesting" },
+        { icon: "fa-duotone fa-regular fa-umbrella-beach", label: "Unlimited PTO, 3-week minimum" },
+        { icon: "fa-duotone fa-regular fa-graduation-cap", label: "$5,000 annual learning budget" },
+        { icon: "fa-duotone fa-regular fa-house-laptop", label: "Flexible hybrid schedule" },
+        { icon: "fa-duotone fa-regular fa-utensils", label: "Daily catered meals" },
     ],
+    skills: ["TypeScript", "Go", "Kubernetes", "AWS", "PostgreSQL", "Microservices", "GraphQL", "Docker"],
 };
 
-const timeline = [
-    { id: 1, user: "Diana Foster", action: "posted this job to the network", time: "Feb 3 at 9:14 AM", icon: "fa-duotone fa-regular fa-plus-circle" },
-    { id: 2, user: "Marcus Rivera", action: "was assigned as a network recruiter", time: "Feb 4 at 11:02 AM", icon: "fa-duotone fa-regular fa-user-plus" },
-    { id: 3, user: "Sarah Chen", action: "submitted a candidate: Alex Kim", time: "Feb 6 at 2:30 PM", icon: "fa-duotone fa-regular fa-file-circle-plus" },
-    { id: 4, user: "Diana Foster", action: "scheduled a phone screen with Alex Kim", time: "Feb 8 at 10:15 AM", icon: "fa-duotone fa-regular fa-calendar-check" },
-    { id: 5, user: "James Park", action: "left a note: \"Strong culture fit, recommend advancing\"", time: "Feb 10 at 4:45 PM", icon: "fa-duotone fa-regular fa-comment" },
-    { id: 6, user: "Lisa Okafor", action: "submitted a candidate: Jordan Lee", time: "Feb 12 at 9:00 AM", icon: "fa-duotone fa-regular fa-file-circle-plus" },
+const activity = [
+    { id: 1, user: "Sarah Chen", action: "submitted an application", time: "2 hours ago", icon: "fa-duotone fa-regular fa-file-circle-plus" },
+    { id: 2, user: "Marcus Rivera", action: "viewed this listing", time: "3 hours ago", icon: "fa-duotone fa-regular fa-eye" },
+    { id: 3, user: "Diana Foster", action: "shared with a candidate", time: "5 hours ago", icon: "fa-duotone fa-regular fa-share" },
+    { id: 4, user: "Kevin Zhang", action: "submitted an application", time: "Yesterday", icon: "fa-duotone fa-regular fa-file-circle-plus" },
+    { id: 5, user: "System", action: "listing marked as urgent", time: "2 days ago", icon: "fa-duotone fa-regular fa-bolt" },
+    { id: 6, user: "Alexandra Whitfield", action: "created this listing", time: "4 days ago", icon: "fa-duotone fa-regular fa-plus-circle" },
 ];
 
 const relatedJobs = [
-    { title: "Senior Frontend Engineer", company: "Helix Dynamics", location: "Remote", salary: "$170k - $210k", applicants: 22 },
-    { title: "Frontend Tech Lead", company: "Cirrus Technologies", location: "New York, NY", salary: "$190k - $240k", applicants: 18 },
-    { title: "Principal UI Engineer", company: "Quantum Financial", location: "Austin, TX", salary: "$210k - $270k", applicants: 11 },
+    { title: "Principal Engineer", company: "Quantum Financial", salary: "$250k\u2013$320k", location: "Remote" },
+    { title: "Senior Platform Engineer", company: "Cirrus Technologies", salary: "$190k\u2013$240k", location: "New York" },
+    { title: "Engineering Manager", company: "Helix Dynamics", salary: "$200k\u2013$260k", location: "Austin, TX" },
 ];
 
-/* ─── Component ──────────────────────────────────────────────────────────────── */
-
-export default function DetailTwo() {
+export default function DetailsTwoPage() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [saved, setSaved] = useState(false);
+    const [activeTab, setActiveTab] = useState<"overview" | "activity">("overview");
 
     useGSAP(() => {
-        gsap.from("[data-detail-title]", {
-            y: 40, opacity: 0, duration: 0.9, stagger: 0.12, ease: "power3.out",
-        });
-        gsap.from("[data-meta-item]", {
-            y: 20, opacity: 0, duration: 0.6, stagger: 0.06, ease: "power2.out", delay: 0.4,
-        });
-        gsap.utils.toArray<HTMLElement>("[data-divider]").forEach((line) => {
-            gsap.from(line, {
-                scaleX: 0, transformOrigin: "left center", duration: 1, ease: "power2.inOut",
-                scrollTrigger: { trigger: line, start: "top 90%" },
-            });
-        });
-        gsap.from("[data-section]", {
-            y: 30, opacity: 0, duration: 0.7, stagger: 0.12, ease: "power2.out",
-            scrollTrigger: { trigger: "[data-content]", start: "top 80%" },
-        });
-        gsap.from("[data-timeline-item]", {
-            x: -30, opacity: 0, duration: 0.6, stagger: 0.08, ease: "power2.out",
-            scrollTrigger: { trigger: "[data-timeline]", start: "top 80%" },
-        });
-        gsap.from("[data-related]", {
-            y: 30, opacity: 0, duration: 0.7, stagger: 0.12, ease: "power2.out",
-            scrollTrigger: { trigger: "[data-related-section]", start: "top 80%" },
-        });
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        gsap.from("[data-dh]", { y: -30, opacity: 0, duration: 0.7, ease: "power3.out" });
+        gsap.from("[data-dm]", { y: 20, opacity: 0, duration: 0.5, stagger: 0.06, ease: "power2.out", delay: 0.2 });
+        gsap.from("[data-dc]", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.4 });
+        gsap.from("[data-ds]", { x: 30, opacity: 0, duration: 0.6, ease: "power2.out", delay: 0.5 });
+        gsap.from("[data-sect]", { y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", scrollTrigger: { trigger: "[data-dc]", start: "top 80%" } });
     }, { scope: containerRef });
 
     return (
-        <div ref={containerRef} className="overflow-hidden min-h-screen bg-base-100">
-            {/* ─── Header ────────────────────────────────────────────── */}
-            <section className="bg-neutral text-neutral-content py-16 md:py-24">
-                <div className="max-w-5xl mx-auto px-6 md:px-12">
-                    <div className="flex items-center gap-3 mb-6">
-                        <span data-detail-title className="px-2 py-0.5 text-xs uppercase tracking-wider font-semibold bg-success/20 text-success">{job.status}</span>
-                        <span data-detail-title className="text-xs uppercase tracking-[0.2em] text-neutral-content/40">Posted {job.posted}</span>
-                    </div>
-                    <h1 data-detail-title className="text-4xl md:text-6xl font-bold tracking-tight leading-[0.95] mb-4">{job.title}</h1>
-                    <p data-detail-title className="text-xl text-neutral-content/70 mb-8">
-                        {job.company} &middot; {job.location} &middot; {job.locationType}
-                    </p>
-                    <div data-detail-title className="flex flex-wrap gap-3">
-                        <button className="btn btn-secondary text-xs uppercase tracking-[0.15em] font-semibold px-6">
-                            <i className="fa-regular fa-paper-plane mr-2" /> Submit Candidate
-                        </button>
-                        <button className="btn btn-ghost text-xs uppercase tracking-[0.15em] font-semibold px-6 border border-neutral-content/20 text-neutral-content hover:bg-neutral-content/10">
-                            <i className="fa-regular fa-bookmark mr-2" /> Save
-                        </button>
-                        <button className="btn btn-ghost text-xs uppercase tracking-[0.15em] font-semibold px-6 border border-neutral-content/20 text-neutral-content hover:bg-neutral-content/10">
-                            <i className="fa-regular fa-share-nodes mr-2" /> Share
-                        </button>
-                        <button className="btn btn-ghost text-xs uppercase tracking-[0.15em] font-semibold px-6 border border-neutral-content/20 text-neutral-content hover:bg-neutral-content/10">
-                            <i className="fa-regular fa-print mr-2" /> Print
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* ─── Metadata Bar ───────────────────────────────────────── */}
-            <section className="bg-base-200 border-b border-base-300">
-                <div className="max-w-5xl mx-auto px-6 md:px-12 py-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                        {[
-                            { label: "Department", value: job.department, icon: "fa-duotone fa-regular fa-building" },
-                            { label: "Type", value: job.employmentType, icon: "fa-duotone fa-regular fa-clock" },
-                            { label: "Level", value: job.experienceLevel, icon: "fa-duotone fa-regular fa-chart-simple" },
-                            { label: "Salary", value: job.salary, icon: "fa-duotone fa-regular fa-dollar-sign" },
-                            { label: "Split Fee", value: job.splitFee, icon: "fa-duotone fa-regular fa-handshake" },
-                            { label: "Deadline", value: "Mar 15", icon: "fa-duotone fa-regular fa-calendar" },
-                        ].map((item) => (
-                            <div key={item.label} data-meta-item className="flex items-center gap-3">
-                                <i className={`${item.icon} text-secondary`} />
-                                <div>
-                                    <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-medium">{item.label}</p>
-                                    <p className="text-sm font-semibold text-base-content">{item.value}</p>
+        <div ref={containerRef} className="min-h-screen bg-base-100">
+            <div data-dh className="border-b border-base-300">
+                <div className="max-w-6xl mx-auto px-6 md:px-10 py-8">
+                    <button className="flex items-center gap-2 text-xs text-base-content/40 hover:text-base-content/60 transition-colors mb-5"><i className="fa-duotone fa-regular fa-arrow-left text-[10px]" /> Back to Jobs</button>
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                        <div className="flex gap-4">
+                            <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-lg font-bold text-primary shrink-0">{job.companyInitials}</div>
+                            <div>
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                    <span className="px-2 py-0.5 bg-warning/10 text-warning text-[9px] font-bold uppercase tracking-[0.1em] rounded-full"><i className="fa-duotone fa-regular fa-star text-[8px] mr-0.5" /> Featured</span>
+                                    <span className="px-2 py-0.5 bg-success/10 text-success text-[9px] font-bold uppercase tracking-[0.1em] rounded-full">{job.status}</span>
+                                    <span className="px-2 py-0.5 bg-error/10 text-error text-[9px] font-bold uppercase tracking-[0.1em] rounded-full"><i className="fa-duotone fa-regular fa-bolt text-[8px] mr-0.5" /> {job.urgency}</span>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ─── Stats Row ──────────────────────────────────────────── */}
-            <section className="bg-base-100 border-b border-base-300">
-                <div className="max-w-5xl mx-auto px-6 md:px-12 py-4">
-                    <div className="flex items-center gap-8 text-sm">
-                        <span className="flex items-center gap-2 text-base-content/60">
-                            <i className="fa-duotone fa-regular fa-eye text-secondary" />
-                            <strong className="text-base-content">{job.views.toLocaleString()}</strong> views
-                        </span>
-                        <span className="flex items-center gap-2 text-base-content/60">
-                            <i className="fa-duotone fa-regular fa-file-lines text-secondary" />
-                            <strong className="text-base-content">{job.applicants}</strong> applicants
-                        </span>
-                        <span className="flex items-center gap-2 text-base-content/60">
-                            <i className="fa-duotone fa-regular fa-user-tie text-secondary" />
-                            <strong className="text-base-content">{job.recruiterAssigned}</strong> recruiters
-                        </span>
-                    </div>
-                </div>
-            </section>
-
-            {/* ─── Main Content ───────────────────────────────────────── */}
-            <section className="py-16 md:py-24" data-content>
-                <div className="max-w-5xl mx-auto px-6 md:px-12">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
-                        <div className="lg:col-span-2 space-y-12">
-                            <div data-section>
-                                <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">About the Role</p>
-                                <div data-divider className="h-px bg-base-300 mb-6" />
-                                {job.description.split("\n\n").map((para, i) => (
-                                    <p key={i} className="text-base-content/70 leading-relaxed mb-4 last:mb-0">{para}</p>
-                                ))}
-                            </div>
-
-                            <div data-section>
-                                <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Requirements</p>
-                                <div data-divider className="h-px bg-base-300 mb-6" />
-                                <ul className="space-y-3">
-                                    {job.requirements.map((req, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-base-content/70">
-                                            <i className="fa-regular fa-check text-secondary mt-1 shrink-0" /><span>{req}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            <div data-section>
-                                <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Benefits & Perks</p>
-                                <div data-divider className="h-px bg-base-300 mb-6" />
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {job.benefits.map((b, i) => (
-                                        <div key={i} className="flex items-start gap-3 text-base-content/70">
-                                            <i className="fa-duotone fa-regular fa-circle-check text-success mt-0.5 shrink-0" />
-                                            <span className="text-sm">{b}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div data-section>
-                                <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Required Skills</p>
-                                <div data-divider className="h-px bg-base-300 mb-6" />
-                                <div className="flex flex-wrap gap-2">
-                                    {job.skills.map((s) => (
-                                        <span key={s} className="px-3 py-1.5 text-xs uppercase tracking-wider font-medium border border-base-300 text-base-content/70">{s}</span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div data-timeline>
-                                <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Activity Timeline</p>
-                                <div data-divider className="h-px bg-base-300 mb-6" />
-                                <div className="space-y-0">
-                                    {timeline.map((item) => (
-                                        <div key={item.id} data-timeline-item className="flex items-start gap-4 py-4 border-b border-base-300 last:border-b-0">
-                                            <div className="w-8 h-8 bg-base-200 flex items-center justify-center shrink-0 mt-0.5">
-                                                <i className={`${item.icon} text-secondary text-sm`} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm"><span className="font-semibold text-base-content">{item.user}</span> <span className="text-base-content/60">{item.action}</span></p>
-                                                <p className="text-xs text-base-content/40 mt-0.5 uppercase tracking-wider">{item.time}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-base-content">{job.title}</h1>
+                                <div data-dm className="flex flex-wrap items-center gap-3 mt-2 text-sm text-base-content/50">
+                                    <span className="flex items-center gap-1.5"><i className="fa-duotone fa-regular fa-building text-xs" /> {job.company}</span>
+                                    <span className="w-1 h-1 bg-base-content/20 rounded-full" />
+                                    <span><i className="fa-duotone fa-regular fa-location-dot text-xs mr-1" />{job.location}</span>
+                                    <span className="w-1 h-1 bg-base-content/20 rounded-full" />
+                                    <span>{job.locationType}</span>
                                 </div>
                             </div>
                         </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button onClick={() => setSaved(!saved)} className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-all ${saved ? "bg-secondary/10 border-secondary/30 text-secondary" : "border-base-300 text-base-content/30 hover:text-base-content/60"}`}><i className={`${saved ? "fa-solid" : "fa-regular"} fa-bookmark text-sm`} /></button>
+                            <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-base-300 text-base-content/30 hover:text-base-content/60 transition-all"><i className="fa-duotone fa-regular fa-share text-sm" /></button>
+                            <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-base-300 text-base-content/30 hover:text-base-content/60 transition-all"><i className="fa-duotone fa-regular fa-print text-sm" /></button>
+                            <button className="flex items-center gap-2 px-5 py-2.5 bg-base-content text-base-100 text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"><i className="fa-duotone fa-regular fa-paper-plane text-xs" /> Apply Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        {/* Sidebar */}
-                        <div className="space-y-8">
-                            <div className="border border-base-300 p-6">
-                                <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-4">Quick Actions</p>
-                                <div className="space-y-3">
-                                    <button className="btn btn-secondary w-full text-xs uppercase tracking-[0.15em] font-semibold">
-                                        <i className="fa-regular fa-paper-plane mr-2" /> Submit Candidate
-                                    </button>
-                                    <button className="btn btn-ghost w-full text-xs uppercase tracking-[0.15em] font-semibold border border-base-300 text-base-content/60">
-                                        <i className="fa-regular fa-message mr-2" /> Contact Hiring Manager
-                                    </button>
-                                </div>
-                            </div>
+            <div className="border-b border-base-200"><div className="max-w-6xl mx-auto px-6 md:px-10 flex gap-0">
+                {(["overview", "activity"] as const).map((tab) => (
+                    <button key={tab} onClick={() => setActiveTab(tab)} className={`px-5 py-3.5 text-sm font-medium border-b-2 transition-all capitalize ${activeTab === tab ? "border-b-base-content text-base-content" : "border-b-transparent text-base-content/40 hover:text-base-content/60"}`}>
+                        {tab}{tab === "activity" && <span className="ml-2 px-1.5 py-0.5 bg-base-200 rounded text-[10px] font-bold">{activity.length}</span>}
+                    </button>
+                ))}
+            </div></div>
 
-                            <div className="border border-base-300 p-6">
-                                <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-4">Split-Fee Terms</p>
-                                <div className="text-center py-4 mb-4">
-                                    <p className="text-4xl font-bold text-primary tracking-tight">{job.splitFee}</p>
-                                    <p className="text-xs text-base-content/40 uppercase tracking-wider mt-1">Fee Split</p>
-                                </div>
-                                <div className="h-px bg-base-300 mb-4" />
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex justify-between"><span className="text-base-content/50">Guarantee</span><span className="font-medium text-base-content">90 days</span></div>
-                                    <div className="flex justify-between"><span className="text-base-content/50">Payment</span><span className="font-medium text-base-content">Net 30</span></div>
-                                    <div className="flex justify-between"><span className="text-base-content/50">Fee Rate</span><span className="font-medium text-base-content">20% of salary</span></div>
-                                </div>
-                            </div>
-
-                            <div className="border border-base-300 p-6">
-                                <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-4">Company</p>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-primary flex items-center justify-center"><span className="text-primary-content text-sm font-bold">MC</span></div>
-                                    <div>
-                                        <p className="font-bold text-base-content">{job.company}</p>
-                                        <p className="text-xs text-base-content/50">Enterprise SaaS &middot; 500-1000</p>
+            <div className="max-w-6xl mx-auto px-6 md:px-10 py-8 md:py-12">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                    <div data-dc className="flex-1 min-w-0">
+                        {activeTab === "overview" && (
+                            <div className="space-y-10">
+                                <div data-sect className="p-6 border border-base-200 rounded-xl bg-base-200/20">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div><p className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-1">Compensation</p><p className="text-2xl md:text-3xl font-bold text-base-content tracking-tight">${job.salaryMin.toLocaleString()} &ndash; ${job.salaryMax.toLocaleString()}</p><p className="text-xs text-base-content/40 mt-1">USD &middot; {job.experienceLevel} &middot; {job.department}</p></div>
+                                        <div className="flex gap-6"><div className="text-center"><p className="text-lg font-bold text-secondary">{job.splitFee}</p><p className="text-[10px] text-base-content/30 uppercase tracking-wider">Fee</p></div><div className="text-center"><p className="text-lg font-bold text-base-content">{job.splitModel}</p><p className="text-[10px] text-base-content/30 uppercase tracking-wider">Split</p></div></div>
                                     </div>
                                 </div>
-                                <p className="text-sm text-base-content/60 leading-relaxed">
-                                    Meridian Corp builds data infrastructure for enterprise teams. Series C, backed by Accel and Sequoia.
-                                </p>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">About the Role</h3>{job.description.split("\n\n").map((p, i) => <p key={i} className="text-sm text-base-content/60 leading-relaxed mb-4">{p}</p>)}</div>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Requirements</h3><ul className="space-y-2.5">{job.requirements.map((r, i) => <li key={i} className="flex gap-3 text-sm text-base-content/60"><i className="fa-duotone fa-regular fa-check text-secondary text-xs mt-1 shrink-0" />{r}</li>)}</ul></div>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Nice to Have</h3><ul className="space-y-2.5">{job.niceToHave.map((n, i) => <li key={i} className="flex gap-3 text-sm text-base-content/50"><i className="fa-duotone fa-regular fa-circle text-[6px] text-base-content/20 mt-2 shrink-0" />{n}</li>)}</ul></div>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Skills</h3><div className="flex flex-wrap gap-2">{job.skills.map((s) => <span key={s} className="px-3 py-1.5 rounded-full border border-base-300 text-xs font-medium text-base-content/50">{s}</span>)}</div></div>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Benefits</h3><div className="grid md:grid-cols-2 gap-3">{job.benefits.map((b) => <div key={b.label} className="flex items-center gap-3 p-3 rounded-lg border border-base-200"><div className="w-8 h-8 rounded-lg bg-base-200/60 flex items-center justify-center shrink-0"><i className={`${b.icon} text-sm text-base-content/30`} /></div><span className="text-xs text-base-content/60">{b.label}</span></div>)}</div></div>
+                                <div data-sect><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Similar Roles</h3><div className="space-y-3">{relatedJobs.map((rj) => <a key={rj.title} href="#" className="flex items-center justify-between p-4 border border-base-200 rounded-xl hover:border-base-300 transition-colors group"><div><p className="text-sm font-semibold text-base-content group-hover:text-secondary transition-colors">{rj.title}</p><p className="text-xs text-base-content/40 mt-0.5">{rj.company} &middot; {rj.location}</p></div><span className="text-xs font-semibold text-base-content/50">{rj.salary}</span></a>)}</div></div>
                             </div>
-
-                            <div className="border-l-4 border-secondary pl-6 py-2">
-                                <p className="text-lg italic text-base-content/70 leading-snug mb-3">
-                                    &ldquo;This is a high-impact role with direct access to the CTO. We need someone who can own the frontend platform end to end.&rdquo;
-                                </p>
-                                <cite className="text-xs text-base-content/40 not-italic uppercase tracking-wider">Diana Foster, VP Engineering</cite>
-                            </div>
-                        </div>
+                        )}
+                        {activeTab === "activity" && (
+                            <div><h3 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-6">Timeline</h3>{activity.map((a, i) => (<div key={a.id} className="flex gap-4 relative">{i < activity.length - 1 && <div className="absolute left-[18px] top-10 bottom-0 w-px bg-base-200" />}<div className="w-9 h-9 rounded-full bg-base-200/60 flex items-center justify-center shrink-0 z-10"><i className={`${a.icon} text-xs text-base-content/40`} /></div><div className="pb-6"><p className="text-sm text-base-content/70"><span className="font-semibold">{a.user}</span> {a.action}</p><p className="text-[11px] text-base-content/30 mt-0.5">{a.time}</p></div></div>))}</div>
+                        )}
                     </div>
+                    <aside data-ds className="w-full lg:w-[300px] shrink-0 space-y-6">
+                        <div className="border border-base-200 rounded-xl p-5"><h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Metrics</h4><div className="grid grid-cols-2 gap-4"><div className="text-center p-3 bg-base-200/30 rounded-lg"><p className="text-xl font-bold text-base-content">{job.applicants}</p><p className="text-[10px] text-base-content/30 uppercase tracking-wider mt-0.5">Applicants</p></div><div className="text-center p-3 bg-base-200/30 rounded-lg"><p className="text-xl font-bold text-base-content">{job.views.toLocaleString()}</p><p className="text-[10px] text-base-content/30 uppercase tracking-wider mt-0.5">Views</p></div></div></div>
+                        <div className="border border-base-200 rounded-xl p-5"><h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Details</h4><div className="space-y-3">{[{ l: "Posted", v: job.postedDate }, { l: "Closing", v: job.closingDate }, { l: "Department", v: job.department }, { l: "Experience", v: job.experienceLevel }].map((d) => <div key={d.l} className="flex justify-between"><span className="text-xs text-base-content/40">{d.l}</span><span className="text-xs font-medium text-base-content/70">{d.v}</span></div>)}</div></div>
+                        <div className="border border-base-200 rounded-xl p-5"><h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Recruiter</h4><div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-xs font-bold text-secondary">AW</div><div><p className="text-sm font-semibold text-base-content">Alexandra Whitfield</p><p className="text-[11px] text-base-content/40">Senior Talent Partner</p></div></div><button className="w-full flex items-center justify-center gap-2 py-2.5 border border-base-300 rounded-lg text-xs font-semibold text-base-content/60 hover:border-base-content/30 transition-colors"><i className="fa-duotone fa-regular fa-paper-plane" /> Message</button></div>
+                        <div className="border border-base-200 rounded-xl p-5"><h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-4">Share</h4><div className="flex gap-2">{["fa-brands fa-linkedin-in", "fa-brands fa-x-twitter", "fa-duotone fa-regular fa-envelope", "fa-duotone fa-regular fa-link"].map((ic, i) => <button key={i} className="flex-1 py-2.5 rounded-lg bg-base-200/50 text-base-content/30 hover:text-base-content/60 hover:bg-base-200 transition-colors"><i className={`${ic} text-sm`} /></button>)}</div></div>
+                    </aside>
                 </div>
-            </section>
-
-            {/* ─── Related Jobs ───────────────────────────────────────── */}
-            <section className="bg-neutral text-neutral-content py-16 md:py-24" data-related-section>
-                <div className="max-w-5xl mx-auto px-6 md:px-12">
-                    <p className="text-xs uppercase tracking-[0.3em] text-secondary font-medium mb-4">Similar Roles</p>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10">You may also be interested in</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {relatedJobs.map((rj) => (
-                            <div key={rj.title} data-related className="border border-neutral-content/10 p-6 hover:border-secondary/40 transition-colors group cursor-pointer">
-                                <h3 className="font-bold text-neutral-content group-hover:text-secondary transition-colors mb-2">{rj.title}</h3>
-                                <p className="text-sm text-neutral-content/50 mb-4">{rj.company} &middot; {rj.location}</p>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-secondary font-semibold">{rj.salary}</span>
-                                    <span className="text-neutral-content/40">{rj.applicants} applicants</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section className="bg-base-200 py-12">
-                <div className="max-w-5xl mx-auto px-6 md:px-12 text-center">
-                    <p className="text-sm text-base-content/40 uppercase tracking-[0.2em]">Splits Network &middot; Job Detail &middot; Magazine Editorial</p>
-                </div>
-            </section>
+            </div>
         </div>
     );
 }

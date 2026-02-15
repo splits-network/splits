@@ -1,637 +1,173 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 /* ─── Data ───────────────────────────────────────────────────────────────────── */
 
-interface Job {
-    id: number;
-    title: string;
-    company: string;
-    location: string;
-    salary: string;
-    salaryNum: number;
-    type: string;
-    splitFee: string;
-    posted: string;
-    postedDays: number;
-    applicants: number;
-    category: string;
-    remote: boolean;
-    urgent: boolean;
-    skills: string[];
+const locationOptions = ["Remote", "San Francisco, CA", "New York, NY", "Austin, TX", "Seattle, WA", "Chicago, IL", "Boston, MA", "Denver, CO"];
+const typeOptions = ["Full-time", "Part-time", "Contract", "Freelance"];
+const experienceOptions = ["Entry", "Mid", "Senior", "Staff", "Principal", "Director", "VP", "C-Level"];
+const departmentOptions = ["Engineering", "Product", "Design", "Marketing", "Sales", "Data Science", "Operations"];
+const sortOptions = [{ value: "relevance", label: "Relevance" }, { value: "salary-desc", label: "Highest Salary" }, { value: "salary-asc", label: "Lowest Salary" }, { value: "newest", label: "Newest" }, { value: "applicants", label: "Most Applied" }];
+
+interface SearchResult {
+    id: number; title: string; company: string; initials: string; location: string; type: string;
+    salary: string; splitFee: string; skills: string[]; applicants: number; posted: string; urgency: string;
 }
 
-const allJobs: Job[] = [
-    { id: 1, title: "Senior Product Designer", company: "Meridian Tech", location: "San Francisco, CA", salary: "$145K - $185K", salaryNum: 165, type: "Full-time", splitFee: "25%", posted: "3 days ago", postedDays: 3, applicants: 47, category: "Technology", remote: false, urgent: false, skills: ["Figma", "Design Systems", "Prototyping"] },
-    { id: 2, title: "VP of Engineering", company: "Quantum Financial", location: "New York, NY", salary: "$280K - $350K", salaryNum: 315, type: "Full-time", splitFee: "30%", posted: "2 days ago", postedDays: 2, applicants: 12, category: "Executive", remote: false, urgent: true, skills: ["Leadership", "Architecture", "Scaling"] },
-    { id: 3, title: "Clinical Data Manager", company: "BioVance Labs", location: "Boston, MA", salary: "$110K - $140K", salaryNum: 125, type: "Full-time", splitFee: "20%", posted: "1 week ago", postedDays: 7, applicants: 23, category: "Healthcare", remote: false, urgent: false, skills: ["Clinical Trials", "SAS", "Regulatory"] },
-    { id: 4, title: "Growth Marketing Lead", company: "Spark Commerce", location: "Remote", salary: "$130K - $165K", salaryNum: 148, type: "Full-time", splitFee: "22%", posted: "5 days ago", postedDays: 5, applicants: 38, category: "Marketing", remote: true, urgent: false, skills: ["SEO", "Analytics", "Paid Media"] },
-    { id: 5, title: "Chief Revenue Officer", company: "Pinnacle SaaS", location: "Austin, TX", salary: "$250K - $320K", salaryNum: 285, type: "Full-time", splitFee: "30%", posted: "1 day ago", postedDays: 1, applicants: 8, category: "Executive", remote: false, urgent: true, skills: ["Revenue", "GTM", "Enterprise Sales"] },
-    { id: 6, title: "DevOps Engineer", company: "CloudNine Infra", location: "Remote", salary: "$140K - $175K", salaryNum: 158, type: "Contract", splitFee: "20%", posted: "2 days ago", postedDays: 2, applicants: 31, category: "Technology", remote: true, urgent: false, skills: ["AWS", "Kubernetes", "Terraform"] },
-    { id: 7, title: "Risk Analyst", company: "Atlas Capital", location: "Chicago, IL", salary: "$95K - $125K", salaryNum: 110, type: "Full-time", splitFee: "18%", posted: "4 days ago", postedDays: 4, applicants: 19, category: "Finance", remote: false, urgent: false, skills: ["Risk Modeling", "Python", "Compliance"] },
-    { id: 8, title: "Frontend Engineer", company: "NovaPay", location: "Remote", salary: "$150K - $190K", salaryNum: 170, type: "Full-time", splitFee: "25%", posted: "1 day ago", postedDays: 1, applicants: 54, category: "Technology", remote: true, urgent: false, skills: ["React", "TypeScript", "Next.js"] },
-    { id: 9, title: "Head of Talent", company: "Orion Labs", location: "Seattle, WA", salary: "$170K - $210K", salaryNum: 190, type: "Full-time", splitFee: "25%", posted: "6 days ago", postedDays: 6, applicants: 15, category: "Executive", remote: false, urgent: false, skills: ["Recruiting", "Strategy", "Leadership"] },
-    { id: 10, title: "Data Scientist", company: "Prism AI", location: "Remote", salary: "$160K - $200K", salaryNum: 180, type: "Full-time", splitFee: "22%", posted: "3 days ago", postedDays: 3, applicants: 42, category: "Technology", remote: true, urgent: true, skills: ["Python", "ML", "Statistics"] },
+const results: SearchResult[] = [
+    { id: 1, title: "Staff Software Engineer", company: "Meridian Corp", initials: "MC", location: "San Francisco, CA", type: "Full-time", salary: "$220k\u2013$280k", splitFee: "20%", skills: ["TypeScript", "Go", "Kubernetes"], applicants: 34, posted: "2 days ago", urgency: "Urgent" },
+    { id: 2, title: "VP of Engineering", company: "Quantum Financial", initials: "QF", location: "New York, NY", type: "Full-time", salary: "$300k\u2013$400k", splitFee: "25%", skills: ["Leadership", "System Design"], applicants: 12, posted: "4 days ago", urgency: "Critical" },
+    { id: 3, title: "Senior Frontend Engineer", company: "Cirrus Technologies", initials: "CT", location: "Remote", type: "Full-time", salary: "$180k\u2013$240k", splitFee: "20%", skills: ["React", "TypeScript"], applicants: 45, posted: "1 week ago", urgency: "Standard" },
+    { id: 4, title: "Data Engineering Lead", company: "Apex Robotics", initials: "AR", location: "Austin, TX", type: "Hybrid", salary: "$190k\u2013$250k", splitFee: "22%", skills: ["Python", "Spark", "AWS"], applicants: 18, posted: "3 days ago", urgency: "Standard" },
+    { id: 5, title: "Principal Engineer", company: "Helix Dynamics", initials: "HD", location: "Seattle, WA", type: "Full-time", salary: "$250k\u2013$320k", splitFee: "20%", skills: ["System Design", "Go", "PostgreSQL"], applicants: 8, posted: "1 day ago", urgency: "Urgent" },
+    { id: 6, title: "Engineering Manager", company: "Meridian Corp", initials: "MC", location: "San Francisco, CA", type: "Full-time", salary: "$200k\u2013$260k", splitFee: "20%", skills: ["Leadership", "Agile"], applicants: 22, posted: "5 days ago", urgency: "Standard" },
+    { id: 7, title: "DevOps Architect", company: "Quantum Financial", initials: "QF", location: "Remote", type: "Contract", salary: "$150\u2013$200/hr", splitFee: "18%", skills: ["Terraform", "Kubernetes", "AWS"], applicants: 15, posted: "6 days ago", urgency: "Standard" },
+    { id: 8, title: "ML Engineer", company: "Apex Robotics", initials: "AR", location: "Austin, TX", type: "Full-time", salary: "$200k\u2013$270k", splitFee: "22%", skills: ["Python", "PyTorch", "MLOps"], applicants: 29, posted: "2 days ago", urgency: "Urgent" },
 ];
 
-const CATEGORIES = ["Technology", "Healthcare", "Finance", "Marketing", "Executive"];
-const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Contract-to-Hire"];
-const SORT_OPTIONS = [
-    { value: "newest", label: "Newest First" },
-    { value: "salary-high", label: "Salary: High to Low" },
-    { value: "salary-low", label: "Salary: Low to High" },
-    { value: "applicants", label: "Most Applicants" },
-];
+interface ActiveFilter { type: string; value: string; }
 
-interface Filters {
-    query: string;
-    categories: string[];
-    types: string[];
-    remoteOnly: boolean;
-    urgentOnly: boolean;
-    salaryMin: number;
-    salaryMax: number;
-    postedWithin: number;
-}
-
-const defaultFilters: Filters = {
-    query: "",
-    categories: [],
-    types: [],
-    remoteOnly: false,
-    urgentOnly: false,
-    salaryMin: 0,
-    salaryMax: 400,
-    postedWithin: 30,
-};
-
-/* ─── Component ──────────────────────────────────────────────────────────────── */
-
-export default function SearchPageTwo() {
+export default function SearchTwoPage() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [filters, setFilters] = useState<Filters>(defaultFilters);
-    const [sortBy, setSortBy] = useState("newest");
+    const [query, setQuery] = useState("");
+    const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
+    const [sortBy, setSortBy] = useState("relevance");
+    const [salaryRange, setSalaryRange] = useState([100, 400]);
+    const [showFilters, setShowFilters] = useState(true);
     const [savedSearch, setSavedSearch] = useState(false);
-    const [filtersOpen, setFiltersOpen] = useState(true);
 
-    useGSAP(
-        () => {
-            gsap.from("[data-page-text]", {
-                y: 50,
-                opacity: 0,
-                duration: 0.9,
-                stagger: 0.12,
-                ease: "power3.out",
-            });
+    useGSAP(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        gsap.from("[data-sh]", { y: -30, opacity: 0, duration: 0.7, ease: "power3.out" });
+        gsap.from("[data-sf]", { x: -30, opacity: 0, duration: 0.6, ease: "power2.out", delay: 0.2 });
+        gsap.from("[data-sr]", { y: 20, opacity: 0, duration: 0.5, stagger: 0.06, ease: "power2.out", delay: 0.3 });
+    }, { scope: containerRef });
 
-            gsap.from("[data-search-bar]", {
-                y: 30,
-                opacity: 0,
-                duration: 0.7,
-                delay: 0.3,
-                ease: "power2.out",
-            });
-
-            gsap.from("[data-filter-panel]", {
-                x: -30,
-                opacity: 0,
-                duration: 0.7,
-                delay: 0.4,
-                ease: "power2.out",
-            });
-        },
-        { scope: containerRef }
-    );
-
-    const activeFilterCount = useMemo(() => {
-        let count = 0;
-        if (filters.categories.length > 0) count++;
-        if (filters.types.length > 0) count++;
-        if (filters.remoteOnly) count++;
-        if (filters.urgentOnly) count++;
-        if (filters.salaryMin > 0) count++;
-        if (filters.salaryMax < 400) count++;
-        if (filters.postedWithin < 30) count++;
-        return count;
-    }, [filters]);
-
-    const activeFilterTags = useMemo(() => {
-        const tags: { label: string; clear: () => void }[] = [];
-        filters.categories.forEach((cat) => {
-            tags.push({
-                label: cat,
-                clear: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        categories: prev.categories.filter((c) => c !== cat),
-                    })),
-            });
-        });
-        filters.types.forEach((type) => {
-            tags.push({
-                label: type,
-                clear: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        types: prev.types.filter((t) => t !== type),
-                    })),
-            });
-        });
-        if (filters.remoteOnly) {
-            tags.push({
-                label: "Remote Only",
-                clear: () => setFilters((prev) => ({ ...prev, remoteOnly: false })),
-            });
-        }
-        if (filters.urgentOnly) {
-            tags.push({
-                label: "Urgent Only",
-                clear: () => setFilters((prev) => ({ ...prev, urgentOnly: false })),
-            });
-        }
-        if (filters.salaryMin > 0 || filters.salaryMax < 400) {
-            tags.push({
-                label: `$${filters.salaryMin}K - $${filters.salaryMax}K`,
-                clear: () => setFilters((prev) => ({ ...prev, salaryMin: 0, salaryMax: 400 })),
-            });
-        }
-        if (filters.postedWithin < 30) {
-            tags.push({
-                label: `Last ${filters.postedWithin} days`,
-                clear: () => setFilters((prev) => ({ ...prev, postedWithin: 30 })),
-            });
-        }
-        return tags;
-    }, [filters]);
-
-    const filteredJobs = useMemo(() => {
-        let result = allJobs.filter((job) => {
-            if (filters.query) {
-                const q = filters.query.toLowerCase();
-                if (
-                    !job.title.toLowerCase().includes(q) &&
-                    !job.company.toLowerCase().includes(q) &&
-                    !job.location.toLowerCase().includes(q) &&
-                    !job.skills.some((s) => s.toLowerCase().includes(q))
-                )
-                    return false;
-            }
-            if (filters.categories.length > 0 && !filters.categories.includes(job.category))
-                return false;
-            if (filters.types.length > 0 && !filters.types.includes(job.type)) return false;
-            if (filters.remoteOnly && !job.remote) return false;
-            if (filters.urgentOnly && !job.urgent) return false;
-            if (job.salaryNum < filters.salaryMin || job.salaryNum > filters.salaryMax)
-                return false;
-            if (job.postedDays > filters.postedWithin) return false;
-            return true;
-        });
-
-        switch (sortBy) {
-            case "salary-high":
-                result.sort((a, b) => b.salaryNum - a.salaryNum);
-                break;
-            case "salary-low":
-                result.sort((a, b) => a.salaryNum - b.salaryNum);
-                break;
-            case "applicants":
-                result.sort((a, b) => b.applicants - a.applicants);
-                break;
-            default:
-                result.sort((a, b) => a.postedDays - b.postedDays);
-        }
-
-        return result;
-    }, [filters, sortBy]);
-
-    const toggleCategory = (cat: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            categories: prev.categories.includes(cat)
-                ? prev.categories.filter((c) => c !== cat)
-                : [...prev.categories, cat],
-        }));
+    const addFilter = (type: string, value: string) => {
+        if (!activeFilters.some((f) => f.type === type && f.value === value)) setActiveFilters([...activeFilters, { type, value }]);
     };
+    const removeFilter = (type: string, value: string) => setActiveFilters(activeFilters.filter((f) => !(f.type === type && f.value === value)));
+    const clearFilters = () => setActiveFilters([]);
 
-    const toggleType = (type: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            types: prev.types.includes(type)
-                ? prev.types.filter((t) => t !== type)
-                : [...prev.types, type],
-        }));
-    };
-
-    const clearAllFilters = () => {
-        setFilters(defaultFilters);
-    };
+    const filtered = results.filter((r) => {
+        if (query && !r.title.toLowerCase().includes(query.toLowerCase()) && !r.company.toLowerCase().includes(query.toLowerCase())) return false;
+        const locFilters = activeFilters.filter((f) => f.type === "location").map((f) => f.value);
+        if (locFilters.length > 0 && !locFilters.includes(r.location)) return false;
+        const typeFilters = activeFilters.filter((f) => f.type === "type").map((f) => f.value);
+        if (typeFilters.length > 0 && !typeFilters.includes(r.type)) return false;
+        return true;
+    });
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-base-100 overflow-hidden">
-            {/* Hero */}
-            <section className="bg-neutral text-neutral-content py-20 md:py-28">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <p
-                        data-page-text
-                        className="text-sm uppercase tracking-[0.3em] text-secondary font-medium mb-6"
-                    >
-                        Component Showcase
-                    </p>
-                    <h1
-                        data-page-text
-                        className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] mb-6"
-                    >
-                        Search &
-                        <br />
-                        Filters
-                    </h1>
-                    <p
-                        data-page-text
-                        className="text-lg md:text-xl text-neutral-content/70 max-w-xl leading-relaxed"
-                    >
-                        Advanced search with multi-faceted filtering, active filter
-                        tags, sort controls, and save-search functionality for the
-                        recruiting marketplace.
-                    </p>
-                </div>
-            </section>
-
-            {/* Search Bar */}
-            <div className="bg-base-200 border-b border-base-300 sticky top-0 z-30">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
-                    <div data-search-bar className="flex items-center gap-3">
-                        <div className="relative flex-1">
-                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/30" />
-                            <input
-                                type="text"
-                                placeholder="Search jobs, companies, skills..."
-                                value={filters.query}
-                                onChange={(e) =>
-                                    setFilters((prev) => ({ ...prev, query: e.target.value }))
-                                }
-                                className="input input-bordered w-full bg-base-100 pl-11 focus:border-secondary"
-                            />
-                            {filters.query && (
-                                <button
-                                    onClick={() => setFilters((prev) => ({ ...prev, query: "" }))}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content"
-                                >
-                                    <i className="fa-regular fa-xmark" />
-                                </button>
-                            )}
-                        </div>
-                        <button
-                            onClick={() => setFiltersOpen(!filtersOpen)}
-                            className={`btn btn-ghost border font-semibold uppercase text-[10px] tracking-wider px-4 ${
-                                filtersOpen
-                                    ? "border-secondary text-secondary"
-                                    : "border-base-300 text-base-content/60"
-                            }`}
-                        >
-                            <i className="fa-duotone fa-regular fa-sliders mr-2" />
-                            Filters
-                            {activeFilterCount > 0 && (
-                                <span className="ml-2 w-5 h-5 bg-secondary text-secondary-content text-[10px] font-bold flex items-center justify-center">
-                                    {activeFilterCount}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setSavedSearch(!savedSearch)}
-                            className={`btn btn-ghost border font-semibold uppercase text-[10px] tracking-wider px-4 ${
-                                savedSearch
-                                    ? "border-secondary text-secondary"
-                                    : "border-base-300 text-base-content/60"
-                            }`}
-                        >
-                            <i className={`fa-${savedSearch ? "solid" : "regular"} fa-bookmark mr-2`} />
-                            {savedSearch ? "Saved" : "Save Search"}
-                        </button>
+        <div ref={containerRef} className="min-h-screen bg-base-100">
+            <div data-sh className="border-b border-base-300">
+                <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-base-content/30 font-semibold mb-2">Search</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-base-content mb-5">Find Opportunities</h1>
+                    <div className="relative max-w-3xl">
+                        <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search jobs, companies, skills..." className="w-full pl-11 pr-4 py-3.5 bg-base-200/50 border border-base-300 rounded-xl text-sm focus:outline-none focus:border-secondary/50 transition-colors placeholder:text-base-content/30" />
                     </div>
-
-                    {/* Active Filter Tags */}
-                    {activeFilterTags.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 mt-3">
-                            <span className="text-[10px] uppercase tracking-wider text-base-content/40 font-medium">
-                                Active:
-                            </span>
-                            {activeFilterTags.map((tag, i) => (
-                                <button
-                                    key={i}
-                                    onClick={tag.clear}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/10 text-secondary text-xs font-medium hover:bg-secondary/20 transition-colors"
-                                >
-                                    {tag.label}
-                                    <i className="fa-regular fa-xmark text-[10px]" />
-                                </button>
-                            ))}
-                            <button
-                                onClick={clearAllFilters}
-                                className="text-[10px] uppercase tracking-wider text-base-content/40 hover:text-error transition-colors ml-2"
-                            >
-                                Clear All
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Main Content */}
-            <section className="py-8 md:py-12">
-                <div className="max-w-7xl mx-auto px-6 md:px-12">
-                    <div className="flex gap-8">
-                        {/* Sidebar Filters */}
-                        {filtersOpen && (
-                            <aside data-filter-panel className="hidden lg:block w-64 shrink-0">
-                                <div className="sticky top-28 space-y-8">
-                                    {/* Categories */}
-                                    <div>
-                                        <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-3">
-                                            Category
-                                        </p>
-                                        <div className="space-y-2">
-                                            {CATEGORIES.map((cat) => (
-                                                <label
-                                                    key={cat}
-                                                    className="flex items-center gap-3 cursor-pointer group"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="checkbox checkbox-secondary checkbox-sm"
-                                                        checked={filters.categories.includes(cat)}
-                                                        onChange={() => toggleCategory(cat)}
-                                                    />
-                                                    <span className="text-sm text-base-content/60 group-hover:text-base-content transition-colors">
-                                                        {cat}
-                                                    </span>
-                                                    <span className="ml-auto text-[10px] text-base-content/30">
-                                                        {allJobs.filter((j) => j.category === cat).length}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="h-px bg-base-300" />
-
-                                    {/* Job Type */}
-                                    <div>
-                                        <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-3">
-                                            Job Type
-                                        </p>
-                                        <div className="space-y-2">
-                                            {JOB_TYPES.map((type) => (
-                                                <label
-                                                    key={type}
-                                                    className="flex items-center gap-3 cursor-pointer group"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="checkbox checkbox-secondary checkbox-sm"
-                                                        checked={filters.types.includes(type)}
-                                                        onChange={() => toggleType(type)}
-                                                    />
-                                                    <span className="text-sm text-base-content/60 group-hover:text-base-content transition-colors">
-                                                        {type}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="h-px bg-base-300" />
-
-                                    {/* Salary Range */}
-                                    <div>
-                                        <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-3">
-                                            Salary Range
-                                        </p>
-                                        <div className="space-y-3">
-                                            <div>
-                                                <div className="flex justify-between text-[10px] uppercase tracking-wider text-base-content/40 mb-1">
-                                                    <span>Min: ${filters.salaryMin}K</span>
-                                                    <span>Max: ${filters.salaryMax}K</span>
-                                                </div>
-                                                <input
-                                                    type="range"
-                                                    min="0"
-                                                    max="400"
-                                                    step="10"
-                                                    value={filters.salaryMin}
-                                                    onChange={(e) =>
-                                                        setFilters((prev) => ({
-                                                            ...prev,
-                                                            salaryMin: Math.min(Number(e.target.value), prev.salaryMax - 10),
-                                                        }))
-                                                    }
-                                                    className="range range-secondary range-xs w-full"
-                                                />
-                                                <input
-                                                    type="range"
-                                                    min="0"
-                                                    max="400"
-                                                    step="10"
-                                                    value={filters.salaryMax}
-                                                    onChange={(e) =>
-                                                        setFilters((prev) => ({
-                                                            ...prev,
-                                                            salaryMax: Math.max(Number(e.target.value), prev.salaryMin + 10),
-                                                        }))
-                                                    }
-                                                    className="range range-secondary range-xs w-full"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="h-px bg-base-300" />
-
-                                    {/* Posted Within */}
-                                    <div>
-                                        <p className="text-xs uppercase tracking-[0.2em] text-secondary font-medium mb-3">
-                                            Posted Within
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {[
-                                                { value: 1, label: "24h" },
-                                                { value: 3, label: "3d" },
-                                                { value: 7, label: "7d" },
-                                                { value: 14, label: "14d" },
-                                                { value: 30, label: "Any" },
-                                            ].map((opt) => (
-                                                <button
-                                                    key={opt.value}
-                                                    onClick={() =>
-                                                        setFilters((prev) => ({
-                                                            ...prev,
-                                                            postedWithin: opt.value,
-                                                        }))
-                                                    }
-                                                    className={`px-3 py-1 text-[10px] uppercase tracking-wider font-medium border transition-colors ${
-                                                        filters.postedWithin === opt.value
-                                                            ? "bg-secondary text-secondary-content border-secondary"
-                                                            : "text-base-content/50 border-base-300 hover:border-secondary"
-                                                    }`}
-                                                >
-                                                    {opt.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="h-px bg-base-300" />
-
-                                    {/* Toggles */}
-                                    <div className="space-y-3">
-                                        <label className="flex items-center justify-between cursor-pointer">
-                                            <span className="text-sm text-base-content/60">Remote Only</span>
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-secondary toggle-sm"
-                                                checked={filters.remoteOnly}
-                                                onChange={(e) =>
-                                                    setFilters((prev) => ({
-                                                        ...prev,
-                                                        remoteOnly: e.target.checked,
-                                                    }))
-                                                }
-                                            />
-                                        </label>
-                                        <label className="flex items-center justify-between cursor-pointer">
-                                            <span className="text-sm text-base-content/60">Urgent Only</span>
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-secondary toggle-sm"
-                                                checked={filters.urgentOnly}
-                                                onChange={(e) =>
-                                                    setFilters((prev) => ({
-                                                        ...prev,
-                                                        urgentOnly: e.target.checked,
-                                                    }))
-                                                }
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                            </aside>
-                        )}
-
-                        {/* Results */}
-                        <div className="flex-1 min-w-0">
-                            {/* Results header */}
-                            <div className="flex items-center justify-between mb-6">
-                                <p className="text-sm text-base-content/50">
-                                    <span className="font-bold text-base-content">
-                                        {filteredJobs.length}
-                                    </span>{" "}
-                                    result{filteredJobs.length !== 1 ? "s" : ""} found
-                                </p>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="select select-bordered select-sm bg-base-100 text-xs focus:border-secondary"
-                                >
-                                    {SORT_OPTIONS.map((opt) => (
-                                        <option key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="h-px bg-base-300 mb-6" />
-
-                            {/* Job Results */}
-                            {filteredJobs.length === 0 ? (
-                                <div className="text-center py-20">
-                                    <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/15 text-5xl mb-6 block" />
-                                    <h3 className="text-xl font-bold text-base-content tracking-tight mb-2">
-                                        No results found
-                                    </h3>
-                                    <p className="text-sm text-base-content/50 mb-6 max-w-sm mx-auto">
-                                        Try adjusting your search query or removing some filters
-                                        to see more results.
-                                    </p>
-                                    <button
-                                        onClick={clearAllFilters}
-                                        className="btn btn-secondary btn-sm font-semibold uppercase text-[10px] tracking-wider"
-                                    >
-                                        Clear All Filters
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {filteredJobs.map((job) => (
-                                        <div
-                                            key={job.id}
-                                            className="border border-base-300 p-5 md:p-6 hover:border-secondary/40 transition-all group cursor-pointer"
-                                        >
-                                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                        {job.urgent && (
-                                                            <span className="text-[10px] uppercase tracking-wider font-medium bg-error/10 text-error px-2 py-0.5">
-                                                                Urgent
-                                                            </span>
-                                                        )}
-                                                        {job.remote && (
-                                                            <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary/10 text-secondary px-2 py-0.5">
-                                                                Remote
-                                                            </span>
-                                                        )}
-                                                        <span className="text-[10px] uppercase tracking-wider text-base-content/30">
-                                                            {job.posted}
-                                                        </span>
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-base-content tracking-tight mb-1 group-hover:text-secondary transition-colors">
-                                                        {job.title}
-                                                    </h3>
-                                                    <p className="text-sm text-base-content/50 mb-3">
-                                                        {job.company} &middot; {job.location}
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {job.skills.map((skill) => (
-                                                            <span
-                                                                key={skill}
-                                                                className="text-[10px] uppercase tracking-wider font-medium bg-base-200 text-base-content/50 px-2 py-0.5"
-                                                            >
-                                                                {skill}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right shrink-0 md:ml-6">
-                                                    <p className="text-base font-bold text-primary mb-1">
-                                                        {job.salary}
-                                                    </p>
-                                                    <p className="text-[10px] uppercase tracking-wider text-base-content/40 mb-1">
-                                                        {job.splitFee} split &middot; {job.type}
-                                                    </p>
-                                                    <p className="text-xs text-base-content/40">
-                                                        {job.applicants} applicants
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+            <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
+                {/* Active Filters + Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all border ${showFilters ? "border-base-content bg-base-content text-base-100" : "border-base-300 text-base-content/50 hover:border-base-content/30"}`}>
+                            <i className="fa-duotone fa-regular fa-sliders text-[10px]" /> Filters
+                        </button>
+                        {activeFilters.map((f) => (
+                            <span key={`${f.type}-${f.value}`} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-secondary/10 rounded-full text-[11px] font-medium text-secondary">
+                                {f.value}
+                                <button onClick={() => removeFilter(f.type, f.value)} className="hover:text-error transition-colors"><i className="fa-duotone fa-regular fa-xmark text-[9px]" /></button>
+                            </span>
+                        ))}
+                        {activeFilters.length > 0 && <button onClick={clearFilters} className="text-[11px] text-base-content/30 hover:text-base-content/60 transition-colors">Clear all</button>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-xs text-base-content/30">{filtered.length} results</span>
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-secondary/50">
+                            {sortOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                        </select>
+                        <button onClick={() => setSavedSearch(!savedSearch)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border ${savedSearch ? "border-secondary bg-secondary/10 text-secondary" : "border-base-300 text-base-content/40 hover:border-base-content/30"}`}>
+                            <i className={`${savedSearch ? "fa-solid" : "fa-regular"} fa-bookmark text-[10px]`} /> {savedSearch ? "Saved" : "Save"}
+                        </button>
                     </div>
                 </div>
-            </section>
 
-            {/* Colophon */}
-            <section className="bg-base-200 border-t border-base-300 py-12">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
-                    <p className="text-sm text-base-content/40 uppercase tracking-[0.2em]">
-                        Splits Network &middot; Search Patterns &middot; Magazine Editorial
-                    </p>
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Filters Panel */}
+                    {showFilters && (
+                        <aside data-sf className="w-full lg:w-[260px] shrink-0 space-y-6">
+                            <FilterSection title="Location" options={locationOptions} type="location" activeFilters={activeFilters} onToggle={(v) => activeFilters.some((f) => f.type === "location" && f.value === v) ? removeFilter("location", v) : addFilter("location", v)} />
+                            <FilterSection title="Job Type" options={typeOptions} type="type" activeFilters={activeFilters} onToggle={(v) => activeFilters.some((f) => f.type === "type" && f.value === v) ? removeFilter("type", v) : addFilter("type", v)} />
+                            <div className="border border-base-200 rounded-xl p-4">
+                                <h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-3">Salary Range</h4>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs text-base-content/40">${salaryRange[0]}k</span>
+                                    <input type="range" min={50} max={500} value={salaryRange[1]} onChange={(e) => setSalaryRange([salaryRange[0], Number(e.target.value)])} className="flex-1 accent-secondary" />
+                                    <span className="text-xs text-base-content/40">${salaryRange[1]}k</span>
+                                </div>
+                            </div>
+                            <FilterSection title="Experience" options={experienceOptions} type="experience" activeFilters={activeFilters} onToggle={(v) => activeFilters.some((f) => f.type === "experience" && f.value === v) ? removeFilter("experience", v) : addFilter("experience", v)} />
+                            <FilterSection title="Department" options={departmentOptions} type="department" activeFilters={activeFilters} onToggle={(v) => activeFilters.some((f) => f.type === "department" && f.value === v) ? removeFilter("department", v) : addFilter("department", v)} />
+                        </aside>
+                    )}
+
+                    {/* Results */}
+                    <div className="flex-1 min-w-0 space-y-3">
+                        {filtered.length === 0 && (
+                            <div className="text-center py-16"><i className="fa-duotone fa-regular fa-magnifying-glass text-3xl text-base-content/10 mb-4" /><p className="text-sm text-base-content/40">No results found. Try adjusting your filters.</p></div>
+                        )}
+                        {filtered.map((r) => (
+                            <a key={r.id} href="#" data-sr className="flex flex-col md:flex-row md:items-center gap-4 p-5 border border-base-200 rounded-xl hover:border-base-300 transition-all group">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">{r.initials}</div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-bold text-base-content group-hover:text-secondary transition-colors truncate">{r.title}</p>
+                                            {r.urgency !== "Standard" && <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${r.urgency === "Critical" ? "bg-error/10 text-error" : "bg-warning/10 text-warning"}`}>{r.urgency}</span>}
+                                        </div>
+                                        <p className="text-xs text-base-content/40 truncate">{r.company} &middot; {r.location} &middot; {r.type}</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 md:justify-end">{r.skills.slice(0, 3).map((s) => <span key={s} className="px-2 py-0.5 rounded-full bg-base-200/60 text-[10px] font-medium text-base-content/40">{s}</span>)}</div>
+                                <div className="flex items-center gap-4 md:gap-6 shrink-0 text-xs">
+                                    <span className="font-semibold text-base-content/60">{r.salary}</span>
+                                    <span className="text-secondary font-semibold">{r.splitFee}</span>
+                                    <span className="text-base-content/30">{r.posted}</span>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
                 </div>
-            </section>
+            </div>
+        </div>
+    );
+}
+
+function FilterSection({ title, options, type, activeFilters, onToggle }: { title: string; options: string[]; type: string; activeFilters: ActiveFilter[]; onToggle: (v: string) => void }) {
+    return (
+        <div className="border border-base-200 rounded-xl p-4">
+            <h4 className="text-[10px] uppercase tracking-[0.3em] text-base-content/30 font-semibold mb-3">{title}</h4>
+            <div className="space-y-1.5">
+                {options.map((opt) => {
+                    const checked = activeFilters.some((f) => f.type === type && f.value === opt);
+                    return (
+                        <button key={opt} onClick={() => onToggle(opt)} className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs transition-all text-left ${checked ? "bg-secondary/10 text-secondary font-semibold" : "text-base-content/50 hover:bg-base-200/50"}`}>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${checked ? "border-secondary bg-secondary" : "border-base-300"}`}>
+                                {checked && <i className="fa-solid fa-check text-[8px] text-white" />}
+                            </div>
+                            {opt}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }
