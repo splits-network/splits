@@ -16,7 +16,7 @@ export interface NotificationBadgeProps {
 /**
  * NotificationBadge - Memphis-styled label badge with optional count
  *
- * Uses the plugin's `.memphis-badge` base (interactive tier border 3px,
+ * Uses the plugin's `.badge` base (interactive tier border 3px,
  * sharp corners, uppercase, bold).
  * Color is applied via inline style since it accepts dynamic accent hex values.
  * Extracted from notifications-ui-six showcase.
@@ -32,7 +32,7 @@ export function NotificationBadge({
     return (
         <span
             className={[
-                'memphis-badge',
+                'badge',
                 'font-black tracking-wider',
                 className,
             ].filter(Boolean).join(' ')}

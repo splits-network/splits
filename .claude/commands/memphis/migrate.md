@@ -33,10 +33,12 @@ Memphis:  apps/portal/src/app/roles-memphis/page.tsx   ← New file created
 ### ⛔ THE OLD PAGE IS NOT A DESIGN TEMPLATE
 
 The Memphis version uses the old page as a **DATA SOURCE ONLY**:
+
 - ✅ Extract: API calls, data fetching hooks, event handlers, route params, auth checks, types
 - ❌ Ignore: Layout, component structure, UI patterns (side panels, drawers, expandable rows, tabs, modals, card layouts, table structures, filter positions), styling, interaction design
 
 The Memphis version:
+
 - Matches the same FUNCTIONALITY (API calls, business logic, user flows)
 - Does NOT copy ANY UI patterns or layout from the original
 - Is designed FRESH from Memphis showcase patterns in `apps/corporate/src/app/showcase/`
@@ -44,11 +46,11 @@ The Memphis version:
 
 ## Styling Hierarchy (CRITICAL — follow this order)
 
-**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in. A `memphis-btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
+**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
 
 1. **Memphis UI React components** — Use `@splits-network/memphis-ui` (86+ components) FIRST. Design decisions (border tier, colors, typography) are already correct.
-2. **Memphis plugin CSS classes** — `memphis-btn`, `memphis-badge`, `memphis-card`, `memphis-input`, etc. Border tiers are baked in.
-3. **Memphis CSS theme classes** — `bg-coral`, `text-dark`, `border-memphis-interactive`, etc.
+2. **Memphis plugin CSS classes** — `btn`, `badge`, `card`, `input`, etc. Border tiers are baked in.
+3. **Memphis CSS theme classes** — `bg-coral`, `text-dark`, `border-interactive`, etc.
 4. **Local components** — Page-specific widgets in `{feature}-memphis/components/` (must use memphis-ui internally)
 5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid
 
@@ -60,18 +62,18 @@ The Memphis version:
 4. Creates a NEW parallel page at `{feature}-memphis/page.tsx`
 5. Designs the Memphis version FROM SCRATCH using showcase patterns and **memphis-ui components first**, then plugin CSS classes, then theme classes
 6. Applies Memphis design principles:
-   - Flat design (no shadows, gradients)
-   - Sharp corners (border-radius: 0)
-   - 3-tier border hierarchy: container=4px, interactive=3px, detail=2px (managed by plugin CSS vars)
-   - Memphis colors via Tailwind classes only (bg-coral, text-dark, etc.)
-   - Geometric decorations
-   - ZERO hardcoded hex colors — NO `const M = {}`, NO `#FF6B6B`
-   - ZERO inline `style={}` for colors, borders, backgrounds, spacing, opacity
-   - Use plugin classes (memphis-btn, memphis-card, etc.) — border tiers are baked in
-6. Flags any feature recommendations (see below)
-7. Validates Memphis compliance
-8. Updates build progress state
-9. Saves checkpoint
+    - Flat design (no shadows, gradients)
+    - Sharp corners (border-radius: 0)
+    - 3-tier border hierarchy: container=4px, interactive=3px, detail=2px (managed by plugin CSS vars)
+    - Memphis colors via Tailwind classes only (bg-coral, text-dark, etc.)
+    - Geometric decorations
+    - ZERO hardcoded hex colors — NO `const M = {}`, NO `#FF6B6B`
+    - ZERO inline `style={}` for colors, borders, backgrounds, spacing, opacity
+    - Use plugin classes (btn, card, etc.) — border tiers are baked in
+7. Flags any feature recommendations (see below)
+8. Validates Memphis compliance
+9. Updates build progress state
+10. Saves checkpoint
 
 ## Feature Recommendations
 
@@ -82,6 +84,7 @@ If the Memphis showcase suggests a new field, feature, or UX improvement not in 
 - **new_feature** (significant new work): Flag for user discussion
 
 Example recommendation:
+
 ```
 🆕 Recommended: Add "split fee visualization" to job details
 - Source: showcase/details-six.tsx (SplitFeeBar component)
@@ -92,6 +95,7 @@ Example recommendation:
 ## Implementation
 
 When invoked:
+
 1. Loads build progress state
 2. Creates migration task in state file
 3. Reads original page to extract DATA LAYER ONLY (API calls, hooks, handlers, route params, auth, types)

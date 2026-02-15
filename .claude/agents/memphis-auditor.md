@@ -143,16 +143,16 @@ Memphis uses a 3-tier border hierarchy. Using the wrong tier for an element brea
 
 **3-Tier Border Hierarchy:**
 - **Container tier (4px)**: Cards, modals, tables outer, tab bars → use `border-memphis` or `border-4`
-- **Interactive tier (3px)**: Buttons, inputs, selects, badges, CTAs → use `memphis-btn`, `memphis-badge`, `memphis-input`, `memphis-select`, or `border-memphis-interactive` or `border-3`
-- **Detail tier (2px)**: Checkboxes, toggle internals, table cells, tiny indicators → use `memphis-checkbox`, `memphis-toggle`, `border-memphis-detail`, or `border-2`
+- **Interactive tier (3px)**: Buttons, inputs, selects, badges, CTAs → use `btn`, `badge`, `input`, `select`, or `border-interactive` or `border-3`
+- **Detail tier (2px)**: Checkboxes, toggle internals, table cells, tiny indicators → use `checkbox`, `toggle`, `border-detail`, or `border-2`
 
 Search patterns:
 - `border-[5px]`, `border-[1px]`, `border-[6px]` — arbitrary widths outside the 3 tiers
 - `border-[3px]`, `border-[2px]`, `border-[4px]` — arbitrary bracket syntax (use standard classes instead)
 - `5px solid`, `1px solid`, `6px solid` — inline style arbitrary widths
-- `border-4` on buttons/inputs — wrong tier (should be `border-3` / `memphis-btn` / `memphis-input`)
+- `border-4` on buttons/inputs — wrong tier (should be `border-3` / `btn` / `input`)
 - `border-2` on cards/modals — wrong tier (should be `border-4` / `border-memphis`)
-- `border-4` on checkboxes/toggles — wrong tier (should be `border-2` / `memphis-checkbox`)
+- `border-4` on checkboxes/toggles — wrong tier (should be `border-2` / `checkbox`)
 
 Example violations:
 ```tsx
@@ -160,26 +160,26 @@ style={{ borderBottom: "5px solid #FF6B6B" }} ❌ CRITICAL (arbitrary width)
 style={{ borderBottom: "1px solid #2D2D44" }} ❌ CRITICAL (arbitrary width)
 className="border-[5px]" ❌ CRITICAL (arbitrary bracket syntax)
 className="border-[4px]" ❌ CRITICAL (use border-4 instead of bracket)
-<button className="border-4"> ❌ CRITICAL (button is interactive tier → border-3 or memphis-btn)
-<input className="border-2"> ❌ CRITICAL (input is interactive tier → border-3 or memphis-input)
+<button className="border-4"> ❌ CRITICAL (button is interactive tier → border-3 or btn)
+<input className="border-2"> ❌ CRITICAL (input is interactive tier → border-3 or input)
 <div className="card border-2"> ❌ CRITICAL (card is container tier → border-4 or border-memphis)
-<input type="checkbox" className="border-4"> ❌ CRITICAL (checkbox is detail tier → border-2 or memphis-checkbox)
+<input type="checkbox" className="border-4"> ❌ CRITICAL (checkbox is detail tier → border-2 or checkbox)
 ```
 
 Fix: Use the correct tier:
 ```tsx
 // Container tier (4px) — cards, modals, tables, tab bars
 className="border-4 border-dark"       // or border-memphis
-className="memphis-card"               // plugin class (preferred)
+className="card"               // plugin class (preferred)
 
 // Interactive tier (3px) — buttons, inputs, selects, badges
-className="border-3 border-dark"       // or border-memphis-interactive
-className="memphis-btn btn-coral"      // plugin class (preferred)
-className="memphis-input"              // plugin class (preferred)
+className="border-3 border-dark"       // or border-interactive
+className="btn btn-coral"      // plugin class (preferred)
+className="input"              // plugin class (preferred)
 
 // Detail tier (2px) — checkboxes, toggles, table cells
-className="border-2 border-dark"       // or border-memphis-detail
-className="memphis-checkbox"           // plugin class (preferred)
+className="border-2 border-dark"       // or border-detail
+className="checkbox"           // plugin class (preferred)
 ```
 
 #### 7b. Tailwind v4 Arbitrary Value Classes (Zero Tolerance — INVISIBLE BREAKAGE)
@@ -233,9 +233,9 @@ Example violation:
 #### 5. Wrong Border Tier on Elements
 Elements must use the correct border tier from the 3-tier hierarchy:
 
-- **Interactive elements** (buttons, inputs, textareas, selects): use plugin classes (`memphis-btn`, `memphis-input`, `memphis-select`) or `border-3` / `border-memphis-interactive`
-- **Container elements** (cards, modals, tables outer, tab bars): use plugin classes (`memphis-card`, `memphis-modal`, `memphis-table`) or `border-4` / `border-memphis`
-- **Detail elements** (checkboxes, toggles, table cells, tiny indicators): use plugin classes (`memphis-checkbox`, `memphis-toggle`) or `border-2` / `border-memphis-detail`
+- **Interactive elements** (buttons, inputs, textareas, selects): use plugin classes (`btn`, `input`, `select`) or `border-3` / `border-interactive`
+- **Container elements** (cards, modals, tables outer, tab bars): use plugin classes (`card`, `modal`, `table`) or `border-4` / `border-memphis`
+- **Detail elements** (checkboxes, toggles, table cells, tiny indicators): use plugin classes (`checkbox`, `toggle`) or `border-2` / `border-detail`
 
 Search for:
 - `border` (1px default — too thin for any Memphis element)
@@ -246,9 +246,9 @@ Search for:
 Example violations:
 ```tsx
 <button className="btn border"> ⚠️ WARNING (1px, should be 3px interactive tier)
-<button className="btn border-4"> ⚠️ WARNING (4px container tier on interactive element — use memphis-btn or border-3)
-<div className="card border-2"> ⚠️ WARNING (2px detail tier on container — use memphis-card or border-4)
-<input type="checkbox" className="border-4"> ⚠️ WARNING (4px container tier on detail element — use memphis-checkbox or border-2)
+<button className="btn border-4"> ⚠️ WARNING (4px container tier on interactive element — use btn or border-3)
+<div className="card border-2"> ⚠️ WARNING (2px detail tier on container — use card or border-4)
+<input type="checkbox" className="border-4"> ⚠️ WARNING (4px container tier on detail element — use checkbox or border-2)
 ```
 
 #### 5b. Missing Memphis Plugin Class Usage (Warning)
@@ -257,30 +257,30 @@ When raw Tailwind border/styling classes are used where a Memphis plugin class e
 Example violations:
 ```tsx
 <button className="border-3 border-dark bg-coral text-white font-bold uppercase"> ⚠️ WARNING
-  → should use: <button className="memphis-btn btn-coral memphis-btn-md">
+  → should use: <button className="btn btn-coral btn-md">
 
 <span className="border-3 border-dark font-bold text-xs uppercase"> ⚠️ WARNING
-  → should use: <span className="memphis-badge">
+  → should use: <span className="badge">
 
 <input className="border-3 border-dark"> ⚠️ WARNING
-  → should use: <input className="memphis-input">
+  → should use: <input className="input">
 
 <select className="border-3 border-dark"> ⚠️ WARNING
-  → should use: <select className="memphis-select">
+  → should use: <select className="select">
 
 <div className="border-4 border-dark p-6"> (card) ⚠️ WARNING
-  → should use: <div className="memphis-card">
+  → should use: <div className="card">
 
 <dialog className="border-4 border-dark"> ⚠️ WARNING
-  → should use: <dialog className="memphis-modal">
+  → should use: <dialog className="modal">
 ```
 
 Search for raw Tailwind patterns that have plugin class equivalents:
-- `<button` with `border-3` or `border-dark` but no `memphis-btn` → suggest `memphis-btn`
-- `<input` with `border-3` or `border-dark` but no `memphis-input` → suggest `memphis-input`
-- `<select` with `border-3` or `border-dark` but no `memphis-select` → suggest `memphis-select`
-- `<span` with `border-3` + `font-bold` + `uppercase` but no `memphis-badge` → suggest `memphis-badge`
-- `<div` with `border-4` + `card`-like pattern but no `memphis-card` → suggest `memphis-card`
+- `<button` with `border-3` or `border-dark` but no `btn` → suggest `btn`
+- `<input` with `border-3` or `border-dark` but no `input` → suggest `input`
+- `<select` with `border-3` or `border-dark` but no `select` → suggest `select`
+- `<span` with `border-3` + `font-bold` + `uppercase` but no `badge` → suggest `badge`
+- `<div` with `border-4` + `card`-like pattern but no `card` → suggest `card`
 
 ### Info Violations (NICE TO FIX)
 
@@ -304,11 +304,11 @@ When raw markup is used where a memphis-ui component exists, it's a sign the sty
 
 **Styling Hierarchy (agents MUST follow this order):**
 
-**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `memphis-btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
+**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
 
 1. **Memphis-UI React components** (`@splits-network/memphis-ui`) — use first if a matching component exists. Design decisions (border tier, colors, typography) are already correct.
-2. **Memphis plugin CSS classes** (`memphis-btn`, `memphis-badge`, `memphis-input`, `memphis-card`, etc.) — for raw HTML elements that need Memphis styling. Border tiers are baked in.
-3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-memphis-interactive`, etc.) — use for elements not covered by a component or plugin class
+2. **Memphis plugin CSS classes** (`btn`, `badge`, `input`, `card`, etc.) — for raw HTML elements that need Memphis styling. Border tiers are baked in.
+3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-interactive`, etc.) — use for elements not covered by a component or plugin class
 4. **Local components** (in `{feature}-memphis/components/`) — for page-specific widgets, must use memphis-ui primitives internally
 5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid
 
@@ -470,7 +470,7 @@ Line 34: Non-Memphis color (bg-blue-500)
 
 Line 56: Wrong border tier (border, 1px)
   <button className="btn border">
-  Suggestion: <button className="memphis-btn btn-coral"> or <button className="btn border-3 border-dark">
+  Suggestion: <button className="btn btn-coral"> or <button className="btn border-3 border-dark">
 
 Line 102: Non-Memphis color (text-gray-600)
   <p className="text-gray-600">
@@ -482,7 +482,7 @@ Line 134: Non-Memphis color (border-gray-300)
 
 Line 156: Wrong border tier (border-2 on input)
   <input className="input border-2">
-  Suggestion: <input className="memphis-input"> or <input className="input border-3 border-dark">
+  Suggestion: <input className="input"> or <input className="input border-3 border-dark">
 
 Info: 1
 -------
@@ -585,12 +585,12 @@ grep -rn "style={{" apps/portal/src/ --include="*.tsx"
 
 # Wrong border tier / arbitrary border widths
 grep -rn "border-\[.*px\]\|1px solid\|5px solid\|6px solid" apps/portal/src/ --include="*.tsx"
-# Wrong tier on buttons (should be border-3 / memphis-btn, not border-4)
+# Wrong tier on buttons (should be border-3 / btn, not border-4)
 grep -rn "<button.*border-4\|<button.*border-2" apps/portal/src/ --include="*.tsx"
-# Wrong tier on inputs (should be border-3 / memphis-input, not border-4 or border-2)
+# Wrong tier on inputs (should be border-3 / input, not border-4 or border-2)
 grep -rn "<input.*border-4\|<input.*border-2" apps/portal/src/ --include="*.tsx"
 # Raw Tailwind where plugin classes should be used
-grep -rn "<button.*border-3.*border-dark\|<input.*border-3.*border-dark\|<select.*border-3.*border-dark" apps/portal/src/ --include="*.tsx" | grep -v "memphis-btn\|memphis-input\|memphis-select"
+grep -rn "<button.*border-3.*border-dark\|<input.*border-3.*border-dark\|<select.*border-3.*border-dark" apps/portal/src/ --include="*.tsx" | grep -v "btn\|input\|select"
 
 # Chart.js usage (must migrate to Recharts)
 grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerChart\|applyThemeToChart" apps/portal/src/ --include="*.tsx" --include="*.ts"
@@ -602,12 +602,12 @@ grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerCha
 grep -rn "bg-blue-\|bg-green-\|bg-red-\|bg-orange-\|bg-indigo-\|bg-violet-\|bg-pink-\|bg-gray-\|bg-slate-\|bg-zinc-\|text-blue-\|text-green-\|text-red-\|border-blue-\|border-green-" apps/portal/src/
 
 # Wrong border tier on elements
-grep -rn "className=\".*btn.*border\"" apps/portal/src/ | grep -v "border-3\|memphis-btn"
-grep -rn "className=\".*input.*border\"" apps/portal/src/ | grep -v "border-3\|memphis-input"
+grep -rn "className=\".*btn.*border\"" apps/portal/src/ | grep -v "border-3\|btn"
+grep -rn "className=\".*input.*border\"" apps/portal/src/ | grep -v "border-3\|input"
 # Raw Tailwind where plugin classes exist
-grep -rn "<button.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-btn"
-grep -rn "<input.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-input"
-grep -rn "<select.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-select"
+grep -rn "<button.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "btn"
+grep -rn "<input.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "input"
+grep -rn "<select.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "select"
 ```
 
 ## Compliance Scoring
@@ -649,7 +649,7 @@ The auditor can automatically fix violations or spawn designers to fix them.
      - Replace inline `style={{ borderBottom: "5px solid #FF6B6B" }}` → `className="border-b-4 border-coral"`
      - Replace hardcoded hex in className → proper Memphis class
      - Fix wrong border tier → correct tier (container=4px, interactive=3px, detail=2px)
-     - Replace raw Tailwind with plugin classes (`memphis-btn`, `memphis-input`, `memphis-card`, etc.)
+     - Replace raw Tailwind with plugin classes (`btn`, `input`, `card`, etc.)
    - **Needs designer** (spawn memphis-designer):
      - Complex layout restructuring
      - Adding geometric decorations
@@ -680,17 +680,17 @@ The auditor can automatically fix violations or spawn designers to fix them.
 | `bg-blue-500` | → `bg-coral` or `bg-teal` |
 | `text-gray-600` | → `text-dark opacity-70` |
 | `border-gray-300` | → `border-dark` |
-| `border-[5px]` | → depends on element: `memphis-btn` (button), `memphis-input` (input), `border-memphis` (card) |
+| `border-[5px]` | → depends on element: `btn` (button), `input` (input), `border-memphis` (card) |
 | `border-[3px]` | → `border-3` or use plugin class |
 | `border-[2px]` | → `border-2` or use plugin class |
 | `border-[4px]` | → `border-4` or use plugin class (no arbitrary values) |
-| `border-2` on buttons | → `memphis-btn` (3px interactive tier) |
-| `border-4` on buttons | → `memphis-btn` (3px interactive tier) |
-| `border-2` on inputs | → `memphis-input` (3px interactive tier) |
-| `border-4` on checkboxes | → `memphis-checkbox` (2px detail tier) |
-| Raw Tailwind button styling | → `memphis-btn` + `btn-{color}` + `memphis-btn-{size}` |
-| Raw Tailwind badge styling | → `memphis-badge` |
-| Raw Tailwind input styling | → `memphis-input` |
+| `border-2` on buttons | → `btn` (3px interactive tier) |
+| `border-4` on buttons | → `btn` (3px interactive tier) |
+| `border-2` on inputs | → `input` (3px interactive tier) |
+| `border-4` on checkboxes | → `checkbox` (2px detail tier) |
+| Raw Tailwind button styling | → `btn` + `btn-{color}` + `btn-{size}` |
+| Raw Tailwind badge styling | → `badge` |
+| Raw Tailwind input styling | → `input` |
 
 ### Hex → Tailwind Class Mapping
 ```
@@ -720,7 +720,7 @@ After auto-fix, re-run ALL audit patterns to confirm:
 - Correct tier usage: containers=4px, interactive=3px, details=2px
 - Zero arbitrary border widths (no bracket syntax, no non-tier widths)
 - Zero shadows, rounded corners, gradients
-- Plugin classes used where available (memphis-btn, memphis-input, memphis-card, etc.)
+- Plugin classes used where available (btn, input, card, etc.)
 If any violations remain, report them for manual review.
 
 ## Output Format
@@ -751,11 +751,11 @@ Report to orchestrator:
 When auditing, recommend these plugin classes instead of raw Tailwind equivalents.
 
 ### Buttons
-- `.memphis-btn` — base button (3px border, bold, uppercase)
-- `.memphis-btn-sm` — small size
-- `.memphis-btn-md` — medium size (default)
-- `.memphis-btn-lg` — large size
-- `.memphis-btn-outline` — outline variant
+- `.btn` — base button (3px border, bold, uppercase)
+- `.btn-sm` — small size
+- `.btn-md` — medium size (default)
+- `.btn-lg` — large size
+- `.btn-outline` — outline variant
 - `.btn-coral` — coral color variant
 - `.btn-teal` — teal color variant
 - `.btn-yellow` — yellow color variant
@@ -763,34 +763,34 @@ When auditing, recommend these plugin classes instead of raw Tailwind equivalent
 - `.btn-dark` — dark color variant
 
 ### Badges
-- `.memphis-badge` — badge element (3px border, bold, uppercase, small text)
+- `.badge` — badge element (3px border, bold, uppercase, small text)
 
 ### Forms
-- `.memphis-input` — text input (3px border)
-- `.memphis-select` — select dropdown (3px border)
-- `.memphis-checkbox` — checkbox (2px border)
-- `.memphis-toggle` — toggle switch (2px border)
+- `.input` — text input (3px border)
+- `.select` — select dropdown (3px border)
+- `.checkbox` — checkbox (2px border)
+- `.toggle` — toggle switch (2px border)
 
 ### Layout
-- `.memphis-card` — card container (4px border)
-- `.memphis-card-dark` — dark card variant
-- `.memphis-modal` — modal dialog (4px border)
-- `.memphis-modal-overlay` — modal backdrop
-- `.memphis-table` — table container (4px outer border)
-- `.memphis-tabs` — tab bar container (4px border)
-- `.memphis-tab` — individual tab
-- `.memphis-tab-active` — active tab state
+- `.card` — card container (4px border)
+- `.card-dark` — dark card variant
+- `.modal` — modal dialog (4px border)
+- `.modal-overlay` — modal backdrop
+- `.table` — table container (4px outer border)
+- `.tabs` — tab bar container (4px border)
+- `.tab` — individual tab
+- `.tab-active` — active tab state
 
 ### Border Tier Utility Classes
 - `.border-memphis` — container tier (4px)
-- `.border-memphis-interactive` — interactive tier (3px)
-- `.border-memphis-detail` — detail tier (2px)
+- `.border-interactive` — interactive tier (3px)
+- `.border-detail` — detail tier (2px)
 
 ### CSS Custom Properties
 ```css
---memphis-border-container: 4px;    /* cards, modals, tables, tab bars */
---memphis-border-interactive: 3px;  /* buttons, inputs, selects, badges */
---memphis-border-detail: 2px;       /* checkboxes, toggles, table cells */
+--border-container: 4px;    /* cards, modals, tables, tab bars */
+--border-interactive: 3px;  /* buttons, inputs, selects, badges */
+--border-detail: 2px;       /* checkboxes, toggles, table cells */
 ```
 
 ## Critical Rules

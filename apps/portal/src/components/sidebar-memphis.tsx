@@ -692,7 +692,7 @@ export function SidebarMemphis() {
             {/* ── Mobile hamburger button ── */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="fixed left-4 z-40 lg:hidden w-12 h-12 flex items-center justify-center border-memphis-interactive border-coral bg-dark text-coral transition-transform hover:scale-105"
+                className="fixed left-4 z-40 lg:hidden w-12 h-12 flex items-center justify-center border-interactive border-coral bg-dark text-coral transition-transform hover:scale-105"
                 style={{ top: "calc(var(--header-h, 4rem) + 1rem)" }}
                 aria-label="Open navigation"
             >
@@ -722,7 +722,7 @@ export function SidebarMemphis() {
                 <div className="lg:hidden flex items-center justify-end px-5 py-3 border-b-4 border-cream/10">
                     <button
                         onClick={() => setMobileOpen(false)}
-                        className="w-8 h-8 flex items-center justify-center border-memphis-interactive border-coral text-coral transition-transform hover:scale-110"
+                        className="w-8 h-8 flex items-center justify-center border-interactive border-coral text-coral transition-transform hover:scale-110"
                         aria-label="Close navigation"
                     >
                         <i className="fa-solid fa-xmark text-sm" />

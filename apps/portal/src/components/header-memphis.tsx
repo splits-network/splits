@@ -216,7 +216,7 @@ function DesktopNav() {
                                 {/* Dashboard link */}
                                 <Link
                                     href="/portal/dashboard"
-                                    className="nav-action w-10 h-10 flex items-center justify-center border-memphis-interactive border-dark-gray text-white/50 transition-all hover:-translate-y-0.5"
+                                    className="nav-action w-10 h-10 flex items-center justify-center border-interactive border-dark-gray text-white/50 transition-all hover:-translate-y-0.5"
                                     title="Dashboard"
                                 >
                                     <i className="fa-duotone fa-regular fa-gauge text-sm" />

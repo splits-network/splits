@@ -1,48 +1,73 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
+
+export type BadgeSize = "sm" | "md" | "lg";
+export type BadgeStyle = "solid" | "outline" | "soft" | "dot";
 
 export interface BadgeProps {
     children: React.ReactNode;
-    variant?: AccentColor | 'dark';
+    variant?: AccentColor | "dark" | "cream";
+    style?: BadgeStyle;
+    size?: BadgeSize;
+    /** @deprecated Use style="outline" instead */
     outline?: boolean;
     className?: string;
 }
 
-const SOLID_CLASSES: Record<string, string> = {
-    coral: 'bg-coral text-white border-dark',
-    teal: 'bg-teal text-dark border-dark',
-    yellow: 'bg-yellow text-dark border-dark',
-    purple: 'bg-purple text-white border-dark',
-    dark: 'bg-dark text-white border-dark',
+const COLOR_CLASS: Record<string, string> = {
+    coral: "badge-coral",
+    teal: "badge-teal",
+    yellow: "badge-yellow",
+    purple: "badge-purple",
+    dark: "badge-dark",
+    cream: "badge-cream",
 };
 
-const OUTLINE_CLASSES: Record<string, string> = {
-    coral: 'bg-transparent text-coral border-coral',
-    teal: 'bg-transparent text-teal border-teal',
-    yellow: 'bg-transparent text-yellow border-yellow',
-    purple: 'bg-transparent text-purple border-purple',
-    dark: 'bg-transparent text-dark border-dark',
+const SIZE_CLASS: Record<BadgeSize, string> = {
+    sm: "badge-sm",
+    md: "badge-md",
+    lg: "badge-lg",
+};
+
+const STYLE_CLASS: Record<BadgeStyle, string> = {
+    solid: "",
+    outline: "badge-outline",
+    soft: "badge-soft",
+    dot: "badge-dot",
 };
 
 /**
  * Memphis Badge
  *
- * Uses the plugin's `.memphis-badge` base (interactive tier border 3px,
+ * Uses the plugin's `.badge` base (interactive tier border 3px,
  * sharp corners, bold typography, uppercase).
- * Supports solid and outline variants via border-color overrides.
+ *
+ * Color: `badge-coral`, `badge-teal`, `badge-yellow`, `badge-purple`, `badge-dark`, `badge-cream`
+ * Size: `badge-sm`, `badge-md`, `badge-lg`
+ * Style: solid (default), `badge-outline`, `badge-soft`, `badge-dot`
  */
-export function Badge({ children, variant = 'coral', outline = false, className = '' }: BadgeProps) {
-    const variantClasses = outline ? OUTLINE_CLASSES[variant] : SOLID_CLASSES[variant];
+export function Badge({
+    children,
+    variant = "coral",
+    style: badgeStyle,
+    size,
+    outline = false,
+    className = "",
+}: BadgeProps) {
+    // Support deprecated outline prop
+    const resolvedStyle = badgeStyle ?? (outline ? "outline" : "solid");
 
     return (
         <span
             className={[
-                'memphis-badge',
-                variantClasses,
+                "badge",
+                COLOR_CLASS[variant] || "badge-coral",
+                size ? SIZE_CLASS[size] : "",
+                STYLE_CLASS[resolvedStyle] || "",
                 className,
             ]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
         >
             {children}
         </span>

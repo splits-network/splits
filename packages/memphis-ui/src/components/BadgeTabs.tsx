@@ -33,8 +33,8 @@ export interface BadgeTabsProps {
 /**
  * BadgeTabs - Memphis-styled tabs with count badges
  *
- * Outer container uses the container tier (4px) via `.border-memphis`.
- * Inner count badges use the detail tier (2px) via `.border-memphis-detail`.
+ * Outer container uses the container tier (4px) via `.border-container`.
+ * Inner count badges use the detail tier (2px) via `.border-detail`.
  * Active tab inverts to dark background. Each tab can display a colored
  * count badge. Extracted from tabs-six showcase.
  */
@@ -48,7 +48,7 @@ export function BadgeTabs({
 }: BadgeTabsProps) {
     return (
         <div
-            className={['flex gap-0 bg-white border-memphis', className].filter(Boolean).join(' ')}
+            className={['flex gap-0 bg-white border-container', className].filter(Boolean).join(' ')}
         >
             {tabs.map((tab, i) => {
                 const isActive = tab.key === activeKey;
@@ -69,7 +69,7 @@ export function BadgeTabs({
                         {tab.label}
                         {tab.count !== undefined && tab.count > 0 && (
                             <span
-                                className="px-2 py-0.5 text-[10px] font-black border-memphis-detail"
+                                className="px-2 py-0.5 text-[10px] font-black border-detail"
                                 style={{
                                     background: hex,
                                     color: 'var(--color-dark)',

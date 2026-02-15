@@ -201,13 +201,13 @@ export default function NotificationBellMemphis() {
             {/* ── Bell Button ── */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative w-10 h-10 flex items-center justify-center border-memphis-interactive border-dark-gray text-white/50 transition-all hover:-translate-y-0.5 cursor-pointer"
+                className="relative w-10 h-10 flex items-center justify-center border-interactive border-dark-gray text-white/50 transition-all hover:-translate-y-0.5 cursor-pointer"
                 aria-label="Notifications"
                 title="Notifications"
             >
                 <i className="fa-duotone fa-regular fa-bell text-sm" />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center px-1 text-[10px] font-black bg-coral text-dark border-memphis-detail border-dark">
+                    <span className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center px-1 text-[10px] font-black bg-coral text-dark border-detail border-dark">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
@@ -224,7 +224,7 @@ export default function NotificationBellMemphis() {
                                 Notifications
                             </span>
                             {unreadCount > 0 && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 border-memphis-detail border-coral text-coral">
+                                <span className="text-[10px] font-bold px-2 py-0.5 border-detail border-coral text-coral">
                                     {unreadCount}
                                 </span>
                             )}
@@ -260,7 +260,7 @@ export default function NotificationBellMemphis() {
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-10 gap-3">
-                                <div className="w-14 h-14 flex items-center justify-center border-memphis border-dark-gray">
+                                <div className="w-14 h-14 flex items-center justify-center border-container border-dark-gray">
                                     <i className="fa-duotone fa-regular fa-inbox text-2xl text-white/20" />
                                 </div>
                                 <div className="text-center">

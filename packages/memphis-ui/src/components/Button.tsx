@@ -8,17 +8,17 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const SIZE_CLASSES: Record<string, string> = {
-    sm: "memphis-btn-sm",
-    md: "memphis-btn-md",
-    lg: "memphis-btn-lg",
+    sm: "btn-sm",
+    md: "btn-md",
+    lg: "btn-lg",
 };
 
 /**
  * Memphis Button
  *
- * Uses the plugin's `.memphis-btn` base (border, radius, weight, uppercase,
+ * Uses the plugin's `.btn` base (border, radius, weight, uppercase,
  * tracking, cursor, transition) plus `.btn-{color}` for palette and
- * `.memphis-btn-{size}` for padding/font-size.
+ * `.btn-{size}` for padding/font-size.
  *
  * Flat design, sharp corners, thick border, bold colors.
  * No shadows, no gradients, no border-radius.
@@ -34,7 +34,7 @@ export function Button({
     return (
         <button
             className={[
-                "memphis-btn",
+                "btn",
                 SIZE_CLASSES[size],
                 `btn-${variant}`,
                 className,

@@ -7,7 +7,7 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": "./dist/index.js",
-        "./plugin": "./dist/plugin.js",
+        "./plugin": "./dist/plugin/index.js",
         "./theme.css": "./src/theme.css"
     },
     "scripts": {

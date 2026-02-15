@@ -119,7 +119,7 @@ export function UserDropdownMemphis() {
             >
                 {/* Square avatar */}
                 <div
-                    className="w-9 h-9 flex items-center justify-center border-memphis text-[10px] font-black overflow-hidden"
+                    className="w-9 h-9 flex items-center justify-center border-container text-[10px] font-black overflow-hidden"
                     style={{
                         borderColor: ACCENT_HEX.teal,
                         backgroundColor: user.imageUrl ? "transparent" : ACCENT_HEX.teal,
@@ -144,7 +144,7 @@ export function UserDropdownMemphis() {
             {/* ── Dropdown Panel ── */}
             {isOpen && (
                 <div
-                    className="absolute right-0 mt-2 border-memphis border-teal z-[100] bg-dark"
+                    className="absolute right-0 mt-2 border-container border-teal z-[100] bg-dark"
                     style={{ minWidth: '288px' }}
                 >
                     {/* User header */}
@@ -152,7 +152,7 @@ export function UserDropdownMemphis() {
                         <div className="flex items-center gap-3">
                             {/* Large square avatar */}
                             <div
-                                className="w-11 h-11 flex items-center justify-center border-memphis text-sm font-black flex-shrink-0 overflow-hidden"
+                                className="w-11 h-11 flex items-center justify-center border-container text-sm font-black flex-shrink-0 overflow-hidden"
                                 style={{
                                     borderColor: roleColor,
                                     backgroundColor: user.imageUrl ? "transparent" : roleColor,
@@ -180,7 +180,7 @@ export function UserDropdownMemphis() {
                                 )}
                                 <div className="mt-1.5">
                                     <span
-                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 border-memphis-interactive"
+                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 border-interactive"
                                         style={{ borderColor: roleColor, color: roleColor }}
                                     >
                                         <i className={`fa-duotone fa-regular ${roleIcon} text-[8px]`} />
@@ -203,7 +203,7 @@ export function UserDropdownMemphis() {
                                 onMouseLeave={(e) => { e.currentTarget.style.borderLeftColor = "transparent"; }}
                             >
                                 <div
-                                    className="w-8 h-8 flex items-center justify-center border-memphis-interactive flex-shrink-0"
+                                    className="w-8 h-8 flex items-center justify-center border-interactive flex-shrink-0"
                                     style={{ borderColor: item.color }}
                                 >
                                     <i className={`${item.icon} text-sm`} style={{ color: item.color }} />
@@ -226,7 +226,7 @@ export function UserDropdownMemphis() {
                             onClick={handleSignOut}
                             className="flex items-center gap-3 w-full px-3 py-2.5 transition-all hover:translate-x-1 cursor-pointer border-l-4 border-transparent hover:border-coral"
                         >
-                            <div className="w-8 h-8 flex items-center justify-center border-memphis-interactive border-coral flex-shrink-0">
+                            <div className="w-8 h-8 flex items-center justify-center border-interactive border-coral flex-shrink-0">
                                 <i className="fa-duotone fa-regular fa-right-from-bracket text-sm text-coral" />
                             </div>
                             <span className="text-xs font-black uppercase tracking-wide text-coral">

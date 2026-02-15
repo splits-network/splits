@@ -14,8 +14,8 @@ export interface HeaderCtaProps {
 /**
  * HeaderCta - Memphis header call-to-action button
  *
- * Uses the plugin's `.memphis-btn` base for shared border/radius/weight/tracking,
- * plus `.memphis-btn-outline` for the secondary (transparent) variant.
+ * Uses the plugin's `.btn` base for shared border/radius/weight/tracking,
+ * plus `.btn-outline` for the secondary (transparent) variant.
  * Color is applied via inline style since it accepts arbitrary hex values.
  */
 export function HeaderCta({
@@ -31,10 +31,10 @@ export function HeaderCta({
     const isPrimary = variant === 'primary';
 
     const classes = [
-        'memphis-btn memphis-btn-sm',
+        'btn btn-sm',
         'text-xs font-black tracking-[0.12em]',
         'transition-all hover:-translate-y-0.5',
-        !isPrimary && 'memphis-btn-outline',
+        !isPrimary && 'btn-outline',
         className,
     ].filter(Boolean).join(' ');
 

@@ -30,6 +30,7 @@
 When fixing violations, apply this hierarchy in order:
 
 ### 1. Memphis UI React Components (FIRST CHOICE)
+
 Use pre-built components from `@splits-network/memphis-ui` (86+ components).
 Design decisions (border tier, colors, typography) are already correct.
 
@@ -48,6 +49,7 @@ import { HeaderLogo, NavItem, HeaderCta, HeaderDecorations } from '@splits-netwo
 ```
 
 Key components to check before writing raw markup:
+
 - **Header**: HeaderLogo, NavItem, NavDropdown, NavDropdownItem, HeaderSearchToggle, HeaderCta, MobileMenuToggle, MobileAccordionNav, HeaderDecorations
 - **Footer**: FooterLinkColumn, FooterBottomBar, FooterDecorations, NewsletterSection, SocialLink
 - **Cards**: Card, JobCard, RecruiterCard, CompanyCard, StatCard, PricingCard, TestimonialCard, ReviewCard, IntegrationCard, SelectionCard, FeaturedCard, SidebarCard, EmptyStateCard
@@ -60,68 +62,81 @@ Key components to check before writing raw markup:
 - **Misc**: Accordion, AccordionItem, Timeline, HorizontalTimeline, StepProgress, BillingToggle, ComparisonTable, FAQAccordion, TrustBadge, BenefitGrid, FilterBar, CategoryFilter, ActiveFilterChips
 
 ### 1b. Memphis Plugin CSS Classes (SECOND CHOICE)
+
 When you can't use a React component but need Memphis styling on raw HTML, use the plugin's CSS classes:
 
 **Buttons:**
+
 ```tsx
 // ❌ WRONG — raw Tailwind
 <button className="border-3 border-dark bg-coral text-white font-bold uppercase tracking-wide px-6 py-3">
 
 // ✅ CORRECT — plugin classes
-<button className="memphis-btn memphis-btn-md btn-coral">
+<button className="btn btn-md btn-coral">
 ```
 
 **Badges:**
+
 ```tsx
 // ❌ WRONG — raw Tailwind
 <span className="border-3 border-dark font-bold text-xs uppercase px-3 py-1">
 
 // ✅ CORRECT — plugin class
-<span className="memphis-badge bg-coral text-white border-dark">
+<span className="badge bg-coral text-white border-dark">
 ```
 
 **Forms:**
+
 ```tsx
-<input className="memphis-input" />
-<select className="memphis-select" />
-<input type="checkbox" className="memphis-checkbox" />
+<input className="input" />
+<select className="select" />
+<input type="checkbox" className="checkbox" />
 ```
 
 **Cards/Modals:**
+
 ```tsx
-<div className="memphis-card">...</div>
-<div className="memphis-card-dark">...</div>
-<div className="memphis-modal">...</div>
+<div className="card">...</div>
+<div className="card-dark">...</div>
+<div className="modal">...</div>
 ```
 
 **Semantic borders (when no component class fits):**
+
 ```tsx
-className="border-memphis"              // container tier (4px)
-className="border-memphis-interactive"  // interactive tier (3px)
-className="border-memphis-detail"       // detail tier (2px)
+className = "border-memphis"; // container tier (4px)
+className = "border-interactive"; // interactive tier (3px)
+className = "border-detail"; // detail tier (2px)
 ```
 
-Available plugin classes: `.memphis-btn`, `.memphis-btn-sm/md/lg`, `.memphis-btn-outline`, `.btn-coral/teal/yellow/purple/dark`, `.memphis-badge`, `.memphis-input`, `.memphis-select`, `.memphis-checkbox`, `.memphis-toggle`, `.memphis-card`, `.memphis-card-dark`, `.memphis-modal`, `.memphis-table`, `.memphis-tabs`, `.memphis-tab`, `.memphis-tab-active`, `.border-memphis`, `.border-memphis-interactive`, `.border-memphis-detail`
+Available plugin classes: `.btn`, `.btn-sm/md/lg`, `.btn-outline`, `.btn-coral/teal/yellow/purple/dark`, `.badge`, `.input`, `.select`, `.checkbox`, `.toggle`, `.card`, `.card-dark`, `.modal`, `.table`, `.tabs`, `.tab`, `.tab-active`, `.border-memphis`, `.border-interactive`, `.border-detail`
 
 ### 2. Memphis CSS Theme Classes (THIRD CHOICE)
+
 If no memphis-ui component or plugin class fits, use the theme's Tailwind tokens:
+
 ```tsx
-className="bg-coral text-dark border-4 border-dark"
-className="text-cream/40"
-className="border-b-4 border-teal"
+className = "bg-coral text-dark border-4 border-dark";
+className = "text-cream/40";
+className = "border-b-4 border-teal";
 ```
 
 ### 3. Local Memphis Components (FOURTH CHOICE)
+
 If the component is page-specific and doesn't exist in memphis-ui, create it locally:
+
 ```
 apps/portal/src/app/{feature}-memphis/components/CustomWidget.tsx
 ```
+
 The local component must still use memphis-ui primitives and theme classes internally.
 
 ### 4. Raw Tailwind (LAST RESORT)
+
 Only for layout/spacing/grid that has no component:
+
 ```tsx
-className="grid grid-cols-3 gap-6 p-8"
+className = "grid grid-cols-3 gap-6 p-8";
 ```
 
 ## What It Does
@@ -129,21 +144,25 @@ className="grid grid-cols-3 gap-6 p-8"
 Runs an automated **audit → fix → verify** loop until the target has zero violations:
 
 ### Phase 1: Scan
+
 Spawns memphis-auditor to scan target file(s) for ALL violation types:
+
 - **Missing memphis-ui component usage** — raw markup where a component exists
 - Shadows, rounded corners, gradients (classic violations)
 - Hardcoded hex colors (`#FF6B6B`, `#4ECDC4`, `rgba()`, etc.)
 - Inline `style={{}}` for visual properties (colors, borders, backgrounds, spacing, opacity)
 - Color constant objects (`const M = {}`, `const COLORS = {}`)
-- **Raw Tailwind styling where plugin classes exist** — buttons with raw border/bg/font classes instead of memphis-btn, badges with raw classes instead of memphis-badge, etc.
-- **Wrong border tier** — border-4 on buttons (should be 3px/memphis-btn), border-2 on cards (should be 4px/memphis-card)
+- **Raw Tailwind styling where plugin classes exist** — buttons with raw border/bg/font classes instead of btn, badges with raw classes instead of badge, etc.
+- **Wrong border tier** — border-4 on buttons (should be 3px/btn), border-2 on cards (should be 4px/card)
 - Component isolation violations (imports from original page tree)
 
 ### Phase 2: Fix
+
 Spawns memphis-designer with the violation report to apply fixes **using the hierarchy above**:
+
 - **First**: Replace raw markup with memphis-ui React components where they exist
-- **Then**: Replace raw button/badge/input/card markup with plugin CSS classes (memphis-btn, memphis-badge, memphis-input, memphis-card)
-- **Then**: Fix wrong border tiers (border-4 on buttons → memphis-btn, border-2 on cards → memphis-card, etc.)
+- **Then**: Replace raw button/badge/input/card markup with plugin CSS classes (btn, badge, input, card)
+- **Then**: Fix wrong border tiers (border-4 on buttons → btn, border-2 on cards → card, etc.)
 - **Then**: Delete color constant objects entirely (`const M = { ... }`)
 - **Then**: Replace inline `style={{}}` with Tailwind theme classes
 - **Then**: Replace hardcoded hex with Tailwind color classes
@@ -151,13 +170,16 @@ Spawns memphis-designer with the violation report to apply fixes **using the hie
 - **Then**: Remove shadows, rounded corners, gradients
 
 ### Phase 3: Verify
+
 Re-runs memphis-auditor to confirm zero violations remain.
+
 - If violations remain → loops back to Phase 2 (max 3 iterations)
 - If still failing after 3 iterations → escalates to user with detailed report
 
 ## Fix Mappings
 
 ### Hex → Tailwind
+
 ```
 #FF6B6B → bg-coral / text-coral / border-coral
 #4ECDC4 → bg-teal / text-teal / border-teal
@@ -169,6 +191,7 @@ Re-runs memphis-auditor to confirm zero violations remain.
 ```
 
 ### RGBA → Tailwind Opacity
+
 ```
 rgba(255,255,255,0.4)  → text-cream/40
 rgba(255,255,255,0.15) → text-cream/15
@@ -177,25 +200,26 @@ rgba(255,255,255,0.7)  → text-cream/70
 ```
 
 ### Border Tiers (3-tier hierarchy)
+
 ```
 Container tier (4px — cards, modals, outer frames):
-  Raw markup with border-4 → memphis-card / memphis-modal / border-memphis
+  Raw markup with border-4 → card / modal / border-memphis
 
 Interactive tier (3px — buttons, inputs, badges):
-  Raw button markup → memphis-btn + btn-{color} + memphis-btn-{size}
-  Raw badge markup → memphis-badge
-  Raw input markup → memphis-input
-  Raw select markup → memphis-select
+  Raw button markup → btn + btn-{color} + btn-{size}
+  Raw badge markup → badge
+  Raw input markup → input
+  Raw select markup → select
 
 Detail tier (2px — checkboxes, toggles, small indicators):
-  Raw checkbox → memphis-checkbox
-  Raw toggle → memphis-toggle
-  Other small elements → border-memphis-detail
+  Raw checkbox → checkbox
+  Raw toggle → toggle
+  Other small elements → border-detail
 
 Wrong tier (always a violation):
-  border-4 on buttons → memphis-btn (interactive tier, 3px)
-  border-2 on cards → memphis-card (container tier, 4px)
-  border-4 on checkboxes → memphis-checkbox (detail tier, 2px)
+  border-4 on buttons → btn (interactive tier, 3px)
+  border-2 on cards → card (container tier, 4px)
+  border-4 on checkboxes → checkbox (detail tier, 2px)
   border-[5px] → violation (not a valid tier)
   border-1 → violation (not a valid tier)
   5px solid → violation
@@ -203,6 +227,7 @@ Wrong tier (always a violation):
 ```
 
 ### Tailwind v4 Arbitrary Class → Safe Alternative
+
 **CRITICAL: Arbitrary bracket classes silently fail in Tailwind v4** when the source isn't scanned (packages, default props, dynamic strings). These cause invisible breakage with zero console errors.
 
 ```
@@ -223,6 +248,7 @@ w-[440px]     → Check if CSS rule is generated. If not, use inline style.
 **Rule for memphis-ui package:** NEVER use arbitrary Tailwind classes for configurable values. Use inline styles. Standard classes (`border-4`, `w-72`, `p-4`) are always safe.
 
 ### Inline Style → Tailwind Class
+
 ```
 style={{ backgroundColor: "#1A1A2E" }}     → className="bg-dark"
 style={{ borderBottom: "5px solid #FF6B6B" }} → className="border-b-4 border-coral"
@@ -260,6 +286,7 @@ Verification (after fix):
 ## Implementation
 
 When invoked:
+
 1. Spawns memphis-auditor to scan target
 2. Auditor checks for memphis-ui component opportunities (raw markup that could use a component)
 3. If violations found, spawns memphis-designer with fix instructions

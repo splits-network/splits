@@ -130,10 +130,10 @@ import { SearchBar, FilterBar, JobCard } from '@splits-network/memphis-ui';
 
 **Where components/styling come from (in priority order — FOLLOW THIS HIERARCHY):**
 
-**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `memphis-btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
+**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
 
 1. **Memphis-UI React components** (Button, Badge, etc. from `@splits-network/memphis-ui`) — ALWAYS check here FIRST. If a component exists for your use case, USE IT. Design decisions (border tier, colors, typography) are already correct.
-2. **Memphis plugin CSS classes** (`memphis-btn`, `memphis-badge`, `memphis-card`, `memphis-input`, `memphis-modal`, etc.) — for raw HTML elements that need Memphis styling. Border tiers are baked in.
+2. **Memphis plugin CSS classes** (`btn`, `badge`, `card`, `input`, `modal`, etc.) — for raw HTML elements that need Memphis styling. Border tiers are baked in.
 3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-memphis`, etc.) — Use for elements not covered by a component or plugin class
 4. **Local components** created alongside the Memphis page (must use memphis-ui primitives + theme/plugin classes internally)
 5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid (not for visual styling)
@@ -210,11 +210,11 @@ Add a `## Feature Recommendations` section to your migration report:
 Memphis uses a 3-tier border system managed by CSS custom properties in the plugin:
 
 - **Container tier (4px)**: `border-memphis` or `border-4` — Cards, modals, tables outer, tab bars, layout sections
-- **Interactive tier (3px)**: `memphis-btn`, `memphis-badge`, `memphis-input`, `memphis-select`, or `border-memphis-interactive` or `border-3` — Buttons, inputs, selects, badges, CTAs
-- **Detail tier (2px)**: `memphis-checkbox`, `memphis-toggle`, `border-memphis-detail` or `border-2` — Checkboxes, toggle internals, table cells, tiny indicators
+- **Interactive tier (3px)**: `btn`, `badge`, `input`, `select`, or `border-interactive` or `border-3` — Buttons, inputs, selects, badges, CTAs
+- **Detail tier (2px)**: `checkbox`, `toggle`, `border-detail` or `border-2` — Checkboxes, toggle internals, table cells, tiny indicators
 
 **REQUIRED**: Use the correct tier for each element type.
-**PREFERRED**: Use Memphis plugin classes (memphis-btn, memphis-badge, etc.) over raw border classes.
+**PREFERRED**: Use Memphis plugin classes (btn, badge, etc.) over raw border classes.
 **FORBIDDEN**: border-1, border-[5px], 5px solid, 1px solid, or wrong tier for element type
 
 ### 4. Memphis Color Palette ONLY
@@ -329,19 +329,19 @@ className="border-dark"
 Use the correct border tier for each element type:
 ```tsx
 // Container tier (4px) — cards, modals, outer frames
-className="memphis-card"           // preferred
+className="card"           // preferred
 className="border-memphis"         // alternative
 className="border-4 border-dark"   // raw Tailwind fallback
 
 // Interactive tier (3px) — buttons, inputs, badges
-className="memphis-btn btn-coral memphis-btn-md"  // preferred for buttons
-className="memphis-badge"                          // preferred for badges
-className="memphis-input"                          // preferred for inputs
-className="border-memphis-interactive"             // generic alternative
+className="btn btn-coral btn-md"  // preferred for buttons
+className="badge"                          // preferred for badges
+className="input"                          // preferred for inputs
+className="border-interactive"             // generic alternative
 
 // Detail tier (2px) — checkboxes, toggles, small indicators
-className="memphis-checkbox"       // preferred
-className="border-memphis-detail"  // alternative
+className="checkbox"       // preferred
+className="border-detail"  // alternative
 className="border-2 border-dark"   // raw Tailwind fallback
 ```
 
@@ -351,7 +351,7 @@ className="border-2 border-dark"   // raw Tailwind fallback
 className="border-4 border-dark bg-coral text-white font-bold uppercase"
 
 // ✅ CORRECT — button using interactive tier via plugin
-className="memphis-btn btn-coral memphis-btn-md"
+className="btn btn-coral btn-md"
 ```
 
 ## Migration Process
@@ -385,7 +385,7 @@ const showcasePage = findSimilarShowcase(targetPath);
 <div className="card shadow-xl bg-white">
 
 // AFTER
-<div className="memphis-card">
+<div className="card">
 ```
 
 #### Remove Rounded Corners
@@ -394,7 +394,7 @@ const showcasePage = findSimilarShowcase(targetPath);
 <button className="btn btn-primary rounded-lg">
 
 // AFTER
-<button className="memphis-btn btn-coral memphis-btn-md">
+<button className="btn btn-coral btn-md">
 ```
 
 #### Remove Gradients
@@ -412,7 +412,7 @@ const showcasePage = findSimilarShowcase(targetPath);
 <button className="btn bg-blue-500 text-white hover:bg-blue-600">
 
 // AFTER
-<button className="memphis-btn btn-coral memphis-btn-md">
+<button className="btn btn-coral btn-md">
 ```
 
 #### Add Thick Borders
@@ -421,7 +421,7 @@ const showcasePage = findSimilarShowcase(targetPath);
 <input className="input input-bordered" />
 
 // AFTER
-<input className="memphis-input" />
+<input className="input" />
 ```
 
 #### Add Geometric Decorations
@@ -463,7 +463,7 @@ updateBuildProgress({
   Submit
 </button>
 
-<button className="memphis-btn btn-coral memphis-btn-md">
+<button className="btn btn-coral btn-md">
   Submit
 </button>
 ```
@@ -476,7 +476,7 @@ updateBuildProgress({
   <p className="text-gray-600">Content</p>
 </div>
 
-<div className="memphis-card p-6 relative">
+<div className="card p-6 relative">
   <h3 className="text-lg font-bold text-dark mb-4 uppercase">Title</h3>
   <p className="text-dark opacity-70">Content</p>
   <div className="absolute top-4 right-4 w-8 h-8 bg-teal rotate-45" />
@@ -494,7 +494,7 @@ updateBuildProgress({
 
 <input
   type="text"
-  className="memphis-input w-full"
+  className="input w-full"
   placeholder="ENTER NAME"
 />
 ```
@@ -510,7 +510,7 @@ updateBuildProgress({
 </dialog>
 
 <dialog className="modal">
-  <div className="memphis-modal relative">
+  <div className="modal relative">
     <h3 className="font-bold text-lg text-dark uppercase">Title</h3>
     <p className="text-dark opacity-70">Content</p>
     <div className="absolute top-0 right-0 w-16 h-2 bg-coral" />
@@ -533,7 +533,7 @@ Before marking task complete, run ALL of these checks on your output file:
 9. ✅ **NO hardcoded hex colors** - Grep for `#FF6B6B`, `#4ECDC4`, `#FFE66D`, `#A78BFA`, `#1A1A2E`, `#F5F0EB`, `#2D2D44`, `rgba(` — MUST be zero matches
 10. ✅ **NO inline style for visual props** - Grep for `style={{` — only allowed for dynamic calculated values (percentages, transforms), NEVER for colors, borders, backgrounds, spacing, or opacity
 11. ✅ **NO color constant objects** - Grep for `const M =`, `const COLORS =`, `const memphis` — MUST be zero matches
-12. ✅ **Correct border tiers** — Buttons/inputs/badges use interactive tier (3px/memphis-btn/memphis-badge), cards/modals use container tier (4px/memphis-card), checkboxes/toggles use detail tier (2px/memphis-checkbox)
+12. ✅ **Correct border tiers** — Buttons/inputs/badges use interactive tier (3px/btn/badge), cards/modals use container tier (4px/card), checkboxes/toggles use detail tier (2px/checkbox)
 13. ✅ **Component isolation** - Verify NO imports from original page's component tree
 
 ## Error Handling
@@ -601,7 +601,7 @@ The orchestrator will spawn `memphis-copy` to produce the text in the Designer S
 3. **ALWAYS** follow the styling hierarchy: memphis-ui components → plugin CSS classes → theme classes → local components → raw Tailwind
 4. **ALWAYS** reference showcase pages for design inspiration — NEVER the original page
 5. **NEVER** add shadows, rounded corners, or gradients
-6. **ALWAYS** use the correct border tier: interactive tier (3px / memphis-btn / memphis-badge) for buttons/inputs/badges, container tier (4px / memphis-card) for cards/modals, detail tier (2px) for checkboxes/toggles
+6. **ALWAYS** use the correct border tier: interactive tier (3px / btn / badge) for buttons/inputs/badges, container tier (4px / card) for cards/modals, detail tier (2px) for checkboxes/toggles
 7. **ALWAYS** use Memphis color palette exclusively via Tailwind classes
 8. **NEVER** change component functionality or logic
 9. **ALWAYS** add at least 1-2 geometric decorations
@@ -610,6 +610,6 @@ The orchestrator will spawn `memphis-copy` to produce the text in the Designer S
 12. **NEVER** use hardcoded hex color values — use Tailwind classes (bg-coral, text-dark, etc.)
 13. **NEVER** use inline `style={}` for colors, borders, backgrounds, spacing, or opacity
 14. **NEVER** create color constant objects (`const M = {}`, `const COLORS = {}`)
-15. **ALWAYS** use Memphis plugin classes first (memphis-btn, memphis-badge, memphis-input, memphis-card) — they have correct border tiers baked in
+15. **ALWAYS** use Memphis plugin classes first (btn, badge, input, card) — they have correct border tiers baked in
 16. **ALWAYS** run quality checks (section above) before marking complete
 17. **NEVER** write user-facing copy — delegate to `memphis-copy` agent

@@ -6,306 +6,255 @@ import { ACCENT_HEX } from '@splits-network/memphis-ui';
 type AccentKey = 'coral' | 'teal' | 'yellow' | 'purple';
 const ACCENT_CYCLE: AccentKey[] = ['coral', 'teal', 'yellow', 'purple'];
 
-const VARIANT_NAMES = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'] as const;
+// ─── Designer Six: Domain Pages ────────────────────────────────────────────
+// These are the primary showcase pages — full list views for each portal section
 
-interface ShowcaseCategory {
+interface DomainPage {
     title: string;
     slug: string;
     description: string;
     icon: string;
-    /** Which numbered variants exist (e.g. ['one','two',...,'ten']) */
+    accent: AccentKey;
+    href: string;
+}
+
+const DOMAIN_PAGES: DomainPage[] = [
+    {
+        title: 'Roles',
+        slug: 'lists',
+        description: 'Job listings with table, grid, and browse views',
+        icon: 'fa-briefcase',
+        accent: 'teal',
+        href: '/showcase/lists/six',
+    },
+    {
+        title: 'Applications',
+        slug: 'applications',
+        description: 'Candidate-role pipeline with match scores and stages',
+        icon: 'fa-file-lines',
+        accent: 'coral',
+        href: '/showcase/applications',
+    },
+    {
+        title: 'Candidates',
+        slug: 'candidates',
+        description: 'Talent pool with availability, skills, and salary data',
+        icon: 'fa-users',
+        accent: 'yellow',
+        href: '/showcase/candidates',
+    },
+    {
+        title: 'Recruiters',
+        slug: 'recruiters',
+        description: 'Marketplace for finding split-fee partners',
+        icon: 'fa-user-tie',
+        accent: 'purple',
+        href: '/showcase/recruiters',
+    },
+    {
+        title: 'Placements',
+        slug: 'placements',
+        description: 'Filled roles with fees, guarantees, and invoices',
+        icon: 'fa-handshake',
+        accent: 'coral',
+        href: '/showcase/placements',
+    },
+    {
+        title: 'Billing',
+        slug: 'billing',
+        description: 'Invoices, payments, subscriptions, and revenue',
+        icon: 'fa-receipt',
+        accent: 'teal',
+        href: '/showcase/billing',
+    },
+    {
+        title: 'Company',
+        slug: 'company',
+        description: 'Company settings, details, billing, and team management',
+        icon: 'fa-building',
+        accent: 'yellow',
+        href: '/showcase/company',
+    },
+    {
+        title: 'Integrations',
+        slug: 'integrations',
+        description: 'Third-party system connections and sync status',
+        icon: 'fa-puzzle-piece',
+        accent: 'purple',
+        href: '/showcase/integrations',
+    },
+    {
+        title: 'Candidate Invitations',
+        slug: 'candidate-invitations',
+        description: 'Recruiter invitations sent to candidates',
+        icon: 'fa-envelope-open-text',
+        accent: 'coral',
+        href: '/showcase/candidate-invitations',
+    },
+    {
+        title: 'Company Invitations',
+        slug: 'company-invitations',
+        description: 'Recruiter invitations sent to companies',
+        icon: 'fa-paper-plane',
+        accent: 'teal',
+        href: '/showcase/company-invitations',
+    },
+    {
+        title: 'Recruiter Teams',
+        slug: 'recruiter-teams',
+        description: 'Recruiter team structure and performance',
+        icon: 'fa-people-group',
+        accent: 'yellow',
+        href: '/showcase/recruiter-teams',
+    },
+    {
+        title: 'Company Teams',
+        slug: 'company-teams',
+        description: 'Company hiring team management',
+        icon: 'fa-sitemap',
+        accent: 'purple',
+        href: '/showcase/company-teams',
+    },
+    {
+        title: 'Referral Codes',
+        slug: 'referral-codes',
+        description: 'Referral code management and tracking',
+        icon: 'fa-ticket',
+        accent: 'coral',
+        href: '/showcase/referral-codes',
+    },
+];
+
+// ─── Designer Six: UI Components ───────────────────────────────────────────
+// These are the component pattern showcase pages (the "six" variant)
+
+interface UIComponentPage {
+    title: string;
+    slug: string;
+    description: string;
+    icon: string;
+    accent: AccentKey;
+    href: string;
+}
+
+const UI_COMPONENT_SECTIONS: { label: string; pages: UIComponentPage[] }[] = [
+    {
+        label: 'Layout & Navigation',
+        pages: [
+            { title: 'Headers', slug: 'headers', description: 'Navigation bars, mega menus, mobile', icon: 'fa-browser', accent: 'coral', href: '/showcase/headers/six' },
+            { title: 'Footers', slug: 'footers', description: 'Site footers, link columns, newsletters', icon: 'fa-rectangle-wide', accent: 'teal', href: '/showcase/footers/six' },
+            { title: 'Menus', slug: 'menus', description: 'Dropdowns, filters, search bars', icon: 'fa-bars-staggered', accent: 'yellow', href: '/showcase/menus/six' },
+            { title: 'Tabs', slug: 'tabs', description: 'Tabbed interfaces, segmented controls', icon: 'fa-window-restore', accent: 'purple', href: '/showcase/tabs/six' },
+        ],
+    },
+    {
+        label: 'Data Display',
+        pages: [
+            { title: 'Dashboards', slug: 'dashboards', description: 'Analytics, KPIs, chart grids', icon: 'fa-gauge-high', accent: 'coral', href: '/showcase/dashboards/six' },
+            { title: 'Tables', slug: 'tables', description: 'Data tables, sortable columns', icon: 'fa-table', accent: 'yellow', href: '/showcase/tables/six' },
+            { title: 'Cards', slug: 'cards', description: 'Card grids, stat cards, feature cards', icon: 'fa-cards-blank', accent: 'purple', href: '/showcase/cards/six' },
+            { title: 'Details', slug: 'details', description: 'Single-record views, entity profiles', icon: 'fa-file-lines', accent: 'coral', href: '/showcase/details/six' },
+            { title: 'Profiles', slug: 'profiles', description: 'User profiles, avatar layouts', icon: 'fa-user', accent: 'teal', href: '/showcase/profiles/six' },
+        ],
+    },
+    {
+        label: 'Forms & Input',
+        pages: [
+            { title: 'Forms', slug: 'forms', description: 'Input forms, wizards, validation', icon: 'fa-input-text', accent: 'yellow', href: '/showcase/forms/six' },
+            { title: 'Buttons', slug: 'buttons', description: 'Variants, sizes, states, groups', icon: 'fa-hand-pointer', accent: 'purple', href: '/showcase/buttons/six' },
+            { title: 'Search', slug: 'search', description: 'Search results, autocomplete', icon: 'fa-magnifying-glass', accent: 'coral', href: '/showcase/search/six' },
+            { title: 'Modals', slug: 'modals', description: 'Dialogs, confirmations, drawers', icon: 'fa-window-maximize', accent: 'teal', href: '/showcase/modals/six' },
+        ],
+    },
+    {
+        label: 'Content',
+        pages: [
+            { title: 'Landing Pages', slug: 'landing', description: 'Hero sections, CTAs, marketing', icon: 'fa-rocket-launch', accent: 'yellow', href: '/showcase/landing/six' },
+            { title: 'Articles', slug: 'articles', description: 'Blog posts, long-form content', icon: 'fa-newspaper', accent: 'purple', href: '/showcase/articles/six' },
+            { title: 'Pricing', slug: 'pricing', description: 'Pricing tables, plan comparisons', icon: 'fa-tags', accent: 'coral', href: '/showcase/pricing/six' },
+            { title: 'Testimonials', slug: 'testimonials', description: 'Reviews, social proof, ratings', icon: 'fa-quote-right', accent: 'teal', href: '/showcase/testimonials/six' },
+            { title: 'FAQs', slug: 'faqs', description: 'Accordion FAQs, knowledge base', icon: 'fa-circle-question', accent: 'yellow', href: '/showcase/faqs/six' },
+        ],
+    },
+    {
+        label: 'Communication',
+        pages: [
+            { title: 'Messages', slug: 'messages', description: 'Chat interfaces, threads', icon: 'fa-comments', accent: 'purple', href: '/showcase/messages/six' },
+            { title: 'Notifications', slug: 'notifications', description: 'Notification feeds, alerts', icon: 'fa-bell', accent: 'coral', href: '/showcase/notifications/six' },
+            { title: 'Notifications UI', slug: 'notifications-ui', description: 'Badges, indicators, dots', icon: 'fa-bell-on', accent: 'teal', href: '/showcase/notifications-ui/six' },
+        ],
+    },
+    {
+        label: 'Flows & States',
+        pages: [
+            { title: 'Auth', slug: 'auth', description: 'Login, signup, verification', icon: 'fa-lock', accent: 'yellow', href: '/showcase/auth/six' },
+            { title: 'Onboarding', slug: 'onboarding', description: 'Welcome flows, setup wizards', icon: 'fa-flag-checkered', accent: 'purple', href: '/showcase/onboarding/six' },
+            { title: 'Empty States', slug: 'empty', description: 'Zero-data views, placeholders', icon: 'fa-ghost', accent: 'coral', href: '/showcase/empty/six' },
+            { title: 'Settings', slug: 'settings', description: 'Preference panels, toggles', icon: 'fa-gear', accent: 'teal', href: '/showcase/settings/six' },
+        ],
+    },
+    {
+        label: 'Timeline & Calendar',
+        pages: [
+            { title: 'Timelines', slug: 'timelines', description: 'Activity feeds, history views', icon: 'fa-timeline', accent: 'yellow', href: '/showcase/timelines/six' },
+            { title: 'Calendars', slug: 'calendars', description: 'Calendar views, scheduling', icon: 'fa-calendar', accent: 'purple', href: '/showcase/calendars/six' },
+        ],
+    },
+    {
+        label: 'Typography',
+        pages: [
+            { title: 'Typography', slug: 'typography-six', description: 'Headlines, body, labels, colors', icon: 'fa-font-case', accent: 'coral', href: '/showcase/typography-six' },
+        ],
+    },
+];
+
+// ─── Archived: Variant 1-10 (excluding 6) ─────────────────────────────────
+
+const VARIANT_NAMES = ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine', 'ten'] as const;
+
+interface ArchivedCategory {
+    title: string;
+    slug: string;
+    icon: string;
     variants: string[];
     accent: AccentKey;
 }
 
-function variants(count: number): string[] {
-    return VARIANT_NAMES.slice(0, count) as unknown as string[];
-}
-
-const SHOWCASE_CATEGORIES: ShowcaseCategory[] = [
-    // ── Layout & Navigation ──────────────────────────────────────
-    {
-        title: 'Headers',
-        slug: 'headers',
-        description: 'Navigation bars, mega menus, search toggles, mobile hamburgers',
-        icon: 'fa-browser',
-        variants: variants(10),
-        accent: 'coral',
-    },
-    {
-        title: 'Footers',
-        slug: 'footers',
-        description: 'Site footers, link columns, newsletters, social links',
-        icon: 'fa-rectangle-wide',
-        variants: variants(10),
-        accent: 'teal',
-    },
-    {
-        title: 'Menus',
-        slug: 'menus',
-        description: 'Dropdowns, context menus, filters, search bars, selects',
-        icon: 'fa-bars-staggered',
-        variants: ['six'],
-        accent: 'yellow',
-    },
-    {
-        title: 'Tabs',
-        slug: 'tabs',
-        description: 'Tabbed interfaces, segmented controls, underline tabs',
-        icon: 'fa-window-restore',
-        variants: ['six'],
-        accent: 'purple',
-    },
-
-    // ── Data Display ─────────────────────────────────────────────
-    {
-        title: 'Dashboards',
-        slug: 'dashboards',
-        description: 'Analytics layouts, stat cards, KPIs, chart grids',
-        icon: 'fa-gauge-high',
-        variants: variants(10),
-        accent: 'coral',
-    },
-    {
-        title: 'Lists',
-        slug: 'lists',
-        description: 'Data lists, filtered views, list items, pagination',
-        icon: 'fa-list',
-        variants: variants(10),
-        accent: 'teal',
-    },
-    {
-        title: 'Tables',
-        slug: 'tables',
-        description: 'Data tables, sortable columns, row actions, bulk select',
-        icon: 'fa-table',
-        variants: variants(9),
-        accent: 'yellow',
-    },
-    {
-        title: 'Cards',
-        slug: 'cards',
-        description: 'Card grids, stat cards, feature cards, pricing cards',
-        icon: 'fa-cards-blank',
-        variants: variants(10),
-        accent: 'purple',
-    },
-    {
-        title: 'Details',
-        slug: 'details',
-        description: 'Detail pages, single-record views, entity profiles',
-        icon: 'fa-file-lines',
-        variants: variants(10),
-        accent: 'coral',
-    },
-    {
-        title: 'Profiles',
-        slug: 'profiles',
-        description: 'User profiles, team members, avatar layouts',
-        icon: 'fa-user',
-        variants: variants(9),
-        accent: 'teal',
-    },
-
-    // ── Forms & Input ────────────────────────────────────────────
-    {
-        title: 'Forms',
-        slug: 'forms',
-        description: 'Input forms, multi-step wizards, validation patterns',
-        icon: 'fa-input-text',
-        variants: variants(10),
-        accent: 'yellow',
-    },
-    {
-        title: 'Buttons',
-        slug: 'buttons',
-        description: 'Button variants, sizes, states, groups, icons, loading',
-        icon: 'fa-hand-pointer',
-        variants: ['six'],
-        accent: 'purple',
-    },
-    {
-        title: 'Search',
-        slug: 'search',
-        description: 'Search pages, results layouts, autocomplete, filters',
-        icon: 'fa-magnifying-glass',
-        variants: variants(10),
-        accent: 'coral',
-    },
-    {
-        title: 'Modals',
-        slug: 'modals',
-        description: 'Dialogs, confirmations, form modals, drawers',
-        icon: 'fa-window-maximize',
-        variants: variants(10),
-        accent: 'teal',
-    },
-
-    // ── Content ──────────────────────────────────────────────────
-    {
-        title: 'Landing Pages',
-        slug: 'landing',
-        description: 'Hero sections, feature blocks, CTAs, marketing layouts',
-        icon: 'fa-rocket-launch',
-        variants: variants(10),
-        accent: 'yellow',
-    },
-    {
-        title: 'Articles',
-        slug: 'articles',
-        description: 'Blog posts, long-form content, pull quotes, media',
-        icon: 'fa-newspaper',
-        variants: variants(10),
-        accent: 'purple',
-    },
-    {
-        title: 'Pricing',
-        slug: 'pricing',
-        description: 'Pricing tables, plan comparisons, feature matrices',
-        icon: 'fa-tags',
-        variants: variants(9),
-        accent: 'coral',
-    },
-    {
-        title: 'Testimonials',
-        slug: 'testimonials',
-        description: 'Reviews, quotes, social proof, rating displays',
-        icon: 'fa-quote-right',
-        variants: ['six'],
-        accent: 'teal',
-    },
-    {
-        title: 'FAQs',
-        slug: 'faqs',
-        description: 'Accordion FAQs, knowledge base, help sections',
-        icon: 'fa-circle-question',
-        variants: ['six'],
-        accent: 'yellow',
-    },
-
-    // ── Communication ────────────────────────────────────────────
-    {
-        title: 'Messages',
-        slug: 'messages',
-        description: 'Chat interfaces, conversation threads, message bubbles',
-        icon: 'fa-comments',
-        variants: variants(10),
-        accent: 'purple',
-    },
-    {
-        title: 'Notifications',
-        slug: 'notifications',
-        description: 'Notification feeds, alert banners, toast patterns',
-        icon: 'fa-bell',
-        variants: variants(9),
-        accent: 'coral',
-    },
-    {
-        title: 'Notifications UI',
-        slug: 'notifications-ui',
-        description: 'Notification badges, indicators, dot patterns',
-        icon: 'fa-bell-on',
-        variants: ['six'],
-        accent: 'teal',
-    },
-
-    // ── Flows & States ───────────────────────────────────────────
-    {
-        title: 'Auth',
-        slug: 'auth',
-        description: 'Login, signup, forgot password, verification flows',
-        icon: 'fa-lock',
-        variants: variants(9),
-        accent: 'yellow',
-    },
-    {
-        title: 'Onboarding',
-        slug: 'onboarding',
-        description: 'Welcome flows, setup wizards, progress indicators',
-        icon: 'fa-flag-checkered',
-        variants: variants(9),
-        accent: 'purple',
-    },
-    {
-        title: 'Empty States',
-        slug: 'empty',
-        description: 'Zero-data views, first-run experiences, placeholder UIs',
-        icon: 'fa-ghost',
-        variants: variants(10),
-        accent: 'coral',
-    },
-    {
-        title: 'Settings',
-        slug: 'settings',
-        description: 'Preference panels, account settings, toggle groups',
-        icon: 'fa-gear',
-        variants: variants(9),
-        accent: 'teal',
-    },
-
-    // ── Timeline & Calendar ──────────────────────────────────────
-    {
-        title: 'Timelines',
-        slug: 'timelines',
-        description: 'Activity feeds, history views, progress trackers',
-        icon: 'fa-timeline',
-        variants: ['six'],
-        accent: 'yellow',
-    },
-    {
-        title: 'Calendars',
-        slug: 'calendars',
-        description: 'Calendar views, date pickers, event scheduling',
-        icon: 'fa-calendar',
-        variants: ['six'],
-        accent: 'purple',
-    },
-
-    // ── Typography ───────────────────────────────────────────────
-    {
-        title: 'Typography',
-        slug: 'typography-six',
-        description: 'Headlines, body, labels, data, accent patterns, color matrix',
-        icon: 'fa-font-case',
-        variants: [],
-        accent: 'coral',
-    },
+const ARCHIVED_CATEGORIES: ArchivedCategory[] = [
+    { title: 'Headers', slug: 'headers', icon: 'fa-browser', variants: [...VARIANT_NAMES], accent: 'coral' },
+    { title: 'Footers', slug: 'footers', icon: 'fa-rectangle-wide', variants: [...VARIANT_NAMES], accent: 'teal' },
+    { title: 'Dashboards', slug: 'dashboards', icon: 'fa-gauge-high', variants: [...VARIANT_NAMES], accent: 'coral' },
+    { title: 'Lists', slug: 'lists', icon: 'fa-list', variants: [...VARIANT_NAMES], accent: 'teal' },
+    { title: 'Tables', slug: 'tables', icon: 'fa-table', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'yellow' },
+    { title: 'Cards', slug: 'cards', icon: 'fa-cards-blank', variants: [...VARIANT_NAMES], accent: 'purple' },
+    { title: 'Details', slug: 'details', icon: 'fa-file-lines', variants: [...VARIANT_NAMES], accent: 'coral' },
+    { title: 'Profiles', slug: 'profiles', icon: 'fa-user', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'teal' },
+    { title: 'Forms', slug: 'forms', icon: 'fa-input-text', variants: [...VARIANT_NAMES], accent: 'yellow' },
+    { title: 'Search', slug: 'search', icon: 'fa-magnifying-glass', variants: [...VARIANT_NAMES], accent: 'coral' },
+    { title: 'Modals', slug: 'modals', icon: 'fa-window-maximize', variants: [...VARIANT_NAMES], accent: 'teal' },
+    { title: 'Landing Pages', slug: 'landing', icon: 'fa-rocket-launch', variants: [...VARIANT_NAMES], accent: 'yellow' },
+    { title: 'Articles', slug: 'articles', icon: 'fa-newspaper', variants: [...VARIANT_NAMES], accent: 'purple' },
+    { title: 'Pricing', slug: 'pricing', icon: 'fa-tags', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'coral' },
+    { title: 'Messages', slug: 'messages', icon: 'fa-comments', variants: [...VARIANT_NAMES], accent: 'purple' },
+    { title: 'Notifications', slug: 'notifications', icon: 'fa-bell', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'coral' },
+    { title: 'Auth', slug: 'auth', icon: 'fa-lock', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'yellow' },
+    { title: 'Onboarding', slug: 'onboarding', icon: 'fa-flag-checkered', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'purple' },
+    { title: 'Empty States', slug: 'empty', icon: 'fa-ghost', variants: [...VARIANT_NAMES], accent: 'coral' },
+    { title: 'Settings', slug: 'settings', icon: 'fa-gear', variants: ['one', 'two', 'three', 'four', 'five', 'seven', 'eight', 'nine'], accent: 'teal' },
 ];
 
-// Group categories for visual sections
-const SECTIONS = [
-    { label: 'Layout & Navigation', start: 0, end: 4 },
-    { label: 'Data Display', start: 4, end: 10 },
-    { label: 'Forms & Input', start: 10, end: 14 },
-    { label: 'Content', start: 14, end: 19 },
-    { label: 'Communication', start: 19, end: 22 },
-    { label: 'Flows & States', start: 22, end: 26 },
-    { label: 'Timeline & Calendar', start: 26, end: 28 },
-    { label: 'Typography', start: 28, end: 29 },
-];
-
-function getVariantHref(slug: string, variant: string): string {
-    return `/showcase/${slug}/${variant}`;
-}
-
-function getCategoryHref(cat: ShowcaseCategory): string {
-    // Typography has page.tsx directly in its folder
-    if (cat.variants.length === 0) return `/showcase/${cat.slug}`;
-    // Single variant — link straight to it
-    if (cat.variants.length === 1) return getVariantHref(cat.slug, cat.variants[0]);
-    // Multi-variant — link to the "six" variant as default
-    return getVariantHref(cat.slug, 'six');
-}
+// ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function ShowcaseIndexPage() {
-    const totalPages = SHOWCASE_CATEGORIES.reduce(
-        (sum, c) => sum + Math.max(c.variants.length, 1),
-        0,
-    );
+    const domainCount = DOMAIN_PAGES.length;
+    const uiCount = UI_COMPONENT_SECTIONS.reduce((sum, s) => sum + s.pages.length, 0);
+    const archivedCount = ARCHIVED_CATEGORIES.reduce((sum, c) => sum + c.variants.length, 0);
 
     return (
         <div className="min-h-screen bg-dark">
-            {/* Hero */}
+            {/* ══════════════════════════════════════════════════════════════
+                HERO
+               ══════════════════════════════════════════════════════════════ */}
             <div className="relative overflow-hidden border-b-4 border-coral">
                 <div className="max-w-6xl mx-auto px-8 py-16">
                     {/* Geometric decorations */}
@@ -325,11 +274,15 @@ export default function ShowcaseIndexPage() {
                     </p>
                     <div className="flex items-center gap-4">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/20">
-                            {SHOWCASE_CATEGORIES.length} categories
+                            {domainCount} domain pages
                         </span>
                         <span className="text-cream/10">|</span>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/20">
-                            {totalPages} pages
+                            {uiCount} UI components
+                        </span>
+                        <span className="text-cream/10">|</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/20">
+                            {archivedCount} archived
                         </span>
                     </div>
                 </div>
@@ -343,97 +296,176 @@ export default function ShowcaseIndexPage() {
                 </div>
             </div>
 
-            {/* Showcase Grid — grouped by section */}
             <div className="max-w-6xl mx-auto px-8 py-12">
-                {SECTIONS.map((section, sectionIdx) => (
-                    <div key={section.label} className={sectionIdx > 0 ? 'mt-12' : ''}>
-                        {/* Section label */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <span
-                                className="px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em]"
-                                style={{
-                                    backgroundColor: ACCENT_HEX[ACCENT_CYCLE[sectionIdx % 4]],
-                                    color: ['yellow', 'teal'].includes(ACCENT_CYCLE[sectionIdx % 4]) ? '#1A1A2E' : '#FFFFFF',
-                                }}
-                            >
-                                {section.label}
-                            </span>
-                            <div className="flex-1 h-[2px] bg-cream/10" />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {SHOWCASE_CATEGORIES.slice(section.start, section.end).map((cat) => (
-                                <div
-                                    key={cat.slug}
-                                    className="border-4 p-5"
-                                    style={{ borderColor: ACCENT_HEX[cat.accent] }}
-                                >
-                                    {/* Category header — links to primary variant */}
-                                    <Link
-                                        href={getCategoryHref(cat)}
-                                        className="group flex items-center gap-3 mb-3"
-                                    >
-                                        <div
-                                            className="w-8 h-8 border-4 flex items-center justify-center flex-shrink-0"
-                                            style={{ borderColor: ACCENT_HEX[cat.accent] }}
-                                        >
-                                            <i
-                                                className={`fa-duotone fa-regular ${cat.icon} text-xs`}
-                                                style={{ color: ACCENT_HEX[cat.accent] }}
-                                            />
-                                        </div>
-                                        <h2
-                                            className="text-xs font-black uppercase tracking-wide group-hover:translate-x-1 transition-transform"
-                                            style={{ color: ACCENT_HEX[cat.accent] }}
-                                        >
-                                            {cat.title}
-                                        </h2>
-                                    </Link>
-
-                                    <p className="text-[11px] text-cream/40 leading-relaxed mb-3">
-                                        {cat.description}
-                                    </p>
-
-                                    {/* Variant links */}
-                                    {cat.variants.length > 1 ? (
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {cat.variants.map((v) => (
-                                                <Link
-                                                    key={v}
-                                                    href={getVariantHref(cat.slug, v)}
-                                                    className="w-7 h-7 border-4 flex items-center justify-center text-[9px] font-black uppercase text-cream/30 hover:text-cream transition-colors"
-                                                    style={{ borderColor: `${ACCENT_HEX[cat.accent]}40` }}
-                                                    onMouseEnter={(e) => {
-                                                        (e.currentTarget as HTMLElement).style.borderColor = ACCENT_HEX[cat.accent];
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT_HEX[cat.accent]}40`;
-                                                    }}
-                                                >
-                                                    {cat.variants.indexOf(v) + 1}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <Link
-                                            href={getCategoryHref(cat)}
-                                            className="group/link flex items-center gap-2"
-                                        >
-                                            <span className="text-[9px] font-black uppercase tracking-wide text-cream/20 group-hover/link:text-cream/50 transition-colors">
-                                                View
-                                            </span>
-                                            <i className="fa-solid fa-arrow-right text-[7px] text-cream/20 group-hover/link:text-cream/50 group-hover/link:translate-x-1 transition-all" />
-                                        </Link>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                {/* ══════════════════════════════════════════════════════════════
+                    DOMAIN PAGES — Primary showcase for portal sections
+                   ══════════════════════════════════════════════════════════════ */}
+                <div className="mb-16">
+                    <div className="flex items-center gap-3 mb-8">
+                        <span className="px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] bg-coral text-cream">
+                            Domain Pages
+                        </span>
+                        <div className="flex-1 h-[2px] bg-cream/10" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/20">
+                            Portal Section Showcases
+                        </span>
                     </div>
-                ))}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {DOMAIN_PAGES.map((page) => (
+                            <Link
+                                key={page.slug}
+                                href={page.href}
+                                className="group border-4 p-5 transition-transform hover:-translate-y-1"
+                                style={{ borderColor: ACCENT_HEX[page.accent] }}
+                            >
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div
+                                        className="w-9 h-9 flex items-center justify-center flex-shrink-0"
+                                        style={{ backgroundColor: ACCENT_HEX[page.accent] }}
+                                    >
+                                        <i
+                                            className={`fa-duotone fa-regular ${page.icon} text-sm`}
+                                            style={{ color: page.accent === 'yellow' ? '#1A1A2E' : '#FFFFFF' }}
+                                        />
+                                    </div>
+                                    <h2
+                                        className="text-sm font-black uppercase tracking-wide group-hover:translate-x-1 transition-transform"
+                                        style={{ color: ACCENT_HEX[page.accent] }}
+                                    >
+                                        {page.title}
+                                    </h2>
+                                </div>
+                                <p className="text-[11px] text-cream/40 leading-relaxed mb-3">
+                                    {page.description}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-black uppercase tracking-wide text-cream/20 group-hover:text-cream/50 transition-colors">
+                                        Open
+                                    </span>
+                                    <i className="fa-solid fa-arrow-right text-[7px] text-cream/20 group-hover:text-cream/50 group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ══════════════════════════════════════════════════════════════
+                    UI COMPONENTS — Component pattern showcases
+                   ══════════════════════════════════════════════════════════════ */}
+                <div className="mb-16">
+                    <div className="flex items-center gap-3 mb-8">
+                        <span className="px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] bg-teal text-dark">
+                            UI Components
+                        </span>
+                        <div className="flex-1 h-[2px] bg-cream/10" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/20">
+                            Designer Six Patterns
+                        </span>
+                    </div>
+
+                    {UI_COMPONENT_SECTIONS.map((section, sectionIdx) => (
+                        <div key={section.label} className={sectionIdx > 0 ? 'mt-8' : ''}>
+                            <div className="flex items-center gap-3 mb-4">
+                                <span
+                                    className="px-3 py-0.5 text-[9px] font-black uppercase tracking-[0.15em] border-2"
+                                    style={{
+                                        borderColor: ACCENT_HEX[ACCENT_CYCLE[sectionIdx % 4]],
+                                        color: ACCENT_HEX[ACCENT_CYCLE[sectionIdx % 4]],
+                                    }}
+                                >
+                                    {section.label}
+                                </span>
+                                <div className="flex-1 h-px bg-cream/5" />
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                                {section.pages.map((page) => (
+                                    <Link
+                                        key={page.slug}
+                                        href={page.href}
+                                        className="group border-2 p-3 transition-transform hover:-translate-y-0.5"
+                                        style={{ borderColor: `${ACCENT_HEX[page.accent]}40` }}
+                                    >
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <i
+                                                className={`fa-duotone fa-regular ${page.icon} text-xs`}
+                                                style={{ color: ACCENT_HEX[page.accent] }}
+                                            />
+                                            <span
+                                                className="text-[11px] font-black uppercase tracking-wide group-hover:translate-x-0.5 transition-transform"
+                                                style={{ color: ACCENT_HEX[page.accent] }}
+                                            >
+                                                {page.title}
+                                            </span>
+                                        </div>
+                                        <p className="text-[10px] text-cream/30 leading-relaxed">
+                                            {page.description}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* ══════════════════════════════════════════════════════════════
+                    ARCHIVED — Variants 1-10 (excluding 6)
+                   ══════════════════════════════════════════════════════════════ */}
+                <div>
+                    <div className="flex items-center gap-3 mb-8">
+                        <span className="px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] bg-cream/10 text-cream/30">
+                            Archived
+                        </span>
+                        <div className="flex-1 h-[2px] bg-cream/5" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cream/15">
+                            Variants 1-10 (excluding Designer Six)
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {ARCHIVED_CATEGORIES.map((cat) => (
+                            <div
+                                key={cat.slug}
+                                className="border-2 p-4"
+                                style={{ borderColor: `${ACCENT_HEX[cat.accent]}20` }}
+                            >
+                                <div className="flex items-center gap-2 mb-2">
+                                    <i
+                                        className={`fa-duotone fa-regular ${cat.icon} text-xs`}
+                                        style={{ color: `${ACCENT_HEX[cat.accent]}60` }}
+                                    />
+                                    <span
+                                        className="text-[11px] font-black uppercase tracking-wide"
+                                        style={{ color: `${ACCENT_HEX[cat.accent]}60` }}
+                                    >
+                                        {cat.title}
+                                    </span>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                    {cat.variants.map((v, i) => {
+                                        const num = ['one','two','three','four','five','seven','eight','nine','ten'].indexOf(v);
+                                        const display = num < 5 ? num + 1 : num + 2; // skip 6
+                                        return (
+                                            <Link
+                                                key={v}
+                                                href={`/showcase/${cat.slug}/${v}`}
+                                                className="w-6 h-6 border-2 flex items-center justify-center text-[8px] font-bold text-cream/20 hover:text-cream/60 transition-colors"
+                                                style={{ borderColor: `${ACCENT_HEX[cat.accent]}15` }}
+                                            >
+                                                {display}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {/* Bottom accent bar */}
-            <div className="flex">
+            <div className="flex mt-12">
                 <div className="h-2 flex-1 bg-coral" />
                 <div className="h-2 flex-1 bg-teal" />
                 <div className="h-2 flex-1 bg-yellow" />
