@@ -190,5 +190,5 @@ Extract reusable components from the calendars showcase page.
 - All components use the Memphis color palette `COLORS` and utility functions (`getDaysInMonth`, `getFirstDayOfMonth`, `formatDate`)
 
 ## Reference
-Source: `.claude/memphis/showcase/calendars-six.tsx`
+Source: `apps/corporate/src/app/showcase/calendars/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

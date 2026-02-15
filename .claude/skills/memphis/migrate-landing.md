@@ -93,4 +93,4 @@ Landing pages are the primary marketing entry point. They are long, scroll-based
 - Missing corner accent blocks on cards
 
 ## Reference
-Showcase: `.claude/memphis/showcase/landing-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/landing/six/page.tsx`

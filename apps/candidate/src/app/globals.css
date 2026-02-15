@@ -9,6 +9,9 @@
 
 @import "./themes/light.css";
 @import "./themes/dark.css";
+@import "./themes/memphis.css";
+
+@plugin "@splits-network/memphis-ui/plugin";
 
 @keyframes slide-up {
     from {

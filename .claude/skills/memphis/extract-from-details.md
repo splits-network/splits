@@ -108,5 +108,5 @@ interface SplitFeeCardProps {
 - **RecruiterCard** composes: SidebarCard
 
 ## Reference
-Source: `.claude/memphis/showcase/details-six.tsx`
+Source: `apps/corporate/src/app/showcase/details/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

@@ -2,14 +2,18 @@
 
 @import "tailwindcss";
 
-@plugin "daisyui" {
+@plugin "@splits-network/memphis-ui/plugin";
+@import "./themes/memphis.css";
+
+/* @plugin "daisyui" {
     themes: splits-light --default, splits-dark --prefers-dark, memphis;
     //themes: false;
-}
-
+} */
+/* 
 @import "./themes/light.css";
 @import "./themes/dark.css";
 @import "./themes/memphis.css";
+ */
 
 /* Cookie Consent Banner Animation */
 @keyframes slide-up {
@@ -114,6 +118,19 @@
 
 .animate-scale-in {
     animation: scale-in 0.2s ease-out;
+}
+
+/* Sidebar: full height on mobile, below sticky header on desktop */
+.sidebar-positioned {
+    top: 0;
+    height: 100vh;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-positioned {
+        top: var(--header-h, 0px);
+        height: calc(100vh - var(--header-h, 0px));
+    }
 }
 
 /* Sidebar Active Indicator */

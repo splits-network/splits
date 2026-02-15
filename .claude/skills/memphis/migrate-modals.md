@@ -121,4 +121,4 @@ function AnimatedModal({ open, onClose, children, wide = false }) {
 - Confirmation dialogs without impact list and warning box
 
 ## Reference
-Showcase: `.claude/memphis/showcase/modals-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/modals/six/page.tsx`

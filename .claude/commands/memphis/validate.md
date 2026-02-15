@@ -86,7 +86,62 @@ className="border border-gray-300" // 1px border
 className="border-4 border-dark"
 ```
 
-### 6. Geometric Decorations (Optional) ℹ️
+### 6. No Hardcoded Hex Colors ❌ (CRITICAL)
+```tsx
+// FAIL
+const M = { coral: "#FF6B6B", teal: "#4ECDC4" };
+style={{ color: "#FF6B6B" }}
+style={{ backgroundColor: "#1A1A2E" }}
+style={{ color: "rgba(255,255,255,0.4)" }}
+
+// PASS
+className="text-coral"
+className="bg-dark"
+className="text-cream/40"
+```
+
+### 7. No Inline Styles for Visual Props ❌ (CRITICAL)
+```tsx
+// FAIL
+style={{ backgroundColor: M.navy }}
+style={{ borderBottom: `5px solid ${M.coral}` }}
+style={{ color: "rgba(255,255,255,0.4)" }}
+style={{ borderColor: "#2D2D44" }}
+
+// PASS
+className="bg-dark"
+className="border-b-4 border-coral"
+className="text-cream/40"
+className="border-dark"
+```
+
+### 8. No Color Constant Objects ❌ (CRITICAL)
+```tsx
+// FAIL
+const M = { coral: "#FF6B6B", teal: "#4ECDC4", navy: "#1A1A2E" };
+const COLORS = { primary: "#FF6B6B" };
+const memphisColors = { ... };
+
+// PASS — just use Tailwind classes directly
+className="bg-coral"
+className="text-dark"
+```
+
+### 9. No Non-4px Border Widths ❌ (CRITICAL)
+```tsx
+// FAIL
+style={{ borderBottom: "3px solid #2D2D44" }}
+style={{ borderBottom: "5px solid #FF6B6B" }}
+className="border-2"
+className="border-[3px]"
+className="border-[5px]"
+
+// PASS
+className="border-4 border-dark"
+className="border-b-4 border-coral"
+```
+
+### 10. Geometric Decorations (Optional) ℹ️
 ```tsx
 // INFO: Add geometric shapes for Memphis authenticity
 <div className="absolute top-4 right-4 w-8 h-8 bg-yellow rotate-45" />

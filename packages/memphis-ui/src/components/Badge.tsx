@@ -27,8 +27,9 @@ const OUTLINE_CLASSES: Record<string, string> = {
 /**
  * Memphis Badge
  *
- * Sharp corners, thick border, bold typography.
- * Supports solid and outline variants.
+ * Uses the plugin's `.memphis-badge` base (interactive tier border 3px,
+ * sharp corners, bold typography, uppercase).
+ * Supports solid and outline variants via border-color overrides.
  */
 export function Badge({ children, variant = 'coral', outline = false, className = '' }: BadgeProps) {
     const variantClasses = outline ? OUTLINE_CLASSES[variant] : SOLID_CLASSES[variant];
@@ -36,8 +37,7 @@ export function Badge({ children, variant = 'coral', outline = false, className 
     return (
         <span
             className={[
-                'inline-flex items-center px-3 py-1',
-                'border-2 font-bold text-xs uppercase tracking-wider',
+                'memphis-badge',
                 variantClasses,
                 className,
             ]

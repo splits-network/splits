@@ -73,4 +73,4 @@ const C = { coral: "#FF6B6B", teal: "#4ECDC4", yellow: "#FFE66D", purple: "#A78B
 - Missing GSAP entrance animations for the card and background shapes
 
 ## Reference
-Showcase: `.claude/memphis/showcase/auth-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/auth/six/page.tsx`

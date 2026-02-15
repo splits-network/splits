@@ -125,5 +125,5 @@ Extract reusable components from the notifications-ui showcase page.
 - All components use the Memphis color palette `COLORS`
 
 ## Reference
-Source: `.claude/memphis/showcase/notifications-ui-six.tsx`
+Source: `apps/corporate/src/app/showcase/notifications-ui/page.tsx`
 Target: `packages/memphis-ui/src/components/`

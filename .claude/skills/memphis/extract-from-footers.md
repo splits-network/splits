@@ -142,5 +142,5 @@ interface StatusIndicatorProps {
 - 5 social links defined in `SOCIAL_LINKS` data array
 
 ## Reference
-Source: `.claude/memphis/showcase/footers-six.tsx`
+Source: `apps/corporate/src/app/showcase/footers/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

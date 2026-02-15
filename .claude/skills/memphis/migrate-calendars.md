@@ -87,4 +87,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Missing the dark-background day header row with yellow text
 
 ## Reference
-Showcase: `.claude/memphis/showcase/calendars-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/calendars/six/page.tsx`

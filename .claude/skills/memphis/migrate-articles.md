@@ -122,4 +122,4 @@ Article pages are long-form editorial content with a magazine-like layout. They 
 - Article headings in sentence case instead of uppercase
 
 ## Reference
-Showcase: `.claude/memphis/showcase/articles-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/articles/six/page.tsx`

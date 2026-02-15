@@ -135,4 +135,4 @@ Pricing pages present subscription tiers, feature comparisons, and FAQs. They fe
 - Using shadow for popular tier emphasis instead of position shift
 
 ## Reference
-Showcase: `.claude/memphis/showcase/pricing-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/pricing/six/page.tsx`

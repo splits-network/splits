@@ -37,7 +37,7 @@ This skill is invoked to extract patterns from showcase pages into the memphis-u
 
 ### From Showcase
 ```tsx
-// .claude/memphis/showcase/notifications-ui/page.tsx
+// apps/corporate/src/app/showcase/notifications-ui/page.tsx
 <div className="card border-4 border-dark bg-cream p-6">
   <div className="flex items-start gap-4">
     <div className="w-12 h-12 bg-coral flex items-center justify-center">
@@ -144,7 +144,7 @@ export type { NotificationCardProps } from './components/NotificationCard';
 Report extraction result:
 ```
 ✅ Component extracted: NotificationCard
-- Source: .claude/memphis/showcase/notifications-ui/page.tsx
+- Source: apps/corporate/src/app/showcase/notifications-ui/page.tsx
 - Destination: packages/memphis-ui/src/components/NotificationCard.tsx
 - Props: 6 (icon, iconColor, title, message, timestamp, onDismiss)
 - TypeScript: ✓

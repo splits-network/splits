@@ -1,53 +1,46 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: AccentColor | 'dark';
-    size?: 'sm' | 'md' | 'lg';
+    variant?: AccentColor | "dark";
+    size?: "sm" | "md" | "lg";
     children: React.ReactNode;
 }
 
-const VARIANT_CLASSES: Record<string, string> = {
-    coral: 'bg-coral text-white hover:bg-[#e85d5d]',
-    teal: 'bg-teal text-dark hover:bg-[#3dbdb4]',
-    yellow: 'bg-yellow text-dark hover:bg-[#f5da57]',
-    purple: 'bg-purple text-white hover:bg-[#9577e8]',
-    dark: 'bg-dark text-white hover:bg-[#2a2a44]',
-};
-
 const SIZE_CLASSES: Record<string, string> = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-5 py-2.5 text-base',
-    lg: 'px-7 py-3.5 text-lg',
+    sm: "memphis-btn-sm",
+    md: "memphis-btn-md",
+    lg: "memphis-btn-lg",
 };
 
 /**
  * Memphis Button
  *
+ * Uses the plugin's `.memphis-btn` base (border, radius, weight, uppercase,
+ * tracking, cursor, transition) plus `.btn-{color}` for palette and
+ * `.memphis-btn-{size}` for padding/font-size.
+ *
  * Flat design, sharp corners, thick border, bold colors.
  * No shadows, no gradients, no border-radius.
  */
 export function Button({
-    variant = 'coral',
-    size = 'md',
+    variant = "coral",
+    size = "md",
     children,
-    className = '',
+    className = "",
     disabled,
     ...props
 }: ButtonProps) {
     return (
         <button
             className={[
-                'border-4 border-dark font-bold uppercase tracking-wide',
-                'transition-colors cursor-pointer',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'active:scale-[0.97]',
-                VARIANT_CLASSES[variant],
+                "memphis-btn",
                 SIZE_CLASSES[size],
+                `btn-${variant}`,
                 className,
             ]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
             disabled={disabled}
             {...props}
         >

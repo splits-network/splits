@@ -102,4 +102,4 @@ Cards pages display collections of entities in grid layouts. They feature:
 - Grid cards without consistent border width -- always `border-4` for cards, `border-3` for inner elements
 
 ## Reference
-Showcase: `.claude/memphis/showcase/cards-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/cards/six/page.tsx`

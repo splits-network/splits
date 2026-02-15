@@ -163,5 +163,5 @@ interface AvailabilityCardProps {
 - **ContactInfoCard** composes: SidebarCard (from details)
 
 ## Reference
-Source: `.claude/memphis/showcase/profiles-six.tsx`
+Source: `apps/corporate/src/app/showcase/profiles/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

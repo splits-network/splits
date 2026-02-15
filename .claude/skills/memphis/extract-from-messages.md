@@ -132,5 +132,5 @@ interface QuickActionButtonProps {
 - Mobile responsive: `ConversationPanel` and `MessageThread` toggle visibility using `showMobileThread` state
 
 ## Reference
-Source: `.claude/memphis/showcase/messages-six.tsx`
+Source: `apps/corporate/src/app/showcase/messages/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

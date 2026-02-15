@@ -12,7 +12,7 @@ You are the Memphis Auditor. You scan pages and components for Memphis design vi
 
 ## Memphis Compliance Rules
 
-### Critical Violations (MUST FIX)
+### Critical Violations (MUST FIX — auto-fail)
 
 #### 1. Shadows (Zero Tolerance)
 Search patterns:
@@ -51,6 +51,165 @@ Example violation:
 <div className="bg-gradient-to-r from-blue-500 to-purple-600"> ❌ CRITICAL
 ```
 
+#### 4. Hardcoded Hex Colors (Zero Tolerance)
+The theme system is bypassed when hex values are hardcoded. This is as severe as a shadow violation.
+
+Search patterns:
+- `#FF6B6B`, `#ff6b6b` (coral)
+- `#4ECDC4`, `#4ecdc4` (teal)
+- `#FFE66D`, `#ffe66d` (yellow)
+- `#A78BFA`, `#a78bfa` (purple)
+- `#1A1A2E`, `#1a1a2e` (dark/navy)
+- `#F5F0EB`, `#f5f0eb` (cream)
+- `#2D2D44`, `#2d2d44` (darkGray)
+- Any other raw hex color value in TSX files
+- Any `rgba(` or `rgb(` in TSX files
+
+Grep command:
+```bash
+grep -n "#[0-9A-Fa-f]\{6\}\|rgba\?\s*(" <file>
+```
+
+Example violations:
+```tsx
+const M = { coral: "#FF6B6B", teal: "#4ECDC4" }; ❌ CRITICAL
+style={{ backgroundColor: "#1A1A2E" }} ❌ CRITICAL
+style={{ color: "rgba(255,255,255,0.4)" }} ❌ CRITICAL
+style={{ borderColor: "#FF6B6B" }} ❌ CRITICAL
+```
+
+Fix: Replace with Tailwind theme classes:
+```tsx
+className="bg-dark"        // not #1A1A2E
+className="text-cream/40"  // not rgba(255,255,255,0.4)
+className="border-coral"   // not #FF6B6B
+```
+
+#### 5. Inline Styles for Visual Properties (Zero Tolerance)
+Using `style={}` for colors, borders, backgrounds, spacing, or opacity bypasses Tailwind and the theme.
+
+Search patterns:
+- `style={{` followed by `backgroundColor`, `color`, `border`, `padding`, `margin`, `opacity`
+
+Grep command:
+```bash
+grep -n 'style={{' <file>
+```
+
+Then manually check each match. Allowed exceptions (dynamic values only):
+- ✅ `style={{ width: `${percent}%` }}` — dynamic calculated width
+- ✅ `style={{ transform: ... }}` — animation/position values
+- ✅ `style={{ gridTemplateColumns: ... }}` — dynamic grid
+
+NOT allowed:
+```tsx
+style={{ backgroundColor: M.navy }} ❌ CRITICAL
+style={{ color: "rgba(255,255,255,0.5)" }} ❌ CRITICAL
+style={{ borderBottom: "5px solid #FF6B6B" }} ❌ CRITICAL
+style={{ borderColor: M.darkGray }} ❌ CRITICAL
+style={{ padding: "1.5rem" }} ❌ CRITICAL
+```
+
+Fix: Convert to Tailwind classes:
+```tsx
+className="bg-dark"
+className="text-cream/50"
+className="border-b-4 border-coral"
+className="border-dark"
+className="p-6"
+```
+
+#### 6. Color Constant Objects (Zero Tolerance)
+Creating objects that store hex values is a pattern that leads to inline style usage.
+
+Search patterns:
+- `const M =`
+- `const COLORS =`
+- `const memphis`
+- `const colors =`
+- Any object literal containing hex color values
+
+Example violation:
+```tsx
+const M = {
+    coral: "#FF6B6B",
+    teal: "#4ECDC4",
+    navy: "#1A1A2E",
+}; ❌ CRITICAL — delete entirely, use Tailwind classes
+```
+
+#### 7. Wrong Border Tier Usage (Zero Tolerance)
+Memphis uses a 3-tier border hierarchy. Using the wrong tier for an element breaks visual consistency.
+
+**3-Tier Border Hierarchy:**
+- **Container tier (4px)**: Cards, modals, tables outer, tab bars → use `border-memphis` or `border-4`
+- **Interactive tier (3px)**: Buttons, inputs, selects, badges, CTAs → use `memphis-btn`, `memphis-badge`, `memphis-input`, `memphis-select`, or `border-memphis-interactive` or `border-3`
+- **Detail tier (2px)**: Checkboxes, toggle internals, table cells, tiny indicators → use `memphis-checkbox`, `memphis-toggle`, `border-memphis-detail`, or `border-2`
+
+Search patterns:
+- `border-[5px]`, `border-[1px]`, `border-[6px]` — arbitrary widths outside the 3 tiers
+- `border-[3px]`, `border-[2px]`, `border-[4px]` — arbitrary bracket syntax (use standard classes instead)
+- `5px solid`, `1px solid`, `6px solid` — inline style arbitrary widths
+- `border-4` on buttons/inputs — wrong tier (should be `border-3` / `memphis-btn` / `memphis-input`)
+- `border-2` on cards/modals — wrong tier (should be `border-4` / `border-memphis`)
+- `border-4` on checkboxes/toggles — wrong tier (should be `border-2` / `memphis-checkbox`)
+
+Example violations:
+```tsx
+style={{ borderBottom: "5px solid #FF6B6B" }} ❌ CRITICAL (arbitrary width)
+style={{ borderBottom: "1px solid #2D2D44" }} ❌ CRITICAL (arbitrary width)
+className="border-[5px]" ❌ CRITICAL (arbitrary bracket syntax)
+className="border-[4px]" ❌ CRITICAL (use border-4 instead of bracket)
+<button className="border-4"> ❌ CRITICAL (button is interactive tier → border-3 or memphis-btn)
+<input className="border-2"> ❌ CRITICAL (input is interactive tier → border-3 or memphis-input)
+<div className="card border-2"> ❌ CRITICAL (card is container tier → border-4 or border-memphis)
+<input type="checkbox" className="border-4"> ❌ CRITICAL (checkbox is detail tier → border-2 or memphis-checkbox)
+```
+
+Fix: Use the correct tier:
+```tsx
+// Container tier (4px) — cards, modals, tables, tab bars
+className="border-4 border-dark"       // or border-memphis
+className="memphis-card"               // plugin class (preferred)
+
+// Interactive tier (3px) — buttons, inputs, selects, badges
+className="border-3 border-dark"       // or border-memphis-interactive
+className="memphis-btn btn-coral"      // plugin class (preferred)
+className="memphis-input"              // plugin class (preferred)
+
+// Detail tier (2px) — checkboxes, toggles, table cells
+className="border-2 border-dark"       // or border-memphis-detail
+className="memphis-checkbox"           // plugin class (preferred)
+```
+
+#### 7b. Tailwind v4 Arbitrary Value Classes (Zero Tolerance — INVISIBLE BREAKAGE)
+
+**This is critical.** Tailwind v4 uses automatic content detection to generate CSS. Arbitrary value classes like `border-[3px]`, `w-[440px]`, `border-[2px]` will SILENTLY FAIL if Tailwind's scanner doesn't find them in the source files it processes. This is especially dangerous in:
+
+1. **Shared packages** (`packages/memphis-ui/`) — Tailwind scans `apps/portal/src/` but may NOT scan compiled package code in `dist/`
+2. **Default prop values** — `width = 'w-[440px]'` in a component's props won't be detected
+3. **Dynamic class construction** — `` className={`border-[${size}px]`} `` is never detected
+
+The result: the class is applied to the DOM element but **no CSS rule exists**, so the browser silently ignores it. Borders render at 0px, widths collapse, and the UI breaks with no console error.
+
+**Search patterns (ANY arbitrary bracket value is suspect):**
+```bash
+# Find all arbitrary Tailwind classes in TSX files
+grep -rn '\(className\|class\).*\[.*px\]' --include="*.tsx"
+# Specifically borders
+grep -rn 'border-\[[0-9]*px\]' --include="*.tsx"
+# Widths/heights
+grep -rn 'w-\[[0-9]*px\]\|h-\[[0-9]*px\]\|min-w-\[[0-9]*px\]' --include="*.tsx"
+```
+
+**Resolution rules:**
+- `border-[Npx]` → Use standard class (`border-4`) or inline `style={{ border: '4px solid' }}`
+- `w-[Npx]` → Use inline `style={{ width: 'Npx' }}` or `style={{ minWidth: 'Npx' }}`
+- For memphis-ui package components: ALWAYS use inline styles for configurable dimensions, NEVER arbitrary Tailwind classes
+- Standard Tailwind classes (`border-4`, `w-72`, `p-4`) are safe — they're always generated
+
+**Severity: CRITICAL** — These cause invisible rendering failures with zero console errors.
+
 ### Warning Violations (SHOULD FIX)
 
 #### 4. Non-Memphis Colors
@@ -71,23 +230,57 @@ Example violation:
 <button className="bg-blue-500"> ⚠️ WARNING
 ```
 
-#### 5. Thin Borders on Interactive Elements
-Interactive elements need border-4:
-- Buttons: `border-4 border-dark`
-- Inputs: `border-4 border-dark`
-- Textareas: `border-4 border-dark`
-- Selects: `border-4 border-dark`
-- Cards: `border-4 border-dark`
+#### 5. Wrong Border Tier on Elements
+Elements must use the correct border tier from the 3-tier hierarchy:
+
+- **Interactive elements** (buttons, inputs, textareas, selects): use plugin classes (`memphis-btn`, `memphis-input`, `memphis-select`) or `border-3` / `border-memphis-interactive`
+- **Container elements** (cards, modals, tables outer, tab bars): use plugin classes (`memphis-card`, `memphis-modal`, `memphis-table`) or `border-4` / `border-memphis`
+- **Detail elements** (checkboxes, toggles, table cells, tiny indicators): use plugin classes (`memphis-checkbox`, `memphis-toggle`) or `border-2` / `border-memphis-detail`
 
 Search for:
-- `border` (1px default)
-- `border-2`
-- `border-3`
+- `border` (1px default — too thin for any Memphis element)
+- `border-4` on buttons/inputs (wrong tier — should be `border-3` or plugin class)
+- `border-2` on cards/modals (wrong tier — should be `border-4` or plugin class)
+- `border-4` on checkboxes/toggles (wrong tier — should be `border-2` or plugin class)
 
-Example violation:
+Example violations:
 ```tsx
-<button className="btn border"> ⚠️ WARNING (1px, should be 4px)
+<button className="btn border"> ⚠️ WARNING (1px, should be 3px interactive tier)
+<button className="btn border-4"> ⚠️ WARNING (4px container tier on interactive element — use memphis-btn or border-3)
+<div className="card border-2"> ⚠️ WARNING (2px detail tier on container — use memphis-card or border-4)
+<input type="checkbox" className="border-4"> ⚠️ WARNING (4px container tier on detail element — use memphis-checkbox or border-2)
 ```
+
+#### 5b. Missing Memphis Plugin Class Usage (Warning)
+When raw Tailwind border/styling classes are used where a Memphis plugin class exists, flag it. Plugin classes ensure consistent border tiers, spacing, and typography.
+
+Example violations:
+```tsx
+<button className="border-3 border-dark bg-coral text-white font-bold uppercase"> ⚠️ WARNING
+  → should use: <button className="memphis-btn btn-coral memphis-btn-md">
+
+<span className="border-3 border-dark font-bold text-xs uppercase"> ⚠️ WARNING
+  → should use: <span className="memphis-badge">
+
+<input className="border-3 border-dark"> ⚠️ WARNING
+  → should use: <input className="memphis-input">
+
+<select className="border-3 border-dark"> ⚠️ WARNING
+  → should use: <select className="memphis-select">
+
+<div className="border-4 border-dark p-6"> (card) ⚠️ WARNING
+  → should use: <div className="memphis-card">
+
+<dialog className="border-4 border-dark"> ⚠️ WARNING
+  → should use: <dialog className="memphis-modal">
+```
+
+Search for raw Tailwind patterns that have plugin class equivalents:
+- `<button` with `border-3` or `border-dark` but no `memphis-btn` → suggest `memphis-btn`
+- `<input` with `border-3` or `border-dark` but no `memphis-input` → suggest `memphis-input`
+- `<select` with `border-3` or `border-dark` but no `memphis-select` → suggest `memphis-select`
+- `<span` with `border-3` + `font-bold` + `uppercase` but no `memphis-badge` → suggest `memphis-badge`
+- `<div` with `border-4` + `card`-like pattern but no `memphis-card` → suggest `memphis-card`
 
 ### Info Violations (NICE TO FIX)
 
@@ -106,15 +299,122 @@ Memphis typography:
 - Body: font-normal, normal case
 - Buttons: font-bold, uppercase
 
+### 8. Missing Memphis-UI Component Usage (Warning)
+When raw markup is used where a memphis-ui component exists, it's a sign the styling hierarchy wasn't followed.
+
+**Styling Hierarchy (agents MUST follow this order):**
+
+**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `memphis-btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
+
+1. **Memphis-UI React components** (`@splits-network/memphis-ui`) — use first if a matching component exists. Design decisions (border tier, colors, typography) are already correct.
+2. **Memphis plugin CSS classes** (`memphis-btn`, `memphis-badge`, `memphis-input`, `memphis-card`, etc.) — for raw HTML elements that need Memphis styling. Border tiers are baked in.
+3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-memphis-interactive`, etc.) — use for elements not covered by a component or plugin class
+4. **Local components** (in `{feature}-memphis/components/`) — for page-specific widgets, must use memphis-ui primitives internally
+5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid
+
+**Check for these patterns:**
+- Header being built from raw `<nav>` / `<a>` tags → should use `HeaderLogo`, `NavItem`, `NavDropdown`, `HeaderCta`, `MobileMenuToggle`, `HeaderDecorations`
+- Footer built from raw `<footer>` / `<div>` → should use `FooterLinkColumn`, `FooterBottomBar`, `FooterDecorations`, `NewsletterSection`, `SocialLink`
+- Cards built from raw `<div className="card border-4...">` → should use `Card`, `JobCard`, `StatCard`, `PricingCard`, etc.
+- Buttons built from raw `<button className="bg-coral...">` → should use `Button` component
+- Inputs built from raw `<input className="border-4...">` → should use `Input` component
+- Tables built from raw `<table>` → should use `Table` with `Pagination`
+- Modals built from raw `<dialog>` → should use `Modal`
+
+**Full component inventory:** See `packages/memphis-ui/src/components/index.ts` for all 86+ available components.
+
+### 10. Chart.js Usage (Critical — Must Migrate to Recharts)
+Charts must use **Recharts** with Memphis theming. Any Chart.js usage is a violation that must be migrated by `memphis-charts`.
+
+Search patterns:
+- `from 'chart.js'`
+- `from 'react-chartjs-2'`
+- `ChartJS.register(`
+- `import { Chart as ChartJS`
+- `registerChart` / `applyThemeToChart` from old chart-options.tsx
+
+Grep command:
+```bash
+grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerChart\|applyThemeToChart" --include="*.tsx" --include="*.ts"
+```
+
+Example violations:
+```tsx
+import { Line } from 'react-chartjs-2'; // CRITICAL
+import { Chart as ChartJS, ... } from 'chart.js'; // CRITICAL
+ChartJS.register(CategoryScale, ...); // CRITICAL
+```
+
+Recommendation: Spawn `memphis-charts` or run `/memphis:chart migrate <file>`
+
+### 11. Non-Memphis Chart Styling (Warning)
+Charts using Recharts must follow Memphis chart design rules. Check for:
+- Rounded bar corners (`radius` not `[0,0,0,0]`)
+- Curved lines (`type="monotone"` instead of `type="linear"`)
+- Default Recharts tooltip (no custom `content` prop — must use MemphisTooltip)
+- Thin strokes (`strokeWidth` less than 4 on data elements)
+- Missing `<ResponsiveContainer>` wrapper
+- Dashed grid lines (must be solid)
+- Hardcoded colors instead of `useMemphisChartColors()` hook
+- Missing `ChartLoadingState` for loading condition
+
+### 9. Placeholder / Generic Copy (Warning)
+Memphis pages should have copy written by the `memphis-copy` agent in the Designer Six voice. Flag text that looks like designer placeholder or generic copy.
+
+Search patterns:
+- `Lorem ipsum` or `lorem ipsum`
+- `TODO:` or `FIXME:` in user-facing strings
+- Generic placeholder text ("Description goes here", "Click here to get started")
+- Hedge words in user-facing text: "might", "could potentially", "we believe"
+- Corporate cliches: "leverage", "synergy", "revolutionize", "unlock your potential"
+- Passive voice CTAs: "Roles can be posted" instead of "Post a Role"
+
+Report as:
+```markdown
+⚠️ WARNING: Generic/placeholder copy — delegate to memphis-copy
+Line 42: "Enter your description here" — needs Designer Six voice
+Line 89: "Click here to get started" — weak CTA
+```
+
+Recommendation: Spawn `memphis-copy` to rewrite in Designer Six voice.
+
 ## Audit Process
 
 ### 1. Scan Target
-```bash
-# For single file
-grep -n "shadow\|rounded\|gradient" <file>
 
-# For entire app
-grep -rn "shadow\|rounded\|gradient" apps/<app>/src/
+Run ALL of these grep patterns against every file:
+
+```bash
+# === CRITICAL: Visual violations ===
+# Shadows
+grep -n "shadow-sm\|shadow-md\|shadow-lg\|shadow-xl\|shadow-2xl\|drop-shadow\|box-shadow:" <file>
+
+# Rounded corners (exclude rounded-full)
+grep -n "rounded-sm\|rounded-md\|rounded-lg\|rounded-xl\|rounded-2xl\|rounded-3xl\|border-radius:" <file>
+
+# Gradients
+grep -n "gradient\|linear-gradient\|radial-gradient" <file>
+
+# === CRITICAL: Theme bypass violations ===
+# Hardcoded hex colors
+grep -n "#[0-9A-Fa-f]\{6\}" <file>
+
+# Inline rgba/rgb
+grep -n "rgba\?\s*(" <file>
+
+# Color constant objects
+grep -n "const M \|const COLORS \|const memphis\|const colors " <file>
+
+# Inline style for visual properties
+grep -n "style={{" <file>
+
+# Wrong border tier / arbitrary border widths
+grep -n "border-\[.*px\]\|1px solid\|5px solid\|6px solid" <file>
+# Wrong tier on interactive elements (buttons/inputs should be border-3, not border-4)
+grep -n "<button.*border-4\|<input.*border-4\|<button.*border-2\|<input.*border-2" <file>
+
+# === For entire app ===
+# (replace <file> with apps/<app>/src/ and add -r flag)
 ```
 
 ### 2. Categorize Violations
@@ -122,7 +422,7 @@ grep -rn "shadow\|rounded\|gradient" apps/<app>/src/
 interface Violation {
   file: string;
   line: number;
-  type: 'shadow' | 'rounded' | 'gradient' | 'color' | 'border';
+  type: 'shadow' | 'rounded' | 'gradient' | 'color' | 'border' | 'hardcoded_hex' | 'inline_style' | 'color_constant' | 'border_width' | 'chartjs_usage' | 'chart_styling';
   severity: 'critical' | 'warning' | 'info';
   code: string;
   fix: string;
@@ -130,6 +430,14 @@ interface Violation {
 
 const violations: Violation[] = [];
 ```
+
+**Severity mapping:**
+- `shadow`, `rounded`, `gradient` → **critical**
+- `hardcoded_hex`, `inline_style`, `color_constant`, `border_width` → **critical**
+- `chartjs_usage` → **critical** (must migrate to Recharts)
+- `chart_styling` → **warning** (non-Memphis chart styling)
+- Non-Memphis Tailwind colors (bg-blue-500 etc.) → **warning**
+- Missing geometric decorations → **info**
 
 ### 3. Generate Report
 
@@ -160,9 +468,9 @@ Line 34: Non-Memphis color (bg-blue-500)
   <div className="bg-blue-500">
   Suggestion: <div className="bg-coral">
 
-Line 56: Thin border (border, 1px)
+Line 56: Wrong border tier (border, 1px)
   <button className="btn border">
-  Suggestion: <button className="btn border-4 border-dark">
+  Suggestion: <button className="memphis-btn btn-coral"> or <button className="btn border-3 border-dark">
 
 Line 102: Non-Memphis color (text-gray-600)
   <p className="text-gray-600">
@@ -172,9 +480,9 @@ Line 134: Non-Memphis color (border-gray-300)
   <div className="border border-gray-300">
   Suggestion: <div className="border-4 border-dark">
 
-Line 156: Thin border (border-2)
+Line 156: Wrong border tier (border-2 on input)
   <input className="input border-2">
-  Suggestion: <input className="input border-4 border-dark">
+  Suggestion: <input className="memphis-input"> or <input className="input border-3 border-dark">
 
 Info: 1
 -------
@@ -261,14 +569,45 @@ grep -rn "rounded-sm\|rounded-md\|rounded-lg\|rounded-xl\|rounded-2xl\|rounded-3
 grep -rn "bg-gradient\|linear-gradient\|radial-gradient\|conic-gradient" apps/portal/src/
 ```
 
+### Theme Bypass Patterns (CRITICAL)
+```bash
+# Hardcoded hex colors
+grep -rn "#[0-9A-Fa-f]\{6\}" apps/portal/src/ --include="*.tsx" --include="*.ts"
+
+# Inline rgba/rgb
+grep -rn "rgba\?\s*(" apps/portal/src/ --include="*.tsx"
+
+# Color constant objects
+grep -rn "const M \|const COLORS \|const memphis\|const colors " apps/portal/src/ --include="*.tsx"
+
+# Inline styles (check each manually for visual property violations)
+grep -rn "style={{" apps/portal/src/ --include="*.tsx"
+
+# Wrong border tier / arbitrary border widths
+grep -rn "border-\[.*px\]\|1px solid\|5px solid\|6px solid" apps/portal/src/ --include="*.tsx"
+# Wrong tier on buttons (should be border-3 / memphis-btn, not border-4)
+grep -rn "<button.*border-4\|<button.*border-2" apps/portal/src/ --include="*.tsx"
+# Wrong tier on inputs (should be border-3 / memphis-input, not border-4 or border-2)
+grep -rn "<input.*border-4\|<input.*border-2" apps/portal/src/ --include="*.tsx"
+# Raw Tailwind where plugin classes should be used
+grep -rn "<button.*border-3.*border-dark\|<input.*border-3.*border-dark\|<select.*border-3.*border-dark" apps/portal/src/ --include="*.tsx" | grep -v "memphis-btn\|memphis-input\|memphis-select"
+
+# Chart.js usage (must migrate to Recharts)
+grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerChart\|applyThemeToChart" apps/portal/src/ --include="*.tsx" --include="*.ts"
+```
+
 ### Warning Patterns
 ```bash
 # Non-Memphis colors (Tailwind)
 grep -rn "bg-blue-\|bg-green-\|bg-red-\|bg-orange-\|bg-indigo-\|bg-violet-\|bg-pink-\|bg-gray-\|bg-slate-\|bg-zinc-\|text-blue-\|text-green-\|text-red-\|border-blue-\|border-green-" apps/portal/src/
 
-# Thin borders on interactive elements
-grep -rn "className=\".*btn.*border\"" apps/portal/src/ | grep -v "border-4"
-grep -rn "className=\".*input.*border\"" apps/portal/src/ | grep -v "border-4"
+# Wrong border tier on elements
+grep -rn "className=\".*btn.*border\"" apps/portal/src/ | grep -v "border-3\|memphis-btn"
+grep -rn "className=\".*input.*border\"" apps/portal/src/ | grep -v "border-3\|memphis-input"
+# Raw Tailwind where plugin classes exist
+grep -rn "<button.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-btn"
+grep -rn "<input.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-input"
+grep -rn "<select.*border-3" apps/portal/src/ --include="*.tsx" | grep -v "memphis-select"
 ```
 
 ## Compliance Scoring
@@ -296,15 +635,93 @@ function calculateCompliance(violations: Violation[]): number {
 // 0-49%: Poor (critical violations)
 ```
 
-## Auto-Fix Option
+## Auto-Fix Capability (CRITICAL)
 
-If invoked with `--fix` flag:
+The auditor can automatically fix violations or spawn designers to fix them.
+
+### When Invoked with `--fix` Flag
 1. Generate full violation report
-2. Ask user to confirm auto-fix
-3. Spawn memphis-designer agents for each failing file
-4. Designers fix violations in parallel
-5. Re-audit after fixes
+2. Categorize fixes into auto-fixable vs manual:
+   - **Auto-fixable** (auditor handles directly with Edit tool):
+     - Delete color constant objects (`const M = { ... }`)
+     - Replace inline `style={{ backgroundColor: "#1A1A2E" }}` → `className="bg-dark"`
+     - Replace inline `style={{ color: "rgba(255,255,255,0.4)" }}` → `className="text-cream/40"`
+     - Replace inline `style={{ borderBottom: "5px solid #FF6B6B" }}` → `className="border-b-4 border-coral"`
+     - Replace hardcoded hex in className → proper Memphis class
+     - Fix wrong border tier → correct tier (container=4px, interactive=3px, detail=2px)
+     - Replace raw Tailwind with plugin classes (`memphis-btn`, `memphis-input`, `memphis-card`, etc.)
+   - **Needs designer** (spawn memphis-designer):
+     - Complex layout restructuring
+     - Adding geometric decorations
+     - Significant component redesign
+3. Auto-fix simple violations immediately
+4. Spawn memphis-designer for complex fixes
+5. Re-audit after all fixes applied
 6. Report before/after compliance scores
+
+### Auto-Fix Mapping
+
+| Violation | Auto-Fix |
+|-----------|----------|
+| `const M = { coral: "#FF6B6B", ... }` | Delete the entire constant |
+| `style={{ backgroundColor: "#1A1A2E" }}` | → `className="bg-dark"` |
+| `style={{ backgroundColor: M.navy }}` | → `className="bg-dark"` |
+| `style={{ color: "#FF6B6B" }}` | → `className="text-coral"` |
+| `style={{ color: "rgba(255,255,255,0.4)" }}` | → `className="text-cream/40"` |
+| `style={{ color: "rgba(255,255,255,0.15)" }}` | → `className="text-cream/15"` |
+| `style={{ borderBottom: "5px solid #FF6B6B" }}` | → `className="border-b-4 border-coral"` (container) or `border-b-3` (interactive) |
+| `style={{ borderBottom: "3px solid #2D2D44" }}` | → `className="border-b-3 border-dark"` (interactive) |
+| `style={{ borderBottom: "1px solid ..." }}` | → correct tier class based on element type |
+| `style={{ borderColor: M.darkGray }}` | → `className="border-dark"` |
+| `style={{ padding: "1.5rem" }}` | → `className="p-6"` |
+| `shadow-xl` | → Remove, add `border-4 border-dark` |
+| `rounded-lg` | → Remove |
+| `bg-gradient-to-r from-blue-500 to-purple-600` | → `bg-coral` |
+| `bg-blue-500` | → `bg-coral` or `bg-teal` |
+| `text-gray-600` | → `text-dark opacity-70` |
+| `border-gray-300` | → `border-dark` |
+| `border-[5px]` | → depends on element: `memphis-btn` (button), `memphis-input` (input), `border-memphis` (card) |
+| `border-[3px]` | → `border-3` or use plugin class |
+| `border-[2px]` | → `border-2` or use plugin class |
+| `border-[4px]` | → `border-4` or use plugin class (no arbitrary values) |
+| `border-2` on buttons | → `memphis-btn` (3px interactive tier) |
+| `border-4` on buttons | → `memphis-btn` (3px interactive tier) |
+| `border-2` on inputs | → `memphis-input` (3px interactive tier) |
+| `border-4` on checkboxes | → `memphis-checkbox` (2px detail tier) |
+| Raw Tailwind button styling | → `memphis-btn` + `btn-{color}` + `memphis-btn-{size}` |
+| Raw Tailwind badge styling | → `memphis-badge` |
+| Raw Tailwind input styling | → `memphis-input` |
+
+### Hex → Tailwind Class Mapping
+```
+#FF6B6B → coral    (bg-coral, text-coral, border-coral)
+#4ECDC4 → teal     (bg-teal, text-teal, border-teal)
+#FFE66D → yellow   (bg-yellow, text-yellow, border-yellow)
+#A78BFA → purple   (bg-purple, text-purple, border-purple)
+#1A1A2E → dark     (bg-dark, text-dark, border-dark)
+#F5F0EB → cream    (bg-cream, text-cream, border-cream)
+#2D2D44 → dark     (bg-dark, text-dark, border-dark)  // darkGray maps to dark
+#FFFFFF → cream    (bg-cream, text-cream)
+```
+
+### rgba → Tailwind Opacity Mapping
+```
+rgba(255,255,255,0.4)  → text-cream/40 or bg-cream/40
+rgba(255,255,255,0.15) → text-cream/15
+rgba(255,255,255,0.5)  → text-cream/50
+rgba(26,26,46,0.5)     → bg-dark/50
+```
+
+### Post-Fix Verification
+After auto-fix, re-run ALL audit patterns to confirm:
+- Zero hardcoded hex values
+- Zero inline styles for visual properties
+- Zero color constant objects
+- Correct tier usage: containers=4px, interactive=3px, details=2px
+- Zero arbitrary border widths (no bracket syntax, no non-tier widths)
+- Zero shadows, rounded corners, gradients
+- Plugin classes used where available (memphis-btn, memphis-input, memphis-card, etc.)
+If any violations remain, report them for manual review.
 
 ## Output Format
 
@@ -327,6 +744,53 @@ Report to orchestrator:
   recommendation: 'Fix 31 files with critical violations',
   autoFixAvailable: true
 }
+```
+
+## Available Memphis Plugin Classes Reference
+
+When auditing, recommend these plugin classes instead of raw Tailwind equivalents.
+
+### Buttons
+- `.memphis-btn` — base button (3px border, bold, uppercase)
+- `.memphis-btn-sm` — small size
+- `.memphis-btn-md` — medium size (default)
+- `.memphis-btn-lg` — large size
+- `.memphis-btn-outline` — outline variant
+- `.btn-coral` — coral color variant
+- `.btn-teal` — teal color variant
+- `.btn-yellow` — yellow color variant
+- `.btn-purple` — purple color variant
+- `.btn-dark` — dark color variant
+
+### Badges
+- `.memphis-badge` — badge element (3px border, bold, uppercase, small text)
+
+### Forms
+- `.memphis-input` — text input (3px border)
+- `.memphis-select` — select dropdown (3px border)
+- `.memphis-checkbox` — checkbox (2px border)
+- `.memphis-toggle` — toggle switch (2px border)
+
+### Layout
+- `.memphis-card` — card container (4px border)
+- `.memphis-card-dark` — dark card variant
+- `.memphis-modal` — modal dialog (4px border)
+- `.memphis-modal-overlay` — modal backdrop
+- `.memphis-table` — table container (4px outer border)
+- `.memphis-tabs` — tab bar container (4px border)
+- `.memphis-tab` — individual tab
+- `.memphis-tab-active` — active tab state
+
+### Border Tier Utility Classes
+- `.border-memphis` — container tier (4px)
+- `.border-memphis-interactive` — interactive tier (3px)
+- `.border-memphis-detail` — detail tier (2px)
+
+### CSS Custom Properties
+```css
+--memphis-border-container: 4px;    /* cards, modals, tables, tab bars */
+--memphis-border-interactive: 3px;  /* buttons, inputs, selects, badges */
+--memphis-border-detail: 2px;       /* checkboxes, toggles, table cells */
 ```
 
 ## Critical Rules

@@ -116,5 +116,5 @@ interface StatsBarProps {
 - All share the Memphis color palette constants
 
 ## Reference
-Source: `.claude/memphis/showcase/articles-six.tsx`
+Source: `apps/corporate/src/app/showcase/articles/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

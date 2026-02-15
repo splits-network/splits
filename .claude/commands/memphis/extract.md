@@ -42,7 +42,7 @@
 
 ### 2. Extract Component
 ```tsx
-// From: .claude/memphis/showcase/notifications-ui/page.tsx
+// From: apps/corporate/src/app/showcase/notifications-ui/page.tsx
 <div className="card border-4 border-dark bg-cream p-6">
   <div className="flex items-start gap-4">
     <div className="w-12 h-12 bg-coral flex items-center justify-center">

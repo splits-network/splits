@@ -200,5 +200,5 @@ interface ColumnVisibilityMenuProps {
 - **SortableColumnHeader** composes: SortIcon
 
 ## Reference
-Source: `.claude/memphis/showcase/tables-six.tsx`
+Source: `apps/corporate/src/app/showcase/tables/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

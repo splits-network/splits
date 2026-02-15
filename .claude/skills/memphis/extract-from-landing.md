@@ -136,5 +136,5 @@ interface CtaRoleCardProps {
 - All components use the Memphis color palette: coral `#FF6B6B`, teal `#4ECDC4`, yellow `#FFE66D`, purple `#A78BFA`, dark `#1A1A2E`, cream `#F5F0EB`
 
 ## Reference
-Source: `.claude/memphis/showcase/landing-six.tsx`
+Source: `apps/corporate/src/app/showcase/landing/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

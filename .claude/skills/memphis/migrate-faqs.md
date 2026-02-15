@@ -81,4 +81,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Missing count badges on category filter pills
 
 ## Reference
-Showcase: `.claude/memphis/showcase/faqs-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/faqs/six/page.tsx`

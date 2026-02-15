@@ -43,11 +43,16 @@
 - **Shadows**: box-shadow, drop-shadow, filter: drop-shadow()
 - **Rounded corners**: border-radius > 0
 - **Gradients**: background: linear-gradient(), radial-gradient()
+- **Hardcoded hex colors**: `#FF6B6B`, `#4ECDC4`, `#FFE66D`, `#A78BFA`, `#1A1A2E`, `#F5F0EB`, `#2D2D44`, or any hex in `style={{}}`
+- **Inline styles for visual props**: `style={{ backgroundColor: ... }}`, `style={{ color: ... }}`, `style={{ border: ... }}`
+- **Color constant objects**: `const M = { coral: "#FF6B6B" }`, `const COLORS = {}`, `const memphis = {}`
+- **Non-4px border widths**: `border-2`, `border-[3px]`, `border-[5px]`, `3px solid`, `5px solid`
 
 ### Warning Violations (Should Fix)
-- **Non-Memphis colors**: Colors outside Memphis palette
+- **Non-Memphis colors**: Colors outside Memphis palette (Tailwind blue-*, green-*, etc.)
 - **Thin borders**: border-width < 4px on buttons/inputs
 - **Missing decorations**: Pages without geometric shapes
+- **Component isolation**: Imports from original page's component tree
 
 ### Info Violations (Nice to Fix)
 - **Inconsistent spacing**: Not using Memphis spacing scale
@@ -97,13 +102,32 @@ Recommendations:
 Auto-fix available: Run /memphis:audit portal --fix
 ```
 
+## Scan Patterns
+
+The auditor uses these grep patterns to detect violations:
+```bash
+# Classic violations
+shadow, drop-shadow, box-shadow
+rounded-sm, rounded-md, rounded-lg, rounded-xl, rounded-2xl, rounded-3xl
+gradient, linear-gradient, radial-gradient
+
+# Theme bypass violations (CRITICAL)
+#FF6B6B, #4ECDC4, #FFE66D, #A78BFA, #1A1A2E, #F5F0EB, #2D2D44
+rgba(
+style={{
+const M =, const COLORS =, const memphis
+border-2, border-[3px], border-[5px], 3px solid, 5px solid
+```
+
 ## Implementation
 
 When invoked:
 1. Spawns memphis-auditor agent
 2. Auditor scans all files in target app
-3. Uses Grep to find violation patterns
+3. Uses Grep to find violation patterns (including theme bypass patterns)
 4. Categorizes violations by severity
 5. Generates comprehensive report
-6. Optionally spawns designers to fix violations
-7. Updates build progress state
+6. **Auto-fix flow**: Spawns memphis-designer to fix violations automatically
+7. Re-audits fixed files to verify compliance
+8. Repeats fix/verify loop until clean (max 3 iterations)
+9. Updates build progress state

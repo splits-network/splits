@@ -174,5 +174,5 @@ interface SettingsSaveBarProps {
 - **IntegrationCard** is self-contained
 
 ## Reference
-Source: `.claude/memphis/showcase/settings-six.tsx`
+Source: `apps/corporate/src/app/showcase/settings/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

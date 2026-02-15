@@ -275,3 +275,47 @@ export type { FAQAccordionProps, FAQItem } from './FAQAccordion';
 
 export { TrustBadge } from './TrustBadge';
 export type { TrustBadgeProps, TrustBadgeItem } from './TrustBadge';
+
+// Header components (from headers-six showcase)
+export { HeaderLogo } from './HeaderLogo';
+export type { HeaderLogoProps, LogoBrand } from './HeaderLogo';
+
+export { NavItem } from './NavItem';
+export type { NavItemProps } from './NavItem';
+
+export { NavDropdown } from './NavDropdown';
+export type { NavDropdownProps } from './NavDropdown';
+
+export { NavDropdownItem } from './NavDropdownItem';
+export type { NavDropdownItemProps } from './NavDropdownItem';
+
+export { HeaderSearchToggle } from './HeaderSearchToggle';
+export type { HeaderSearchToggleProps } from './HeaderSearchToggle';
+
+export { HeaderCta } from './HeaderCta';
+export type { HeaderCtaProps } from './HeaderCta';
+
+export { MobileMenuToggle } from './MobileMenuToggle';
+export type { MobileMenuToggleProps } from './MobileMenuToggle';
+
+export { MobileAccordionNav } from './MobileAccordionNav';
+export type { MobileAccordionNavProps, MobileNavItemData, MobileNavSubItem } from './MobileAccordionNav';
+
+export { HeaderDecorations } from './HeaderDecorations';
+export type { HeaderDecorationsProps } from './HeaderDecorations';
+
+// Footer components (from footers-six showcase)
+export { FooterDecorations } from './FooterDecorations';
+export type { FooterDecorationsProps } from './FooterDecorations';
+
+export { FooterLinkColumn } from './FooterLinkColumn';
+export type { FooterLinkColumnProps, FooterLinkData } from './FooterLinkColumn';
+
+export { NewsletterSection } from './NewsletterSection';
+export type { NewsletterSectionProps } from './NewsletterSection';
+
+export { FooterBottomBar } from './FooterBottomBar';
+export type { FooterBottomBarProps, FooterBottomBarLegalLink } from './FooterBottomBar';
+
+export { SocialLink } from './SocialLink';
+export type { SocialLinkProps } from './SocialLink';

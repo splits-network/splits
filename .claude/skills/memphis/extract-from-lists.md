@@ -141,5 +141,5 @@ interface ViewModeToggleProps {
 - Color cycling uses `ACCENT_CYCLE = [coral, teal, yellow, purple]` applied by item index
 
 ## Reference
-Source: `.claude/memphis/showcase/lists-six.tsx`
+Source: `apps/corporate/src/app/showcase/lists/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

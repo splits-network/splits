@@ -144,5 +144,5 @@ interface MemphisTagProps {
 - **CategoryFilterBar** composes: CategoryFilterButton
 
 ## Reference
-Source: `.claude/memphis/showcase/cards-six.tsx`
+Source: `apps/corporate/src/app/showcase/cards/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

@@ -69,4 +69,4 @@ const C = { coral: "#FF6B6B", teal: "#4ECDC4", yellow: "#FFE66D", purple: "#A78B
 - No GSAP staggered entrance animation on notification items
 
 ## Reference
-Showcase: `.claude/memphis/showcase/notifications-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/notifications/six/page.tsx`

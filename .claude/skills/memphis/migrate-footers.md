@@ -134,4 +134,4 @@ Footer pages are site-wide navigation and brand reinforcement components at the 
 - Missing app store badges
 
 ## Reference
-Showcase: `.claude/memphis/showcase/footers-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/footers/six/page.tsx`

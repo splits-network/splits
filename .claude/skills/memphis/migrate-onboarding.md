@@ -124,4 +124,4 @@ Onboarding pages guide new users through a multi-step setup wizard. They feature
 - Skip button styled as a prominent button instead of muted text link
 
 ## Reference
-Showcase: `.claude/memphis/showcase/onboarding-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/onboarding/six/page.tsx`

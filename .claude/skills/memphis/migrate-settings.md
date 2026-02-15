@@ -134,4 +134,4 @@ Settings pages provide form-based configuration organized by category. They feat
 - Save button without loading spinner state
 
 ## Reference
-Showcase: `.claude/memphis/showcase/settings-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/settings/six/page.tsx`

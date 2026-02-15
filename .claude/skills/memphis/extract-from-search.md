@@ -139,5 +139,5 @@ interface ResultsHeaderProps {
 - **ResultsHeader** composes: SortSelect
 
 ## Reference
-Source: `.claude/memphis/showcase/search-six.tsx`
+Source: `apps/corporate/src/app/showcase/search/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

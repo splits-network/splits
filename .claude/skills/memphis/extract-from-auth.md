@@ -171,5 +171,5 @@ Horizontal bar with 4 equal colored segments.
 - All components rely on the Memphis color palette constant `C`
 
 ## Reference
-Source: `.claude/memphis/showcase/auth-six.tsx`
+Source: `apps/corporate/src/app/showcase/auth/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

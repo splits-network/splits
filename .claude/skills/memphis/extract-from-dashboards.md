@@ -141,5 +141,5 @@ interface TrendIndicatorProps {
 - The main layout uses `lg:ml-[260px]` to accommodate the sidebar
 
 ## Reference
-Source: `.claude/memphis/showcase/dashboards-six.tsx`
+Source: `apps/corporate/src/app/showcase/dashboards/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

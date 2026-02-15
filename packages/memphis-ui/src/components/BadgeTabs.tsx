@@ -7,6 +7,8 @@ export interface BadgeTab {
     key: string;
     /** Display label */
     label: string;
+    /** FontAwesome icon class (e.g. "fa-duotone fa-regular fa-grid-2") */
+    icon?: string;
     /** Count to display in the badge (0 hides the badge) */
     count?: number;
     /** Accent color for the count badge */
@@ -20,17 +22,19 @@ export interface BadgeTabsProps {
     activeKey: string;
     /** Called when a tab is selected */
     onChange: (key: string) => void;
+    /** Whether tabs stretch to fill container (default true) */
+    stretch?: boolean;
+    /** Active tab text color — defaults to white */
+    activeTextColor?: string;
     /** Additional className */
     className?: string;
 }
 
-const COLORS = {
-    dark: '#1A1A2E',
-};
-
 /**
  * BadgeTabs - Memphis-styled tabs with count badges
  *
+ * Outer container uses the container tier (4px) via `.border-memphis`.
+ * Inner count badges use the detail tier (2px) via `.border-memphis-detail`.
  * Active tab inverts to dark background. Each tab can display a colored
  * count badge. Extracted from tabs-six showcase.
  */
@@ -38,12 +42,13 @@ export function BadgeTabs({
     tabs,
     activeKey,
     onChange,
+    stretch = true,
+    activeTextColor,
     className = '',
 }: BadgeTabsProps) {
     return (
         <div
-            className={['flex gap-0 bg-white', className].filter(Boolean).join(' ')}
-            style={{ border: `4px solid ${COLORS.dark}` }}
+            className={['flex gap-0 bg-white border-memphis', className].filter(Boolean).join(' ')}
         >
             {tabs.map((tab, i) => {
                 const isActive = tab.key === activeKey;
@@ -53,21 +58,21 @@ export function BadgeTabs({
                     <button
                         key={tab.key}
                         onClick={() => onChange(tab.key)}
-                        className="flex-1 px-4 py-4 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                        className={`${stretch ? 'flex-1' : ''} px-4 py-4 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer`}
                         style={{
-                            background: isActive ? COLORS.dark : 'transparent',
-                            color: isActive ? '#fff' : COLORS.dark,
-                            borderRight: i < tabs.length - 1 ? `2px solid ${COLORS.dark}30` : 'none',
+                            background: isActive ? 'var(--color-dark)' : 'transparent',
+                            color: isActive ? (activeTextColor || '#fff') : 'var(--color-dark)',
+                            borderRight: i < tabs.length - 1 ? '2px solid rgba(26, 26, 46, 0.19)' : 'none',
                         }}
                     >
+                        {tab.icon && <i className={tab.icon} />}
                         {tab.label}
                         {tab.count !== undefined && tab.count > 0 && (
                             <span
-                                className="px-2 py-0.5 text-[10px] font-black"
+                                className="px-2 py-0.5 text-[10px] font-black border-memphis-detail"
                                 style={{
                                     background: hex,
-                                    color: COLORS.dark,
-                                    border: `2px solid ${COLORS.dark}`,
+                                    color: 'var(--color-dark)',
                                 }}
                             >
                                 {tab.count}

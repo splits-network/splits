@@ -99,4 +99,4 @@ List pages are data-rich interactive views with sidebar navigation, search/filte
 - Status colors not mapped to the Memphis palette
 
 ## Reference
-Showcase: `.claude/memphis/showcase/lists-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/lists/six/page.tsx`

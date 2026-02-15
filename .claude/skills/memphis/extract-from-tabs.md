@@ -199,5 +199,5 @@ Extract reusable components from the tabs showcase page.
 - All components use the Memphis color palette `COLORS`
 
 ## Reference
-Source: `.claude/memphis/showcase/tabs-six.tsx`
+Source: `apps/corporate/src/app/showcase/tabs/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

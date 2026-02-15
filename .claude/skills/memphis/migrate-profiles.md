@@ -106,4 +106,4 @@ Profile pages display a person or entity's full public-facing information. They 
 - Activity items without colored icon box (just icon alone)
 
 ## Reference
-Showcase: `.claude/memphis/showcase/profiles-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/profiles/six/page.tsx`

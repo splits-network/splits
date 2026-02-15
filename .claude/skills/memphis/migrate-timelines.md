@@ -80,4 +80,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Missing the horizontal track line (`h-1`, dark) connecting milestone nodes
 
 ## Reference
-Showcase: `.claude/memphis/showcase/timelines-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/timelines/six/page.tsx`

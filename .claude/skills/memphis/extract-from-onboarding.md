@@ -165,5 +165,5 @@ interface StepBadgeProps {
 - **NotificationPreferenceList** composes: NotificationPreferenceRow (uses checkbox pattern from IndustryChip)
 
 ## Reference
-Source: `.claude/memphis/showcase/onboarding-six.tsx`
+Source: `apps/corporate/src/app/showcase/onboarding/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

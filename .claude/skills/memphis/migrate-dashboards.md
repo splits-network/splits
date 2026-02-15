@@ -103,4 +103,4 @@ Dashboard pages are data-heavy analytical views with KPI cards, charts (line, do
 - Quick action cards without badge counts or "Go" arrow links
 
 ## Reference
-Showcase: `.claude/memphis/showcase/dashboards-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/dashboards/six/page.tsx`

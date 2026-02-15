@@ -137,4 +137,4 @@ Form pages are multi-step wizard forms with rich input components, real-time val
 - Missing submitting animation state
 
 ## Reference
-Showcase: `.claude/memphis/showcase/forms-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/forms/six/page.tsx`

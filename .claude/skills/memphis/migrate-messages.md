@@ -109,4 +109,4 @@ Messages pages are real-time chat interfaces with a two-pane layout (conversatio
 - Missing quick action buttons in compose area
 
 ## Reference
-Showcase: `.claude/memphis/showcase/messages-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/messages/six/page.tsx`

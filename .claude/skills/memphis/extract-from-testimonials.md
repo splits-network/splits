@@ -160,5 +160,5 @@ Extract reusable components from the testimonials showcase page.
 - All components use the Memphis color palette `COLORS`
 
 ## Reference
-Source: `.claude/memphis/showcase/testimonials-six.tsx`
+Source: `apps/corporate/src/app/showcase/testimonials/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

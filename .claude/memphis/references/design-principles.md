@@ -170,6 +170,105 @@ Memphis pages should include 1-3 decorative geometric elements:
 - Use z-index carefully
 - Rotate for visual interest (rotate-45, rotate-90, rotate-180)
 
+### 6. Styling Hierarchy (CRITICAL — follow this order)
+
+Before writing ANY markup, follow this hierarchy:
+
+**1. Memphis UI Components (FIRST CHOICE)**
+Use pre-built components from `@splits-network/memphis-ui` (86+ components).
+These already have correct Memphis styling baked in.
+
+```tsx
+// ❌ WRONG — raw markup when a component exists
+<button className="bg-coral text-dark border-4 border-dark font-bold uppercase px-6 py-3">
+  Sign Up
+</button>
+
+// ✅ CORRECT — use the component
+import { Button } from '@splits-network/memphis-ui';
+<Button variant="primary" size="lg">Sign Up</Button>
+```
+
+Check `packages/memphis-ui/src/components/index.ts` for the full component list.
+Key categories: Header, Footer, Cards, Forms, Tables, Navigation, Feedback, Layout, Profiles.
+
+**2. Memphis CSS Theme Classes (SECOND CHOICE)**
+If no component fits, use theme Tailwind tokens:
+```tsx
+className="bg-coral text-dark border-4 border-dark"
+```
+
+**3. Local Components (THIRD CHOICE)**
+Page-specific widgets in `{feature}-memphis/components/`. Must use memphis-ui primitives internally.
+
+**4. Raw Tailwind (LAST RESORT)**
+Only for layout/spacing/grid: `className="grid grid-cols-3 gap-6 p-8"`
+
+### 7. Tailwind Classes ONLY - No Inline Styles
+**ZERO hardcoded hex colors. ZERO inline style={{}} for visual properties.**
+
+This is the single most important rule for maintaining the theme system. If colors are hardcoded as hex values or set via inline styles, they bypass the theme entirely.
+
+❌ **FORBIDDEN — Color Constants:**
+```tsx
+const M = { coral: "#FF6B6B", teal: "#4ECDC4", navy: "#1A1A2E" };
+const COLORS = { primary: "#FF6B6B" };
+const memphisColors = { ... };
+```
+
+❌ **FORBIDDEN — Inline Styles for Visual Props:**
+```tsx
+style={{ backgroundColor: M.navy }}
+style={{ borderBottom: `5px solid ${M.coral}` }}
+style={{ color: "#FF6B6B" }}
+style={{ color: "rgba(255,255,255,0.4)" }}
+style={{ borderColor: "#2D2D44" }}
+style={{ padding: "1.5rem" }}
+```
+
+✅ **CORRECT — Tailwind Classes Only:**
+```tsx
+className="bg-dark"
+className="border-b-4 border-coral"
+className="text-coral"
+className="text-cream/40"
+className="border-dark"
+className="p-6"
+```
+
+**Opacity with Tailwind:**
+```tsx
+// ❌ WRONG
+style={{ color: "rgba(255,255,255,0.4)" }}
+
+// ✅ CORRECT
+className="text-cream/40"
+```
+
+**Allowed inline styles (rare exceptions):**
+- `style={{ width: `${percentage}%` }}` — dynamic calculated values
+- `style={{ transform: `translateX(${x}px)` }}` — animation values
+- `style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}` — dynamic grid
+
+### 8. Border Width Consistency - 4px ALWAYS
+**All borders must be 4px. No exceptions.**
+
+❌ **FORBIDDEN:**
+```tsx
+style={{ borderBottom: "3px solid #2D2D44" }}
+style={{ borderBottom: "5px solid #FF6B6B" }}
+className="border-2"
+className="border-[3px]"
+className="border-[5px]"
+```
+
+✅ **CORRECT:**
+```tsx
+className="border-4 border-dark"
+className="border-b-4 border-coral"
+className="border-t-4 border-teal"
+```
+
 ## Additional Guidelines
 
 ### Typography
@@ -310,11 +409,16 @@ Before marking any page/component as "Memphis compliant":
 - [ ] ❌ No box-shadow or drop-shadow
 - [ ] ❌ No border-radius (except rounded-full for circles)
 - [ ] ❌ No gradients (linear, radial, conic)
-- [ ] ✅ Memphis colors only (coral, teal, yellow, purple, dark, cream)
-- [ ] ✅ 4px borders on all interactive elements
+- [ ] ❌ No hardcoded hex colors (#FF6B6B, rgba(), etc.)
+- [ ] ❌ No inline style={{}} for visual properties (colors, borders, backgrounds, spacing, opacity)
+- [ ] ❌ No color constant objects (const M = {}, const COLORS = {})
+- [ ] ❌ No non-4px border widths (no 3px, 5px — always border-4)
+- [ ] ✅ Memphis colors via Tailwind classes only (bg-coral, text-dark, border-teal)
+- [ ] ✅ 4px borders on all interactive elements (border-4 class)
 - [ ] ✅ 1-3 geometric decorations added
 - [ ] ✅ High contrast maintained (WCAG AA)
 - [ ] ✅ Accessibility preserved (ARIA, keyboard nav)
 - [ ] ✅ Flat design aesthetic throughout
+- [ ] ✅ Component isolation (no imports from original page tree)
 
 **If ANY violation exists, compliance = 0%. Fix before proceeding.**

@@ -107,4 +107,4 @@ Empty state pages communicate "no data" scenarios with engaging visuals and help
 - Not using dark background for full-page empty state showcase
 
 ## Reference
-Showcase: `.claude/memphis/showcase/empty-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/empty/six/page.tsx`

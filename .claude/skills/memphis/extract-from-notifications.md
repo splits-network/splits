@@ -134,5 +134,5 @@ Extract reusable components from the notifications showcase page.
 - All components rely on the Memphis color palette constant `C` and the `TYPE_META` mapping
 
 ## Reference
-Source: `.claude/memphis/showcase/notifications-six.tsx`
+Source: `apps/corporate/src/app/showcase/notifications/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

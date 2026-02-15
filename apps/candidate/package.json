@@ -16,6 +16,7 @@
     "@sentry/nextjs": "^10.32.1",
     "@splits-network/shared-api-client": "workspace:*",
     "@splits-network/shared-types": "workspace:*",
+    "@splits-network/memphis-ui": "workspace:*",
     "@splits-network/shared-ui": "workspace:*",
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.0",
@@ -24,7 +25,8 @@
     "next": "^16.1.0",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

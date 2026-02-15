@@ -129,4 +129,4 @@ Table pages display structured data in rows and columns with rich interactivity.
 - Default browser `<select>` styling without Memphis borders
 
 ## Reference
-Showcase: `.claude/memphis/showcase/tables-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/tables/six/page.tsx`

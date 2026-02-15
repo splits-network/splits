@@ -80,4 +80,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Stats section with rounded or shadowed cards instead of flat colored blocks
 
 ## Reference
-Showcase: `.claude/memphis/showcase/testimonials-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/testimonials/six/page.tsx`

@@ -203,5 +203,5 @@ interface FormSuccessStateProps {
 - Form state management: `useState` for form data, `Set<string>` for touched fields
 
 ## Reference
-Source: `.claude/memphis/showcase/forms-six.tsx`
+Source: `apps/corporate/src/app/showcase/forms/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

@@ -153,7 +153,7 @@ Apply Memphis theme to component
 
 ## Showcase Pages (26 Total)
 
-Reference implementations in `.claude/memphis/showcase/`:
+Reference implementations in `apps/corporate/src/app/showcase/`:
 
 1. landing-six.tsx - Landing page
 2. articles-six.tsx - Article/blog page

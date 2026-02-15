@@ -169,5 +169,5 @@ interface PopularBadgeProps {
 - **BillingToggle** is self-contained (uses Memphis toggle pattern)
 
 ## Reference
-Source: `.claude/memphis/showcase/pricing-six.tsx`
+Source: `apps/corporate/src/app/showcase/pricing/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

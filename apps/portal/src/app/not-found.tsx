@@ -8,7 +8,6 @@ export const metadata = {
 export default function NotFound() {
     return (
         <>
-            <Header />
             <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
                 <div className="max-w-2xl w-full text-center">
                     {/* Large 404 with gradient background */}

@@ -24,6 +24,8 @@ export interface TrustBadgeProps {
  * TrustBadge - Grid of trust/security indicators
  *
  * Memphis compliant trust badges with icon, label, and accent-colored borders.
+ * Uses the interactive tier border (3px) from the plugin via
+ * `.border-memphis-interactive`.
  * Commonly used in pricing or security sections.
  * Extracted from pricing-six showcase.
  */
@@ -45,7 +47,7 @@ export function TrustBadge({ items, columns = 4, className = '' }: TrustBadgePro
                 return (
                     <div
                         key={i}
-                        className="border-3 p-4 text-center"
+                        className="border-memphis-interactive p-4 text-center"
                         style={{
                             borderColor: hex,
                             backgroundColor: 'rgba(255,255,255,0.03)',

@@ -147,5 +147,5 @@ Extract reusable components from the timelines showcase page.
 - All components use the Memphis color palette `COLORS`
 
 ## Reference
-Source: `.claude/memphis/showcase/timelines-six.tsx`
+Source: `apps/corporate/src/app/showcase/timelines/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

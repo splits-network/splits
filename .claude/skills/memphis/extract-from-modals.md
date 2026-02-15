@@ -144,5 +144,5 @@ interface WarningBoxProps {
 - All animations require GSAP library
 
 ## Reference
-Source: `.claude/memphis/showcase/modals-six.tsx`
+Source: `apps/corporate/src/app/showcase/modals/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

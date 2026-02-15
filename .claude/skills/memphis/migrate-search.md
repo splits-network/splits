@@ -114,4 +114,4 @@ Search pages enable users to find and filter entities with advanced criteria. Th
 - Sort/filter controls with default browser styling -- style with `border-3` and Memphis colors
 
 ## Reference
-Showcase: `.claude/memphis/showcase/search-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/search/six/page.tsx`

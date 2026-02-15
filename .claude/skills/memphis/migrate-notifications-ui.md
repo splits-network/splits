@@ -68,4 +68,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Not using the type-to-color mapping (success=teal, error=coral, warning=yellow, info=purple)
 
 ## Reference
-Showcase: `.claude/memphis/showcase/notifications-ui-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/notifications-ui/page.tsx`

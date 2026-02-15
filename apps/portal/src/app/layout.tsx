@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
-import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { ServiceStatusBannerMemphis } from "@/components/service-status-banner-memphis";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -12,8 +12,8 @@ import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 import { UserProfileProvider } from "@/contexts";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { HeaderMemphis } from "@/components/header-memphis";
+import { FooterMemphis } from "@/components/footer-memphis";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -153,10 +153,12 @@ export default async function RootLayout({
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <UserProfileProvider>
-                        <ThemeInitializer />
-                        <ServiceStatusBanner statusHref="/public/status" />
                         <ToastProvider>
+                            <HeaderMemphis />
+                            <ThemeInitializer />
+                            <ServiceStatusBannerMemphis statusHref="/public/status" />
                             <main className="grow">{children}</main>
+                            <FooterMemphis />
                             <CookieConsent />
                         </ToastProvider>
                         <DevDebugPanel />

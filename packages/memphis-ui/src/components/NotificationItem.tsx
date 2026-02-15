@@ -103,7 +103,7 @@ export function NotificationItem({
                 <div className="flex items-center gap-1 flex-shrink-0">
                     {onToggleRead && (
                         <button
-                            onClick={onToggleRead}
+                            onClick={(e) => { e.stopPropagation(); onToggleRead(); }}
                             title={read ? 'Mark unread' : 'Mark read'}
                             className="w-7 h-7 flex items-center justify-center border-2 transition-colors"
                             style={{
@@ -116,7 +116,7 @@ export function NotificationItem({
                     )}
                     {onDelete && (
                         <button
-                            onClick={onDelete}
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
                             title="Delete"
                             className="w-7 h-7 flex items-center justify-center border-2 transition-colors"
                             style={{ borderColor: 'rgba(26,26,46,0.1)', color: 'rgba(26,26,46,0.3)' }}

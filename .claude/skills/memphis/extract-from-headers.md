@@ -136,5 +136,5 @@ interface MobileAccordionNavProps {
 - Animation constants used: D (durations), E (easing), S (stagger)
 
 ## Reference
-Source: `.claude/memphis/showcase/headers-six.tsx`
+Source: `apps/corporate/src/app/showcase/headers/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

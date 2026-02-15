@@ -91,4 +91,4 @@ Details pages display a single entity (job, candidate, placement) in depth. They
 - Using `gap-1` for metadata -- use `gap-4` for breathing room
 
 ## Reference
-Showcase: `.claude/memphis/showcase/details-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/details/six/page.tsx`

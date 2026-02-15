@@ -94,4 +94,4 @@ Header pages showcase navigation components in both desktop and mobile variants.
 - Missing top utility bar on desktop
 
 ## Reference
-Showcase: `.claude/memphis/showcase/headers-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/headers/six/page.tsx`

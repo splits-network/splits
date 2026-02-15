@@ -106,5 +106,5 @@ interface MemphisBackgroundShapesProps {
 - All illustration components are standalone with no props
 
 ## Reference
-Source: `.claude/memphis/showcase/empty-six.tsx`
+Source: `apps/corporate/src/app/showcase/empty/six/page.tsx`
 Target: `packages/memphis-ui/src/components/`

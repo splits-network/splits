@@ -82,4 +82,4 @@ const COLORS = { coral: '#FF6B6B', teal: '#4ECDC4', yellow: '#FFE66D', purple: '
 - Not handling disabled state with lock icon and `cursor: not-allowed`
 
 ## Reference
-Showcase: `.claude/memphis/showcase/tabs-six.tsx`
+Showcase: `apps/corporate/src/app/showcase/tabs/six/page.tsx`

@@ -1,0 +1,76 @@
+/* Memphis DaisyUI Theme for Candidate App
+ *
+ * Scoped to [data-theme="memphis"] via daisyui/theme plugin.
+ * Does NOT affect applicant-light or applicant-dark themes.
+ *
+ * Memphis color palette:
+ *   coral   = #FF6B6B   (primary, CTAs)
+ *   teal    = #4ECDC4   (secondary, success)
+ *   yellow  = #FFE66D   (accent, warnings)
+ *   purple  = #A78BFA   (info, tertiary)
+ *   dark    = #1A1A2E   (neutral, text)
+ *   cream   = #F5F0EB   (base-200)
+ *   white   = #FFFFFF   (base-100)
+ */
+
+@plugin "daisyui/theme" {
+    name: "memphis";
+    color-scheme: light;
+    default: false;
+    prefersdark: false;
+
+    --color-primary: #FF6B6B;
+    --color-primary-content: #FFFFFF;
+
+    --color-secondary: #4ECDC4;
+    --color-secondary-content: #1A1A2E;
+
+    --color-accent: #FFE66D;
+    --color-accent-content: #1A1A2E;
+
+    --color-neutral: #1A1A2E;
+    --color-neutral-content: #FFFFFF;
+
+    --color-base-100: #FFFFFF;
+    --color-base-200: #F5F0EB;
+    --color-base-300: #E8E0D8;
+    --color-base-content: #1A1A2E;
+
+    --color-info: #A78BFA;
+    --color-info-content: #FFFFFF;
+
+    --color-success: #4ECDC4;
+    --color-success-content: #1A1A2E;
+
+    --color-warning: #FFE66D;
+    --color-warning-content: #1A1A2E;
+
+    --color-error: #FF6B6B;
+    --color-error-content: #FFFFFF;
+
+    --radius-selector: 0;
+    --radius-field: 0;
+    --radius-box: 0;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 4px;
+    --depth: 0;
+    --noise: 0;
+}
+
+/* Memphis custom color utilities (globally available, uniquely named) */
+@theme {
+    --color-coral: #FF6B6B;
+    --color-teal: #4ECDC4;
+    --color-yellow: #FFE66D;
+    --color-purple: #A78BFA;
+    --color-dark: #1A1A2E;
+    --color-dark-gray: #2D2D44;
+    --color-cream: #F5F0EB;
+
+    --color-coral-light: #FF9E9E20;
+    --color-teal-light: #4ECDC420;
+    --color-yellow-light: #FFE66D20;
+    --color-purple-light: #A78BFA20;
+    --color-dark-overlay: #1A1A2E50;
+}
