@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PageAnimator } from "./page-animator";
+import { PageAnimator } from "./landing-animator";
 
 // Memphis colors - using semantic Tailwind theme colors
 const MEMPHIS_COLORS = {

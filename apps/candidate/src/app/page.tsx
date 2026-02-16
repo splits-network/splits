@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@splits-network/shared-ui";
 import { buildCanonical } from "@/lib/seo";
 import { candidateFaqs } from "@/components/landing/sections/faq-data";
-import PageMemphisClient from "./page-client";
+import PageMemphisClient from "./landing-client";
 
 export const metadata: Metadata = {
     title: "Find Your Next Career Opportunity",
