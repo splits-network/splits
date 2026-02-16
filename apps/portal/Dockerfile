@@ -12,6 +12,7 @@ COPY packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
+COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY apps/portal/package.json ./apps/portal/
 RUN pnpm install --frozen-lockfile
 
@@ -54,12 +55,14 @@ COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
+COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/portal ./apps/portal
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
+RUN pnpm --filter @splits-network/memphis-ui build
 # Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
 
@@ -75,6 +78,7 @@ COPY --from=build /app/packages/shared-api-client/package.json ./packages/shared
 COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
+COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY --from=build /app/apps/portal/package.json ./apps/portal/
 
 # Production install (only dependencies, no devDependencies)
@@ -85,6 +89,7 @@ COPY --from=build /app/packages/shared-api-client/dist ./packages/shared-api-cli
 COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
+COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/apps/portal/.next ./apps/portal/.next
 COPY --from=build /app/apps/portal/public ./apps/portal/public
 COPY --from=build /app/apps/portal/next.config.mjs ./apps/portal/
