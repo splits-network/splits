@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import StatusMemphisClient from "./status-client";
+import StatusMemphisClient from "./status-memphis-client";
 import type { ServiceHealth } from "@splits-network/shared-ui";
 
 export const revalidate = 15;

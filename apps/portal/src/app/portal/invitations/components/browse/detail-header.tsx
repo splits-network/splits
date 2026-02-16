@@ -40,7 +40,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                 )}
                 <button
                     onClick={onClose}
-                    className="btn btn-sm btn-circle btn-ghost hidden md:flex"
+                    className="btn btn-sm btn-square btn-ghost hidden md:flex"
                     aria-label="Close"
                 >
                     <i className="fa-duotone fa-regular fa-xmark" />

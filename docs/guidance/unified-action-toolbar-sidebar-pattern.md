@@ -11,21 +11,21 @@ This document describes the architectural pattern for implementing consistent, r
 List-based features (roles, candidates, applications, etc.) typically suffered from:
 
 1. **Scattered Action Implementations**
-   - Actions duplicated across card views, table views, detail pages
-   - Inconsistent button styles, sizes, and colors
-   - Different permission checks in different places
-   - Difficult to maintain and update
+    - Actions duplicated across card views, table views, detail pages
+    - Inconsistent button styles, sizes, and colors
+    - Different permission checks in different places
+    - Difficult to maintain and update
 
 2. **Poor Browsing Experience**
-   - Navigation away from list loses scroll position and context
-   - Can't quickly compare multiple items
-   - Slow to browse through items
-   - Mobile unfriendly navigation patterns
+    - Navigation away from list loses scroll position and context
+    - Can't quickly compare multiple items
+    - Slow to browse through items
+    - Mobile unfriendly navigation patterns
 
 3. **Maintenance Burden**
-   - Changes require updating multiple components
-   - Easy to miss edge cases and permission checks
-   - No single source of truth for actions
+    - Changes require updating multiple components
+    - Easy to miss edge cases and permission checks
+    - No single source of truth for actions
 
 ## Solution Architecture
 
@@ -76,48 +76,59 @@ export interface <Feature>ActionsToolbarProps {
 ### Action Types
 
 #### 1. **View Details Action**
+
 - **Always visible** (unless explicitly hidden)
 - **Behavior**:
-  - If `onViewDetails` provided → call callback (opens sidebar)
-  - Else → Link to detail page
+    - If `onViewDetails` provided → call callback (opens sidebar)
+    - Else → Link to detail page
 - **Icon**: `fa-eye`
 
 #### 2. **Primary Action(s)**
+
 - Feature-specific primary actions
 - **Color**: Primary (blue)
 - **Examples**:
-  - Roles: "Submit Candidate"
-  - Applications: "Move to Interview"
-  - Candidates: "Propose to Role"
+    - Roles: "Submit Candidate"
+    - Applications: "Move to Interview"
+    - Candidates: "Propose to Role"
 
 #### 3. **Edit Action**
+
 - **Permission-based** (admin/owner)
 - **Color**: Ghost (neutral)
 - **Icon**: `fa-pen-to-square`
 - Opens edit modal
 
 #### 4. **Status/State Actions**
+
 - Entity-specific state transitions
 - **Rendered as individual colored buttons** (NOT dropdown)
 - **Color coding by severity**:
-  - Success (green): Activate, Approve, Accept
-  - Warning (orange): Pause, Hold, Pending
-  - Info (blue): Mark as Filled, Complete
-  - Error (red): Close, Reject, Decline
+    - Success (green): Activate, Approve, Accept
+    - Warning (orange): Pause, Hold, Pending
+    - Info (blue): Mark as Filled, Complete
+    - Error (red): Close, Reject, Decline
 
 ### Variant Patterns
 
 #### Icon-Only Variant
+
 Used in: Cards, Table rows, Dashboard widgets
 
 ```tsx
 // Compact, colorful icons with tooltips
-<div className={`flex ${layout === 'horizontal' ? 'gap-1' : 'flex-col gap-1'}`}>
-    <button className={`btn btn-${size} btn-square btn-ghost`} title="View Details">
+<div className={`flex ${layout === "horizontal" ? "gap-1" : "flex-col gap-1"}`}>
+    <button
+        className={`btn btn-${size} btn-square btn-ghost`}
+        title="View Details"
+    >
         <i className="fa-duotone fa-regular fa-eye" />
     </button>
 
-    <button className={`btn btn-${size} btn-square btn-primary`} title="Primary Action">
+    <button
+        className={`btn btn-${size} btn-square btn-primary`}
+        title="Primary Action"
+    >
         <i className="fa-duotone fa-regular fa-icon" />
     </button>
 
@@ -127,17 +138,19 @@ Used in: Cards, Table rows, Dashboard widgets
 ```
 
 **Key Features**:
+
 - Square buttons with icons only
 - Tooltips for accessibility
 - Shows ONE quick status action (most relevant to current state)
 - Compact spacing (gap-1)
 
 #### Descriptive Variant
+
 Used in: Detail pages, Sidebars, Expanded rows
 
 ```tsx
 // Full buttons with labels
-<div className={`flex ${layout === 'horizontal' ? 'gap-2' : 'flex-col gap-2'}`}>
+<div className={`flex ${layout === "horizontal" ? "gap-2" : "flex-col gap-2"}`}>
     <button className={`btn btn-${size} btn-outline gap-2`}>
         <i className="fa-duotone fa-regular fa-eye" />
         View Details
@@ -154,6 +167,7 @@ Used in: Detail pages, Sidebars, Expanded rows
 ```
 
 **Key Features**:
+
 - Full-width buttons with text labels
 - Shows ALL applicable status transitions
 - Wider spacing (gap-2)
@@ -309,7 +323,7 @@ export default function <Feature>DetailSidebar({ <feature>Id, onClose }: <Featur
                         <h2 className="text-lg font-bold"><Feature> Details</h2>
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-circle btn-ghost"
+                            className="btn btn-sm btn-square btn-ghost"
                             aria-label="Close"
                         >
                             ✕
@@ -529,6 +543,7 @@ interface <Feature>TableRowProps {
 ### Example: Applications Feature
 
 **Status Transitions**:
+
 - Submitted → Review
 - Review → Interview
 - Interview → Offer
@@ -536,18 +551,21 @@ interface <Feature>TableRowProps {
 - Any → Rejected
 
 **Primary Actions**:
+
 - Schedule Interview
 - Send Offer
 - Move to Next Stage
 
 **Permission Logic**:
+
 ```typescript
 const canManageApplication = useMemo(() => {
     if (isAdmin) return true;
 
     // Company users can manage applications for their roles
-    const isCompanyUser = profile?.roles?.includes('company_admin') ||
-                         profile?.roles?.includes('hiring_manager');
+    const isCompanyUser =
+        profile?.roles?.includes("company_admin") ||
+        profile?.roles?.includes("hiring_manager");
     if (!isCompanyUser) return false;
 
     // Verify application belongs to company's role
@@ -561,16 +579,19 @@ const canManageApplication = useMemo(() => {
 ### Example: Candidates Feature
 
 **Status Transitions**:
+
 - Unverified → Verified
 - Active → Inactive
 - Public → Private
 
 **Primary Actions**:
+
 - Propose to Role
 - View Applications
 - Contact Candidate
 
 **Permission Logic**:
+
 ```typescript
 const canManageCandidate = useMemo(() => {
     if (isAdmin) return true;
@@ -596,69 +617,69 @@ const canManageCandidate = useMemo(() => {
 ### DO ✅
 
 1. **Always use icon-only variant in compact spaces**
-   - Cards, table rows, dashboard widgets
-   - Keeps UI clean and scannable
+    - Cards, table rows, dashboard widgets
+    - Keeps UI clean and scannable
 
 2. **Always use descriptive variant where space allows**
-   - Detail pages, sidebars, expanded rows
-   - Better accessibility and clarity
+    - Detail pages, sidebars, expanded rows
+    - Better accessibility and clarity
 
 3. **Color code status actions by severity**
-   - Success (green): Positive actions
-   - Warning (orange): Caution actions
-   - Info (blue): Neutral actions
-   - Error (red): Destructive actions
+    - Success (green): Positive actions
+    - Warning (orange): Caution actions
+    - Info (blue): Neutral actions
+    - Error (red): Destructive actions
 
 4. **Show confirmation for destructive actions**
-   - Delete, Close, Reject, etc.
-   - Use browser `confirm()` for consistency
+    - Delete, Close, Reject, etc.
+    - Use browser `confirm()` for consistency
 
 5. **Always provide loading states**
-   - Show spinner during async operations
-   - Disable buttons while loading
-   - Clear visual feedback
+    - Show spinner during async operations
+    - Disable buttons while loading
+    - Clear visual feedback
 
 6. **Integrate with existing modals**
-   - Don't create duplicate modals
-   - Reuse existing wizard components
-   - Consistent modal patterns
+    - Don't create duplicate modals
+    - Reuse existing wizard components
+    - Consistent modal patterns
 
 7. **Handle permissions at component level**
-   - Don't pass permission flags as props
-   - Use `useUserProfile` hook internally
-   - Keep permission logic centralized
+    - Don't pass permission flags as props
+    - Use `useUserProfile` hook internally
+    - Keep permission logic centralized
 
 ### DON'T ❌
 
 1. **Don't use dropdowns for status actions**
-   - Individual buttons are more accessible
-   - Clearer visual hierarchy
-   - Better mobile experience
+    - Individual buttons are more accessible
+    - Clearer visual hierarchy
+    - Better mobile experience
 
 2. **Don't show all actions in icon-only variant**
-   - Too cluttered
-   - Show only most important actions
-   - Save comprehensive actions for descriptive variant
+    - Too cluttered
+    - Show only most important actions
+    - Save comprehensive actions for descriptive variant
 
 3. **Don't navigate away from lists unnecessarily**
-   - Use sidebar for quick views
-   - Preserve scroll position and context
-   - Link to full detail page only when needed
+    - Use sidebar for quick views
+    - Preserve scroll position and context
+    - Link to full detail page only when needed
 
 4. **Don't duplicate action implementations**
-   - Single toolbar component for all views
-   - Don't copy-paste action handlers
-   - DRY principle
+    - Single toolbar component for all views
+    - Don't copy-paste action handlers
+    - DRY principle
 
 5. **Don't forget mobile optimization**
-   - Test sidebar on mobile
-   - Ensure touch targets are large enough
-   - Responsive button sizes
+    - Test sidebar on mobile
+    - Ensure touch targets are large enough
+    - Responsive button sizes
 
 6. **Don't skip loading states**
-   - Always show feedback for async operations
-   - Users need to know something is happening
-   - Prevents double-clicks
+    - Always show feedback for async operations
+    - Users need to know something is happening
+    - Prevents double-clicks
 
 ---
 
@@ -1093,7 +1114,7 @@ export default function <Feature>DetailSidebar({
                         <h2 className="text-lg font-bold"><Feature> Details</h2>
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-circle btn-ghost"
+                            className="btn btn-sm btn-square btn-ghost"
                             aria-label="Close"
                         >
                             ✕

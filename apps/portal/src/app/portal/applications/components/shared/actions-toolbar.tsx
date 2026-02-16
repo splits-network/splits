@@ -13,12 +13,12 @@ import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
-import HireModal from "@/app/portal/roles/components/modals/hire-modal";
-import PreScreenRequestModal from "@/app/portal/roles/components/modals/pre-screen-request-modal";
+import HireModal from "@/app/portal/applications-memphis/components/modals/hire-modal";
+import PreScreenRequestModal from "@/app/portal/applications-memphis/components/modals/pre-screen-request-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
-} from "@/app/portal/applications/_archive/lib/permission-utils";
+} from "@/app/portal/applications-memphis/lib/permission-utils";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { useFilterOptional } from "../../contexts/filter-context";
 import type { Application } from "../../types";
@@ -433,7 +433,7 @@ export default function ActionsToolbar({
                     {actions.addNote && (
                         <button
                             onClick={() => setShowNoteModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-ghost`}
+                            className={`btn ${sizeClass} btn-square btn-ghost`}
                             title="Add Note"
                             disabled={actionLoading}
                         >
@@ -482,7 +482,7 @@ export default function ActionsToolbar({
                     {actions.reject && (
                         <button
                             onClick={() => setShowDenyModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-error`}
+                            className={`btn ${sizeClass} btn-square btn-error`}
                             title={permissions.rejectButtonText}
                             disabled={actionLoading}
                         >
@@ -503,7 +503,7 @@ export default function ActionsToolbar({
                         <span title={chatDisabledReason || undefined}>
                             <button
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-circle btn-ghost relative`}
+                                className={`btn ${sizeClass} btn-square btn-ghost relative`}
                                 title="Message Candidate"
                                 disabled={!canChat || startingChat}
                             >
@@ -524,7 +524,7 @@ export default function ActionsToolbar({
                             <div className="w-px h-4 bg-base-300 mx-0.5" />
                             <button
                                 onClick={() => onViewDetails(application.id)}
-                                className={`btn ${sizeClass} btn-circle btn-primary`}
+                                className={`btn ${sizeClass} btn-square btn-primary`}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />

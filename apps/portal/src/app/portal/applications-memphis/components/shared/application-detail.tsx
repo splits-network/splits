@@ -7,7 +7,6 @@ import type { Application } from "../../types";
 import type { AccentClasses } from "./accent";
 import Details from "./details";
 import ActionsToolbar from "./actions-toolbar";
-import { candidateName, roleTitle } from "./helpers";
 
 interface DetailLoaderProps {
     applicationId: string;
@@ -16,7 +15,12 @@ interface DetailLoaderProps {
     onRefresh?: () => void;
 }
 
-export function DetailLoader({ applicationId, accent, onClose, onRefresh }: DetailLoaderProps) {
+export function DetailLoader({
+    applicationId,
+    accent,
+    onClose,
+    onRefresh,
+}: DetailLoaderProps) {
     const { getToken } = useAuth();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(true);
@@ -30,9 +34,12 @@ export function DetailLoader({ applicationId, accent, onClose, onRefresh }: Deta
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const response = await client.get(`/applications/${applicationId}`, {
-                    params: { include: "candidate,job,company,ai_review" },
-                });
+                const response = await client.get(
+                    `/applications/${applicationId}`,
+                    {
+                        params: { include: "candidate,job,company,ai_review" },
+                    },
+                );
                 if (!cancelled) setApplication(response.data || null);
             } catch (error) {
                 console.error("Failed to fetch application detail:", error);
@@ -70,26 +77,21 @@ export function DetailLoader({ applicationId, accent, onClose, onRefresh }: Deta
         <div className="flex flex-col h-full bg-white">
             <div className={`p-4 border-b-4 ${accent.border}`}>
                 <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                        <h3 className="font-black text-lg uppercase tracking-tight text-dark truncate">
-                            {candidateName(application)}
-                        </h3>
-                        <p className={`text-sm font-bold ${accent.text} truncate`}>
-                            {roleTitle(application)}
-                        </p>
+                    <div className="flex-1 min-w-0">
+                        <ActionsToolbar
+                            application={application}
+                            variant="priority"
+                            size="xs"
+                            showActions={{ viewDetails: false }}
+                            onRefresh={onRefresh}
+                        />
                     </div>
-                    <button onClick={onClose} className="btn btn-xs btn-square btn-ghost">
+                    <button
+                        onClick={onClose}
+                        className="btn btn-xs btn-square btn-ghost flex-shrink-0"
+                    >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
-                </div>
-                <div className="mt-3">
-                    <ActionsToolbar
-                        application={application}
-                        variant="descriptive"
-                        size="sm"
-                        showActions={{ viewDetails: false }}
-                        onRefresh={onRefresh}
-                    />
                 </div>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">

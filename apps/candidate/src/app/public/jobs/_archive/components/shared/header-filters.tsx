@@ -45,7 +45,7 @@ export default function HeaderFilters({
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -130,4 +130,3 @@ export default function HeaderFilters({
         </div>
     );
 }
-

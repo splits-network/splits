@@ -1163,7 +1163,7 @@ const [searchOpen, setSearchOpen] = useState(false);
 ```tsx
 // Add search icon in the center nav area
 <button
-    className="btn btn-ghost btn-circle"
+    className="btn btn-ghost btn-square"
     onClick={() => setSearchOpen(true)}
     aria-label="Search"
 >

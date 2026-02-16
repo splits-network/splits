@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import ThreadPanel from "@/app/portal/messages/components/shared/thread-panel";
+import ThreadPanel from "@/app/portal/messages-memphis/components/shared/thread-panel";
 
 interface MessageSidebarProps {
     conversationId: string | null;
@@ -16,8 +15,6 @@ export default function MessageSidebar({
     candidateName,
     onClose,
 }: MessageSidebarProps) {
-    const { getToken } = useAuth();
-
     // Reset conversation when conversationId changes to null
     useEffect(() => {
         if (!conversationId) {
@@ -91,7 +88,7 @@ export default function MessageSidebar({
 
                             <button
                                 onClick={onClose}
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 aria-label="Close"
                             >
                                 ✕

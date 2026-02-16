@@ -4,7 +4,13 @@ import { Badge, Card } from "@splits-network/memphis-ui";
 import type { Application } from "../../types";
 import { getDisplayStatus } from "../../types";
 import type { AccentClasses } from "../shared/accent";
-import { candidateName, candidateInitials, roleTitle, companyName, aiScore, isNew } from "../shared/helpers";
+import {
+    candidateName,
+    roleTitle,
+    companyName,
+    aiScore,
+    isNew,
+} from "../shared/helpers";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function GridCard({
@@ -24,6 +30,13 @@ export function GridCard({
     const status = getDisplayStatus(application);
     const score = aiScore(application);
     const candidate = candidateName(application);
+    const company = companyName(application);
+    const companyInitials = company
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("") || "?";
 
     return (
         <Card
@@ -47,14 +60,24 @@ export function GridCard({
                     {roleTitle(application)}
                 </div>
 
-                <div className="text-sm text-dark/60 mb-3 truncate">{companyName(application)}</div>
+                <div className="text-sm text-dark/60 mb-3 truncate">
+                    {companyName(application)}
+                </div>
 
                 <div className="flex items-center justify-between mb-3 gap-2">
-                    <Badge variant={status.badgeClass.includes("success") ? "teal" : "purple"}>
+                    <Badge
+                        variant={
+                            status.badgeClass.includes("success")
+                                ? "teal"
+                                : "purple"
+                        }
+                        className="max-w-[140px] truncate"
+                        title={status.label}
+                    >
                         {status.label}
                     </Badge>
                     {score != null && (
-                        <Badge variant="yellow">
+                        <Badge variant="yellow" className="shrink-0">
                             <i className="fa-duotone fa-regular fa-robot mr-1" />
                             {score}%
                         </Badge>
@@ -62,24 +85,37 @@ export function GridCard({
                 </div>
             </div>
 
-            <div className={`card-actions justify-between gap-3 pt-3 border-t-2 ${ac.border}/30`}>
-                <div className="flex flex-row items-center gap-2 mt-2 min-w-0">
-                    <div className={`w-10 h-10 shrink-0 flex items-center justify-center border-2 ${ac.border} bg-cream text-sm font-bold text-dark`}>
-                        {candidateInitials(candidate)}
+            <div
+                className={`card-actions flex-col items-stretch gap-3 pt-3 border-t-4 ${ac.border}/30`}
+            >
+                <div className="flex flex-row items-center gap-2 min-w-0">
+                    <div
+                        className={`w-10 h-10 shrink-0 flex items-center justify-center border-4 ${ac.border} bg-cream text-sm font-bold text-dark`}
+                    >
+                        {companyInitials}
                     </div>
                     <div className="min-w-0">
-                        <div className="text-sm font-bold text-dark truncate">{candidate}</div>
-                        <div className="text-sm text-dark/50 truncate">{roleTitle(application)}</div>
+                        <div className="text-sm font-bold text-dark truncate">
+                            {company}
+                        </div>
+                        <div className="text-sm text-dark/50 truncate">
+                            {roleTitle(application)}
+                        </div>
                     </div>
                 </div>
-                <div className="mt-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <ActionsToolbar
-                        application={application}
-                        variant="icon-only"
-                        size="sm"
-                        onRefresh={onRefresh}
-                        showActions={{ viewDetails: false }}
-                    />
+                <div
+                    className="w-full flex justify-end overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex gap-1 flex-wrap justify-end max-w-full">
+                        <ActionsToolbar
+                            application={application}
+                            variant="icon-only"
+                            size="xs"
+                            onRefresh={onRefresh}
+                            showActions={{ viewDetails: false }}
+                        />
+                    </div>
                 </div>
             </div>
         </Card>

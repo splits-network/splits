@@ -14,7 +14,11 @@ interface DetailHeaderProps {
     ) => void;
 }
 
-export default function DetailHeader({ item, onClose, onMessage }: DetailHeaderProps) {
+export default function DetailHeader({
+    item,
+    onClose,
+    onMessage,
+}: DetailHeaderProps) {
     return (
         <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-3 flex items-center justify-between">
             {/* Mobile back button */}
@@ -48,7 +52,7 @@ export default function DetailHeader({ item, onClose, onMessage }: DetailHeaderP
                 )}
                 <button
                     onClick={onClose}
-                    className="btn btn-sm btn-circle btn-ghost hidden md:flex"
+                    className="btn btn-sm btn-square btn-ghost hidden md:flex"
                     aria-label="Close"
                 >
                     <i className="fa-duotone fa-regular fa-xmark" />

@@ -87,7 +87,7 @@ export default function InviteRecruiterModal({
                 <form method="dialog">
                     <button
                         type="button"
-                        className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                        className="btn btn-sm btn-square btn-ghost absolute right-2 top-2"
                         onClick={onClose}
                         disabled={isSubmitting}
                     >

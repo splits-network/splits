@@ -68,10 +68,10 @@ const FOOTER_SECTIONS: {
         color: ACCENT_HEX.yellow,
         links: [
             { label: "Help Center", icon: "fa-duotone fa-regular fa-circle-question" },
-            { label: "Contact Us", icon: "fa-duotone fa-regular fa-envelope" },
+            { label: "Contact Us", icon: "fa-duotone fa-regular fa-envelope", href: "/public/contact-memphis" },
             { label: "Documentation", icon: "fa-duotone fa-regular fa-book-open", href: "/public/documentation" },
             { label: "API Reference", icon: "fa-duotone fa-regular fa-code" },
-            { label: "System Status", icon: "fa-duotone fa-regular fa-signal-bars", href: "/public/status" },
+            { label: "System Status", icon: "fa-duotone fa-regular fa-signal-bars", href: "/public/status-memphis" },
         ],
     },
     {

@@ -76,7 +76,7 @@ export default function DocumentViewerModal({
         };
 
         fetchSignedUrl();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, document]);
 
     if (!isOpen || !document) return null;
@@ -139,7 +139,7 @@ export default function DocumentViewerModal({
                         </button>
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-circle btn-ghost"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
                             <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>

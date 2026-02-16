@@ -348,7 +348,8 @@ export default function ThreadPanel({
 
         setIsLoadingMore(true);
         // Batch layout reads before any writes
-        const { scrollHeight: prevScrollHeight, scrollTop: prevScrollTop } = container;
+        const { scrollHeight: prevScrollHeight, scrollTop: prevScrollTop } =
+            container;
 
         try {
             const token = await getToken();
@@ -389,7 +390,8 @@ export default function ThreadPanel({
                     // Read layout property first
                     const newScrollHeight = updated.scrollHeight;
                     // Then write (prevents read-write-read pattern)
-                    updated.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight);
+                    updated.scrollTop =
+                        prevScrollTop + (newScrollHeight - prevScrollHeight);
                 });
             }
         } finally {
@@ -488,7 +490,7 @@ export default function ThreadPanel({
                             <div className="dropdown dropdown-end">
                                 <button
                                     type="button"
-                                    className="btn btn-ghost btn-sm btn-circle"
+                                    className="btn btn-ghost btn-sm btn-square"
                                     aria-label="Conversation actions"
                                 >
                                     <i className="fa-duotone fa-ellipsis-vertical"></i>
@@ -526,7 +528,7 @@ export default function ThreadPanel({
                             </div>
                             {onClose && (
                                 <button
-                                    className="btn btn-ghost btn-sm btn-circle"
+                                    className="btn btn-ghost btn-sm btn-square"
                                     onClick={onClose}
                                     aria-label="Close thread"
                                 >
@@ -639,7 +641,7 @@ export default function ThreadPanel({
                             <button
                                 type="button"
                                 onClick={scrollToBottom}
-                                className="btn btn-circle btn-primary shadow-md"
+                                className="btn btn-square btn-primary shadow-md"
                                 aria-label="Jump to latest"
                             >
                                 <i className="fa-duotone fa-arrow-down"></i>
@@ -699,7 +701,7 @@ export default function ThreadPanel({
                             />
                         )}
                         <button
-                            className="btn btn-primary btn-circle btn-soft absolute bottom-4 right-2"
+                            className="btn btn-primary btn-square btn-soft absolute bottom-4 right-2"
                             onClick={handleSend}
                             disabled={disabled || sending}
                             title={"Send message"}

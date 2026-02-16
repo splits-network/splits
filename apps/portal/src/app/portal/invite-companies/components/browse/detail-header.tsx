@@ -26,7 +26,7 @@ export default function DetailHeader({
                     {/* Mobile back button */}
                     <button
                         onClick={onClose}
-                        className="md:hidden btn btn-ghost btn-circle btn-sm"
+                        className="md:hidden btn btn-ghost btn-square btn-sm"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-left" />
                     </button>

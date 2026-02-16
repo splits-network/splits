@@ -633,7 +633,7 @@ useEffect(() => {
             </span>
             <div className="flex gap-2">
                 <button
-                    className="btn btn-ghost btn-sm btn-circle"
+                    className="btn btn-ghost btn-sm btn-square"
                     title="Save Job"
                 >
                     <i

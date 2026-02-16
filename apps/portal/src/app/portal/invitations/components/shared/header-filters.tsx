@@ -49,7 +49,7 @@ export default function HeaderFilters({
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -100,10 +100,7 @@ export default function HeaderFilters({
                             className="select w-full select-sm"
                             value={filters.status || ""}
                             onChange={(e) =>
-                                setFilter(
-                                    "status",
-                                    e.target.value || undefined,
-                                )
+                                setFilter("status", e.target.value || undefined)
                             }
                         >
                             <option value="">All</option>
@@ -123,8 +120,7 @@ export default function HeaderFilters({
                 className="btn btn-sm btn-primary"
                 onClick={() => setShowAddModal(true)}
             >
-                <i className="fa-duotone fa-regular fa-plus" /> Invite
-                Candidate
+                <i className="fa-duotone fa-regular fa-plus" /> Invite Candidate
             </button>
 
             {/* Add Modal */}

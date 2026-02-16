@@ -31,7 +31,9 @@ export function DevDebugPanel() {
         process.env.NODE_ENV === "development" ||
         process.env.NEXT_PUBLIC_DEV_DEBUG === "true";
 
-    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     if (!isDev || !mounted) return null;
 
@@ -79,7 +81,7 @@ function DevDebugPanelInner() {
         return (
             <button
                 onClick={() => setCollapsed(false)}
-                className="fixed bottom-3 right-3 z-[9999] btn btn-xs btn-circle btn-ghost opacity-40 hover:opacity-100 bg-base-300 border border-base-content/20"
+                className="fixed bottom-3 right-3 z-[9999] btn btn-xs btn-square btn-ghost opacity-40 hover:opacity-100 bg-base-300 border border-base-content/20"
                 title="Dev Debug"
             >
                 <i className="fa-duotone fa-regular fa-bug text-xs" />
@@ -96,14 +98,14 @@ function DevDebugPanelInner() {
                 <div className="flex gap-1">
                     <button
                         onClick={fetchMe}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                         title="Refresh"
                     >
                         <i className="fa-duotone fa-regular fa-arrows-rotate text-[10px]" />
                     </button>
                     <button
                         onClick={() => setCollapsed(true)}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                         title="Collapse"
                     >
                         <i className="fa-duotone fa-regular fa-xmark text-[10px]" />
@@ -118,7 +120,10 @@ function DevDebugPanelInner() {
                     <>
                         {/* Clerk user info */}
                         <Section title="Clerk">
-                            <Row label="Email" value={user?.primaryEmailAddress?.emailAddress} />
+                            <Row
+                                label="Email"
+                                value={user?.primaryEmailAddress?.emailAddress}
+                            />
                             <Row label="Clerk ID" value={user?.id} copyable />
                         </Section>
 
@@ -131,18 +136,58 @@ function DevDebugPanelInner() {
                         {meData && (
                             <>
                                 <Section title="Identity">
-                                    <Row label="User ID" value={meData.id} copyable />
+                                    <Row
+                                        label="User ID"
+                                        value={meData.id}
+                                        copyable
+                                    />
                                     <Row label="Name" value={meData.name} />
-                                    <Row label="Onboarding" value={meData.onboarding_status} />
+                                    <Row
+                                        label="Onboarding"
+                                        value={meData.onboarding_status}
+                                    />
                                 </Section>
 
                                 <Section title="Access">
-                                    <Row label="Roles" value={meData.roles?.join(", ") || "none"} />
-                                    <Row label="Admin" value={meData.is_platform_admin ? "yes" : "no"} />
-                                    <Row label="Recruiter" value={meData.recruiter_id} copyable />
-                                    <Row label="Candidate" value={meData.candidate_id} copyable />
-                                    <Row label="Org IDs" value={meData.organization_ids?.join(", ") || "none"} />
-                                    <Row label="Company IDs" value={meData.company_ids?.join(", ") || "none"} />
+                                    <Row
+                                        label="Roles"
+                                        value={
+                                            meData.roles?.join(", ") || "none"
+                                        }
+                                    />
+                                    <Row
+                                        label="Admin"
+                                        value={
+                                            meData.is_platform_admin
+                                                ? "yes"
+                                                : "no"
+                                        }
+                                    />
+                                    <Row
+                                        label="Recruiter"
+                                        value={meData.recruiter_id}
+                                        copyable
+                                    />
+                                    <Row
+                                        label="Candidate"
+                                        value={meData.candidate_id}
+                                        copyable
+                                    />
+                                    <Row
+                                        label="Org IDs"
+                                        value={
+                                            meData.organization_ids?.join(
+                                                ", ",
+                                            ) || "none"
+                                        }
+                                    />
+                                    <Row
+                                        label="Company IDs"
+                                        value={
+                                            meData.company_ids?.join(", ") ||
+                                            "none"
+                                        }
+                                    />
                                 </Section>
                             </>
                         )}
@@ -156,7 +201,13 @@ function DevDebugPanelInner() {
     );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+    title,
+    children,
+}: {
+    title: string;
+    children: React.ReactNode;
+}) {
     return (
         <div>
             <div className="text-base-content/50 font-semibold mb-1 uppercase tracking-wider text-[10px]">
@@ -167,7 +218,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     );
 }
 
-function Row({ label, value, copyable }: { label: string; value?: string | null; copyable?: boolean }) {
+function Row({
+    label,
+    value,
+    copyable,
+}: {
+    label: string;
+    value?: string | null;
+    copyable?: boolean;
+}) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -183,10 +242,18 @@ function Row({ label, value, copyable }: { label: string; value?: string | null;
             <span
                 className={`break-all ${copyable && value ? "cursor-pointer hover:text-primary" : ""} ${copied ? "text-success" : "text-base-content"}`}
                 onClick={copyable ? handleCopy : undefined}
-                title={copyable && value ? (copied ? "Copied!" : "Click to copy") : undefined}
+                title={
+                    copyable && value
+                        ? copied
+                            ? "Copied!"
+                            : "Click to copy"
+                        : undefined
+                }
             >
                 {value || <span className="text-base-content/30">-</span>}
-                {copied && <span className="ml-1 text-success text-[9px]">copied</span>}
+                {copied && (
+                    <span className="ml-1 text-success text-[9px]">copied</span>
+                )}
             </span>
         </div>
     );

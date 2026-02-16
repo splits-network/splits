@@ -111,7 +111,7 @@ export function ApplicationNoteItem({
                         <div className="dropdown dropdown-end">
                             <button
                                 tabIndex={0}
-                                className="btn btn-ghost btn-xs btn-circle"
+                                className="btn btn-ghost btn-xs btn-square"
                             >
                                 <i className="fa-duotone fa-regular fa-ellipsis-vertical" />
                             </button>

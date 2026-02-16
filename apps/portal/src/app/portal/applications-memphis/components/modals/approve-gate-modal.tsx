@@ -181,7 +181,7 @@ export default function ApproveGateModal({
                             </p>
 
                             {showDocumentUpload && (
-                                <div className="bg-base-100 border border-base-300 rounded-lg p-4">
+                                <div className="bg-white border-4 border-dark/20 p-4">
                                     <CompanyDocumentUpload
                                         entityType="application"
                                         entityId={applicationId}

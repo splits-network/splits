@@ -37,87 +37,110 @@ export function ListsSixAnimator({ children }: ListsSixAnimatorProps) {
                 containerRef.current!.querySelector(sel);
 
             // Memphis shapes
-            gsap.fromTo(
-                $(".memphis-shape"),
-                { opacity: 0, scale: 0, rotation: -180 },
-                {
-                    opacity: 0.4,
-                    scale: 1,
-                    rotation: 0,
-                    duration: D.slow,
-                    ease: E.elastic,
-                    stagger: { each: S.tight, from: "random" },
-                    delay: 0.2,
-                },
-            );
+            const memphisShapes = $(".memphis-shape");
+            if (memphisShapes.length > 0) {
+                gsap.fromTo(
+                    memphisShapes,
+                    { opacity: 0, scale: 0, rotation: -180 },
+                    {
+                        opacity: 0.4,
+                        scale: 1,
+                        rotation: 0,
+                        duration: D.slow,
+                        ease: E.elastic,
+                        stagger: { each: S.tight, from: "random" },
+                        delay: 0.2,
+                    },
+                );
 
-            $(".memphis-shape").forEach((shape, i) => {
-                gsap.to(shape, {
-                    y: `+=${8 + (i % 3) * 4}`,
-                    x: `+=${4 + (i % 2) * 6}`,
-                    rotation: `+=${(i % 2 === 0 ? 1 : -1) * (4 + i * 2)}`,
-                    duration: 3 + i * 0.4,
-                    ease: "sine.inOut",
-                    repeat: -1,
-                    yoyo: true,
+                memphisShapes.forEach((shape, i) => {
+                    gsap.to(shape, {
+                        y: `+=${8 + (i % 3) * 4}`,
+                        x: `+=${4 + (i % 2) * 6}`,
+                        rotation: `+=${(i % 2 === 0 ? 1 : -1) * (4 + i * 2)}`,
+                        duration: 3 + i * 0.4,
+                        ease: "sine.inOut",
+                        repeat: -1,
+                        yoyo: true,
+                    });
                 });
-            });
+            }
 
             // Header
             const headerTl = gsap.timeline({ defaults: { ease: E.smooth } });
 
-            headerTl.fromTo(
-                $1(".header-badge"),
-                { opacity: 0, y: -20, scale: 0.8 },
-                { opacity: 1, y: 0, scale: 1, duration: D.normal, ease: E.bounce },
-            );
-            headerTl.fromTo(
-                $1(".header-title"),
-                { opacity: 0, y: 50, skewY: 2 },
-                { opacity: 1, y: 0, skewY: 0, duration: D.slow },
-                "-=0.3",
-            );
-            headerTl.fromTo(
-                $1(".header-subtitle"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: D.normal },
-                "-=0.4",
-            );
+            const headerBadge = $1(".header-badge");
+            if (headerBadge) {
+                headerTl.fromTo(
+                    headerBadge,
+                    { opacity: 0, y: -20, scale: 0.8 },
+                    { opacity: 1, y: 0, scale: 1, duration: D.normal, ease: E.bounce },
+                );
+            }
+
+            const headerTitle = $1(".header-title");
+            if (headerTitle) {
+                headerTl.fromTo(
+                    headerTitle,
+                    { opacity: 0, y: 50, skewY: 2 },
+                    { opacity: 1, y: 0, skewY: 0, duration: D.slow },
+                    "-=0.3",
+                );
+            }
+
+            const headerSubtitle = $1(".header-subtitle");
+            if (headerSubtitle) {
+                headerTl.fromTo(
+                    headerSubtitle,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: D.normal },
+                    "-=0.4",
+                );
+            }
 
             // Controls bar
-            headerTl.fromTo(
-                $1(".controls-bar"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: D.normal, ease: E.bounce },
-                "-=0.2",
-            );
+            const controlsBar = $1(".controls-bar");
+            if (controlsBar) {
+                headerTl.fromTo(
+                    controlsBar,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: D.normal, ease: E.bounce },
+                    "-=0.2",
+                );
+            }
 
             // Stats
-            gsap.fromTo(
-                $(".stat-pill"),
-                { opacity: 0, scale: 0.8 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: D.fast,
-                    ease: E.pop,
-                    stagger: S.tight,
-                    delay: 0.8,
-                },
-            );
+            const statPills = $(".stat-pill");
+            if (statPills.length > 0) {
+                gsap.fromTo(
+                    statPills,
+                    { opacity: 0, scale: 0.8 },
+                    {
+                        opacity: 1,
+                        scale: 1,
+                        duration: D.fast,
+                        ease: E.pop,
+                        stagger: S.tight,
+                        delay: 0.8,
+                    },
+                );
+            }
 
             // Content area
-            gsap.fromTo(
-                $1(".listings-content"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: D.normal,
-                    ease: E.smooth,
-                    delay: 1.0,
-                },
-            );
+            const listingsContent = $1(".listings-content");
+            if (listingsContent) {
+                gsap.fromTo(
+                    listingsContent,
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        ease: E.smooth,
+                        delay: 1.0,
+                    },
+                );
+            }
         },
         { scope: containerRef },
     );

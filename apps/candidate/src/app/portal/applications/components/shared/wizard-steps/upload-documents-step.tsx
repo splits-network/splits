@@ -366,7 +366,7 @@ export function UploadDocumentsStep({
                                             onClick={() =>
                                                 handleRemoveNewDocument(index)
                                             }
-                                            className="btn btn-xs btn-ghost btn-circle text-error"
+                                            className="btn btn-xs btn-ghost btn-square text-error"
                                         >
                                             <i className="fa-duotone fa-regular fa-times"></i>
                                         </button>

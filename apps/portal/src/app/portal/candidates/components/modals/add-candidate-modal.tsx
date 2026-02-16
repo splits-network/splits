@@ -45,9 +45,7 @@ export default function AddCandidateModal({
         } catch (error: any) {
             console.error("Failed to create candidate:", error);
             const errorMessage =
-                error.message ||
-                error.response?.data?.error?.message ||
-                "";
+                error.message || error.response?.data?.error?.message || "";
 
             if (
                 errorMessage.includes("candidates_email_key") ||
@@ -86,12 +84,10 @@ export default function AddCandidateModal({
             <div className="bg-base-100 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold">
-                            Add New Candidate
-                        </h2>
+                        <h2 className="text-xl font-bold">Add New Candidate</h2>
                         <button
                             type="button"
-                            className="btn btn-ghost btn-sm btn-circle"
+                            className="btn btn-ghost btn-sm btn-square"
                             onClick={handleClose}
                             disabled={submitting}
                         >
@@ -141,9 +137,7 @@ export default function AddCandidateModal({
                         </fieldset>
 
                         <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Email *
-                            </legend>
+                            <legend className="fieldset-legend">Email *</legend>
                             <input
                                 type="email"
                                 className="input w-full"
@@ -207,8 +201,8 @@ export default function AddCandidateModal({
                                 The candidate will receive an invitation email
                                 to join Splits Network and accept your "right to
                                 represent" agreement. Once accepted, they can
-                                complete their profile and you can submit them to
-                                relevant job roles.
+                                complete their profile and you can submit them
+                                to relevant job roles.
                             </p>
                         </div>
                     </div>

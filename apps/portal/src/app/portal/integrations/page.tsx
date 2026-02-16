@@ -191,7 +191,7 @@ export default function IntegrationsPage() {
                                     <div className="dropdown dropdown-end">
                                         <label
                                             tabIndex={0}
-                                            className="btn btn-sm btn-ghost btn-circle"
+                                            className="btn btn-sm btn-ghost btn-square"
                                         >
                                             <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                         </label>

@@ -51,9 +51,7 @@ export default function EditCandidateModal({
                 }
 
                 const client = createAuthenticatedClient(token);
-                const response = await client.get(
-                    `/candidates/${candidateId}`,
-                );
+                const response = await client.get(`/candidates/${candidateId}`);
                 const candidate = response.data;
 
                 setFormData({
@@ -88,7 +86,7 @@ export default function EditCandidateModal({
         }
 
         loadCandidate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [candidateId, isOpen]);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -102,19 +100,16 @@ export default function EditCandidateModal({
 
             const client = createAuthenticatedClient(token);
 
-            const response = await client.patch(
-                `/candidates/${candidateId}`,
-                {
-                    ...formData,
-                    linkedin_url: formData.linkedin_url || undefined,
-                    phone: formData.phone || undefined,
-                    location: formData.location || undefined,
-                    current_title: formData.current_title || undefined,
-                    current_company: formData.current_company || undefined,
-                    github_url: formData.github_url || undefined,
-                    portfolio_url: formData.portfolio_url || undefined,
-                },
-            );
+            const response = await client.patch(`/candidates/${candidateId}`, {
+                ...formData,
+                linkedin_url: formData.linkedin_url || undefined,
+                phone: formData.phone || undefined,
+                location: formData.location || undefined,
+                current_title: formData.current_title || undefined,
+                current_company: formData.current_company || undefined,
+                github_url: formData.github_url || undefined,
+                portfolio_url: formData.portfolio_url || undefined,
+            });
 
             onSuccess?.(response.data);
             onClose();
@@ -145,7 +140,7 @@ export default function EditCandidateModal({
                     <h3 className="font-bold text-xl">Edit Candidate</h3>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                         disabled={submitting}
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />

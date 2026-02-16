@@ -318,7 +318,7 @@ const navGroups = [
     <div className="dropdown dropdown-top dropdown-end">
         <label
             tabIndex={0}
-            className="btn btn-primary btn-circle btn-lg shadow-lg"
+            className="btn btn-primary btn-square btn-lg shadow-lg"
         >
             <i className="fa-duotone fa-regular fa-plus text-xl"></i>
         </label>
@@ -1475,7 +1475,7 @@ import { Line } from "react-chartjs-2";
 {
     /* Icon-only buttons need labels */
 }
-<button className="btn btn-ghost btn-circle" aria-label="Open sidebar menu">
+<button className="btn btn-ghost btn-square" aria-label="Open sidebar menu">
     <i className="fa-duotone fa-regular fa-bars" aria-hidden="true"></i>
 </button>;
 

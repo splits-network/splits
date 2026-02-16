@@ -383,14 +383,19 @@ export function AdminSidebar() {
             }));
 
             // Fetch counts in parallel
-            const [recruitersRes, fraudRes, payoutsRes, escrowRes, notificationsRes] =
-                await Promise.allSettled([
-                    client.get("/recruiters?status=pending&limit=1"),
-                    client.get("/fraud-signals?status=active&limit=1"),
-                    client.get("/payouts?status=pending&limit=1"),
-                    client.get("/escrow-holds?status=active&limit=1"),
-                    client.get("/site-notifications/all?is_active=true&limit=1"),
-                ]);
+            const [
+                recruitersRes,
+                fraudRes,
+                payoutsRes,
+                escrowRes,
+                notificationsRes,
+            ] = await Promise.allSettled([
+                client.get("/recruiters?status=pending&limit=1"),
+                client.get("/fraud-signals?status=active&limit=1"),
+                client.get("/payouts?status=pending&limit=1"),
+                client.get("/escrow-holds?status=active&limit=1"),
+                client.get("/site-notifications/all?is_active=true&limit=1"),
+            ]);
 
             setBadges({
                 "/portal/admin/recruiters":
@@ -418,7 +423,7 @@ export function AdminSidebar() {
             console.error("Failed to fetch badge counts:", error);
             setBadges({});
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -477,7 +482,7 @@ export function AdminSidebar() {
             {/* Mobile Toggle Button */}
             <button
                 onClick={() => setIsMobileOpen(true)}
-                className="lg:hidden fixed bottom-20 left-4 z-40 btn btn-circle btn-primary shadow-lg"
+                className="lg:hidden fixed bottom-20 left-4 z-40 btn btn-square btn-primary shadow-lg"
                 aria-label="Open admin menu"
             >
                 <i className="fa-duotone fa-regular fa-bars"></i>
@@ -508,7 +513,7 @@ export function AdminSidebar() {
                         <span className="font-semibold">Admin Menu</span>
                         <button
                             onClick={() => setIsMobileOpen(false)}
-                            className="btn btn-ghost btn-sm btn-circle"
+                            className="btn btn-ghost btn-sm btn-square"
                             aria-label="Close menu"
                         >
                             <i className="fa-duotone fa-regular fa-xmark"></i>

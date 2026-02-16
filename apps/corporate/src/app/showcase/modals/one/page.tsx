@@ -429,7 +429,7 @@ export default function ModalsOne() {
                                 </div>
                                 <button
                                     onClick={closeStandard}
-                                    className="btn btn-ghost btn-sm btn-circle text-neutral-content/60 hover:text-neutral-content"
+                                    className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
                                 </button>
@@ -706,7 +706,7 @@ export default function ModalsOne() {
                                 </div>
                                 <button
                                     onClick={closeWizard}
-                                    className="btn btn-ghost btn-sm btn-circle text-neutral-content/60 hover:text-neutral-content"
+                                    className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
                                 </button>

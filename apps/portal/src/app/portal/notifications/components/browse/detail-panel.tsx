@@ -13,7 +13,8 @@ import {
 import ApplicationDetails from "@/app/portal/applications-memphis/components/shared/details";
 import CandidateDetails from "@/app/portal/candidates/components/shared/details";
 import PlacementDetails from "@/app/portal/placements/components/shared/details";
-import RoleDetailsView from "@/app/portal/roles/components/details-view";
+import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
+import { accentAt } from "@/app/portal/roles/components/shared/accent";
 
 interface DetailPanelProps {
     id: string;
@@ -151,7 +152,7 @@ export default function NotificationDetailPanel({
                 <div className="flex items-center gap-3 min-w-0">
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle md:hidden shrink-0"
+                        className="btn btn-ghost btn-sm btn-square md:hidden shrink-0"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     </button>
@@ -286,17 +287,9 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
 
     return (
         <div className="p-6">
-            <RoleDetailsView
+            <JobDetail
                 job={job}
-                tabbed
-                showSections={{
-                    quickStats: true,
-                    descriptions: true,
-                    requirements: true,
-                    preScreen: true,
-                    financials: true,
-                    company: true,
-                }}
+                accent={accentAt(1)}
                 onRefresh={fetchJob}
             />
         </div>

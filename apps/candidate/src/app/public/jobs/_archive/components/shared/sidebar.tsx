@@ -41,10 +41,13 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                 Job Details
                             </h2>
                             <div className="flex items-center gap-2">
-                                <ActionsToolbar item={item} variant="descriptive" />
+                                <ActionsToolbar
+                                    item={item}
+                                    variant="descriptive"
+                                />
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-sm btn-circle btn-ghost"
+                                    className="btn btn-sm btn-square btn-ghost"
                                     aria-label="Close"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark" />

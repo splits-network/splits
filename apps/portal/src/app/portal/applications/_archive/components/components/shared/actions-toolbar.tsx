@@ -433,7 +433,7 @@ export default function ActionsToolbar({
                     {actions.addNote && (
                         <button
                             onClick={() => setShowNoteModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-ghost`}
+                            className={`btn ${sizeClass} btn-square btn-ghost`}
                             title="Add Note"
                             disabled={actionLoading}
                         >
@@ -482,7 +482,7 @@ export default function ActionsToolbar({
                     {actions.reject && (
                         <button
                             onClick={() => setShowDenyModal(true)}
-                            className={`btn ${sizeClass} btn-circle btn-error`}
+                            className={`btn ${sizeClass} btn-square btn-error`}
                             title={permissions.rejectButtonText}
                             disabled={actionLoading}
                         >
@@ -503,7 +503,7 @@ export default function ActionsToolbar({
                         <span title={chatDisabledReason || undefined}>
                             <button
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-circle btn-ghost relative`}
+                                className={`btn ${sizeClass} btn-square btn-ghost relative`}
                                 title="Message Candidate"
                                 disabled={!canChat || startingChat}
                             >
@@ -524,7 +524,7 @@ export default function ActionsToolbar({
                             <div className="w-px h-4 bg-base-300 mx-0.5" />
                             <button
                                 onClick={() => onViewDetails(application.id)}
-                                className={`btn ${sizeClass} btn-circle btn-primary`}
+                                className={`btn ${sizeClass} btn-square btn-primary`}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
@@ -657,4 +657,3 @@ export default function ActionsToolbar({
         </>
     );
 }
-

@@ -222,7 +222,7 @@ export default function NewIntegrationPage() {
         <div className="container mx-auto p-6">
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
-                <Link href="/integrations" className="btn btn-ghost btn-circle">
+                <Link href="/integrations" className="btn btn-ghost btn-square">
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </Link>
                 <div>
@@ -299,7 +299,7 @@ export default function NewIntegrationPage() {
                         <div className="flex items-center gap-4 mb-6 pb-4 border-b border-base-300">
                             <button
                                 type="button"
-                                className="btn btn-ghost btn-circle btn-sm"
+                                className="btn btn-ghost btn-square btn-sm"
                                 onClick={() => setStep("select")}
                             >
                                 <i className="fa-duotone fa-regular fa-arrow-left"></i>

@@ -138,7 +138,7 @@ function DisruptionBanner({
                         {allDismissible && (
                             <button
                                 onClick={onDismissAll}
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 aria-label="Dismiss notification"
                             >
                                 <i className="fa-duotone fa-regular fa-xmark"></i>
@@ -182,7 +182,7 @@ function NotificationBannerItem({
                         {notification.dismissible && (
                             <button
                                 onClick={() => onDismiss(notification.id)}
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 aria-label="Dismiss notification"
                             >
                                 <i className="fa-duotone fa-regular fa-xmark"></i>

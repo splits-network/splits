@@ -16,13 +16,15 @@ import type {
 } from "@splits-network/shared-types";
 import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
 import ApplicationTimeline from "./application-timeline";
-import AIReviewDisplay from "./ai-review-display";
 import DocumentViewerModal from "../modals/document-viewer-modal";
 import CompanyContacts from "@/components/company-contacts";
 import { categorizeDocuments } from "@/app/portal/applications-memphis/lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
-import AIReviewPanel from "@/components/ai-review-panel";
+import AIReviewPanel from "./ai-review-panel";
+import { CandidateDetail } from "@/app/portal/candidates-memphis/components/shared/candidate-detail";
+import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
+import { accentAt } from "./accent";
 
 interface DetailsProps {
     itemId: string;
@@ -288,36 +290,176 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 // ===== TAB COMPONENTS =====
 
 function OverviewTab({ application }: { application: Application }) {
-    const stageBadge = getApplicationStageBadge(application.stage);
+    const job = application.job;
+    const candidate = application.candidate;
+
+    // Handle recruiter data - check multiple possible structures
+    const recruiter = application.recruiter || (application as any).assigned_recruiter;
     const recruiterName =
-        application.recruiter?.name || application.recruiter?.user?.name;
+        recruiter?.name ||
+        recruiter?.user?.name ||
+        recruiter?.full_name ||
+        ((recruiter as any)?.first_name && (recruiter as any)?.last_name
+            ? `${(recruiter as any).first_name} ${(recruiter as any).last_name}`
+            : null);
     const recruiterEmail =
-        application.recruiter?.email || application.recruiter?.user?.email;
-    const recruiterValue =
-        recruiterName || recruiterEmail || "Unassigned";
+        recruiter?.email || recruiter?.user?.email || null;
+    const recruiterInitials = recruiterName
+        ? recruiterName
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+        : "?";
+
+    // Truncate text to ~5 lines (approx 400 chars)
+    const truncateText = (text: string | null | undefined, maxLength = 400) => {
+        if (!text) return null;
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + "...";
+    };
+
+    const jobDescription = job?.recruiter_description || job?.description;
+    const candidateBio =
+        (candidate?.marketplace_profile as any)?.rich_bio ||
+        candidate?.bio;
 
     return (
-        <>
-            <div className="retro-metrics grid grid-cols-1 md:grid-cols-3 w-full">
-                <div className="metric-block metric-block-sm bg-coral text-coral-content">
-                    <div className="retro-metric-value">{stageBadge.label}</div>
-                    <div className="retro-metric-label">Status</div>
-                </div>
-                <div className="metric-block metric-block-sm bg-teal text-teal-content">
-                    <div className="retro-metric-value">
-                        {formatApplicationDate(application.created_at)}
+        <div className="space-y-6">
+            {/* Job Key Facts */}
+            {job && (
+                <div className="bg-white border-4 border-teal p-6">
+                    <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
+                        <span className="w-6 h-6 flex items-center justify-center bg-teal">
+                            <i className="fa-duotone fa-regular fa-briefcase text-xs text-white" />
+                        </span>
+                        Job Key Facts
+                    </h3>
+                    <div className="space-y-3">
+                        <div>
+                            <div className="text-lg font-black uppercase tracking-tight text-dark">
+                                {job.title}
+                            </div>
+                            <div className="text-sm text-dark/70">
+                                {job.company?.name || "Company not specified"}
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm text-dark/60">
+                            {job.location && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-location-dot text-teal" />
+                                    {job.location}
+                                </div>
+                            )}
+                            {job.employment_type && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-briefcase text-purple" />
+                                    {job.employment_type.replace("_", " ")}
+                                </div>
+                            )}
+                            {(job.salary_min || job.salary_max) && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-money-bill-wave text-yellow" />
+                                    ${job.salary_min?.toLocaleString() || "..."} - $
+                                    {job.salary_max?.toLocaleString() || "..."}
+                                </div>
+                            )}
+                        </div>
+                        {jobDescription && (
+                            <div className="text-sm text-dark/70 leading-relaxed pt-3 border-t-2 border-dark/10">
+                                {truncateText(jobDescription)}
+                            </div>
+                        )}
                     </div>
-                    <div className="retro-metric-label">Submitted</div>
                 </div>
-                <div className="metric-block metric-block-sm bg-yellow text-yellow-content">
-                    <div className="retro-metric-value truncate">
-                        {recruiterValue}
+            )}
+
+            {/* Candidate Key Facts */}
+            {candidate && (
+                <div className="bg-white border-4 border-coral p-6">
+                    <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
+                        <span className="w-6 h-6 flex items-center justify-center bg-coral">
+                            <i className="fa-duotone fa-regular fa-user text-xs text-white" />
+                        </span>
+                        Candidate Key Facts
+                    </h3>
+                    <div className="space-y-3">
+                        <div>
+                            <div className="text-lg font-black uppercase tracking-tight text-dark">
+                                {candidate.full_name}
+                            </div>
+                            {candidate.current_title && (
+                                <div className="text-sm text-dark/70">
+                                    {candidate.current_title}
+                                    {candidate.current_company &&
+                                        ` at ${candidate.current_company}`}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm text-dark/60">
+                            {candidate.email && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-envelope text-coral" />
+                                    {candidate.email}
+                                </div>
+                            )}
+                            {candidate.phone && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-phone text-teal" />
+                                    {candidate.phone}
+                                </div>
+                            )}
+                            {candidate.location && (
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-location-dot text-purple" />
+                                    {candidate.location}
+                                </div>
+                            )}
+                        </div>
+                        {candidateBio && (
+                            <div className="text-sm text-dark/70 leading-relaxed pt-3 border-t-2 border-dark/10">
+                                {truncateText(candidateBio)}
+                            </div>
+                        )}
                     </div>
-                    <div className="retro-metric-label">Recruiter</div>
+                </div>
+            )}
+
+            {/* Submitted By */}
+            <div className="bg-white border-4 border-purple p-6">
+                <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
+                    <span className="w-6 h-6 flex items-center justify-center bg-purple">
+                        <i className="fa-duotone fa-regular fa-user-tie text-xs text-white" />
+                    </span>
+                    Submitted By
+                </h3>
+                <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 flex items-center justify-center bg-purple text-white font-black text-lg border-4 border-dark flex-shrink-0">
+                        {recruiterInitials}
+                    </div>
+                    <div className="flex-1">
+                        <div className="text-lg font-black uppercase tracking-tight text-dark">
+                            {recruiterName || "Unassigned"}
+                        </div>
+                        {recruiterEmail && (
+                            <a
+                                href={`mailto:${recruiterEmail}`}
+                                className="text-sm text-coral hover:text-coral/80 font-bold"
+                            >
+                                {recruiterEmail}
+                            </a>
+                        )}
+                        <div className="text-sm text-dark/60 mt-1">
+                            <i className="fa-duotone fa-regular fa-calendar mr-1" />
+                            Submitted {formatApplicationDate(application.created_at)}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <AIReviewPanel applicationId={application.id} variant="full" />
-        </>
+
+            {/* AI Analysis */}
+            <AIReviewPanel applicationId={application.id} variant="compact" />
+        </div>
     );
 }
 
@@ -333,90 +475,15 @@ function CandidateTab({ application }: { application: Application }) {
         );
     }
 
+    // Use accent from application index (cycling through colors)
+    const accent = accentAt(0);
+
     return (
-        <div className="card bg-base-200 p-6">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                    <i className="fa-duotone fa-regular fa-users fa-2xl text-primary mr-2 pt-6" />
-                    <div>
-                        <h2 className="text-2xl font-bold mb-2">
-                            {candidate.full_name}
-                        </h2>
-                        <div className="flex flex-wrap gap-3 text-sm">
-                            {candidate.email && (
-                                <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-envelope text-primary" />
-                                    <span>{candidate.email}</span>
-                                </div>
-                            )}
-                            {candidate.phone && (
-                                <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-phone text-primary" />
-                                    <span>{candidate.phone}</span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex flex-wrap gap-4 mt-4">
-                            {candidate.current_title && (
-                                <div>
-                                    <div className="text-sm text-base-content/60 mb-1">
-                                        Current Role
-                                    </div>
-                                    <div className="text-base font-medium">
-                                        {candidate.current_title}
-                                    </div>
-                                </div>
-                            )}
-                            {candidate.current_company && (
-                                <div>
-                                    <div className="text-sm text-base-content/60 mb-1">
-                                        Current Company
-                                    </div>
-                                    <div className="text-base font-medium">
-                                        {candidate.current_company}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2 text-sm items-end">
-                    {candidate.linkedin_url && (
-                        <Link
-                            href={candidate.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link link-primary"
-                        >
-                            <i className="fa-brands fa-linkedin mr-1" />
-                            View LinkedIn Profile
-                        </Link>
-                    )}
-                    {candidate.portfolio_url && (
-                        <Link
-                            href={candidate.portfolio_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link link-primary"
-                        >
-                            <i className="fa-duotone fa-regular fa-globe mr-1" />
-                            View Portfolio
-                        </Link>
-                    )}
-                    {candidate.github_url && (
-                        <Link
-                            href={candidate.github_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link link-primary"
-                        >
-                            <i className="fa-brands fa-github mr-1" />
-                            View GitHub
-                        </Link>
-                    )}
-                </div>
-            </div>
-        </div>
+        <CandidateDetail
+            candidate={candidate as any}
+            accent={accent}
+            onRefresh={undefined}
+        />
     );
 }
 
@@ -432,98 +499,154 @@ function JobTab({ application }: { application: Application }) {
         );
     }
 
-    const requirements = (job as any).job_requirements || [];
+    // Use accent from application index (cycling through colors)
+    const accent = accentAt(1);
 
     return (
-        <div className="space-y-6">
-            <div className="card bg-base-200 p-6">
-                <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                        <i className="fa-duotone fa-regular fa-buildings fa-2xl text-primary mr-2 pt-6" />
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2">
-                                {job.title}
-                            </h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {job.location && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">
-                                            Location
-                                        </div>
-                                        <div className="text-sm font-medium">
-                                            {job.location}
-                                        </div>
-                                    </div>
-                                )}
-                                {job.employment_type && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">
-                                            Type
-                                        </div>
-                                        <div className="text-sm font-medium capitalize">
-                                            {job.employment_type.replace(
-                                                "_",
-                                                " ",
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                                {(job.salary_min || job.salary_max) && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">
-                                            Salary Range
-                                        </div>
-                                        <div className="text-sm font-medium">
-                                            $
-                                            {job.salary_min?.toLocaleString() ||
-                                                "..."}{" "}
-                                            - $
-                                            {job.salary_max?.toLocaleString() ||
-                                                "..."}
-                                        </div>
-                                    </div>
-                                )}
-                                {job.department && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">
-                                            Department
-                                        </div>
-                                        <div className="text-sm font-medium">
-                                            {job.department}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+        <JobDetail
+            job={job as any}
+            accent={accent}
+            onRefresh={undefined}
+        />
+    );
+}
+
+function JobTabOLD_BACKUP({ application }: { application: Application }) {
+    const job = application.job;
+
+    if (!job) {
+        return (
+            <div className="text-center p-8 text-base-content/50">
+                <i className="fa-duotone fa-briefcase text-4xl mb-2" />
+                <p>Job information not available</p>
+            </div>
+        );
+    }
+
+    const accent = accentAt(1);
+
+    return (
+        <div className="space-y-6 BACKUP_OLD_CODE">
+            {/* Header with Job Title and Company */}
+            <div className="bg-white border-4 border-dark p-6">
+                <h2 className="text-3xl font-black uppercase tracking-tight text-dark flex items-center gap-3 mb-2">
+                    <i className="fa-duotone fa-regular fa-briefcase text-coral" />
+                    {job.title}
+                </h2>
+                <div className="text-lg font-bold text-dark/60">
+                    {job.company?.name || "Company not specified"}
+                </div>
+            </div>
+
+            {/* Job Details Grid */}
+            <div className="retro-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                <div className="metric-block metric-block-sm bg-coral text-white">
+                    <div className="retro-metric-label mb-2">
+                        <i className="fa-duotone fa-regular fa-location-dot mr-2" />
+                        Location
                     </div>
-                    <div className="flex flex-col text-sm items-end">
-                        <div className="text-base font-medium">
-                            {job.company?.name}
+                    <div className="retro-metric-value text-base font-bold">
+                        {job.location || (
+                            <span className="italic opacity-60">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="metric-block metric-block-sm bg-teal text-white">
+                    <div className="retro-metric-label mb-2">
+                        <i className="fa-duotone fa-regular fa-briefcase mr-2" />
+                        Employment Type
+                    </div>
+                    <div className="retro-metric-value text-base font-bold capitalize">
+                        {job.employment_type ? (
+                            job.employment_type.replace("_", " ")
+                        ) : (
+                            <span className="italic opacity-60">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="metric-block metric-block-sm bg-yellow text-dark">
+                    <div className="retro-metric-label mb-2">
+                        <i className="fa-duotone fa-regular fa-money-bill-wave mr-2" />
+                        Salary Range
+                    </div>
+                    <div className="retro-metric-value text-base font-bold">
+                        {job.salary_min || job.salary_max ? (
+                            <>
+                                ${job.salary_min?.toLocaleString() || "..."} -{" "}
+                                ${job.salary_max?.toLocaleString() || "..."}
+                            </>
+                        ) : (
+                            <span className="italic opacity-60">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="metric-block metric-block-sm bg-purple text-white">
+                    <div className="retro-metric-label mb-2">
+                        <i className="fa-duotone fa-regular fa-sitemap mr-2" />
+                        Department
+                    </div>
+                    <div className="retro-metric-value text-base font-bold">
+                        {job.department || (
+                            <span className="italic opacity-60">
+                                Not provided
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Company Information */}
+            <div className="bg-white border-4 border-dark p-6">
+                <h3 className="text-xs font-black uppercase tracking-wider text-dark/60 mb-4">
+                    Company Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-dark/60 mb-2">
+                            <i className="fa-duotone fa-regular fa-globe mr-1" />
+                            Website
                         </div>
-                        {job.company?.website && (
+                        {job.company?.website ? (
                             <Link
                                 href={job.company.website}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-base-content/60 hover:text-primary"
+                                className="text-coral hover:text-coral/80 font-bold flex items-center gap-2 group"
                             >
-                                <i className="fa-duotone fa-regular fa-globe mr-2" />
                                 {job.company.website}
+                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                             </Link>
+                        ) : (
+                            <span className="text-dark/40 italic">
+                                Not provided
+                            </span>
                         )}
-                        {job.company?.industry && (
-                            <div className="text-sm text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-industry mr-2" />
-                                {job.company.industry}
-                            </div>
-                        )}
+                    </div>
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-dark/60 mb-2">
+                            <i className="fa-duotone fa-regular fa-industry mr-1" />
+                            Industry
+                        </div>
+                        <div className="text-dark font-bold">
+                            {job.company?.industry || (
+                                <span className="text-dark/40 italic">
+                                    Not provided
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Company Contacts */}
             {(job.company?.id || job.company_id) && (
-                <div className="card bg-base-200 p-4">
+                <div className="bg-white border-4 border-dark p-4">
                     <h4 className="font-semibold mb-2">
                         <i className="fa-duotone fa-users mr-2" />
                         Company Contacts
@@ -537,7 +660,7 @@ function JobTab({ application }: { application: Application }) {
             )}
 
             {(job.recruiter_description || job.description) && (
-                <div className="card bg-base-200 p-4">
+                <div className="bg-white border-4 border-dark p-4">
                     <h4 className="font-semibold mb-2">Description</h4>
                     <p className="text-sm text-base-content/80 whitespace-pre-wrap">
                         {job.recruiter_description || job.description}
@@ -545,14 +668,14 @@ function JobTab({ application }: { application: Application }) {
                 </div>
             )}
 
-            {requirements.length > 0 && (
+            {(job as any).requirements && (job as any).requirements.length > 0 && (
                 <div className="grid md:grid-cols-2 gap-4">
-                    <div className="card bg-base-200 p-4">
-                        <h4 className="font-semibold text-error mb-2">
+                    <div className="bg-white border-4 border-dark p-4">
+                        <h4 className="font-semibold text-coral mb-2">
                             Required
                         </h4>
                         <ul className="space-y-2">
-                            {requirements
+                            {(job as any).requirements
                                 .filter(
                                     (r: any) =>
                                         r.requirement_type === "mandatory",
@@ -567,18 +690,18 @@ function JobTab({ application }: { application: Application }) {
                                         key={req.id}
                                         className="flex items-start gap-2 text-sm"
                                     >
-                                        <i className="fa-duotone fa-regular fa-circle-check text-error mt-1 shrink-0" />
+                                        <i className="fa-duotone fa-regular fa-circle-check text-coral mt-1 shrink-0" />
                                         <span>{req.description}</span>
                                     </li>
                                 ))}
                         </ul>
                     </div>
-                    <div className="card bg-base-200 p-4">
-                        <h4 className="font-semibold text-info mb-2">
+                    <div className="bg-white border-4 border-dark p-4">
+                        <h4 className="font-semibold text-teal mb-2">
                             Preferred
                         </h4>
                         <ul className="space-y-2">
-                            {requirements
+                            {(job as any).requirements
                                 .filter(
                                     (r: any) =>
                                         r.requirement_type === "preferred",
@@ -593,7 +716,7 @@ function JobTab({ application }: { application: Application }) {
                                         key={req.id}
                                         className="flex items-start gap-2 text-sm"
                                     >
-                                        <i className="fa-duotone fa-regular fa-circle-plus text-info mt-1 shrink-0" />
+                                        <i className="fa-duotone fa-regular fa-circle-plus text-teal mt-1 shrink-0" />
                                         <span>{req.description}</span>
                                     </li>
                                 ))}
@@ -604,7 +727,7 @@ function JobTab({ application }: { application: Application }) {
 
             {application.pre_screen_answers &&
                 application.pre_screen_answers.length > 0 && (
-                    <div className="card bg-base-200 p-4">
+                    <div className="bg-white border-4 border-dark p-4">
                         <h4 className="font-semibold mb-4">
                             <i className="fa-duotone fa-regular fa-clipboard-question mr-2" />
                             Pre-Screen Questions
@@ -653,7 +776,7 @@ function DocumentsTab({ application }: { application: Application }) {
     }
 
     const renderDocumentList = (docs: any[], title: string) => (
-        <div className="card bg-base-200 p-4">
+        <div className="bg-white border-4 border-dark p-4">
             <h4 className="font-semibold mb-4">{title}</h4>
             <div className="space-y-2">
                 {docs.map((doc: any) => (
@@ -669,7 +792,7 @@ function DocumentsTab({ application }: { application: Application }) {
                                         : doc.document_type === "cover_letter"
                                           ? "fa-file-lines"
                                           : "fa-file"
-                                } text-primary`}
+                                } text-coral`}
                             />
                             <div className="flex-1 min-w-0">
                                 <div className="font-medium truncate">
@@ -859,4 +982,3 @@ function TimelineTab({
         />
     );
 }
-

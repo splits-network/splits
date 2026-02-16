@@ -71,7 +71,13 @@ export function TableRow({
                 </td>
 
                 <td className="px-4 py-3">
-                    <Badge variant={status.badgeClass.includes("success") ? "teal" : "purple"}>{status.label}</Badge>
+                    <Badge
+                        variant={status.badgeClass.includes("success") ? "teal" : "purple"}
+                        className="max-w-[160px] truncate"
+                        title={status.label}
+                    >
+                        {status.label}
+                    </Badge>
                 </td>
 
                 <td className="px-4 py-3 text-sm font-bold text-dark">{score != null ? `${score}%` : "-"}</td>

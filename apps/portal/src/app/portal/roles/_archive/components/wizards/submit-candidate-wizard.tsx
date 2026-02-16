@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { MarkdownEditor, MarkdownRenderer } from '@splits-network/shared-ui';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useRef, useEffect } from "react";
+import { MarkdownEditor, MarkdownRenderer } from "@splits-network/shared-ui";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 interface SubmitCandidateWizardProps {
     roleId: string;
     roleTitle: string;
@@ -37,9 +37,10 @@ export default function SubmitCandidateWizard({
 
     // Wizard state
     const [currentStep, setCurrentStep] = useState(1);
-    const [mode, setMode] = useState<'select' | 'new'>('select');
-    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-    const [pitch, setPitch] = useState('');
+    const [mode, setMode] = useState<"select" | "new">("select");
+    const [selectedCandidate, setSelectedCandidate] =
+        useState<Candidate | null>(null);
+    const [pitch, setPitch] = useState("");
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -47,8 +48,8 @@ export default function SubmitCandidateWizard({
     // Step 1: Candidate selection/creation state
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [candidatesLoading, setCandidatesLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
@@ -56,13 +57,13 @@ export default function SubmitCandidateWizard({
 
     // New candidate form data
     const [formData, setFormData] = useState({
-        full_name: '',
-        email: '',
-        phone: '',
-        location: '',
-        current_title: '',
-        current_company: '',
-        linkedin_url: '',
+        full_name: "",
+        email: "",
+        phone: "",
+        location: "",
+        current_title: "",
+        current_company: "",
+        linkedin_url: "",
     });
 
     // Debounce search query (300ms delay)
@@ -82,7 +83,7 @@ export default function SubmitCandidateWizard({
 
     // Load candidates with server-side search and pagination
     useEffect(() => {
-        if (currentStep !== 1 || mode !== 'select') return;
+        if (currentStep !== 1 || mode !== "select") return;
 
         async function loadCandidates() {
             try {
@@ -98,16 +99,18 @@ export default function SubmitCandidateWizard({
                     page,
                     limit,
                     search: debouncedSearch || undefined,
-                    sort_by: 'created_at',
-                    sort_order: 'desc',
+                    sort_by: "created_at",
+                    sort_order: "desc",
                 };
 
-                const response = await client.get('/candidates', { params });
+                const response = await client.get("/candidates", { params });
 
                 if (response.data?.data) {
                     setCandidates(response.data);
                     if (response.data.pagination) {
-                        setTotalPages(response.data.pagination.total_pages || 1);
+                        setTotalPages(
+                            response.data.pagination.total_pages || 1,
+                        );
                         setTotalCount(response.data.pagination.total || 0);
                     }
                 } else if (Array.isArray(response.data)) {
@@ -121,36 +124,39 @@ export default function SubmitCandidateWizard({
                 }
 
                 // If no candidates exist, default to new mode
-                if ((response.data?.data || response.data)?.length === 0 && !debouncedSearch) {
-                    setMode('new');
+                if (
+                    (response.data?.data || response.data)?.length === 0 &&
+                    !debouncedSearch
+                ) {
+                    setMode("new");
                 }
             } catch (err: any) {
-                console.error('Failed to load candidates:', err);
-                setError('Failed to load candidates. Please try again.');
+                console.error("Failed to load candidates:", err);
+                setError("Failed to load candidates. Please try again.");
             } finally {
                 setCandidatesLoading(false);
             }
         }
 
         loadCandidates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStep, mode, page, debouncedSearch]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const allowedTypes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain',
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "text/plain",
             ];
             if (!allowedTypes.includes(file.type)) {
-                setError('Please upload a PDF, DOC, DOCX, or TXT file');
+                setError("Please upload a PDF, DOC, DOCX, or TXT file");
                 return;
             }
             if (file.size > 10 * 1024 * 1024) {
-                setError('File size must be less than 10MB');
+                setError("File size must be less than 10MB");
                 return;
             }
             setResumeFile(file);
@@ -160,19 +166,19 @@ export default function SubmitCandidateWizard({
 
     const handleNext = () => {
         if (currentStep === 1) {
-            if (mode === 'select' && !selectedCandidate) {
-                setError('Please select a candidate to continue');
+            if (mode === "select" && !selectedCandidate) {
+                setError("Please select a candidate to continue");
                 return;
             }
-            if (mode === 'new') {
+            if (mode === "new") {
                 // Validate new candidate form
                 if (!formData.full_name.trim() || !formData.email.trim()) {
-                    setError('Please provide candidate name and email');
+                    setError("Please provide candidate name and email");
                     return;
                 }
                 // Create temporary candidate object
                 setSelectedCandidate({
-                    id: 'new',
+                    id: "new",
                     full_name: formData.full_name,
                     email: formData.email,
                     phone: formData.phone,
@@ -184,7 +190,7 @@ export default function SubmitCandidateWizard({
             }
         }
         if (currentStep === 2 && !pitch.trim()) {
-            setError('Please provide a pitch for this opportunity');
+            setError("Please provide a pitch for this opportunity");
             return;
         }
         setError(null);
@@ -204,7 +210,7 @@ export default function SubmitCandidateWizard({
             setError(null);
 
             const token = await getToken();
-            if (!token) throw new Error('Not authenticated');
+            if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
 
@@ -212,12 +218,12 @@ export default function SubmitCandidateWizard({
             let applicationId: string | undefined;
 
             // Step 1: Create or use existing candidate
-            if (mode === 'select' && selectedCandidate.id !== 'new') {
+            if (mode === "select" && selectedCandidate.id !== "new") {
                 // Use existing candidate
                 candidateId = selectedCandidate.id;
             } else {
                 // Create new candidate first
-                const createResponse: any = await client.post('/applications', {
+                const createResponse: any = await client.post("/applications", {
                     job_id: roleId,
                     ...formData,
                 });
@@ -229,61 +235,68 @@ export default function SubmitCandidateWizard({
 
             // Step 2: Create application with proposal details
             if (candidateId) {
-                const applicationResponse: any = await client.post('/applications', {
-                    job_id: roleId,
-                    candidate_id: candidateId,
-                    stage: 'recruiter_proposed',
-                    application_source: 'recruiter',
-                });
+                const applicationResponse: any = await client.post(
+                    "/applications",
+                    {
+                        job_id: roleId,
+                        candidate_id: candidateId,
+                        stage: "recruiter_proposed",
+                        application_source: "recruiter",
+                    },
+                );
 
                 applicationId =
-                    applicationResponse.data?.id ||
-                    applicationResponse.id;
+                    applicationResponse.data?.id || applicationResponse.id;
             }
 
             if (!applicationId) {
-                throw new Error('Could not create application for this proposal');
+                throw new Error(
+                    "Could not create application for this proposal",
+                );
             }
 
             // Step 3: Create application note with recruiter pitch if provided
             if (pitch.trim()) {
                 try {
                     await client.post(`/applications/${applicationId}/notes`, {
-                        created_by_type: 'candidate_recruiter',
-                        note_type: 'note',
-                        visibility: 'shared',
+                        created_by_type: "candidate_recruiter",
+                        note_type: "note",
+                        visibility: "shared",
                         message_text: pitch.trim(),
                     });
                 } catch (noteError: any) {
                     // Log but don't fail the submission if note creation fails
-                    console.warn('Failed to create pitch note:', noteError);
+                    console.warn("Failed to create pitch note:", noteError);
                 }
             }
 
             // Upload resume if provided
             if (resumeFile && candidateId) {
                 const uploadFormData = new FormData();
-                uploadFormData.append('file', resumeFile);
-                uploadFormData.append('entity_type', 'candidate');
-                uploadFormData.append('entity_id', candidateId);
-                uploadFormData.append('document_type', 'resume');
+                uploadFormData.append("file", resumeFile);
+                uploadFormData.append("entity_type", "candidate");
+                uploadFormData.append("entity_id", candidateId);
+                uploadFormData.append("document_type", "resume");
 
-                await client.post('/documents', uploadFormData);
+                await client.post("/documents", uploadFormData);
             }
 
             // Success
-            toast.success(`Opportunity sent to ${selectedCandidate.full_name}! They'll receive an email notification.`);
+            toast.success(
+                `Opportunity sent to ${selectedCandidate.full_name}! They'll receive an email notification.`,
+            );
             onClose();
             onSuccess?.();
         } catch (err: any) {
-            console.error('Failed to submit candidate:', err);
+            console.error("Failed to submit candidate:", err);
 
             // Handle specific error cases
-            let errorMessage = err.message || 'Failed to send opportunity to candidate';
+            let errorMessage =
+                err.message || "Failed to send opportunity to candidate";
 
-            if (errorMessage.includes('already has an active application')) {
+            if (errorMessage.includes("already has an active application")) {
                 errorMessage = `${selectedCandidate.full_name} already has an active application for this role. Please check the role's applications list.`;
-            } else if (errorMessage.includes('HTTP 409')) {
+            } else if (errorMessage.includes("HTTP 409")) {
                 errorMessage = `${selectedCandidate.full_name} already has an active application for this role. You cannot submit the same candidate twice.`;
             }
 
@@ -298,26 +311,37 @@ export default function SubmitCandidateWizard({
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h3 className="font-bold text-2xl">Submit Candidate to Role</h3>
+                        <h3 className="font-bold text-2xl">
+                            Submit Candidate to Role
+                        </h3>
                         <p className="text-sm text-base-content/70 mt-1">
                             Step {currentStep} of 3 • {roleTitle}
                             {companyName && ` • ${companyName}`}
                         </p>
                     </div>
-                    <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
+                    <button
+                        onClick={onClose}
+                        className="btn btn-sm btn-square btn-ghost"
+                    >
                         <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
 
                 {/* Progress Steps */}
                 <ul className="steps steps-horizontal w-full mb-6">
-                    <li className={`step ${currentStep >= 1 ? 'step-primary' : ''}`}>
+                    <li
+                        className={`step ${currentStep >= 1 ? "step-primary" : ""}`}
+                    >
                         Select Candidate
                     </li>
-                    <li className={`step ${currentStep >= 2 ? 'step-primary' : ''}`}>
+                    <li
+                        className={`step ${currentStep >= 2 ? "step-primary" : ""}`}
+                    >
                         Proposal Details
                     </li>
-                    <li className={`step ${currentStep >= 3 ? 'step-primary' : ''}`}>
+                    <li
+                        className={`step ${currentStep >= 3 ? "step-primary" : ""}`}
+                    >
                         Review
                     </li>
                 </ul>
@@ -338,43 +362,50 @@ export default function SubmitCandidateWizard({
                             {/* Mode Selection Tabs */}
                             <div className="tabs tabs-boxed bg-base-200">
                                 <a
-                                    className={`tab ${mode === 'select' ? 'tab-active' : ''}`}
-                                    onClick={() => setMode('select')}
+                                    className={`tab ${mode === "select" ? "tab-active" : ""}`}
+                                    onClick={() => setMode("select")}
                                 >
                                     <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
                                     Select Existing
                                 </a>
                                 <a
-                                    className={`tab ${mode === 'new' ? 'tab-active' : ''}`}
-                                    onClick={() => setMode('new')}
+                                    className={`tab ${mode === "new" ? "tab-active" : ""}`}
+                                    onClick={() => setMode("new")}
                                 >
                                     <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                                     Add New
                                 </a>
                             </div>
 
-                            {mode === 'select' ? (
+                            {mode === "select" ? (
                                 <>
                                     {/* Search */}
                                     <div className="card bg-base-200">
                                         <div className="card-body py-4">
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend">Search Candidates</legend>
+                                                <legend className="fieldset-legend">
+                                                    Search Candidates
+                                                </legend>
                                                 <input
                                                     type="text"
                                                     placeholder="Search by name, email, title, company..."
                                                     className="input w-full"
                                                     value={searchQuery}
-                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    onChange={(e) =>
+                                                        setSearchQuery(
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                 />
                                                 <p className="fieldset-label text-base-content/50">
-                                                    {candidatesLoading && debouncedSearch ? (
+                                                    {candidatesLoading &&
+                                                    debouncedSearch ? (
                                                         <>
                                                             <span className="loading loading-spinner loading-xs mr-1"></span>
                                                             Searching...
                                                         </>
                                                     ) : (
-                                                        'Search updates as you type'
+                                                        "Search updates as you type"
                                                     )}
                                                 </p>
                                             </fieldset>
@@ -392,14 +423,18 @@ export default function SubmitCandidateWizard({
                                             <span>
                                                 {debouncedSearch
                                                     ? `No candidates found matching "${debouncedSearch}". Try a different search term or add a new candidate.`
-                                                    : 'No candidates found. Please add a new candidate.'}
+                                                    : "No candidates found. Please add a new candidate."}
                                             </span>
                                         </div>
                                     ) : (
                                         <>
                                             {debouncedSearch && (
                                                 <div className="text-sm text-base-content/70 mb-2">
-                                                    Found {totalCount} candidate{totalCount !== 1 ? 's' : ''} matching "{debouncedSearch}"
+                                                    Found {totalCount} candidate
+                                                    {totalCount !== 1
+                                                        ? "s"
+                                                        : ""}{" "}
+                                                    matching "{debouncedSearch}"
                                                 </div>
                                             )}
                                             <div className="overflow-x-auto border border-base-300 rounded-lg">
@@ -409,48 +444,90 @@ export default function SubmitCandidateWizard({
                                                             <th>Select</th>
                                                             <th>Name</th>
                                                             <th>Email</th>
-                                                            <th>Current Role</th>
+                                                            <th>
+                                                                Current Role
+                                                            </th>
                                                             <th>Location</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {candidates.map((candidate) => (
-                                                            <tr
-                                                                key={candidate.id}
-                                                                className={`cursor-pointer hover:bg-base-200 ${selectedCandidate?.id === candidate.id ? 'bg-primary/10' : ''
+                                                        {candidates.map(
+                                                            (candidate) => (
+                                                                <tr
+                                                                    key={
+                                                                        candidate.id
+                                                                    }
+                                                                    className={`cursor-pointer hover:bg-base-200 ${
+                                                                        selectedCandidate?.id ===
+                                                                        candidate.id
+                                                                            ? "bg-primary/10"
+                                                                            : ""
                                                                     }`}
-                                                                onClick={() => setSelectedCandidate(candidate)}
-                                                            >
-                                                                <td>
-                                                                    <input
-                                                                        type="radio"
-                                                                        className="radio radio-primary"
-                                                                        checked={selectedCandidate?.id === candidate.id}
-                                                                        onChange={() => setSelectedCandidate(candidate)}
-                                                                    />
-                                                                </td>
-                                                                <td>
-                                                                    <div className="font-semibold">{candidate.full_name}</div>
-                                                                </td>
-                                                                <td>{candidate.email}</td>
-                                                                <td>
-                                                                    {candidate.current_title || candidate.current_company ? (
-                                                                        <div className="text-sm">
-                                                                            {candidate.current_title}
-                                                                            {candidate.current_title && candidate.current_company && ' • '}
-                                                                            {candidate.current_company}
+                                                                    onClick={() =>
+                                                                        setSelectedCandidate(
+                                                                            candidate,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <td>
+                                                                        <input
+                                                                            type="radio"
+                                                                            className="radio radio-primary"
+                                                                            checked={
+                                                                                selectedCandidate?.id ===
+                                                                                candidate.id
+                                                                            }
+                                                                            onChange={() =>
+                                                                                setSelectedCandidate(
+                                                                                    candidate,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <div className="font-semibold">
+                                                                            {
+                                                                                candidate.full_name
+                                                                            }
                                                                         </div>
-                                                                    ) : (
-                                                                        <span className="text-base-content/50">Not specified</span>
-                                                                    )}
-                                                                </td>
-                                                                <td>
-                                                                    {candidate.location || (
-                                                                        <span className="text-base-content/50">Not specified</span>
-                                                                    )}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            candidate.email
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {candidate.current_title ||
+                                                                        candidate.current_company ? (
+                                                                            <div className="text-sm">
+                                                                                {
+                                                                                    candidate.current_title
+                                                                                }
+                                                                                {candidate.current_title &&
+                                                                                    candidate.current_company &&
+                                                                                    " • "}
+                                                                                {
+                                                                                    candidate.current_company
+                                                                                }
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-base-content/50">
+                                                                                Not
+                                                                                specified
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td>
+                                                                        {candidate.location || (
+                                                                            <span className="text-base-content/50">
+                                                                                Not
+                                                                                specified
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ),
+                                                        )}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -459,13 +536,26 @@ export default function SubmitCandidateWizard({
                                             {totalPages > 1 && (
                                                 <div className="flex justify-between items-center mt-4">
                                                     <div className="text-sm text-base-content/70">
-                                                        Showing page {page} of {totalPages} ({totalCount} total candidates)
+                                                        Showing page {page} of{" "}
+                                                        {totalPages} (
+                                                        {totalCount} total
+                                                        candidates)
                                                     </div>
                                                     <div className="join">
                                                         <button
                                                             className="join-item btn btn-sm"
-                                                            onClick={() => setPage(Math.max(1, page - 1))}
-                                                            disabled={page === 1}
+                                                            onClick={() =>
+                                                                setPage(
+                                                                    Math.max(
+                                                                        1,
+                                                                        page -
+                                                                            1,
+                                                                    ),
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                page === 1
+                                                            }
                                                         >
                                                             <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                                         </button>
@@ -474,8 +564,19 @@ export default function SubmitCandidateWizard({
                                                         </button>
                                                         <button
                                                             className="join-item btn btn-sm"
-                                                            onClick={() => setPage(Math.min(totalPages, page + 1))}
-                                                            disabled={page === totalPages}
+                                                            onClick={() =>
+                                                                setPage(
+                                                                    Math.min(
+                                                                        totalPages,
+                                                                        page +
+                                                                            1,
+                                                                    ),
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                page ===
+                                                                totalPages
+                                                            }
                                                         >
                                                             <i className="fa-duotone fa-regular fa-chevron-right"></i>
                                                         </button>
@@ -490,28 +591,46 @@ export default function SubmitCandidateWizard({
                                 <div className="space-y-4">
                                     <div className="alert alert-info">
                                         <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                        <span>This candidate will be added to your database and proposed for this role.</span>
+                                        <span>
+                                            This candidate will be added to your
+                                            database and proposed for this role.
+                                        </span>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Full Name *</legend>
+                                            <legend className="fieldset-legend">
+                                                Full Name *
+                                            </legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
                                                 value={formData.full_name}
-                                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        full_name:
+                                                            e.target.value,
+                                                    })
+                                                }
                                                 placeholder="John Doe"
                                             />
                                         </fieldset>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Email *</legend>
+                                            <legend className="fieldset-legend">
+                                                Email *
+                                            </legend>
                                             <input
                                                 type="email"
                                                 className="input w-full"
                                                 value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        email: e.target.value,
+                                                    })
+                                                }
                                                 placeholder="john@example.com"
                                             />
                                         </fieldset>
@@ -519,23 +638,38 @@ export default function SubmitCandidateWizard({
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Phone</legend>
+                                            <legend className="fieldset-legend">
+                                                Phone
+                                            </legend>
                                             <input
                                                 type="tel"
                                                 className="input w-full"
                                                 value={formData.phone}
-                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        phone: e.target.value,
+                                                    })
+                                                }
                                                 placeholder="+1 (555) 123-4567"
                                             />
                                         </fieldset>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Location</legend>
+                                            <legend className="fieldset-legend">
+                                                Location
+                                            </legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
                                                 value={formData.location}
-                                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        location:
+                                                            e.target.value,
+                                                    })
+                                                }
                                                 placeholder="City, State/Country"
                                             />
                                         </fieldset>
@@ -543,35 +677,59 @@ export default function SubmitCandidateWizard({
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Current Title</legend>
+                                            <legend className="fieldset-legend">
+                                                Current Title
+                                            </legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
                                                 value={formData.current_title}
-                                                onChange={(e) => setFormData({ ...formData, current_title: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        current_title:
+                                                            e.target.value,
+                                                    })
+                                                }
                                                 placeholder="e.g., Senior Software Engineer"
                                             />
                                         </fieldset>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">Current Company</legend>
+                                            <legend className="fieldset-legend">
+                                                Current Company
+                                            </legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
                                                 value={formData.current_company}
-                                                onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        current_company:
+                                                            e.target.value,
+                                                    })
+                                                }
                                                 placeholder="e.g., Acme Corp"
                                             />
                                         </fieldset>
                                     </div>
 
                                     <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">LinkedIn URL</legend>
+                                        <legend className="fieldset-legend">
+                                            LinkedIn URL
+                                        </legend>
                                         <input
                                             type="url"
                                             className="input w-full"
                                             value={formData.linkedin_url}
-                                            onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    linkedin_url:
+                                                        e.target.value,
+                                                })
+                                            }
                                             placeholder="https://linkedin.com/in/..."
                                         />
                                     </fieldset>
@@ -587,8 +745,12 @@ export default function SubmitCandidateWizard({
                             <div className="alert alert-info">
                                 <i className="fa-duotone fa-regular fa-user"></i>
                                 <div>
-                                    <div className="font-semibold">{selectedCandidate.full_name}</div>
-                                    <div className="text-sm">{selectedCandidate.email}</div>
+                                    <div className="font-semibold">
+                                        {selectedCandidate.full_name}
+                                    </div>
+                                    <div className="text-sm">
+                                        {selectedCandidate.email}
+                                    </div>
                                 </div>
                             </div>
 
@@ -609,7 +771,9 @@ export default function SubmitCandidateWizard({
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">
                                     Resume (Optional)
-                                    <span className="text-base-content/60 font-normal text-sm ml-2">PDF, DOC, DOCX, or TXT - Max 10MB</span>
+                                    <span className="text-base-content/60 font-normal text-sm ml-2">
+                                        PDF, DOC, DOCX, or TXT - Max 10MB
+                                    </span>
                                 </legend>
                                 <input
                                     type="file"
@@ -621,14 +785,17 @@ export default function SubmitCandidateWizard({
                                 {resumeFile && (
                                     <div className="mt-2 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-file text-primary"></i>
-                                        <span className="text-sm">{resumeFile.name}</span>
+                                        <span className="text-sm">
+                                            {resumeFile.name}
+                                        </span>
                                         <button
                                             type="button"
                                             className="btn btn-ghost btn-xs"
                                             onClick={() => {
                                                 setResumeFile(null);
                                                 if (fileInputRef.current) {
-                                                    fileInputRef.current.value = '';
+                                                    fileInputRef.current.value =
+                                                        "";
                                                 }
                                             }}
                                         >
@@ -645,7 +812,12 @@ export default function SubmitCandidateWizard({
                         <div className="space-y-6">
                             <div className="alert alert-info">
                                 <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                <span>Review the details below. {selectedCandidate.full_name} will receive an email notification and must approve this opportunity before it proceeds.</span>
+                                <span>
+                                    Review the details below.{" "}
+                                    {selectedCandidate.full_name} will receive
+                                    an email notification and must approve this
+                                    opportunity before it proceeds.
+                                </span>
                             </div>
 
                             {/* Role Summary */}
@@ -655,7 +827,9 @@ export default function SubmitCandidateWizard({
                                         <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                         Role
                                     </h4>
-                                    <div className="text-lg font-semibold">{roleTitle}</div>
+                                    <div className="text-lg font-semibold">
+                                        {roleTitle}
+                                    </div>
                                     {companyName && (
                                         <div className="text-sm text-base-content/70">
                                             <i className="fa-duotone fa-regular fa-building mr-1"></i>
@@ -673,13 +847,24 @@ export default function SubmitCandidateWizard({
                                         Candidate
                                     </h4>
                                     <div className="space-y-2">
-                                        <div className="text-lg font-semibold">{selectedCandidate.full_name}</div>
-                                        <div className="text-sm text-base-content/70">{selectedCandidate.email}</div>
-                                        {(selectedCandidate.current_title || selectedCandidate.current_company) && (
+                                        <div className="text-lg font-semibold">
+                                            {selectedCandidate.full_name}
+                                        </div>
+                                        <div className="text-sm text-base-content/70">
+                                            {selectedCandidate.email}
+                                        </div>
+                                        {(selectedCandidate.current_title ||
+                                            selectedCandidate.current_company) && (
                                             <div className="text-sm text-base-content/70">
-                                                {selectedCandidate.current_title}
-                                                {selectedCandidate.current_title && selectedCandidate.current_company && ' • '}
-                                                {selectedCandidate.current_company}
+                                                {
+                                                    selectedCandidate.current_title
+                                                }
+                                                {selectedCandidate.current_title &&
+                                                    selectedCandidate.current_company &&
+                                                    " • "}
+                                                {
+                                                    selectedCandidate.current_company
+                                                }
                                             </div>
                                         )}
                                         {selectedCandidate.location && (
@@ -700,7 +885,10 @@ export default function SubmitCandidateWizard({
                                             <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                             Your Pitch
                                         </h4>
-                                        <MarkdownRenderer content={pitch} className="prose prose-sm max-w-none" />
+                                        <MarkdownRenderer
+                                            content={pitch}
+                                            className="prose prose-sm max-w-none"
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -731,7 +919,11 @@ export default function SubmitCandidateWizard({
                     </button>
                     <div className="flex gap-2">
                         {currentStep > 1 && (
-                            <button onClick={handleBack} className="btn" disabled={submitting}>
+                            <button
+                                onClick={handleBack}
+                                className="btn"
+                                disabled={submitting}
+                            >
                                 <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                 Back
                             </button>
@@ -741,8 +933,13 @@ export default function SubmitCandidateWizard({
                                 onClick={handleNext}
                                 className="btn btn-primary"
                                 disabled={
-                                    (currentStep === 1 && mode === 'select' && !selectedCandidate) ||
-                                    (currentStep === 1 && mode === 'new' && (!formData.full_name.trim() || !formData.email.trim()))
+                                    (currentStep === 1 &&
+                                        mode === "select" &&
+                                        !selectedCandidate) ||
+                                    (currentStep === 1 &&
+                                        mode === "new" &&
+                                        (!formData.full_name.trim() ||
+                                            !formData.email.trim()))
                                 }
                             >
                                 Next

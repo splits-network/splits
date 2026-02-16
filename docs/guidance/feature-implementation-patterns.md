@@ -159,7 +159,10 @@ function FeaturePageContent() {
                     showStats={showStats}
                     setShowStats={setShowStats}
                 />
-                <ViewToggle viewMode={viewMode} onViewChange={handleViewChange} />
+                <ViewToggle
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
+                />
             </PageTitle>
 
             <div className="space-y-6">
@@ -190,13 +193,27 @@ The filter context uses the standardized list pattern for data fetching and stat
 // [feature]/contexts/filter-context.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
-import { useStandardList, UseStandardListReturn } from "@/hooks/use-standard-list";
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+    useMemo,
+    ReactNode,
+} from "react";
+import {
+    useStandardList,
+    UseStandardListReturn,
+} from "@/hooks/use-standard-list";
 import { FeatureItem, FeatureFilters } from "../types";
 
 const STATS_VISIBLE_KEY = "[feature]StatsVisible";
 
-interface FilterContextValue extends UseStandardListReturn<FeatureItem, FeatureFilters> {
+interface FilterContextValue extends UseStandardListReturn<
+    FeatureItem,
+    FeatureFilters
+> {
     showStats: boolean;
     setShowStats: (show: boolean) => void;
 }
@@ -318,7 +335,10 @@ export default function BrowseView() {
                         </div>
                     ) : data.length === 0 ? (
                         <div className="p-4">
-                            <EmptyState title="No items found" description="..." />
+                            <EmptyState
+                                title="No items found"
+                                description="..."
+                            />
                         </div>
                     ) : (
                         data.map((item) => (
@@ -335,14 +355,22 @@ export default function BrowseView() {
                 {/* Pagination Footer */}
                 {totalPages > 1 && (
                     <div className="border-t border-base-300 p-2 flex items-center justify-between text-xs">
-                        <span>Page {page} of {totalPages}</span>
+                        <span>
+                            Page {page} of {totalPages}
+                        </span>
                         <div className="join">
-                            <button className="join-item btn btn-xs" disabled={page <= 1}
-                                    onClick={() => goToPage(page - 1)}>
+                            <button
+                                className="join-item btn btn-xs"
+                                disabled={page <= 1}
+                                onClick={() => goToPage(page - 1)}
+                            >
                                 <i className="fa-duotone fa-regular fa-chevron-left" />
                             </button>
-                            <button className="join-item btn btn-xs" disabled={page >= totalPages}
-                                    onClick={() => goToPage(page + 1)}>
+                            <button
+                                className="join-item btn btn-xs"
+                                disabled={page >= totalPages}
+                                onClick={() => goToPage(page + 1)}
+                            >
                                 <i className="fa-duotone fa-regular fa-chevron-right" />
                             </button>
                         </div>
@@ -353,7 +381,9 @@ export default function BrowseView() {
             {/* Right Panel - Detail */}
             <div
                 className={`flex-1 flex-col bg-base-100 min-w-0 ${
-                    selectedId ? "fixed inset-0 z-50 flex md:static md:z-auto" : "hidden md:flex"
+                    selectedId
+                        ? "fixed inset-0 z-50 flex md:static md:z-auto"
+                        : "hidden md:flex"
                 }`}
             >
                 {selectedId ? (
@@ -411,8 +441,14 @@ import Sidebar from "../shared/sidebar";
 
 export default function TableView() {
     const {
-        data, loading, pagination, sortBy, sortOrder, handleSort,
-        page, goToPage,
+        data,
+        loading,
+        pagination,
+        sortBy,
+        sortOrder,
+        handleSort,
+        page,
+        goToPage,
     } = useFilter();
 
     // Track the FULL ENTITY for sidebar (avoids extra fetch)
@@ -443,7 +479,11 @@ export default function TableView() {
                 </DataTable>
 
                 {pagination && pagination.total_pages > 1 && (
-                    <PaginationControls page={page} totalPages={pagination.total_pages} onPageChange={goToPage} />
+                    <PaginationControls
+                        page={page}
+                        totalPages={pagination.total_pages}
+                        onPageChange={goToPage}
+                    />
                 )}
             </div>
 
@@ -496,7 +536,11 @@ export default function GridView() {
                 )}
 
                 {pagination && pagination.total_pages > 1 && (
-                    <PaginationControls page={page} totalPages={pagination.total_pages} onPageChange={goToPage} />
+                    <PaginationControls
+                        page={page}
+                        totalPages={pagination.total_pages}
+                        onPageChange={goToPage}
+                    />
                 )}
             </div>
 
@@ -543,7 +587,11 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
             />
 
             <div className="drawer-side z-50">
-                <label className="drawer-overlay" onClick={onClose} aria-label="Close sidebar" />
+                <label
+                    className="drawer-overlay"
+                    onClick={onClose}
+                    aria-label="Close sidebar"
+                />
 
                 <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
                     {/* Header - Actions toolbar here for always-visible access */}
@@ -557,7 +605,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                 <ActionsToolbar item={item} />
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-sm btn-circle btn-ghost"
+                                    className="btn btn-sm btn-square btn-ghost"
                                     aria-label="Close"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark" />
@@ -623,16 +671,19 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         }
     }, [itemId, getToken]);
 
-    useEffect(() => { fetchDetail(); }, [fetchDetail]);
+    useEffect(() => {
+        fetchDetail();
+    }, [fetchDetail]);
 
-    if (loading) return <div className="p-8"><LoadingState message="Loading details..." /></div>;
+    if (loading)
+        return (
+            <div className="p-8">
+                <LoadingState message="Loading details..." />
+            </div>
+        );
     if (!item) return null;
 
-    return (
-        <div className="space-y-6 p-6">
-            {/* Detail sections here */}
-        </div>
-    );
+    return <div className="space-y-6 p-6">{/* Detail sections here */}</div>;
 }
 ```
 
@@ -642,7 +693,9 @@ When a feature has a large amount of detail data to present, use DaisyUI's `tabs
 
 ```tsx
 // Inside details.tsx - tabbed layout for complex entities
-const [activeTab, setActiveTab] = useState<"overview" | "requirements" | "financials">("overview");
+const [activeTab, setActiveTab] = useState<
+    "overview" | "requirements" | "financials"
+>("overview");
 
 return (
     <div className="space-y-6 p-6">
@@ -739,7 +792,7 @@ export default function HeaderFilters({ searchInput, setSearchInput, ... }: Head
                 <input type="text" placeholder="Search..." value={searchInput}
                        onChange={(e) => setSearchInput(e.target.value)} disabled={loading} />
                 {searchInput && (
-                    <button onClick={clearSearch} className="btn btn-ghost btn-xs btn-circle">
+                    <button onClick={clearSearch} className="btn btn-ghost btn-xs btn-square">
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 )}
@@ -836,7 +889,8 @@ export default function Stats() {
                 if (!cancelled) {
                     setStats({
                         total: response.pagination?.total || items.length,
-                        active: items.filter((i: any) => i.status === "active").length,
+                        active: items.filter((i: any) => i.status === "active")
+                            .length,
                     });
                 }
             } catch (error) {
@@ -846,7 +900,9 @@ export default function Stats() {
         };
 
         void run();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [getToken, isLoaded]);
 
     return (
@@ -947,7 +1003,10 @@ const [showAddModal, setShowAddModal] = useState(false);
 <AddFeatureModal
     isOpen={showAddModal}
     onClose={() => setShowAddModal(false)}
-    onSuccess={() => { refresh(); setShowAddModal(false); }}
+    onSuccess={() => {
+        refresh();
+        setShowAddModal(false);
+    }}
 />;
 ```
 

@@ -934,25 +934,25 @@ export default function ButtonsSixPage() {
                         <HeaderCta
                             label="Get Started Free"
                             icon="fa-duotone fa-regular fa-rocket"
-                            color="#FF6B6B"
+                            color="coral"
                             variant="primary"
                         />
                         <HeaderCta
                             label="Watch Demo"
                             icon="fa-duotone fa-regular fa-play"
-                            color="#FF6B6B"
+                            color="coral"
                             variant="secondary"
                         />
                         <HeaderCta
                             label="Browse Jobs"
                             icon="fa-duotone fa-regular fa-briefcase"
-                            color="#4ECDC4"
+                            color="teal"
                             variant="primary"
                         />
                         <HeaderCta
                             label="Learn More"
                             icon="fa-duotone fa-regular fa-arrow-right"
-                            color="#4ECDC4"
+                            color="teal"
                             variant="secondary"
                         />
                     </div>
@@ -992,10 +992,10 @@ export default function ButtonsSixPage() {
                         <AccentCycle count={4}>
                             {(color, i) => {
                                 const ctas = [
-                                    { label: "Post a Job", icon: "fa-duotone fa-regular fa-plus-circle", color: "#FF6B6B" },
-                                    { label: "Find Talent", icon: "fa-duotone fa-regular fa-search", color: "#4ECDC4" },
-                                    { label: "Upgrade Plan", icon: "fa-duotone fa-regular fa-crown", color: "#FFE66D" },
-                                    { label: "Get Support", icon: "fa-duotone fa-regular fa-headset", color: "#A78BFA" },
+                                    { label: "Post a Job", icon: "fa-duotone fa-regular fa-plus-circle", color: "coral" as const },
+                                    { label: "Find Talent", icon: "fa-duotone fa-regular fa-search", color: "teal" as const },
+                                    { label: "Upgrade Plan", icon: "fa-duotone fa-regular fa-crown", color: "yellow" as const },
+                                    { label: "Get Support", icon: "fa-duotone fa-regular fa-headset", color: "purple" as const },
                                 ];
                                 return (
                                     <HeaderCta

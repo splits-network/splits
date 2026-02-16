@@ -41,7 +41,7 @@ export function Footer() {
                                 href="https://x.com/employ_network"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-twitter text-lg"></i>
                             </a>
@@ -49,7 +49,7 @@ export function Footer() {
                                 href="https://www.instagram.com/employ_networks/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-instagram text-lg"></i>
                             </a>
@@ -57,7 +57,7 @@ export function Footer() {
                                 href="https://www.linkedin.com/company/employment-networks-inc"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-linkedin text-lg"></i>
                             </a>
@@ -65,7 +65,7 @@ export function Footer() {
                                 href="https://www.facebook.com/profile.php?id=61586842350461"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-facebook text-lg"></i>
                             </a>
@@ -73,7 +73,7 @@ export function Footer() {
                                 href="https://github.com/splits-network"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-github text-lg"></i>
                             </a>
@@ -81,7 +81,7 @@ export function Footer() {
                                 href="https://www.youtube.com/@employ_networks"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-circle btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
+                                className="btn btn-square btn-ghost btn-sm hover:bg-primary hover:text-primary-content"
                             >
                                 <i className="fa-brands fa-youtube text-lg"></i>
                             </a>

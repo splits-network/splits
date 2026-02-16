@@ -50,7 +50,7 @@ export default function HeaderFilters({
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -109,10 +109,7 @@ export default function HeaderFilters({
                             className="select select-sm w-full"
                             value={filters.status || ""}
                             onChange={(e) =>
-                                setFilter(
-                                    "status",
-                                    e.target.value || undefined,
-                                )
+                                setFilter("status", e.target.value || undefined)
                             }
                         >
                             <option value="active">Active</option>

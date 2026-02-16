@@ -415,7 +415,7 @@ export default function ActionsToolbar({
                 {/* Edit — only shown in draft */}
                 {canEdit && (
                     <button
-                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        className={`btn btn-ghost btn-square ${getSizeClass()}`}
                         disabled={isLoading}
                         onClick={() => setShowEditWizard(true)}
                         title="Edit draft"
@@ -431,7 +431,7 @@ export default function ActionsToolbar({
                 {/* Move to Draft — only shown when applicable */}
                 {canBackToDraft && (
                     <button
-                        className={`btn btn-ghost btn-circle ${getSizeClass()}`}
+                        className={`btn btn-ghost btn-square ${getSizeClass()}`}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick(
@@ -487,7 +487,7 @@ export default function ActionsToolbar({
                 {/* Withdraw — only shown when applicable */}
                 {canWithdraw && (
                     <button
-                        className={`btn btn-ghost text-error btn-circle ${getSizeClass()}`}
+                        className={`btn btn-ghost text-error btn-square ${getSizeClass()}`}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick("withdraw", handleWithdraw)
@@ -525,7 +525,7 @@ export default function ActionsToolbar({
                             Accept
                         </button>
                         <button
-                            className={`btn btn-error btn-circle ${getSizeClass()}`}
+                            className={`btn btn-error btn-square ${getSizeClass()}`}
                             disabled={isJobClosed || isLoading}
                             onClick={() => setShowDeclineModal(true)}
                             title="Decline proposal"
@@ -547,7 +547,7 @@ export default function ActionsToolbar({
                 {/* Message — always visible */}
                 <span title={chatDisabledReason || undefined}>
                     <button
-                        className={`btn btn-ghost btn-circle relative ${getSizeClass()}`}
+                        className={`btn btn-ghost btn-square relative ${getSizeClass()}`}
                         disabled={!recruiterUserId || startingChat}
                         onClick={handleMessageRecruiter}
                         title="Message recruiter"
@@ -569,7 +569,7 @@ export default function ActionsToolbar({
                     <>
                         <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
-                            className={`btn btn-primary btn-circle ${getSizeClass()}`}
+                            className={`btn btn-primary btn-square ${getSizeClass()}`}
                             onClick={() => onViewDetails(item.id)}
                             title="View details"
                         >

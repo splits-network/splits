@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { ActivitySnapshot } from '../components/admin/online-activity-chart';
+import { ActivitySnapshot } from '../components/online-activity-chart';
 
 export function useOnlineActivity() {
     const { getToken } = useAuth();

@@ -56,7 +56,7 @@ export default function CompanyBillingSetupWizard({
                                 Set Up Company Billing
                             </h2>
                             <button
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 onClick={onClose}
                                 aria-label="Close"
                             >
@@ -99,32 +99,28 @@ function WizardContent({
 
     // Step 1 form state
     const [billingEmail, setBillingEmail] = useState(
-        existingProfile?.billing_email || ""
+        existingProfile?.billing_email || "",
     );
     const [billingContactName, setBillingContactName] = useState(
-        existingProfile?.billing_contact_name || ""
+        existingProfile?.billing_contact_name || "",
     );
     const [billingTerms, setBillingTerms] = useState(
-        existingProfile?.billing_terms || "net_30"
+        existingProfile?.billing_terms || "net_30",
     );
     const [street, setStreet] = useState(
-        existingProfile?.billing_address?.street || ""
+        existingProfile?.billing_address?.street || "",
     );
     const [city, setCity] = useState(
-        existingProfile?.billing_address?.city || ""
+        existingProfile?.billing_address?.city || "",
     );
     const [state, setState] = useState(
-        existingProfile?.billing_address?.state || ""
+        existingProfile?.billing_address?.state || "",
     );
-    const [zip, setZip] = useState(
-        existingProfile?.billing_address?.zip || ""
-    );
+    const [zip, setZip] = useState(existingProfile?.billing_address?.zip || "");
     const [country, setCountry] = useState(
-        existingProfile?.billing_address?.country || "United States"
+        existingProfile?.billing_address?.country || "United States",
     );
-    const [taxId, setTaxId] = useState(
-        existingProfile?.stripe_tax_id || ""
-    );
+    const [taxId, setTaxId] = useState(existingProfile?.stripe_tax_id || "");
 
     // Step 2 state
     const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
@@ -426,7 +422,7 @@ function WizardContent({
                                     : billingTerms
                                           .replace("_", " ")
                                           .replace(/\b\w/g, (l) =>
-                                              l.toUpperCase()
+                                              l.toUpperCase(),
                                           )}
                             </div>
                         </div>

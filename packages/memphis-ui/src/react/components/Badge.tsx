@@ -1,10 +1,10 @@
 import React from "react";
 import type { AccentColor } from "../utils/accent-cycle";
 
-export type BadgeSize = "sm" | "md" | "lg";
+export type BadgeSize = "xs" | "sm" | "md" | "lg";
 export type BadgeStyle = "solid" | "outline" | "soft" | "dot";
 
-export interface BadgeProps {
+export interface BadgeProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "style"> {
     children: React.ReactNode;
     variant?: AccentColor | "dark" | "cream";
     style?: BadgeStyle;
@@ -24,6 +24,7 @@ const COLOR_CLASS: Record<string, string> = {
 };
 
 const SIZE_CLASS: Record<BadgeSize, string> = {
+    xs: "badge-xs",
     sm: "badge-sm",
     md: "badge-md",
     lg: "badge-lg",
@@ -53,6 +54,7 @@ export function Badge({
     size,
     outline = false,
     className = "",
+    ...rest
 }: BadgeProps) {
     // Support deprecated outline prop
     const resolvedStyle = badgeStyle ?? (outline ? "outline" : "solid");
@@ -68,6 +70,7 @@ export function Badge({
             ]
                 .filter(Boolean)
                 .join(" ")}
+            {...rest}
         >
             {children}
         </span>

@@ -224,7 +224,7 @@ export default function IntegrationDetailPage() {
         <div className="container mx-auto p-6">
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
-                <Link href="/integrations" className="btn btn-ghost btn-circle">
+                <Link href="/integrations" className="btn btn-ghost btn-square">
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </Link>
                 <div className="flex-1">

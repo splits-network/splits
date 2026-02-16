@@ -91,8 +91,7 @@ export default function SubmitToJobWizard({
                 const params = {
                     page,
                     limit,
-                    status:
-                        statusFilter === "all" ? undefined : statusFilter,
+                    status: statusFilter === "all" ? undefined : statusFilter,
                     search: debouncedSearch || undefined,
                     sort_by: "created_at",
                     sort_order: "desc",
@@ -106,9 +105,7 @@ export default function SubmitToJobWizard({
                         setTotalPages(
                             response.data.pagination.total_pages || 1,
                         );
-                        setTotalCount(
-                            response.data.pagination.total || 0,
-                        );
+                        setTotalCount(response.data.pagination.total || 0);
                     }
                 } else if (Array.isArray(response.data)) {
                     setJobs(response.data);
@@ -128,7 +125,7 @@ export default function SubmitToJobWizard({
         }
 
         loadJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStep, page, statusFilter, debouncedSearch]);
 
     useEffect(() => {
@@ -155,7 +152,7 @@ export default function SubmitToJobWizard({
         }
 
         loadDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStep, candidateId, documents.length]);
 
     const toggleDocument = (docId: string) => {
@@ -187,11 +184,7 @@ export default function SubmitToJobWizard({
         try {
             setSubmitting(true);
             setError(null);
-            await onSubmit(
-                selectedJob.id,
-                notes,
-                Array.from(selectedDocIds),
-            );
+            await onSubmit(selectedJob.id, notes, Array.from(selectedDocIds));
         } catch (err: any) {
             setError(err.message || "Failed to submit candidate");
             setSubmitting(false);
@@ -214,13 +207,13 @@ export default function SubmitToJobWizard({
                             Send Job Opportunity to {candidateName}
                         </h3>
                         <p className="text-sm text-base-content/70 mt-1">
-                            Step {currentStep} of 3 - Candidate will review
-                            and approve
+                            Step {currentStep} of 3 - Candidate will review and
+                            approve
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -364,9 +357,7 @@ export default function SubmitToJobWizard({
                                                                 : ""
                                                         }`}
                                                         onClick={() =>
-                                                            setSelectedJob(
-                                                                job,
-                                                            )
+                                                            setSelectedJob(job)
                                                         }
                                                     >
                                                         <td>
@@ -446,8 +437,8 @@ export default function SubmitToJobWizard({
                                         <div className="flex justify-between items-center mt-4">
                                             <div className="text-sm text-base-content/70">
                                                 Showing page {page} of{" "}
-                                                {totalPages} ({totalCount}{" "}
-                                                total jobs)
+                                                {totalPages} ({totalCount} total
+                                                jobs)
                                             </div>
                                             <div className="join">
                                                 <button
@@ -549,9 +540,7 @@ export default function SubmitToJobWizard({
                                                         doc.id,
                                                     )}
                                                     onChange={() =>
-                                                        toggleDocument(
-                                                            doc.id,
-                                                        )
+                                                        toggleDocument(doc.id)
                                                     }
                                                 />
                                                 <i
@@ -587,8 +576,8 @@ export default function SubmitToJobWizard({
                                 <i className="fa-duotone fa-regular fa-info-circle" />
                                 <span>
                                     Review the details below. {candidateName}{" "}
-                                    will receive an email notification and
-                                    must approve this opportunity.
+                                    will receive an email notification and must
+                                    approve this opportunity.
                                 </span>
                             </div>
 
@@ -664,9 +653,7 @@ export default function SubmitToJobWizard({
                                         <ul className="space-y-1">
                                             {documents
                                                 .filter((doc) =>
-                                                    selectedDocIds.has(
-                                                        doc.id,
-                                                    ),
+                                                    selectedDocIds.has(doc.id),
                                                 )
                                                 .map((doc) => (
                                                     <li

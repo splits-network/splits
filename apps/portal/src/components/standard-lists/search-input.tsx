@@ -1,4 +1,3 @@
-
 interface SearchInputProps {
     value: string;
     onChange: (value: string) => void;
@@ -12,12 +11,12 @@ export function SearchInput({
     value,
     onChange,
     onClear,
-    placeholder = 'Search...',
+    placeholder = "Search...",
     loading = false,
-    className = '',
+    className = "",
 }: SearchInputProps) {
     return (
-        <label className='input'>
+        <label className="input">
             <i className="fa-duotone fa-regular fa-search"></i>
             <input
                 type="text"
@@ -30,7 +29,7 @@ export function SearchInput({
                 <span className="loading loading-spinner loading-sm absolute right-3 top-1/2 -translate-y-1/2"></span>
             ) : value && onClear ? (
                 <button
-                    className="btn btn-ghost btn-xs btn-circle absolute right-2 top-1/2 -translate-y-1/2"
+                    className="btn btn-ghost btn-xs btn-square absolute right-2 top-1/2 -translate-y-1/2"
                     onClick={onClear}
                 >
                     <i className="fa-duotone fa-regular fa-times"></i>

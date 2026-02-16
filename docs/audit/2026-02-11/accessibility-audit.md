@@ -13,20 +13,20 @@ The Splits Network portal has **foundational accessibility gaps** that affect ke
 
 **Key metrics from the audit:**
 
-| Metric | Value | Assessment |
-|--------|-------|------------|
-| Total `aria-*` attribute usages | ~66 across 37 files | Very low for ~97 pages |
-| `aria-live` regions | 0 | **None exist** |
-| `aria-busy` regions | 0 | **None exist** |
-| `role="alert"` usages | 0 | **None exist** |
-| `aria-sort` on sortable columns | 0 | **Missing** |
-| `aria-selected` on tabs | 0 | **Missing** |
-| `scope="col"` / `scope="row"` on tables | 0 | **Missing** |
-| Skip-to-content links | 0 | **None exist** |
-| Focus trap implementations | 0 | **None exist** |
-| `focus-ring` class usage (outside CSS definition) | 0 files | **Never applied** |
-| Duplicate `<main>` landmarks | 4 nested layouts | **Landmark confusion** |
-| `text-secondary` on white backgrounds | 150 occurrences across 50 files | **Potential contrast failures** |
+| Metric                                            | Value                           | Assessment                      |
+| ------------------------------------------------- | ------------------------------- | ------------------------------- |
+| Total `aria-*` attribute usages                   | ~66 across 37 files             | Very low for ~97 pages          |
+| `aria-live` regions                               | 0                               | **None exist**                  |
+| `aria-busy` regions                               | 0                               | **None exist**                  |
+| `role="alert"` usages                             | 0                               | **None exist**                  |
+| `aria-sort` on sortable columns                   | 0                               | **Missing**                     |
+| `aria-selected` on tabs                           | 0                               | **Missing**                     |
+| `scope="col"` / `scope="row"` on tables           | 0                               | **Missing**                     |
+| Skip-to-content links                             | 0                               | **None exist**                  |
+| Focus trap implementations                        | 0                               | **None exist**                  |
+| `focus-ring` class usage (outside CSS definition) | 0 files                         | **Never applied**               |
+| Duplicate `<main>` landmarks                      | 4 nested layouts                | **Landmark confusion**          |
+| `text-secondary` on white backgrounds             | 150 occurrences across 50 files | **Potential contrast failures** |
 
 **Overall Rating:** The portal has significant accessibility barriers. Approximately 30-40 issues require attention, with 7 classified as critical, 14 as major, and the remainder as minor.
 
@@ -44,6 +44,7 @@ These issues create hard barriers for assistive technology users and likely viol
 **Impact:** Keyboard-only users must tab through the entire sidebar navigation (15+ items) on every page load before reaching main content.
 
 **Files affected:**
+
 - `g:\code\splits.network\apps\portal\src\app\layout.tsx` (line 131)
 - `g:\code\splits.network\apps\portal\src\app\portal\layout.tsx` (line 30)
 - `g:\code\splits.network\apps\portal\src\app\(auth)\layout.tsx` (line 9)
@@ -55,11 +56,16 @@ These issues create hard barriers for assistive technology users and likely viol
 
 ```tsx
 <body>
-    <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:p-4 focus:bg-primary focus:text-primary-content">
+    <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:p-4 focus:bg-primary focus:text-primary-content"
+    >
         Skip to main content
     </a>
     ...
-    <main id="main-content" className="grow">{children}</main>
+    <main id="main-content" className="grow">
+        {children}
+    </main>
 </body>
 ```
 
@@ -71,6 +77,7 @@ These issues create hard barriers for assistive technology users and likely viol
 **Impact:** Screen readers announce multiple main landmarks, making it unclear which is the actual primary content area.
 
 **Files affected:**
+
 - `g:\code\splits.network\apps\portal\src\app\layout.tsx` (line 136): `<main className="grow">`
 - `g:\code\splits.network\apps\portal\src\app\portal\layout.tsx` (line 30): `<main className="p-2 flex-1">`
 - `g:\code\splits.network\apps\portal\src\app\portal\admin\layout.tsx` (line 41): `<main className="flex-1 p-6">`
@@ -121,6 +128,7 @@ When a user navigates to `/portal/dashboard`, they encounter **two** nested `<ma
 **Impact:** When modals open, keyboard focus can escape behind them. Users can interact with background content while the modal is visually blocking it. No modals have `aria-modal="true"` or `aria-labelledby`.
 
 **Files affected (all modals in the application):**
+
 - `g:\code\splits.network\apps\portal\src\components\confirm-dialog.tsx` (line 62): Uses `<div className="modal modal-open">` instead of `<dialog>`
 - `g:\code\splits.network\apps\portal\src\components\upload-document-modal.tsx` (line 88): Same pattern
 - `g:\code\splits.network\apps\portal\src\components\onboarding\onboarding-wizard-modal.tsx` (line 72): Uses raw `<div className="fixed">` with no dialog semantics at all
@@ -169,6 +177,7 @@ Additionally, implement focus trapping (e.g., using `focus-trap-react` or a cust
 **File:** `g:\code\splits.network\apps\portal\src\components\onboarding\onboarding-wizard-modal.tsx`
 
 **Issues at lines 66-141:**
+
 1. Modal is a raw `<div className="fixed">` with no `role="dialog"` or `aria-modal`
 2. No focus trap -- focus can escape to background content
 3. No Escape key handler (intentionally non-dismissible, but should still trap focus)
@@ -212,6 +221,7 @@ Additionally, implement focus trapping (e.g., using `focus-trap-react` or a cust
 **Impact:** Tabs across the portal use `<a role="tab">` without `href`, `aria-selected`, `aria-controls`, or keyboard navigation (arrow keys). Screen readers cannot determine which tab is active or navigate between tabs.
 
 **Files affected (all tab implementations):**
+
 - `g:\code\splits.network\apps\portal\src\app\portal\applications\components\shared\details.tsx` (lines 175-239)
 - `g:\code\splits.network\apps\portal\src\app\portal\candidates\components\shared\details.tsx` (lines 209+)
 - `g:\code\splits.network\apps\portal\src\app\portal\roles\components\details-view.tsx` (lines 283-350, 566+)
@@ -233,6 +243,7 @@ Additionally, implement focus trapping (e.g., using `focus-trap-react` or a cust
 ```
 
 **Problems:**
+
 1. `<a>` tags without `href` are not keyboard-focusable by default
 2. Missing `aria-selected={true/false}` on each tab
 3. Missing `aria-controls` linking to the tab panel
@@ -275,21 +286,25 @@ Additionally, implement focus trapping (e.g., using `focus-trap-react` or a cust
 **Impact:** The secondary theme color (`#0f9d8a` in light mode, `#14b8a6` in dark mode) used as text on white/light backgrounds fails the minimum 4.5:1 contrast ratio for normal text.
 
 **Files:**
+
 - `g:\code\splits.network\apps\portal\src\app\themes\light.css` (line 11): `--color-secondary: #0f9d8a` (3.7:1 ratio on white -- **FAILS**)
 - `g:\code\splits.network\apps\portal\src\app\themes\dark.css` (line 11): `--color-secondary: #14b8a6`
 
 **Scope of impact:** 150 occurrences of `text-secondary` across 50 files. Common usages include:
+
 - Badge text, stat labels, category indicators
 - Link-like decorative text
 - Icon colors paired with text
 
 **Specific high-traffic examples:**
+
 - `g:\code\splits.network\apps\portal\src\app\public\for-companies\for-companies-content.tsx` (14 occurrences)
 - `g:\code\splits.network\apps\portal\src\app\public\how-it-works\how-it-works-content.tsx` (7 occurrences)
 - `g:\code\splits.network\apps\portal\src\app\public\for-recruiters\for-recruiters-content.tsx` (7 occurrences)
 - `g:\code\splits.network\apps\portal\src\app\public\terms-of-service\page.tsx` (40 occurrences)
 
 **Recommended fix options:**
+
 1. **Darken the secondary color** to at least `#0d7d6e` (4.5:1 on white) while maintaining brand identity
 2. **Audit all 50 files** and replace `text-secondary` with `text-base-content` where the text must be readable at small sizes
 3. Reserve `text-secondary` for large text (18px+/14px bold+) and decorative/icon uses only
@@ -310,12 +325,14 @@ These issues significantly degrade the experience for assistive technology users
 **Impact:** The page has multiple `<nav>` elements but none have `aria-label` to distinguish them. Screen readers announce "navigation" multiple times without context.
 
 **Files affected:**
+
 - `g:\code\splits.network\apps\portal\src\components\sidebar.tsx` (line 539): `<nav className="flex-1 px-3 py-4 ...">` -- no `aria-label`
 - `g:\code\splits.network\apps\portal\src\components\header.tsx` (line 78): `<nav className="hidden lg:flex ...">` -- no `aria-label`
 - `g:\code\splits.network\apps\portal\src\components\footer.tsx` -- no `<nav>` wrapping footer links at all
 - `g:\code\splits.network\apps\portal\src\app\portal\admin\components\admin-sidebar.tsx` (line 444): `<nav>` -- no `aria-label`
 
 **Recommended fix:**
+
 ```tsx
 // sidebar.tsx line 539
 <nav aria-label="Main navigation" className="flex-1 px-3 py-4 ...">
@@ -337,6 +354,7 @@ These issues significantly degrade the experience for assistive technology users
 **File:** `g:\code\splits.network\apps\portal\src\components\ui\tables\data-table.tsx`
 
 **Issues at lines 136-187:**
+
 1. `<th>` elements lack `scope="col"` (line 160-186)
 2. Sortable columns lack `aria-sort` attribute (should be `"ascending"`, `"descending"`, or `"none"`)
 3. Sortable `<th>` elements use `onClick` but are not keyboard-focusable (`<th>` is not interactive by default)
@@ -405,6 +423,7 @@ The `<tr>` has `onClick` but no `tabIndex={0}`, no `onKeyDown` handler, and no A
 **File:** `g:\code\splits.network\apps\portal\src\components\notification-bell.tsx`
 
 **Issues:**
+
 1. Lines 185-186: Uses `onFocus`/`onBlur` to toggle dropdown -- this means tabbing into the dropdown content closes it
 2. Line 187: `aria-label="Notifications"` should include unread count (e.g., `aria-label="Notifications, 5 unread"`)
 3. Line 239-291: Each notification is a `<div onClick>` without `role="button"`, `tabIndex`, or `onKeyDown`
@@ -433,6 +452,7 @@ The `<tr>` has `onClick` but no `tabIndex={0}`, no `onKeyDown` handler, and no A
 **File:** `g:\code\splits.network\apps\portal\src\components\user-dropdown.tsx`
 
 **Issues:**
+
 1. Line 75-100: Trigger button lacks `aria-expanded`, `aria-haspopup="menu"`, and `aria-label`
 2. Line 102-147: Dropdown menu lacks `role="menu"` and items lack `role="menuitem"`
 3. No Escape key to close
@@ -500,6 +520,7 @@ And on the child container:
 This is a well-designed utility but it is never applied. Custom interactive elements (clickable cards, expandable rows, dropdown triggers, etc.) should all use this class.
 
 **Recommended fix:** Apply `focus-ring` to all custom interactive elements:
+
 - `BaseCard` when clickable (`g:\code\splits.network\apps\portal\src\components\ui\cards\base-card.tsx`)
 - `StatCard` when clickable (`g:\code\splits.network\apps\portal\src\components\ui\cards\stat-card.tsx`)
 - `ExpandableTableRow` (`g:\code\splits.network\apps\portal\src\components\ui\tables\expandable-table-row.tsx`)
@@ -542,6 +563,7 @@ There are 6 social media links, none with `aria-label`.
 **Impact:** The hamburger menu button in the public header and portal header uses `<label>` as a button without an accessible name.
 
 **Files:**
+
 - `g:\code\splits.network\apps\portal\src\components\header.tsx` (lines 156-162): Mobile menu label with no accessible name
 - `g:\code\splits.network\apps\portal\src\components\portal-header.tsx` (lines 62-67): Sidebar toggle label with no accessible name
 
@@ -558,7 +580,11 @@ The `<label>` acts as a button but has no text content and no `aria-label`. The 
 **Recommended fix:**
 
 ```tsx
-<label htmlFor="sidebar-drawer" className="btn btn-square btn-ghost" aria-label="Toggle sidebar menu">
+<label
+    htmlFor="sidebar-drawer"
+    className="btn btn-square btn-ghost"
+    aria-label="Toggle sidebar menu"
+>
     <i className="fa-duotone fa-regular fa-bars text-lg" aria-hidden="true"></i>
 </label>
 ```
@@ -571,14 +597,23 @@ The `<label>` acts as a button but has no text content and no `aria-label`. The 
 **Impact:** The theme toggle checkbox is visually labeled by sun/moon icons but has no programmatic label. Screen readers announce "checkbox" with no context.
 
 **Files:**
+
 - `g:\code\splits.network\apps\portal\src\components\portal-header.tsx` (lines 106-118)
 - `g:\code\splits.network\apps\portal\src\components\header.tsx` (lines 108-120)
 
 **Current state:**
 
 ```tsx
-<label className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle" title="Toggle Theme">
-    <input type="checkbox" checked={isDark} onChange={handleThemeChange} className="theme-controller" />
+<label
+    className="swap swap-rotate cursor-pointer btn btn-ghost btn-square"
+    title="Toggle Theme"
+>
+    <input
+        type="checkbox"
+        checked={isDark}
+        onChange={handleThemeChange}
+        className="theme-controller"
+    />
     <i className="fa-duotone fa-regular fa-sun-bright swap-off"></i>
     <i className="fa-duotone fa-regular fa-moon swap-on"></i>
 </label>
@@ -757,6 +792,7 @@ The banner appears with a delay animation but is not announced. Adding `role="di
 Across the portal, loading states render visual spinners but do not announce to screen readers. The `LoadingState` component from `@splits-network/shared-ui` should include `role="status"` and `aria-live="polite"`.
 
 **Representative locations:**
+
 - `g:\code\splits.network\apps\portal\src\components\notification-bell.tsx` (line 229-231)
 - `g:\code\splits.network\apps\portal\src\components\ui\tables\data-table.tsx` (line 201)
 - All page loading states using `<LoadingState>` component
@@ -770,6 +806,7 @@ Across the portal, loading states render visual spinners but do not announce to 
 FontAwesome icons (e.g., `<i className="fa-duotone fa-regular fa-check">`) that are decorative (paired with text) should have `aria-hidden="true"` to prevent screen readers from attempting to announce them.
 
 This is a very widespread pattern -- virtually every icon in the portal lacks `aria-hidden="true"`. A few examples:
+
 - Sidebar navigation icons (sidebar.tsx, line 248)
 - Footer social icons (footer.tsx, lines 46-87)
 - Toast icons (toast-context.tsx, lines 96-104)
@@ -812,6 +849,7 @@ The word "close" is visible but visually hidden behind the backdrop. This is a D
 The `prefers-reduced-motion` media query is checked in 26 files, all within the landing page section (`components/landing/`, `app/public/`). Portal-side animations (expand/collapse in sidebar, loading spinners, toast slide-in) do not respect this preference.
 
 **Files with animations that should check reduced motion:**
+
 - `g:\code\splits.network\apps\portal\src\app\globals.css` (cookie banner slide-up, expand/collapse animations)
 - Toast notifications
 - Sidebar expand/collapse
@@ -831,6 +869,7 @@ Mobile dock items are `<button>` elements that call `router.push()` instead of `
 ## Summary of Recommended Remediation Priority
 
 ### Phase 1 -- Critical (Sprint 1)
+
 1. Add skip-to-content link (CRIT-01)
 2. Fix duplicate `<main>` landmarks (CRIT-02)
 3. Add `aria-live` to toast container (CRIT-03)
@@ -839,6 +878,7 @@ Mobile dock items are `<button>` elements that call `router.push()` instead of `
 6. Address secondary color contrast (CRIT-07)
 
 ### Phase 2 -- Major (Sprint 2-3)
+
 7. Add `aria-label` to all navigation landmarks (MAJ-01)
 8. Add `scope` and `aria-sort` to DataTable (MAJ-02)
 9. Make clickable DataTableRows keyboard-accessible (MAJ-03)
@@ -853,6 +893,7 @@ Mobile dock items are `<button>` elements that call `router.push()` instead of `
 18. Add dialog semantics to MessageSidebar (MAJ-14)
 
 ### Phase 3 -- Minor (Ongoing)
+
 19. All remaining minor issues (MIN-01 through MIN-10)
 20. Systematic `aria-hidden="true"` on decorative icons
 21. Reduced motion support for portal animations
@@ -863,27 +904,33 @@ Mobile dock items are `<button>` elements that call `router.push()` instead of `
 ## Appendix: Quick Grep Findings
 
 ### Clickable `<div>` / `<span>` Elements (Non-Semantic Interactive)
+
 - `g:\code\splits.network\apps\portal\src\app\portal\candidates\components\grid\item.tsx` (line 192): `<div onClick>` (event propagation stop -- acceptable)
 - `g:\code\splits.network\apps\portal\src\components\ui\cards\content-card.tsx` (line 118): `<div onClick>` (event propagation stop -- acceptable)
 
 These two instances are used for event propagation control within already-clickable parents, which is an acceptable pattern.
 
 ### `outline: none` Without Focus Alternative
+
 - `g:\code\splits.network\apps\portal\src\app\globals.css` (line 203): Inside `.focus-ring` class -- has `:focus-visible` counterpart (acceptable)
 - No other instances found -- the app generally relies on browser defaults.
 
 ### Images Without `alt` Text
+
 - All `<img>` tags in the portal have `alt` attributes. No missing `alt` was detected.
 
 ### `aria-live` Regions
+
 - **Zero** instances found anywhere in the portal.
 
 ### `aria-busy` Usage
+
 - **Zero** instances found anywhere in the portal.
 
 ### `role="alert"` Usage
+
 - **Zero** instances found anywhere in the portal.
 
 ---
 
-*End of audit. This report should be used as the basis for a remediation plan. Each issue references specific file paths and line numbers for developer actionability.*
+_End of audit. This report should be used as the basis for a remediation plan. Each issue references specific file paths and line numbers for developer actionability._

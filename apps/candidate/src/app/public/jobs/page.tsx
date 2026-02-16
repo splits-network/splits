@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Fragment, useCallback, useEffect } from "react";
+import { useState, useMemo, Fragment, useCallback, useEffect, Suspense } from "react";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { apiClient } from "@/lib/api-client";
 import { formatSalary, formatRelativeTime } from "@/lib/utils";
@@ -652,9 +652,9 @@ function SplitView({
     );
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
+// ─── Inner Component (uses useSearchParams via useStandardList) ──────────────
 
-export default function JobsPage() {
+function JobsPageInner() {
     const [viewMode, setViewMode] = useState<ViewMode>("grid");
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
@@ -993,5 +993,40 @@ export default function JobsPage() {
                 </div>
             </section>
         </ListsSixAnimator>
+    );
+}
+
+// ─── Loading Fallback ───────────────────────────────────────────────────────
+
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen bg-cream flex items-center justify-center">
+            <div className="text-center">
+                <div className="w-16 h-16 bg-coral mx-auto mb-4 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-briefcase text-2xl text-white animate-pulse"></i>
+                </div>
+                <h2 className="text-xl font-black uppercase tracking-tight text-dark mb-2">
+                    Loading Jobs
+                </h2>
+                <p className="text-dark/60 text-sm">
+                    Finding the best opportunities for you...
+                </p>
+            </div>
+        </div>
+    );
+}
+
+// ─── Main Page Component (wrapped in Suspense) ──────────────────────────────
+
+/**
+ * Jobs Page - Browse available job opportunities
+ * 
+ * Wrapped in Suspense for useSearchParams compatibility with Next.js 16.
+ */
+export default function JobsPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <JobsPageInner />
+        </Suspense>
     );
 }

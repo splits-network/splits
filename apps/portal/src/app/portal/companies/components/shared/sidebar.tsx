@@ -10,9 +10,7 @@ interface SidebarProps {
     onClose: () => void;
 }
 
-function getCompanyFromItem(
-    item: Company | CompanyRelationship,
-): Company {
+function getCompanyFromItem(item: Company | CompanyRelationship): Company {
     if ("company" in item && item.company) {
         // It's a CompanyRelationship - extract company data
         return {
@@ -89,7 +87,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                 />
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-sm btn-circle btn-ghost"
+                                    className="btn btn-sm btn-square btn-ghost"
                                     aria-label="Close"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark" />

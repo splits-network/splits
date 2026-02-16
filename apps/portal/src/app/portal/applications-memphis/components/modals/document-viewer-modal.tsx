@@ -76,7 +76,7 @@ export default function DocumentViewerModal({
         };
 
         fetchSignedUrl();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, document]);
 
     if (!isOpen || !document) return null;
@@ -102,7 +102,7 @@ export default function DocumentViewerModal({
         <dialog className="modal modal-open">
             <div className="modal-box max-w-6xl h-[90vh] p-0 flex flex-col">
                 {/* Header */}
-                <div className="p-4 border-b border-base-300 flex justify-between items-start bg-base-100 shrink-0">
+                <div className="p-4 border-b-4 border-dark/20 flex justify-between items-start bg-white shrink-0">
                     <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-bold truncate mb-1">
                             {document.file_name}
@@ -139,7 +139,7 @@ export default function DocumentViewerModal({
                         </button>
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-circle btn-ghost"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
                             <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>
@@ -209,7 +209,7 @@ export default function DocumentViewerModal({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-base-300 bg-base-100 shrink-0">
+                <div className="p-4 border-t-4 border-dark/20 bg-white shrink-0">
                     <div className="flex justify-between items-center">
                         <div className="text-sm text-base-content/60">
                             <i className="fa-duotone fa-regular fa-circle-info mr-2"></i>

@@ -1055,7 +1055,7 @@ export default function DeclineModal({
                     </h3>
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle"
+                        className="btn btn-ghost btn-sm btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-times"></i>
                     </button>
@@ -1337,7 +1337,7 @@ export default function ProposalResponseWizard({
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle"
+                        className="btn btn-ghost btn-sm btn-square"
                         disabled={submitting}
                     >
                         <i className="fa-duotone fa-regular fa-times"></i>

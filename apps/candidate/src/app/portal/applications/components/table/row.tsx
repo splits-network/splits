@@ -17,7 +17,7 @@ export default function Row({ item, onViewDetails, onStageChange }: RowProps) {
             {/* Expand column spacer */}
             <td className="w-10">
                 <button
-                    className="btn btn-ghost btn-xs btn-circle"
+                    className="btn btn-ghost btn-xs btn-square"
                     onClick={(e) => {
                         e.stopPropagation();
                         onViewDetails(item.id);

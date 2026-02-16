@@ -505,7 +505,7 @@ export default function RoleActionsToolbar({
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-circle gap-2`}
+                        className={`btn ${getSizeClass()} btn-square gap-2`}
                         disabled={isSharing}
                     >
                         {isSharing ? (

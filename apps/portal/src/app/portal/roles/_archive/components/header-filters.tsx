@@ -73,7 +73,7 @@ export function HeaderFilters({
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                         aria-label="Clear search"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
@@ -199,11 +199,18 @@ export function HeaderFilters({
 
                     {/* Commute Type Filter */}
                     <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Commute Type</legend>
+                        <legend className="fieldset-legend">
+                            Commute Type
+                        </legend>
                         <select
                             className="select select-sm w-full"
                             value={filters.commute_type || ""}
-                            onChange={(e) => setFilter("commute_type", e.target.value || undefined)}
+                            onChange={(e) =>
+                                setFilter(
+                                    "commute_type",
+                                    e.target.value || undefined,
+                                )
+                            }
                         >
                             <option value="">All Commute Types</option>
                             <option value="remote">Remote</option>
@@ -221,7 +228,12 @@ export function HeaderFilters({
                         <select
                             className="select select-sm w-full"
                             value={filters.job_level || ""}
-                            onChange={(e) => setFilter("job_level", e.target.value || undefined)}
+                            onChange={(e) =>
+                                setFilter(
+                                    "job_level",
+                                    e.target.value || undefined,
+                                )
+                            }
                         >
                             <option value="">All Levels</option>
                             <option value="entry">Entry Level</option>

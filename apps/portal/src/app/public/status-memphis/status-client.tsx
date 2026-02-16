@@ -22,6 +22,10 @@ interface StatusMemphisClientProps {
     initialCheckedAt?: string;
 }
 
+// Memphis accent cycling (coral → teal → yellow → purple)
+const ACCENT_COLORS = ['coral', 'teal', 'yellow', 'purple'] as const;
+const accentAt = (idx: number) => ACCENT_COLORS[idx % 4];
+
 export default function StatusMemphisClient({
     initialStatuses,
     initialCheckedAt,
@@ -63,46 +67,78 @@ export default function StatusMemphisClient({
         return ((healthyCount / totalCount) * 100).toFixed(1);
     }, [healthyCount, totalCount]);
 
+    // State-based styling using Memphis Tailwind classes
+    const heroState = useMemo(() => {
+        if (isLoading) {
+            return {
+                headline: "CHECKING SYSTEM STATUS",
+                subtext: "Hang tight while we validate the API gateway, auth, ATS, network, billing, docs, AI, and automation stacks.",
+                bgColor: "bg-dark",
+                textColor: "text-cream",
+                badgeColor: "bg-purple",
+                badgeText: "text-white",
+            };
+        }
+        if (allHealthy) {
+            return {
+                headline: "ALL SYSTEMS OPERATIONAL",
+                subtext: "Recruiter dashboards, pipelines, automations, and AI review signals are green. Post roles, submit candidates, track placements — everything's running smooth.",
+                bgColor: "bg-teal",
+                textColor: "text-dark",
+                badgeColor: "bg-teal",
+                badgeText: "text-dark",
+            };
+        }
+        if (someUnhealthy) {
+            return {
+                headline: "INVESTIGATING SERVICE DEGRADATION",
+                subtext: "We detected a hiccup. Follow the incident card below or ping us at help@splits.network. Core features still work — you can browse, apply, and message.",
+                bgColor: "bg-coral",
+                textColor: "text-white",
+                badgeColor: "bg-coral",
+                badgeText: "text-white",
+            };
+        }
+        return {
+            headline: "MONITORING SYSTEM ANOMALIES",
+            subtext: "We're seeing unusual patterns. No confirmed impact yet. Everything still works — this is precautionary. We'll update as we learn more.",
+            bgColor: "bg-yellow",
+            textColor: "text-dark",
+            badgeColor: "bg-yellow",
+            badgeText: "text-dark",
+        };
+    }, [isLoading, allHealthy, someUnhealthy]);
+
+    // Overall status styling
     const overallLabel = useMemo(() => {
-        if (isLoading) return "Checking Services";
-        if (allHealthy) return "All Systems Operational";
-        if (someUnhealthy) return "Service Disruption Detected";
-        return "Degraded Performance";
+        if (isLoading) return "Checking System Status";
+        if (allHealthy) return "All Systems Operational";  
+        if (someUnhealthy) return "Service Issues Detected";
+        return "System Under Investigation";
     }, [isLoading, allHealthy, someUnhealthy]);
 
     const overallBorderColor = useMemo(() => {
-        if (isLoading) return "border-[#A78BFA]";
-        if (allHealthy) return "border-[#4ECDC4]";
-        if (someUnhealthy) return "border-[#FF6B6B]";
-        return "border-[#FFE66D]";
+        if (isLoading) return "border-purple";
+        if (allHealthy) return "border-teal";
+        if (someUnhealthy) return "border-coral"; 
+        return "border-yellow";
     }, [isLoading, allHealthy, someUnhealthy]);
 
     const overallAccentBg = useMemo(() => {
-        if (isLoading) return "bg-[#A78BFA]";
-        if (allHealthy) return "bg-[#4ECDC4]";
-        if (someUnhealthy) return "bg-[#FF6B6B]";
-        return "bg-[#FFE66D]";
+        if (isLoading) return "bg-purple";
+        if (allHealthy) return "bg-teal";
+        if (someUnhealthy) return "bg-coral";
+        return "bg-yellow";
     }, [isLoading, allHealthy, someUnhealthy]);
 
-    const statusColor = (status: string) => {
+    const statusBadgeClass = (status: string) => {
         switch (status) {
             case "healthy":
-                return "bg-[#4ECDC4]";
+                return "badge badge-teal";
             case "unhealthy":
-                return "bg-[#FF6B6B]";
+                return "badge badge-coral";
             default:
-                return "bg-[#FFE66D]";
-        }
-    };
-
-    const statusTextColor = (status: string) => {
-        switch (status) {
-            case "healthy":
-                return "text-[#4ECDC4]";
-            case "unhealthy":
-                return "text-[#FF6B6B]";
-            default:
-                return "text-[#FFE66D]";
+                return "badge badge-yellow";
         }
     };
 
@@ -117,62 +153,72 @@ export default function StatusMemphisClient({
         }
     };
 
+    const statusColor = (status: string) => {
+        switch (status) {
+            case "healthy":
+                return "bg-teal";
+            case "unhealthy":
+                return "bg-coral";
+            default:
+                return "bg-yellow";
+        }
+    };
+
+    const statusTextColor = (status: string) => {
+        switch (status) {
+            case "healthy":
+                return "text-teal";
+            case "unhealthy":
+                return "text-coral";
+            default:
+                return "text-yellow";
+        }
+    };
+
     return (
         <StatusAnimator>
             {/* ══════════════════════════════════════════════════════════════
                 HERO
                ══════════════════════════════════════════════════════════════ */}
-            <section className="status-hero relative min-h-[50vh] overflow-hidden flex items-center"
-                style={{ backgroundColor: "#1A1A2E" }}>
+            <section className={`status-hero relative min-h-[50vh] overflow-hidden flex items-center ${heroState.bgColor}`}>
                 {/* Memphis decorations */}
                 <div className="memphis-shapes absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="memphis-shape absolute top-[10%] left-[5%] w-20 h-20 rounded-full border-[4px] opacity-0"
-                        style={{ borderColor: "#FF6B6B" }} />
-                    <div className="memphis-shape absolute top-[60%] right-[8%] w-16 h-16 rounded-full opacity-0"
-                        style={{ backgroundColor: "#4ECDC4" }} />
-                    <div className="memphis-shape absolute bottom-[15%] left-[12%] w-10 h-10 rounded-full opacity-0"
-                        style={{ backgroundColor: "#FFE66D" }} />
-                    <div className="memphis-shape absolute top-[25%] right-[18%] w-14 h-14 rotate-12 opacity-0"
-                        style={{ backgroundColor: "#A78BFA" }} />
-                    <div className="memphis-shape absolute bottom-[25%] right-[28%] w-20 h-8 -rotate-6 border-[4px] opacity-0"
-                        style={{ borderColor: "#FF6B6B" }} />
-                    <div className="memphis-shape absolute top-[45%] left-[22%] w-8 h-8 rotate-45 opacity-0"
-                        style={{ backgroundColor: "#FF6B6B" }} />
-                    <svg className="memphis-shape absolute bottom-[10%] right-[40%] opacity-0" width="80" height="25" viewBox="0 0 80 25">
+                    <div className="memphis-shape absolute top-[10%] left-[5%] w-20 h-20 rounded-full border-4 border-coral opacity-0" />
+                    <div className="memphis-shape absolute top-[60%] right-[8%] w-16 h-16 rounded-full bg-teal opacity-0" />
+                    <div className="memphis-shape absolute bottom-[15%] left-[12%] w-10 h-10 rounded-full bg-yellow opacity-0" />
+                    <div className="memphis-shape absolute top-[25%] right-[18%] w-14 h-14 rotate-12 bg-purple opacity-0" />
+                    <div className="memphis-shape absolute bottom-[25%] right-[28%] w-20 h-8 -rotate-6 border-4 border-coral opacity-0" />
+                    <div className="memphis-shape absolute top-[45%] left-[22%] w-8 h-8 rotate-45 bg-coral opacity-0" />
+                    {/* SVG shapes - stroke colors via Tailwind */}
+                    <svg className="memphis-shape absolute bottom-[10%] right-[40%] opacity-0 stroke-purple" width="80" height="25" viewBox="0 0 80 25">
                         <polyline points="0,20 10,5 20,20 30,5 40,20 50,5 60,20 70,5 80,20"
-                            fill="none" stroke="#A78BFA" strokeWidth="3" strokeLinecap="round" />
+                            fill="none" strokeWidth="3" strokeLinecap="round" />
                     </svg>
-                    <svg className="memphis-shape absolute top-[70%] left-[35%] opacity-0" width="30" height="30" viewBox="0 0 30 30">
-                        <line x1="15" y1="3" x2="15" y2="27" stroke="#FFE66D" strokeWidth="4" strokeLinecap="round" />
-                        <line x1="3" y1="15" x2="27" y2="15" stroke="#FFE66D" strokeWidth="4" strokeLinecap="round" />
+                    <svg className="memphis-shape absolute top-[70%] left-[35%] opacity-0 stroke-yellow" width="30" height="30" viewBox="0 0 30 30">
+                        <line x1="15" y1="3" x2="15" y2="27" strokeWidth="4" strokeLinecap="round" />
+                        <line x1="3" y1="15" x2="27" y2="15" strokeWidth="4" strokeLinecap="round" />
                     </svg>
                 </div>
 
                 <div className="container mx-auto px-4 relative z-10 py-16">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="hero-badge inline-block mb-6 opacity-0">
-                            <span className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-[0.2em]"
-                                style={{ backgroundColor: "#4ECDC4", color: "#1A1A2E" }}>
+                            <span className={`inline-flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-[0.2em] ${heroState.badgeColor} ${heroState.badgeText}`}>
                                 <i className="fa-duotone fa-regular fa-signal-bars"></i>
-                                System Status
+                                Live System Status
                             </span>
                         </div>
 
-                        <h1 className="hero-headline text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-6 opacity-0"
-                            style={{ color: "#FFFFFF" }}>
-                            Platform{" "}
-                            <span style={{ color: "#4ECDC4" }}>Status</span>
+                        <h1 className={`hero-headline text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-6 opacity-0 ${heroState.textColor}`}>
+                            {heroState.headline}
                         </h1>
 
-                        <p className="hero-subtext text-lg md:text-xl leading-relaxed mb-8 opacity-0"
-                            style={{ color: "rgba(255,255,255,0.7)" }}>
-                            Live health telemetry for the Splits Network platform.
-                            Auto-refreshes every 30 seconds.
+                        <p className={`hero-subtext text-lg md:text-xl leading-relaxed mb-8 opacity-0 ${heroState.textColor}/70`}>
+                            {heroState.subtext}
                         </p>
 
-                        <div className="hero-timestamp inline-flex items-center gap-2 px-4 py-2 border-4 text-xs font-bold uppercase tracking-wider opacity-0"
-                            style={{ borderColor: "#A78BFA", color: "rgba(255,255,255,0.6)" }}>
-                            <i className="fa-duotone fa-regular fa-clock" style={{ color: "#A78BFA" }}></i>
+                        <div className={`hero-timestamp inline-flex items-center gap-2 px-4 py-2 border-4 border-purple text-xs font-bold uppercase tracking-wider opacity-0 ${heroState.textColor}/60`}>
+                            <i className="fa-duotone fa-regular fa-clock text-purple"></i>
                             <span suppressHydrationWarning>
                                 Last checked {lastChecked.toLocaleTimeString()}
                             </span>

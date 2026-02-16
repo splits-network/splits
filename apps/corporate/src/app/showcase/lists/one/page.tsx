@@ -3,8 +3,8 @@
 import { useRef, useState, useCallback, useMemo } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { mockJobs } from "../../../data/mock-jobs";
-import type { JobListing } from "../../../types/job-listing";
+import { mockJobs } from "@/data/mock-jobs";
+import type { JobListing } from "@/types/job-listing";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin();

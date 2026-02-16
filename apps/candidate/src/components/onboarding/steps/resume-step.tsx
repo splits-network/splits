@@ -150,7 +150,7 @@ export function ResumeStep() {
                             </div>
                             <button
                                 type="button"
-                                className="btn btn-ghost btn-sm btn-circle"
+                                className="btn btn-ghost btn-sm btn-square"
                                 onClick={handleRemoveFile}
                                 title="Remove file"
                             >

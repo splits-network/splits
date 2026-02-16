@@ -54,7 +54,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                 />
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-sm btn-circle btn-ghost"
+                                    className="btn btn-sm btn-square btn-ghost"
                                     aria-label="Close"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark" />
@@ -65,10 +65,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
 
                     {/* Scrollable Content */}
                     <div className="flex-1 overflow-y-auto">
-                        <Details
-                            itemId={item.id}
-                            onRefresh={refresh}
-                        />
+                        <Details itemId={item.id} onRefresh={refresh} />
                     </div>
                 </div>
             </div>

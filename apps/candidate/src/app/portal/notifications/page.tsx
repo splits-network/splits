@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import {
     formatNotificationTime,
     getNotificationIcon,
     getPriorityColor,
     InAppNotification,
-} from '@/lib/notifications';
-import { createAuthenticatedClient } from '@/lib/api-client';
+} from "@/lib/notifications";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 // ===== TYPES =====
 
-type FilterMode = 'all' | 'unread';
+type FilterMode = "all" | "unread";
 
 // ===== PAGE COMPONENT =====
 
@@ -23,8 +23,8 @@ export default function NotificationsPage() {
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filter, setFilter] = useState<FilterMode>('all');
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [filter, setFilter] = useState<FilterMode>("all");
+    const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
     // Load notifications when filter changes
     useEffect(() => {
@@ -36,22 +36,24 @@ export default function NotificationsPage() {
         setError(null);
         try {
             const token = await getToken();
-            if (!token) throw new Error('User not authenticated');
+            if (!token) throw new Error("User not authenticated");
 
             const client = createAuthenticatedClient(token);
-            const data = await client.get('/notifications', {
-                params: {
-                    filters: {
-                        unread_only: filter === 'unread' ? true : undefined,
+            const data = await client
+                .get("/notifications", {
+                    params: {
+                        filters: {
+                            unread_only: filter === "unread" ? true : undefined,
+                        },
+                        limit: 100,
                     },
-                    limit: 100,
-                },
-            }).then(res => res.data as InAppNotification[]);
+                })
+                .then((res) => res.data as InAppNotification[]);
 
             setNotifications(data);
         } catch (err: any) {
-            console.error('Failed to fetch notifications:', err);
-            setError(err.message || 'Failed to load notifications');
+            console.error("Failed to fetch notifications:", err);
+            setError(err.message || "Failed to load notifications");
         } finally {
             setLoading(false);
         }
@@ -62,17 +64,19 @@ export default function NotificationsPage() {
         if (!notification.read) {
             try {
                 const token = await getToken();
-                if (!token) throw new Error('User not authenticated');
+                if (!token) throw new Error("User not authenticated");
 
                 const client = createAuthenticatedClient(token);
-                await client.patch(`/notifications/${notification.id}`, { read: true });
+                await client.patch(`/notifications/${notification.id}`, {
+                    read: true,
+                });
                 setNotifications((prev) =>
                     prev.map((n) =>
-                        n.id === notification.id ? { ...n, read: true } : n
-                    )
+                        n.id === notification.id ? { ...n, read: true } : n,
+                    ),
                 );
             } catch (err) {
-                console.error('Failed to mark as read:', err);
+                console.error("Failed to mark as read:", err);
             }
         }
 
@@ -85,40 +89,51 @@ export default function NotificationsPage() {
     const handleMarkAllRead = async () => {
         try {
             const token = await getToken();
-            if (!token) throw new Error('User not authenticated');
+            if (!token) throw new Error("User not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post('/notifications/mark-all-read', {});
-            setNotifications((prev) =>
-                prev.map((n) => ({ ...n, read: true }))
-            );
+            await client.post("/notifications/mark-all-read", {});
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         } catch (err) {
-            console.error('Failed to mark all as read:', err);
+            console.error("Failed to mark all as read:", err);
         }
     };
 
-    const handleDismiss = async (notificationId: string, event: React.MouseEvent) => {
+    const handleDismiss = async (
+        notificationId: string,
+        event: React.MouseEvent,
+    ) => {
         event.stopPropagation();
         try {
             const token = await getToken();
-            if (!token) throw new Error('User not authenticated');
+            if (!token) throw new Error("User not authenticated");
 
             const client = createAuthenticatedClient(token);
             await client.delete(`/notifications/${notificationId}`);
             setNotifications((prev) =>
-                prev.filter((n) => n.id !== notificationId)
+                prev.filter((n) => n.id !== notificationId),
             );
         } catch (err) {
-            console.error('Failed to dismiss notification:', err);
+            console.error("Failed to dismiss notification:", err);
         }
     };
 
     // Computed values
     const unreadCount = notifications.filter((n) => !n.read).length;
-    const categories = ['all', ...Array.from(new Set(notifications.map((n) => n.category).filter((c): c is string => Boolean(c))))];
-    const filteredNotifications = selectedCategory === 'all'
-        ? notifications
-        : notifications.filter((n) => n.category === selectedCategory);
+    const categories = [
+        "all",
+        ...Array.from(
+            new Set(
+                notifications
+                    .map((n) => n.category)
+                    .filter((c): c is string => Boolean(c)),
+            ),
+        ),
+    ];
+    const filteredNotifications =
+        selectedCategory === "all"
+            ? notifications
+            : notifications.filter((n) => n.category === selectedCategory);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -128,7 +143,8 @@ export default function NotificationsPage() {
                     <h1 className="text-3xl font-bold">Notifications</h1>
                     {unreadCount > 0 && (
                         <p className="text-base-content/60 mt-1">
-                            {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                            {unreadCount} unread notification
+                            {unreadCount !== 1 ? "s" : ""}
                         </p>
                     )}
                 </div>
@@ -160,19 +176,21 @@ export default function NotificationsPage() {
                         <div className="flex gap-2">
                             <button
                                 type="button"
-                                className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setFilter('all')}
+                                className={`btn btn-sm ${filter === "all" ? "btn-primary" : "btn-ghost"}`}
+                                onClick={() => setFilter("all")}
                             >
                                 All
                             </button>
                             <button
                                 type="button"
-                                className={`btn btn-sm ${filter === 'unread' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setFilter('unread')}
+                                className={`btn btn-sm ${filter === "unread" ? "btn-primary" : "btn-ghost"}`}
+                                onClick={() => setFilter("unread")}
                             >
                                 Unread
                                 {unreadCount > 0 && (
-                                    <span className="badge badge-sm ml-1">{unreadCount}</span>
+                                    <span className="badge badge-sm ml-1">
+                                        {unreadCount}
+                                    </span>
                                 )}
                             </button>
                         </div>
@@ -180,15 +198,22 @@ export default function NotificationsPage() {
                         {/* Category Filter */}
                         {categories.length > 1 && (
                             <div className="flex gap-2 items-center">
-                                <span className="text-sm text-base-content/60">Category:</span>
+                                <span className="text-sm text-base-content/60">
+                                    Category:
+                                </span>
                                 <select
                                     className="select select-sm"
                                     value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    onChange={(e) =>
+                                        setSelectedCategory(e.target.value)
+                                    }
                                 >
                                     {categories.map((cat) => (
                                         <option key={cat} value={cat}>
-                                            {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                            {cat === "all"
+                                                ? "All Categories"
+                                                : cat.charAt(0).toUpperCase() +
+                                                  cat.slice(1)}
                                         </option>
                                     ))}
                                 </select>
@@ -213,13 +238,15 @@ export default function NotificationsPage() {
                         <div className="text-center py-12">
                             <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20 mb-4"></i>
                             <p className="text-lg text-base-content/60">
-                                {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                                {filter === "unread"
+                                    ? "No unread notifications"
+                                    : "No notifications"}
                             </p>
-                            {filter === 'unread' && (
+                            {filter === "unread" && (
                                 <button
                                     type="button"
                                     className="btn btn-ghost btn-sm mt-4"
-                                    onClick={() => setFilter('all')}
+                                    onClick={() => setFilter("all")}
                                 >
                                     View all notifications
                                 </button>
@@ -235,17 +262,23 @@ export default function NotificationsPage() {
                                     key={notification.id}
                                     className={`
                                         flex gap-4 p-4 cursor-pointer hover:bg-base-200 transition-colors
-                                        ${!notification.read ? 'bg-primary/5 border-l-4 border-l-primary' : ''}
+                                        ${!notification.read ? "bg-primary/5 border-l-4 border-l-primary" : ""}
                                     `}
-                                    onClick={() => handleNotificationClick(notification)}
+                                    onClick={() =>
+                                        handleNotificationClick(notification)
+                                    }
                                 >
                                     {/* Icon */}
                                     <div className="flex-shrink-0">
-                                        <div className={`
+                                        <div
+                                            className={`
                                             w-12 h-12 rounded-full flex items-center justify-center
-                                            ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
-                                        `}>
-                                            <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} text-lg`}></i>
+                                            ${!notification.read ? "bg-primary text-primary-content" : "bg-base-300"}
+                                        `}
+                                        >
+                                            <i
+                                                className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} text-lg`}
+                                            ></i>
                                         </div>
                                     </div>
 
@@ -253,21 +286,32 @@ export default function NotificationsPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-4 mb-2">
                                             <div className="flex-1">
-                                                <p className={`text-base ${!notification.read ? 'font-semibold' : ''}`}>
+                                                <p
+                                                    className={`text-base ${!notification.read ? "font-semibold" : ""}`}
+                                                >
                                                     {notification.subject}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="text-sm text-base-content/60">
-                                                        {formatNotificationTime(notification.created_at)}
+                                                        {formatNotificationTime(
+                                                            notification.created_at,
+                                                        )}
                                                     </span>
                                                     {notification.category && (
                                                         <span className="badge badge-sm badge-ghost">
-                                                            {notification.category}
+                                                            {
+                                                                notification.category
+                                                            }
                                                         </span>
                                                     )}
-                                                    {notification.priority !== 'normal' && (
-                                                        <span className={`badge badge-sm ${getPriorityColor(notification.priority)}`}>
-                                                            {notification.priority}
+                                                    {notification.priority !==
+                                                        "normal" && (
+                                                        <span
+                                                            className={`badge badge-sm ${getPriorityColor(notification.priority)}`}
+                                                        >
+                                                            {
+                                                                notification.priority
+                                                            }
                                                         </span>
                                                     )}
                                                 </div>
@@ -278,22 +322,30 @@ export default function NotificationsPage() {
                                                 )}
                                                 <button
                                                     type="button"
-                                                    className="btn btn-ghost btn-xs btn-circle"
-                                                    onClick={(e) => handleDismiss(notification.id, e)}
+                                                    className="btn btn-ghost btn-xs btn-square"
+                                                    onClick={(e) =>
+                                                        handleDismiss(
+                                                            notification.id,
+                                                            e,
+                                                        )
+                                                    }
                                                     aria-label="Dismiss"
                                                 >
                                                     <i className="fa-duotone fa-regular fa-times"></i>
                                                 </button>
                                             </div>
                                         </div>
-                                        {notification.action_label && notification.action_url && (
-                                            <div className="mt-2">
-                                                <span className="text-sm text-primary inline-flex items-center gap-1">
-                                                    {notification.action_label}
-                                                    <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
-                                                </span>
-                                            </div>
-                                        )}
+                                        {notification.action_label &&
+                                            notification.action_url && (
+                                                <div className="mt-2">
+                                                    <span className="text-sm text-primary inline-flex items-center gap-1">
+                                                        {
+                                                            notification.action_label
+                                                        }
+                                                        <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                             ))}

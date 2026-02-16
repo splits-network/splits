@@ -21,7 +21,7 @@ export default function DetailHeader({
                 <div className="flex items-center gap-3 mb-2">
                     <button
                         onClick={onClose}
-                        className="md:hidden btn btn-ghost btn-circle btn-sm -ml-2"
+                        className="md:hidden btn btn-ghost btn-square btn-sm -ml-2"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-left" />
                     </button>

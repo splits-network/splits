@@ -57,12 +57,12 @@ const NAV_ITEMS: NavItemDef[] = [
         color: "coral",
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", color: "coral" },
-            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", color: "teal" },
-            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", color: "yellow" },
-            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", color: "purple" },
-            { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", color: "coral" },
-            { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", color: "teal" },
+            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", color: "coral", href: "/public/platform/ats-memphis" },
+            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", color: "teal", href: "/public/platform/split-fees-memphis" },
+            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", color: "yellow", href: "/public/platform/analytics-memphis" },
+            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", color: "purple", href: "/public/platform/messaging-memphis" },
+            { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", color: "coral", href: "/public/platform/ai-matching-memphis" },
+            { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", color: "teal", href: "/public/platform/billing-memphis" },
         ],
     },
     {

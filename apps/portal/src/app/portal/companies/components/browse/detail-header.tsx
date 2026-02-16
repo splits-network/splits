@@ -48,7 +48,7 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
         };
 
         fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const handleRefresh = () => {
@@ -84,7 +84,7 @@ export default function DetailHeader({ id, onClose }: DetailHeaderProps) {
                     )}
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost hidden md:flex"
+                        className="btn btn-sm btn-square btn-ghost hidden md:flex"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>

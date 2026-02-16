@@ -363,7 +363,8 @@ export default function RoleWizardModal({
                 payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max)
                 payload.salary_max = parseInt(formData.salary_max);
-            if (formData.commute_types.length > 0) payload.commute_types = formData.commute_types;
+            if (formData.commute_types.length > 0)
+                payload.commute_types = formData.commute_types;
             if (formData.job_level) payload.job_level = formData.job_level;
 
             let targetJobId: string;
@@ -532,7 +533,7 @@ export default function RoleWizardModal({
                         </p>
                     </div>
                     <button
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                         onClick={handleClose}
                         disabled={submitting}
                     >
@@ -665,7 +666,11 @@ export default function RoleWizardModal({
                     )}
                 </div>
             </div>
-            <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+            <form
+                method="dialog"
+                className="modal-backdrop"
+                onClick={handleClose}
+            >
                 <button type="button">close</button>
             </form>
         </dialog>

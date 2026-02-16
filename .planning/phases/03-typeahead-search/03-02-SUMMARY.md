@@ -133,7 +133,7 @@ key-files:
         placeholder="Search..."
     />
     {query && (
-        <button className="btn btn-ghost btn-xs btn-circle">
+        <button className="btn btn-ghost btn-xs btn-square">
             <i className="fa-xmark" />
         </button>
     )}

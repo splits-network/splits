@@ -43,7 +43,7 @@ export function ConnectDrawer({ open, onClose }: ConnectDrawerProps) {
                                 Set Up Payouts
                             </h2>
                             <button
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 onClick={onClose}
                                 aria-label="Close"
                             >
@@ -94,10 +94,9 @@ function DrawerContent({ onClose }: { onClose: () => void }) {
                         Your data is secure
                     </div>
                     <div className="text-sm">
-                        Your personal and financial information is collected
-                        and stored securely by Stripe. Splits Network never
-                        sees or stores your bank details, tax ID, or
-                        identity documents.
+                        Your personal and financial information is collected and
+                        stored securely by Stripe. Splits Network never sees or
+                        stores your bank details, tax ID, or identity documents.
                     </div>
                 </div>
             </div>
@@ -114,8 +113,7 @@ function ProgressStepper({ status }: { status: ConnectStatus }) {
         {
             label: "Complete Verification",
             done: status === "ready" || status === "pending_verification",
-            active:
-                status === "incomplete" || status === "action_required",
+            active: status === "incomplete" || status === "action_required",
         },
         { label: "Ready", done: status === "ready" },
     ];
@@ -143,9 +141,7 @@ function ConnectContentByStatus({
 
     if (status === "not_started") {
         return (
-            <NotStartedState
-                onCreateAccount={connectStatus.createAccount}
-            />
+            <NotStartedState onCreateAccount={connectStatus.createAccount} />
         );
     }
 
@@ -154,9 +150,7 @@ function ConnectContentByStatus({
     }
 
     if (status === "ready") {
-        return (
-            <ReadyState onOpenDashboard={connectStatus.openDashboard} />
-        );
+        return <ReadyState onOpenDashboard={connectStatus.openDashboard} />;
     }
 
     // incomplete or action_required — show embedded onboarding
@@ -193,10 +187,7 @@ function NotStartedState({
                 Set up your payout account to receive commissions from
                 successful placements. This takes about 5 minutes.
             </p>
-            <button
-                className="btn btn-primary btn-lg"
-                onClick={handleCreate}
-            >
+            <button className="btn btn-primary btn-lg" onClick={handleCreate}>
                 <i className="fa-duotone fa-regular fa-rocket"></i>
                 Get Started
             </button>
@@ -208,16 +199,13 @@ function PendingVerificationState() {
     return (
         <div className="text-center py-8">
             <i className="fa-duotone fa-regular fa-clock text-5xl text-warning mb-4"></i>
-            <h3 className="text-xl font-bold mb-2">
-                Verification in Progress
-            </h3>
+            <h3 className="text-xl font-bold mb-2">Verification in Progress</h3>
             <p className="text-base-content/70 max-w-md mx-auto mb-2">
-                Stripe is reviewing your information. This usually takes
-                1-2 business days.
+                Stripe is reviewing your information. This usually takes 1-2
+                business days.
             </p>
             <p className="text-base-content/50 text-sm">
-                We&apos;ll notify you by email when verification is
-                complete.
+                We&apos;ll notify you by email when verification is complete.
             </p>
         </div>
     );
@@ -303,27 +291,23 @@ function EmbeddedOnboarding({
 
         // Clean up any existing element
         if (elementRef.current && containerRef.current.firstChild) {
-            containerRef.current.removeChild(
-                containerRef.current.firstChild
-            );
+            containerRef.current.removeChild(containerRef.current.firstChild);
         }
 
-        const onboardingElement = connectInstance.create(
-            "account-onboarding"
-        );
+        const onboardingElement = connectInstance.create("account-onboarding");
         onboardingElement.setOnExit(handleExit);
         onboardingElement.setCollectionOptions({
             fields: "eventually_due",
             futureRequirements: "include",
         });
         onboardingElement.setFullTermsOfServiceUrl(
-            "https://splits.network/terms-of-service"
+            "https://splits.network/terms-of-service",
         );
         onboardingElement.setRecipientTermsOfServiceUrl(
-            "https://splits.network/terms-of-service"
+            "https://splits.network/terms-of-service",
         );
         onboardingElement.setPrivacyPolicyUrl(
-            "https://splits.network/privacy-policy"
+            "https://splits.network/privacy-policy",
         );
 
         containerRef.current.appendChild(onboardingElement);
@@ -368,13 +352,10 @@ function EmbeddedManagement() {
         if (!connectInstance || !containerRef.current) return;
 
         if (elementRef.current && containerRef.current.firstChild) {
-            containerRef.current.removeChild(
-                containerRef.current.firstChild
-            );
+            containerRef.current.removeChild(containerRef.current.firstChild);
         }
 
-        const managementElement =
-            connectInstance.create("account-management");
+        const managementElement = connectInstance.create("account-management");
 
         containerRef.current.appendChild(managementElement);
         elementRef.current = managementElement;
@@ -391,9 +372,7 @@ function EmbeddedManagement() {
     }, [connectInstance]);
 
     if (loading) {
-        return (
-            <LoadingState message="Loading account management..." />
-        );
+        return <LoadingState message="Loading account management..." />;
     }
 
     if (error) {

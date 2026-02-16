@@ -7,7 +7,10 @@ interface HeaderFiltersProps {
     setSearchInput: (value: string) => void;
     clearSearch: () => void;
     filters: ConnectionFilters;
-    setFilter: <K extends keyof ConnectionFilters>(key: K, value: ConnectionFilters[K]) => void;
+    setFilter: <K extends keyof ConnectionFilters>(
+        key: K,
+        value: ConnectionFilters[K],
+    ) => void;
     loading: boolean;
     refresh: () => void;
     showStats: boolean;
@@ -42,7 +45,7 @@ export default function HeaderFilters({
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-circle"
+                        className="btn btn-ghost btn-xs btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>

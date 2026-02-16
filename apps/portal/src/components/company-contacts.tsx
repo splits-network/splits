@@ -178,7 +178,7 @@ export default function CompanyContacts({
                             {contact.email && (
                                 <a
                                     href={`mailto:${contact.email}`}
-                                    className="btn btn-ghost btn-xs btn-circle"
+                                    className="btn btn-ghost btn-xs btn-square"
                                     title={`Email ${contact.name}`}
                                 >
                                     <i className="fa-duotone fa-envelope text-xs" />

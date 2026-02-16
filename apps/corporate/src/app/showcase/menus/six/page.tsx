@@ -24,81 +24,81 @@ import type { MobileNavItemData, ActiveFilter } from "@splits-network/memphis-ui
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 
 const NAV_ITEMS_DATA = [
-    { label: "Platform", icon: "fa-duotone fa-regular fa-grid-2", color: ACCENT_HEX.coral },
-    { label: "Network", icon: "fa-duotone fa-regular fa-circle-nodes", color: ACCENT_HEX.teal },
-    { label: "Pricing", icon: "fa-duotone fa-regular fa-tag", color: ACCENT_HEX.yellow },
-    { label: "Resources", icon: "fa-duotone fa-regular fa-books", color: ACCENT_HEX.purple },
+    { label: "Platform", icon: "fa-duotone fa-regular fa-grid-2", color: "coral" as const },
+    { label: "Network", icon: "fa-duotone fa-regular fa-circle-nodes", color: "teal" as const },
+    { label: "Pricing", icon: "fa-duotone fa-regular fa-tag", color: "yellow" as const },
+    { label: "Resources", icon: "fa-duotone fa-regular fa-books", color: "purple" as const },
 ];
 
 const PLATFORM_DROPDOWN_ITEMS = [
-    { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", color: ACCENT_HEX.coral },
-    { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", color: ACCENT_HEX.teal },
-    { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", color: ACCENT_HEX.yellow },
-    { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", color: ACCENT_HEX.purple },
-    { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", color: ACCENT_HEX.coral },
-    { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", color: ACCENT_HEX.teal },
+    { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", color: "coral" as const },
+    { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", color: "teal" as const },
+    { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", color: "yellow" as const },
+    { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", color: "purple" as const },
+    { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", color: "coral" as const },
+    { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", color: "teal" as const },
 ];
 
 const NETWORK_DROPDOWN_ITEMS = [
-    { icon: "fa-duotone fa-regular fa-user-group", label: "Recruiters", desc: "Browse the network", color: ACCENT_HEX.teal },
-    { icon: "fa-duotone fa-regular fa-building", label: "Companies", desc: "Hiring partners", color: ACCENT_HEX.purple },
-    { icon: "fa-duotone fa-regular fa-magnifying-glass", label: "Search", desc: "Find connections", color: ACCENT_HEX.yellow },
+    { icon: "fa-duotone fa-regular fa-user-group", label: "Recruiters", desc: "Browse the network", color: "teal" as const },
+    { icon: "fa-duotone fa-regular fa-building", label: "Companies", desc: "Hiring partners", color: "purple" as const },
+    { icon: "fa-duotone fa-regular fa-magnifying-glass", label: "Search", desc: "Find connections", color: "yellow" as const },
 ];
 
 const RESOURCES_DROPDOWN_ITEMS = [
-    { icon: "fa-duotone fa-regular fa-book-open", label: "Documentation", desc: "Guides & API docs", color: ACCENT_HEX.purple },
-    { icon: "fa-duotone fa-regular fa-graduation-cap", label: "Academy", desc: "Learn the platform", color: ACCENT_HEX.coral },
-    { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", desc: "Latest industry news", color: ACCENT_HEX.teal },
-    { icon: "fa-duotone fa-regular fa-headset", label: "Support", desc: "Get help from our team", color: ACCENT_HEX.yellow },
+    { icon: "fa-duotone fa-regular fa-book-open", label: "Documentation", desc: "Guides & API docs", color: "purple" as const },
+    { icon: "fa-duotone fa-regular fa-graduation-cap", label: "Academy", desc: "Learn the platform", color: "coral" as const },
+    { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", desc: "Latest industry news", color: "teal" as const },
+    { icon: "fa-duotone fa-regular fa-headset", label: "Support", desc: "Get help from our team", color: "yellow" as const },
 ];
 
 const USER_MENU_ITEMS = [
-    { icon: "fa-duotone fa-regular fa-user-pen", label: "Profile", description: "Manage your account", color: ACCENT_HEX.teal },
-    { icon: "fa-duotone fa-regular fa-credit-card", label: "Billing", description: "Plans & payments", color: ACCENT_HEX.yellow },
-    { icon: "fa-duotone fa-regular fa-gear", label: "Settings", description: "Preferences & config", color: ACCENT_HEX.purple },
-    { icon: "fa-duotone fa-regular fa-bell", label: "Notifications", description: "Alert preferences", color: ACCENT_HEX.coral },
+    { icon: "fa-duotone fa-regular fa-user-pen", label: "Profile", description: "Manage your account", color: "teal" as const },
+    { icon: "fa-duotone fa-regular fa-credit-card", label: "Billing", description: "Plans & payments", color: "yellow" as const },
+    { icon: "fa-duotone fa-regular fa-gear", label: "Settings", description: "Preferences & config", color: "purple" as const },
+    { icon: "fa-duotone fa-regular fa-bell", label: "Notifications", description: "Alert preferences", color: "coral" as const },
 ];
 
 const CONTEXT_MENU_ITEMS = [
-    { icon: "fa-duotone fa-regular fa-pen", label: "Edit", color: ACCENT_HEX.teal },
-    { icon: "fa-duotone fa-regular fa-copy", label: "Duplicate", color: ACCENT_HEX.purple },
-    { icon: "fa-duotone fa-regular fa-arrow-up-from-bracket", label: "Share", color: ACCENT_HEX.yellow },
-    { icon: "fa-duotone fa-regular fa-archive", label: "Archive", color: ACCENT_HEX.coral },
+    { icon: "fa-duotone fa-regular fa-pen", label: "Edit", color: "teal" as const },
+    { icon: "fa-duotone fa-regular fa-copy", label: "Duplicate", color: "purple" as const },
+    { icon: "fa-duotone fa-regular fa-arrow-up-from-bracket", label: "Share", color: "yellow" as const },
+    { icon: "fa-duotone fa-regular fa-archive", label: "Archive", color: "coral" as const },
 ];
 
 const MOBILE_NAV_ITEMS: MobileNavItemData[] = [
     {
         label: "Platform",
         icon: "fa-duotone fa-regular fa-grid-2",
-        color: ACCENT_HEX.coral,
+        color: "coral" as const,
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", color: ACCENT_HEX.coral },
-            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", color: ACCENT_HEX.teal },
-            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", color: ACCENT_HEX.yellow },
-            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", color: ACCENT_HEX.purple },
+            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", color: "coral" as const },
+            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", color: "teal" as const },
+            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", color: "yellow" as const },
+            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", color: "purple" as const },
         ],
     },
     {
         label: "Network",
         icon: "fa-duotone fa-regular fa-circle-nodes",
-        color: ACCENT_HEX.teal,
+        color: "teal" as const,
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-user-group", label: "Recruiters", color: ACCENT_HEX.teal },
-            { icon: "fa-duotone fa-regular fa-building", label: "Companies", color: ACCENT_HEX.purple },
+            { icon: "fa-duotone fa-regular fa-user-group", label: "Recruiters", color: "teal" as const },
+            { icon: "fa-duotone fa-regular fa-building", label: "Companies", color: "purple" as const },
         ],
     },
-    { label: "Pricing", icon: "fa-duotone fa-regular fa-tag", color: ACCENT_HEX.yellow },
+    { label: "Pricing", icon: "fa-duotone fa-regular fa-tag", color: "yellow" as const },
     {
         label: "Resources",
         icon: "fa-duotone fa-regular fa-books",
-        color: ACCENT_HEX.purple,
+        color: "purple" as const,
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-book-open", label: "Docs", color: ACCENT_HEX.purple },
-            { icon: "fa-duotone fa-regular fa-graduation-cap", label: "Academy", color: ACCENT_HEX.coral },
-            { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", color: ACCENT_HEX.teal },
+            { icon: "fa-duotone fa-regular fa-book-open", label: "Docs", color: "purple" as const },
+            { icon: "fa-duotone fa-regular fa-graduation-cap", label: "Academy", color: "coral" as const },
+            { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", color: "teal" as const },
         ],
     },
 ];
@@ -473,11 +473,11 @@ export default function MenusSixPage() {
                             <NavItem
                                 label="Platform"
                                 icon="fa-duotone fa-regular fa-grid-2"
-                                color={ACCENT_HEX.coral}
+                                color="coral"
                                 hasDropdown
                             />
                             <NavDropdown
-                                accentColor={ACCENT_HEX.coral}
+                                accentColor="coral"
                                 title="Platform Tools"
                                 width="380px"
                             >
@@ -506,11 +506,11 @@ export default function MenusSixPage() {
                             <NavItem
                                 label="Network"
                                 icon="fa-duotone fa-regular fa-circle-nodes"
-                                color={ACCENT_HEX.teal}
+                                color="teal"
                                 hasDropdown
                             />
                             <NavDropdown
-                                accentColor={ACCENT_HEX.teal}
+                                accentColor="teal"
                                 title="Browse Network"
                                 width="320px"
                             >
@@ -539,11 +539,11 @@ export default function MenusSixPage() {
                             <NavItem
                                 label="Resources"
                                 icon="fa-duotone fa-regular fa-books"
-                                color={ACCENT_HEX.purple}
+                                color="purple"
                                 hasDropdown
                             />
                             <NavDropdown
-                                accentColor={ACCENT_HEX.purple}
+                                accentColor="purple"
                                 title="Help & Learn"
                                 width="360px"
                             >
@@ -888,7 +888,7 @@ export default function MenusSixPage() {
                         </div>
                         <ContextMenu
                             items={CONTEXT_MENU_ITEMS}
-                            accentColor={ACCENT_HEX.coral}
+                            accentColor="coral"
                             isOpen={contextMenu1}
                             onToggle={() => {
                                 setContextMenu1(!contextMenu1);
@@ -912,7 +912,7 @@ export default function MenusSixPage() {
                                 { icon: "fa-duotone fa-regular fa-eye", label: "View", color: ACCENT_HEX.teal },
                                 { icon: "fa-duotone fa-regular fa-pen", label: "Edit", color: ACCENT_HEX.purple },
                             ]}
-                            accentColor={ACCENT_HEX.teal}
+                            accentColor="teal"
                             isOpen={contextMenu2}
                             onToggle={() => {
                                 setContextMenu2(!contextMenu2);
@@ -939,7 +939,7 @@ export default function MenusSixPage() {
                                 { icon: "fa-duotone fa-regular fa-users", label: "View Candidates", color: ACCENT_HEX.coral },
                                 { icon: "fa-duotone fa-regular fa-archive", label: "Archive", color: ACCENT_HEX.teal },
                             ]}
-                            accentColor={ACCENT_HEX.purple}
+                            accentColor="purple"
                             isOpen={contextMenu3}
                             onToggle={() => {
                                 setContextMenu3(!contextMenu3);

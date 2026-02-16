@@ -113,12 +113,14 @@ export default function ActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex items-center ${layoutClass} ${className}`}>
+                <div
+                    className={`flex items-center ${layoutClass} ${className}`}
+                >
                     {/* Resend - CTA */}
                     {actions.resend && (
                         <button
                             onClick={handleResend}
-                            className={`btn ${sizeClass} btn-circle btn-primary`}
+                            className={`btn ${sizeClass} btn-square btn-primary`}
                             title="Resend Invitation"
                             disabled={isLoading}
                         >
@@ -134,7 +136,7 @@ export default function ActionsToolbar({
                     {actions.cancel && (
                         <button
                             onClick={() => setConfirmDialog(true)}
-                            className={`btn ${sizeClass} btn-circle btn-error`}
+                            className={`btn ${sizeClass} btn-square btn-error`}
                             title="Cancel Invitation"
                             disabled={isLoading}
                         >
@@ -150,7 +152,7 @@ export default function ActionsToolbar({
                     {actions.viewDeclineReason && (
                         <button
                             onClick={handleViewDeclineReason}
-                            className={`btn ${sizeClass} btn-circle btn-ghost`}
+                            className={`btn ${sizeClass} btn-square btn-ghost`}
                             title="View Decline Reason"
                         >
                             <i className="fa-duotone fa-regular fa-comment" />
@@ -160,12 +162,14 @@ export default function ActionsToolbar({
                     {/* View Candidate - far right */}
                     {actions.viewCandidate && (
                         <>
-                            {(actions.resend || actions.cancel || actions.viewDeclineReason) && (
+                            {(actions.resend ||
+                                actions.cancel ||
+                                actions.viewDeclineReason) && (
                                 <div className="w-px h-4 bg-base-300 mx-0.5" />
                             )}
                             <Link
                                 href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
-                                className={`btn ${sizeClass} btn-circle btn-primary`}
+                                className={`btn ${sizeClass} btn-square btn-primary`}
                                 title="View Candidate"
                             >
                                 <i className="fa-duotone fa-regular fa-user" />
@@ -239,7 +243,9 @@ export default function ActionsToolbar({
                 {/* View Candidate - far right */}
                 {actions.viewCandidate && (
                     <>
-                        {(actions.resend || actions.cancel || actions.viewDeclineReason) && (
+                        {(actions.resend ||
+                            actions.cancel ||
+                            actions.viewDeclineReason) && (
                             <div className="divider divider-horizontal mx-0" />
                         )}
                         <Link

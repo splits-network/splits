@@ -117,7 +117,7 @@ export default function PaymentMethodSection() {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -320,7 +320,7 @@ export default function PaymentMethodSection() {
                 <dialog className="modal modal-open">
                     <div className="modal-box max-w-md">
                         <button
-                            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                            className="btn btn-sm btn-square btn-ghost absolute right-2 top-2"
                             onClick={handleCloseModal}
                         >
                             ✕

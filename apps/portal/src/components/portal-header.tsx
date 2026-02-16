@@ -83,7 +83,7 @@ export function PortalHeader() {
 
                     {/* Theme toggle */}
                     <label
-                        className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle ml-2"
+                        className="swap swap-rotate cursor-pointer btn btn-ghost btn-square ml-2"
                         title="Toggle Theme"
                     >
                         <input

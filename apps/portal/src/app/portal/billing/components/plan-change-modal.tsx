@@ -603,7 +603,7 @@ export default function PlanChangeModal({
                         {currentStep === "confirm" && "Confirm Your Changes"}
                     </h3>
                     <button
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                         onClick={onClose}
                     >
                         <i className="fa-duotone fa-regular fa-xmark"></i>

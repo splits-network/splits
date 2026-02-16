@@ -226,7 +226,7 @@ function CookiePreferences({
                         </h2>
                         <button
                             onClick={onClose}
-                            className="btn btn-ghost btn-sm btn-circle"
+                            className="btn btn-ghost btn-sm btn-square"
                         >
                             <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>

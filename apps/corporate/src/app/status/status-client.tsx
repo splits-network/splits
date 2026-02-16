@@ -5,7 +5,8 @@ import {
     getGatewayBaseUrl,
     type ServiceHealth,
 } from "@splits-network/shared-ui";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { StatusAnimator } from "./status-animator";
 
 interface HealthIncident {
     id: string;
@@ -16,23 +17,19 @@ interface HealthIncident {
     duration_seconds: number | null;
 }
 
-const corporateFormDefaults = {
-    name: "",
-    email: "",
-    topic: "operations",
-    urgency: "normal",
-    message: "",
-};
-
-interface StatusPageClientProps {
+interface StatusMemphisClientProps {
     initialStatuses?: ServiceHealth[];
     initialCheckedAt?: string;
 }
 
-export default function StatusPageClient({
+// Memphis accent cycling (coral → teal → yellow → purple)
+const ACCENT_COLORS = ['coral', 'teal', 'yellow', 'purple'] as const;
+const accentAt = (idx: number) => ACCENT_COLORS[idx % 4];
+
+export default function StatusMemphisClient({
     initialStatuses,
     initialCheckedAt,
-}: StatusPageClientProps) {
+}: StatusMemphisClientProps) {
     const {
         serviceStatuses,
         lastChecked,
@@ -57,549 +54,403 @@ export default function StatusPageClient({
             .catch(() => {});
     }, []);
 
-    const [formData, setFormData] = useState(corporateFormDefaults);
-    const [formFeedback, setFormFeedback] = useState<{
-        type: "success" | "error";
-        message: string;
-    } | null>(null);
-    const [submitting, setSubmitting] = useState(false);
+    const avgResponseTime = useMemo(() => {
+        const times = serviceStatuses
+            .filter((s) => s.responseTime != null)
+            .map((s) => s.responseTime!);
+        if (times.length === 0) return 0;
+        return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+    }, [serviceStatuses]);
 
-    useEffect(() => {
-        document.title = allHealthy
-            ? "All Systems Operational - Employment Networks"
-            : "Service Status - Employment Networks";
-    }, [allHealthy]);
+    const uptimePercent = useMemo(() => {
+        if (totalCount === 0) return "---";
+        return ((healthyCount / totalCount) * 100).toFixed(1);
+    }, [healthyCount, totalCount]);
 
-    const overallState = useMemo(() => {
+    // State-based styling using Memphis Tailwind classes
+    const heroState = useMemo(() => {
         if (isLoading) {
             return {
-                title: "Validating services.",
-                color: "bg-base-300 text-base-content",
-                message:
-                    "We run health checks on every corporate surface before publishing results.",
-                icon: "fa-duotone fa-regular fa-stethoscope",
+                headline: "CHECKING SYSTEM STATUS",
+                subtext: "Hang tight while we validate the API gateway, auth, ATS, network, billing, docs, AI, and automation stacks.",
+                bgColor: "bg-dark",
+                textColor: "text-cream",
+                badgeColor: "bg-purple",
+                badgeText: "text-white",
+                accentColor: "purple",
             };
         }
-
         if (allHealthy) {
             return {
-                title: "All Systems Operational",
-                color: "bg-primary text-primary-content",
-                message:
-                    "Partner dashboards, lead forms, and analytics are ready for your next campaign.",
-                icon: "fa-duotone fa-regular fa-circle-check",
+                headline: "ALL SYSTEMS OPERATIONAL",
+                subtext: "Recruiter dashboards, pipelines, automations, and AI review signals are green. Post roles, submit candidates, track placements — everything's running smooth.",
+                bgColor: "bg-teal",
+                textColor: "text-dark",
+                badgeColor: "bg-teal",
+                badgeText: "text-dark",
+                accentColor: "teal",
             };
         }
-
         if (someUnhealthy) {
             return {
-                title: "Investigating anomalies",
-                color: "bg-error text-error-content",
-                message:
-                    "Our reliability team is mitigating an issue. Track the impacted services below.",
-                icon: "fa-duotone fa-regular fa-triangle-exclamation",
+                headline: "INVESTIGATING SERVICE DEGRADATION",
+                subtext: "We detected a hiccup. Follow the incident card below or ping us at help@splits.network. Core features still work — you can browse, apply, and message.",
+                bgColor: "bg-coral",
+                textColor: "text-white",
+                badgeColor: "bg-coral",
+                badgeText: "text-white",
+                accentColor: "coral",
             };
         }
-
         return {
-            title: "Degraded Performance",
-            color: "bg-warning text-warning-content",
-            message:
-                "Some upstream dependencies are warming up; we will post updates shortly.",
-            icon: "fa-duotone fa-regular fa-wave-square",
+            headline: "MONITORING SYSTEM ANOMALIES",
+            subtext: "We're seeing unusual patterns. No confirmed impact yet. Everything still works — this is precautionary. We'll update as we learn more.",
+            bgColor: "bg-yellow",
+            textColor: "text-dark",
+            badgeColor: "bg-yellow",
+            badgeText: "text-dark",
+            accentColor: "yellow",
         };
-    }, [allHealthy, isLoading, someUnhealthy]);
+    }, [isLoading, allHealthy, someUnhealthy]);
 
-    const statusBadge = (status: string) => {
+    const statusBadgeClass = (status: string) => {
         switch (status) {
             case "healthy":
-                return "badge badge-success";
+                return "badge badge-teal";
             case "unhealthy":
-                return "badge badge-error";
+                return "badge badge-coral";
             default:
-                return "badge badge-warning";
+                return "badge badge-yellow";
         }
     };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setSubmitting(true);
-        setFormFeedback(null);
-
-        try {
-            const response = await fetch("/api/v2/status-contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-
-            const responseBody = await response.json().catch(() => ({}));
-
-            if (!response.ok) {
-                throw new Error(
-                    responseBody.error || "Unable to send feedback.",
-                );
-            }
-
-            setFormFeedback({
-                type: "success",
-                message:
-                    "Message received - watch your inbox for a follow-up from our success team.",
-            });
-            setFormData(corporateFormDefaults);
-        } catch (error) {
-            setFormFeedback({
-                type: "error",
-                message:
-                    error instanceof Error
-                        ? error.message
-                        : "Unable to send feedback. Email help@employment-networks.com and we will jump in.",
-            });
-        } finally {
-            setSubmitting(false);
+    const statusLabel = (status: string) => {
+        switch (status) {
+            case "healthy":
+                return "Operational";
+            case "unhealthy":
+                return "Down";
+            default:
+                return "Degraded";
         }
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-b from-base-200 via-base-100 to-base-200 py-12">
-            <div className="container mx-auto px-4">
-                <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-wide text-secondary font-semibold">
-                            Employment Networks platform status
-                        </p>
-                        <h1 className="text-4xl font-bold mt-2">
-                            Operational clarity for every campaign
-                        </h1>
-                        <p className="text-base-content/70 mt-2 max-w-3xl">
-                            Live health telemetry across the gateway, identity,
-                            ATS, network, billing, docs, AI, and automation
-                            services powering Employment Networks.
-                        </p>
-                    </div>
-                    <div className="text-sm text-base-content/70 flex flex-col gap-2 items-start">
-                        <span className="text-xs" suppressHydrationWarning>
-                            Last checked {lastChecked.toLocaleTimeString()}{" "}
-                            &nbsp; Auto-refresh every 30 seconds
-                        </span>
-                    </div>
+        <StatusAnimator>
+            {/* ══════════════════════════════════════════════════════════════
+                HERO
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="status-hero relative min-h-[50vh] overflow-hidden flex items-center bg-dark">
+                {/* Memphis decorations */}
+                <div className="memphis-shapes absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="memphis-shape absolute top-[10%] left-[5%] w-20 h-20 rounded-full border-4 border-coral opacity-0" />
+                    <div className="memphis-shape absolute top-[60%] right-[8%] w-16 h-16 rounded-full bg-teal opacity-0" />
+                    <div className="memphis-shape absolute bottom-[15%] left-[12%] w-10 h-10 rounded-full bg-yellow opacity-0" />
+                    <div className="memphis-shape absolute top-[25%] right-[18%] w-14 h-14 rotate-12 bg-purple opacity-0" />
+                    <div className="memphis-shape absolute bottom-[25%] right-[28%] w-20 h-8 -rotate-6 border-4 border-coral opacity-0" />
+                    <div className="memphis-shape absolute top-[45%] left-[22%] w-8 h-8 rotate-45 bg-coral opacity-0" />
+                    {/* SVG shapes */}
+                    <svg className="memphis-shape absolute bottom-[10%] right-[40%] opacity-0 stroke-purple" width="80" height="25" viewBox="0 0 80 25">
+                        <polyline points="0,20 10,5 20,20 30,5 40,20 50,5 60,20 70,5 80,20"
+                            fill="none" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    <svg className="memphis-shape absolute top-[70%] left-[35%] opacity-0 stroke-yellow" width="30" height="30" viewBox="0 0 30 30">
+                        <line x1="15" y1="3" x2="15" y2="27" strokeWidth="4" strokeLinecap="round" />
+                        <line x1="3" y1="15" x2="27" y2="15" strokeWidth="4" strokeLinecap="round" />
+                    </svg>
                 </div>
 
-                <div className="grid gap-8 lg:grid-cols-3">
-                    <div className="space-y-8 lg:col-span-2">
-                        <div className={`card ${overallState.color} shadow-xl`}>
-                            <div className="card-body">
-                                <div className="flex flex-col gap-6 md:flex-row md:justify-between">
-                                    <div>
-                                        <p className="text-sm uppercase">
-                                            Live overview
-                                        </p>
-                                        <h2 className="text-3xl font-bold flex items-center gap-3 mt-2">
-                                            <i
-                                                className={`${overallState.icon} text-2xl`}
-                                            />
-                                            {overallState.title}
-                                        </h2>
-                                        <p className="mt-2 opacity-90">
-                                            {overallState.message}
-                                        </p>
-                                    </div>
-                                    <div className="grid gap-3 text-sm">
-                                        <div className="bg-base-100/20 rounded-xl p-3">
-                                            <p className="font-semibold text-lg">
-                                                {healthyCount}/{totalCount}
-                                            </p>
-                                            <p className="opacity-80">
-                                                Services healthy
-                                            </p>
-                                        </div>
-                                        <div className="bg-base-100/20 rounded-xl p-3">
-                                            <p className="font-semibold text-lg">
-                                                {someUnhealthy
-                                                    ? "Action required"
-                                                    : "Everything green"}
-                                            </p>
-                                            <p className="opacity-80">
-                                                Gateway, AI review, automation,
-                                                and docs monitored
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div className="container mx-auto px-4 relative z-10 py-16">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <div className="hero-badge inline-block mb-6 opacity-0">
+                            <span className={`inline-flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-[0.2em] ${heroState.badgeColor} ${heroState.badgeText}`}>
+                                <i className="fa-duotone fa-regular fa-signal-bars"></i>
+                                Live System Status
+                            </span>
                         </div>
 
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <h2 className="card-title">
-                                        <i className="fa-duotone fa-regular fa-server" />
-                                        Service-by-service detail
-                                    </h2>
-                                    <span className="text-xs text-base-content/60">
-                                        Sorted alphabetically
-                                    </span>
-                                </div>
-                                <div className="space-y-3 mt-4">
-                                    {serviceStatuses.map((service) => (
-                                        <div
-                                            key={service.name}
-                                            className="flex flex-col gap-3 rounded-xl border border-base-200 p-4 md:flex-row md:items-center md:justify-between"
-                                        >
+                        <h1 className="hero-headline text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-6 opacity-0 text-white">
+                            {heroState.headline}
+                        </h1>
+
+                        <p className="hero-subtext text-lg md:text-xl leading-relaxed mb-8 opacity-0 text-white/70">
+                            {heroState.subtext}
+                        </p>
+
+                        <div className="hero-timestamp inline-flex items-center gap-2 px-4 py-2 border-4 border-purple text-xs font-bold uppercase tracking-wider opacity-0 text-white/60">
+                            <i className="fa-duotone fa-regular fa-clock text-purple"></i>
+                            <span suppressHydrationWarning>
+                                Last checked {lastChecked.toLocaleTimeString()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                RETRO METRICS - Bold color-blocked counters
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="retro-metrics py-0 overflow-hidden">
+                <div className="grid grid-cols-2 lg:grid-cols-4">
+                    <div className="metric-block p-8 md:p-12 text-center opacity-0 bg-teal text-dark">
+                        <div className="retro-metric-value text-4xl md:text-6xl font-black mb-2">
+                            {healthyCount}/{totalCount}
+                        </div>
+                        <div className="text-sm md:text-base font-bold uppercase tracking-[0.15em]">
+                            Services Healthy
+                        </div>
+                    </div>
+                    <div className="metric-block p-8 md:p-12 text-center opacity-0 bg-coral text-white">
+                        <div className="retro-metric-value text-4xl md:text-6xl font-black mb-2">
+                            {avgResponseTime}ms
+                        </div>
+                        <div className="text-sm md:text-base font-bold uppercase tracking-[0.15em]">
+                            Avg Response
+                        </div>
+                    </div>
+                    <div className="metric-block p-8 md:p-12 text-center opacity-0 bg-yellow text-dark">
+                        <div className="retro-metric-value text-4xl md:text-6xl font-black mb-2">
+                            {uptimePercent}%
+                        </div>
+                        <div className="text-sm md:text-base font-bold uppercase tracking-[0.15em]">
+                            Uptime
+                        </div>
+                    </div>
+                    <div className="metric-block p-8 md:p-12 text-center opacity-0 bg-purple text-white">
+                        <div className="retro-metric-value text-4xl md:text-6xl font-black mb-2">
+                            30s
+                        </div>
+                        <div className="text-sm md:text-base font-bold uppercase tracking-[0.15em]">
+                            Auto-Refresh
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                SERVICE GRID
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="status-services py-16 overflow-hidden bg-dark">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="services-heading text-center mb-12 opacity-0">
+                            <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 bg-coral text-white">
+                                Services
+                            </span>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white">
+                                Service{" "}
+                                <span className="text-coral">Breakdown</span>
+                            </h2>
+                            <p className="text-base text-white/70 mt-2">
+                                Real-time health across all infrastructure layers
+                            </p>
+                        </div>
+
+                        <div className="services-grid grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {serviceStatuses.map((service, idx) => {
+                                const accent = accentAt(idx);
+                                const borderClass = `border-${accent}`;
+                                const accentBg = `bg-${accent}`;
+
+                                return (
+                                    <div key={service.name}
+                                        className={`service-card relative p-5 border-4 ${borderClass} bg-white/5 opacity-0`}>
+                                        {/* Corner accent */}
+                                        <div className={`absolute top-0 right-0 w-8 h-8 ${accentBg}`} />
+
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <h3 className="font-black text-sm uppercase tracking-wide text-white">
+                                                {service.name}
+                                            </h3>
+                                            <span className={statusBadgeClass(service.status)}>
+                                                {statusLabel(service.status)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="font-semibold">
-                                                    {service.name}
+                                                <p className="text-xs font-bold uppercase tracking-wider text-white/40">
+                                                    Response
                                                 </p>
-                                                <p className="text-xs text-base-content/60">
-                                                    {service.responseTime
-                                                        ? `Response ${service.responseTime}ms`
-                                                        : "Awaiting heartbeat"}
+                                                <p className={`text-lg font-black text-${accent}`}>
+                                                    {service.responseTime ? `${service.responseTime}ms` : "---"}
                                                 </p>
-                                                {service.error && (
-                                                    <p className="mt-1 text-xs text-error">
-                                                        <i className="fa-duotone fa-regular fa-circle-exclamation mr-1" />
-                                                        {service.error}
-                                                    </p>
-                                                )}
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                {service.timestamp && (
-                                                    <span
-                                                        className="text-xs text-base-content/50"
-                                                        suppressHydrationWarning
-                                                    >
-                                                        {new Date(
-                                                            service.timestamp,
-                                                        ).toLocaleTimeString()}
-                                                    </span>
-                                                )}
-                                                <span
-                                                    className={statusBadge(
-                                                        service.status,
-                                                    )}
-                                                >
-                                                    {service.status ===
-                                                    "healthy"
-                                                        ? "Operational"
-                                                        : service.status ===
-                                                            "unhealthy"
-                                                          ? "Investigating"
-                                                          : "Checking"}
+                                            {service.timestamp && (
+                                                <div className="text-right">
+                                                    <p className="text-xs font-bold uppercase tracking-wider text-white/40">
+                                                        Last Check
+                                                    </p>
+                                                    <p className="text-xs font-bold text-white/60"
+                                                        suppressHydrationWarning>
+                                                        {new Date(service.timestamp).toLocaleTimeString()}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {service.error && (
+                                            <div className="mt-3 p-2 border-2 border-coral bg-coral/10">
+                                                <p className="text-xs text-coral">
+                                                    <i className="fa-duotone fa-regular fa-circle-exclamation mr-1"></i>
+                                                    {service.error}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                INCIDENT FEED
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="status-incidents py-16 overflow-hidden bg-cream">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="incidents-heading text-center mb-12 opacity-0">
+                            <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 bg-purple text-white">
+                                Incidents
+                            </span>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-dark">
+                                Active{" "}
+                                <span className="text-coral">Incidents</span>
+                            </h2>
+                        </div>
+
+                        {/* Active incidents */}
+                        {unhealthyServices.length > 0 && (
+                            <div className="space-y-4 mb-8">
+                                {unhealthyServices.map((service) => (
+                                    <div key={service.name}
+                                        className="incident-card relative p-6 border-4 border-coral bg-white opacity-0">
+                                        <div className="absolute top-0 right-0 w-8 h-8 bg-coral" />
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0 bg-coral">
+                                                <i className="fa-duotone fa-regular fa-triangle-exclamation text-lg text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-black text-lg uppercase tracking-wide text-dark">
+                                                    {service.name}
+                                                </h3>
+                                                <p className="text-base mt-1 text-dark/70">
+                                                    {service.error || "We're mitigating the issue. Updates every 10 minutes."}
+                                                </p>
+                                                <span className="inline-block mt-2 badge badge-coral">
+                                                    Active
                                                 </span>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title">
-                                    <i className="fa-duotone fa-regular fa-wave-square" />
-                                    Live incident feed
-                                </h2>
-                                {unhealthyServices.length > 0 ? (
-                                    <div className="mt-4 space-y-4">
-                                        {unhealthyServices.map((service) => (
-                                            <div
-                                                key={service.name}
-                                                className="alert alert-error"
-                                            >
-                                                <i className="fa-duotone fa-regular fa-triangle-exclamation" />
-                                                <div>
-                                                    <p className="font-semibold">
-                                                        {service.name}
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        {service.error ||
-                                                            "We are mitigating the issue and will update shortly."}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
                                     </div>
-                                ) : (
-                                    <p className="text-base-content/70 mt-4">
-                                        No incidents at this time. If you are
-                                        seeing unexpected behavior, let us know
-                                        via the contact form.
-                                    </p>
-                                )}
-                                <div className="divider" />
-                                <p className="text-xs text-base-content/60">
-                                    Maintenance notifications, release notes,
-                                    and RCA summaries are also distributed via
-                                    email.
+                                ))}
+                            </div>
+                        )}
+
+                        {unhealthyServices.length === 0 && (
+                            <div className="no-incidents-card relative p-8 border-4 border-teal bg-white text-center mb-8 opacity-0">
+                                <div className="absolute top-0 right-0 w-8 h-8 bg-teal" />
+                                <i className="fa-duotone fa-regular fa-circle-check text-5xl text-teal mb-3"></i>
+                                <p className="font-black text-xl uppercase tracking-wide text-dark">
+                                    No Active Incidents
+                                </p>
+                                <p className="text-base mt-2 text-dark/60">
+                                    All services running smooth. We'll update here if anything changes.
                                 </p>
                             </div>
-                        </div>
+                        )}
 
-                        {incidents.length > 0 && (
-                            <div className="card bg-base-100 shadow">
-                                <div className="card-body">
-                                    <h2 className="card-title">
-                                        <i className="fa-duotone fa-regular fa-clock-rotate-left" />
-                                        Past incidents
-                                    </h2>
-                                    <div className="mt-4 space-y-3">
-                                        {incidents
-                                            .filter((i) => i.resolved_at)
-                                            .map((incident) => (
-                                                <div
-                                                    key={incident.id}
-                                                    className="flex flex-col gap-2 rounded-xl border border-base-200 p-4 md:flex-row md:items-center md:justify-between"
-                                                >
-                                                    <div>
-                                                        <p className="font-semibold">
-                                                            {incident.service_name}
+                        {/* Past incidents */}
+                        {incidents.filter((i) => i.resolved_at).length > 0 && (
+                            <div className="past-incidents space-y-4">
+                                <h3 className="font-black text-xl uppercase tracking-wide mb-4 text-dark">
+                                    <i className="fa-duotone fa-regular fa-clock-rotate-left mr-2 text-purple"></i>
+                                    Past Incidents
+                                </h3>
+                                {incidents
+                                    .filter((i) => i.resolved_at)
+                                    .map((incident) => (
+                                        <div key={incident.id}
+                                            className="past-incident-card relative p-5 border-4 border-purple bg-white">
+                                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                                <div>
+                                                    <p className="font-black text-base uppercase tracking-wide text-dark">
+                                                        {incident.service_name}
+                                                    </p>
+                                                    <p className="text-xs mt-1 text-dark/60">
+                                                        {incident.severity === "unhealthy" ? "Service outage" : "Degraded performance"}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-right">
+                                                        <p className="text-xs font-bold text-dark/60"
+                                                            suppressHydrationWarning>
+                                                            {new Date(incident.started_at).toLocaleString()}
                                                         </p>
-                                                        <p className="text-xs text-base-content/60">
-                                                            {incident.severity ===
-                                                            "unhealthy"
-                                                                ? "Service outage"
-                                                                : "Degraded performance"}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-xs text-base-content/60 text-right">
-                                                        <p suppressHydrationWarning>
-                                                            {new Date(
-                                                                incident.started_at,
-                                                            ).toLocaleString()}
-                                                        </p>
-                                                        <p>
+                                                        <p className="text-xs text-dark/50">
                                                             Duration:{" "}
-                                                            {incident.duration_seconds !=
-                                                            null
-                                                                ? incident.duration_seconds <
-                                                                  60
+                                                            {incident.duration_seconds != null
+                                                                ? incident.duration_seconds < 60
                                                                     ? `${incident.duration_seconds}s`
                                                                     : `${Math.round(incident.duration_seconds / 60)}m`
                                                                 : "N/A"}
                                                         </p>
-                                                        <span className="badge badge-success badge-sm mt-1">
-                                                            Resolved
-                                                        </span>
                                                     </div>
+                                                    <span className="badge badge-teal">
+                                                        Resolved
+                                                    </span>
                                                 </div>
-                                            ))}
-                                    </div>
-                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                             </div>
                         )}
                     </div>
-
-                    <aside className="space-y-6">
-                        <div className="card bg-base-100 shadow-lg">
-                            <div className="card-body">
-                                <h2 className="card-title text-2xl">
-                                    <i className="fa-duotone fa-regular fa-headset text-primary" />
-                                    Ping support
-                                </h2>
-                                <p className="text-sm text-base-content/70">
-                                    Share how the status impacts your teams and
-                                    we&apos;ll loop you into the incident
-                                    channel.
-                                </p>
-
-                                {formFeedback && (
-                                    <div
-                                        className={`alert mt-4 ${
-                                            formFeedback.type === "success"
-                                                ? "alert-success"
-                                                : "alert-error"
-                                        }`}
-                                    >
-                                        <span>{formFeedback.message}</span>
-                                    </div>
-                                )}
-
-                                <form
-                                    className="mt-4 space-y-4"
-                                    onSubmit={handleSubmit}
-                                >
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">
-                                            Full name
-                                        </legend>
-                                        <input
-                                            className="input w-full"
-                                            required
-                                            value={formData.name}
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    name: e.target.value,
-                                                })
-                                            }
-                                            placeholder="Alex Operations"
-                                        />
-                                    </fieldset>
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">
-                                            Email
-                                        </legend>
-                                        <input
-                                            className="input w-full"
-                                            type="email"
-                                            required
-                                            value={formData.email}
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    email: e.target.value,
-                                                })
-                                            }
-                                            placeholder="you@employment-networks.com"
-                                        />
-                                    </fieldset>
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                        <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">
-                                                Topic
-                                            </legend>
-                                            <select
-                                                className="select w-full"
-                                                value={formData.topic}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        topic: e.target.value,
-                                                    })
-                                                }
-                                            >
-                                                <option value="operations">
-                                                    Operations
-                                                </option>
-                                                <option value="partners">
-                                                    Partner support
-                                                </option>
-                                                <option value="campaigns">
-                                                    Campaigns
-                                                </option>
-                                                <option value="analytics">
-                                                    Analytics
-                                                </option>
-                                                <option value="other">
-                                                    Other
-                                                </option>
-                                            </select>
-                                        </fieldset>
-                                        <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">
-                                                Urgency
-                                            </legend>
-                                            <select
-                                                className="select w-full"
-                                                value={formData.urgency}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        urgency: e.target.value,
-                                                    })
-                                                }
-                                            >
-                                                <option value="normal">
-                                                    Normal
-                                                </option>
-                                                <option value="high">
-                                                    High - blocker
-                                                </option>
-                                                <option value="low">
-                                                    Low - FYI
-                                                </option>
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">
-                                            Message
-                                        </legend>
-                                        <textarea
-                                            className="textarea h-24 w-full"
-                                            required
-                                            value={formData.message}
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    message: e.target.value,
-                                                })
-                                            }
-                                            placeholder="Include affected teams, timelines, and links."
-                                        />
-                                    </fieldset>
-                                    <button
-                                        className="btn btn-primary w-full"
-                                        disabled={submitting}
-                                        type="submit"
-                                    >
-                                        {submitting ? (
-                                            <>
-                                                <span className="loading loading-spinner loading-sm mr-2" />
-                                                Sending.
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fa-duotone fa-regular fa-paper-plane mr-2" />
-                                                Send update
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-
-                                <p className="text-xs text-base-content/60 mt-4">
-                                    Prefer email?{" "}
-                                    <a
-                                        className="link link-primary"
-                                        href="mailto:help@employment-networks.com"
-                                    >
-                                        help@employment-networks.com
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h3 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-clock text-secondary" />
-                                    Support hours
-                                </h3>
-                                <ul className="text-sm text-base-content/70 space-y-1 mt-2">
-                                    <li>Weekdays: 8am - 6pm ET</li>
-                                    <li>
-                                        Weekends: On-call escalation for Sev 1
-                                        incidents
-                                    </li>
-                                </ul>
-                                <p className="text-xs text-base-content/60 mt-3">
-                                    Mention the incident ID (if any) and we will
-                                    tie your note to the active thread.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h3 className="card-title text-lg">
-                                    <i className="fa-duotone fa-regular fa-circle-info text-accent" />
-                                    Quick links
-                                </h3>
-                                <ul className="text-sm text-base-content/70 space-y-2">
-                                    <li>
-                                        - Press kit:
-                                        employment-networks.com/press
-                                    </li>
-                                    <li>- Partner program overview</li>
-                                    <li>
-                                        - Subscribe to status RSS/JSON feeds
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </aside>
                 </div>
-            </div>
-        </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                FOOTER CTA
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="status-cta relative py-20 overflow-hidden bg-dark">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[12%] right-[6%] w-14 h-14 rounded-full border-4 border-coral" />
+                    <div className="absolute bottom-[18%] left-[10%] w-10 h-10 rotate-45 bg-teal" />
+                    <div className="absolute top-[50%] left-[4%] w-8 h-8 rounded-full bg-yellow" />
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="cta-content text-center max-w-3xl mx-auto opacity-0">
+                        <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-6 text-white">
+                            Need{" "}
+                            <span className="text-coral">Help?</span>
+                        </h2>
+                        <p className="text-lg mb-8 text-white/60">
+                            If you're experiencing issues not reflected here,
+                            our support team is ready to assist.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="/contact-memphis"
+                                className="btn btn-coral btn-md uppercase tracking-wider">
+                                <i className="fa-duotone fa-regular fa-message"></i>
+                                Contact Us
+                            </a>
+                            <a href="mailto:help@splits.network"
+                                className="btn btn-outline-white btn-md uppercase tracking-wider">
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
+                                help@splits.network
+                            </a>
+                            <a href="/status"
+                                className="btn btn-outline-white btn-md uppercase tracking-wider">
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                                Classic View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </StatusAnimator>
     );
 }

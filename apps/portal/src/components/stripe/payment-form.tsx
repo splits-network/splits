@@ -246,7 +246,7 @@ export function PaymentForm({
                                 </div>
                                 <button
                                     type="button"
-                                    className="btn btn-sm btn-ghost btn-circle"
+                                    className="btn btn-sm btn-ghost btn-square"
                                     onClick={removeDiscount}
                                     disabled={processing || isProcessing}
                                     title="Remove discount"

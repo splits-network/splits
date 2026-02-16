@@ -394,7 +394,9 @@ export function Sidebar() {
     // Badge counts (could be fetched from API)
     const [badges, setBadges] = useState<Record<string, number>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const activityStatus = useActivityStatus({ enabled: Boolean(currentUserId) });
+    const activityStatus = useActivityStatus({
+        enabled: Boolean(currentUserId),
+    });
 
     const fetchUnreadCount = useCallback(async () => {
         const token = await getToken();
@@ -461,7 +463,7 @@ export function Sidebar() {
                 "/portal/messages": 0,
             }));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Fetch notification counts by category for sidebar badges
@@ -489,7 +491,7 @@ export function Sidebar() {
         } catch (error) {
             console.warn("Failed to fetch notification counts:", error);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -509,7 +511,7 @@ export function Sidebar() {
             mounted = false;
             clearInterval(interval);
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchUnreadCount, fetchNotificationCounts]);
 
     useEffect(() => {
@@ -584,7 +586,12 @@ export function Sidebar() {
 
     // Flatten all filtered items (including children) that have shortcuts
     const shortcutItems = useMemo(() => {
-        const flat: { href: string; label: string; shortcut: string; section?: string }[] = [];
+        const flat: {
+            href: string;
+            label: string;
+            shortcut: string;
+            section?: string;
+        }[] = [];
         const collect = (items: NavItem[]) => {
             for (const item of items) {
                 if (item.shortcut) {
@@ -644,9 +651,15 @@ export function Sidebar() {
                                 <SectionHeader title="Management" />
                                 {groupedItems.management.map((item) => {
                                     // For expandable parents, sum child badges
-                                    const itemBadge = item.expandable && item.children
-                                        ? item.children.reduce((sum, child) => sum + (badges[child.href] || 0), 0)
-                                        : badges[item.href];
+                                    const itemBadge =
+                                        item.expandable && item.children
+                                            ? item.children.reduce(
+                                                  (sum, child) =>
+                                                      sum +
+                                                      (badges[child.href] || 0),
+                                                  0,
+                                              )
+                                            : badges[item.href];
                                     return (
                                         <NavItem
                                             key={item.href}
@@ -693,24 +706,37 @@ export function Sidebar() {
                             .filter((i) => i.mobileDock && filterByRole(i))
                             .map((item) => {
                                 // For expandable parents, navigate to first child route
-                                const href = item.expandable && item.children?.length
-                                    ? item.children[0].href
-                                    : item.href;
-                                const isActive = pathname === href ||
+                                const href =
+                                    item.expandable && item.children?.length
+                                        ? item.children[0].href
+                                        : item.href;
+                                const isActive =
+                                    pathname === href ||
                                     pathname.startsWith(href + "/") ||
                                     // Also check all children for active state
-                                    (item.children?.some(c => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false);
+                                    (item.children?.some(
+                                        (c) =>
+                                            pathname === c.href ||
+                                            pathname.startsWith(c.href + "/"),
+                                    ) ??
+                                        false);
 
                                 return (
                                     <button
                                         key={item.href}
                                         type="button"
                                         onClick={() => router.push(href)}
-                                        className={isActive ? "dock-active" : ""}
+                                        className={
+                                            isActive ? "dock-active" : ""
+                                        }
                                         title={item.label}
                                     >
-                                        <i className={`fa-duotone fa-regular ${item.icon}`}></i>
-                                        <span className="dock-label">{item.label}</span>
+                                        <i
+                                            className={`fa-duotone fa-regular ${item.icon}`}
+                                        ></i>
+                                        <span className="dock-label">
+                                            {item.label}
+                                        </span>
                                     </button>
                                 );
                             });
@@ -739,7 +765,7 @@ export function Sidebar() {
                                 className="dropdown dropdown-top dropdown-center"
                             >
                                 <summary
-                                    className="btn btn-ghost btn-circle dock-item"
+                                    className="btn btn-ghost btn-square dock-item"
                                     title="More options"
                                 >
                                     <i className="fa-duotone fa-regular fa-ellipsis text-lg"></i>

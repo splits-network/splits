@@ -24,7 +24,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 transition-colors border-b-2 border-dark/10 border-l-4 ${
+            className={`cursor-pointer p-4 transition-colors border-b-4 border-dark/10 border-l-4 ${
                 isSelected ? `${ac.bgLight} ${ac.border}` : "bg-white border-transparent"
             }`}
         >
@@ -39,9 +39,15 @@ export function SplitItem({
                 {roleTitle(application)}
                 <span className="text-dark/50 font-normal"> at {companyName(application)}</span>
             </div>
-            <div className="flex items-center justify-between">
-                <Badge variant={status.badgeClass.includes("success") ? "teal" : "purple"}>{status.label}</Badge>
-                {score != null && <span className="text-sm font-bold text-dark/60">AI {score}%</span>}
+            <div className="flex items-center justify-between gap-2">
+                <Badge
+                    variant={status.badgeClass.includes("success") ? "teal" : "purple"}
+                    className="max-w-[140px] truncate"
+                    title={status.label}
+                >
+                    {status.label}
+                </Badge>
+                {score != null && <span className="text-sm font-bold text-dark/60 shrink-0">AI {score}%</span>}
             </div>
         </div>
     );

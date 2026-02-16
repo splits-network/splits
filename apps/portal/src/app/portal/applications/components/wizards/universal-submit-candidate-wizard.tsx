@@ -466,7 +466,7 @@ export default function UniversalSubmitCandidateWizard({
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                     >
                         <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
@@ -590,7 +590,9 @@ export default function UniversalSubmitCandidateWizard({
                                     {debouncedJobSearch && (
                                         <div className="text-sm text-base-content/70 mb-2">
                                             Found {jobTotalCount} job
-                                            {jobTotalCount !== 1 ? "s" : ""}{" "}
+                                            {jobTotalCount !== 1
+                                                ? "s"
+                                                : ""}{" "}
                                             matching "{debouncedJobSearch}"
                                         </div>
                                     )}

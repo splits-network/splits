@@ -19,7 +19,7 @@ import ApplicationTimeline from "./application-timeline";
 import AIReviewDisplay from "./ai-review-display";
 import DocumentViewerModal from "../modals/document-viewer-modal";
 import CompanyContacts from "@/components/company-contacts";
-import { categorizeDocuments } from "@/app/portal/applications/_archive/lib/permission-utils";
+import { categorizeDocuments } from "@/app/portal/applications-memphis/lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
 import AIReviewPanel from "@/components/ai-review-panel";

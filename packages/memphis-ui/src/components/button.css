@@ -69,7 +69,7 @@
         &:is(input[type="checkbox"], input[type="radio"]) {
             @apply appearance-none;
 
-            /* &:not(.btn-square, .btn-circle) {
+            /* &:not(.btn-square, .btn-square) {
       @apply w-auto;
     } */
 
@@ -384,7 +384,7 @@
     }
 }
 
-.btn-circle {
+.btn-square {
     @layer memphis.modifier {
         @apply rounded-full px-0;
         width: var(--size);
@@ -407,106 +407,130 @@
 /* ═══ Memphis Additions (generated) ═══ */
 
 .btn {
-  @layer memphis.modifier {
-    text-transform: uppercase;
-    letter-spacing: var(--ls);
-  }
+    @layer memphis.modifier {
+        text-transform: uppercase;
+        letter-spacing: var(--ls);
+    }
 }
 
 .btn-coral {
-  @layer memphis.modifier {
-    --btn-color: var(--color-coral);
-    --btn-fg: var(--color-neutral-content);
-  }
+    @layer memphis.modifier {
+        --btn-color: var(--color-coral);
+        --btn-fg: var(--color-neutral-content);
+    }
 }
+
 .btn-teal {
-  @layer memphis.modifier {
-    --btn-color: var(--color-teal);
-    --btn-fg: var(--color-base-content);
-  }
+    @layer memphis.modifier {
+        --btn-color: var(--color-teal);
+        --btn-fg: var(--color-base-content);
+    }
 }
+
 .btn-yellow {
-  @layer memphis.modifier {
-    --btn-color: var(--color-yellow);
-    --btn-fg: var(--color-base-content);
-  }
+    @layer memphis.modifier {
+        --btn-color: var(--color-yellow);
+        --btn-fg: var(--color-base-content);
+    }
 }
+
 .btn-purple {
-  @layer memphis.modifier {
-    --btn-color: var(--color-purple);
-    --btn-fg: var(--color-neutral-content);
-  }
+    @layer memphis.modifier {
+        --btn-color: var(--color-purple);
+        --btn-fg: var(--color-neutral-content);
+    }
 }
+
 .btn-dark {
-  @layer memphis.modifier {
-    --btn-color: var(--color-dark);
-    --btn-fg: var(--color-neutral-content);
-  }
+    @layer memphis.modifier {
+        --btn-color: var(--color-dark);
+        --btn-fg: var(--color-neutral-content);
+    }
 }
 
 .btn-sm {
-  @layer memphis.modifier {
-    border-width: var(--border-detail);
-    --fontsize: 0.875rem;
-    --btn-p: 1rem;
-  }
+    @layer memphis.modifier {
+        border-width: var(--border-detail);
+        --fontsize: 0.875rem;
+        --btn-p: 1rem;
+    }
 }
+
 .btn-md {
-  @layer memphis.modifier {
-    border-width: var(--border-interactive);
-    --fontsize: 1rem;
-    --btn-p: 1.5rem;
-  }
+    @layer memphis.modifier {
+        border-width: var(--border-interactive);
+        --fontsize: 1rem;
+        --btn-p: 1.5rem;
+    }
 }
+
 .btn-lg {
-  @layer memphis.modifier {
-    border-width: var(--border-container);
-    --fontsize: 1.125rem;
-    --btn-p: 2rem;
-  }
+    @layer memphis.modifier {
+        border-width: var(--border-container);
+        --fontsize: 1.125rem;
+        --btn-p: 2rem;
+    }
 }
 
 .btn-outline.btn-coral {
-  @layer memphis.modifier {
-    &:not(.btn-active, :hover, :active:focus, :focus-visible) {
-      --btn-fg: var(--color-coral);
-      --btn-border: var(--color-coral);
+    @layer memphis.modifier {
+        &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+            --btn-fg: var(--color-coral);
+            --btn-border: var(--color-coral);
+        }
     }
-  }
-}
-.btn-outline.btn-teal {
-  @layer memphis.modifier {
-    &:not(.btn-active, :hover, :active:focus, :focus-visible) {
-      --btn-fg: var(--color-teal);
-      --btn-border: var(--color-teal);
-    }
-  }
-}
-.btn-outline.btn-yellow {
-  @layer memphis.modifier {
-    &:not(.btn-active, :hover, :active:focus, :focus-visible) {
-      --btn-fg: var(--color-yellow);
-      --btn-border: var(--color-yellow);
-    }
-  }
-}
-.btn-outline.btn-purple {
-  @layer memphis.modifier {
-    &:not(.btn-active, :hover, :active:focus, :focus-visible) {
-      --btn-fg: var(--color-purple);
-      --btn-border: var(--color-purple);
-    }
-  }
-}
-.btn-outline.btn-dark {
-  @layer memphis.modifier {
-    &:not(.btn-active, :hover, :active:focus, :focus-visible) {
-      --btn-fg: var(--color-dark);
-      --btn-border: var(--color-dark);
-    }
-  }
 }
 
-.btn-border-thin { @layer memphis.modifier { border-width: var(--border-detail); } }
-.btn-border-default { @layer memphis.modifier { border-width: var(--border-interactive); } }
-.btn-border-thick { @layer memphis.modifier { border-width: var(--border-container); } }
+.btn-outline.btn-teal {
+    @layer memphis.modifier {
+        &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+            --btn-fg: var(--color-teal);
+            --btn-border: var(--color-teal);
+        }
+    }
+}
+
+.btn-outline.btn-yellow {
+    @layer memphis.modifier {
+        &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+            --btn-fg: var(--color-yellow);
+            --btn-border: var(--color-yellow);
+        }
+    }
+}
+
+.btn-outline.btn-purple {
+    @layer memphis.modifier {
+        &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+            --btn-fg: var(--color-purple);
+            --btn-border: var(--color-purple);
+        }
+    }
+}
+
+.btn-outline.btn-dark {
+    @layer memphis.modifier {
+        &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+            --btn-fg: var(--color-dark);
+            --btn-border: var(--color-dark);
+        }
+    }
+}
+
+.btn-border-thin {
+    @layer memphis.modifier {
+        border-width: var(--border-detail);
+    }
+}
+
+.btn-border-default {
+    @layer memphis.modifier {
+        border-width: var(--border-interactive);
+    }
+}
+
+.btn-border-thick {
+    @layer memphis.modifier {
+        border-width: var(--border-container);
+    }
+}

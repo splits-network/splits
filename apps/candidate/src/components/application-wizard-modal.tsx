@@ -414,7 +414,7 @@ export default function ApplicationWizardModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost"
+                        className="btn btn-sm btn-square btn-ghost"
                         disabled={submitting}
                     >
                         <i className="fa-duotone fa-regular fa-xmark text-xl"></i>

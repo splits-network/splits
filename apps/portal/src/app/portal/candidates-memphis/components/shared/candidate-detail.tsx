@@ -100,7 +100,7 @@ export function DetailLoader({ candidateId, accent, onClose, onRefresh }: Detail
 
 // ─── Detail Panel ───────────────────────────────────────────────────────────
 
-function CandidateDetail({
+export function CandidateDetail({
     candidate,
     accent,
     onClose,

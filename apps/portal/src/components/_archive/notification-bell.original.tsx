@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import {
     formatNotificationTime,
     getNotificationIcon,
     InAppNotification,
-} from '@/lib/notifications';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
-import { useNotificationTabIndicator } from '@/hooks/use-notification-tab-indicator';
+} from "@/lib/notifications";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useNotificationTabIndicator } from "@/hooks/use-notification-tab-indicator";
 
 interface NotificationBellProps {
     /** Position of the dropdown. Use 'right' when in a sidebar */
-    position?: 'end' | 'right' | 'top';
+    position?: "end" | "right" | "top";
 }
 
-export default function NotificationBell({ position = 'end' }: NotificationBellProps) {
+export default function NotificationBell({
+    position = "end",
+}: NotificationBellProps) {
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
@@ -41,16 +43,19 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get('/notifications/unread-count');
+            const res = await client.get("/notifications/unread-count");
             const count = res?.data?.count ?? 0;
 
             // Detect new notifications and show toast
-            if (previousUnreadCount.current !== null && count > previousUnreadCount.current) {
+            if (
+                previousUnreadCount.current !== null &&
+                count > previousUnreadCount.current
+            ) {
                 const newCount = count - previousUnreadCount.current;
                 toast.info(
                     newCount === 1
-                        ? 'You have a new notification'
-                        : `You have ${newCount} new notifications`
+                        ? "You have a new notification"
+                        : `You have ${newCount} new notifications`,
                 );
             }
             previousUnreadCount.current = count;
@@ -59,10 +64,10 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             setError(false);
         } catch (err) {
             // Silently fail - notification count is non-critical
-            console.warn('Failed to fetch unread count:', err);
+            console.warn("Failed to fetch unread count:", err);
             setError(true);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [toast]);
 
     // Fetch recent notifications when dropdown opens
@@ -76,18 +81,20 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             }
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get('/notifications', { params: { limit: 10 } });
+            const res = await client.get("/notifications", {
+                params: { limit: 10 },
+            });
             const data = res?.data ?? [];
             setNotifications(Array.isArray(data) ? data : []);
             setError(false);
         } catch (err) {
-            console.warn('Failed to fetch notifications:', err);
+            console.warn("Failed to fetch notifications:", err);
             setNotifications([]);
             setError(true);
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Initial load and polling
@@ -112,17 +119,22 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                await client.patch(`/notifications/${notification.id}`, { read: true });
+                await client.patch(`/notifications/${notification.id}`, {
+                    read: true,
+                });
 
                 setUnreadCount((prev) => Math.max(0, prev - 1));
-                previousUnreadCount.current = Math.max(0, (previousUnreadCount.current ?? 1) - 1);
+                previousUnreadCount.current = Math.max(
+                    0,
+                    (previousUnreadCount.current ?? 1) - 1,
+                );
                 setNotifications((prev) =>
                     prev.map((n) =>
-                        n.id === notification.id ? { ...n, read: true } : n
-                    )
+                        n.id === notification.id ? { ...n, read: true } : n,
+                    ),
                 );
             } catch (error) {
-                console.error('Failed to mark as read:', error);
+                console.error("Failed to mark as read:", error);
             }
         }
 
@@ -139,18 +151,19 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.post('/notifications/mark-all-read', {});
+            await client.post("/notifications/mark-all-read", {});
             setUnreadCount(0);
             previousUnreadCount.current = 0;
-            setNotifications((prev) =>
-                prev.map((n) => ({ ...n, read: true }))
-            );
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         } catch (error) {
-            console.error('Failed to mark all as read:', error);
+            console.error("Failed to mark all as read:", error);
         }
     };
 
-    const handleDismiss = async (notificationId: string, event: React.MouseEvent) => {
+    const handleDismiss = async (
+        notificationId: string,
+        event: React.MouseEvent,
+    ) => {
         event.stopPropagation();
         try {
             const token = await getToken();
@@ -159,21 +172,22 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             const client = createAuthenticatedClient(token);
             await client.delete(`/notifications/${notificationId}`);
             setNotifications((prev) =>
-                prev.filter((n) => n.id !== notificationId)
+                prev.filter((n) => n.id !== notificationId),
             );
             // Refresh unread count
             loadUnreadCount();
         } catch (err) {
-            console.warn('Failed to dismiss notification:', err);
+            console.warn("Failed to dismiss notification:", err);
         }
     };
 
     // Determine dropdown position class
-    const dropdownPositionClass = position === 'right'
-        ? 'dropdown-right dropdown-end'
-        : position === 'top'
-            ? 'dropdown-top dropdown-end'
-            : 'dropdown-end';
+    const dropdownPositionClass =
+        position === "right"
+            ? "dropdown-right dropdown-end"
+            : position === "top"
+              ? "dropdown-top dropdown-end"
+              : "dropdown-end";
 
     return (
         <div className={`dropdown relative ${dropdownPositionClass}`}>
@@ -181,16 +195,16 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 type="button"
                 tabIndex={0}
                 role="button"
-                className="btn btn-ghost btn-circle relative indicator"
+                className="btn btn-ghost btn-square relative indicator"
                 onFocus={() => setIsOpen(true)}
                 onBlur={() => setIsOpen(false)}
                 aria-label="Notifications"
-                title='Notifications'
+                title="Notifications"
             >
                 <i className="fa-duotone fa-regular fa-bell text-lg text-content/50"></i>
                 {unreadCount > 0 && (
                     <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                        {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
             </button>
@@ -241,30 +255,43 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                                 className={`
                                         flex gap-2 px-3 py-2 border-b border-base-200 cursor-pointer
                                         hover:bg-base-200 transition-colors
-                                        ${!notification.read ? 'bg-primary/5' : ''}
+                                        ${!notification.read ? "bg-primary/5" : ""}
                                     `}
-                                onClick={() => handleNotificationClick(notification)}
+                                onClick={() =>
+                                    handleNotificationClick(notification)
+                                }
                             >
                                 {/* Icon */}
                                 <div className="shrink-0">
-                                    <div className={`
+                                    <div
+                                        className={`
                                             w-8 h-8 rounded-full flex items-center justify-center text-xs
-                                            ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
-                                        `}>
-                                        <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
+                                            ${!notification.read ? "bg-primary text-primary-content" : "bg-base-300"}
+                                        `}
+                                    >
+                                        <i
+                                            className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}
+                                        ></i>
                                     </div>
                                 </div>
 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-1">
-                                        <p className={`text-xs leading-snug line-clamp-2 ${!notification.read ? 'font-semibold' : ''}`}>
+                                        <p
+                                            className={`text-xs leading-snug line-clamp-2 ${!notification.read ? "font-semibold" : ""}`}
+                                        >
                                             {notification.subject}
                                         </p>
                                         <button
                                             type="button"
-                                            className="btn btn-ghost btn-xs btn-circle shrink-0"
-                                            onClick={(e) => handleDismiss(notification.id, e)}
+                                            className="btn btn-ghost btn-xs btn-square shrink-0"
+                                            onClick={(e) =>
+                                                handleDismiss(
+                                                    notification.id,
+                                                    e,
+                                                )
+                                            }
                                             aria-label="Dismiss"
                                         >
                                             <i className="fa-duotone fa-regular fa-times text-xs"></i>
@@ -272,7 +299,9 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                                     </div>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className="text-[10px] text-base-content/50">
-                                            {formatNotificationTime(notification.created_at)}
+                                            {formatNotificationTime(
+                                                notification.created_at,
+                                            )}
                                         </span>
                                         {notification.action_label && (
                                             <span className="text-[10px] text-primary">

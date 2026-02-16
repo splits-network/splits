@@ -1,7 +1,14 @@
-import StatusPageClient from "./status-client";
+import type { Metadata } from "next";
+import StatusMemphisClient from "./status-memphis-client";
 import type { ServiceHealth } from "@splits-network/shared-ui";
 
 export const revalidate = 15;
+
+export const metadata: Metadata = {
+    title: "System Status | Applicant Network",
+    description:
+        "Live system health for the Applicant Network platform. Monitor service status, response times, and incident history in real time.",
+};
 
 async function fetchSystemHealth(): Promise<{
     statuses: ServiceHealth[];
@@ -34,11 +41,11 @@ async function fetchSystemHealth(): Promise<{
     }
 }
 
-export default async function StatusPage() {
+export default async function StatusMemphisPage() {
     const { statuses, checkedAt } = await fetchSystemHealth();
 
     return (
-        <StatusPageClient
+        <StatusMemphisClient
             initialStatuses={statuses}
             initialCheckedAt={checkedAt}
         />

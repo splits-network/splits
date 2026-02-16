@@ -196,7 +196,7 @@ export default function DetailSidebar({
                             </div>
                             <button
                                 onClick={onClose}
-                                className="btn btn-sm btn-circle btn-ghost"
+                                className="btn btn-sm btn-square btn-ghost"
                                 aria-label="Close"
                             >
                                 ✕

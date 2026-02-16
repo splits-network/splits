@@ -67,7 +67,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
                                     />
                                     <button
                                         onClick={onClose}
-                                        className="btn btn-sm btn-circle btn-ghost"
+                                        className="btn btn-sm btn-square btn-ghost"
                                         aria-label="Close"
                                     >
                                         <i className="fa-duotone fa-regular fa-xmark" />

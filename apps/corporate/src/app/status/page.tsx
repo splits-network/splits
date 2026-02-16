@@ -1,7 +1,16 @@
-import StatusPageClient from "./status-client";
+import type { Metadata } from "next";
+import { buildCanonical } from "@/lib/seo";
+import StatusClient from "./status-client";
 import type { ServiceHealth } from "@splits-network/shared-ui";
 
 export const revalidate = 15;
+
+export const metadata: Metadata = {
+    title: "Platform Status | Employment Networks",
+    description:
+        "Live system health for the Employment Networks platform. Monitor service status, response times, and incident history in real time.",
+    ...buildCanonical("/status"),
+};
 
 async function fetchSystemHealth(): Promise<{
     statuses: ServiceHealth[];
@@ -38,7 +47,7 @@ export default async function StatusPage() {
     const { statuses, checkedAt } = await fetchSystemHealth();
 
     return (
-        <StatusPageClient
+        <StatusClient
             initialStatuses={statuses}
             initialCheckedAt={checkedAt}
         />

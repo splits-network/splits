@@ -13,7 +13,7 @@ const VIEW_MODES: { mode: ViewMode; icon: string; label: string }[] = [
 
 export function ViewModeToggle({ viewMode, onViewModeChange }: ViewModeToggleProps) {
     return (
-        <div className="flex items-center border-2 border-dark h-10">
+        <div className="flex items-center border-4 border-dark h-10">
             {VIEW_MODES.map(({ mode, icon, label }) => (
                 <button
                     key={mode}

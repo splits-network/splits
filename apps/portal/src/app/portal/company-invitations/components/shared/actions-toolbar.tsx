@@ -57,9 +57,12 @@ export default function ConnectionActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.patch(`/recruiter-companies/${invitation.id}/respond`, {
-                accept: true,
-            });
+            await client.patch(
+                `/recruiter-companies/${invitation.id}/respond`,
+                {
+                    accept: true,
+                },
+            );
             toast.success("Connection accepted!");
             refresh();
         } catch (e: any) {
@@ -70,11 +73,15 @@ export default function ConnectionActionsToolbar({
         } finally {
             setAccepting(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
     const handleDecline = useCallback(async () => {
-        if (!confirm("Are you sure you want to decline this connection request?")) {
+        if (
+            !confirm(
+                "Are you sure you want to decline this connection request?",
+            )
+        ) {
             return;
         }
         setDeclining(true);
@@ -82,9 +89,12 @@ export default function ConnectionActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.patch(`/recruiter-companies/${invitation.id}/respond`, {
-                accept: false,
-            });
+            await client.patch(
+                `/recruiter-companies/${invitation.id}/respond`,
+                {
+                    accept: false,
+                },
+            );
             toast.success("Connection declined.");
             refresh();
         } catch (e: any) {
@@ -95,7 +105,7 @@ export default function ConnectionActionsToolbar({
         } finally {
             setDeclining(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
     const handleViewDetails = useCallback(() => {
@@ -126,12 +136,14 @@ export default function ConnectionActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+                <div
+                    className={`flex items-center ${getLayoutClass()} ${className}`}
+                >
                     {/* Accept - CTA */}
                     {actions.accept && (
                         <button
                             onClick={handleAccept}
-                            className={`btn ${getSizeClass()} btn-circle btn-success`}
+                            className={`btn ${getSizeClass()} btn-square btn-success`}
                             disabled={accepting}
                             title="Accept"
                         >
@@ -146,7 +158,7 @@ export default function ConnectionActionsToolbar({
                     {actions.decline && (
                         <button
                             onClick={handleDecline}
-                            className={`btn ${getSizeClass()} btn-circle btn-ghost text-error`}
+                            className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
                             disabled={declining}
                             title="Decline"
                         >
@@ -161,7 +173,7 @@ export default function ConnectionActionsToolbar({
                     {actions.terminate && (
                         <button
                             onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${getSizeClass()} btn-circle btn-ghost text-error`}
+                            className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
                             title="End Relationship"
                         >
                             <i className="fa-duotone fa-regular fa-link-slash" />
@@ -170,12 +182,14 @@ export default function ConnectionActionsToolbar({
                     {/* View Details - far right */}
                     {onViewDetails && (
                         <>
-                            {(actions.accept || actions.decline || actions.terminate) && (
+                            {(actions.accept ||
+                                actions.decline ||
+                                actions.terminate) && (
                                 <div className="w-px h-4 bg-base-300 mx-0.5" />
                             )}
                             <button
                                 onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-circle btn-primary`}
+                                className={`btn ${getSizeClass()} btn-square btn-primary`}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
@@ -237,7 +251,9 @@ export default function ConnectionActionsToolbar({
                 {/* View Details - far right */}
                 {onViewDetails && (
                     <>
-                        {(actions.accept || actions.decline || actions.terminate) && (
+                        {(actions.accept ||
+                            actions.decline ||
+                            actions.terminate) && (
                             <div className="divider divider-horizontal mx-0" />
                         )}
                         <button

@@ -253,7 +253,7 @@ export default function CompanyPaymentMethodSection({
                                 : "Add Payment Method"}
                         </h3>
                         <button
-                            className="btn btn-sm btn-circle btn-ghost"
+                            className="btn btn-sm btn-square btn-ghost"
                             onClick={handleCloseDrawer}
                         >
                             ✕

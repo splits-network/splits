@@ -29,7 +29,10 @@ export default function DetailHeader({
     }
 
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
-    const counterpartySubtext = getCounterpartySubtext(invitation, isCompanyUser);
+    const counterpartySubtext = getCounterpartySubtext(
+        invitation,
+        isCompanyUser,
+    );
 
     return (
         <div className="p-4 sm:p-6 border-b border-base-300 bg-base-100 flex justify-between items-start gap-4">
@@ -38,7 +41,7 @@ export default function DetailHeader({
                     {/* Mobile back button */}
                     <button
                         onClick={onClose}
-                        className="md:hidden btn btn-ghost btn-circle btn-sm"
+                        className="md:hidden btn btn-ghost btn-square btn-sm"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-left" />
                     </button>

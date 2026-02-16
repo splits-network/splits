@@ -149,11 +149,13 @@ export default function InvitationActionsToolbar({
 
     if (variant === "icon-only") {
         return (
-            <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+            <div
+                className={`flex items-center ${getLayoutClass()} ${className}`}
+            >
                 {actions.copyCode && (
                     <button
                         onClick={handleCopyCode}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
                         title="Copy code"
                     >
                         <i className="fa-duotone fa-regular fa-copy" />
@@ -162,7 +164,7 @@ export default function InvitationActionsToolbar({
                 {actions.copyLink && (
                     <button
                         onClick={handleCopyLink}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
                         title="Copy link"
                     >
                         <i className="fa-duotone fa-regular fa-link" />
@@ -171,7 +173,7 @@ export default function InvitationActionsToolbar({
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
                         title="Share"
                     >
                         <i className="fa-duotone fa-regular fa-share" />
@@ -180,7 +182,7 @@ export default function InvitationActionsToolbar({
                 {actions.resend && (
                     <button
                         onClick={handleResend}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost`}
+                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
                         disabled={resending}
                         title="Resend email"
                     >
@@ -194,7 +196,7 @@ export default function InvitationActionsToolbar({
                 {actions.revoke && (
                     <button
                         onClick={handleRevoke}
-                        className={`btn ${getSizeClass()} btn-circle btn-ghost text-error`}
+                        className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
                         disabled={revoking}
                         title="Revoke"
                     >
@@ -211,7 +213,7 @@ export default function InvitationActionsToolbar({
                         <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
                             onClick={handleViewDetails}
-                            className={`btn ${getSizeClass()} btn-circle btn-primary`}
+                            className={`btn ${getSizeClass()} btn-square btn-primary`}
                             title="View Details"
                         >
                             <i className="fa-duotone fa-regular fa-eye" />

@@ -32,7 +32,7 @@ export default function Row({ item, onViewDetails }: RowProps) {
             {/* Expand column spacer */}
             <td className="w-10">
                 <button
-                    className="btn btn-ghost btn-xs btn-circle"
+                    className="btn btn-ghost btn-xs btn-square"
                     onClick={(e) => {
                         e.stopPropagation();
                         onViewDetails(item.id);
@@ -77,9 +77,7 @@ export default function Row({ item, onViewDetails }: RowProps) {
 
             {/* Company */}
             <td>
-                <div className="text-sm">
-                    {companyName}
-                </div>
+                <div className="text-sm">{companyName}</div>
                 <div className="text-xs text-base-content/60">
                     {companyIndustry || "Not specified"}
                 </div>
@@ -96,11 +94,17 @@ export default function Row({ item, onViewDetails }: RowProps) {
             {/* Salary */}
             <td className="hidden md:table-cell">
                 <div className="text-sm">
-                    {item.show_salary_range === false
-                        ? <span className="text-base-content/50">Not disclosed</span>
-                        : shouldShowSalary(item)
-                          ? formatSalary(item.salary_min ?? 0, item.salary_max ?? 0)
-                          : <span className="text-base-content/50">Not specified</span>}
+                    {item.show_salary_range === false ? (
+                        <span className="text-base-content/50">
+                            Not disclosed
+                        </span>
+                    ) : shouldShowSalary(item) ? (
+                        formatSalary(item.salary_min ?? 0, item.salary_max ?? 0)
+                    ) : (
+                        <span className="text-base-content/50">
+                            Not specified
+                        </span>
+                    )}
                 </div>
                 <div className="text-xs text-base-content/60">
                     {formatEmploymentType(item.employment_type)}
