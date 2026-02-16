@@ -1,8 +1,6 @@
-@layer base;
+/* @layer base; */
 
 @import "tailwindcss";
-
-@plugin "memphis-ui/plugin";
 
 @import "./themes/light.css";
 @import "./themes/dark.css";

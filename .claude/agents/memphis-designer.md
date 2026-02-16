@@ -102,6 +102,49 @@ These are your ONLY design references. You MUST read relevant showcase files bef
 
 **Pro tip:** When a category has multiple variants, read variant `six` first (our primary reference). Then browse others for alternative patterns if needed.
 
+### Golden Example: Roles Feature (ARCHITECTURE REFERENCE)
+
+The **roles feature** (`apps/portal/src/app/portal/roles/`) is the completed, production-ready reference implementation for Memphis feature pages. Before building a new feature page, **read this implementation first** to understand the standard folder structure, component breakdown, and data flow patterns.
+
+```
+apps/portal/src/app/portal/roles/
+├── page.tsx                    # Orchestrator: useStandardList, state, view switching
+├── types.ts                    # Feature types, filters, label maps
+├── lists-six-animator.tsx      # GSAP entrance animations
+└── components/
+    ├── shared/                 # Cross-view utilities
+    │   ├── accent.ts           # Accent color cycling (coral→teal→yellow→purple)
+    │   ├── helpers.ts          # Display formatters (salary, dates, status)
+    │   ├── controls-bar.tsx    # Search + filters + add button + view toggle
+    │   ├── header-section.tsx  # Hero header with geometric shapes + stats
+    │   ├── actions-toolbar.tsx # Context actions (icon-only + descriptive variants)
+    │   ├── expandable-button.tsx # Hover-expand icon button primitive
+    │   ├── view-mode-toggle.tsx  # Table / Grid / Split switcher
+    │   └── job-detail.tsx      # DetailLoader + JobDetail presentation
+    ├── table/
+    │   ├── table-view.tsx      # ~50 lines — layout orchestrator only
+    │   └── table-row.tsx       # Row + inline expandable detail
+    ├── grid/
+    │   ├── grid-view.tsx       # ~62 lines — responsive grid + sidebar
+    │   └── grid-card.tsx       # Card with accent stripe + badges
+    ├── split/
+    │   ├── split-view.tsx      # ~60 lines — list left, detail right
+    │   └── split-item.tsx      # Compact list item
+    └── modals/
+        ├── role-wizard-modal.tsx
+        └── submit-candidate-modal.tsx
+```
+
+**Key patterns to follow:**
+- **page.tsx owns all state** — no context provider needed, uses `useStandardList` directly
+- **View components are thin** (~50-60 lines) — just layout, delegate rendering to item components
+- **Accent cycling** via `accentAt(idx)` — each item gets a rotating color from the 4-accent palette
+- **ExpandableButton** for compact toolbars — square icon that expands on hover to reveal label
+- **ControlsBar** extracted as shared component — search, inline filters, add button, view toggle
+- **DetailLoader** wrapper around **JobDetail** — separation of data fetching from presentation
+
+See `docs/memphis/feature-architecture.md` for the complete architecture documentation.
+
 ### What to Carry Over (re-implement, don't import)
 - ✅ Same API calls and data fetching logic
 - ✅ Same business logic and event handlers

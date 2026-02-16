@@ -108,6 +108,9 @@ importers:
       '@gsap/react':
         specifier: ^2.1.2
         version: 2.1.2(gsap@3.14.2)(react@19.2.1)
+      '@splits-network/memphis-ui':
+        specifier: workspace:*
+        version: link:../../packages/memphis-ui
       '@splits-network/shared-ui':
         specifier: workspace:*
         version: link:../../packages/shared-ui
@@ -279,28 +282,6 @@ importers:
       postcss-js:
         specifier: ^4.0.1
         version: 4.1.0(postcss@8.5.6)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
-  packages/memphis-ui-old:
-    dependencies:
-      react:
-        specifier: ^19.0.0
-        version: 19.2.1
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.1(react@19.2.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.1
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.0.2
-        version: 19.2.3(@types/react@19.2.7)
-      tailwindcss:
-        specifier: ^4.0.0
-        version: 4.1.17
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

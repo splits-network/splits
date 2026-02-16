@@ -129,8 +129,15 @@ const UTILITY_ITEMS = [
 
 // ─── Desktop Header ─────────────────────────────────────────────────────────
 function DesktopNav() {
-    const { isSignedIn } = useAuth();
+    const { isSignedIn, isLoaded } = useAuth();
     const [searchOpen, setSearchOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const showSignedIn = mounted && isLoaded && isSignedIn;
 
     return (
         <header className="desktop-header relative hidden lg:block bg-dark border-b-[5px] border-coral">
@@ -221,7 +228,7 @@ function DesktopNav() {
                         {/* Search */}
                         <HeaderSearchToggle isOpen={searchOpen} onToggle={() => setSearchOpen(!searchOpen)} />
 
-                        {isSignedIn ? (
+                        {showSignedIn ? (
                             <>
                                 {/* Dashboard link */}
                                 <Link
@@ -265,8 +272,15 @@ function DesktopNav() {
 
 // ─── Mobile Header ──────────────────────────────────────────────────────────
 function MobileNav() {
-    const { isSignedIn } = useAuth();
+    const { isSignedIn, isLoaded } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const showSignedIn = mounted && isLoaded && isSignedIn;
 
     return (
         <header className="mobile-header relative lg:hidden bg-dark border-b-[5px] border-teal">
@@ -283,7 +297,7 @@ function MobileNav() {
 
                     {/* Right side */}
                     <div className="navbar-end gap-2">
-                        {isSignedIn && <NotificationBell />}
+                        {showSignedIn && <NotificationBell />}
                         <MobileMenuToggle isOpen={menuOpen} onToggle={() => setMenuOpen(!menuOpen)} />
                     </div>
                 </div>
@@ -295,7 +309,7 @@ function MobileNav() {
 
                         {/* CTAs */}
                         <div className="space-y-2 pt-3 border-t-[3px] border-dark-gray">
-                            {isSignedIn ? (
+                            {showSignedIn ? (
                                 <HeaderCta
                                     label="Dashboard"
                                     icon="fa-duotone fa-regular fa-gauge"

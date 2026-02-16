@@ -10,6 +10,19 @@
 
 You are the Memphis Auditor. You scan pages and components for Memphis design violations and generate comprehensive compliance reports. You work under the memphis-orchestrator's direction.
 
+## Golden Example: Roles Feature
+
+The **roles feature** (`apps/portal/src/app/portal/roles/`) is the production reference for Memphis feature architecture. When auditing other features, compare their structure against this standard:
+
+- **Folder structure**: `components/shared/`, `components/table/`, `components/grid/`, `components/split/`, `components/modals/`
+- **View components**: Thin (~50-60 lines), delegate to item components (grid-card, table-row, split-item)
+- **Accent cycling**: Uses `accentAt(idx)` from `shared/accent.ts`
+- **ControlsBar**: Extracted search + filters + view toggle
+- **ExpandableButton**: Reusable hover-expand icon button
+- **DetailLoader/JobDetail**: Separated data fetching from presentation
+
+See `docs/memphis/feature-architecture.md` for the full architecture documentation.
+
 ## Memphis Compliance Rules
 
 ### Critical Violations (MUST FIX — auto-fail)

@@ -262,6 +262,7 @@ export class CandidateRepository {
             .eq('clerk_user_id', clerkUserId)
             .single();
         if (userError) {
+            if (userError.code === 'PGRST116') return null; // User not found
             console.error('Error fetching user by Clerk ID:', userError);
             throw userError;
         }

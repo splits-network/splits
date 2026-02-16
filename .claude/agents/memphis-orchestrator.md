@@ -247,7 +247,7 @@ You have access to:
 - **Migration workflows** in `.claude/memphis/workflows/migration-workflow.md`
 - **Memphis UI package** in `packages/memphis-ui/` — 101 React components (`src/react/components/`) + 57 CSS component files (`src/components/*.css`)
 
-**CRITICAL:** When spawning a designer, ALWAYS tell them which showcase file(s) to read. Use variant `six` as the primary reference. Example:
+**CRITICAL:** When spawning a designer, ALWAYS tell them to read the **roles golden example** (`apps/portal/src/app/portal/roles/`) for architecture patterns AND the relevant showcase file(s) for design inspiration. Use variant `six` as the primary showcase reference. Example:
 - Migrating a roles list page → tell designer to read `apps/corporate/src/app/showcase/lists/six/page.tsx` and `apps/corporate/src/app/showcase/tables/six/page.tsx`
 - Migrating a role detail page → tell designer to read `apps/corporate/src/app/showcase/details/six/page.tsx`
 - Migrating a settings page → tell designer to read `apps/corporate/src/app/showcase/settings/six/page.tsx`

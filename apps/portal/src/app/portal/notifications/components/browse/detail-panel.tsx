@@ -10,7 +10,7 @@ import {
     formatNotificationTime,
     getNotificationIcon,
 } from "@/lib/notifications";
-import ApplicationDetails from "@/app/portal/applications/components/shared/details";
+import ApplicationDetails from "@/app/portal/applications-memphis/components/shared/details";
 import CandidateDetails from "@/app/portal/candidates/components/shared/details";
 import PlacementDetails from "@/app/portal/placements/components/shared/details";
 import RoleDetailsView from "@/app/portal/roles/components/details-view";
@@ -361,3 +361,4 @@ function NotificationFallback({
         </div>
     );
 }
+
