@@ -68,14 +68,47 @@ type ViewMode = "table" | "grid" | "gmail";
 // ─── Sidebar Navigation ──────────────────────────────────────────────────────
 
 const sidebarNav = [
-    { key: "dashboard",    label: "Dashboard",    icon: "fa-duotone fa-regular fa-chart-tree-map" },
-    { key: "roles",        label: "Roles",        icon: "fa-duotone fa-regular fa-briefcase",     active: true },
-    { key: "recruiters",   label: "Recruiters",   icon: "fa-duotone fa-regular fa-user-tie" },
-    { key: "candidates",   label: "Candidates",   icon: "fa-duotone fa-regular fa-users" },
-    { key: "companies",    label: "Companies",    icon: "fa-duotone fa-regular fa-building" },
-    { key: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-file-lines" },
-    { key: "messages",     label: "Messages",     icon: "fa-duotone fa-regular fa-comments" },
-    { key: "placements",   label: "Placements",   icon: "fa-duotone fa-regular fa-handshake" },
+    {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: "fa-duotone fa-regular fa-chart-tree-map",
+    },
+    {
+        key: "roles",
+        label: "Roles",
+        icon: "fa-duotone fa-regular fa-briefcase",
+        active: true,
+    },
+    {
+        key: "recruiters",
+        label: "Recruiters",
+        icon: "fa-duotone fa-regular fa-user-tie",
+    },
+    {
+        key: "candidates",
+        label: "Candidates",
+        icon: "fa-duotone fa-regular fa-users",
+    },
+    {
+        key: "companies",
+        label: "Companies",
+        icon: "fa-duotone fa-regular fa-building",
+    },
+    {
+        key: "applications",
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
+    {
+        key: "messages",
+        label: "Messages",
+        icon: "fa-duotone fa-regular fa-comments",
+    },
+    {
+        key: "placements",
+        label: "Placements",
+        icon: "fa-duotone fa-regular fa-handshake",
+    },
 ];
 
 // ─── Page Component ───────────────────────────────────────────────────────────
@@ -109,13 +142,10 @@ export default function ListsFivePage() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
-                gsap.set(
-                    containerRef.current.querySelectorAll(".opacity-0"),
-                    { opacity: 1 },
-                );
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                gsap.set(containerRef.current.querySelectorAll(".opacity-0"), {
+                    opacity: 1,
+                });
                 return;
             }
 
@@ -178,12 +208,9 @@ export default function ListsFivePage() {
         );
     }, [view]);
 
-    const handleSelect = useCallback(
-        (job: JobListing) => {
-            setSelectedJob((prev) => (prev?.id === job.id ? null : job));
-        },
-        [],
-    );
+    const handleSelect = useCallback((job: JobListing) => {
+        setSelectedJob((prev) => (prev?.id === job.id ? null : job));
+    }, []);
 
     // ─── Render Helpers ───────────────────────────────────────────────────────
 
@@ -222,8 +249,12 @@ export default function ListsFivePage() {
                     <i className="fa-duotone fa-regular fa-briefcase text-warning" />
                     {typeLabel(job.type)}
                 </span>
-                <span className={`inline-flex items-center gap-1.5 border border-[#27272a] bg-[#09090b] px-2.5 py-1 rounded-lg font-mono text-[10px] uppercase tracking-wider ${statusColor(job.status)}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`} />
+                <span
+                    className={`inline-flex items-center gap-1.5 border border-[#27272a] bg-[#09090b] px-2.5 py-1 rounded-lg font-mono text-[10px] uppercase tracking-wider ${statusColor(job.status)}`}
+                >
+                    <span
+                        className={`w-1.5 h-1.5 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`}
+                    />
                     {job.status}
                 </span>
             </div>
@@ -231,31 +262,52 @@ export default function ListsFivePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="border border-[#27272a] bg-[#09090b] rounded-lg p-3 text-center">
-                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">{job.applicants}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">Applicants</div>
+                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">
+                        {job.applicants}
+                    </div>
+                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">
+                        Applicants
+                    </div>
                 </div>
                 <div className="border border-[#27272a] bg-[#09090b] rounded-lg p-3 text-center">
-                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">{job.views.toLocaleString()}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">Views</div>
+                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">
+                        {job.views.toLocaleString()}
+                    </div>
+                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">
+                        Views
+                    </div>
                 </div>
                 <div className="border border-[#27272a] bg-[#09090b] rounded-lg p-3 text-center">
-                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">{daysAgo(job.postedDate)}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">Posted</div>
+                    <div className="font-mono text-lg font-bold text-[#e5e7eb]">
+                        {daysAgo(job.postedDate)}
+                    </div>
+                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/30">
+                        Posted
+                    </div>
                 </div>
             </div>
 
             {/* Description */}
             <div className="mb-6">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-info/60 mb-3">Description</h4>
-                <p className="text-sm leading-relaxed text-[#e5e7eb]/60">{job.description}</p>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-info/60 mb-3">
+                    Description
+                </h4>
+                <p className="text-sm leading-relaxed text-[#e5e7eb]/60">
+                    {job.description}
+                </p>
             </div>
 
             {/* Requirements */}
             <div className="mb-6">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-warning/60 mb-3">Requirements</h4>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-warning/60 mb-3">
+                    Requirements
+                </h4>
                 <ul className="space-y-2">
                     {job.requirements.map((req, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-[#e5e7eb]/60">
+                        <li
+                            key={i}
+                            className="flex items-start gap-2 text-sm text-[#e5e7eb]/60"
+                        >
                             <i className="fa-duotone fa-regular fa-terminal text-warning/40 text-[10px] mt-1 flex-shrink-0" />
                             {req}
                         </li>
@@ -265,10 +317,15 @@ export default function ListsFivePage() {
 
             {/* Responsibilities */}
             <div className="mb-6">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-success/60 mb-3">Responsibilities</h4>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-success/60 mb-3">
+                    Responsibilities
+                </h4>
                 <ul className="space-y-2">
                     {job.responsibilities.map((resp, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-[#e5e7eb]/60">
+                        <li
+                            key={i}
+                            className="flex items-start gap-2 text-sm text-[#e5e7eb]/60"
+                        >
                             <i className="fa-duotone fa-regular fa-chevron-right text-success/40 text-[10px] mt-1 flex-shrink-0" />
                             {resp}
                         </li>
@@ -278,10 +335,15 @@ export default function ListsFivePage() {
 
             {/* Benefits */}
             <div className="mb-6">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-accent/60 mb-3">Benefits</h4>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-accent/60 mb-3">
+                    Benefits
+                </h4>
                 <div className="flex flex-wrap gap-2">
                     {job.benefits.map((b, i) => (
-                        <span key={i} className="border border-accent/20 bg-accent/5 px-2.5 py-1 rounded-lg font-mono text-[10px] text-accent/70">
+                        <span
+                            key={i}
+                            className="border border-yellow/20 bg-accent/5 px-2.5 py-1 rounded-lg font-mono text-[10px] text-accent/70"
+                        >
                             {b}
                         </span>
                     ))}
@@ -290,10 +352,15 @@ export default function ListsFivePage() {
 
             {/* Tags */}
             <div className="mb-6">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-[#e5e7eb]/30 mb-3">Skills</h4>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-[#e5e7eb]/30 mb-3">
+                    Skills
+                </h4>
                 <div className="flex flex-wrap gap-2">
                     {job.tags.map((tag, i) => (
-                        <span key={i} className="border border-[#27272a] bg-[#09090b] px-2.5 py-1 rounded-lg font-mono text-[10px] text-[#e5e7eb]/50">
+                        <span
+                            key={i}
+                            className="border border-[#27272a] bg-[#09090b] px-2.5 py-1 rounded-lg font-mono text-[10px] text-[#e5e7eb]/50"
+                        >
                             {tag}
                         </span>
                     ))}
@@ -302,7 +369,9 @@ export default function ListsFivePage() {
 
             {/* Recruiter */}
             <div className="border-t border-[#27272a]/50 pt-4">
-                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-[#e5e7eb]/30 mb-3">Recruiter</h4>
+                <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-[#e5e7eb]/30 mb-3">
+                    Recruiter
+                </h4>
                 <div className="flex items-center gap-3">
                     <img
                         src={job.recruiter.avatar}
@@ -310,8 +379,12 @@ export default function ListsFivePage() {
                         className="w-10 h-10 rounded-lg object-cover border border-[#27272a]"
                     />
                     <div>
-                        <div className="text-sm font-bold text-[#e5e7eb]">{job.recruiter.name}</div>
-                        <div className="font-mono text-[10px] text-[#e5e7eb]/40 uppercase tracking-wider">{job.recruiter.agency}</div>
+                        <div className="text-sm font-bold text-[#e5e7eb]">
+                            {job.recruiter.name}
+                        </div>
+                        <div className="font-mono text-[10px] text-[#e5e7eb]/40 uppercase tracking-wider">
+                            {job.recruiter.agency}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -321,7 +394,9 @@ export default function ListsFivePage() {
                 <div className="mt-4 pt-4 border-t border-[#27272a]/50">
                     <div className="flex items-center gap-2">
                         <i className="fa-duotone fa-regular fa-chart-pie text-info text-xs" />
-                        <span className="font-mono text-xs text-[#e5e7eb]/50">Equity: {job.equity}</span>
+                        <span className="font-mono text-xs text-[#e5e7eb]/50">
+                            Equity: {job.equity}
+                        </span>
                     </div>
                 </div>
             )}
@@ -334,11 +409,21 @@ export default function ListsFivePage() {
         <div className="border border-[#27272a] bg-[#18181b]/40 rounded-xl overflow-hidden">
             {/* Table header */}
             <div className="grid grid-cols-[1fr_140px_160px_140px_80px] gap-0 border-b border-[#27272a] bg-[#09090b]/60">
-                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">Title / Company</div>
-                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">Location</div>
-                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">Salary</div>
-                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">Type</div>
-                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30 text-center">Status</div>
+                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">
+                    Title / Company
+                </div>
+                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">
+                    Location
+                </div>
+                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">
+                    Salary
+                </div>
+                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30">
+                    Type
+                </div>
+                <div className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e5e7eb]/30 text-center">
+                    Status
+                </div>
             </div>
 
             {/* Table rows */}
@@ -357,21 +442,33 @@ export default function ListsFivePage() {
                             <i className="fa-duotone fa-regular fa-star text-warning text-xs flex-shrink-0" />
                         )}
                         <div className="min-w-0">
-                            <div className="text-sm font-bold text-[#e5e7eb] truncate">{job.title}</div>
-                            <div className="text-xs text-[#e5e7eb]/40 truncate">{job.company}</div>
+                            <div className="text-sm font-bold text-[#e5e7eb] truncate">
+                                {job.title}
+                            </div>
+                            <div className="text-xs text-[#e5e7eb]/40 truncate">
+                                {job.company}
+                            </div>
                         </div>
                     </div>
                     <div className="px-4 py-3.5 flex items-center">
-                        <span className="text-xs text-[#e5e7eb]/50 truncate">{job.location}</span>
+                        <span className="text-xs text-[#e5e7eb]/50 truncate">
+                            {job.location}
+                        </span>
                     </div>
                     <div className="px-4 py-3.5 flex items-center">
-                        <span className="font-mono text-xs text-[#e5e7eb]/60">{formatSalary(job.salary)}</span>
+                        <span className="font-mono text-xs text-[#e5e7eb]/60">
+                            {formatSalary(job.salary)}
+                        </span>
                     </div>
                     <div className="px-4 py-3.5 flex items-center">
-                        <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/40">{typeLabel(job.type)}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/40">
+                            {typeLabel(job.type)}
+                        </span>
                     </div>
                     <div className="px-4 py-3.5 flex items-center justify-center">
-                        <span className={`w-2 h-2 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`} />
+                        <span
+                            className={`w-2 h-2 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`}
+                        />
                     </div>
                 </div>
             ))}
@@ -379,8 +476,12 @@ export default function ListsFivePage() {
             {filtered.length === 0 && (
                 <div className="px-4 py-12 text-center">
                     <i className="fa-duotone fa-regular fa-radar text-2xl text-[#e5e7eb]/20 mb-3 block" />
-                    <div className="font-mono text-sm text-[#e5e7eb]/30">No signals detected</div>
-                    <div className="font-mono text-[10px] text-[#e5e7eb]/15 mt-1 uppercase tracking-wider">Adjust filters to scan wider</div>
+                    <div className="font-mono text-sm text-[#e5e7eb]/30">
+                        No signals detected
+                    </div>
+                    <div className="font-mono text-[10px] text-[#e5e7eb]/15 mt-1 uppercase tracking-wider">
+                        Adjust filters to scan wider
+                    </div>
                 </div>
             )}
         </div>
@@ -391,7 +492,9 @@ export default function ListsFivePage() {
     const renderGrid = () => (
         <div className={`flex gap-6 ${selectedJob ? "" : ""}`}>
             {/* Cards grid */}
-            <div className={`flex-1 grid ${selectedJob ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"} gap-4`}>
+            <div
+                className={`flex-1 grid ${selectedJob ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"} gap-4`}
+            >
                 {filtered.map((job) => (
                     <div
                         key={job.id}
@@ -405,12 +508,20 @@ export default function ListsFivePage() {
                         <div className="flex items-start justify-between mb-3">
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                    {job.featured && <i className="fa-duotone fa-regular fa-star text-warning text-xs" />}
-                                    <h3 className="text-sm font-bold text-[#e5e7eb] truncate">{job.title}</h3>
+                                    {job.featured && (
+                                        <i className="fa-duotone fa-regular fa-star text-warning text-xs" />
+                                    )}
+                                    <h3 className="text-sm font-bold text-[#e5e7eb] truncate">
+                                        {job.title}
+                                    </h3>
                                 </div>
-                                <div className="text-xs text-[#e5e7eb]/40">{job.company}</div>
+                                <div className="text-xs text-[#e5e7eb]/40">
+                                    {job.company}
+                                </div>
                             </div>
-                            <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`} />
+                            <span
+                                className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`}
+                            />
                         </div>
 
                         <div className="flex items-center gap-4 text-xs text-[#e5e7eb]/40 mb-4">
@@ -421,18 +532,27 @@ export default function ListsFivePage() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs text-info/70">{formatSalary(job.salary)}</span>
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/25">{typeLabel(job.type)}</span>
+                            <span className="font-mono text-xs text-info/70">
+                                {formatSalary(job.salary)}
+                            </span>
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/25">
+                                {typeLabel(job.type)}
+                            </span>
                         </div>
 
                         <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#27272a]/40">
                             {job.tags.slice(0, 3).map((tag, i) => (
-                                <span key={i} className="font-mono text-[9px] text-[#e5e7eb]/30 border border-[#27272a]/50 px-1.5 py-0.5 rounded">
+                                <span
+                                    key={i}
+                                    className="font-mono text-[9px] text-[#e5e7eb]/30 border border-[#27272a]/50 px-1.5 py-0.5 rounded"
+                                >
                                     {tag}
                                 </span>
                             ))}
                             {job.tags.length > 3 && (
-                                <span className="font-mono text-[9px] text-[#e5e7eb]/20">+{job.tags.length - 3}</span>
+                                <span className="font-mono text-[9px] text-[#e5e7eb]/20">
+                                    +{job.tags.length - 3}
+                                </span>
                             )}
                         </div>
                     </div>
@@ -441,7 +561,9 @@ export default function ListsFivePage() {
                 {filtered.length === 0 && (
                     <div className="col-span-full px-4 py-16 text-center">
                         <i className="fa-duotone fa-regular fa-radar text-2xl text-[#e5e7eb]/20 mb-3 block" />
-                        <div className="font-mono text-sm text-[#e5e7eb]/30">No signals detected</div>
+                        <div className="font-mono text-sm text-[#e5e7eb]/30">
+                            No signals detected
+                        </div>
                     </div>
                 )}
             </div>
@@ -460,7 +582,9 @@ export default function ListsFivePage() {
     const renderGmail = () => (
         <div className="flex gap-0 border border-[#27272a] rounded-xl overflow-hidden bg-[#18181b]/40 min-h-[600px]">
             {/* Left list */}
-            <div className={`${selectedJob ? "w-[360px] flex-shrink-0" : "flex-1"} border-r border-[#27272a] overflow-y-auto max-h-[calc(100vh-280px)]`}>
+            <div
+                className={`${selectedJob ? "w-[360px] flex-shrink-0" : "flex-1"} border-r border-[#27272a] overflow-y-auto max-h-[calc(100vh-280px)]`}
+            >
                 {filtered.map((job) => (
                     <div
                         key={job.id}
@@ -473,22 +597,38 @@ export default function ListsFivePage() {
                     >
                         <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2 min-w-0 flex-1">
-                                {job.featured && <i className="fa-duotone fa-regular fa-star text-warning text-[10px]" />}
-                                <span className="text-sm font-bold text-[#e5e7eb] truncate">{job.title}</span>
+                                {job.featured && (
+                                    <i className="fa-duotone fa-regular fa-star text-warning text-[10px]" />
+                                )}
+                                <span className="text-sm font-bold text-[#e5e7eb] truncate">
+                                    {job.title}
+                                </span>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                <span className="font-mono text-[10px] text-[#e5e7eb]/25">{daysAgo(job.postedDate)}</span>
-                                <span className={`w-1.5 h-1.5 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`} />
+                                <span className="font-mono text-[10px] text-[#e5e7eb]/25">
+                                    {daysAgo(job.postedDate)}
+                                </span>
+                                <span
+                                    className={`w-1.5 h-1.5 rounded-full ${statusDot(job.status)} ${job.status === "open" ? "animate-pulse" : ""}`}
+                                />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-xs text-[#e5e7eb]/40 truncate">{job.company}</span>
+                            <span className="text-xs text-[#e5e7eb]/40 truncate">
+                                {job.company}
+                            </span>
                             <span className="text-[#e5e7eb]/15">-</span>
-                            <span className="text-xs text-[#e5e7eb]/30 truncate">{job.location}</span>
+                            <span className="text-xs text-[#e5e7eb]/30 truncate">
+                                {job.location}
+                            </span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="font-mono text-[10px] text-info/50">{formatSalary(job.salary)}</span>
-                            <span className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/20">{typeLabel(job.type)}</span>
+                            <span className="font-mono text-[10px] text-info/50">
+                                {formatSalary(job.salary)}
+                            </span>
+                            <span className="font-mono text-[9px] uppercase tracking-wider text-[#e5e7eb]/20">
+                                {typeLabel(job.type)}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -496,7 +636,9 @@ export default function ListsFivePage() {
                 {filtered.length === 0 && (
                     <div className="px-4 py-16 text-center">
                         <i className="fa-duotone fa-regular fa-radar text-2xl text-[#e5e7eb]/20 mb-3 block" />
-                        <div className="font-mono text-sm text-[#e5e7eb]/30">No signals detected</div>
+                        <div className="font-mono text-sm text-[#e5e7eb]/30">
+                            No signals detected
+                        </div>
                     </div>
                 )}
             </div>
@@ -512,7 +654,9 @@ export default function ListsFivePage() {
                         <div className="w-16 h-16 rounded-xl border border-[#27272a] bg-[#09090b] flex items-center justify-center mx-auto mb-4">
                             <i className="fa-duotone fa-regular fa-arrow-left text-xl text-[#e5e7eb]/15" />
                         </div>
-                        <div className="font-mono text-sm text-[#e5e7eb]/25">Select a listing</div>
+                        <div className="font-mono text-sm text-[#e5e7eb]/25">
+                            Select a listing
+                        </div>
                         <div className="font-mono text-[10px] text-[#e5e7eb]/15 mt-1 uppercase tracking-wider">
                             Click a job to view details
                         </div>
@@ -525,7 +669,10 @@ export default function ListsFivePage() {
     // ─── Main Render ──────────────────────────────────────────────────────────
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-[#09090b] text-[#e5e7eb] flex">
+        <div
+            ref={containerRef}
+            className="min-h-screen bg-[#09090b] text-[#e5e7eb] flex"
+        >
             {/* Scanline overlay */}
             <div
                 className="fixed inset-0 pointer-events-none z-50 opacity-[0.02]"
@@ -556,8 +703,12 @@ export default function ListsFivePage() {
                             <i className="fa-duotone fa-regular fa-satellite-dish text-info text-sm" />
                         </div>
                         <div>
-                            <div className="text-sm font-bold text-[#e5e7eb]">Observatory</div>
-                            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e5e7eb]/25">Mission Control</div>
+                            <div className="text-sm font-bold text-[#e5e7eb]">
+                                Observatory
+                            </div>
+                            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#e5e7eb]/25">
+                                Mission Control
+                            </div>
                         </div>
                         {/* Mobile close */}
                         <button
@@ -580,8 +731,12 @@ export default function ListsFivePage() {
                                     : "text-[#e5e7eb]/40 hover:text-[#e5e7eb]/70 hover:bg-[#e5e7eb]/[0.03] border border-transparent"
                             }`}
                         >
-                            <i className={`${item.icon} text-sm w-4 text-center ${item.active ? "text-info" : ""}`} />
-                            <span className={`text-sm ${item.active ? "font-bold" : "font-medium"}`}>
+                            <i
+                                className={`${item.icon} text-sm w-4 text-center ${item.active ? "text-info" : ""}`}
+                            />
+                            <span
+                                className={`text-sm ${item.active ? "font-bold" : "font-medium"}`}
+                            >
                                 {item.label}
                             </span>
                             {item.active && (
@@ -633,7 +788,8 @@ export default function ListsFivePage() {
                             <span className="text-info">Listings</span>
                         </h1>
                         <p className="header-sub text-sm text-[#e5e7eb]/40 font-mono uppercase tracking-wider opacity-0">
-                            {filtered.length} signals detected across the network
+                            {filtered.length} signals detected across the
+                            network
                         </p>
                     </div>
                 </header>
@@ -685,7 +841,10 @@ export default function ListsFivePage() {
                         {/* View toggle */}
                         <div className="flex items-center border border-[#27272a] rounded-lg overflow-hidden">
                             <button
-                                onClick={() => { setView("table"); setSelectedJob(null); }}
+                                onClick={() => {
+                                    setView("table");
+                                    setSelectedJob(null);
+                                }}
                                 className={`px-3 py-2 text-xs transition-colors ${
                                     view === "table"
                                         ? "bg-info/10 text-info border-r border-info/20"
@@ -696,7 +855,10 @@ export default function ListsFivePage() {
                                 <i className="fa-duotone fa-regular fa-table-list" />
                             </button>
                             <button
-                                onClick={() => { setView("grid"); setSelectedJob(null); }}
+                                onClick={() => {
+                                    setView("grid");
+                                    setSelectedJob(null);
+                                }}
                                 className={`px-3 py-2 text-xs transition-colors ${
                                     view === "grid"
                                         ? "bg-info/10 text-info border-r border-info/20"
@@ -707,7 +869,10 @@ export default function ListsFivePage() {
                                 <i className="fa-duotone fa-regular fa-grid-2" />
                             </button>
                             <button
-                                onClick={() => { setView("gmail"); setSelectedJob(null); }}
+                                onClick={() => {
+                                    setView("gmail");
+                                    setSelectedJob(null);
+                                }}
                                 className={`px-3 py-2 text-xs transition-colors ${
                                     view === "gmail"
                                         ? "bg-info/10 text-info"
@@ -729,7 +894,8 @@ export default function ListsFivePage() {
                             <div className="flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-info animate-pulse" />
                                 <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/30">
-                                    {filtered.length} of {mockJobs.length} listings
+                                    {filtered.length} of {mockJobs.length}{" "}
+                                    listings
                                 </span>
                             </div>
                             {selectedJob && view === "table" && (
@@ -744,7 +910,9 @@ export default function ListsFivePage() {
                         <div ref={contentRef}>
                             {view === "table" && (
                                 <div className="flex gap-6">
-                                    <div className="flex-1 overflow-x-auto">{renderTable()}</div>
+                                    <div className="flex-1 overflow-x-auto">
+                                        {renderTable()}
+                                    </div>
                                     {selectedJob && (
                                         <div className="hidden lg:block w-[400px] flex-shrink-0 sticky top-[72px] self-start max-h-[calc(100vh-120px)]">
                                             {renderDetailPanel(selectedJob)}

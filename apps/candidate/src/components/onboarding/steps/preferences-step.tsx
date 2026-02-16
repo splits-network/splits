@@ -104,7 +104,7 @@ export function PreferencesStep() {
                         Work Flexibility
                     </legend>
                     <div className="space-y-2 mt-2">
-                        <label className="flex items-center gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:border-primary/50 transition-all">
+                        <label className="flex items-center gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:border-coral/50 transition-all">
                             <input
                                 type="checkbox"
                                 className="toggle toggle-primary"
@@ -128,7 +128,7 @@ export function PreferencesStep() {
                             </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:border-primary/50 transition-all">
+                        <label className="flex items-center gap-3 p-3 rounded-lg border border-base-300 cursor-pointer hover:border-coral/50 transition-all">
                             <input
                                 type="checkbox"
                                 className="toggle toggle-primary"

@@ -51,6 +51,13 @@ This directory contains all resources for migrating Splits Network apps to the M
 └── README.md             # This file
 ```
 
+## Documentation
+
+Consolidated Memphis documentation lives in `docs/memphis/`:
+- **[Design Principles](../../docs/memphis/design-principles.md)** - The 5 rules, styling hierarchy, typography
+- **[Color System](../../docs/memphis/color-system.md)** - 6-color palette, combinations, accessibility
+- **[Feature Architecture](../../docs/memphis/feature-architecture.md)** - Golden example: roles feature pattern
+
 ## Memphis Design Principles
 
 ### The 5 Rules (Never Violate)
@@ -60,6 +67,16 @@ This directory contains all resources for migrating Splits Network apps to the M
 3. **Thick Borders** - 4px borders on all interactive elements
 4. **Memphis Colors** - Use only coral, teal, yellow, purple, dark, cream
 5. **Geometric Shapes** - Add 1-3 decorative shapes per page
+
+### Styling Hierarchy (CRITICAL)
+
+Before writing ANY markup, follow this order. Use memphis-ui components and named CSS classes before ever reaching for raw Tailwind:
+
+1. **Memphis UI React components** (`@splits-network/memphis-ui`) — FIRST. 101 components with correct styling baked in.
+2. **Memphis plugin CSS classes** (`btn`, `badge`, `card`, `input`, etc.) — named classes with border tiers baked in.
+3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-interactive`) — for elements not covered above.
+4. **Local components** (`{feature}-memphis/components/`) — must use memphis-ui primitives internally.
+5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid.
 
 ### Color Palette
 
@@ -211,25 +228,53 @@ Migration progress tracked in `.build-progress.json`:
 
 Location: `packages/memphis-ui/`
 
-**Components**:
-- Button, Card, Badge
-- Input, Select, Modal
-- Table, Tabs
-- GeometricDecoration, AccentCycle
+Built on SilicaUI (DaisyUI v5 fork). All DaisyUI v5 component classes work.
 
-**Utilities**:
-- btn-coral, bg-teal, text-yellow, border-purple
-- Tailwind v4 CSS-based theme
-- No tailwind.config.ts
-
-**Usage**:
-```tsx
-import { Button, Card } from '@splits-network/memphis-ui';
-import '@splits-network/memphis-ui/theme.css';
-
-<Button variant="primary">Click Me</Button>
-<Card accentColor="coral">Content</Card>
+**Architecture:**
 ```
+packages/memphis-ui/
+├── src/                           # HAND-AUTHORED only
+│   ├── base/                      # Base CSS (reset, rootcolor, properties)
+│   ├── components/                # 57 CSS component files (SilicaUI + Memphis)
+│   ├── themes/memphis.css         # Generated CSS variables (NEVER edit)
+│   ├── utilities/                 # SilicaUI + Memphis utilities
+│   ├── react/components/          # 101 React components
+│   └── theme.config.ts            # Single source of truth
+├── dist/                          # Generated (gitignored)
+├── functions/                     # Runtime plugin handlers
+├── scripts/generators/            # 7 modular generators
+├── build.js, index.js, package.json
+```
+
+**Build:** `pnpm --filter @splits-network/memphis-ui build`
+(Runs: `tsx scripts/generate.ts` → `node build.js` → `tsc -b`)
+
+**Plugin Loading (in app globals.css):**
+```css
+@plugin "@splits-network/memphis-ui/plugin";
+```
+No `@import` of theme.css. No `tailwind.config.ts` needed.
+
+**React Usage:**
+```tsx
+import { Button, Card, Badge } from '@splits-network/memphis-ui';
+```
+
+**CSS Classes (all DaisyUI v5 classes work):**
+```tsx
+<button className="btn btn-coral btn-md">Click Me</button>
+<span className="badge badge-yellow badge-sm">New</span>
+<div className="card p-6">Content</div>
+```
+
+**Color variants use CSS variables (not direct properties):**
+- Buttons: `--btn-color` and `--btn-fg`
+- Badges: `--badge-color` and `--badge-fg`
+
+**Size variants include border tiers + font sizes:**
+- `sm`: 2px border (detail), smaller font
+- `md`: 3px border (interactive), standard font
+- `lg`: 4px border (container), larger font
 
 ## Migration Workflow
 
@@ -247,9 +292,12 @@ See [workflows/migration-workflow.md](./workflows/migration-workflow.md) for det
 <div className="shadow-xl"> // FORBIDDEN
 ```
 
-### ✅ Memphis
+### ✅ Memphis (use component or plugin class first)
 ```tsx
-<div className="border-4 border-dark"> // CORRECT
+import { Card } from '@splits-network/memphis-ui';
+<Card>...</Card>                          // BEST — React component
+<div className="card">...</div>           // OK — plugin class
+<div className="border-4 border-dark">    // FALLBACK — theme classes
 ```
 
 ### ❌ Rounded Corners
@@ -257,9 +305,11 @@ See [workflows/migration-workflow.md](./workflows/migration-workflow.md) for det
 <button className="rounded-lg"> // FORBIDDEN
 ```
 
-### ✅ Memphis
+### ✅ Memphis (use component or plugin class first)
 ```tsx
-<button className="border-4 border-dark"> // CORRECT
+import { Button } from '@splits-network/memphis-ui';
+<Button variant="primary">Click</Button>  // BEST — React component
+<button className="btn btn-coral btn-md">  // OK — plugin class
 ```
 
 ### ❌ Gradients
@@ -269,7 +319,7 @@ See [workflows/migration-workflow.md](./workflows/migration-workflow.md) for det
 
 ### ✅ Memphis
 ```tsx
-<div className="bg-coral"> // CORRECT
+<div className="bg-coral"> // CORRECT — solid Memphis color
 ```
 
 ## Accessibility

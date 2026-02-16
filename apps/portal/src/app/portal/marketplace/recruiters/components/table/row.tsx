@@ -157,7 +157,7 @@ export default function Row({ item, onViewDetails }: RowProps) {
                         {specialties.map((s, i) => (
                             <span
                                 key={i}
-                                className="badge badge-sm bg-primary/10 text-primary border-primary/20"
+                                className="badge badge-sm bg-primary/10 text-primary border-coral/20"
                             >
                                 {s}
                             </span>

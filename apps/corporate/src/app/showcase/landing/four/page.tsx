@@ -127,9 +127,7 @@ export default function LandingFourPage() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 // Make everything visible without animation
                 gsap.set(containerRef.current.querySelectorAll(".cin-reveal"), {
                     opacity: 1,
@@ -735,11 +733,8 @@ export default function LandingFourPage() {
 
                     <div className="cin-quotes-grid grid md:grid-cols-3 gap-8">
                         {testimonials.map((t, i) => (
-                            <div
-                                key={i}
-                                className="cin-quote opacity-0"
-                            >
-                                <div className="border-l-4 border-primary pl-6 mb-6">
+                            <div key={i} className="cin-quote opacity-0">
+                                <div className="border-l-4 border-coral pl-6 mb-6">
                                     <p className="text-xl md:text-2xl font-bold leading-snug text-white/90 italic">
                                         &ldquo;{t.quote}&rdquo;
                                     </p>

@@ -1,168 +1,82 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Radar } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    RadialLinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import { useReputationData } from '../hooks/use-reputation-data';
-import { ContentCard, EmptyState } from '@/components/ui/cards';
-import { ChartLoadingState } from '@splits-network/shared-ui';
-
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+import { MemphisCard, MemphisEmpty, MemphisSkeleton } from './primitives';
+import { ACCENT, accentAt } from './accent';
 
 interface ReputationRadarProps {
     refreshKey?: number;
 }
 
-interface ThemeColors {
-    secondary: string;
-    text: string;
-    grid: string;
-    surface: string;
-}
+const METRIC_LABELS = ['Speed', 'Volume', 'Quality', 'Collaboration', 'Consistency'] as const;
+type MetricKey = 'speed' | 'volume' | 'quality' | 'collaboration' | 'consistency';
+const METRIC_KEYS: MetricKey[] = ['speed', 'volume', 'quality', 'collaboration', 'consistency'];
 
-function getThemeColors(): ThemeColors {
-    if (typeof window === 'undefined') {
-        return { secondary: '#0f9d8a', text: '#111827', grid: '#e5e7eb', surface: '#ffffff' };
-    }
-    const style = getComputedStyle(document.documentElement);
-    const read = (prop: string, fallback: string) => style.getPropertyValue(prop).trim() || fallback;
-    return {
-        secondary: read('--color-secondary', '#0f9d8a'),
-        text: read('--color-base-content', '#18181b'),
-        grid: read('--color-base-300', '#e4e4e7'),
-        surface: read('--color-base-100', '#ffffff'),
-    };
-}
-
-/** Compute average reputation score across all 5 axes */
-function computeOverallScore(metrics: { speed: number; volume: number; quality: number; collaboration: number; consistency: number }) {
-    const values = [metrics.speed, metrics.volume, metrics.quality, metrics.collaboration, metrics.consistency];
+function computeOverallScore(metrics: Record<MetricKey, number>) {
+    const values = METRIC_KEYS.map(k => metrics[k]);
     return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length);
 }
 
 export default function ReputationRadar({ refreshKey }: ReputationRadarProps) {
     const { metrics, loading, error } = useReputationData();
-    const [colors, setColors] = useState<ThemeColors>(getThemeColors());
 
-    // Watch for theme changes
-    useEffect(() => {
-        const update = () => setColors(getThemeColors());
-        update();
-
-        const observer = new MutationObserver(update);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
+    const headerRight = (
+        <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-dark/40">Score</span>
+            <span className="text-sm font-black tabular-nums text-teal">
+                {loading ? '—' : computeOverallScore(metrics)}/100
+            </span>
+        </div>
+    );
 
     if (loading) {
         return (
-            <ContentCard title="Reputation score" icon="fa-shield-check" className="bg-base-200">
-                <ChartLoadingState height={220} />
-            </ContentCard>
+            <MemphisCard title="Reputation Score" icon="fa-shield-check" accent={ACCENT[1]} headerRight={headerRight}>
+                <MemphisSkeleton count={5} />
+            </MemphisCard>
         );
     }
 
-    const hasData = metrics.speed > 0 || metrics.volume > 0 || metrics.quality > 0 ||
-        metrics.collaboration > 0 || metrics.consistency > 0;
+    const hasData = METRIC_KEYS.some(k => metrics[k] > 0);
 
     if (error || !hasData) {
         return (
-            <ContentCard title="Reputation score" icon="fa-shield-check" className="bg-base-200">
-                <EmptyState
+            <MemphisCard title="Reputation Score" icon="fa-shield-check" accent={ACCENT[1]} headerRight={headerRight}>
+                <MemphisEmpty
                     icon="fa-shield-check"
-                    title="No reputation data yet"
-                    description="Your reputation score builds automatically as you complete placements and collaborate with partners."
-                    size="sm"
+                    title="No reputation data"
+                    description="Your reputation score builds as you complete placements and collaborate with partners."
                 />
-            </ContentCard>
+            </MemphisCard>
         );
     }
 
-    const overallScore = computeOverallScore(metrics);
-
-    const chartData = {
-        labels: ['Speed', 'Volume', 'Quality', 'Collaboration', 'Consistency'],
-        datasets: [{
-            label: 'Your scores',
-            data: [metrics.speed, metrics.volume, metrics.quality, metrics.collaboration, metrics.consistency],
-            backgroundColor: `${colors.secondary}20`,
-            borderColor: colors.secondary,
-            borderWidth: 2,
-            pointBackgroundColor: colors.secondary,
-            pointBorderColor: colors.surface,
-            pointHoverBackgroundColor: colors.surface,
-            pointHoverBorderColor: colors.secondary,
-            pointRadius: 4,
-            pointBorderWidth: 2,
-            pointHoverRadius: 6,
-        }],
-    };
-
     return (
-        <ContentCard
-            title="Reputation score"
-            icon="fa-shield-check"
-            className="bg-base-200"
-            headerActions={
-                <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-base-content/60 font-medium">Overall score</span>
-                    <span className="text-sm font-bold tabular-nums text-secondary">{overallScore}/100</span>
-                </div>
-            }
-        >
-            <div className="h-52">
-                <Radar
-                    data={chartData}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    stepSize: 25,
-                                    display: false,
-                                },
-                                pointLabels: {
-                                    color: colors.text,
-                                    font: { size: 10, weight: 500 },
-                                },
-                                grid: {
-                                    circular: true,
-                                    color: `${colors.grid}80`,
-                                },
-                                angleLines: {
-                                    color: `${colors.grid}60`,
-                                },
-                            },
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: colors.surface,
-                                titleColor: colors.text,
-                                bodyColor: colors.text,
-                                borderColor: `${colors.text}20`,
-                                borderWidth: 1,
-                                padding: 10,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) => ` ${ctx.label}: ${ctx.parsed.r}/100`,
-                                },
-                            },
-                        },
-                    }}
-                />
+        <MemphisCard title="Reputation Score" icon="fa-shield-check" accent={ACCENT[1]} headerRight={headerRight}>
+            <div className="space-y-3">
+                {METRIC_KEYS.map((key, i) => {
+                    const value = metrics[key];
+                    const accent = accentAt(i);
+                    return (
+                        <div key={key}>
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-dark/60">
+                                    {METRIC_LABELS[i]}
+                                </span>
+                                <span className={`text-xs font-black tabular-nums ${accent.text}`}>
+                                    {value}
+                                </span>
+                            </div>
+                            <div className="h-3 border-4 border-dark overflow-hidden">
+                                <div
+                                    className={`h-full ${accent.bg} transition-all duration-700`}
+                                    style={{ width: `${value}%` }}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
-        </ContentCard>
+        </MemphisCard>
     );
 }

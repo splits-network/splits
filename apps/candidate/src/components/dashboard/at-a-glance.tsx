@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 
 interface AtAGlanceItem {
     label: string;
     value: string | number;
     icon: string;
     href: string;
-    priority: 'urgent' | 'important' | 'info';
+    priority: "urgent" | "important" | "info";
     visible: boolean;
 }
 
@@ -27,35 +27,40 @@ export default function AtAGlance({
     // Build items based on available data
     const items: AtAGlanceItem[] = [
         {
-            label: 'Unread Messages',
+            label: "Unread Messages",
             value: messageCount,
-            icon: 'fa-messages',
-            href: '/portal/messages',
-            priority: messageCount > 0 ? 'important' : 'info',
+            icon: "fa-messages",
+            href: "/portal/messages",
+            priority: messageCount > 0 ? "important" : "info",
             visible: messageCount > 0,
         },
         {
-            label: 'New Notifications',
+            label: "New Notifications",
             value: notificationCount,
-            icon: 'fa-bell',
-            href: '/portal/notifications',
-            priority: notificationCount > 0 ? 'important' : 'info',
+            icon: "fa-bell",
+            href: "/portal/notifications",
+            priority: notificationCount > 0 ? "important" : "info",
             visible: notificationCount > 0,
         },
         {
-            label: 'Pending Actions',
+            label: "Pending Actions",
             value: pendingApplications,
-            icon: 'fa-clipboard-check',
-            href: '/portal/applications',
-            priority: pendingApplications > 0 ? 'urgent' : 'info',
+            icon: "fa-clipboard-check",
+            href: "/portal/applications",
+            priority: pendingApplications > 0 ? "urgent" : "info",
             visible: pendingApplications > 0,
         },
         {
-            label: 'Complete Your Profile',
+            label: "Complete Your Profile",
             value: `${profileCompletion}%`,
-            icon: 'fa-user-check',
-            href: '/portal/profile',
-            priority: profileCompletion < 50 ? 'urgent' : profileCompletion < 100 ? 'important' : 'info',
+            icon: "fa-user-check",
+            href: "/portal/profile",
+            priority:
+                profileCompletion < 50
+                    ? "urgent"
+                    : profileCompletion < 100
+                      ? "important"
+                      : "info",
             visible: profileCompletion < 100,
         },
     ];
@@ -63,16 +68,16 @@ export default function AtAGlance({
     // Get priority color class
     const getPriorityClass = (priority: string): string => {
         switch (priority) {
-            case 'urgent':
-                return 'text-error';
-            case 'important':
-                return 'text-warning';
+            case "urgent":
+                return "text-error";
+            case "important":
+                return "text-warning";
             default:
-                return 'text-info';
+                return "text-info";
         }
     };
 
-    const visibleItems = items.filter(item => item.visible);
+    const visibleItems = items.filter((item) => item.visible);
 
     // If no items to show
     if (visibleItems.length === 0) {
@@ -91,17 +96,23 @@ export default function AtAGlance({
                 <Link
                     key={index}
                     href={item.href}
-                    className="block p-3 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-md border border-transparent hover:border-primary/30 transition-all group"
+                    className="block p-3 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-md border border-transparent hover:border-coral/30 transition-all group"
                 >
                     <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center flex-shrink-0 ${getPriorityClass(item.priority)} group-hover:bg-base-300 transition-colors`}>
-                            <i className={`fa-duotone fa-regular ${item.icon} text-sm`}></i>
+                        <div
+                            className={`w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center flex-shrink-0 ${getPriorityClass(item.priority)} group-hover:bg-base-300 transition-colors`}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular ${item.icon} text-sm`}
+                            ></i>
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="text-xs font-medium text-base-content/80 group-hover:text-primary transition-colors truncate">
                                 {item.label}
                             </div>
-                            <div className={`text-sm font-bold ${getPriorityClass(item.priority)}`}>
+                            <div
+                                className={`text-sm font-bold ${getPriorityClass(item.priority)}`}
+                            >
                                 {item.value}
                             </div>
                         </div>

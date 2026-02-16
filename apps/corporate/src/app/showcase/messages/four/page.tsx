@@ -453,7 +453,10 @@ function formatFullTime(date: Date): string {
 }
 
 function getOtherParticipant(conv: Conversation): User {
-    return conv.participants.find((p) => p.id !== CURRENT_USER.id) || conv.participants[0];
+    return (
+        conv.participants.find((p) => p.id !== CURRENT_USER.id) ||
+        conv.participants[0]
+    );
 }
 
 function getUnreadCount(conv: Conversation): number {
@@ -501,9 +504,7 @@ export default function MessagesFourPage() {
     const [composerText, setComposerText] = useState("");
     const [mobileShowThread, setMobileShowThread] = useState(false);
 
-    const selectedConv = allConversations.find(
-        (c) => c.id === selectedConvId,
-    );
+    const selectedConv = allConversations.find((c) => c.id === selectedConvId);
 
     /* ─── Filtered conversations ─────────────────────────────── */
     const filteredConversations = allConversations
@@ -514,9 +515,7 @@ export default function MessagesFourPage() {
                 const q = searchQuery.toLowerCase();
                 const other = getOtherParticipant(c);
                 const matchesName = other.name.toLowerCase().includes(q);
-                const matchesSubject = c.subject
-                    ?.toLowerCase()
-                    .includes(q);
+                const matchesSubject = c.subject?.toLowerCase().includes(q);
                 const matchesMessage = c.messages.some((m) =>
                     m.text.toLowerCase().includes(q),
                 );
@@ -617,13 +616,12 @@ export default function MessagesFourPage() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
-                gsap.set(
-                    containerRef.current.querySelectorAll(".cin-anim"),
-                    { opacity: 1, y: 0, x: 0 },
-                );
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                gsap.set(containerRef.current.querySelectorAll(".cin-anim"), {
+                    opacity: 1,
+                    y: 0,
+                    x: 0,
+                });
                 return;
             }
 
@@ -735,7 +733,10 @@ export default function MessagesFourPage() {
             </header>
 
             {/* ── Main Layout ──────────────────────────────────────── */}
-            <div className="max-w-[1600px] mx-auto flex" style={{ height: "calc(100vh - 4rem)" }}>
+            <div
+                className="max-w-[1600px] mx-auto flex"
+                style={{ height: "calc(100vh - 4rem)" }}
+            >
                 {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    SIDEBAR — Conversation List
                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
@@ -752,28 +753,21 @@ export default function MessagesFourPage() {
                                 type="text"
                                 placeholder="Search conversations..."
                                 value={searchQuery}
-                                onChange={(e) =>
-                                    setSearchQuery(e.target.value)
-                                }
-                                className="input input-sm w-full pl-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 focus:border-primary/40 focus:bg-white/[0.06] transition-colors"
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="input input-sm w-full pl-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 focus:border-coral/40 focus:bg-white/[0.06] transition-colors"
                             />
                         </div>
 
                         <div className="flex gap-1.5">
                             {(
-                                [
-                                    "all",
-                                    "direct",
-                                    "job",
-                                    "placement",
-                                ] as const
+                                ["all", "direct", "job", "placement"] as const
                             ).map((cat) => (
                                 <button
                                     key={cat}
                                     onClick={() => setFilterCategory(cat)}
                                     className={`btn btn-xs font-medium tracking-wide transition-all duration-200 ${
                                         filterCategory === cat
-                                            ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/25"
+                                            ? "bg-primary/20 text-primary border-coral/30 hover:bg-primary/25"
                                             : "btn-ghost text-white/40 hover:text-white/60 hover:bg-white/[0.04]"
                                     }`}
                                 >
@@ -806,18 +800,14 @@ export default function MessagesFourPage() {
                                 const other = getOtherParticipant(conv);
                                 const lastMsg = getLastMessage(conv);
                                 const unread = getUnreadCount(conv);
-                                const isSelected =
-                                    conv.id === selectedConvId;
-                                const roleConf =
-                                    ROLE_CONFIG[other.role];
+                                const isSelected = conv.id === selectedConvId;
+                                const roleConf = ROLE_CONFIG[other.role];
 
                                 return (
                                     <button
                                         key={conv.id}
                                         onClick={() =>
-                                            handleSelectConversation(
-                                                conv.id,
-                                            )
+                                            handleSelectConversation(conv.id)
                                         }
                                         className={`cin-conv-item opacity-0 w-full text-left px-4 py-3.5 flex gap-3 transition-all duration-200 border-b border-white/[0.03] group ${
                                             isSelected
@@ -945,9 +935,7 @@ export default function MessagesFourPage() {
                                 <div className="flex items-center gap-3 min-w-0">
                                     {(() => {
                                         const other =
-                                            getOtherParticipant(
-                                                selectedConv,
-                                            );
+                                            getOtherParticipant(selectedConv);
                                         const roleConf =
                                             ROLE_CONFIG[other.role];
                                         return (
@@ -1074,142 +1062,127 @@ export default function MessagesFourPage() {
                                     <div className="flex-1 h-px bg-white/[0.06]" />
                                 </div>
 
-                                {selectedConv.messages.map(
-                                    (msg, idx) => {
-                                        const isMine =
-                                            msg.senderId ===
-                                            CURRENT_USER.id;
-                                        const sender = isMine
-                                            ? CURRENT_USER
-                                            : users[msg.senderId];
-                                        const roleConf =
-                                            ROLE_CONFIG[sender.role];
+                                {selectedConv.messages.map((msg, idx) => {
+                                    const isMine =
+                                        msg.senderId === CURRENT_USER.id;
+                                    const sender = isMine
+                                        ? CURRENT_USER
+                                        : users[msg.senderId];
+                                    const roleConf = ROLE_CONFIG[sender.role];
 
-                                        // Check if we need a date separator
-                                        const prevMsg =
-                                            idx > 0
-                                                ? selectedConv
-                                                      .messages[
-                                                      idx - 1
-                                                  ]
-                                                : null;
-                                        const showDateSep =
-                                            prevMsg &&
-                                            msg.timestamp.toDateString() !==
-                                                prevMsg.timestamp.toDateString();
+                                    // Check if we need a date separator
+                                    const prevMsg =
+                                        idx > 0
+                                            ? selectedConv.messages[idx - 1]
+                                            : null;
+                                    const showDateSep =
+                                        prevMsg &&
+                                        msg.timestamp.toDateString() !==
+                                            prevMsg.timestamp.toDateString();
 
-                                        // Check if same sender as previous (for grouping)
-                                        const sameSender =
-                                            prevMsg &&
-                                            prevMsg.senderId ===
-                                                msg.senderId &&
-                                            !showDateSep;
+                                    // Check if same sender as previous (for grouping)
+                                    const sameSender =
+                                        prevMsg &&
+                                        prevMsg.senderId === msg.senderId &&
+                                        !showDateSep;
 
-                                        return (
-                                            <div key={msg.id}>
-                                                {showDateSep && (
-                                                    <div className="flex items-center gap-3 my-4">
-                                                        <div className="flex-1 h-px bg-white/[0.06]" />
-                                                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium">
-                                                            {msg.timestamp.toLocaleDateString(
-                                                                "en-US",
-                                                                {
-                                                                    weekday:
-                                                                        "long",
-                                                                    month: "long",
-                                                                    day: "numeric",
-                                                                },
-                                                            )}
-                                                        </span>
-                                                        <div className="flex-1 h-px bg-white/[0.06]" />
-                                                    </div>
-                                                )}
-
-                                                <div
-                                                    className={`cin-msg-bubble flex gap-3 ${
-                                                        isMine
-                                                            ? "flex-row-reverse"
-                                                            : ""
-                                                    } ${
-                                                        sameSender
-                                                            ? "mt-1"
-                                                            : "mt-4"
-                                                    }`}
-                                                >
-                                                    {/* Avatar (hide for grouped messages) */}
-                                                    <div className="flex-shrink-0 w-8">
-                                                        {!sameSender && (
-                                                            <div
-                                                                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                                                                    isMine
-                                                                        ? "bg-primary/20 text-primary"
-                                                                        : "bg-white/[0.06] text-white/50"
-                                                                }`}
-                                                            >
-                                                                {
-                                                                    sender.avatar
-                                                                }
-                                                            </div>
+                                    return (
+                                        <div key={msg.id}>
+                                            {showDateSep && (
+                                                <div className="flex items-center gap-3 my-4">
+                                                    <div className="flex-1 h-px bg-white/[0.06]" />
+                                                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium">
+                                                        {msg.timestamp.toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                                weekday: "long",
+                                                                month: "long",
+                                                                day: "numeric",
+                                                            },
                                                         )}
-                                                    </div>
+                                                    </span>
+                                                    <div className="flex-1 h-px bg-white/[0.06]" />
+                                                </div>
+                                            )}
 
-                                                    {/* Bubble */}
-                                                    <div
-                                                        className={`max-w-[70%] min-w-0 ${isMine ? "items-end" : "items-start"} flex flex-col`}
-                                                    >
-                                                        {!sameSender && (
-                                                            <div
-                                                                className={`flex items-center gap-2 mb-1 ${isMine ? "flex-row-reverse" : ""}`}
-                                                            >
-                                                                <span className="text-white/60 text-xs font-semibold">
-                                                                    {isMine
-                                                                        ? "You"
-                                                                        : sender.name}
-                                                                </span>
-                                                                <span
-                                                                    className={`text-[9px] ${roleConf.badgeClass} badge badge-xs`}
-                                                                >
-                                                                    {
-                                                                        roleConf.label
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        )}
-
+                                            <div
+                                                className={`cin-msg-bubble flex gap-3 ${
+                                                    isMine
+                                                        ? "flex-row-reverse"
+                                                        : ""
+                                                } ${
+                                                    sameSender ? "mt-1" : "mt-4"
+                                                }`}
+                                            >
+                                                {/* Avatar (hide for grouped messages) */}
+                                                <div className="flex-shrink-0 w-8">
+                                                    {!sameSender && (
                                                         <div
-                                                            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                                            className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
                                                                 isMine
-                                                                    ? "bg-primary text-primary-content rounded-br-md"
-                                                                    : "bg-white/[0.06] text-white/80 rounded-bl-md"
+                                                                    ? "bg-primary/20 text-primary"
+                                                                    : "bg-white/[0.06] text-white/50"
                                                             }`}
                                                         >
-                                                            {msg.text}
+                                                            {sender.avatar}
                                                         </div>
+                                                    )}
+                                                </div>
 
+                                                {/* Bubble */}
+                                                <div
+                                                    className={`max-w-[70%] min-w-0 ${isMine ? "items-end" : "items-start"} flex flex-col`}
+                                                >
+                                                    {!sameSender && (
                                                         <div
-                                                            className={`flex items-center gap-1.5 mt-1 ${isMine ? "flex-row-reverse" : ""}`}
+                                                            className={`flex items-center gap-2 mb-1 ${isMine ? "flex-row-reverse" : ""}`}
                                                         >
-                                                            <span className="text-[10px] text-white/20">
-                                                                {formatFullTime(
-                                                                    msg.timestamp,
-                                                                )}
+                                                            <span className="text-white/60 text-xs font-semibold">
+                                                                {isMine
+                                                                    ? "You"
+                                                                    : sender.name}
                                                             </span>
-                                                            {isMine && (
-                                                                <i
-                                                                    className={`fa-solid fa-check-double text-[9px] ${
-                                                                        msg.read
-                                                                            ? "text-primary/60"
-                                                                            : "text-white/20"
-                                                                    }`}
-                                                                />
-                                                            )}
+                                                            <span
+                                                                className={`text-[9px] ${roleConf.badgeClass} badge badge-xs`}
+                                                            >
+                                                                {roleConf.label}
+                                                            </span>
                                                         </div>
+                                                    )}
+
+                                                    <div
+                                                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                                            isMine
+                                                                ? "bg-primary text-primary-content rounded-br-md"
+                                                                : "bg-white/[0.06] text-white/80 rounded-bl-md"
+                                                        }`}
+                                                    >
+                                                        {msg.text}
+                                                    </div>
+
+                                                    <div
+                                                        className={`flex items-center gap-1.5 mt-1 ${isMine ? "flex-row-reverse" : ""}`}
+                                                    >
+                                                        <span className="text-[10px] text-white/20">
+                                                            {formatFullTime(
+                                                                msg.timestamp,
+                                                            )}
+                                                        </span>
+                                                        {isMine && (
+                                                            <i
+                                                                className={`fa-solid fa-check-double text-[9px] ${
+                                                                    msg.read
+                                                                        ? "text-primary/60"
+                                                                        : "text-white/20"
+                                                                }`}
+                                                            />
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
-                                        );
-                                    },
-                                )}
+                                        </div>
+                                    );
+                                })}
                                 <div ref={messageEndRef} />
                             </div>
 
@@ -1232,14 +1205,12 @@ export default function MessagesFourPage() {
                                             ref={inputRef}
                                             value={composerText}
                                             onChange={(e) =>
-                                                setComposerText(
-                                                    e.target.value,
-                                                )
+                                                setComposerText(e.target.value)
                                             }
                                             onKeyDown={handleKeyDown}
                                             placeholder="Type a message..."
                                             rows={1}
-                                            className="textarea w-full min-h-[40px] max-h-32 bg-white/[0.04] border-white/[0.08] text-white text-sm placeholder:text-white/25 focus:border-primary/40 focus:bg-white/[0.06] resize-none py-2.5 leading-relaxed transition-colors"
+                                            className="textarea w-full min-h-[40px] max-h-32 bg-white/[0.04] border-white/[0.08] text-white text-sm placeholder:text-white/25 focus:border-coral/40 focus:bg-white/[0.06] resize-none py-2.5 leading-relaxed transition-colors"
                                         />
                                     </div>
 
@@ -1259,7 +1230,8 @@ export default function MessagesFourPage() {
 
                                 <div className="flex items-center justify-between mt-2">
                                     <p className="text-[10px] text-white/15">
-                                        Press Enter to send, Shift+Enter for new line
+                                        Press Enter to send, Shift+Enter for new
+                                        line
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <button className="btn btn-ghost btn-xs text-white/20 hover:text-white/40 gap-1">
@@ -1282,7 +1254,8 @@ export default function MessagesFourPage() {
                                 Select a conversation
                             </h3>
                             <p className="text-white/15 text-sm max-w-xs text-center leading-relaxed">
-                                Choose a conversation from the sidebar to view messages and continue the discussion.
+                                Choose a conversation from the sidebar to view
+                                messages and continue the discussion.
                             </p>
                         </div>
                     )}

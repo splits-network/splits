@@ -67,20 +67,16 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
     useGSAP(
         () => {
             if (!sidebarRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
-                gsap.set(
-                    sidebarRef.current.querySelectorAll(".opacity-0"),
-                    { opacity: 1 },
-                );
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                gsap.set(sidebarRef.current.querySelectorAll(".opacity-0"), {
+                    opacity: 1,
+                });
                 return;
             }
 
             const $ = (sel: string) =>
                 sidebarRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                sidebarRef.current!.querySelector(sel);
+            const $1 = (sel: string) => sidebarRef.current!.querySelector(sel);
 
             const tl = gsap.timeline({
                 defaults: { ease: "power2.out" },
@@ -172,9 +168,7 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
                                                 : "text-[#e5e7eb]/30"
                                         }`}
                                     />
-                                    <span className="flex-1">
-                                        {item.label}
-                                    </span>
+                                    <span className="flex-1">{item.label}</span>
                                     {item.badge && (
                                         <span className="font-mono text-[10px] bg-error/20 text-error px-2 py-0.5 rounded-full">
                                             {item.badge}
@@ -193,7 +187,7 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
                 <div className="px-3 py-4 border-t border-[#27272a]/40">
                     {/* User avatar section */}
                     <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#18181b] transition-colors cursor-pointer">
-                        <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-accent/10 border border-yellow/20 flex items-center justify-center">
                             <span className="font-mono text-xs font-bold text-accent">
                                 JD
                             </span>

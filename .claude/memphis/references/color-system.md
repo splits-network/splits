@@ -3,10 +3,12 @@
 ## The Palette
 
 Memphis design uses exactly **6 colors**. No more, no less.
+Use the memphis-ui component library and named memphis colors to ensure consistency and accessibility.
 
 ### Primary Colors
 
 #### 1. Coral (#FF6B6B)
+
 - **Hex**: `#FF6B6B`
 - **RGB**: `rgb(255, 107, 107)`
 - **Tailwind**: `coral`
@@ -14,6 +16,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Energetic, friendly, approachable
 
 **Examples:**
+
 ```tsx
 <button className="bg-coral text-dark">Primary Action</button>
 <div className="border-4 border-coral">Highlighted Card</div>
@@ -21,6 +24,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### 2. Teal (#4ECDC4)
+
 - **Hex**: `#4ECDC4`
 - **RGB**: `rgb(78, 205, 196)`
 - **Tailwind**: `teal`
@@ -28,6 +32,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Calming, trustworthy, modern
 
 **Examples:**
+
 ```tsx
 <button className="bg-teal text-dark">Secondary Action</button>
 <div className="border-l-4 border-teal">Success Message</div>
@@ -35,6 +40,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### 3. Yellow (#FFE66D)
+
 - **Hex**: `#FFE66D`
 - **RGB**: `rgb(255, 230, 109)`
 - **Tailwind**: `yellow`
@@ -42,6 +48,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Optimistic, playful, attention-grabbing
 
 **Examples:**
+
 ```tsx
 <div className="bg-yellow text-dark">Warning Banner</div>
 <div className="border-4 border-yellow">Highlighted Section</div>
@@ -49,6 +56,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### 4. Purple (#A78BFA)
+
 - **Hex**: `#A78BFA`
 - **RGB**: `rgb(167, 139, 250)`
 - **Tailwind**: `purple`
@@ -56,6 +64,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Creative, imaginative, sophisticated
 
 **Examples:**
+
 ```tsx
 <div className="bg-purple text-dark">Info Panel</div>
 <button className="bg-purple text-dark">Tertiary Action</button>
@@ -65,6 +74,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ### Neutral Colors
 
 #### 5. Dark (#1A1A2E)
+
 - **Hex**: `#1A1A2E`
 - **RGB**: `rgb(26, 26, 46)`
 - **Tailwind**: `dark`
@@ -72,6 +82,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Professional, authoritative, grounding
 
 **Examples:**
+
 ```tsx
 <p className="text-dark">Body text</p>
 <div className="border-4 border-dark">Card with border</div>
@@ -79,6 +90,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### 6. Cream (#F5F0EB)
+
 - **Hex**: `#F5F0EB`
 - **RGB**: `rgb(245, 240, 235)`
 - **Tailwind**: `cream`
@@ -86,6 +98,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 - **Psychology**: Warm, comfortable, spacious
 
 **Examples:**
+
 ```tsx
 <div className="bg-cream">Page background</div>
 <div className="card bg-cream border-4 border-dark">Card background</div>
@@ -97,55 +110,61 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ### High Contrast (Accessible)
 
 #### Dark on Cream (Primary Text)
+
 ```tsx
 <div className="bg-cream text-dark">
-  <p>High contrast, WCAG AAA (12.5:1)</p>
+    <p>High contrast, WCAG AAA (12.5:1)</p>
 </div>
 ```
 
 #### Dark on Coral (Primary Button)
+
 ```tsx
-<button className="bg-coral text-dark border-4 border-dark">
-  Submit
-</button>
+<button className="bg-coral text-dark border-4 border-dark">Submit</button>
 ```
+
 **Contrast**: 4.6:1 (WCAG AA ✓)
 
 #### Dark on Teal (Secondary Button)
+
 ```tsx
-<button className="bg-teal text-dark border-4 border-dark">
-  Cancel
-</button>
+<button className="bg-teal text-dark border-4 border-dark">Cancel</button>
 ```
+
 **Contrast**: 4.8:1 (WCAG AA ✓)
 
 #### Dark on Yellow (Warning)
+
 ```tsx
-<div className="bg-yellow text-dark border-4 border-dark">
-  Warning message
-</div>
+<div className="bg-yellow text-dark border-4 border-dark">Warning message</div>
 ```
+
 **Contrast**: 9.2:1 (WCAG AAA ✓)
 
 #### Dark on Purple (Info)
+
 ```tsx
 <div className="bg-purple text-dark border-4 border-dark">
-  Information panel
+    Information panel
 </div>
 ```
+
 **Contrast**: 5.1:1 (WCAG AA ✓)
 
 #### Cream on Dark (Inverted)
+
 ```tsx
 <div className="bg-dark text-cream">
-  <p>Inverted color scheme</p>
+    <p>Inverted color scheme</p>
 </div>
 ```
+
 **Contrast**: 12.5:1 (WCAG AAA ✓)
 
 ### Component Color Patterns
 
 #### Buttons
+
 ```tsx
 /* Primary */
 <button className="bg-coral text-dark border-4 border-dark hover:bg-teal">
@@ -164,6 +183,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### Cards
+
 ```tsx
 /* Light card (default) */
 <div className="bg-cream text-dark border-4 border-dark">
@@ -179,6 +199,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### Inputs
+
 ```tsx
 /* Default input */
 <input className="bg-cream text-dark border-4 border-dark
@@ -196,6 +217,7 @@ Memphis design uses exactly **6 colors**. No more, no less.
 ```
 
 #### Badges
+
 ```tsx
 /* Info badge */
 <span className="bg-purple text-dark px-4 py-2 border-2 border-dark">
@@ -214,47 +236,49 @@ Memphis design uses exactly **6 colors**. No more, no less.
 
 ### Replacing Common Tailwind Colors
 
-| Generic Color | Memphis Replacement | Rationale |
-|--------------|---------------------|-----------|
-| bg-blue-500 | bg-coral or bg-teal | Blues → Coral (primary) or Teal (secondary) |
-| bg-green-500 | bg-teal | Greens → Teal (success, positive) |
-| bg-red-500 | bg-coral | Reds → Coral (errors, danger) |
-| bg-orange-500 | bg-yellow | Oranges → Yellow (warnings) |
-| bg-indigo-500, bg-violet-500 | bg-purple | Purples → Purple (info) |
-| bg-white | bg-cream | White → Cream (softer, warmer) |
-| bg-gray-100 | bg-cream | Light grays → Cream |
-| bg-gray-900, bg-black | bg-dark | Dark grays/black → Dark |
-| text-gray-600 | text-dark opacity-70 | Medium grays → Dark with opacity |
-| border-gray-300 | border-dark | Border grays → Dark |
+| Generic Color                | Memphis Replacement  | Rationale                                   |
+| ---------------------------- | -------------------- | ------------------------------------------- |
+| bg-blue-500                  | bg-coral or bg-teal  | Blues → Coral (primary) or Teal (secondary) |
+| bg-green-500                 | bg-teal              | Greens → Teal (success, positive)           |
+| bg-red-500                   | bg-coral             | Reds → Coral (errors, danger)               |
+| bg-orange-500                | bg-yellow            | Oranges → Yellow (warnings)                 |
+| bg-indigo-500, bg-violet-500 | bg-purple            | Purples → Purple (info)                     |
+| bg-white                     | bg-cream             | White → Cream (softer, warmer)              |
+| bg-gray-100                  | bg-cream             | Light grays → Cream                         |
+| bg-gray-900, bg-black        | bg-dark              | Dark grays/black → Dark                     |
+| text-gray-600                | text-dark opacity-70 | Medium grays → Dark with opacity            |
+| border-gray-300              | border-dark          | Border grays → Dark                         |
 
 ### Color State Mapping
 
-| State | Color | Example |
-|-------|-------|---------|
-| Default | cream bg, dark text/border | `bg-cream text-dark border-4 border-dark` |
-| Hover | coral or teal | `hover:bg-coral` |
-| Active/Focus | coral | `focus:border-coral` |
-| Success | teal | `bg-teal text-dark` |
-| Error | coral | `border-coral text-dark` |
-| Warning | yellow | `bg-yellow text-dark` |
-| Info | purple | `bg-purple text-dark` |
-| Disabled | dark with opacity | `bg-dark opacity-50` |
+| State        | Color                      | Example                                   |
+| ------------ | -------------------------- | ----------------------------------------- |
+| Default      | cream bg, dark text/border | `bg-cream text-dark border-4 border-dark` |
+| Hover        | coral or teal              | `hover:bg-coral`                          |
+| Active/Focus | coral                      | `focus:border-coral`                      |
+| Success      | teal                       | `bg-teal text-dark`                       |
+| Error        | coral                      | `border-coral text-dark`                  |
+| Warning      | yellow                     | `bg-yellow text-dark`                     |
+| Info         | purple                     | `bg-purple text-dark`                     |
+| Disabled     | dark with opacity          | `bg-dark opacity-50`                      |
 
 ## Accent Cycling
 
 For dynamic color variations, cycle through Memphis accents:
 
 ```tsx
-const accentColors = ['coral', 'teal', 'yellow', 'purple'];
+const accentColors = ["coral", "teal", "yellow", "purple"];
 
-{items.map((item, index) => (
-  <div
-    key={item.id}
-    className={`border-l-4 border-${accentColors[index % 4]} bg-cream`}
-  >
-    {item.content}
-  </div>
-))}
+{
+    items.map((item, index) => (
+        <div
+            key={item.id}
+            className={`border-l-4 border-${accentColors[index % 4]} bg-cream`}
+        >
+            {item.content}
+        </div>
+    ));
+}
 ```
 
 ## Geometric Decoration Colors
@@ -262,23 +286,29 @@ const accentColors = ['coral', 'teal', 'yellow', 'purple'];
 Use contrasting colors for decorative shapes:
 
 ```tsx
-{/* On cream background */}
+{
+    /* On cream background */
+}
 <div className="bg-cream relative">
-  <div className="absolute top-4 right-4 w-8 h-8 bg-coral rotate-45" />
-  <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-teal" />
-</div>
+    <div className="absolute top-4 right-4 w-8 h-8 bg-coral rotate-45" />
+    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-teal" />
+</div>;
 
-{/* On dark background */}
+{
+    /* On dark background */
+}
 <div className="bg-dark relative">
-  <div className="absolute top-4 right-4 w-8 h-8 bg-yellow rotate-45" />
-  <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-purple" />
-</div>
+    <div className="absolute top-4 right-4 w-8 h-8 bg-yellow rotate-45" />
+    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-purple" />
+</div>;
 
-{/* On colored background */}
+{
+    /* On colored background */
+}
 <div className="bg-coral relative">
-  <div className="absolute top-4 right-4 w-8 h-8 bg-dark rotate-45" />
-  <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-cream" />
-</div>
+    <div className="absolute top-4 right-4 w-8 h-8 bg-dark rotate-45" />
+    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-cream" />
+</div>;
 ```
 
 ## Forbidden Colors
@@ -286,48 +316,51 @@ Use contrasting colors for decorative shapes:
 **NEVER use these Tailwind color utilities:**
 
 ### Color Families
-- blue-*
-- green-*
-- red-*
-- orange-*
-- amber-*
-- lime-*
-- emerald-*
-- cyan-*
-- sky-*
-- indigo-* (use purple instead)
-- violet-* (use purple instead)
-- fuchsia-*
-- pink-*
-- rose-*
+
+- blue-\*
+- green-\*
+- red-\*
+- orange-\*
+- amber-\*
+- lime-\*
+- emerald-\*
+- cyan-\*
+- sky-\*
+- indigo-\* (use purple instead)
+- violet-\* (use purple instead)
+- fuchsia-\*
+- pink-\*
+- rose-\*
 
 ### Grays
+
 - white (use cream)
 - black (use dark)
-- gray-*
-- slate-*
-- zinc-*
-- neutral-*
-- stone-*
+- gray-\*
+- slate-\*
+- zinc-\*
+- neutral-\*
+- stone-\*
 
 ## Accessibility Compliance
 
 All Memphis color combinations maintain WCAG compliance:
 
 | Foreground | Background | Contrast | WCAG Level |
-|------------|------------|----------|------------|
-| dark | cream | 12.5:1 | AAA |
-| dark | coral | 4.6:1 | AA |
-| dark | teal | 4.8:1 | AA |
-| dark | yellow | 9.2:1 | AAA |
-| dark | purple | 5.1:1 | AA |
-| cream | dark | 12.5:1 | AAA |
+| ---------- | ---------- | -------- | ---------- |
+| dark       | cream      | 12.5:1   | AAA        |
+| dark       | coral      | 4.6:1    | AA         |
+| dark       | teal       | 4.8:1    | AA         |
+| dark       | yellow     | 9.2:1    | AAA        |
+| dark       | purple     | 5.1:1    | AA         |
+| cream      | dark       | 12.5:1   | AAA        |
 
 **All combinations pass WCAG AA (4.5:1 minimum) for normal text.**
 
 ## Quick Reference
 
 ### Tailwind Classes
+
 ```tsx
 /* Backgrounds */
 bg-coral bg-teal bg-yellow bg-purple bg-dark bg-cream
@@ -345,13 +378,14 @@ text-dark opacity-30    /* Very light gray equivalent */
 ```
 
 ### CSS Variables (memphis-ui theme)
+
 ```css
---color-coral: #FF6B6B;
---color-teal: #4ECDC4;
---color-yellow: #FFE66D;
---color-purple: #A78BFA;
---color-dark: #1A1A2E;
---color-cream: #F5F0EB;
+--color-coral: #ff6b6b;
+--color-teal: #4ecdc4;
+--color-yellow: #ffe66d;
+--color-purple: #a78bfa;
+--color-dark: #1a1a2e;
+--color-cream: #f5f0eb;
 ```
 
 ## Summary

@@ -46,7 +46,7 @@ function TeamCard({ team }: { team: Team }) {
     return (
         <Link
             href={`/teams/${team.id}`}
-            className="card bg-base-100 shadow-sm border border-base-300 hover:border-primary hover:shadow-md transition-all"
+            className="card bg-base-100 shadow-sm border border-base-300 hover:border-coral hover:shadow-md transition-all"
         >
             <div className="card-body">
                 <div className="flex items-start justify-between mb-2">

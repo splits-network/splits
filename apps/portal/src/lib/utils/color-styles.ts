@@ -23,10 +23,10 @@ export function getJobStatusBorderColor(status: string): string {
 export function getApplicationStageBorderColor(stage: string): string {
     const borders: Record<string, string> = {
         draft: 'border-neutral',
-        recruiter_proposed: 'border-primary',
+        recruiter_proposed: 'border-coral',
         recruiter_request: 'border-info',
         ai_review: 'border-warning',
-        screen: 'border-primary',
+        screen: 'border-coral',
         submitted: 'border-info',
         interview: 'border-warning',
         offer: 'border-success',
@@ -39,10 +39,10 @@ export function getApplicationStageBorderColor(stage: string): string {
 export function getApplicationStageBgColor(stage: string): string {
     const borders: Record<string, string> = {
         draft: 'border-neutral',
-        recruiter_proposed: 'border-primary',
+        recruiter_proposed: 'border-coral',
         recruiter_request: 'border-info',
         ai_review: 'border-warning',
-        screen: 'border-primary',
+        screen: 'border-coral',
         submitted: 'border-info',
         interview: 'border-warning',
         offer: 'border-success',
@@ -58,7 +58,7 @@ export function getApplicationStageBgColor(stage: string): string {
 export function getPlacementStatusBgColor(status: string): string {
     const colors: Record<string, string> = {
         hired: 'bg-info/10 border-info/20',
-        active: 'bg-primary/10 border-primary/20',
+        active: 'bg-primary/10 border-coral/20',
         completed: 'bg-success/10 border-success/20',
         failed: 'bg-error/10 border-error/20',
     };

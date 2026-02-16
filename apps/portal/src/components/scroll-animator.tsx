@@ -38,9 +38,10 @@ export function ScrollAnimator({ children }: ScrollAnimatorProps) {
             const sections =
                 containerRef.current.querySelectorAll("section");
             sections.forEach((section) => {
-                gsap.from(section, {
-                    opacity: 0,
-                    y: 30,
+                gsap.set(section, { opacity: 0, y: 30 });
+                gsap.to(section, {
+                    opacity: 1,
+                    y: 0,
                     duration: 0.6,
                     ease: "power2.out",
                     scrollTrigger: {
@@ -56,10 +57,12 @@ export function ScrollAnimator({ children }: ScrollAnimatorProps) {
                     "[data-animate-stagger]",
                 );
             staggerGroups.forEach((group) => {
-                gsap.from(group.children, {
-                    opacity: 0,
-                    y: 25,
-                    scale: 0.97,
+                if (group.children.length === 0) return;
+                gsap.set(group.children, { opacity: 0, y: 25, scale: 0.97 });
+                gsap.to(group.children, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
                     duration: 0.5,
                     ease: "power2.out",
                     stagger: 0.08,
@@ -68,6 +71,12 @@ export function ScrollAnimator({ children }: ScrollAnimatorProps) {
                         start: "top 85%",
                     },
                 });
+            });
+
+            // Recalculate trigger positions after Next.js layout settles —
+            // without this, elements already in viewport on mount never fire.
+            requestAnimationFrame(() => {
+                ScrollTrigger.refresh();
             });
         },
         { scope: containerRef },

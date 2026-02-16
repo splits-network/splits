@@ -16,20 +16,52 @@ const navLinks = [
         label: "Platform",
         icon: "fa-duotone fa-regular fa-grid-2",
         children: [
-            { label: "For Recruiters", href: "#", icon: "fa-duotone fa-regular fa-user-tie" },
-            { label: "For Companies", href: "#", icon: "fa-duotone fa-regular fa-building" },
-            { label: "For Candidates", href: "#", icon: "fa-duotone fa-regular fa-user" },
-            { label: "Integrations", href: "#", icon: "fa-duotone fa-regular fa-puzzle-piece" },
+            {
+                label: "For Recruiters",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-user-tie",
+            },
+            {
+                label: "For Companies",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-building",
+            },
+            {
+                label: "For Candidates",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-user",
+            },
+            {
+                label: "Integrations",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-puzzle-piece",
+            },
         ],
     },
     {
         label: "Solutions",
         icon: "fa-duotone fa-regular fa-lightbulb",
         children: [
-            { label: "Split-Fee Recruiting", href: "#", icon: "fa-duotone fa-regular fa-handshake" },
-            { label: "ATS & Pipeline", href: "#", icon: "fa-duotone fa-regular fa-chart-kanban" },
-            { label: "AI Matching", href: "#", icon: "fa-duotone fa-regular fa-brain-circuit" },
-            { label: "Analytics", href: "#", icon: "fa-duotone fa-regular fa-chart-mixed" },
+            {
+                label: "Split-Fee Recruiting",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-handshake",
+            },
+            {
+                label: "ATS & Pipeline",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-chart-kanban",
+            },
+            {
+                label: "AI Matching",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-brain-circuit",
+            },
+            {
+                label: "Analytics",
+                href: "#",
+                icon: "fa-duotone fa-regular fa-chart-mixed",
+            },
         ],
     },
     { label: "Pricing", href: "#" },
@@ -79,10 +111,8 @@ export default function HeadersOne() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             /* Header bar entrance */
             gsap.fromTo(
@@ -95,7 +125,13 @@ export default function HeadersOne() {
             gsap.fromTo(
                 $1(".header-logo"),
                 { opacity: 0, x: -20 },
-                { opacity: 1, x: 0, duration: 0.5, ease: "power2.out", delay: 0.2 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.5,
+                    ease: "power2.out",
+                    delay: 0.2,
+                },
             );
 
             /* Nav links stagger */
@@ -197,7 +233,10 @@ export default function HeadersOne() {
                         {/* ── Left: Logo + Nav ────────────────── */}
                         <div className="flex items-center gap-10">
                             {/* Logo */}
-                            <a href="#" className="header-logo flex items-center gap-3 opacity-0">
+                            <a
+                                href="#"
+                                className="header-logo flex items-center gap-3 opacity-0"
+                            >
                                 <div className="w-9 h-9 bg-primary flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-split text-primary-content text-lg" />
                                 </div>
@@ -220,7 +259,8 @@ export default function HeadersOne() {
                                                 <button
                                                     onClick={() =>
                                                         setActiveDropdown(
-                                                            activeDropdown === link.label
+                                                            activeDropdown ===
+                                                                link.label
                                                                 ? null
                                                                 : link.label,
                                                         )
@@ -230,7 +270,8 @@ export default function HeadersOne() {
                                                     {link.label}
                                                     <i
                                                         className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
-                                                            activeDropdown === link.label
+                                                            activeDropdown ===
+                                                            link.label
                                                                 ? "rotate-180"
                                                                 : ""
                                                         }`}
@@ -238,25 +279,36 @@ export default function HeadersOne() {
                                                 </button>
 
                                                 {/* Dropdown */}
-                                                {activeDropdown === link.label && (
+                                                {activeDropdown ===
+                                                    link.label && (
                                                     <div className="absolute top-full left-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2 z-50">
                                                         <div className="px-4 py-2 border-b border-base-300 mb-1">
                                                             <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                                                                 {link.label}
                                                             </span>
                                                         </div>
-                                                        {link.children.map((child) => (
-                                                            <a
-                                                                key={child.label}
-                                                                href={child.href}
-                                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
-                                                            >
-                                                                <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
-                                                                    <i className={`${child.icon} text-primary text-xs`} />
-                                                                </div>
-                                                                {child.label}
-                                                            </a>
-                                                        ))}
+                                                        {link.children.map(
+                                                            (child) => (
+                                                                <a
+                                                                    key={
+                                                                        child.label
+                                                                    }
+                                                                    href={
+                                                                        child.href
+                                                                    }
+                                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+                                                                >
+                                                                    <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
+                                                                        <i
+                                                                            className={`${child.icon} text-primary text-xs`}
+                                                                        />
+                                                                    </div>
+                                                                    {
+                                                                        child.label
+                                                                    }
+                                                                </a>
+                                                            ),
+                                                        )}
                                                     </div>
                                                 )}
                                             </>
@@ -291,7 +343,7 @@ export default function HeadersOne() {
                                             <input
                                                 type="text"
                                                 placeholder="Search jobs, candidates, companies..."
-                                                className="input input-sm w-full pl-9 bg-base-200 border-base-300 focus:border-primary focus:outline-none"
+                                                className="input input-sm w-full pl-9 bg-base-200 border-base-300 focus:border-coral focus:outline-none"
                                                 autoFocus
                                             />
                                         </div>
@@ -300,16 +352,27 @@ export default function HeadersOne() {
                                                 Quick Actions
                                             </p>
                                             {[
-                                                { label: "Browse open jobs", icon: "fa-duotone fa-regular fa-briefcase" },
-                                                { label: "View my candidates", icon: "fa-duotone fa-regular fa-users" },
-                                                { label: "Check placements", icon: "fa-duotone fa-regular fa-trophy" },
+                                                {
+                                                    label: "Browse open jobs",
+                                                    icon: "fa-duotone fa-regular fa-briefcase",
+                                                },
+                                                {
+                                                    label: "View my candidates",
+                                                    icon: "fa-duotone fa-regular fa-users",
+                                                },
+                                                {
+                                                    label: "Check placements",
+                                                    icon: "fa-duotone fa-regular fa-trophy",
+                                                },
                                             ].map((action) => (
                                                 <a
                                                     key={action.label}
                                                     href="#"
                                                     className="flex items-center gap-2 px-2 py-1.5 text-xs text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
                                                 >
-                                                    <i className={`${action.icon} text-primary`} />
+                                                    <i
+                                                        className={`${action.icon} text-primary`}
+                                                    />
                                                     {action.label}
                                                 </a>
                                             ))}
@@ -333,7 +396,9 @@ export default function HeadersOne() {
                             {/* User menu */}
                             <div className="header-right-item opacity-0 relative hidden sm:block">
                                 <button
-                                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                    onClick={() =>
+                                        setUserMenuOpen(!userMenuOpen)
+                                    }
                                     className="flex items-center gap-2 px-2 py-1 hover:bg-base-200 transition-colors"
                                 >
                                     <div className="w-8 h-8 bg-primary text-primary-content flex items-center justify-center font-bold text-xs">
@@ -353,21 +418,39 @@ export default function HeadersOne() {
                                 {userMenuOpen && (
                                     <div className="absolute top-full right-0 mt-1 w-56 bg-base-100 border border-base-300 shadow-lg py-2 z-50">
                                         <div className="px-4 py-3 border-b border-base-300">
-                                            <div className="text-sm font-bold">{userMenu.name}</div>
-                                            <div className="text-xs text-base-content/50">{userMenu.role}</div>
+                                            <div className="text-sm font-bold">
+                                                {userMenu.name}
+                                            </div>
+                                            <div className="text-xs text-base-content/50">
+                                                {userMenu.role}
+                                            </div>
                                         </div>
                                         {[
-                                            { label: "Dashboard", icon: "fa-duotone fa-regular fa-gauge-high" },
-                                            { label: "My Profile", icon: "fa-duotone fa-regular fa-user" },
-                                            { label: "Settings", icon: "fa-duotone fa-regular fa-gear" },
-                                            { label: "Billing", icon: "fa-duotone fa-regular fa-credit-card" },
+                                            {
+                                                label: "Dashboard",
+                                                icon: "fa-duotone fa-regular fa-gauge-high",
+                                            },
+                                            {
+                                                label: "My Profile",
+                                                icon: "fa-duotone fa-regular fa-user",
+                                            },
+                                            {
+                                                label: "Settings",
+                                                icon: "fa-duotone fa-regular fa-gear",
+                                            },
+                                            {
+                                                label: "Billing",
+                                                icon: "fa-duotone fa-regular fa-credit-card",
+                                            },
                                         ].map((item) => (
                                             <a
                                                 key={item.label}
                                                 href="#"
                                                 className="flex items-center gap-3 px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
                                             >
-                                                <i className={`${item.icon} text-xs w-4 text-center`} />
+                                                <i
+                                                    className={`${item.icon} text-xs w-4 text-center`}
+                                                />
                                                 {item.label}
                                             </a>
                                         ))}
@@ -431,7 +514,8 @@ export default function HeadersOne() {
                                                 <button
                                                     onClick={() =>
                                                         setActiveDropdown(
-                                                            activeDropdown === link.label
+                                                            activeDropdown ===
+                                                                link.label
                                                                 ? null
                                                                 : link.label,
                                                         )
@@ -439,27 +523,43 @@ export default function HeadersOne() {
                                                     className="flex items-center justify-between w-full px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
                                                 >
                                                     <span className="flex items-center gap-2">
-                                                        <i className={`${link.icon} text-primary text-xs`} />
+                                                        <i
+                                                            className={`${link.icon} text-primary text-xs`}
+                                                        />
                                                         {link.label}
                                                     </span>
                                                     <i
                                                         className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
-                                                            activeDropdown === link.label ? "rotate-180" : ""
+                                                            activeDropdown ===
+                                                            link.label
+                                                                ? "rotate-180"
+                                                                : ""
                                                         }`}
                                                     />
                                                 </button>
-                                                {activeDropdown === link.label && (
+                                                {activeDropdown ===
+                                                    link.label && (
                                                     <div className="pl-6 space-y-1 mb-2">
-                                                        {link.children.map((child) => (
-                                                            <a
-                                                                key={child.label}
-                                                                href={child.href}
-                                                                className="flex items-center gap-2 px-3 py-2 text-sm text-base-content/60 hover:text-base-content"
-                                                            >
-                                                                <i className={`${child.icon} text-xs text-primary`} />
-                                                                {child.label}
-                                                            </a>
-                                                        ))}
+                                                        {link.children.map(
+                                                            (child) => (
+                                                                <a
+                                                                    key={
+                                                                        child.label
+                                                                    }
+                                                                    href={
+                                                                        child.href
+                                                                    }
+                                                                    className="flex items-center gap-2 px-3 py-2 text-sm text-base-content/60 hover:text-base-content"
+                                                                >
+                                                                    <i
+                                                                        className={`${child.icon} text-xs text-primary`}
+                                                                    />
+                                                                    {
+                                                                        child.label
+                                                                    }
+                                                                </a>
+                                                            ),
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -482,13 +582,18 @@ export default function HeadersOne() {
                                         {userMenu.initials}
                                     </div>
                                     <div>
-                                        <div className="text-sm font-bold">{userMenu.name}</div>
+                                        <div className="text-sm font-bold">
+                                            {userMenu.name}
+                                        </div>
                                         <div className="text-[10px] text-base-content/50">
                                             {userMenu.role}
                                         </div>
                                     </div>
                                 </div>
-                                <a href="#" className="btn btn-primary btn-sm w-full">
+                                <a
+                                    href="#"
+                                    className="btn btn-primary btn-sm w-full"
+                                >
                                     <i className="fa-duotone fa-regular fa-plus" />
                                     Post a Job
                                 </a>
@@ -505,7 +610,9 @@ export default function HeadersOne() {
                 {/* Diagonal accent panel */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                    style={{ clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
                 />
 
                 <div className="relative z-10 container mx-auto px-6 lg:px-12 py-20">
@@ -528,11 +635,12 @@ export default function HeadersOne() {
                         </h1>
 
                         <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl opacity-0">
-                            A bold, editorial-inspired navigation system. Clean lines,
-                            sharp typography, and deliberate negative space create a
-                            professional hierarchy. Features dropdown menus with
-                            icon-labeled items, inline search, notification badges, and
-                            a user profile menu with role context.
+                            A bold, editorial-inspired navigation system. Clean
+                            lines, sharp typography, and deliberate negative
+                            space create a professional hierarchy. Features
+                            dropdown menus with icon-labeled items, inline
+                            search, notification badges, and a user profile menu
+                            with role context.
                         </p>
 
                         {/* Feature badges */}
@@ -601,7 +709,7 @@ export default function HeadersOne() {
                                 ].map((job, i) => (
                                     <div
                                         key={i}
-                                        className="border-l-4 border-primary bg-base-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                                        className="border-l-4 border-coral bg-base-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                                     >
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">
@@ -648,17 +756,35 @@ export default function HeadersOne() {
                                 </h3>
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Active Jobs", value: "47", icon: "fa-duotone fa-regular fa-briefcase" },
-                                        { label: "My Candidates", value: "23", icon: "fa-duotone fa-regular fa-users" },
-                                        { label: "Interviews", value: "8", icon: "fa-duotone fa-regular fa-calendar-check" },
-                                        { label: "Placements MTD", value: "3", icon: "fa-duotone fa-regular fa-trophy" },
+                                        {
+                                            label: "Active Jobs",
+                                            value: "47",
+                                            icon: "fa-duotone fa-regular fa-briefcase",
+                                        },
+                                        {
+                                            label: "My Candidates",
+                                            value: "23",
+                                            icon: "fa-duotone fa-regular fa-users",
+                                        },
+                                        {
+                                            label: "Interviews",
+                                            value: "8",
+                                            icon: "fa-duotone fa-regular fa-calendar-check",
+                                        },
+                                        {
+                                            label: "Placements MTD",
+                                            value: "3",
+                                            icon: "fa-duotone fa-regular fa-trophy",
+                                        },
                                     ].map((stat) => (
                                         <div
                                             key={stat.label}
                                             className="flex items-center gap-4"
                                         >
                                             <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                                                <i className={`${stat.icon} text-secondary`} />
+                                                <i
+                                                    className={`${stat.icon} text-secondary`}
+                                                />
                                             </div>
                                             <div className="flex-1">
                                                 <div className="text-xs text-base-content/50 uppercase tracking-wider">
@@ -688,20 +814,42 @@ export default function HeadersOne() {
                             The network is growing.
                         </h2>
                         <p className="text-base-content/60 text-sm leading-relaxed mb-12">
-                            Scroll down to see the header transition from transparent to a
-                            frosted glass backdrop blur effect. The editorial design
-                            maintains visual hierarchy at every scroll position.
+                            Scroll down to see the header transition from
+                            transparent to a frosted glass backdrop blur effect.
+                            The editorial design maintains visual hierarchy at
+                            every scroll position.
                         </p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             {[
-                                { value: "2,847", label: "Recruiters", color: "text-primary" },
-                                { value: "518", label: "Companies", color: "text-secondary" },
-                                { value: "12,340", label: "Candidates", color: "text-accent" },
-                                { value: "1,892", label: "Placements", color: "text-success" },
+                                {
+                                    value: "2,847",
+                                    label: "Recruiters",
+                                    color: "text-primary",
+                                },
+                                {
+                                    value: "518",
+                                    label: "Companies",
+                                    color: "text-secondary",
+                                },
+                                {
+                                    value: "12,340",
+                                    label: "Candidates",
+                                    color: "text-accent",
+                                },
+                                {
+                                    value: "1,892",
+                                    label: "Placements",
+                                    color: "text-success",
+                                },
                             ].map((stat) => (
-                                <div key={stat.label} className="bg-base-100 p-6 border-t-2 border-base-300">
-                                    <div className={`text-3xl font-black ${stat.color} mb-1`}>
+                                <div
+                                    key={stat.label}
+                                    className="bg-base-100 p-6 border-t-2 border-base-300"
+                                >
+                                    <div
+                                        className={`text-3xl font-black ${stat.color} mb-1`}
+                                    >
                                         {stat.value}
                                     </div>
                                     <div className="text-xs uppercase tracking-wider text-base-content/50">
@@ -728,10 +876,12 @@ export default function HeadersOne() {
                                 sticky transition.
                             </h2>
                             <p className="text-lg opacity-60 leading-relaxed mb-8">
-                                The header starts transparent against the dark hero section,
-                                then transitions to a frosted glass surface with subtle shadow
-                                as you scroll. This ensures readability against any background
-                                content while maintaining the editorial aesthetic.
+                                The header starts transparent against the dark
+                                hero section, then transitions to a frosted
+                                glass surface with subtle shadow as you scroll.
+                                This ensures readability against any background
+                                content while maintaining the editorial
+                                aesthetic.
                             </p>
                             <div className="space-y-3">
                                 {[
@@ -740,11 +890,16 @@ export default function HeadersOne() {
                                     "Subtle border and shadow for depth",
                                     "Primary accent line always visible at top",
                                 ].map((feature) => (
-                                    <div key={feature} className="flex items-center gap-3">
+                                    <div
+                                        key={feature}
+                                        className="flex items-center gap-3"
+                                    >
                                         <div className="w-6 h-6 bg-secondary/20 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-check text-secondary text-xs" />
                                         </div>
-                                        <span className="text-sm opacity-80">{feature}</span>
+                                        <span className="text-sm opacity-80">
+                                            {feature}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -799,10 +954,14 @@ export default function HeadersOne() {
                             ].map((note) => (
                                 <div key={note.title} className="flex gap-4">
                                     <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                        <i className={`${note.icon} text-primary`} />
+                                        <i
+                                            className={`${note.icon} text-primary`}
+                                        />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-base mb-1">{note.title}</h3>
+                                        <h3 className="font-bold text-base mb-1">
+                                            {note.title}
+                                        </h3>
                                         <p className="text-sm text-base-content/60 leading-relaxed">
                                             {note.body}
                                         </p>

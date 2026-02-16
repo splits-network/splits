@@ -232,7 +232,7 @@ export function UploadDocumentsStep({
                                     key={doc.id}
                                     className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                                         isSelected
-                                            ? "bg-primary/10 border-2 border-primary"
+                                            ? "bg-primary/10 border-2 border-coral"
                                             : "bg-base-200"
                                     }`}
                                 >
@@ -327,7 +327,7 @@ export function UploadDocumentsStep({
                                     key={index}
                                     className={`flex items-center justify-between p-4 rounded-lg ${
                                         isPrimary
-                                            ? "bg-primary/10 border-2 border-primary"
+                                            ? "bg-primary/10 border-2 border-coral"
                                             : "bg-base-200"
                                     }`}
                                 >

@@ -612,7 +612,7 @@ function JobTab({ application }: { application: Application }) {
                                     return (
                                         <div
                                             key={index}
-                                            className="border-l-4 border-primary pl-4"
+                                            className="border-l-4 border-coral pl-4"
                                         >
                                             <p className="font-semibold mb-1">
                                                 {questionText ||

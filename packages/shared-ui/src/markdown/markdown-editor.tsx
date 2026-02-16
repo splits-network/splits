@@ -174,7 +174,7 @@ export function MarkdownEditor({
             </div>
 
             {helperText && (
-                <p className="fieldset-label">
+                <p className="fieldset-label pt-2 text-sm text-base-content/70 flex items-start gap-1">
                     <i className="fa-duotone fa-regular fa-lightbulb"></i>
                     {helperText}
                 </p>

@@ -2,8 +2,13 @@
 
 import { useSignUp, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import gsap from "gsap";
+import {
+    AuthInput,
+    SocialLoginButton,
+} from "@splits-network/memphis-ui";
 import { ensureUserInDatabase } from "@/lib/user-registration";
 import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
 import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
@@ -15,11 +20,8 @@ export default function SignUpPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // Get redirect URL from search params (Clerk preserves this through verification)
     const redirectUrl = searchParams.get("redirect_url");
     const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
-
-    // Get rec_code from URL params or cookie (set by middleware)
     const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
 
     const [email, setEmail] = useState("");
@@ -31,17 +33,12 @@ export default function SignUpPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // Referral code state
     const [referralCode, setReferralCode] = useState(recCode || "");
-    const [referralStatus, setReferralStatus] = useState<
-        "idle" | "validating" | "valid" | "invalid"
-    >("idle");
-    const [referralRecruiter, setReferralRecruiter] = useState<{
-        id: string;
-        name: string;
-        profile_image_url?: string | null;
-    } | null>(null);
+    const [referralStatus, setReferralStatus] = useState<"idle" | "validating" | "valid" | "invalid">("idle");
+    const [referralRecruiter, setReferralRecruiter] = useState<{ id: string; name: string; profile_image_url?: string | null } | null>(null);
     const [referralError, setReferralError] = useState("");
+
+    const stepRef = useRef<HTMLDivElement>(null);
 
     // Validate referral code with debounce
     useEffect(() => {
@@ -63,15 +60,11 @@ export default function SignUpPage() {
                     setReferralStatus("valid");
                     setReferralRecruiter(response.data.recruiter);
                     setReferralError("");
-                    // Set cookie so OAuth flow picks it up via SSO callback
                     document.cookie = `rec_code=${encodeURIComponent(referralCode)}; path=/; max-age=${30 * 24 * 60 * 60}; samesite=lax`;
                 } else {
                     setReferralStatus("invalid");
                     setReferralRecruiter(null);
-                    setReferralError(
-                        response?.data?.error_message ||
-                            "Invalid referral code",
-                    );
+                    setReferralError(response?.data?.error_message || "Invalid referral code");
                 }
             } catch {
                 setReferralStatus("invalid");
@@ -104,11 +97,7 @@ export default function SignUpPage() {
                 lastName,
             });
 
-            // Send email verification code
-            await signUp.prepareEmailAddressVerification({
-                strategy: "email_code",
-            });
-
+            await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
             setPendingVerification(true);
         } catch (err: any) {
             setError(err.errors?.[0]?.message || "Failed to create account");
@@ -125,27 +114,15 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
-            const completeSignUp = await signUp.attemptEmailAddressVerification(
-                {
-                    code,
-                },
-            );
+            const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
 
-            // Try to complete sign up regardless of status if we have a session
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
 
-                // Wait a moment for session to be fully established
                 setTimeout(async () => {
                     try {
-                        // Get auth token for API calls
                         const token = await getToken();
-                        if (!token) {
-                            console.warn(
-                                "No auth token available, proceeding with redirect",
-                            );
-                        } else {
-                            // Resolve referral code to recruiter_id if present
+                        if (token) {
                             let referredByRecruiterId: string | undefined;
                             const codeToUse = referralCode || recCode;
                             if (codeToUse) {
@@ -162,7 +139,6 @@ export default function SignUpPage() {
                                 }
                             }
 
-                            // Ensure user exists in database using the same logic as SSO callback
                             const result = await ensureUserInDatabase(token, {
                                 clerk_user_id: completeSignUp.createdUserId!,
                                 email: completeSignUp.emailAddress!,
@@ -171,40 +147,26 @@ export default function SignUpPage() {
                             });
 
                             if (!result.success) {
-                                // Log the error but don't block - onboarding will catch this
-                                console.warn(
-                                    "[SignUp] User creation warning:",
-                                    result.error,
-                                );
+                                console.warn("[SignUp] User creation warning:", result.error);
                             }
 
-                            // Log rec_code usage after successful registration
                             if (codeToUse && result.success && !result.wasExisting) {
                                 try {
                                     const authClient = createAuthenticatedClient(token);
-                                    await authClient.post("/recruiter-codes/log", {
-                                        code: codeToUse,
-                                    });
+                                    await authClient.post("/recruiter-codes/log", { code: codeToUse });
                                 } catch (logError) {
                                     console.warn("[SignUp] Failed to log rec_code usage:", logError);
                                 }
                             }
                         }
                     } catch (userCreationError) {
-                        // Log error but don't block the flow - webhook will catch this later
-                        console.error(
-                            "Failed to create user in database (webhook will handle):",
-                            userCreationError,
-                        );
+                        console.error("Failed to create user in database (webhook will handle):", userCreationError);
                     }
 
-                    // Redirect using replace to prevent back navigation to verification
                     router.replace(redirectUrl || "/portal/dashboard");
-                }, 500); // 500ms delay to ensure session is stable
+                }, 500);
             } else {
-                setError(
-                    `Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`,
-                );
+                setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
             }
         } catch (err: any) {
             console.error("Verification error:", err);
@@ -214,11 +176,8 @@ export default function SignUpPage() {
         }
     };
 
-    const signUpWithOAuth = (
-        provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
-    ) => {
+    const signUpWithOAuth = (provider: "oauth_google" | "oauth_github" | "oauth_microsoft") => {
         if (!isLoaded) return;
-
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
@@ -226,343 +185,220 @@ export default function SignUpPage() {
         });
     };
 
-    // Show message if user is already signed in
+    // Animate step transitions
+    useEffect(() => {
+        if (!stepRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        gsap.fromTo(
+            stepRef.current,
+            { opacity: 0, x: 20 },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+        );
+    }, [pendingVerification]);
+
+    // Already signed in state
     if (isLoaded && isSignedIn) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-2xl font-bold justify-center mb-6">
-                            Already Signed In
-                        </h2>
+            <div className="space-y-4">
+                <h2 className="card-title text-lg justify-center">Already Signed In</h2>
 
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-info"></i>
-                            <span>
-                                You're already signed in to your account.
-                            </span>
-                        </div>
-
-                        <p className="text-center mb-4">
-                            To create a new account, you'll need to sign out
-                            first.
-                        </p>
-
-                        <div className="space-y-2">
-                            <button
-                                onClick={() => router.push("/portal/dashboard")}
-                                className="btn btn-primary w-full"
-                            >
-                                <i className="fa-duotone fa-regular fa-home"></i>
-                                Go to Dashboard
-                            </button>
-                            <button
-                                onClick={handleSignOut}
-                                className="btn btn-outline w-full"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Signing out...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-right-from-bracket"></i>
-                                        Sign Out & Create New Account
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
+                <div className="alert alert-soft alert-teal" role="alert">
+                    <i className="fa-duotone fa-regular fa-circle-info" />
+                    <span>You&apos;re already signed in to your account.</span>
                 </div>
+
+                <p className="text-center text-base-content/60">
+                    To create a new account, you&apos;ll need to sign out first.
+                </p>
+
+                <button onClick={() => router.push("/portal/dashboard")} className="btn btn-coral btn-block">
+                    <i className="fa-duotone fa-regular fa-home" />
+                    Go to Dashboard
+                </button>
+                <button onClick={handleSignOut} className="btn btn-outline btn-block" disabled={isLoading}>
+                    {isLoading ? (
+                        <><span className="loading loading-spinner" /> Signing out...</>
+                    ) : (
+                        <><i className="fa-duotone fa-regular fa-right-from-bracket" /> Sign Out & Create New Account</>
+                    )}
+                </button>
             </div>
         );
     }
 
+    // Verification step
     if (pendingVerification) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
-                            <Link href="/" className="mb-6">
-                                <img
-                                    src="/logo.svg"
-                                    alt="Applicant Network"
-                                    className="h-12"
-                                />
-                            </Link>
-                            Verify Your Email
-                        </h2>
+            <div ref={stepRef} className="space-y-4">
+                <h2 className="card-title text-lg">Verify Your Email</h2>
 
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-envelope"></i>
-                            <span>We sent a verification code to {email}</span>
-                        </div>
-
-                        {error && (
-                            <div className="alert alert-error mb-4">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleVerification}>
-                            <fieldset className="fieldset mb-4">
-                                <legend className="fieldset-legend">
-                                    Verification Code
-                                </legend>
-                                <input
-                                    type="text"
-                                    placeholder="123456"
-                                    className="input w-full text-center text-2xl tracking-widest"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    maxLength={6}
-                                    autoComplete="one-time-code"
-                                />
-                            </fieldset>
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary w-full"
-                                disabled={isLoading || !isLoaded}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner"></span>
-                                        Verifying...
-                                    </>
-                                ) : (
-                                    "Verify Email"
-                                )}
-                            </button>
-                        </form>
-
-                        <button
-                            onClick={() => setPendingVerification(false)}
-                            className="btn btn-ghost btn-sm w-full mt-2"
-                        >
-                            Back to sign up
-                        </button>
-                    </div>
+                <div className="alert alert-soft alert-purple" role="alert">
+                    <i className="fa-duotone fa-regular fa-envelope" />
+                    <span>We sent a verification code to {email}</span>
                 </div>
+
+                {error && (
+                    <div className="alert alert-outline alert-coral" role="alert">
+                        <i className="fa-solid fa-circle-xmark" />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                <form onSubmit={handleVerification} className="space-y-4">
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Verification Code</legend>
+                        <input
+                            type="text"
+                            placeholder="123456"
+                            className="input w-full text-center text-2xl tracking-widest"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            maxLength={6}
+                            autoComplete="one-time-code"
+                        />
+                    </fieldset>
+
+                    <button type="submit" className="btn btn-teal btn-block" disabled={isLoading || !isLoaded}>
+                        {isLoading ? (
+                            <><span className="loading loading-spinner" /> Verifying...</>
+                        ) : (
+                            "Verify Email"
+                        )}
+                    </button>
+                </form>
+
+                <button onClick={() => setPendingVerification(false)} className="btn btn-ghost btn-sm btn-block">
+                    <i className="fa-solid fa-arrow-left" /> Back to sign up
+                </button>
             </div>
         );
     }
 
+    // Registration form
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
-                        <Link href="/" className="mb-6">
-                            <img
-                                src="/logo.svg"
-                                alt="Applicant Network"
-                                className="h-12"
-                            />
-                        </Link>
-                        Create Your Splits Account
-                    </h2>
-
-                    {isFromInvitation && (
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-envelope-open-text"></i>
-                            <span>
-                                Complete sign-up to accept your invitation
-                            </span>
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Clerk CAPTCHA widget container - required for bot protection */}
-                        <div id="clerk-captcha"></div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    First Name
-                                </legend>
-                                <input
-                                    type="text"
-                                    placeholder="John"
-                                    className="input w-full"
-                                    value={firstName}
-                                    onChange={(e) =>
-                                        setFirstName(e.target.value)
-                                    }
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </fieldset>
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Last Name
-                                </legend>
-                                <input
-                                    type="text"
-                                    placeholder="Doe"
-                                    className="input w-full"
-                                    value={lastName}
-                                    onChange={(e) =>
-                                        setLastName(e.target.value)
-                                    }
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </fieldset>
-                        </div>
-
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email</legend>
-                            <input
-                                type="email"
-                                placeholder="you@example.com"
-                                className="input w-full"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </fieldset>
-
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Password
-                            </legend>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="input w-full"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                                minLength={8}
-                            />
-                            <p className="fieldset-label">
-                                Must be at least 8 characters
-                            </p>
-                        </fieldset>
-
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Referral Code
-                                <span className="text-base-content/50 font-normal ml-1">
-                                    (optional)
-                                </span>
-                            </legend>
-                            <input
-                                type="text"
-                                placeholder="e.g. abc12345"
-                                className={`input w-full tracking-wider ${
-                                    referralStatus === "valid"
-                                        ? "input-success"
-                                        : referralStatus === "invalid"
-                                          ? "input-error"
-                                          : ""
-                                }`}
-                                value={referralCode}
-                                onChange={(e) =>
-                                    setReferralCode(
-                                        e.target.value.toLowerCase().trim(),
-                                    )
-                                }
-                                disabled={isLoading}
-                                maxLength={8}
-                            />
-                            {referralStatus === "validating" && (
-                                <p className="fieldset-label flex items-center gap-1">
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                    Validating...
-                                </p>
-                            )}
-                            {referralStatus === "valid" &&
-                                referralRecruiter && (
-                                    <p className="fieldset-label text-success flex items-center gap-1">
-                                        <i className="fa-duotone fa-regular fa-circle-check"></i>
-                                        Referred by {referralRecruiter.name}
-                                    </p>
-                                )}
-                            {referralStatus === "invalid" && (
-                                <p className="fieldset-label text-error flex items-center gap-1">
-                                    <i className="fa-duotone fa-regular fa-circle-xmark"></i>
-                                    {referralError}
-                                </p>
-                            )}
-                        </fieldset>
-
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-full"
-                            disabled={isLoading || !isLoaded}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="loading loading-spinner"></span>
-                                    Creating account...
-                                </>
-                            ) : (
-                                "Sign Up"
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="divider">OR</div>
-
-                    <div className="space-y-2">
-                        <button
-                            onClick={() => signUpWithOAuth("oauth_google")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-google"></i>
-                            Continue with Google
-                        </button>
-                        <button
-                            onClick={() => signUpWithOAuth("oauth_github")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-github"></i>
-                            Continue with GitHub
-                        </button>
-                        <button
-                            onClick={() => signUpWithOAuth("oauth_microsoft")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-microsoft"></i>
-                            Continue with Microsoft
-                        </button>
-                    </div>
-
-                    <p className="text-center text-sm mt-4">
-                        Already have an account?{" "}
-                        <Link
-                            href={
-                                redirectUrl
-                                    ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`
-                                    : "/sign-in"
-                            }
-                            className="link link-primary"
-                        >
-                            Sign in
-                        </Link>
-                    </p>
-                </div>
+        <div ref={stepRef} className="space-y-4">
+            <div>
+                <h2 className="card-title text-lg">Create Your Account</h2>
+                <p className="text-base-content/50">Join the Splits Network marketplace</p>
             </div>
+
+            {isFromInvitation && (
+                <div className="alert alert-soft alert-teal" role="alert">
+                    <i className="fa-duotone fa-regular fa-envelope-open-text" />
+                    <span>Complete sign-up to accept your invitation</span>
+                </div>
+            )}
+
+            {error && (
+                <div className="alert alert-outline alert-coral" role="alert">
+                    <i className="fa-solid fa-circle-xmark" />
+                    <span>{error}</span>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div id="clerk-captcha" />
+
+                <div className="grid grid-cols-2 gap-4">
+                    <AuthInput
+                        label="First Name"
+                        type="text"
+                        value={firstName}
+                        onChange={(v: string) => setFirstName(v)}
+                        placeholder="John"
+                    />
+                    <AuthInput
+                        label="Last Name"
+                        type="text"
+                        value={lastName}
+                        onChange={(v: string) => setLastName(v)}
+                        placeholder="Doe"
+                    />
+                </div>
+
+                <AuthInput
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(v: string) => setEmail(v)}
+                    placeholder="you@company.com"
+                />
+
+                <div>
+                    <AuthInput
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={(v: string) => setPassword(v)}
+                        placeholder="Enter password"
+                        showPasswordToggle
+                    />
+                    <p className="label text-base-content/50 -mt-1">Must be at least 8 characters</p>
+                </div>
+
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">
+                        Referral Code
+                        <span className="text-base-content/50 font-normal ml-1">(optional)</span>
+                    </legend>
+                    <input
+                        type="text"
+                        placeholder="e.g. abc12345"
+                        className={`input w-full tracking-wider ${
+                            referralStatus === "valid" ? "input-success" : referralStatus === "invalid" ? "input-error" : ""
+                        }`}
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value.toLowerCase().trim())}
+                        disabled={isLoading}
+                        maxLength={8}
+                    />
+                    {referralStatus === "validating" && (
+                        <p className="label flex items-center gap-1">
+                            <span className="loading loading-spinner loading-xs" />
+                            Validating...
+                        </p>
+                    )}
+                    {referralStatus === "valid" && referralRecruiter && (
+                        <p className="label text-success flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-circle-check" />
+                            Referred by {referralRecruiter.name}
+                        </p>
+                    )}
+                    {referralStatus === "invalid" && (
+                        <p className="label text-error flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-circle-xmark" />
+                            {referralError}
+                        </p>
+                    )}
+                </fieldset>
+
+                <button type="submit" className="btn btn-coral btn-block" disabled={isLoading || !isLoaded}>
+                    {isLoading ? (
+                        <><span className="loading loading-spinner" /> Creating account...</>
+                    ) : (
+                        "Sign Up"
+                    )}
+                </button>
+            </form>
+
+            <div className="divider">or</div>
+
+            <div className="grid grid-cols-3 gap-3">
+                <SocialLoginButton label="Google" icon="fa-brands fa-google" color="coral" onClick={() => signUpWithOAuth("oauth_google")} />
+                <SocialLoginButton label="GitHub" icon="fa-brands fa-github" color="purple" onClick={() => signUpWithOAuth("oauth_github")} />
+                <SocialLoginButton label="Microsoft" icon="fa-brands fa-microsoft" color="teal" onClick={() => signUpWithOAuth("oauth_microsoft")} />
+            </div>
+
+            <p className="text-center text-base-content/60">
+                Already have an account?{" "}
+                <Link
+                    href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-in"}
+                    className="btn btn-link btn-sm text-coral"
+                >
+                    Sign in
+                </Link>
+            </p>
         </div>
     );
 }

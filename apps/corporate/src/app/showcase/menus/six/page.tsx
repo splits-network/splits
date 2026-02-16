@@ -249,11 +249,8 @@ function ContextMenu({
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function MenusSixPage() {
-    // Nav state
+    // Nav state (for standalone NavItem demo section)
     const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
-    const [platformOpen, setPlatformOpen] = useState(false);
-    const [networkOpen, setNetworkOpen] = useState(false);
-    const [resourcesOpen, setResourcesOpen] = useState(false);
 
     // User dropdown state
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -459,7 +456,7 @@ export default function MenusSixPage() {
                ═══════════════════════════════════════════════════════════════ */}
             <ShowcaseSection
                 title="Navigation Dropdowns"
-                description="NavDropdown with NavDropdownItem children, section titles, different widths -- click to toggle"
+                description="NavDropdown with NavDropdownItem children — hover to open, CSS-only via .dropdown-hover"
                 accent="teal"
                 icon="fa-duotone fa-regular fa-square-caret-down"
             >
@@ -472,33 +469,28 @@ export default function MenusSixPage() {
                                 Wide Dropdown (440px)
                             </span>
                         </div>
-                        <div className="relative">
+                        <div className="dropdown dropdown-hover dropdown-bottom dropdown-start">
                             <NavItem
                                 label="Platform"
                                 icon="fa-duotone fa-regular fa-grid-2"
                                 color={ACCENT_HEX.coral}
                                 hasDropdown
-                                isActive={platformOpen}
-                                onClick={() => setPlatformOpen(!platformOpen)}
                             />
-                            {platformOpen && (
-                                <NavDropdown
-                                    accentColor={ACCENT_HEX.coral}
-                                    title="Platform Tools"
-                                    width="380px"
-                                    className="!absolute !top-full !left-0 !mt-1"
-                                >
-                                    {PLATFORM_DROPDOWN_ITEMS.map((item, i) => (
-                                        <NavDropdownItem
-                                            key={i}
-                                            icon={item.icon}
-                                            label={item.label}
-                                            desc={item.desc}
-                                            color={item.color}
-                                        />
-                                    ))}
-                                </NavDropdown>
-                            )}
+                            <NavDropdown
+                                accentColor={ACCENT_HEX.coral}
+                                title="Platform Tools"
+                                width="380px"
+                            >
+                                {PLATFORM_DROPDOWN_ITEMS.map((item, i) => (
+                                    <NavDropdownItem
+                                        key={i}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        desc={item.desc}
+                                        color={item.color}
+                                    />
+                                ))}
+                            </NavDropdown>
                         </div>
                     </div>
 
@@ -510,33 +502,28 @@ export default function MenusSixPage() {
                                 Narrow Dropdown (320px)
                             </span>
                         </div>
-                        <div className="relative">
+                        <div className="dropdown dropdown-hover dropdown-bottom dropdown-start">
                             <NavItem
                                 label="Network"
                                 icon="fa-duotone fa-regular fa-circle-nodes"
                                 color={ACCENT_HEX.teal}
                                 hasDropdown
-                                isActive={networkOpen}
-                                onClick={() => setNetworkOpen(!networkOpen)}
                             />
-                            {networkOpen && (
-                                <NavDropdown
-                                    accentColor={ACCENT_HEX.teal}
-                                    title="Browse Network"
-                                    width="320px"
-                                    className="!absolute !top-full !left-0 !mt-1"
-                                >
-                                    {NETWORK_DROPDOWN_ITEMS.map((item, i) => (
-                                        <NavDropdownItem
-                                            key={i}
-                                            icon={item.icon}
-                                            label={item.label}
-                                            desc={item.desc}
-                                            color={item.color}
-                                        />
-                                    ))}
-                                </NavDropdown>
-                            )}
+                            <NavDropdown
+                                accentColor={ACCENT_HEX.teal}
+                                title="Browse Network"
+                                width="320px"
+                            >
+                                {NETWORK_DROPDOWN_ITEMS.map((item, i) => (
+                                    <NavDropdownItem
+                                        key={i}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        desc={item.desc}
+                                        color={item.color}
+                                    />
+                                ))}
+                            </NavDropdown>
                         </div>
                     </div>
 
@@ -548,33 +535,28 @@ export default function MenusSixPage() {
                                 With Section Title
                             </span>
                         </div>
-                        <div className="relative">
+                        <div className="dropdown dropdown-hover dropdown-bottom dropdown-start">
                             <NavItem
                                 label="Resources"
                                 icon="fa-duotone fa-regular fa-books"
                                 color={ACCENT_HEX.purple}
                                 hasDropdown
-                                isActive={resourcesOpen}
-                                onClick={() => setResourcesOpen(!resourcesOpen)}
                             />
-                            {resourcesOpen && (
-                                <NavDropdown
-                                    accentColor={ACCENT_HEX.purple}
-                                    title="Help & Learn"
-                                    width="360px"
-                                    className="!absolute !top-full !left-0 !mt-1"
-                                >
-                                    {RESOURCES_DROPDOWN_ITEMS.map((item, i) => (
-                                        <NavDropdownItem
-                                            key={i}
-                                            icon={item.icon}
-                                            label={item.label}
-                                            desc={item.desc}
-                                            color={item.color}
-                                        />
-                                    ))}
-                                </NavDropdown>
-                            )}
+                            <NavDropdown
+                                accentColor={ACCENT_HEX.purple}
+                                title="Help & Learn"
+                                width="360px"
+                            >
+                                {RESOURCES_DROPDOWN_ITEMS.map((item, i) => (
+                                    <NavDropdownItem
+                                        key={i}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        desc={item.desc}
+                                        color={item.color}
+                                    />
+                                ))}
+                            </NavDropdown>
                         </div>
                     </div>
                 </div>

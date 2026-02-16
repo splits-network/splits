@@ -133,11 +133,15 @@ function CinematicFooter() {
                                 Stay in the loop
                             </p>
                             <h3 className="cin-nl-heading text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
-                                Get recruiting insights <span className="text-primary">delivered weekly</span>
+                                Get recruiting insights{" "}
+                                <span className="text-primary">
+                                    delivered weekly
+                                </span>
                             </h3>
                             <p className="cin-nl-desc text-white/35 text-sm leading-relaxed">
-                                Industry trends, platform updates, and strategies from top-performing recruiters.
-                                No spam. Unsubscribe any time.
+                                Industry trends, platform updates, and
+                                strategies from top-performing recruiters. No
+                                spam. Unsubscribe any time.
                             </p>
                         </div>
 
@@ -148,21 +152,31 @@ function CinematicFooter() {
                                         <i className="fa-duotone fa-regular fa-check text-success" />
                                     </div>
                                     <div>
-                                        <p className="text-white font-semibold text-sm">You are subscribed</p>
-                                        <p className="text-white/40 text-xs">Check your inbox for a confirmation email.</p>
+                                        <p className="text-white font-semibold text-sm">
+                                            You are subscribed
+                                        </p>
+                                        <p className="text-white/40 text-xs">
+                                            Check your inbox for a confirmation
+                                            email.
+                                        </p>
                                     </div>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubscribe} className="cin-nl-form flex gap-2">
+                                <form
+                                    onSubmit={handleSubscribe}
+                                    className="cin-nl-form flex gap-2"
+                                >
                                     <div className="relative flex-1 lg:w-72">
                                         <i className="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 text-sm" />
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
                                             placeholder="you@company.com"
                                             required
-                                            className="input w-full pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-primary/40 focus:bg-white/[0.06] transition-colors"
+                                            className="input w-full pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-coral/40 focus:bg-white/[0.06] transition-colors"
                                         />
                                     </div>
                                     <button
@@ -184,17 +198,25 @@ function CinematicFooter() {
                 <div className="cin-footer-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-6">
                     {/* Brand Column */}
                     <div className="col-span-2 sm:col-span-3 lg:col-span-1 lg:pr-4">
-                        <a href="#" className="cin-footer-brand flex items-center gap-2.5 mb-5 group">
+                        <a
+                            href="#"
+                            className="cin-footer-brand flex items-center gap-2.5 mb-5 group"
+                        >
                             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
                                 <i className="fa-duotone fa-regular fa-split text-primary text-sm" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-white font-black text-base tracking-tight leading-none">SPLITS</span>
-                                <span className="text-white/25 text-[8px] uppercase tracking-[0.2em] leading-none mt-0.5">Network</span>
+                                <span className="text-white font-black text-base tracking-tight leading-none">
+                                    SPLITS
+                                </span>
+                                <span className="text-white/25 text-[8px] uppercase tracking-[0.2em] leading-none mt-0.5">
+                                    Network
+                                </span>
                             </div>
                         </a>
                         <p className="text-white/25 text-xs leading-relaxed mb-5 max-w-[180px]">
-                            The split-fee recruiting marketplace connecting recruiters, companies, and candidates.
+                            The split-fee recruiting marketplace connecting
+                            recruiters, companies, and candidates.
                         </p>
 
                         {/* Social Links */}
@@ -244,15 +266,28 @@ function CinematicFooter() {
             <div className="cin-status border-t border-white/[0.04]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium">System Status</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium">
+                            System Status
+                        </span>
                         {STATUS_ITEMS.map((item) => (
-                            <div key={item.label} className="flex items-center gap-1.5">
-                                <div className={`w-1.5 h-1.5 rounded-full ${item.status === "operational" ? "bg-success" : "bg-warning"}`} />
-                                <span className="text-[10px] text-white/25">{item.label}</span>
+                            <div
+                                key={item.label}
+                                className="flex items-center gap-1.5"
+                            >
+                                <div
+                                    className={`w-1.5 h-1.5 rounded-full ${item.status === "operational" ? "bg-success" : "bg-warning"}`}
+                                />
+                                <span className="text-[10px] text-white/25">
+                                    {item.label}
+                                </span>
                             </div>
                         ))}
-                        <a href="#" className="text-[10px] text-primary/50 hover:text-primary transition-colors">
-                            View status page <i className="fa-regular fa-arrow-right text-[8px]" />
+                        <a
+                            href="#"
+                            className="text-[10px] text-primary/50 hover:text-primary transition-colors"
+                        >
+                            View status page{" "}
+                            <i className="fa-regular fa-arrow-right text-[8px]" />
                         </a>
                     </div>
                 </div>
@@ -263,11 +298,31 @@ function CinematicFooter() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex flex-wrap items-center gap-4 text-[11px] text-white/20">
-                            <span>&copy; {new Date().getFullYear()} Employment Networks, Inc.</span>
-                            <span className="hidden sm:inline text-white/10">|</span>
-                            <a href="#" className="hover:text-white/40 transition-colors">Privacy</a>
-                            <a href="#" className="hover:text-white/40 transition-colors">Terms</a>
-                            <a href="#" className="hover:text-white/40 transition-colors">Cookies</a>
+                            <span>
+                                &copy; {new Date().getFullYear()} Employment
+                                Networks, Inc.
+                            </span>
+                            <span className="hidden sm:inline text-white/10">
+                                |
+                            </span>
+                            <a
+                                href="#"
+                                className="hover:text-white/40 transition-colors"
+                            >
+                                Privacy
+                            </a>
+                            <a
+                                href="#"
+                                className="hover:text-white/40 transition-colors"
+                            >
+                                Terms
+                            </a>
+                            <a
+                                href="#"
+                                className="hover:text-white/40 transition-colors"
+                            >
+                                Cookies
+                            </a>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -279,7 +334,11 @@ function CinematicFooter() {
                                     <option>French</option>
                                 </select>
                             </div>
-                            <a href="#top" className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white/20 hover:text-white/50 hover:bg-white/[0.06] transition-all" aria-label="Back to top">
+                            <a
+                                href="#top"
+                                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white/20 hover:text-white/50 hover:bg-white/[0.06] transition-all"
+                                aria-label="Back to top"
+                            >
                                 <i className="fa-regular fa-arrow-up text-xs" />
                             </a>
                         </div>
@@ -301,7 +360,10 @@ export default function FootersFourPage() {
         () => {
             if (!containerRef.current) return;
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(containerRef.current.querySelectorAll("[class*='cin-']"), { opacity: 1, y: 0, x: 0, scale: 1 });
+                gsap.set(
+                    containerRef.current.querySelectorAll("[class*='cin-']"),
+                    { opacity: 1, y: 0, x: 0, scale: 1 },
+                );
                 return;
             }
 
@@ -309,71 +371,175 @@ export default function FootersFourPage() {
             gsap.fromTo(
                 ".cin-testimonial-card",
                 { opacity: 0, y: 40 },
-                { opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out", scrollTrigger: { trigger: ".cin-testimonials-grid", start: "top 80%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    stagger: 0.15,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-testimonials-grid",
+                        start: "top 80%",
+                    },
+                },
             );
 
             // CTA section parallax
             gsap.to(".cin-cta-bg", {
                 yPercent: 20,
                 ease: "none",
-                scrollTrigger: { trigger: ".cin-cta-section", start: "top bottom", end: "bottom top", scrub: true },
+                scrollTrigger: {
+                    trigger: ".cin-cta-section",
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true,
+                },
             });
 
             gsap.fromTo(
                 ".cin-cta-content",
                 { opacity: 0, y: 50 },
-                { opacity: 1, y: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".cin-cta-section", start: "top 65%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-cta-section",
+                        start: "top 65%",
+                    },
+                },
             );
 
             // Newsletter section
             gsap.fromTo(
                 ".cin-nl-kicker",
                 { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", scrollTrigger: { trigger: ".cin-newsletter", start: "top 85%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-newsletter",
+                        start: "top 85%",
+                    },
+                },
             );
             gsap.fromTo(
                 ".cin-nl-heading",
                 { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", scrollTrigger: { trigger: ".cin-newsletter", start: "top 85%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-newsletter",
+                        start: "top 85%",
+                    },
+                },
             );
             gsap.fromTo(
                 ".cin-nl-desc",
                 { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.6, delay: 0.1, ease: "power3.out", scrollTrigger: { trigger: ".cin-newsletter", start: "top 85%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    delay: 0.1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-newsletter",
+                        start: "top 85%",
+                    },
+                },
             );
             gsap.fromTo(
                 ".cin-nl-form, .cin-nl-success",
                 { opacity: 0, x: 30 },
-                { opacity: 1, x: 0, duration: 0.7, delay: 0.2, ease: "power3.out", scrollTrigger: { trigger: ".cin-newsletter", start: "top 85%" } },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.7,
+                    delay: 0.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-newsletter",
+                        start: "top 85%",
+                    },
+                },
             );
 
             // Footer grid
             gsap.fromTo(
                 ".cin-footer-brand",
                 { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", scrollTrigger: { trigger: ".cin-footer-grid", start: "top 90%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".cin-footer-grid",
+                        start: "top 90%",
+                    },
+                },
             );
             gsap.fromTo(
                 ".cin-footer-col",
                 { opacity: 0, y: 25 },
-                { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out", scrollTrigger: { trigger: ".cin-footer-grid", start: "top 90%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    stagger: 0.08,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: ".cin-footer-grid",
+                        start: "top 90%",
+                    },
+                },
             );
             gsap.fromTo(
                 ".cin-socials",
                 { opacity: 0, y: 15 },
-                { opacity: 1, y: 0, duration: 0.5, delay: 0.3, ease: "power2.out", scrollTrigger: { trigger: ".cin-footer-grid", start: "top 90%" } },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    delay: 0.3,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: ".cin-footer-grid",
+                        start: "top 90%",
+                    },
+                },
             );
 
             // Status and bottom bar
             gsap.fromTo(
                 ".cin-status",
                 { opacity: 0 },
-                { opacity: 1, duration: 0.6, ease: "power2.out", scrollTrigger: { trigger: ".cin-status", start: "top 95%" } },
+                {
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: "power2.out",
+                    scrollTrigger: { trigger: ".cin-status", start: "top 95%" },
+                },
             );
             gsap.fromTo(
                 ".cin-bottom-bar",
                 { opacity: 0 },
-                { opacity: 1, duration: 0.6, ease: "power2.out", scrollTrigger: { trigger: ".cin-bottom-bar", start: "top 95%" } },
+                {
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: ".cin-bottom-bar",
+                        start: "top 95%",
+                    },
+                },
             );
         },
         { scope: containerRef },
@@ -391,9 +557,10 @@ export default function FootersFourPage() {
                         Footer <span className="text-primary">Showcase</span>
                     </h1>
                     <p className="text-white/40 text-lg max-w-xl mx-auto leading-relaxed">
-                        Scroll down through the sample content to see the cinematic footer
-                        with newsletter signup, navigation columns, social links, system
-                        status, and legal information.
+                        Scroll down through the sample content to see the
+                        cinematic footer with newsletter signup, navigation
+                        columns, social links, system status, and legal
+                        information.
                     </p>
                 </div>
             </section>
@@ -406,7 +573,8 @@ export default function FootersFourPage() {
                             Voices from the Network
                         </p>
                         <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">
-                            Trusted by <span className="text-primary">thousands</span>
+                            Trusted by{" "}
+                            <span className="text-primary">thousands</span>
                         </h2>
                     </div>
 
@@ -425,8 +593,12 @@ export default function FootersFourPage() {
                                         {t.avatar}
                                     </div>
                                     <div>
-                                        <p className="text-white/70 text-xs font-semibold">{t.author}</p>
-                                        <p className="text-white/30 text-[10px]">{t.role}</p>
+                                        <p className="text-white/70 text-xs font-semibold">
+                                            {t.author}
+                                        </p>
+                                        <p className="text-white/30 text-[10px]">
+                                            {t.role}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -438,7 +610,12 @@ export default function FootersFourPage() {
             {/* ── CTA Section ──────────────────────────────── */}
             <section className="cin-cta-section relative py-32 overflow-hidden">
                 <div className="cin-cta-bg absolute inset-0 w-full h-[130%] -top-[15%]">
-                    <img src={CTA_IMG} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    <img
+                        src={CTA_IMG}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                    />
                 </div>
                 <div className="absolute inset-0 bg-neutral/85" />
 
@@ -452,15 +629,22 @@ export default function FootersFourPage() {
                         <span className="text-primary">pays for itself</span>
                     </h2>
                     <p className="text-white/40 text-base md:text-lg max-w-lg mx-auto leading-relaxed mb-10">
-                        Thousands of recruiters and hundreds of companies are already making
-                        smarter placements. Start today with zero upfront cost.
+                        Thousands of recruiters and hundreds of companies are
+                        already making smarter placements. Start today with zero
+                        upfront cost.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="#" className="btn btn-primary btn-lg font-semibold border-0 shadow-xl shadow-primary/20">
+                        <a
+                            href="#"
+                            className="btn btn-primary btn-lg font-semibold border-0 shadow-xl shadow-primary/20"
+                        >
                             <i className="fa-duotone fa-regular fa-rocket" />
                             Start Free Trial
                         </a>
-                        <a href="#" className="btn btn-lg font-semibold btn-outline border-white/20 text-white hover:bg-white/10 hover:border-white/40">
+                        <a
+                            href="#"
+                            className="btn btn-lg font-semibold btn-outline border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+                        >
                             <i className="fa-duotone fa-regular fa-calendar" />
                             Book a Demo
                         </a>

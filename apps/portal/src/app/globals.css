@@ -1,19 +1,8 @@
-@layer base;
+/* @layer base; */
 
 @import "tailwindcss";
 
 @plugin "@splits-network/memphis-ui/plugin";
-@import "./themes/memphis.css";
-
-/* @plugin "daisyui" {
-    themes: splits-light --default, splits-dark --prefers-dark, memphis;
-    //themes: false;
-} */
-/* 
-@import "./themes/light.css";
-@import "./themes/dark.css";
-@import "./themes/memphis.css";
- */
 
 /* Cookie Consent Banner Animation */
 @keyframes slide-up {
@@ -93,6 +82,24 @@
     animation: fade-in 0.2s ease-out;
 }
 
+/* Memphis markdown editor overrides */
+.w-md-editor {
+    --md-editor-background-color: var(--color-cream) !important;
+    --md-editor-box-shadow-color: var(--color-dark) !important;
+    box-shadow: 0 0 0 var(--border-interactive) var(--color-dark) !important;
+    border-radius: 0 !important;
+}
+
+.w-md-editor-toolbar {
+    border-radius: 0 !important;
+    border-bottom-width: var(--border-detail) !important;
+    border-bottom-color: var(--color-dark) !important;
+}
+
+.w-md-editor-content {
+    border-radius: 0 !important;
+}
+
 /* Force markdown editor fullscreen to cover viewport */
 .w-md-editor-fullscreen {
     height: 100vh !important;
@@ -120,7 +127,7 @@
     animation: scale-in 0.2s ease-out;
 }
 
-/* Sidebar: full height on mobile, below sticky header on desktop */
+/* Sidebar: full height on mobile, below sticky header + banner on desktop */
 .sidebar-positioned {
     top: 0;
     height: 100vh;
@@ -128,8 +135,8 @@
 
 @media (min-width: 1024px) {
     .sidebar-positioned {
-        top: var(--header-h, 0px);
-        height: calc(100vh - var(--header-h, 0px));
+        top: calc(var(--header-h, 0px) + var(--banner-h, 0px));
+        height: calc(100vh - var(--header-h, 0px) - var(--banner-h, 0px));
     }
 }
 
@@ -193,7 +200,7 @@
 } */
 
 .expanded-row td {
-    @apply border-t-4 border-primary border-b-0 bg-base-100;
+    @apply border-t-4 border-coral border-b-0 bg-base-100;
 }
 
 .expanded-row td:first-child {

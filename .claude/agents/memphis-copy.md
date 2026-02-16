@@ -285,6 +285,14 @@ All content must comply with Memphis design principles:
    - For page-local data, hex in data objects is acceptable (NOT in JSX/className)
 6. **Geometric decorations** — every hero and CTA section gets 3-5 Memphis shapes
 7. **GSAP animations** — use ArticleSixAnimator pattern for scroll-triggered entrances
+8. **Text size minimums** — content readability is non-negotiable:
+   - Body copy, descriptions, instructions = `text-base` (16px) minimum. Never `text-sm` or `text-xs`.
+   - Secondary metadata (bylines, "posted by", counts) = `text-sm` (14px) is acceptable
+   - `text-xs` (12px) is ONLY for afterthought content: timestamps, footnotes, copyright, version numbers
+   - Form labels = `text-base` — users must be able to read what they are filling in
+   - Button labels and CTAs = sized by the button component (never manually set to `text-xs`)
+   - If a designer hands you a layout with `text-xs` on meaningful content, flag it as a violation
+   - **Rationale:** `text-xs` is 12px — extremely difficult for most users to read. `text-sm` at 14px is marginal for body text. `text-base` at 16px is the web standard for readable body content.
 
 ## Content Checklist
 
@@ -301,6 +309,8 @@ Before delivering any content, verify:
 - [ ] CTAs use action verbs, max 3 words
 - [ ] CTA section offers paths for all 3 audiences
 - [ ] Memphis formatting rules followed (no shadows, 4px borders, palette only)
+- [ ] No `text-xs` on meaningful body content (only afterthoughts: timestamps, footnotes, copyright)
+- [ ] Body text defaults to `text-base` (16px) — not `text-sm`
 - [ ] Article follows the full section architecture
 - [ ] Ends with forward momentum — reader feels urgency to act
 

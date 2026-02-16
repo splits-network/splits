@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
-import { MarketplaceProfile } from '@splits-network/shared-types';
-import Link from 'next/link';
-import { useToast } from '@/lib/toast-context';
-import { MarkdownRenderer } from '@/components/markdown-renderer';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import RecruiterReputation from '../components/recruiter-reputation';
+import { useState, useEffect, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
+import { MarketplaceProfile } from "@splits-network/shared-types";
+import Link from "next/link";
+import { useToast } from "@/lib/toast-context";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { MarkdownEditor } from "@splits-network/shared-ui";
+import RecruiterReputation from "../components/recruiter-reputation";
 
 interface MarketplaceRecruiter {
     id: string;
@@ -49,19 +49,58 @@ interface RecruiterDetailClientProps {
 function getProfileCompleteness(recruiter: MarketplaceRecruiter): number {
     let score = 0;
     const checks = [
-        { condition: !!recruiter.tagline && recruiter.tagline.length > 0, weight: 10 },
-        { condition: !!recruiter.location && recruiter.location.length > 0, weight: 8 },
-        { condition: typeof recruiter.years_experience === 'number' && recruiter.years_experience > 0, weight: 8 },
+        {
+            condition: !!recruiter.tagline && recruiter.tagline.length > 0,
+            weight: 10,
+        },
+        {
+            condition: !!recruiter.location && recruiter.location.length > 0,
+            weight: 8,
+        },
+        {
+            condition:
+                typeof recruiter.years_experience === "number" &&
+                recruiter.years_experience > 0,
+            weight: 8,
+        },
         { condition: !!recruiter.bio && recruiter.bio.length > 20, weight: 12 },
-        { condition: !!recruiter.industries && recruiter.industries.length > 0, weight: 10 },
-        { condition: !!recruiter.specialties && recruiter.specialties.length > 0, weight: 12 },
-        { condition: !!recruiter.marketplace_profile?.bio_rich && recruiter.marketplace_profile.bio_rich.length > 50, weight: 15 },
-        { condition: recruiter.total_placements !== undefined && recruiter.total_placements > 0, weight: 10 },
-        { condition: recruiter.success_rate !== undefined && recruiter.success_rate > 0, weight: 10 },
-        { condition: recruiter.reputation_score !== undefined && recruiter.reputation_score > 0, weight: 5 },
+        {
+            condition:
+                !!recruiter.industries && recruiter.industries.length > 0,
+            weight: 10,
+        },
+        {
+            condition:
+                !!recruiter.specialties && recruiter.specialties.length > 0,
+            weight: 12,
+        },
+        {
+            condition:
+                !!recruiter.marketplace_profile?.bio_rich &&
+                recruiter.marketplace_profile.bio_rich.length > 50,
+            weight: 15,
+        },
+        {
+            condition:
+                recruiter.total_placements !== undefined &&
+                recruiter.total_placements > 0,
+            weight: 10,
+        },
+        {
+            condition:
+                recruiter.success_rate !== undefined &&
+                recruiter.success_rate > 0,
+            weight: 10,
+        },
+        {
+            condition:
+                recruiter.reputation_score !== undefined &&
+                recruiter.reputation_score > 0,
+            weight: 5,
+        },
     ];
 
-    checks.forEach(check => {
+    checks.forEach((check) => {
         if (check.condition) score += check.weight;
     });
 
@@ -71,9 +110,17 @@ function getProfileCompleteness(recruiter: MarketplaceRecruiter): number {
 
 function getProfileBadge(completeness: number) {
     if (completeness >= 90) {
-        return { label: 'Complete Profile', color: 'badge-success', icon: 'fa-certificate' };
+        return {
+            label: "Complete Profile",
+            color: "badge-success",
+            icon: "fa-certificate",
+        };
     } else if (completeness >= 70) {
-        return { label: 'Strong Profile', color: 'badge-primary', icon: 'fa-star' };
+        return {
+            label: "Strong Profile",
+            color: "badge-primary",
+            icon: "fa-star",
+        };
     }
     return null; // Don't show badge for incomplete profiles
 }
@@ -87,13 +134,15 @@ export default function RecruiterDetailClient({
     const { getToken } = useAuth();
     const toast = useToast();
 
-    const [recruiter, setRecruiter] = useState<MarketplaceRecruiter | null>(initialRecruiter ?? null);
+    const [recruiter, setRecruiter] = useState<MarketplaceRecruiter | null>(
+        initialRecruiter ?? null,
+    );
     const [loading, setLoading] = useState(!initialRecruiter && !initialError);
-    const [error, setError] = useState(initialError ?? '');
+    const [error, setError] = useState(initialError ?? "");
     const [showConnectModal, setShowConnectModal] = useState(false);
-    const [connectionMessage, setConnectionMessage] = useState('');
+    const [connectionMessage, setConnectionMessage] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState('');
+    const [success, setSuccess] = useState("");
 
     useEffect(() => {
         if (!initialRecruiter) {
@@ -104,19 +153,19 @@ export default function RecruiterDetailClient({
     const loadRecruiter = async () => {
         try {
             setLoading(true);
-            setError('');
+            setError("");
 
             // Try to get token, but allow unauthenticated access
             const token = await getToken().catch(() => null);
             const client = token ? createAuthenticatedClient(token) : apiClient;
 
             const result = await client.get<any>(`/recruiters/${recruiterId}`, {
-                params: { include: 'user,marketplace_profile,reputation' },
+                params: { include: "user,marketplace_profile,reputation" },
             });
             setRecruiter(result.data);
         } catch (err) {
-            console.error('Failed to load recruiter:', err);
-            setError('Failed to load recruiter profile. Please try again.');
+            console.error("Failed to load recruiter:", err);
+            setError("Failed to load recruiter profile. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -125,32 +174,35 @@ export default function RecruiterDetailClient({
     const handleConnect = async (e: FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        setError('');
+        setError("");
 
         try {
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to connect with this recruiter.');
+                setError("Please sign in to connect with this recruiter.");
                 setSubmitting(false);
                 return;
             }
 
             const client = createAuthenticatedClient(token);
 
-            await client.post('/marketplace/connections', {
+            await client.post("/marketplace/connections", {
                 recruiter_id: recruiterId,
                 message: connectionMessage,
             });
 
-            setSuccess('Connection request sent successfully!');
+            setSuccess("Connection request sent successfully!");
             setShowConnectModal(false);
-            setConnectionMessage('');
+            setConnectionMessage("");
             setTimeout(() => {
-                router.push('/public/connections');
+                router.push("/public/connections");
             }, 2000);
         } catch (err: any) {
-            console.error('Failed to send connection request:', err);
-            setError(err.message || 'Failed to send connection request. Please try again.');
+            console.error("Failed to send connection request:", err);
+            setError(
+                err.message ||
+                    "Failed to send connection request. Please try again.",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -208,14 +260,18 @@ export default function RecruiterDetailClient({
 
             {/* Header */}
             <div className="card bg-base-200 shadow mb-6">
-                <div className='card bg-base-100 m-2 shadow-lg'>
+                <div className="card bg-base-100 m-2 shadow-lg">
                     <div className="card-body">
-                        <div className='flex flex-col md:flex-row gap-4 items-center md:items-start md:justify-between'>
+                        <div className="flex flex-col md:flex-row gap-4 items-center md:items-start md:justify-between">
                             <div className="flex flex-col md:flex-row gap-4 items-center">
                                 <div className="avatar avatar-placeholder">
                                     <div className="bg-base-300  text-base-content/50 rounded-xl w-20">
                                         <span className="text-3xl">
-                                            {recruiter.users?.name ? recruiter.users?.name.charAt(0).toUpperCase() : "P"}
+                                            {recruiter.users?.name
+                                                ? recruiter.users?.name
+                                                      .charAt(0)
+                                                      .toUpperCase()
+                                                : "P"}
                                         </span>
                                     </div>
                                 </div>
@@ -223,20 +279,30 @@ export default function RecruiterDetailClient({
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                                         {recruiter.users?.name && (
-                                            <h1 className="text-3xl font-bold">{recruiter.users.name}</h1>
+                                            <h1 className="text-3xl font-bold">
+                                                {recruiter.users.name}
+                                            </h1>
                                         )}
-                                        {recruiter.status === 'active' && (
-                                            <span className="badge badge-success badge-sm">Active</span>
+                                        {recruiter.status === "active" && (
+                                            <span className="badge badge-success badge-sm">
+                                                Active
+                                            </span>
                                         )}
                                         {profileBadge && (
-                                            <span className={`badge ${profileBadge.color} gap-1`}>
-                                                <i className={`fa-duotone fa-regular ${profileBadge.icon}`}></i>
+                                            <span
+                                                className={`badge ${profileBadge.color} gap-1`}
+                                            >
+                                                <i
+                                                    className={`fa-duotone fa-regular ${profileBadge.icon}`}
+                                                ></i>
                                                 {profileBadge.label}
                                             </span>
                                         )}
                                     </div>
                                     {recruiter.tagline && (
-                                        <p className="text-lg text-base-content/70 mb-2">{recruiter.tagline}</p>
+                                        <p className="text-lg text-base-content/70 mb-2">
+                                            {recruiter.tagline}
+                                        </p>
                                     )}
 
                                     <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
@@ -249,13 +315,20 @@ export default function RecruiterDetailClient({
                                         {recruiter.years_experience && (
                                             <span className="flex items-center gap-1">
                                                 <i className="fa-duotone fa-regular fa-briefcase"></i>
-                                                {recruiter.years_experience} years experience
+                                                {recruiter.years_experience}{" "}
+                                                years experience
                                             </span>
                                         )}
                                         {recruiter.created_at && (
                                             <span className="flex items-center gap-1">
                                                 <i className="fa-duotone fa-regular fa-calendar"></i>
-                                                Member since {new Date(recruiter.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                                Member since{" "}
+                                                {new Date(
+                                                    recruiter.created_at,
+                                                ).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}
                                             </span>
                                         )}
                                     </div>
@@ -266,7 +339,11 @@ export default function RecruiterDetailClient({
                                 <button
                                     className="btn btn-primary"
                                     // onClick={() => setShowConnectModal(true)}
-                                    onClick={() => toast.info("Direct messaging coming soon!")}
+                                    onClick={() =>
+                                        toast.info(
+                                            "Direct messaging coming soon!",
+                                        )
+                                    }
                                 >
                                     <i className="fa-duotone fa-regular fa-user-plus"></i>
                                     Connect
@@ -275,12 +352,15 @@ export default function RecruiterDetailClient({
                         </div>
                     </div>
                 </div>
-                <div className='p-4 pt-0'>
+                <div className="p-4 pt-0">
                     {/* Recruiter Statistics Chart */}
                     {/* Placeholder for future chart or stats */}
                     <div className="alert alert-info">
                         <i className="fa-duotone fa-regular fa-info-circle"></i>
-                        <span>Recruiter statistics and activity charts coming soon!</span>
+                        <span>
+                            Recruiter statistics and activity charts coming
+                            soon!
+                        </span>
                     </div>
                 </div>
             </div>
@@ -303,41 +383,54 @@ export default function RecruiterDetailClient({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="stats bg-base-100 shadow w-full mb-6">
                         <div className="stat">
-                            <div className='stat-figure'>
+                            <div className="stat-figure">
                                 <i className="fa-duotone fa-regular fa-trophy text-primary text-3xl"></i>
                             </div>
                             <div className="stat-title">Total Placements</div>
-                            <div className="stat-value text-primary">{recruiter.total_placements}</div>
-                            <div className='stat-desc wrap-normal'>Total number of candidates placed in a role.</div>
+                            <div className="stat-value text-primary">
+                                {recruiter.total_placements}
+                            </div>
+                            <div className="stat-desc wrap-normal">
+                                Total number of candidates placed in a role.
+                            </div>
                         </div>
                     </div>
                     <div className="stats bg-base-100 shadow w-full mb-6">
                         {recruiter.success_rate !== undefined && (
                             <div className="stat">
-                                <div className='stat-figure'>
+                                <div className="stat-figure">
                                     <i className="fa-duotone fa-regular fa-chart-pie text-secondary text-3xl"></i>
                                 </div>
                                 <div className="stat-title">Success Rate</div>
-                                <div className="stat-value text-secondary">{Math.round(recruiter.success_rate * 100)}%</div>
-                                <div className="stat-desc wrap-normal">Percentage of successful placements.</div>
+                                <div className="stat-value text-secondary">
+                                    {Math.round(recruiter.success_rate * 100)}%
+                                </div>
+                                <div className="stat-desc wrap-normal">
+                                    Percentage of successful placements.
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
             )}
 
-            <div className='flex flex-col md:flex-row gap-6'>
-                <div className='basis-2/3'>
+            <div className="flex flex-col md:flex-row gap-6">
+                <div className="basis-2/3">
                     {/* Rich Bio - Featured Story */}
                     {recruiter.marketplace_profile?.bio_rich && (
-                        <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg mb-6 border border-primary/20">
+                        <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg mb-6 border border-coral/20">
                             <div className="card-body">
                                 <h2 className="card-title flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-sparkles text-primary"></i>
                                     Featured Story
                                 </h2>
                                 <div className="text-base-content/90">
-                                    <MarkdownRenderer content={recruiter.marketplace_profile.bio_rich} />
+                                    <MarkdownRenderer
+                                        content={
+                                            recruiter.marketplace_profile
+                                                .bio_rich
+                                        }
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -347,7 +440,9 @@ export default function RecruiterDetailClient({
                     {recruiter.bio && (
                         <div className="card bg-base-100 shadow mb-6">
                             <div className="card-body">
-                                <h2 className="card-title">Bio & Information</h2>
+                                <h2 className="card-title">
+                                    Bio & Information
+                                </h2>
                                 <div className="text-base-content/80">
                                     <MarkdownRenderer content={recruiter.bio} />
                                 </div>
@@ -356,19 +451,23 @@ export default function RecruiterDetailClient({
                     )}
                 </div>
 
-                <div className='basis-1/3'>
+                <div className="basis-1/3">
                     {/* Contact Panel */}
                     {recruiter.show_contact_info && (
                         <div className="card bg-base-200 shadow mb-6">
                             <div className="card-body">
                                 <h3 className="font-bold text-lg mb-4">
-                                    <i className='fa-duotone fa-regular fa-address-book mr-2 ' />Contact Information
+                                    <i className="fa-duotone fa-regular fa-address-book mr-2 " />
+                                    Contact Information
                                 </h3>
                                 <div className="flex flex-col gap-4">
                                     {recruiter.users?.email && (
                                         <div className="flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-envelope text-base-content/70"></i>
-                                            <a href={`mailto:${recruiter.users.email}`} className="link link-primary">
+                                            <a
+                                                href={`mailto:${recruiter.users.email}`}
+                                                className="link link-primary"
+                                            >
                                                 {recruiter.users.email}
                                             </a>
                                         </div>
@@ -376,7 +475,10 @@ export default function RecruiterDetailClient({
                                     {recruiter.phone && (
                                         <div className="flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-phone text-base-content/70"></i>
-                                            <a href={`tel:${recruiter.phone}`} className="link link-primary">
+                                            <a
+                                                href={`tel:${recruiter.phone}`}
+                                                className="link link-primary"
+                                            >
                                                 {recruiter.phone}
                                             </a>
                                         </div>
@@ -386,43 +488,63 @@ export default function RecruiterDetailClient({
                         </div>
                     )}
                     {/* Industries & Specialties */}
-                    {(recruiter.industries && recruiter.industries.length > 0) ||
-                        (recruiter.specialties && recruiter.specialties.length > 0) ? (
+                    {(recruiter.industries &&
+                        recruiter.industries.length > 0) ||
+                    (recruiter.specialties &&
+                        recruiter.specialties.length > 0) ? (
                         <div className="card bg-base-200 shadow mb-6">
                             <div className="card-body">
-                                <h3 className="font-bold text-lg mb-4" title='Yes! That is a flux capacitor!'>
-                                    <i className='fa-duotone fa-regular fa-flux-capacitor mr-2 ' />Areas of Expertise
+                                <h3
+                                    className="font-bold text-lg mb-4"
+                                    title="Yes! That is a flux capacitor!"
+                                >
+                                    <i className="fa-duotone fa-regular fa-flux-capacitor mr-2 " />
+                                    Areas of Expertise
                                 </h3>
                                 <div className="flex flex-col gap-6">
-                                    {recruiter.industries && recruiter.industries.length > 0 && (
-                                        <div className="mb-4">
-                                            <h3 className="font-semibold mb-2">
-                                                <i className='fa-duotone fa-regular fa-industry mr-2 ' />Industries
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {recruiter.industries.map(industry => (
-                                                    <span key={industry} className="badge badge-lg">
-                                                        {industry}
-                                                    </span>
-                                                ))}
+                                    {recruiter.industries &&
+                                        recruiter.industries.length > 0 && (
+                                            <div className="mb-4">
+                                                <h3 className="font-semibold mb-2">
+                                                    <i className="fa-duotone fa-regular fa-industry mr-2 " />
+                                                    Industries
+                                                </h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {recruiter.industries.map(
+                                                        (industry) => (
+                                                            <span
+                                                                key={industry}
+                                                                className="badge badge-lg"
+                                                            >
+                                                                {industry}
+                                                            </span>
+                                                        ),
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {recruiter.specialties && recruiter.specialties.length > 0 && (
-                                        <div>
-                                            <h3 className="font-semibold mb-2">
-                                                <i className='fa-duotone fa-regular fa-sparkles mr-2 ' />Specialties
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {recruiter.specialties.map(specialty => (
-                                                    <span key={specialty} className="badge badge-lg badge-outline">
-                                                        {specialty}
-                                                    </span>
-                                                ))}
+                                    {recruiter.specialties &&
+                                        recruiter.specialties.length > 0 && (
+                                            <div>
+                                                <h3 className="font-semibold mb-2">
+                                                    <i className="fa-duotone fa-regular fa-sparkles mr-2 " />
+                                                    Specialties
+                                                </h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {recruiter.specialties.map(
+                                                        (specialty) => (
+                                                            <span
+                                                                key={specialty}
+                                                                className="badge badge-lg badge-outline"
+                                                            >
+                                                                {specialty}
+                                                            </span>
+                                                        ),
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -434,7 +556,9 @@ export default function RecruiterDetailClient({
             {showConnectModal && (
                 <dialog className="modal modal-open">
                     <div className="modal-box">
-                        <h3 className="font-bold text-lg mb-4">Connect with Recruiter</h3>
+                        <h3 className="font-bold text-lg mb-4">
+                            Connect with Recruiter
+                        </h3>
                         <form onSubmit={handleConnect}>
                             <MarkdownEditor
                                 className="fieldset"
@@ -454,7 +578,7 @@ export default function RecruiterDetailClient({
                                     className="btn"
                                     onClick={() => {
                                         setShowConnectModal(false);
-                                        setConnectionMessage('');
+                                        setConnectionMessage("");
                                     }}
                                     disabled={submitting}
                                 >
@@ -471,14 +595,16 @@ export default function RecruiterDetailClient({
                                             Sending...
                                         </>
                                     ) : (
-                                        'Send Request'
+                                        "Send Request"
                                     )}
                                 </button>
                             </div>
                         </form>
                     </div>
                     <form method="dialog" className="modal-backdrop">
-                        <button onClick={() => setShowConnectModal(false)}>close</button>
+                        <button onClick={() => setShowConnectModal(false)}>
+                            close
+                        </button>
                     </form>
                 </dialog>
             )}

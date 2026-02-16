@@ -183,7 +183,7 @@ export default function ButtonsSixPage() {
                     {/* Decorative shapes row */}
                     <div className="flex items-center justify-center gap-6 mt-10">
                         <AccentCycle count={4}>
-                            {(color, _hex, i) => {
+                            {(color, i) => {
                                 const shapes = ["circle", "square", "triangle", "cross"] as const;
                                 return (
                                     <GeometricDecoration
@@ -587,7 +587,7 @@ export default function ButtonsSixPage() {
                     <SubLabel>Color-Coded Group</SubLabel>
                     <div className="flex">
                         <AccentCycle count={4}>
-                            {(color, _hex, i) => {
+                            {(color, i) => {
                                 const labels = ["Jobs", "Candidates", "Companies", "Reports"];
                                 const icons = [
                                     "fa-duotone fa-regular fa-briefcase",
@@ -990,7 +990,7 @@ export default function ButtonsSixPage() {
                     <SubLabel>Color Cycling CTAs</SubLabel>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
                         <AccentCycle count={4}>
-                            {(color, _hex, i) => {
+                            {(color, i) => {
                                 const ctas = [
                                     { label: "Post a Job", icon: "fa-duotone fa-regular fa-plus-circle", color: "#FF6B6B" },
                                     { label: "Find Talent", icon: "fa-duotone fa-regular fa-search", color: "#4ECDC4" },

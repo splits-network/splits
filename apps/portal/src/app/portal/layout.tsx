@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { SidebarMemphis } from "@/components/sidebar-memphis";
+import { Sidebar } from "@/components/sidebar";
 import { AuthenticatedLayoutClient } from "./layout-client";
 
 export default async function AuthenticatedLayout({
@@ -16,7 +16,7 @@ export default async function AuthenticatedLayout({
 
     return (
         <AuthenticatedLayoutClient>
-            <SidebarMemphis />
+            <Sidebar />
             <div className="lg:ml-[280px] min-h-screen">
                 <main className="p-2">{children}</main>
             </div>

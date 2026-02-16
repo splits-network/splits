@@ -1,0 +1,113 @@
+.indicator {
+    @layer memphis.component {
+        @apply relative inline-flex;
+        width: max-content;
+
+        :where(.indicator-item) {
+            z-index: 1;
+            @apply absolute whitespace-nowrap;
+            top: var(--indicator-t, 0);
+            bottom: var(--indicator-b, auto);
+            left: var(--indicator-s, auto);
+            right: var(--indicator-e, 0);
+            translate: var(--indicator-x, 50%) var(--indicator-y, -50%);
+        }
+    }
+}
+
+.indicator-start {
+    @layer memphis.modifier {
+        --indicator-s: 0;
+        --indicator-e: auto;
+        --indicator-x: -50%;
+
+        [dir="rtl"] & {
+            --indicator-s: auto;
+            --indicator-e: 0;
+            --indicator-x: 50%;
+        }
+    }
+}
+
+.indicator-center {
+    @layer memphis.modifier {
+        --indicator-s: 50%;
+        --indicator-e: 50%;
+        --indicator-x: -50%;
+
+        [dir="rtl"] & {
+            --indicator-x: 50%;
+        }
+    }
+}
+
+.indicator-end {
+    @layer memphis.modifier {
+        --indicator-s: auto;
+        --indicator-e: 0;
+        --indicator-x: 50%;
+
+        [dir="rtl"] & {
+            --indicator-s: 0;
+            --indicator-e: auto;
+            --indicator-x: -50%;
+        }
+    }
+}
+
+.indicator-bottom {
+    @layer memphis.modifier {
+        --indicator-t: auto;
+        --indicator-b: 0;
+        --indicator-y: 50%;
+    }
+}
+
+.indicator-middle {
+    @layer memphis.modifier {
+        --indicator-t: 50%;
+        --indicator-b: 50%;
+        --indicator-y: -50%;
+    }
+}
+
+.indicator-top {
+    @layer memphis.modifier {
+        --indicator-t: 0;
+        --indicator-b: auto;
+        --indicator-y: -50%;
+    }
+}
+
+/* ═══ Memphis Indicator Additions (generated) ═══ */
+
+.indicator .indicator-item.indicator-coral {
+  @layer memphis.modifier {
+    background-color: var(--color-coral);
+    color: var(--color-neutral-content);
+  }
+}
+.indicator .indicator-item.indicator-teal {
+  @layer memphis.modifier {
+    background-color: var(--color-teal);
+    color: var(--color-base-content);
+  }
+}
+.indicator .indicator-item.indicator-yellow {
+  @layer memphis.modifier {
+    background-color: var(--color-yellow);
+    color: var(--color-base-content);
+  }
+}
+.indicator .indicator-item.indicator-purple {
+  @layer memphis.modifier {
+    background-color: var(--color-purple);
+    color: var(--color-neutral-content);
+  }
+}
+.indicator .indicator-item.indicator-dark {
+  @layer memphis.modifier {
+    background-color: var(--color-dark);
+    color: var(--color-neutral-content);
+  }
+}

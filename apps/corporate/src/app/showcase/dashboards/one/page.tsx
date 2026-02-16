@@ -148,31 +148,142 @@ const timeToHire = [
 ];
 
 const activityFeed = [
-    { type: "job_posted", title: "Senior React Developer posted", user: "Sarah K.", initials: "SK", time: "12 min ago", icon: "fa-duotone fa-regular fa-plus-circle", iconColor: "text-primary" },
-    { type: "application", title: "New application for DevOps Engineer", user: "Marcus C.", initials: "MC", time: "34 min ago", icon: "fa-duotone fa-regular fa-file-lines", iconColor: "text-secondary" },
-    { type: "placement", title: "Placement confirmed - Full Stack Engineer", user: "David P.", initials: "DP", time: "1 hr ago", icon: "fa-duotone fa-regular fa-handshake", iconColor: "text-success" },
-    { type: "application", title: "3 new applications for Product Manager", user: "Lisa M.", initials: "LM", time: "2 hrs ago", icon: "fa-duotone fa-regular fa-file-lines", iconColor: "text-secondary" },
-    { type: "job_posted", title: "Data Scientist role published", user: "James R.", initials: "JR", time: "3 hrs ago", icon: "fa-duotone fa-regular fa-plus-circle", iconColor: "text-primary" },
-    { type: "placement", title: "Placement confirmed - UX Designer", user: "Anna W.", initials: "AW", time: "5 hrs ago", icon: "fa-duotone fa-regular fa-handshake", iconColor: "text-success" },
-    { type: "application", title: "New application for Backend Engineer", user: "Tom B.", initials: "TB", time: "6 hrs ago", icon: "fa-duotone fa-regular fa-file-lines", iconColor: "text-secondary" },
-    { type: "job_posted", title: "Marketing Lead role published", user: "Rachel G.", initials: "RG", time: "8 hrs ago", icon: "fa-duotone fa-regular fa-plus-circle", iconColor: "text-primary" },
+    {
+        type: "job_posted",
+        title: "Senior React Developer posted",
+        user: "Sarah K.",
+        initials: "SK",
+        time: "12 min ago",
+        icon: "fa-duotone fa-regular fa-plus-circle",
+        iconColor: "text-primary",
+    },
+    {
+        type: "application",
+        title: "New application for DevOps Engineer",
+        user: "Marcus C.",
+        initials: "MC",
+        time: "34 min ago",
+        icon: "fa-duotone fa-regular fa-file-lines",
+        iconColor: "text-secondary",
+    },
+    {
+        type: "placement",
+        title: "Placement confirmed - Full Stack Engineer",
+        user: "David P.",
+        initials: "DP",
+        time: "1 hr ago",
+        icon: "fa-duotone fa-regular fa-handshake",
+        iconColor: "text-success",
+    },
+    {
+        type: "application",
+        title: "3 new applications for Product Manager",
+        user: "Lisa M.",
+        initials: "LM",
+        time: "2 hrs ago",
+        icon: "fa-duotone fa-regular fa-file-lines",
+        iconColor: "text-secondary",
+    },
+    {
+        type: "job_posted",
+        title: "Data Scientist role published",
+        user: "James R.",
+        initials: "JR",
+        time: "3 hrs ago",
+        icon: "fa-duotone fa-regular fa-plus-circle",
+        iconColor: "text-primary",
+    },
+    {
+        type: "placement",
+        title: "Placement confirmed - UX Designer",
+        user: "Anna W.",
+        initials: "AW",
+        time: "5 hrs ago",
+        icon: "fa-duotone fa-regular fa-handshake",
+        iconColor: "text-success",
+    },
+    {
+        type: "application",
+        title: "New application for Backend Engineer",
+        user: "Tom B.",
+        initials: "TB",
+        time: "6 hrs ago",
+        icon: "fa-duotone fa-regular fa-file-lines",
+        iconColor: "text-secondary",
+    },
+    {
+        type: "job_posted",
+        title: "Marketing Lead role published",
+        user: "Rachel G.",
+        initials: "RG",
+        time: "8 hrs ago",
+        icon: "fa-duotone fa-regular fa-plus-circle",
+        iconColor: "text-primary",
+    },
 ];
 
 const quickActions = [
-    { label: "Post New Job", description: "Create and publish a new job listing to the marketplace", icon: "fa-duotone fa-regular fa-plus-circle", color: "primary" },
-    { label: "Review Applications", description: "Screen and manage incoming candidate applications", icon: "fa-duotone fa-regular fa-inbox", color: "secondary" },
-    { label: "Message Recruiters", description: "Communicate with your connected recruiting network", icon: "fa-duotone fa-regular fa-paper-plane", color: "accent" },
+    {
+        label: "Post New Job",
+        description: "Create and publish a new job listing to the marketplace",
+        icon: "fa-duotone fa-regular fa-plus-circle",
+        color: "primary",
+    },
+    {
+        label: "Review Applications",
+        description: "Screen and manage incoming candidate applications",
+        icon: "fa-duotone fa-regular fa-inbox",
+        color: "secondary",
+    },
+    {
+        label: "Message Recruiters",
+        description: "Communicate with your connected recruiting network",
+        icon: "fa-duotone fa-regular fa-paper-plane",
+        color: "accent",
+    },
 ];
 
 const sidebarNav = [
-    { label: "Dashboard", icon: "fa-duotone fa-regular fa-grid-2", active: true },
-    { label: "Roles", icon: "fa-duotone fa-regular fa-briefcase", active: false },
-    { label: "Recruiters", icon: "fa-duotone fa-regular fa-user-tie", active: false },
-    { label: "Candidates", icon: "fa-duotone fa-regular fa-users", active: false },
-    { label: "Companies", icon: "fa-duotone fa-regular fa-building", active: false },
-    { label: "Applications", icon: "fa-duotone fa-regular fa-file-lines", active: false },
-    { label: "Messages", icon: "fa-duotone fa-regular fa-paper-plane", active: false },
-    { label: "Placements", icon: "fa-duotone fa-regular fa-handshake", active: false },
+    {
+        label: "Dashboard",
+        icon: "fa-duotone fa-regular fa-grid-2",
+        active: true,
+    },
+    {
+        label: "Roles",
+        icon: "fa-duotone fa-regular fa-briefcase",
+        active: false,
+    },
+    {
+        label: "Recruiters",
+        icon: "fa-duotone fa-regular fa-user-tie",
+        active: false,
+    },
+    {
+        label: "Candidates",
+        icon: "fa-duotone fa-regular fa-users",
+        active: false,
+    },
+    {
+        label: "Companies",
+        icon: "fa-duotone fa-regular fa-building",
+        active: false,
+    },
+    {
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-file-lines",
+        active: false,
+    },
+    {
+        label: "Messages",
+        icon: "fa-duotone fa-regular fa-paper-plane",
+        active: false,
+    },
+    {
+        label: "Placements",
+        icon: "fa-duotone fa-regular fa-handshake",
+        active: false,
+    },
 ];
 
 /* ─── SVG Helpers ─────────────────────────────────────────────────────────── */
@@ -226,11 +337,23 @@ function AreaChart({ data }: { data: typeof applicationsOverTime }) {
     const gridValues = [0, 25, 50, 75, 100];
 
     return (
-        <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        <svg
+            viewBox={`0 0 ${w} ${h}`}
+            className="w-full h-full"
+            preserveAspectRatio="xMidYMid meet"
+        >
             <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(var(--p))" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="oklch(var(--p))" stopOpacity="0.02" />
+                    <stop
+                        offset="0%"
+                        stopColor="oklch(var(--p))"
+                        stopOpacity="0.25"
+                    />
+                    <stop
+                        offset="100%"
+                        stopColor="oklch(var(--p))"
+                        stopOpacity="0.02"
+                    />
                 </linearGradient>
             </defs>
             {/* Y-axis grid lines and labels */}
@@ -238,41 +361,126 @@ function AreaChart({ data }: { data: typeof applicationsOverTime }) {
                 const yy = pt + chartH - (v / max) * chartH;
                 return (
                     <g key={i}>
-                        <line x1={pl} y1={yy} x2={w - pr} y2={yy} stroke="oklch(var(--bc) / 0.06)" strokeWidth="1" />
-                        <text x={pl - 6} y={yy + 3} textAnchor="end" fontSize="9" className="fill-base-content/40" fontFamily="system-ui">{v}</text>
+                        <line
+                            x1={pl}
+                            y1={yy}
+                            x2={w - pr}
+                            y2={yy}
+                            stroke="oklch(var(--bc) / 0.06)"
+                            strokeWidth="1"
+                        />
+                        <text
+                            x={pl - 6}
+                            y={yy + 3}
+                            textAnchor="end"
+                            fontSize="9"
+                            className="fill-base-content/40"
+                            fontFamily="system-ui"
+                        >
+                            {v}
+                        </text>
                     </g>
                 );
             })}
             {/* X-axis labels (every 7th) */}
-            {data.filter((_, i) => i % 7 === 0 || i === data.length - 1).map((d, _, arr) => {
-                const idx = data.indexOf(d);
-                const xx = pl + (idx / (data.length - 1)) * chartW;
-                return (
-                    <text key={d.day} x={xx} y={h - 6} textAnchor="middle" fontSize="9" className="fill-base-content/40" fontFamily="system-ui">{d.day}</text>
-                );
-            })}
+            {data
+                .filter((_, i) => i % 7 === 0 || i === data.length - 1)
+                .map((d, _, arr) => {
+                    const idx = data.indexOf(d);
+                    const xx = pl + (idx / (data.length - 1)) * chartW;
+                    return (
+                        <text
+                            key={d.day}
+                            x={xx}
+                            y={h - 6}
+                            textAnchor="middle"
+                            fontSize="9"
+                            className="fill-base-content/40"
+                            fontFamily="system-ui"
+                        >
+                            {d.day}
+                        </text>
+                    );
+                })}
             {/* Area fill */}
             <path d={area} fill="url(#areaGrad)" />
             {/* Line */}
-            <path d={line} fill="none" stroke="oklch(var(--p))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+                d={line}
+                fill="none"
+                stroke="oklch(var(--p))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
             {/* Interactive hover columns */}
             {points.map((p, i) => (
-                <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)}>
-                    <rect x={p.x - chartW / data.length / 2} y={pt} width={chartW / data.length} height={chartH} fill="transparent" />
+                <g
+                    key={i}
+                    onMouseEnter={() => setHoverIdx(i)}
+                    onMouseLeave={() => setHoverIdx(null)}
+                >
+                    <rect
+                        x={p.x - chartW / data.length / 2}
+                        y={pt}
+                        width={chartW / data.length}
+                        height={chartH}
+                        fill="transparent"
+                    />
                     {hoverIdx === i && (
                         <>
-                            <line x1={p.x} y1={pt} x2={p.x} y2={h - pb} stroke="oklch(var(--p) / 0.3)" strokeWidth="1" strokeDasharray="3 3" />
-                            <circle cx={p.x} cy={p.y} r="5" fill="oklch(var(--b1))" stroke="oklch(var(--p))" strokeWidth="2.5" />
-                            <rect x={p.x - 28} y={p.y - 26} width="56" height="20" rx="4" fill="oklch(var(--n))" />
-                            <text x={p.x} y={p.y - 13} textAnchor="middle" fontSize="10" fontWeight="700" fill="oklch(var(--nc))" fontFamily="system-ui">{data[i].count}</text>
+                            <line
+                                x1={p.x}
+                                y1={pt}
+                                x2={p.x}
+                                y2={h - pb}
+                                stroke="oklch(var(--p) / 0.3)"
+                                strokeWidth="1"
+                                strokeDasharray="3 3"
+                            />
+                            <circle
+                                cx={p.x}
+                                cy={p.y}
+                                r="5"
+                                fill="oklch(var(--b1))"
+                                stroke="oklch(var(--p))"
+                                strokeWidth="2.5"
+                            />
+                            <rect
+                                x={p.x - 28}
+                                y={p.y - 26}
+                                width="56"
+                                height="20"
+                                rx="4"
+                                fill="oklch(var(--n))"
+                            />
+                            <text
+                                x={p.x}
+                                y={p.y - 13}
+                                textAnchor="middle"
+                                fontSize="10"
+                                fontWeight="700"
+                                fill="oklch(var(--nc))"
+                                fontFamily="system-ui"
+                            >
+                                {data[i].count}
+                            </text>
                         </>
                     )}
                 </g>
             ))}
             {/* Dots on key points */}
-            {points.filter((_, i) => i % 7 === 0 || i === points.length - 1).map((p, i) => (
-                <circle key={`dot-${i}`} cx={p.x} cy={p.y} r="3" fill="oklch(var(--p))" />
-            ))}
+            {points
+                .filter((_, i) => i % 7 === 0 || i === points.length - 1)
+                .map((p, i) => (
+                    <circle
+                        key={`dot-${i}`}
+                        cx={p.x}
+                        cy={p.y}
+                        r="3"
+                        fill="oklch(var(--p))"
+                    />
+                ))}
         </svg>
     );
 }
@@ -316,22 +524,47 @@ function DonutChart({ data }: { data: typeof jobsByStatus }) {
 
     return (
         <div className="flex items-center gap-8">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-shrink-0">
+            <svg
+                width={size}
+                height={size}
+                viewBox={`0 0 ${size} ${size}`}
+                className="flex-shrink-0"
+            >
                 {segments.map((s) => (
                     <path
                         key={s.idx}
                         d={s.path}
                         fill={s.color}
                         className="transition-all duration-200 cursor-pointer"
-                        style={{ opacity: hoverIdx !== null && hoverIdx !== s.idx ? 0.5 : 1 }}
+                        style={{
+                            opacity:
+                                hoverIdx !== null && hoverIdx !== s.idx
+                                    ? 0.5
+                                    : 1,
+                        }}
                         onMouseEnter={() => setHoverIdx(s.idx)}
                         onMouseLeave={() => setHoverIdx(null)}
                     />
                 ))}
-                <text x={cx} y={cy - 6} textAnchor="middle" fontSize="28" fontWeight="900" className="fill-base-content" fontFamily="system-ui">
+                <text
+                    x={cx}
+                    y={cy - 6}
+                    textAnchor="middle"
+                    fontSize="28"
+                    fontWeight="900"
+                    className="fill-base-content"
+                    fontFamily="system-ui"
+                >
                     {total}
                 </text>
-                <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" className="fill-base-content/40" fontFamily="system-ui">
+                <text
+                    x={cx}
+                    y={cy + 12}
+                    textAnchor="middle"
+                    fontSize="10"
+                    className="fill-base-content/40"
+                    fontFamily="system-ui"
+                >
                     Total Jobs
                 </text>
             </svg>
@@ -343,9 +576,16 @@ function DonutChart({ data }: { data: typeof jobsByStatus }) {
                         onMouseEnter={() => setHoverIdx(i)}
                         onMouseLeave={() => setHoverIdx(null)}
                     >
-                        <span className="w-3 h-3 flex-shrink-0" style={{ backgroundColor: d.color }}></span>
-                        <span className="text-base-content/70 flex-1">{d.status}</span>
-                        <span className="font-bold text-base-content tabular-nums">{d.count}</span>
+                        <span
+                            className="w-3 h-3 flex-shrink-0"
+                            style={{ backgroundColor: d.color }}
+                        ></span>
+                        <span className="text-base-content/70 flex-1">
+                            {d.status}
+                        </span>
+                        <span className="font-bold text-base-content tabular-nums">
+                            {d.count}
+                        </span>
                         <span className="text-base-content/40 text-xs tabular-nums w-10 text-right">
                             {((d.count / total) * 100).toFixed(0)}%
                         </span>
@@ -372,14 +612,21 @@ function BarChart({ data }: { data: typeof placementsByMonth }) {
                         onMouseEnter={() => setHoverIdx(i)}
                         onMouseLeave={() => setHoverIdx(null)}
                     >
-                        <span className={`text-xs font-bold tabular-nums transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}>
+                        <span
+                            className={`text-xs font-bold tabular-nums transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}
+                        >
                             {d.count}
                         </span>
                         <div
                             className={`w-full transition-all duration-300 ${isHovered ? "bg-primary" : "bg-primary/70"}`}
-                            style={{ height: `${heightPct}%`, minHeight: "4px" }}
+                            style={{
+                                height: `${heightPct}%`,
+                                minHeight: "4px",
+                            }}
                         ></div>
-                        <span className={`text-xs transition-colors duration-200 ${isHovered ? "text-base-content font-semibold" : "text-base-content/50"}`}>
+                        <span
+                            className={`text-xs transition-colors duration-200 ${isHovered ? "text-base-content font-semibold" : "text-base-content/50"}`}
+                        >
                             {d.month}
                         </span>
                     </div>
@@ -420,11 +667,23 @@ function RevenueTrendChart({ data }: { data: typeof revenueTrend }) {
     const yTicks = [0, 0.25, 0.5, 0.75, 1];
 
     return (
-        <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        <svg
+            viewBox={`0 0 ${w} ${h}`}
+            className="w-full h-full"
+            preserveAspectRatio="xMidYMid meet"
+        >
             <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(var(--su))" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="oklch(var(--su))" stopOpacity="0.01" />
+                    <stop
+                        offset="0%"
+                        stopColor="oklch(var(--su))"
+                        stopOpacity="0.2"
+                    />
+                    <stop
+                        offset="100%"
+                        stopColor="oklch(var(--su))"
+                        stopOpacity="0.01"
+                    />
                 </linearGradient>
             </defs>
             {/* Grid + Y-axis left (Revenue) */}
@@ -432,8 +691,22 @@ function RevenueTrendChart({ data }: { data: typeof revenueTrend }) {
                 const yy = pt + chartH * (1 - pct);
                 return (
                     <g key={i}>
-                        <line x1={pl} y1={yy} x2={w - pr} y2={yy} stroke="oklch(var(--bc) / 0.06)" strokeWidth="1" />
-                        <text x={pl - 6} y={yy + 3} textAnchor="end" fontSize="9" className="fill-base-content/40" fontFamily="system-ui">
+                        <line
+                            x1={pl}
+                            y1={yy}
+                            x2={w - pr}
+                            y2={yy}
+                            stroke="oklch(var(--bc) / 0.06)"
+                            strokeWidth="1"
+                        />
+                        <text
+                            x={pl - 6}
+                            y={yy + 3}
+                            textAnchor="end"
+                            fontSize="9"
+                            className="fill-base-content/40"
+                            fontFamily="system-ui"
+                        >
                             {formatCurrency(Math.round(maxRev * pct))}
                         </text>
                     </g>
@@ -443,33 +716,116 @@ function RevenueTrendChart({ data }: { data: typeof revenueTrend }) {
             {yTicks.map((pct, i) => {
                 const yy = pt + chartH * (1 - pct);
                 return (
-                    <text key={`r-${i}`} x={w - pr + 6} y={yy + 3} textAnchor="start" fontSize="9" className="fill-base-content/40" fontFamily="system-ui">
+                    <text
+                        key={`r-${i}`}
+                        x={w - pr + 6}
+                        y={yy + 3}
+                        textAnchor="start"
+                        fontSize="9"
+                        className="fill-base-content/40"
+                        fontFamily="system-ui"
+                    >
                         {Math.round(maxP * pct)}
                     </text>
                 );
             })}
             {/* X-axis labels */}
             {data.map((d, i) => (
-                <text key={d.month} x={pl + (i / (data.length - 1)) * chartW} y={h - 6} textAnchor="middle" fontSize="9" className="fill-base-content/40" fontFamily="system-ui">{d.month}</text>
+                <text
+                    key={d.month}
+                    x={pl + (i / (data.length - 1)) * chartW}
+                    y={h - 6}
+                    textAnchor="middle"
+                    fontSize="9"
+                    className="fill-base-content/40"
+                    fontFamily="system-ui"
+                >
+                    {d.month}
+                </text>
             ))}
             {/* Revenue area + line */}
             <path d={revArea} fill="url(#revGrad)" />
-            <path d={revLine} fill="none" stroke="oklch(var(--su))" strokeWidth="2.5" strokeLinecap="round" />
+            <path
+                d={revLine}
+                fill="none"
+                stroke="oklch(var(--su))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+            />
             {/* Placements line */}
-            <path d={plcLine} fill="none" stroke="oklch(var(--p))" strokeWidth="2" strokeLinecap="round" strokeDasharray="6 4" />
+            <path
+                d={plcLine}
+                fill="none"
+                stroke="oklch(var(--p))"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="6 4"
+            />
             {/* Dots */}
             {revPoints.map((p, i) => (
-                <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)}>
-                    <rect x={p.x - chartW / data.length / 2} y={pt} width={chartW / data.length} height={chartH} fill="transparent" />
+                <g
+                    key={i}
+                    onMouseEnter={() => setHoverIdx(i)}
+                    onMouseLeave={() => setHoverIdx(null)}
+                >
+                    <rect
+                        x={p.x - chartW / data.length / 2}
+                        y={pt}
+                        width={chartW / data.length}
+                        height={chartH}
+                        fill="transparent"
+                    />
                     <circle cx={p.x} cy={p.y} r="3.5" fill="oklch(var(--su))" />
-                    <circle cx={plcPoints[i].x} cy={plcPoints[i].y} r="3" fill="oklch(var(--p))" />
+                    <circle
+                        cx={plcPoints[i].x}
+                        cy={plcPoints[i].y}
+                        r="3"
+                        fill="oklch(var(--p))"
+                    />
                     {hoverIdx === i && (
                         <>
-                            <line x1={p.x} y1={pt} x2={p.x} y2={h - pb} stroke="oklch(var(--bc) / 0.15)" strokeWidth="1" strokeDasharray="3 3" />
-                            <circle cx={p.x} cy={p.y} r="6" fill="oklch(var(--b1))" stroke="oklch(var(--su))" strokeWidth="2.5" />
-                            <circle cx={plcPoints[i].x} cy={plcPoints[i].y} r="5" fill="oklch(var(--b1))" stroke="oklch(var(--p))" strokeWidth="2" />
-                            <rect x={p.x - 36} y={p.y - 28} width="72" height="20" rx="4" fill="oklch(var(--n))" />
-                            <text x={p.x} y={p.y - 15} textAnchor="middle" fontSize="10" fontWeight="700" fill="oklch(var(--nc))" fontFamily="system-ui">
+                            <line
+                                x1={p.x}
+                                y1={pt}
+                                x2={p.x}
+                                y2={h - pb}
+                                stroke="oklch(var(--bc) / 0.15)"
+                                strokeWidth="1"
+                                strokeDasharray="3 3"
+                            />
+                            <circle
+                                cx={p.x}
+                                cy={p.y}
+                                r="6"
+                                fill="oklch(var(--b1))"
+                                stroke="oklch(var(--su))"
+                                strokeWidth="2.5"
+                            />
+                            <circle
+                                cx={plcPoints[i].x}
+                                cy={plcPoints[i].y}
+                                r="5"
+                                fill="oklch(var(--b1))"
+                                stroke="oklch(var(--p))"
+                                strokeWidth="2"
+                            />
+                            <rect
+                                x={p.x - 36}
+                                y={p.y - 28}
+                                width="72"
+                                height="20"
+                                rx="4"
+                                fill="oklch(var(--n))"
+                            />
+                            <text
+                                x={p.x}
+                                y={p.y - 15}
+                                textAnchor="middle"
+                                fontSize="10"
+                                fontWeight="700"
+                                fill="oklch(var(--nc))"
+                                fontFamily="system-ui"
+                            >
                                 {formatCurrency(data[i].revenue)}
                             </text>
                         </>
@@ -478,9 +834,33 @@ function RevenueTrendChart({ data }: { data: typeof revenueTrend }) {
             ))}
             {/* Legend */}
             <circle cx={pl + 4} cy={pt + 6} r="4" fill="oklch(var(--su))" />
-            <text x={pl + 14} y={pt + 10} fontSize="9" className="fill-base-content/60" fontFamily="system-ui">Revenue</text>
-            <line x1={pl + 66} y1={pt + 6} x2={pl + 80} y2={pt + 6} stroke="oklch(var(--p))" strokeWidth="2" strokeDasharray="4 3" />
-            <text x={pl + 86} y={pt + 10} fontSize="9" className="fill-base-content/60" fontFamily="system-ui">Placements</text>
+            <text
+                x={pl + 14}
+                y={pt + 10}
+                fontSize="9"
+                className="fill-base-content/60"
+                fontFamily="system-ui"
+            >
+                Revenue
+            </text>
+            <line
+                x1={pl + 66}
+                y1={pt + 6}
+                x2={pl + 80}
+                y2={pt + 6}
+                stroke="oklch(var(--p))"
+                strokeWidth="2"
+                strokeDasharray="4 3"
+            />
+            <text
+                x={pl + 86}
+                y={pt + 10}
+                fontSize="9"
+                className="fill-base-content/60"
+                fontFamily="system-ui"
+            >
+                Placements
+            </text>
         </svg>
     );
 }
@@ -503,17 +883,25 @@ function TopRecruitersChart({ data }: { data: typeof topRecruiters }) {
                         onMouseEnter={() => setHoverIdx(i)}
                         onMouseLeave={() => setHoverIdx(null)}
                     >
-                        <div className={`w-9 h-9 flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors duration-200 ${isHovered ? "bg-primary text-primary-content" : "bg-base-300 text-base-content/70"}`}>
+                        <div
+                            className={`w-9 h-9 flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors duration-200 ${isHovered ? "bg-primary text-primary-content" : "bg-base-300 text-base-content/70"}`}
+                        >
                             {d.initials}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                                <span className={`text-sm font-semibold truncate transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}>
+                                <span
+                                    className={`text-sm font-semibold truncate transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}
+                                >
                                     {d.name}
                                 </span>
                                 <div className="flex items-center gap-3 text-xs tabular-nums flex-shrink-0 ml-3">
-                                    <span className="font-bold text-base-content">{d.placements} placed</span>
-                                    <span className="text-base-content/40">{formatCurrency(d.revenue)}</span>
+                                    <span className="font-bold text-base-content">
+                                        {d.placements} placed
+                                    </span>
+                                    <span className="text-base-content/40">
+                                        {formatCurrency(d.revenue)}
+                                    </span>
                                 </div>
                             </div>
                             <div className="w-full h-2 bg-base-300 overflow-hidden">
@@ -539,7 +927,10 @@ function FunnelChart({ data }: { data: typeof applicationFunnel }) {
         <div className="space-y-3">
             {data.map((d, i) => {
                 const widthPct = (d.count / maxCount) * 100;
-                const conversionFromPrev = i > 0 ? ((d.count / data[i - 1].count) * 100).toFixed(0) : null;
+                const conversionFromPrev =
+                    i > 0
+                        ? ((d.count / data[i - 1].count) * 100).toFixed(0)
+                        : null;
                 const colors = [
                     "bg-primary",
                     "bg-primary/80",
@@ -551,7 +942,9 @@ function FunnelChart({ data }: { data: typeof applicationFunnel }) {
                     <div key={i}>
                         <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-base-content">{d.stage}</span>
+                                <span className="text-sm font-semibold text-base-content">
+                                    {d.stage}
+                                </span>
                                 {conversionFromPrev && (
                                     <span className="text-xs text-base-content/40">
                                         ({conversionFromPrev}% conv.)
@@ -559,11 +952,22 @@ function FunnelChart({ data }: { data: typeof applicationFunnel }) {
                                 )}
                             </div>
                             <div className="flex items-center gap-2 tabular-nums">
-                                <span className="text-sm font-bold text-base-content">{d.count.toLocaleString()}</span>
-                                <span className="text-xs text-base-content/40">{d.pct}%</span>
+                                <span className="text-sm font-bold text-base-content">
+                                    {d.count.toLocaleString()}
+                                </span>
+                                <span className="text-xs text-base-content/40">
+                                    {d.pct}%
+                                </span>
                             </div>
                         </div>
-                        <div className="w-full h-7 bg-base-300 overflow-hidden flex items-center justify-center" style={{ width: `${widthPct}%`, margin: "0 auto", minWidth: "60px" }}>
+                        <div
+                            className="w-full h-7 bg-base-300 overflow-hidden flex items-center justify-center"
+                            style={{
+                                width: `${widthPct}%`,
+                                margin: "0 auto",
+                                minWidth: "60px",
+                            }}
+                        >
                             <div className={`w-full h-full ${colors[i]}`}></div>
                         </div>
                     </div>
@@ -577,34 +981,59 @@ function FunnelChart({ data }: { data: typeof applicationFunnel }) {
 
 function PipelineChart({ data }: { data: typeof hiringPipeline }) {
     const categories = [
-        { key: "engineering" as const, label: "Engineering", color: "oklch(var(--p))" },
+        {
+            key: "engineering" as const,
+            label: "Engineering",
+            color: "oklch(var(--p))",
+        },
         { key: "sales" as const, label: "Sales", color: "oklch(var(--su))" },
-        { key: "marketing" as const, label: "Marketing", color: "oklch(var(--wa))" },
+        {
+            key: "marketing" as const,
+            label: "Marketing",
+            color: "oklch(var(--wa))",
+        },
         { key: "design" as const, label: "Design", color: "oklch(var(--se))" },
     ];
 
-    const maxTotal = Math.max(...data.map((d) => d.engineering + d.sales + d.marketing + d.design));
+    const maxTotal = Math.max(
+        ...data.map((d) => d.engineering + d.sales + d.marketing + d.design),
+    );
 
     return (
         <div>
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mb-6">
                 {categories.map((c) => (
-                    <div key={c.key} className="flex items-center gap-2 text-xs">
-                        <span className="w-3 h-3 flex-shrink-0" style={{ backgroundColor: c.color }}></span>
+                    <div
+                        key={c.key}
+                        className="flex items-center gap-2 text-xs"
+                    >
+                        <span
+                            className="w-3 h-3 flex-shrink-0"
+                            style={{ backgroundColor: c.color }}
+                        ></span>
                         <span className="text-base-content/60">{c.label}</span>
                     </div>
                 ))}
             </div>
             <div className="space-y-4">
                 {data.map((d, i) => {
-                    const total = d.engineering + d.sales + d.marketing + d.design;
+                    const total =
+                        d.engineering + d.sales + d.marketing + d.design;
                     const barWidth = (total / maxTotal) * 100;
                     return (
                         <div key={i} className="flex items-center gap-4">
-                            <span className="text-sm font-semibold text-base-content w-20 text-right flex-shrink-0">{d.stage}</span>
+                            <span className="text-sm font-semibold text-base-content w-20 text-right flex-shrink-0">
+                                {d.stage}
+                            </span>
                             <div className="flex-1">
-                                <div className="flex h-6 overflow-hidden" style={{ width: `${barWidth}%`, minWidth: "40px" }}>
+                                <div
+                                    className="flex h-6 overflow-hidden"
+                                    style={{
+                                        width: `${barWidth}%`,
+                                        minWidth: "40px",
+                                    }}
+                                >
                                     {categories.map((c) => {
                                         const val = d[c.key];
                                         if (val === 0) return null;
@@ -613,14 +1042,19 @@ function PipelineChart({ data }: { data: typeof hiringPipeline }) {
                                             <div
                                                 key={c.key}
                                                 className="h-full transition-all duration-300 hover:opacity-80"
-                                                style={{ width: `${segPct}%`, backgroundColor: c.color }}
+                                                style={{
+                                                    width: `${segPct}%`,
+                                                    backgroundColor: c.color,
+                                                }}
                                                 title={`${c.label}: ${val}`}
                                             ></div>
                                         );
                                     })}
                                 </div>
                             </div>
-                            <span className="text-xs font-bold text-base-content tabular-nums w-6 text-right">{total}</span>
+                            <span className="text-xs font-bold text-base-content tabular-nums w-6 text-right">
+                                {total}
+                            </span>
                         </div>
                     );
                 })}
@@ -648,7 +1082,9 @@ function GeoChart({ data }: { data: typeof geoDistribution }) {
                         onMouseEnter={() => setHoverIdx(i)}
                         onMouseLeave={() => setHoverIdx(null)}
                     >
-                        <span className={`text-sm w-28 text-right flex-shrink-0 transition-colors duration-200 ${isHovered ? "text-primary font-semibold" : "text-base-content/70"}`}>
+                        <span
+                            className={`text-sm w-28 text-right flex-shrink-0 transition-colors duration-200 ${isHovered ? "text-primary font-semibold" : "text-base-content/70"}`}
+                        >
                             {d.location}
                         </span>
                         <div className="flex-1 h-5 bg-base-300 overflow-hidden">
@@ -657,7 +1093,9 @@ function GeoChart({ data }: { data: typeof geoDistribution }) {
                                 style={{ width: `${pct}%` }}
                             ></div>
                         </div>
-                        <span className={`text-sm tabular-nums w-10 text-right font-bold transition-colors duration-200 ${isHovered ? "text-secondary" : "text-base-content"}`}>
+                        <span
+                            className={`text-sm tabular-nums w-10 text-right font-bold transition-colors duration-200 ${isHovered ? "text-secondary" : "text-base-content"}`}
+                        >
                             {d.count}
                         </span>
                     </div>
@@ -671,7 +1109,9 @@ function GeoChart({ data }: { data: typeof geoDistribution }) {
 
 function TimeToHireChart({ data }: { data: typeof timeToHire }) {
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-    const maxDays = Math.max(...data.map((d) => Math.max(d.avgDays, d.benchmark)));
+    const maxDays = Math.max(
+        ...data.map((d) => Math.max(d.avgDays, d.benchmark)),
+    );
 
     return (
         <div>
@@ -683,7 +1123,9 @@ function TimeToHireChart({ data }: { data: typeof timeToHire }) {
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                     <span className="w-3 h-3 bg-base-content/20 flex-shrink-0"></span>
-                    <span className="text-base-content/60">Industry Benchmark</span>
+                    <span className="text-base-content/60">
+                        Industry Benchmark
+                    </span>
                 </div>
             </div>
             <div className="space-y-5">
@@ -700,14 +1142,24 @@ function TimeToHireChart({ data }: { data: typeof timeToHire }) {
                             onMouseLeave={() => setHoverIdx(null)}
                         >
                             <div className="flex items-center justify-between mb-1.5">
-                                <span className={`text-sm font-semibold transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}>
+                                <span
+                                    className={`text-sm font-semibold transition-colors duration-200 ${isHovered ? "text-primary" : "text-base-content"}`}
+                                >
                                     {d.role}
                                 </span>
                                 <div className="flex items-center gap-2 text-xs tabular-nums">
-                                    <span className="font-bold text-primary">{d.avgDays}d</span>
-                                    <span className="text-base-content/30">vs</span>
-                                    <span className="text-base-content/50">{d.benchmark}d</span>
-                                    <span className="text-success font-semibold">-{diff}d</span>
+                                    <span className="font-bold text-primary">
+                                        {d.avgDays}d
+                                    </span>
+                                    <span className="text-base-content/30">
+                                        vs
+                                    </span>
+                                    <span className="text-base-content/50">
+                                        {d.benchmark}d
+                                    </span>
+                                    <span className="text-success font-semibold">
+                                        -{diff}d
+                                    </span>
                                 </div>
                             </div>
                             <div className="relative h-4 bg-base-300 overflow-hidden">
@@ -732,7 +1184,9 @@ function TimeToHireChart({ data }: { data: typeof timeToHire }) {
 
 export default function DashboardOne() {
     const mainRef = useRef<HTMLElement>(null);
-    const [activeTab, setActiveTab] = useState<"overview" | "activity">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "activity">(
+        "overview",
+    );
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useGSAP(
@@ -743,10 +1197,8 @@ export default function DashboardOne() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             // ── Header entrance ──────────────────────────────────
             const headerTl = gsap.timeline({
@@ -973,7 +1425,13 @@ export default function DashboardOne() {
             gsap.fromTo(
                 $1(".sidebar-brand"),
                 { opacity: 0, y: -10 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.1 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power3.out",
+                    delay: 0.1,
+                },
             );
         },
         { scope: mainRef },
@@ -995,7 +1453,11 @@ export default function DashboardOne() {
                     SIDEBAR
                    ═══════════════════════════════════════════════════════ */}
                 <div className="drawer-side z-40">
-                    <label htmlFor="dashboard-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+                    <label
+                        htmlFor="dashboard-drawer"
+                        aria-label="close sidebar"
+                        className="drawer-overlay"
+                    ></label>
                     <aside className="w-64 min-h-screen bg-neutral text-neutral-content flex flex-col">
                         {/* Brand */}
                         <div className="sidebar-brand p-6 pb-4 opacity-0">
@@ -1004,8 +1466,12 @@ export default function DashboardOne() {
                                     <i className="fa-duotone fa-regular fa-chart-mixed text-primary-content text-sm"></i>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-black tracking-tight leading-none">Splits</p>
-                                    <p className="text-[10px] uppercase tracking-[0.15em] opacity-50 mt-0.5">Network</p>
+                                    <p className="text-sm font-black tracking-tight leading-none">
+                                        Splits
+                                    </p>
+                                    <p className="text-[10px] uppercase tracking-[0.15em] opacity-50 mt-0.5">
+                                        Network
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -1027,9 +1493,13 @@ export default function DashboardOne() {
                                                     ? "bg-primary text-primary-content font-bold"
                                                     : "text-neutral-content/70 hover:bg-neutral-content/5 hover:text-neutral-content"
                                             }`}
-                                            onClick={() => setSidebarOpen(false)}
+                                            onClick={() =>
+                                                setSidebarOpen(false)
+                                            }
                                         >
-                                            <i className={`${item.icon} w-5 text-center ${item.active ? "" : "opacity-60"}`}></i>
+                                            <i
+                                                className={`${item.icon} w-5 text-center ${item.active ? "" : "opacity-60"}`}
+                                            ></i>
                                             <span>{item.label}</span>
                                             {item.active && (
                                                 <span className="ml-auto w-1.5 h-1.5 bg-primary-content rounded-full"></span>
@@ -1048,8 +1518,12 @@ export default function DashboardOne() {
                                     SK
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold truncate">Sarah Kim</p>
-                                    <p className="text-[10px] text-neutral-content/40 truncate">Admin</p>
+                                    <p className="text-xs font-semibold truncate">
+                                        Sarah Kim
+                                    </p>
+                                    <p className="text-[10px] text-neutral-content/40 truncate">
+                                        Admin
+                                    </p>
                                 </div>
                                 <button className="text-neutral-content/30 hover:text-neutral-content transition-colors">
                                     <i className="fa-duotone fa-regular fa-gear text-sm"></i>
@@ -1063,441 +1537,471 @@ export default function DashboardOne() {
                     MAIN CONTENT
                    ═══════════════════════════════════════════════════════ */}
                 <div className="drawer-content">
-
-            {/* ═══════════════════════════════════════════════════════
+                    {/* ═══════════════════════════════════════════════════════
                 HEADER
                ═══════════════════════════════════════════════════════ */}
-            <section className="relative py-20 lg:py-28 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
-                    {/* Mobile sidebar toggle */}
-                    <label
-                        htmlFor="dashboard-drawer"
-                        className="btn btn-sm btn-ghost lg:hidden mb-6 -ml-2"
-                    >
-                        <i className="fa-duotone fa-regular fa-bars text-lg"></i>
-                        <span className="text-xs uppercase tracking-wider font-semibold">Menu</span>
-                    </label>
+                    <section className="relative py-20 lg:py-28 bg-base-100">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            {/* Mobile sidebar toggle */}
+                            <label
+                                htmlFor="dashboard-drawer"
+                                className="btn btn-sm btn-ghost lg:hidden mb-6 -ml-2"
+                            >
+                                <i className="fa-duotone fa-regular fa-bars text-lg"></i>
+                                <span className="text-xs uppercase tracking-wider font-semibold">
+                                    Menu
+                                </span>
+                            </label>
 
-                    <div className="max-w-3xl">
-                        <p className="dash-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
-                            Recruiting Dashboard
-                        </p>
+                            <div className="max-w-3xl">
+                                <p className="dash-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                                    Recruiting Dashboard
+                                </p>
 
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                            <span className="dash-headline-word inline-block opacity-0 text-base-content">
-                                Your
-                            </span>{" "}
-                            <span className="dash-headline-word inline-block opacity-0 text-primary">
-                                recruiting
-                            </span>{" "}
-                            <span className="dash-headline-word inline-block opacity-0 text-base-content">
-                                at a glance.
-                            </span>
-                        </h1>
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
+                                    <span className="dash-headline-word inline-block opacity-0 text-base-content">
+                                        Your
+                                    </span>{" "}
+                                    <span className="dash-headline-word inline-block opacity-0 text-primary">
+                                        recruiting
+                                    </span>{" "}
+                                    <span className="dash-headline-word inline-block opacity-0 text-base-content">
+                                        at a glance.
+                                    </span>
+                                </h1>
 
-                        <p className="dash-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl opacity-0">
-                            Real-time metrics, pipeline visibility, and actionable
-                            insights across your entire recruiting operation.
-                        </p>
-                    </div>
+                                <p className="dash-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl opacity-0">
+                                    Real-time metrics, pipeline visibility, and
+                                    actionable insights across your entire
+                                    recruiting operation.
+                                </p>
+                            </div>
 
-                    <div className="flex gap-2 mt-10">
-                        <button
-                            onClick={() => setActiveTab("overview")}
-                            className={`btn btn-sm ${activeTab === "overview" ? "btn-primary" : "btn-ghost"}`}
-                        >
-                            <i className="fa-duotone fa-regular fa-chart-mixed"></i>
-                            Overview
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("activity")}
-                            className={`btn btn-sm ${activeTab === "activity" ? "btn-primary" : "btn-ghost"}`}
-                        >
-                            <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
-                            Activity
-                        </button>
-                    </div>
-                </div>
-            </section>
+                            <div className="flex gap-2 mt-10">
+                                <button
+                                    onClick={() => setActiveTab("overview")}
+                                    className={`btn btn-sm ${activeTab === "overview" ? "btn-primary" : "btn-ghost"}`}
+                                >
+                                    <i className="fa-duotone fa-regular fa-chart-mixed"></i>
+                                    Overview
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("activity")}
+                                    className={`btn btn-sm ${activeTab === "activity" ? "btn-primary" : "btn-ghost"}`}
+                                >
+                                    <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
+                                    Activity
+                                </button>
+                            </div>
+                        </div>
+                    </section>
 
-            {/* ═══════════════════════════════════════════════════════
+                    {/* ═══════════════════════════════════════════════════════
                 KPI CARDS
                ═══════════════════════════════════════════════════════ */}
-            <section className="bg-base-200 py-12">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {kpis.map((kpi, i) => (
-                            <div
-                                key={i}
-                                className={`kpi-card bg-base-100 border-t-4 border-${kpi.color} p-6 opacity-0`}
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className={`w-12 h-12 bg-${kpi.color}/10 flex items-center justify-center`}>
-                                        <i className={`${kpi.icon} text-xl text-${kpi.color}`}></i>
-                                    </div>
-                                    <div className={`flex items-center gap-1 text-sm font-semibold ${kpi.trendUp ? "text-success" : "text-error"}`}>
-                                        <i className={`fa-solid fa-arrow-${kpi.trendUp ? "up" : "down"} text-xs`}></i>
-                                        {kpi.trend}
-                                    </div>
-                                </div>
-                                <div className="text-3xl md:text-4xl font-black tracking-tight text-base-content">
-                                    {kpi.value}
-                                </div>
-                                <div className="text-sm uppercase tracking-wider text-base-content/50 mt-1">
-                                    {kpi.label}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════
-                CHARTS — Primary Analytics
-               ═══════════════════════════════════════════════════════ */}
-            <section className="charts-section py-20 lg:py-28 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="charts-heading max-w-3xl mb-16 opacity-0">
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                            Analytics
-                        </p>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
-                            Pipeline performance.
-                        </h2>
-                    </div>
-
-                    <div className="charts-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Applications Over Time */}
-                        <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Applications Over Time
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Last 30 days &middot; hover for details
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm font-semibold text-success">
-                                    <i className="fa-solid fa-arrow-up text-xs"></i>
-                                    +23.4%
-                                </div>
-                            </div>
-                            <div className="h-56">
-                                <AreaChart data={applicationsOverTime} />
-                            </div>
-                        </div>
-
-                        {/* Jobs by Status */}
-                        <div className="chart-card bg-base-200 p-8 opacity-0">
-                            <div className="mb-6">
-                                <h3 className="text-lg font-bold text-base-content">
-                                    Jobs by Status
-                                </h3>
-                                <p className="text-sm text-base-content/50">
-                                    Current distribution
-                                </p>
-                            </div>
-                            <div className="flex justify-center">
-                                <DonutChart data={jobsByStatus} />
-                            </div>
-                        </div>
-
-                        {/* Placements by Month */}
-                        <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Placements by Month
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Last 6 months
-                                    </p>
-                                </div>
-                                <div className="text-sm text-base-content/50">
-                                    <span className="font-bold text-base-content text-lg">31</span>{" "}
-                                    total placements
-                                </div>
-                            </div>
-                            <BarChart data={placementsByMonth} />
-                        </div>
-
-                        {/* Revenue Trend */}
-                        <div className="chart-card bg-base-200 p-8 opacity-0">
-                            <div className="mb-6">
-                                <h3 className="text-lg font-bold text-base-content">
-                                    Revenue Trend
-                                </h3>
-                                <p className="text-sm text-base-content/50">
-                                    Revenue vs. placements &middot; 7 months
-                                </p>
-                            </div>
-                            <div className="h-56">
-                                <RevenueTrendChart data={revenueTrend} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════
-                ADVANCED ANALYTICS — Funnel + Pipeline + Recruiters
-               ═══════════════════════════════════════════════════════ */}
-            <section className="advanced-section py-20 lg:py-28 bg-base-200">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="advanced-heading max-w-3xl mb-16 opacity-0">
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
-                            Advanced Analytics
-                        </p>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
-                            Deeper insights.
-                        </h2>
-                    </div>
-
-                    <div className="advanced-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Application Funnel */}
-                        <div className="advanced-card bg-base-100 p-8 border-t-4 border-primary opacity-0">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <i className="fa-duotone fa-regular fa-filter text-primary"></i>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Application Funnel
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Conversion through each stage
-                                    </p>
-                                </div>
-                            </div>
-                            <FunnelChart data={applicationFunnel} />
-                        </div>
-
-                        {/* Top Recruiters */}
-                        <div className="advanced-card bg-base-100 p-8 border-t-4 border-secondary opacity-0">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                                    <i className="fa-duotone fa-regular fa-trophy text-secondary"></i>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Top Performing Recruiters
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        By placements this quarter
-                                    </p>
-                                </div>
-                            </div>
-                            <TopRecruitersChart data={topRecruiters} />
-                        </div>
-
-                        {/* Hiring Pipeline */}
-                        <div className="advanced-card lg:col-span-2 bg-base-100 p-8 border-t-4 border-accent opacity-0">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="w-10 h-10 bg-accent/10 flex items-center justify-center flex-shrink-0">
-                                    <i className="fa-duotone fa-regular fa-diagram-project text-accent"></i>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Hiring Pipeline by Department
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Candidates at each stage across departments
-                                    </p>
-                                </div>
-                            </div>
-                            <PipelineChart data={hiringPipeline} />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════
-                DEEP INSIGHTS — Geo + Time to Hire
-               ═══════════════════════════════════════════════════════ */}
-            <section className="insights-section py-20 lg:py-28 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="insights-heading max-w-3xl mb-16 opacity-0">
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                            Deep Insights
-                        </p>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
-                            Operational intelligence.
-                        </h2>
-                    </div>
-
-                    <div className="insights-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Geographic Distribution */}
-                        <div className="insights-card bg-base-200 p-8 opacity-0">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                                    <i className="fa-duotone fa-regular fa-earth-americas text-secondary"></i>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Geographic Distribution
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Applications by location
-                                    </p>
-                                </div>
-                            </div>
-                            <GeoChart data={geoDistribution} />
-                        </div>
-
-                        {/* Time to Hire */}
-                        <div className="insights-card bg-base-200 p-8 opacity-0">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <i className="fa-duotone fa-regular fa-stopwatch text-primary"></i>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-base-content">
-                                        Time to Hire
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Your average vs. industry benchmark
-                                    </p>
-                                </div>
-                            </div>
-                            <TimeToHireChart data={timeToHire} />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════
-                SPLIT-SCREEN — Activity Feed (60) + Quick Actions (40)
-               ═══════════════════════════════════════════════════════ */}
-            <section className="split-section py-20 lg:py-28 bg-base-200">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
-                        {/* Activity Feed */}
-                        <div className="activity-panel lg:col-span-3 opacity-0">
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                                Recent Activity
-                            </p>
-                            <h2 className="text-3xl md:text-4xl font-black leading-[0.95] tracking-tight mb-8">
-                                What&apos;s happening now.
-                            </h2>
-
-                            <div className="activity-list space-y-0 max-h-[520px] overflow-y-auto">
-                                {activityFeed.map((item, i) => (
+                    <section className="bg-base-200 py-12">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {kpis.map((kpi, i) => (
                                     <div
                                         key={i}
-                                        className="activity-item flex items-start gap-4 p-4 border-b border-base-300 hover:bg-base-100 transition-colors opacity-0"
+                                        className={`kpi-card bg-base-100 border-t-4 border-${kpi.color} p-6 opacity-0`}
                                     >
-                                        <div className="w-10 h-10 bg-base-100 flex items-center justify-center flex-shrink-0">
-                                            <i className={`${item.icon} ${item.iconColor}`}></i>
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div
+                                                className={`w-12 h-12 bg-${kpi.color}/10 flex items-center justify-center`}
+                                            >
+                                                <i
+                                                    className={`${kpi.icon} text-xl text-${kpi.color}`}
+                                                ></i>
+                                            </div>
+                                            <div
+                                                className={`flex items-center gap-1 text-sm font-semibold ${kpi.trendUp ? "text-success" : "text-error"}`}
+                                            >
+                                                <i
+                                                    className={`fa-solid fa-arrow-${kpi.trendUp ? "up" : "down"} text-xs`}
+                                                ></i>
+                                                {kpi.trend}
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-base-content text-sm leading-snug">
-                                                {item.title}
-                                            </p>
-                                            <p className="text-xs text-base-content/50 mt-1">
-                                                {item.user} &middot; {item.time}
-                                            </p>
+                                        <div className="text-3xl md:text-4xl font-black tracking-tight text-base-content">
+                                            {kpi.value}
                                         </div>
-                                        <div className="w-8 h-8 bg-primary text-primary-content flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                            {item.initials}
+                                        <div className="text-sm uppercase tracking-wider text-base-content/50 mt-1">
+                                            {kpi.label}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
+                    </section>
 
-                        {/* Quick Actions */}
-                        <div className="actions-panel lg:col-span-2 opacity-0">
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
-                                Quick Actions
-                            </p>
-                            <h2 className="text-3xl md:text-4xl font-black leading-[0.95] tracking-tight mb-8">
-                                Take action.
-                            </h2>
-
-                            <div className="actions-grid space-y-4">
-                                {quickActions.map((action, i) => (
-                                    <button
-                                        key={i}
-                                        className={`action-card w-full text-left border-l-4 border-${action.color} bg-base-100 p-6 hover:bg-base-100/80 transition-colors opacity-0`}
-                                    >
-                                        <div className="flex items-start gap-4">
-                                            <div className={`w-12 h-12 bg-${action.color}/10 flex items-center justify-center flex-shrink-0`}>
-                                                <i className={`${action.icon} text-xl text-${action.color}`}></i>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-base-content mb-1">
-                                                    {action.label}
-                                                </h3>
-                                                <p className="text-sm text-base-content/60 leading-relaxed">
-                                                    {action.description}
-                                                </p>
-                                            </div>
-                                            <i className="fa-duotone fa-regular fa-arrow-right text-base-content/30 ml-auto mt-1"></i>
-                                        </div>
-                                    </button>
-                                ))}
+                    {/* ═══════════════════════════════════════════════════════
+                CHARTS — Primary Analytics
+               ═══════════════════════════════════════════════════════ */}
+                    <section className="charts-section py-20 lg:py-28 bg-base-100">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="charts-heading max-w-3xl mb-16 opacity-0">
+                                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                                    Analytics
+                                </p>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
+                                    Pipeline performance.
+                                </h2>
                             </div>
 
-                            {/* Summary stat block */}
-                            <div className="mt-8 bg-primary text-primary-content p-8">
-                                <p className="text-sm uppercase tracking-wider opacity-70 mb-2">
-                                    This Month
-                                </p>
-                                <div className="text-4xl font-black tracking-tight mb-1">
-                                    $42,300
+                            <div className="charts-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Applications Over Time */}
+                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Applications Over Time
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Last 30 days &middot; hover for
+                                                details
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm font-semibold text-success">
+                                            <i className="fa-solid fa-arrow-up text-xs"></i>
+                                            +23.4%
+                                        </div>
+                                    </div>
+                                    <div className="h-56">
+                                        <AreaChart
+                                            data={applicationsOverTime}
+                                        />
+                                    </div>
                                 </div>
-                                <p className="text-sm opacity-70">
-                                    Revenue from 5 placements
-                                </p>
-                                <div className="flex items-center gap-2 mt-4 text-sm font-semibold">
-                                    <i className="fa-solid fa-arrow-up text-xs"></i>
-                                    +18.2% vs last month
+
+                                {/* Jobs by Status */}
+                                <div className="chart-card bg-base-200 p-8 opacity-0">
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-bold text-base-content">
+                                            Jobs by Status
+                                        </h3>
+                                        <p className="text-sm text-base-content/50">
+                                            Current distribution
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <DonutChart data={jobsByStatus} />
+                                    </div>
+                                </div>
+
+                                {/* Placements by Month */}
+                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Placements by Month
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Last 6 months
+                                            </p>
+                                        </div>
+                                        <div className="text-sm text-base-content/50">
+                                            <span className="font-bold text-base-content text-lg">
+                                                31
+                                            </span>{" "}
+                                            total placements
+                                        </div>
+                                    </div>
+                                    <BarChart data={placementsByMonth} />
+                                </div>
+
+                                {/* Revenue Trend */}
+                                <div className="chart-card bg-base-200 p-8 opacity-0">
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-bold text-base-content">
+                                            Revenue Trend
+                                        </h3>
+                                        <p className="text-sm text-base-content/50">
+                                            Revenue vs. placements &middot; 7
+                                            months
+                                        </p>
+                                    </div>
+                                    <div className="h-56">
+                                        <RevenueTrendChart
+                                            data={revenueTrend}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
+                    </section>
 
-            {/* ═══════════════════════════════════════════════════════
+                    {/* ═══════════════════════════════════════════════════════
+                ADVANCED ANALYTICS — Funnel + Pipeline + Recruiters
+               ═══════════════════════════════════════════════════════ */}
+                    <section className="advanced-section py-20 lg:py-28 bg-base-200">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="advanced-heading max-w-3xl mb-16 opacity-0">
+                                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
+                                    Advanced Analytics
+                                </p>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
+                                    Deeper insights.
+                                </h2>
+                            </div>
+
+                            <div className="advanced-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {/* Application Funnel */}
+                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-coral opacity-0">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <i className="fa-duotone fa-regular fa-filter text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Application Funnel
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Conversion through each stage
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <FunnelChart data={applicationFunnel} />
+                                </div>
+
+                                {/* Top Recruiters */}
+                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-secondary opacity-0">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                                            <i className="fa-duotone fa-regular fa-trophy text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Top Performing Recruiters
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                By placements this quarter
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <TopRecruitersChart data={topRecruiters} />
+                                </div>
+
+                                {/* Hiring Pipeline */}
+                                <div className="advanced-card lg:col-span-2 bg-base-100 p-8 border-t-4 border-yellow opacity-0">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-10 h-10 bg-accent/10 flex items-center justify-center flex-shrink-0">
+                                            <i className="fa-duotone fa-regular fa-diagram-project text-accent"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Hiring Pipeline by Department
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Candidates at each stage across
+                                                departments
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <PipelineChart data={hiringPipeline} />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ═══════════════════════════════════════════════════════
+                DEEP INSIGHTS — Geo + Time to Hire
+               ═══════════════════════════════════════════════════════ */}
+                    <section className="insights-section py-20 lg:py-28 bg-base-100">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="insights-heading max-w-3xl mb-16 opacity-0">
+                                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                                    Deep Insights
+                                </p>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
+                                    Operational intelligence.
+                                </h2>
+                            </div>
+
+                            <div className="insights-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {/* Geographic Distribution */}
+                                <div className="insights-card bg-base-200 p-8 opacity-0">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                                            <i className="fa-duotone fa-regular fa-earth-americas text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Geographic Distribution
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Applications by location
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <GeoChart data={geoDistribution} />
+                                </div>
+
+                                {/* Time to Hire */}
+                                <div className="insights-card bg-base-200 p-8 opacity-0">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <i className="fa-duotone fa-regular fa-stopwatch text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-base-content">
+                                                Time to Hire
+                                            </h3>
+                                            <p className="text-sm text-base-content/50">
+                                                Your average vs. industry
+                                                benchmark
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <TimeToHireChart data={timeToHire} />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ═══════════════════════════════════════════════════════
+                SPLIT-SCREEN — Activity Feed (60) + Quick Actions (40)
+               ═══════════════════════════════════════════════════════ */}
+                    <section className="split-section py-20 lg:py-28 bg-base-200">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
+                                {/* Activity Feed */}
+                                <div className="activity-panel lg:col-span-3 opacity-0">
+                                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                                        Recent Activity
+                                    </p>
+                                    <h2 className="text-3xl md:text-4xl font-black leading-[0.95] tracking-tight mb-8">
+                                        What&apos;s happening now.
+                                    </h2>
+
+                                    <div className="activity-list space-y-0 max-h-[520px] overflow-y-auto">
+                                        {activityFeed.map((item, i) => (
+                                            <div
+                                                key={i}
+                                                className="activity-item flex items-start gap-4 p-4 border-b border-base-300 hover:bg-base-100 transition-colors opacity-0"
+                                            >
+                                                <div className="w-10 h-10 bg-base-100 flex items-center justify-center flex-shrink-0">
+                                                    <i
+                                                        className={`${item.icon} ${item.iconColor}`}
+                                                    ></i>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-base-content text-sm leading-snug">
+                                                        {item.title}
+                                                    </p>
+                                                    <p className="text-xs text-base-content/50 mt-1">
+                                                        {item.user} &middot;{" "}
+                                                        {item.time}
+                                                    </p>
+                                                </div>
+                                                <div className="w-8 h-8 bg-primary text-primary-content flex items-center justify-center font-bold text-xs flex-shrink-0">
+                                                    {item.initials}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Quick Actions */}
+                                <div className="actions-panel lg:col-span-2 opacity-0">
+                                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
+                                        Quick Actions
+                                    </p>
+                                    <h2 className="text-3xl md:text-4xl font-black leading-[0.95] tracking-tight mb-8">
+                                        Take action.
+                                    </h2>
+
+                                    <div className="actions-grid space-y-4">
+                                        {quickActions.map((action, i) => (
+                                            <button
+                                                key={i}
+                                                className={`action-card w-full text-left border-l-4 border-${action.color} bg-base-100 p-6 hover:bg-base-100/80 transition-colors opacity-0`}
+                                            >
+                                                <div className="flex items-start gap-4">
+                                                    <div
+                                                        className={`w-12 h-12 bg-${action.color}/10 flex items-center justify-center flex-shrink-0`}
+                                                    >
+                                                        <i
+                                                            className={`${action.icon} text-xl text-${action.color}`}
+                                                        ></i>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-base-content mb-1">
+                                                            {action.label}
+                                                        </h3>
+                                                        <p className="text-sm text-base-content/60 leading-relaxed">
+                                                            {action.description}
+                                                        </p>
+                                                    </div>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right text-base-content/30 ml-auto mt-1"></i>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Summary stat block */}
+                                    <div className="mt-8 bg-primary text-primary-content p-8">
+                                        <p className="text-sm uppercase tracking-wider opacity-70 mb-2">
+                                            This Month
+                                        </p>
+                                        <div className="text-4xl font-black tracking-tight mb-1">
+                                            $42,300
+                                        </div>
+                                        <p className="text-sm opacity-70">
+                                            Revenue from 5 placements
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-4 text-sm font-semibold">
+                                            <i className="fa-solid fa-arrow-up text-xs"></i>
+                                            +18.2% vs last month
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ═══════════════════════════════════════════════════════
                 BOTTOM CTA
                ═══════════════════════════════════════════════════════ */}
-            <section className="py-20 bg-neutral text-neutral-content">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
-                            Ready to Start
-                        </p>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                            Your recruiting command center awaits.
-                        </h2>
-                        <p className="text-lg opacity-70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                            Get complete visibility into your pipeline, track placements in
-                            real time, and manage your entire recruiting operation from one dashboard.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a
-                                href="https://splits.network/sign-up"
-                                className="btn btn-lg bg-white text-neutral hover:bg-white/90 border-0 shadow-lg"
-                            >
-                                <i className="fa-duotone fa-regular fa-rocket"></i>
-                                Get Started Free
-                            </a>
-                            <a
-                                href="#"
-                                className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-                            >
-                                <i className="fa-duotone fa-regular fa-calendar"></i>
-                                Book a Demo
-                            </a>
+                    <section className="py-20 bg-neutral text-neutral-content">
+                        <div className="container mx-auto px-6 lg:px-12">
+                            <div className="max-w-4xl mx-auto text-center">
+                                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
+                                    Ready to Start
+                                </p>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
+                                    Your recruiting command center awaits.
+                                </h2>
+                                <p className="text-lg opacity-70 mb-10 max-w-2xl mx-auto leading-relaxed">
+                                    Get complete visibility into your pipeline,
+                                    track placements in real time, and manage
+                                    your entire recruiting operation from one
+                                    dashboard.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <a
+                                        href="https://splits.network/sign-up"
+                                        className="btn btn-lg bg-white text-neutral hover:bg-white/90 border-0 shadow-lg"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-rocket"></i>
+                                        Get Started Free
+                                    </a>
+                                    <a
+                                        href="#"
+                                        className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-calendar"></i>
+                                        Book a Demo
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
-            </section>
-
-                </div>{/* end drawer-content */}
-            </div>{/* end drawer */}
+                {/* end drawer-content */}
+            </div>
+            {/* end drawer */}
         </main>
     );
 }

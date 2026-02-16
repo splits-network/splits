@@ -13,10 +13,13 @@ import {
 } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { ColorBar } from "@splits-network/memphis-ui";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 
-interface NavItem {
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface NavItemData {
     href: string;
     label: string;
     icon: string;
@@ -24,16 +27,52 @@ interface NavItem {
     section?: "main" | "management" | "settings";
     badge?: number;
     mobileDock?: boolean;
-    children?: NavItem[];
+    children?: NavItemData[];
     expandable?: boolean;
-    shortcut?: string; // Key letter for Ctrl+Shift+<key> shortcut
+    shortcut?: string;
 }
 
-// Navigation items organized by section
-const navItems: NavItem[] = [
+type MemphisAccent = "coral" | "teal" | "yellow" | "purple";
+
+// ─── Accent Color Tailwind Class Maps (zero inline styles) ──────────────────
+
+const ACCENT_CYCLE: MemphisAccent[] = ["coral", "teal", "yellow", "purple"];
+
+const ACCENT_BG: Record<MemphisAccent, string> = {
+    coral: "bg-coral",
+    teal: "bg-teal",
+    yellow: "bg-yellow",
+    purple: "bg-purple",
+};
+
+const ACCENT_TEXT: Record<MemphisAccent, string> = {
+    coral: "text-coral",
+    teal: "text-teal",
+    yellow: "text-yellow",
+    purple: "text-purple",
+};
+
+const ACCENT_BORDER: Record<MemphisAccent, string> = {
+    coral: "border-coral",
+    teal: "border-teal",
+    yellow: "border-yellow",
+    purple: "border-purple",
+};
+
+// Text on accent-colored backgrounds (contrast-safe)
+const ACCENT_ON_BG: Record<MemphisAccent, string> = {
+    coral: "text-white",
+    teal: "text-dark",
+    yellow: "text-dark",
+    purple: "text-white",
+};
+
+// ─── Navigation Items ───────────────────────────────────────────────────────
+
+const navItems: NavItemData[] = [
     {
         href: "/portal/admin",
-        label: "Admin Dashboard",
+        label: "Admin",
         icon: "fa-gauge-high",
         roles: ["platform_admin"],
         section: "main",
@@ -56,15 +95,12 @@ const navItems: NavItem[] = [
         mobileDock: true,
         shortcut: "R",
     },
-
-    // Management section (recruiter/company focused)
     {
         href: "#recruiters",
         label: "Recruiters",
         icon: "fa-users-viewfinder",
         roles: ["company_admin", "hiring_manager"],
         section: "management",
-        mobileDock: false,
         expandable: true,
         children: [
             {
@@ -72,16 +108,12 @@ const navItems: NavItem[] = [
                 label: "Find",
                 icon: "fa-magnifying-glass",
                 roles: ["company_admin", "hiring_manager"],
-                section: "management",
-                mobileDock: false,
             },
             {
                 href: "/portal/company-invitations",
                 label: "Invitations",
                 icon: "fa-envelope",
                 roles: ["company_admin", "hiring_manager"],
-                section: "management",
-                mobileDock: false,
             },
         ],
     },
@@ -89,12 +121,7 @@ const navItems: NavItem[] = [
         href: "#candidates",
         label: "Candidates",
         icon: "fa-users",
-        roles: [
-            "recruiter",
-            "hiring_manager",
-            "company_admin",
-            "platform_admin",
-        ],
+        roles: ["recruiter", "hiring_manager", "company_admin", "platform_admin"],
         section: "management",
         mobileDock: true,
         expandable: true,
@@ -103,14 +130,7 @@ const navItems: NavItem[] = [
                 href: "/portal/candidates",
                 label: "Manage",
                 icon: "fa-list",
-                roles: [
-                    "recruiter",
-                    "hiring_manager",
-                    "company_admin",
-                    "platform_admin",
-                ],
-                section: "management",
-                mobileDock: false,
+                roles: ["recruiter", "hiring_manager", "company_admin", "platform_admin"],
                 shortcut: "C",
             },
             {
@@ -118,16 +138,12 @@ const navItems: NavItem[] = [
                 label: "Invitations",
                 icon: "fa-envelope",
                 roles: ["recruiter"],
-                section: "management",
-                mobileDock: false,
             },
             {
                 href: "/portal/referral-codes",
                 label: "Referral Codes",
                 icon: "fa-link",
                 roles: ["recruiter"],
-                section: "management",
-                mobileDock: false,
             },
         ],
     },
@@ -137,7 +153,6 @@ const navItems: NavItem[] = [
         icon: "fa-building",
         roles: ["recruiter"],
         section: "management",
-        mobileDock: false,
         expandable: true,
         children: [
             {
@@ -145,21 +160,15 @@ const navItems: NavItem[] = [
                 label: "Browse",
                 icon: "fa-buildings",
                 roles: ["recruiter"],
-                section: "management",
-                mobileDock: false,
             },
             {
                 href: "/portal/invite-companies",
                 label: "Invitations",
                 icon: "fa-building-user",
                 roles: ["recruiter"],
-                section: "management",
-                mobileDock: false,
             },
         ],
     },
-    // { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
-    // { href: '/portal/gate-reviews', label: 'Gate Reviews', icon: 'fa-clipboard-check', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: false },
     {
         href: "/portal/applications",
         label: "Applications",
@@ -182,35 +191,24 @@ const navItems: NavItem[] = [
         href: "/portal/placements",
         label: "Placements",
         icon: "fa-trophy",
-        roles: [
-            "recruiter",
-            "company_admin",
-            "hiring_manager",
-            "platform_admin",
-        ],
+        roles: ["recruiter", "company_admin", "hiring_manager", "platform_admin"],
         section: "management",
-        mobileDock: false,
         shortcut: "P",
     },
-
-    // Settings section
     {
         href: "/portal/profile",
         label: "Profile",
         icon: "fa-user",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "settings",
-        mobileDock: false,
         shortcut: "U",
     },
-
     {
         href: "#company",
         label: "Company",
         icon: "fa-building",
         roles: ["company_admin", "hiring_manager"],
         section: "settings",
-        mobileDock: false,
         expandable: true,
         children: [
             {
@@ -218,48 +216,45 @@ const navItems: NavItem[] = [
                 label: "Settings",
                 icon: "fa-buildings",
                 roles: ["company_admin", "hiring_manager"],
-                section: "management",
-                mobileDock: false,
             },
             {
                 href: "/portal/company/team",
                 label: "Team",
                 icon: "fa-user-group",
                 roles: ["company_admin", "hiring_manager"],
-                section: "management",
-                mobileDock: false,
             },
         ],
     },
 ];
 
-function NavItem({
+// ─── Sub-Components ─────────────────────────────────────────────────────────
+
+function MemphisNavItem({
     item,
     isActive,
     badge,
     badges,
+    accent,
     level = 0,
 }: {
-    item: NavItem;
+    item: NavItemData;
     isActive: boolean;
     badge?: number;
     badges?: Record<string, number>;
+    accent: MemphisAccent;
     level?: number;
 }) {
     const pathname = usePathname();
     const [isExpanded, setIsExpanded] = useState(false);
     const hasChildren = item.children && item.children.length > 0;
 
-    // Check if any child is active to keep parent expanded
     const hasActiveChild = item.children?.some(
         (child) =>
             pathname === child.href || pathname.startsWith(child.href + "/"),
     );
 
     useEffect(() => {
-        if (hasActiveChild) {
-            setIsExpanded(true);
-        }
+        if (hasActiveChild) setIsExpanded(true);
     }, [hasActiveChild]);
 
     const handleClick = (e: React.MouseEvent) => {
@@ -269,47 +264,84 @@ function NavItem({
         }
     };
 
+    // ── Child item (level > 0) ──
+    if (level > 0) {
+        return (
+            <Link
+                href={item.href}
+                className={`
+                    group flex items-center gap-3 pl-16 pr-4 py-2.5
+                    border-l-4 transition-colors
+                    ${isActive
+                        ? `${ACCENT_BORDER[accent]} text-white`
+                        : "border-transparent text-cream/40 hover:text-cream/70 hover:bg-cream/5"
+                    }
+                `}
+            >
+                <span
+                    className={`w-2 h-2 flex-shrink-0 ${
+                        isActive ? ACCENT_BG[accent] : "bg-cream/20"
+                    }`}
+                />
+                <span className="text-xs font-bold uppercase tracking-wider flex-1">
+                    {item.label}
+                </span>
+                {badges?.[item.href] !== undefined && badges[item.href] > 0 && (
+                    <span className="w-5 h-5 flex items-center justify-center bg-coral text-[9px] font-black text-white">
+                        {badges[item.href] > 99 ? "99+" : badges[item.href]}
+                    </span>
+                )}
+            </Link>
+        );
+    }
+
+    // ── Top-level item ──
     const itemContent = (
         <>
-            {/* Active indicator bar */}
-            {isActive && level === 0 && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
-            )}
-
-            <span
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                    isActive
-                        ? "bg-primary text-primary-content"
-                        : "bg-base-200/50 text-base-content/60 group-hover:bg-base-300/70 group-hover:text-base-content"
+            {/* Icon box */}
+            <div
+                className={`w-9 h-9 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isActive || hasActiveChild
+                        ? `${ACCENT_BG[accent]} ${ACCENT_ON_BG[accent]}`
+                        : "bg-cream/5 text-cream/40 group-hover:bg-cream/10 group-hover:text-cream/60"
                 }`}
             >
-                <i className={`fa-duotone fa-regular ${item.icon} text-sm`}></i>
-            </span>
+                <i className={`fa-duotone fa-regular ${item.icon} text-sm`} />
+            </div>
 
-            <span className="flex-1">{item.label}</span>
+            {/* Label */}
+            <span
+                className={`text-sm uppercase tracking-wider flex-1 ${
+                    isActive || hasActiveChild
+                        ? "text-white font-black"
+                        : "text-cream/50 font-bold"
+                }`}
+            >
+                {item.label}
+            </span>
 
             {/* Keyboard shortcut hint */}
             {item.shortcut && (
-                <kbd className="kbd kbd-sm bg-base-100">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-cream/20 hidden xl:inline">
                     Alt+{item.shortcut}
-                </kbd>
+                </span>
             )}
 
-            {/* Badge for counts */}
+            {/* Badge */}
             {badge !== undefined && badge > 0 && (
-                <span className="badge badge-sm badge-primary">
+                <span className="w-6 h-6 flex items-center justify-center bg-coral text-[10px] font-black text-white">
                     {badge > 99 ? "99+" : badge}
                 </span>
             )}
 
-            {/* Expand/collapse icon */}
+            {/* Expand chevron */}
             {hasChildren && item.expandable && (
                 <span
                     className={`w-4 h-4 flex items-center justify-center transition-transform duration-200 ${
-                        isExpanded ? "rotate-90" : "rotate-0"
+                        isExpanded ? "rotate-90" : ""
                     }`}
                 >
-                    <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/40"></i>
+                    <i className="fa-solid fa-chevron-right text-[10px] text-cream/30" />
                 </span>
             )}
         </>
@@ -322,13 +354,11 @@ function NavItem({
                     type="button"
                     onClick={handleClick}
                     className={`
-                        group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
-                        transition-all duration-200 mb-0.5 w-full text-left
-                        ${level > 0 ? `ml-${level * 4} pl-${3 + level * 2}` : ""}
-                        ${
-                            hasActiveChild
-                                ? "bg-base-100 text-primary font-medium"
-                                : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
+                        group w-full flex items-center gap-3 px-4 py-3
+                        border-l-4 transition-colors text-left
+                        ${hasActiveChild
+                            ? `${ACCENT_BORDER[accent]} bg-cream/5`
+                            : "border-transparent hover:bg-cream/5"
                         }
                     `}
                 >
@@ -338,13 +368,11 @@ function NavItem({
                 <Link
                     href={item.href}
                     className={`
-                        group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
-                        transition-all duration-200 mb-0.5
-                        ${level > 0 ? `ml-${level * 4} pl-${3 + level * 2}` : ""}
-                        ${
-                            isActive
-                                ? "bg-base-100 text-primary font-medium"
-                                : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
+                        group flex items-center gap-3 px-4 py-3
+                        border-l-4 transition-colors
+                        ${isActive
+                            ? `${ACCENT_BORDER[accent]} bg-cream/5`
+                            : "border-transparent hover:bg-cream/5"
                         }
                     `}
                 >
@@ -352,11 +380,11 @@ function NavItem({
                 </Link>
             )}
 
-            {/* Render children */}
+            {/* Expanded children */}
             {hasChildren && isExpanded && (
-                <div className="ml-4">
+                <div className="mt-1 mb-2">
                     {item.children!.map((child) => (
-                        <NavItem
+                        <MemphisNavItem
                             key={child.href}
                             item={child}
                             isActive={
@@ -366,6 +394,7 @@ function NavItem({
                             }
                             badge={badges?.[child.href]}
                             badges={badges}
+                            accent={accent}
                             level={level + 1}
                         />
                     ))}
@@ -375,15 +404,18 @@ function NavItem({
     );
 }
 
-function SectionHeader({ title }: { title: string }) {
+function MemphisSectionHeader({ title }: { title: string }) {
     return (
-        <div className="px-3 pt-4 pb-2">
-            <span className="text-xs font-semibold text-base-content/40 uppercase tracking-wider">
+        <div className="px-4 pt-6 pb-2 flex items-center gap-3">
+            <span className="text-[10px] font-black text-cream/30 uppercase tracking-[0.2em]">
                 {title}
             </span>
+            <div className="flex-1 h-px bg-cream/10" />
         </div>
     );
 }
+
+// ─── Main Sidebar Component ─────────────────────────────────────────────────
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -391,10 +423,14 @@ export function Sidebar() {
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
     const { getToken } = useAuth();
 
-    // Badge counts (could be fetched from API)
     const [badges, setBadges] = useState<Record<string, number>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const activityStatus = useActivityStatus({ enabled: Boolean(currentUserId) });
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const activityStatus = useActivityStatus({
+        enabled: Boolean(currentUserId),
+    });
+
+    // ── Fetch unread message count ──────────────────────────────────────
 
     const fetchUnreadCount = useCallback(async () => {
         const token = await getToken();
@@ -402,69 +438,50 @@ export function Sidebar() {
         const client = createAuthenticatedClient(token);
 
         try {
-            // Fetch unread messages from inbox
             const inboxResponse: any = await client.get("/chat/conversations", {
                 params: { filter: "inbox", limit: 100 },
             });
-
             const inboxRows = (inboxResponse?.data || []) as Array<{
                 unread_count?: number;
                 participant?: { unread_count?: number };
             }>;
-
             const unreadCount = inboxRows.reduce((sum, row) => {
-                // Handle both old and new API response formats
                 const count =
                     row.participant?.unread_count || row.unread_count || 0;
                 return sum + count;
             }, 0);
 
-            // Try to fetch pending requests - but don't fail if this fails
             let requestCount = 0;
             try {
                 const requestsResponse: any = await client.get(
                     "/chat/conversations",
-                    {
-                        params: { filter: "requests", limit: 100 },
-                    },
+                    { params: { filter: "requests", limit: 100 } },
                 );
-
                 const requestRows = (requestsResponse?.data || []) as Array<{
                     participant?: { request_state?: string };
-                    request_state?: string; // fallback for old format
+                    request_state?: string;
                 }>;
-
                 requestCount = requestRows.filter((row) => {
                     const state =
                         row.participant?.request_state || row.request_state;
                     return state === "pending";
                 }).length;
-            } catch (requestError) {
-                console.warn(
-                    "Failed to fetch request count, continuing with unread messages only:",
-                    requestError,
-                );
+            } catch {
+                // Silently fall back
             }
 
-            // Total badge count is unread messages + pending requests
-            const totalBadgeCount = unreadCount + requestCount;
-
             setBadges((prev) => ({
                 ...prev,
-                "/portal/messages": totalBadgeCount,
+                "/portal/messages": unreadCount + requestCount,
             }));
-        } catch (error) {
-            console.error("Failed to fetch message counts:", error);
-            // Fallback to 0 to prevent UI from breaking
-            setBadges((prev) => ({
-                ...prev,
-                "/portal/messages": 0,
-            }));
+        } catch {
+            setBadges((prev) => ({ ...prev, "/portal/messages": 0 }));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Fetch notification counts by category for sidebar badges
+    // ── Fetch notification counts ───────────────────────────────────────
+
     const fetchNotificationCounts = useCallback(async () => {
         const token = await getToken();
         if (!token) return;
@@ -475,8 +492,6 @@ export function Sidebar() {
                 "/notifications/counts-by-category",
             );
             const counts = response?.data || {};
-
-            // Map notification categories to sidebar routes
             setBadges((prev) => ({
                 ...prev,
                 "/portal/applications": counts.application || 0,
@@ -486,11 +501,13 @@ export function Sidebar() {
                 "/portal/invitations": counts.invitation || 0,
                 "/portal/company-invitations": counts.company_invitation || 0,
             }));
-        } catch (error) {
-            console.warn("Failed to fetch notification counts:", error);
+        } catch {
+            // Silently fall back
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // ── Initialize data + polling ───────────────────────────────────────
 
     useEffect(() => {
         let mounted = true;
@@ -502,14 +519,12 @@ export function Sidebar() {
             await fetchNotificationCounts();
         };
         load();
-
-        // Poll notification counts every 30 seconds
         const interval = setInterval(fetchNotificationCounts, 30000);
         return () => {
             mounted = false;
             clearInterval(interval);
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchUnreadCount, fetchNotificationCounts]);
 
     useEffect(() => {
@@ -518,6 +533,8 @@ export function Sidebar() {
             unregister();
         };
     }, [fetchUnreadCount]);
+
+    // ── Chat gateway for real-time badge updates ────────────────────────
 
     useChatGateway({
         enabled: Boolean(currentUserId),
@@ -543,8 +560,9 @@ export function Sidebar() {
         },
     });
 
-    // Filter items based on user role
-    const filterByRole = (item: NavItem) => {
+    // ── Role-based filtering ────────────────────────────────────────────
+
+    const filterByRole = (item: NavItemData) => {
         if (item.roles.includes("all")) return true;
         if (isAdmin) return true;
         if (isRecruiter && item.roles.includes("recruiter")) return true;
@@ -557,15 +575,15 @@ export function Sidebar() {
         return false;
     };
 
-    // Recursively filter nav items and their children
-    const filterNavItems = (items: NavItem[]): NavItem[] => {
+    const filterNavItems = (items: NavItemData[]): NavItemData[] => {
         return items.filter(filterByRole).map((item) => ({
             ...item,
-            children: item.children ? filterNavItems(item.children) : undefined,
+            children: item.children
+                ? filterNavItems(item.children)
+                : undefined,
         }));
     };
 
-    // Group items by section
     const groupedItems = useMemo(() => {
         const filtered = filterNavItems(navItems);
         return {
@@ -573,19 +591,42 @@ export function Sidebar() {
             management: filtered.filter((i) => i.section === "management"),
             settings: filtered.filter((i) => i.section === "settings"),
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAdmin, isRecruiter, isCompanyUser]);
 
-    // Keyboard shortcuts
+    // ── Accent color assignment (cycles across all top-level items) ─────
+
+    const itemAccents = useMemo(() => {
+        const accents = new Map<string, MemphisAccent>();
+        let idx = 0;
+        const allItems = [
+            ...groupedItems.main,
+            ...groupedItems.management,
+            ...groupedItems.settings,
+        ];
+        for (const item of allItems) {
+            accents.set(item.href, ACCENT_CYCLE[idx % ACCENT_CYCLE.length]);
+            idx++;
+        }
+        return accents;
+    }, [groupedItems]);
+
+    // ── Keyboard shortcuts ──────────────────────────────────────────────
+
     const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
     const handleHelpToggle = useCallback(
         () => setShowShortcutsHelp((prev) => !prev),
         [],
     );
 
-    // Flatten all filtered items (including children) that have shortcuts
     const shortcutItems = useMemo(() => {
-        const flat: { href: string; label: string; shortcut: string; section?: string }[] = [];
-        const collect = (items: NavItem[]) => {
+        const flat: {
+            href: string;
+            label: string;
+            shortcut: string;
+            section?: string;
+        }[] = [];
+        const collect = (items: NavItemData[]) => {
             for (const item of items) {
                 if (item.shortcut) {
                     flat.push({
@@ -608,125 +649,194 @@ export function Sidebar() {
 
     useKeyboardShortcuts(shortcutItems, handleHelpToggle);
 
+    // ── Close mobile sidebar on route change ────────────────────────────
+
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [pathname]);
+
+    // ── Render helpers ──────────────────────────────────────────────────
+
+    const renderItems = (items: NavItemData[]) =>
+        items.map((item) => {
+            const accent = itemAccents.get(item.href) || "coral";
+            const itemBadge =
+                item.expandable && item.children
+                    ? item.children.reduce(
+                          (sum, child) => sum + (badges[child.href] || 0),
+                          0,
+                      )
+                    : badges[item.href];
+
+            return (
+                <MemphisNavItem
+                    key={item.href}
+                    item={item}
+                    isActive={
+                        pathname === item.href ||
+                        (item.href !== "/portal/dashboard" &&
+                            !item.href.startsWith("#") &&
+                            pathname.startsWith(item.href))
+                    }
+                    badge={itemBadge}
+                    badges={badges}
+                    accent={accent}
+                />
+            );
+        });
+
+    // ── Render ──────────────────────────────────────────────────────────
+
     return (
         <>
-            <div className="drawer-side z-30 overflow-visible hidden md:block bg-base-200 h-[calc(100vh-4rem)]">
-                <label
-                    htmlFor="sidebar-drawer"
-                    className="drawer-overlay"
-                ></label>
-                <aside className=" w-64 flex flex-col border-r border-base-200">
-                    {/* Navigation */}
-                    <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin">
-                        {/* Main Section */}
-                        {groupedItems.main.length > 0 && (
-                            <div>
-                                {groupedItems.main.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            (item.href !==
-                                                "/portal/dashboard" &&
-                                                pathname.startsWith(item.href))
-                                        }
-                                        badge={badges[item.href]}
-                                        badges={badges}
-                                    />
-                                ))}
-                            </div>
-                        )}
+            {/* ── Mobile hamburger button ── */}
+            <button
+                onClick={() => setMobileOpen(true)}
+                className="fixed left-4 z-40 lg:hidden w-12 h-12 flex items-center justify-center border-interactive border-coral bg-dark text-coral transition-transform hover:scale-105"
+                style={{ top: "calc(var(--header-h, 4rem) + 1rem)" }}
+                aria-label="Open navigation"
+            >
+                <i className="fa-duotone fa-regular fa-bars text-lg" />
+            </button>
 
-                        {/* Management Section */}
-                        {groupedItems.management.length > 0 && (
-                            <div>
-                                <SectionHeader title="Management" />
-                                {groupedItems.management.map((item) => {
-                                    // For expandable parents, sum child badges
-                                    const itemBadge = item.expandable && item.children
-                                        ? item.children.reduce((sum, child) => sum + (badges[child.href] || 0), 0)
-                                        : badges[item.href];
-                                    return (
-                                        <NavItem
-                                            key={item.href}
-                                            item={item}
-                                            isActive={
-                                                pathname === item.href ||
-                                                pathname.startsWith(item.href)
-                                            }
-                                            badge={itemBadge}
-                                            badges={badges}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        )}
+            {/* ── Mobile overlay ── */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-dark/70 lg:hidden"
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
 
-                        {/* Settings Section */}
-                        {groupedItems.settings.length > 0 && (
-                            <div>
-                                <SectionHeader title="Settings" />
-                                {groupedItems.settings.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            pathname.startsWith(item.href)
-                                        }
-                                        badge={badges[item.href]}
-                                        badges={badges}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </nav>
-                </aside>
-            </div>
-            {/* Mobile Dock - visible only on small screens */}
-            <div className="md:hidden fixed inset-x-0 bottom-0 z-50">
-                <div className="dock bg-base-100 border-t border-base-200">
+            {/* ── Sidebar ── */}
+            <aside
+                className={`
+                    fixed left-0 z-50 sidebar-positioned
+                    lg:z-40
+                    w-[280px] flex flex-col border-r-4 border-coral bg-dark
+                    transition-transform duration-300 ease-out
+                    lg:translate-x-0
+                    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+                `}
+            >
+                {/* Mobile close button */}
+                <div className="lg:hidden flex items-center justify-end px-5 py-3 border-b-4 border-cream/10">
+                    <button
+                        onClick={() => setMobileOpen(false)}
+                        className="w-8 h-8 flex items-center justify-center border-interactive border-coral text-coral transition-transform hover:scale-110"
+                        aria-label="Close navigation"
+                    >
+                        <i className="fa-solid fa-xmark text-sm" />
+                    </button>
+                </div>
+
+                {/* Memphis color strip */}
+                <ColorBar height="h-1" />
+
+                {/* Navigation */}
+                <nav className="flex-1 overflow-y-auto py-2">
+                    {/* Main section */}
+                    {groupedItems.main.length > 0 && (
+                        <div>{renderItems(groupedItems.main)}</div>
+                    )}
+
+                    {/* Management section */}
+                    {groupedItems.management.length > 0 && (
+                        <div>
+                            <MemphisSectionHeader title="Management" />
+                            {renderItems(groupedItems.management)}
+                        </div>
+                    )}
+
+                    {/* Settings section */}
+                    {groupedItems.settings.length > 0 && (
+                        <div>
+                            <MemphisSectionHeader title="Settings" />
+                            {renderItems(groupedItems.settings)}
+                        </div>
+                    )}
+                </nav>
+
+                {/* Memphis color strip (reversed) */}
+                <ColorBar height="h-1" className="flex-row-reverse" />
+
+                {/* Keyboard shortcuts hint */}
+                <div className="px-5 py-4 border-t-4 border-cream/10">
+                    <button
+                        onClick={handleHelpToggle}
+                        className="flex items-center gap-2 text-cream/30 hover:text-cream/50 transition-colors"
+                    >
+                        <i className="fa-duotone fa-regular fa-keyboard text-xs" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
+                            Keyboard Shortcuts
+                        </span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* ── Mobile bottom dock ── */}
+            <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-dark border-t-4 border-coral">
+                <div className="flex items-center justify-around px-1 py-2">
                     {(() => {
-                        // Filter dock items by role and resolve hrefs for expandable parents
                         const dockItems = navItems
                             .filter((i) => i.mobileDock && filterByRole(i))
                             .map((item) => {
-                                // For expandable parents, navigate to first child route
-                                const href = item.expandable && item.children?.length
-                                    ? item.children[0].href
-                                    : item.href;
-                                const isActive = pathname === href ||
+                                const href =
+                                    item.expandable && item.children?.length
+                                        ? item.children[0].href
+                                        : item.href;
+                                const isItemActive =
+                                    pathname === href ||
                                     pathname.startsWith(href + "/") ||
-                                    // Also check all children for active state
-                                    (item.children?.some(c => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false);
+                                    (item.children?.some(
+                                        (c) =>
+                                            pathname === c.href ||
+                                            pathname.startsWith(c.href + "/"),
+                                    ) ??
+                                        false);
+                                const accent =
+                                    itemAccents.get(item.href) || "coral";
 
                                 return (
                                     <button
                                         key={item.href}
                                         type="button"
                                         onClick={() => router.push(href)}
-                                        className={isActive ? "dock-active" : ""}
+                                        className="flex flex-col items-center gap-1 px-2 py-1 transition-colors"
                                         title={item.label}
                                     >
-                                        <i className={`fa-duotone fa-regular ${item.icon}`}></i>
-                                        <span className="dock-label">{item.label}</span>
+                                        <div
+                                            className={`w-8 h-8 flex items-center justify-center ${
+                                                isItemActive
+                                                    ? `${ACCENT_BG[accent]} ${ACCENT_ON_BG[accent]}`
+                                                    : "text-cream/40"
+                                            }`}
+                                        >
+                                            <i
+                                                className={`fa-duotone fa-regular ${item.icon} text-sm`}
+                                            />
+                                        </div>
+                                        <span
+                                            className={`text-[8px] font-black uppercase tracking-wider ${
+                                                isItemActive
+                                                    ? "text-white"
+                                                    : "text-cream/40"
+                                            }`}
+                                        >
+                                            {item.label}
+                                        </span>
                                     </button>
                                 );
                             });
 
-                        // Build "More" menu: flatten children, skip # parents, filter by role
-                        const moreItems: NavItem[] = [];
+                        // "More" overflow menu
+                        const moreItems: NavItemData[] = [];
                         navItems.forEach((item) => {
-                            if (item.mobileDock) return; // already in dock
+                            if (item.mobileDock) return;
                             if (!filterByRole(item)) return;
-
                             if (item.expandable && item.children?.length) {
-                                // Flatten: add children directly instead of the # parent
                                 item.children.forEach((child) => {
-                                    if (filterByRole(child)) {
+                                    if (filterByRole(child))
                                         moreItems.push(child);
-                                    }
                                 });
                             } else if (!item.href.startsWith("#")) {
                                 moreItems.push(item);
@@ -735,16 +845,21 @@ export function Sidebar() {
 
                         dockItems.push(
                             <details
-                                key="menu"
+                                key="more"
                                 className="dropdown dropdown-top dropdown-center"
                             >
                                 <summary
-                                    className="btn btn-ghost btn-circle dock-item"
+                                    className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer list-none"
                                     title="More options"
                                 >
-                                    <i className="fa-duotone fa-regular fa-ellipsis text-lg"></i>
+                                    <div className="w-8 h-8 flex items-center justify-center text-cream/40">
+                                        <i className="fa-duotone fa-regular fa-ellipsis text-lg" />
+                                    </div>
+                                    <span className="text-[8px] font-black uppercase tracking-wider text-cream/40">
+                                        More
+                                    </span>
                                 </summary>
-                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-1">
+                                <ul className="dropdown-content z-50 mb-2 p-2 w-52 bg-dark border-4 border-coral">
                                     {moreItems.map((item) => (
                                         <li key={item.href}>
                                             <button
@@ -758,12 +873,26 @@ export function Sidebar() {
                                                     if (details)
                                                         details.open = false;
                                                 }}
-                                                className={`flex items-center gap-3 ${pathname === item.href || pathname.startsWith(item.href) ? "active" : ""}`}
+                                                className={`
+                                                    w-full flex items-center gap-3 px-4 py-2.5 text-left
+                                                    transition-colors hover:bg-cream/5
+                                                    ${
+                                                        pathname ===
+                                                            item.href ||
+                                                        pathname.startsWith(
+                                                            item.href,
+                                                        )
+                                                            ? "text-coral"
+                                                            : "text-cream/60"
+                                                    }
+                                                `}
                                             >
                                                 <i
-                                                    className={`fa-duotone fa-regular ${item.icon}`}
-                                                ></i>
-                                                {item.label}
+                                                    className={`fa-duotone fa-regular ${item.icon} text-sm`}
+                                                />
+                                                <span className="text-xs font-bold uppercase tracking-wider">
+                                                    {item.label}
+                                                </span>
                                             </button>
                                         </li>
                                     ))}
@@ -776,7 +905,7 @@ export function Sidebar() {
                 </div>
             </div>
 
-            {/* Keyboard shortcuts help modal */}
+            {/* Keyboard shortcuts modal */}
             <KeyboardShortcutsModal
                 open={showShortcutsHelp}
                 onClose={() => setShowShortcutsHelp(false)}

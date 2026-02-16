@@ -86,7 +86,7 @@ const timelineEvents = [
         title: "The Future Is Now",
         text: "AI-powered matching, real-time analytics, and integrated payment flows make split-fee recruiting faster, fairer, and more profitable than ever.",
         color: "text-accent",
-        border: "border-accent/30",
+        border: "border-yellow/30",
         bg: "bg-accent/10",
         dotBg: "bg-accent",
     },
@@ -129,7 +129,7 @@ const dataModules = [
             "When recruiters collaborate instead of compete, candidates get better representation, clearer communication, and fewer duplicate outreaches.",
         stat: "89% satisfaction",
         color: "text-accent",
-        borderColor: "border-accent/20",
+        borderColor: "border-yellow/20",
     },
     {
         icon: "fa-duotone fa-regular fa-money-bill-transfer",
@@ -221,16 +221,19 @@ export default function ArticleFivePage() {
                         </h1>
 
                         <p className="hero-subtext text-lg md:text-xl text-[#e5e7eb]/60 mb-10 max-w-3xl leading-relaxed font-light opacity-0">
-                            The recruiting industry has operated the same way for
-                            decades. Isolated firms, opaque fees, and candidates
-                            caught in the middle. Split-fee models are rewriting
-                            those rules -- here&apos;s how the data tells the story.
+                            The recruiting industry has operated the same way
+                            for decades. Isolated firms, opaque fees, and
+                            candidates caught in the middle. Split-fee models
+                            are rewriting those rules -- here&apos;s how the
+                            data tells the story.
                         </p>
 
                         {/* Author byline */}
                         <div className="hero-byline flex items-center gap-4 opacity-0">
                             <div className="w-12 h-12 rounded-lg border border-info/30 bg-info/10 flex items-center justify-center">
-                                <span className="font-mono font-bold text-sm text-info">EN</span>
+                                <span className="font-mono font-bold text-sm text-info">
+                                    EN
+                                </span>
                             </div>
                             <div>
                                 <div className="font-bold text-sm text-[#e5e7eb]">
@@ -256,7 +259,9 @@ export default function ArticleFivePage() {
                             className="signal-card border-r border-b border-[#27272a]/50 last:border-r-0 bg-[#18181b]/60 p-6 md:p-8 opacity-0"
                         >
                             <div className="flex items-center gap-2 mb-3">
-                                <i className={`${stat.icon} text-info text-sm`} />
+                                <i
+                                    className={`${stat.icon} text-info text-sm`}
+                                />
                                 <span className="font-mono text-[10px] uppercase tracking-wider text-[#e5e7eb]/40">
                                     {stat.label}
                                 </span>
@@ -295,22 +300,30 @@ export default function ArticleFivePage() {
                             </h2>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                For most of its history, the recruiting industry has been a collection of isolated
-                                silos. Agency A works their clients. Agency B works theirs. An independent recruiter
-                                might know the perfect candidate for a role they&apos;ll never see -- because it&apos;s
-                                locked inside someone else&apos;s network.
+                                For most of its history, the recruiting industry
+                                has been a collection of isolated silos. Agency
+                                A works their clients. Agency B works theirs. An
+                                independent recruiter might know the perfect
+                                candidate for a role they&apos;ll never see --
+                                because it&apos;s locked inside someone
+                                else&apos;s network.
                             </p>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                Split-fee recruiting changes that equation entirely. Instead of competing in darkness,
-                                recruiters collaborate in the open. One recruiter brings the role. Another brings the
-                                candidate. The fee is split according to pre-agreed terms. Everyone wins -- especially
-                                the candidate, who gets represented by the recruiter best positioned to advocate for them.
+                                Split-fee recruiting changes that equation
+                                entirely. Instead of competing in darkness,
+                                recruiters collaborate in the open. One
+                                recruiter brings the role. Another brings the
+                                candidate. The fee is split according to
+                                pre-agreed terms. Everyone wins -- especially
+                                the candidate, who gets represented by the
+                                recruiter best positioned to advocate for them.
                             </p>
 
                             <p className="text-lg leading-relaxed text-[#e5e7eb]/70">
-                                It sounds simple. And conceptually, it is. But the execution has always been the hard
-                                part. Until now.
+                                It sounds simple. And conceptually, it is. But
+                                the execution has always been the hard part.
+                                Until now.
                             </p>
                         </div>
                     </div>
@@ -334,9 +347,12 @@ export default function ArticleFivePage() {
                         </div>
 
                         <p className="text-xl md:text-2xl font-bold leading-relaxed">
-                            <span className="text-info/40 font-mono mr-2">&gt;</span>
-                            The best candidate for a role doesn&apos;t care which recruiter
-                            found the listing. They care about getting hired.{" "}
+                            <span className="text-info/40 font-mono mr-2">
+                                &gt;
+                            </span>
+                            The best candidate for a role doesn&apos;t care
+                            which recruiter found the listing. They care about
+                            getting hired.{" "}
                             <span className="text-info">
                                 Split-fee models make that happen faster.
                             </span>
@@ -364,7 +380,9 @@ export default function ArticleFivePage() {
                             </span>
                             <h2 className="text-3xl md:text-5xl font-bold mb-4">
                                 What Changed?{" "}
-                                <span className="text-warning">Everything.</span>
+                                <span className="text-warning">
+                                    Everything.
+                                </span>
                             </h2>
                         </div>
 
@@ -376,7 +394,9 @@ export default function ArticleFivePage() {
                                         <i className="fa-duotone fa-regular fa-clock-rotate-left text-error" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-lg">The Old Way</h3>
+                                        <h3 className="font-bold text-lg">
+                                            The Old Way
+                                        </h3>
                                         <span className="font-mono text-[10px] uppercase tracking-wider text-error/50">
                                             legacy-mode
                                         </span>
@@ -392,7 +412,10 @@ export default function ArticleFivePage() {
                                         "Payment disputes are common and resolution is painful",
                                         "Independent recruiters are locked out of major opportunities",
                                     ].map((item, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-sm text-[#e5e7eb]/60 leading-relaxed">
+                                        <li
+                                            key={i}
+                                            className="flex items-start gap-3 text-sm text-[#e5e7eb]/60 leading-relaxed"
+                                        >
                                             <i className="fa-duotone fa-regular fa-xmark text-error/60 mt-0.5 flex-shrink-0" />
                                             {item}
                                         </li>
@@ -407,7 +430,9 @@ export default function ArticleFivePage() {
                                         <i className="fa-duotone fa-regular fa-rocket text-success" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-lg">The New Way</h3>
+                                        <h3 className="font-bold text-lg">
+                                            The New Way
+                                        </h3>
                                         <span className="font-mono text-[10px] uppercase tracking-wider text-success/50">
                                             network-mode
                                         </span>
@@ -423,7 +448,10 @@ export default function ArticleFivePage() {
                                         "Payments are automated based on verified placement milestones",
                                         "Any recruiter with the right skills can access the right opportunities",
                                     ].map((item, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-sm text-[#e5e7eb]/60 leading-relaxed">
+                                        <li
+                                            key={i}
+                                            className="flex items-start gap-3 text-sm text-[#e5e7eb]/60 leading-relaxed"
+                                        >
                                             <i className="fa-duotone fa-regular fa-check text-success/80 mt-0.5 flex-shrink-0" />
                                             {item}
                                         </li>
@@ -438,7 +466,10 @@ export default function ArticleFivePage() {
             {/* ================================================================
                 IMAGE BREAK 1 - Aerial / observatory view
                ================================================================ */}
-            <section className="relative overflow-hidden" style={{ minHeight: "400px" }}>
+            <section
+                className="relative overflow-hidden"
+                style={{ minHeight: "400px" }}
+            >
                 <div className="absolute inset-0">
                     <img
                         src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1600&q=80"
@@ -468,8 +499,8 @@ export default function ArticleFivePage() {
                         </div>
                         <p className="text-2xl md:text-4xl font-bold leading-tight text-[#e5e7eb]">
                             Collaboration beats{" "}
-                            <span className="text-info">competition</span>{" "}
-                            -- every single time.
+                            <span className="text-info">competition</span> --
+                            every single time.
                         </p>
                     </div>
                 </div>
@@ -500,8 +531,8 @@ export default function ArticleFivePage() {
                                 <span className="text-accent">Got Here</span>
                             </h2>
                             <p className="text-lg text-[#e5e7eb]/50 max-w-2xl mx-auto">
-                                Two decades of evolution, from handshake deals to
-                                AI-powered ecosystems.
+                                Two decades of evolution, from handshake deals
+                                to AI-powered ecosystems.
                             </p>
                         </div>
 
@@ -513,17 +544,24 @@ export default function ArticleFivePage() {
                                 >
                                     {/* Year column with connector */}
                                     <div className="flex flex-col items-center flex-shrink-0">
-                                        <div className={`w-16 md:w-20 py-2 text-center font-mono font-bold text-sm md:text-base rounded-lg border ${event.border} ${event.bg} ${event.color}`}>
+                                        <div
+                                            className={`w-16 md:w-20 py-2 text-center font-mono font-bold text-sm md:text-base rounded-lg border ${event.border} ${event.bg} ${event.color}`}
+                                        >
                                             {event.year}
                                         </div>
                                         {index < timelineEvents.length - 1 && (
-                                            <div className="w-px flex-grow bg-[#27272a]/50" style={{ minHeight: "40px" }} />
+                                            <div
+                                                className="w-px flex-grow bg-[#27272a]/50"
+                                                style={{ minHeight: "40px" }}
+                                            />
                                         )}
                                     </div>
 
                                     {/* Content */}
                                     <div className="pb-8 md:pb-10">
-                                        <h3 className={`font-bold text-lg mb-2 ${event.color}`}>
+                                        <h3
+                                            className={`font-bold text-lg mb-2 ${event.color}`}
+                                        >
                                             {event.title}
                                         </h3>
                                         <p className="text-sm md:text-base leading-relaxed text-[#e5e7eb]/60">
@@ -554,27 +592,37 @@ export default function ArticleFivePage() {
 
                             <h2 className="text-3xl md:text-4xl font-bold mb-6">
                                 Why It{" "}
-                                <span className="text-success">Actually Works</span>
+                                <span className="text-success">
+                                    Actually Works
+                                </span>
                             </h2>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                The skeptics have a point -- split-fee recruiting has been tried before. Networks
-                                of recruiters sharing roles over email lists and LinkedIn groups have existed for
-                                years. Most of them fizzled. So what&apos;s different now?
+                                The skeptics have a point -- split-fee
+                                recruiting has been tried before. Networks of
+                                recruiters sharing roles over email lists and
+                                LinkedIn groups have existed for years. Most of
+                                them fizzled. So what&apos;s different now?
                             </p>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                The answer is infrastructure. Previous split-fee attempts failed because they lacked
-                                the underlying technology to enforce transparency, track contributions, and automate
-                                payments. Recruiters had to trust each other blindly. Companies had no visibility.
-                                Candidates were an afterthought.
+                                The answer is infrastructure. Previous split-fee
+                                attempts failed because they lacked the
+                                underlying technology to enforce transparency,
+                                track contributions, and automate payments.
+                                Recruiters had to trust each other blindly.
+                                Companies had no visibility. Candidates were an
+                                afterthought.
                             </p>
 
                             <p className="text-lg leading-relaxed text-[#e5e7eb]/70">
-                                Modern platforms solve this by treating the split-fee relationship as a first-class
-                                citizen. Every interaction is tracked. Every contribution is visible. Every payment
-                                is tied to a verified outcome. When the infrastructure handles trust, collaboration
-                                becomes the default instead of the exception.
+                                Modern platforms solve this by treating the
+                                split-fee relationship as a first-class citizen.
+                                Every interaction is tracked. Every contribution
+                                is visible. Every payment is tied to a verified
+                                outcome. When the infrastructure handles trust,
+                                collaboration becomes the default instead of the
+                                exception.
                             </p>
                         </div>
                     </div>
@@ -598,10 +646,14 @@ export default function ArticleFivePage() {
                         </div>
 
                         <p className="text-xl md:text-2xl font-bold leading-relaxed">
-                            <span className="text-warning/40 font-mono mr-2">&gt;</span>
-                            Previous split-fee attempts failed because they lacked infrastructure.{" "}
+                            <span className="text-warning/40 font-mono mr-2">
+                                &gt;
+                            </span>
+                            Previous split-fee attempts failed because they
+                            lacked infrastructure.{" "}
                             <span className="text-warning">
-                                When platforms handle trust, collaboration becomes the default.
+                                When platforms handle trust, collaboration
+                                becomes the default.
                             </span>
                         </p>
 
@@ -630,8 +682,8 @@ export default function ArticleFivePage() {
                                 <span className="text-info">Benefits</span>
                             </h2>
                             <p className="text-lg text-[#e5e7eb]/50 max-w-2xl mx-auto">
-                                Every dimension of the split-fee model, monitored
-                                and validated across the network.
+                                Every dimension of the split-fee model,
+                                monitored and validated across the network.
                             </p>
                         </div>
 
@@ -642,8 +694,12 @@ export default function ArticleFivePage() {
                                     className={`module-card border ${mod.borderColor} bg-[#18181b]/40 rounded-xl p-6 opacity-0`}
                                 >
                                     <div className="flex items-center gap-3 mb-4">
-                                        <i className={`${mod.icon} text-xl ${mod.color}`} />
-                                        <h3 className="font-bold">{mod.title}</h3>
+                                        <i
+                                            className={`${mod.icon} text-xl ${mod.color}`}
+                                        />
+                                        <h3 className="font-bold">
+                                            {mod.title}
+                                        </h3>
                                     </div>
                                     <p className="text-sm text-[#e5e7eb]/50 mb-4 leading-relaxed">
                                         {mod.description}
@@ -664,7 +720,10 @@ export default function ArticleFivePage() {
             {/* ================================================================
                 IMAGE BREAK 2 - Observatory view
                ================================================================ */}
-            <section className="relative overflow-hidden" style={{ minHeight: "350px" }}>
+            <section
+                className="relative overflow-hidden"
+                style={{ minHeight: "350px" }}
+            >
                 <div className="absolute inset-0">
                     <img
                         src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=1600&q=80"
@@ -721,29 +780,39 @@ export default function ArticleFivePage() {
                             </h2>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                The split-fee model is still early. Most of the recruiting industry hasn&apos;t
-                                adopted collaborative platforms yet. But the trajectory is clear. The firms
-                                and independent recruiters who embrace open collaboration now are building the
-                                networks that will dominate the next decade.
+                                The split-fee model is still early. Most of the
+                                recruiting industry hasn&apos;t adopted
+                                collaborative platforms yet. But the trajectory
+                                is clear. The firms and independent recruiters
+                                who embrace open collaboration now are building
+                                the networks that will dominate the next decade.
                             </p>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                AI will accelerate this shift. When platforms can automatically match the right
-                                recruiter to the right role based on track record, specialization, and network --
-                                the friction that once made split-fee deals impractical disappears entirely.
-                                Matching becomes instant. Trust becomes data-driven.
+                                AI will accelerate this shift. When platforms
+                                can automatically match the right recruiter to
+                                the right role based on track record,
+                                specialization, and network -- the friction that
+                                once made split-fee deals impractical disappears
+                                entirely. Matching becomes instant. Trust
+                                becomes data-driven.
                             </p>
 
                             <p className="text-lg leading-relaxed mb-6 text-[#e5e7eb]/70">
-                                For candidates, this means better representation. When multiple specialized
-                                recruiters can advocate for a candidate rather than a single generalist, the
-                                quality of opportunities and communication improves dramatically. The data
-                                already shows an 89% increase in candidate satisfaction on collaborative platforms.
+                                For candidates, this means better
+                                representation. When multiple specialized
+                                recruiters can advocate for a candidate rather
+                                than a single generalist, the quality of
+                                opportunities and communication improves
+                                dramatically. The data already shows an 89%
+                                increase in candidate satisfaction on
+                                collaborative platforms.
                             </p>
 
                             <p className="text-lg leading-relaxed text-[#e5e7eb]/70">
-                                The future of recruiting isn&apos;t solo. It&apos;s networked. It&apos;s transparent.
-                                And it&apos;s already here.
+                                The future of recruiting isn&apos;t solo.
+                                It&apos;s networked. It&apos;s transparent. And
+                                it&apos;s already here.
                             </p>
                         </div>
                     </div>
@@ -755,7 +824,7 @@ export default function ArticleFivePage() {
                ================================================================ */}
             <section className="bg-[#0a0a0c] text-[#e5e7eb] py-16 overflow-hidden">
                 <div className="container mx-auto px-4">
-                    <div className="terminal-quote max-w-4xl mx-auto border border-accent/20 bg-[#18181b]/60 rounded-xl p-8 md:p-12 relative opacity-0">
+                    <div className="terminal-quote max-w-4xl mx-auto border border-yellow/20 bg-[#18181b]/60 rounded-xl p-8 md:p-12 relative opacity-0">
                         {/* Terminal header */}
                         <div className="flex items-center gap-2 mb-6 pb-4 border-b border-[#27272a]/50">
                             <span className="w-3 h-3 rounded-full bg-error/60" />
@@ -767,10 +836,13 @@ export default function ArticleFivePage() {
                         </div>
 
                         <p className="text-xl md:text-2xl font-bold leading-relaxed">
-                            <span className="text-accent/40 font-mono mr-2">&gt;</span>
+                            <span className="text-accent/40 font-mono mr-2">
+                                &gt;
+                            </span>
                             The future of recruiting isn&apos;t solo.{" "}
                             <span className="text-accent">
-                                It&apos;s networked. It&apos;s transparent. And it&apos;s already here.
+                                It&apos;s networked. It&apos;s transparent. And
+                                it&apos;s already here.
                             </span>
                         </p>
 
@@ -802,13 +874,14 @@ export default function ArticleFivePage() {
 
                         <h2 className="text-4xl md:text-5xl font-bold mb-6">
                             Ready to See{" "}
-                            <span className="text-info">Split-Fee</span>{" "}
-                            In Action?
+                            <span className="text-info">Split-Fee</span> In
+                            Action?
                         </h2>
 
                         <p className="text-lg text-[#e5e7eb]/50 mb-10 max-w-xl mx-auto">
-                            Employment Networks powers the platforms making this future real.
-                            Pick your access point and enter the network.
+                            Employment Networks powers the platforms making this
+                            future real. Pick your access point and enter the
+                            network.
                         </p>
                     </div>
 
@@ -818,7 +891,9 @@ export default function ArticleFivePage() {
                             <div className="w-14 h-14 rounded-xl bg-info/10 flex items-center justify-center mx-auto mb-4">
                                 <i className="fa-duotone fa-regular fa-user-tie text-xl text-info" />
                             </div>
-                            <h3 className="font-bold text-base mb-2">Recruiters</h3>
+                            <h3 className="font-bold text-base mb-2">
+                                Recruiters
+                            </h3>
                             <p className="text-xs text-[#e5e7eb]/40 mb-5 font-mono">
                                 Access the split-fee marketplace
                             </p>
@@ -836,7 +911,9 @@ export default function ArticleFivePage() {
                             <div className="w-14 h-14 rounded-xl bg-warning/10 flex items-center justify-center mx-auto mb-4">
                                 <i className="fa-duotone fa-regular fa-building text-xl text-warning" />
                             </div>
-                            <h3 className="font-bold text-base mb-2">Companies</h3>
+                            <h3 className="font-bold text-base mb-2">
+                                Companies
+                            </h3>
                             <p className="text-xs text-[#e5e7eb]/40 mb-5 font-mono">
                                 Post roles, find vetted talent
                             </p>
@@ -854,7 +931,9 @@ export default function ArticleFivePage() {
                             <div className="w-14 h-14 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-4">
                                 <i className="fa-duotone fa-regular fa-user text-xl text-success" />
                             </div>
-                            <h3 className="font-bold text-base mb-2">Candidates</h3>
+                            <h3 className="font-bold text-base mb-2">
+                                Candidates
+                            </h3>
                             <p className="text-xs text-[#e5e7eb]/40 mb-5 font-mono">
                                 Free profile, real recruiters
                             </p>

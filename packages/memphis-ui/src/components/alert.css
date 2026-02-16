@@ -1,0 +1,206 @@
+.alert {
+    /* override the border style of Tailwind CSS Typography plugin */
+    border-width: var(--border);
+    border-color: var(--alert-border-color, var(--color-base-200));
+
+    @layer memphis.component {
+        border-style: solid;
+        --alert-border-color: var(--color-base-200);
+        @apply rounded-box text-base-content grid items-center gap-4 px-4 py-3;
+        background-color: var(--alert-color, var(--color-base-200));
+        justify-content: start;
+        justify-items: start;
+        grid-auto-flow: column;
+        grid-template-columns: auto;
+        text-align: start;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        background-size: auto, calc(var(--noise) * 100%);
+        background-image: none, var(--fx-noise);
+        box-shadow:
+            0 3px 0 -2px oklch(100% 0 0 / calc(var(--depth) * 0.08)) inset,
+            0 1px color-mix(in oklab,
+                color-mix(in oklab, #000 20%, var(--alert-color, var(--color-base-200))) calc(var(--depth) * 20%),
+                #0000),
+            0 4px 3px -2px oklch(0% 0 0 / calc(var(--depth) * 0.08));
+
+        &:has(:nth-child(2)) {
+            grid-template-columns: auto minmax(auto, 1fr);
+        }
+    }
+}
+
+.alert-info {
+    @layer memphis.modifier {
+        @apply text-info-content;
+        --alert-border-color: var(--color-info);
+        --alert-color: var(--color-info);
+    }
+}
+
+.alert-success {
+    @layer memphis.modifier {
+        @apply text-success-content;
+        --alert-border-color: var(--color-success);
+        --alert-color: var(--color-success);
+    }
+}
+
+.alert-warning {
+    @layer memphis.modifier {
+        @apply text-warning-content;
+        --alert-border-color: var(--color-warning);
+        --alert-color: var(--color-warning);
+    }
+}
+
+.alert-error {
+    @layer memphis.modifier {
+        @apply text-error-content;
+        --alert-border-color: var(--color-error);
+        --alert-color: var(--color-error);
+    }
+}
+
+.alert-soft {
+    @layer memphis.style {
+        color: var(--alert-color, var(--color-base-content));
+        background: color-mix(in oklab,
+                var(--alert-color, var(--color-base-content)) 8%,
+                var(--color-base-100));
+        --alert-border-color: color-mix(in oklab,
+                var(--alert-color, var(--color-base-content)) 10%,
+                var(--color-base-100));
+        box-shadow: none;
+        background-image: none;
+    }
+}
+
+.alert-outline {
+    @layer memphis.style {
+        @apply bg-transparent;
+        color: var(--alert-color);
+        box-shadow: none;
+        background-image: none;
+    }
+}
+
+.alert-dash {
+    @layer memphis.style {
+        @apply bg-transparent;
+        color: var(--alert-color);
+        border-style: dashed;
+        box-shadow: none;
+        background-image: none;
+    }
+}
+
+.alert-vertical {
+    @layer memphis.modifier {
+        justify-content: center;
+        justify-items: center;
+        grid-auto-flow: row;
+        grid-template-columns: auto;
+        text-align: center;
+
+        &:has(:nth-child(2)) {
+            grid-template-columns: auto;
+        }
+    }
+}
+
+.alert-horizontal {
+    @layer memphis.modifier {
+        justify-content: start;
+        justify-items: start;
+        grid-auto-flow: column;
+        grid-template-columns: auto;
+        text-align: start;
+
+        &:has(:nth-child(2)) {
+            grid-template-columns: auto minmax(auto, 1fr);
+        }
+    }
+}
+
+/* ═══ Memphis Alert Additions (generated) ═══ */
+
+.alert {
+  @layer memphis.modifier {
+    border: var(--border-interactive) solid var(--color-dark);
+    text-transform: uppercase;
+    letter-spacing: var(--ls);
+  }
+}
+
+.alert-coral {
+  @layer memphis.modifier {
+    background-color: var(--color-coral);
+    color: var(--color-neutral-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-teal {
+  @layer memphis.modifier {
+    background-color: var(--color-teal);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-yellow {
+  @layer memphis.modifier {
+    background-color: var(--color-yellow);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-purple {
+  @layer memphis.modifier {
+    background-color: var(--color-purple);
+    color: var(--color-neutral-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-dark {
+  @layer memphis.modifier {
+    background-color: var(--color-dark);
+    color: var(--color-neutral-content);
+    border-color: var(--color-dark);
+  }
+}
+
+.alert-soft.alert-coral {
+  @layer memphis.modifier {
+    background-color: var(--color-coral-light);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-soft.alert-teal {
+  @layer memphis.modifier {
+    background-color: var(--color-teal-light);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-soft.alert-yellow {
+  @layer memphis.modifier {
+    background-color: var(--color-yellow-light);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-soft.alert-purple {
+  @layer memphis.modifier {
+    background-color: var(--color-purple-light);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}
+.alert-soft.alert-dark {
+  @layer memphis.modifier {
+    background-color: var(--color-cream);
+    color: var(--color-base-content);
+    border-color: var(--color-dark);
+  }
+}

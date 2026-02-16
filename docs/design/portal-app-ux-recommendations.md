@@ -1278,9 +1278,9 @@ import { Line } from "react-chartjs-2";
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
     <button
         onClick={() => selectRole("recruiter")}
-        className={`card bg-base-100 border-2 transition-all hover:border-primary hover:shadow-lg ${
+        className={`card bg-base-100 border-2 transition-all hover:border-coral hover:shadow-lg ${
             selectedRole === "recruiter"
-                ? "border-primary ring-2 ring-primary/20"
+                ? "border-coral ring-2 ring-primary/20"
                 : "border-base-200"
         }`}
     >
@@ -1461,10 +1461,10 @@ import { Line } from "react-chartjs-2";
 #### 11.2 Improved Focus States
 
 ```tsx
-{/* Apply focus-visible utilities directly on interactive elements */}
-<button
-    className="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
->
+{
+    /* Apply focus-visible utilities directly on interactive elements */
+}
+<button className="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">
     Continue
 </button>;
 ```

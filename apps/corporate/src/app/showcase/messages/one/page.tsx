@@ -10,7 +10,13 @@ type UserRole = "recruiter" | "company" | "candidate" | "admin";
 
 const roleMeta: Record<
     UserRole,
-    { label: string; color: string; bgClass: string; textClass: string; icon: string }
+    {
+        label: string;
+        color: string;
+        bgClass: string;
+        textClass: string;
+        icon: string;
+    }
 > = {
     recruiter: {
         label: "Recruiter",
@@ -446,18 +452,22 @@ export default function MessagesOne() {
     const [filterRole, setFilterRole] = useState<UserRole | "all">("all");
     const [mobileShowThread, setMobileShowThread] = useState(false);
 
-    const selected = conversations.find((c) => c.id === selectedId) ?? conversations[0];
+    const selected =
+        conversations.find((c) => c.id === selectedId) ?? conversations[0];
 
     /* ── Filter conversations ─────────────────────────────────── */
     const filtered = conversations
         .filter((c) => {
             const matchesSearch =
                 !searchQuery ||
-                c.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                c.contact.name
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
                 c.messages.some((m) =>
                     m.text.toLowerCase().includes(searchQuery.toLowerCase()),
                 );
-            const matchesRole = filterRole === "all" || c.contact.role === filterRole;
+            const matchesRole =
+                filterRole === "all" || c.contact.role === filterRole;
             return matchesSearch && matchesRole;
         })
         .sort((a, b) => {
@@ -481,7 +491,10 @@ export default function MessagesOne() {
                     ? {
                           ...c,
                           unread: 0,
-                          messages: c.messages.map((m) => ({ ...m, read: true })),
+                          messages: c.messages.map((m) => ({
+                              ...m,
+                              read: true,
+                          })),
                       }
                     : c,
             ),
@@ -517,10 +530,8 @@ export default function MessagesOne() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             /* Header entrance */
             const headerTl = gsap.timeline({
@@ -556,14 +567,26 @@ export default function MessagesOne() {
             gsap.fromTo(
                 $1(".inbox-panel"),
                 { opacity: 0, x: -40 },
-                { opacity: 1, x: 0, duration: 0.7, ease: "power3.out", delay: 0.3 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.7,
+                    ease: "power3.out",
+                    delay: 0.3,
+                },
             );
 
             /* Thread panel slide */
             gsap.fromTo(
                 $1(".thread-panel"),
                 { opacity: 0, x: 40 },
-                { opacity: 1, x: 0, duration: 0.7, ease: "power3.out", delay: 0.4 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.7,
+                    ease: "power3.out",
+                    delay: 0.4,
+                },
             );
 
             /* Conversation items stagger */
@@ -616,7 +639,10 @@ export default function MessagesOne() {
     };
 
     return (
-        <main ref={mainRef} className="min-h-screen bg-base-100 overflow-hidden">
+        <main
+            ref={mainRef}
+            className="min-h-screen bg-base-100 overflow-hidden"
+        >
             {/* ═══════════════════════════════════════════════════════
                 HEADER — Editorial split-screen style
                ═══════════════════════════════════════════════════════ */}
@@ -624,7 +650,9 @@ export default function MessagesOne() {
                 {/* Diagonal accent bar */}
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
-                    style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
                 />
 
                 <div className="relative z-10 container mx-auto px-6 lg:px-12">
@@ -656,7 +684,9 @@ export default function MessagesOne() {
                                     <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
                                 </div>
                                 <div>
-                                    <div className="text-2xl font-black">{conversations.length}</div>
+                                    <div className="text-2xl font-black">
+                                        {conversations.length}
+                                    </div>
                                     <div className="text-xs uppercase tracking-wider opacity-60">
                                         Conversations
                                     </div>
@@ -667,7 +697,9 @@ export default function MessagesOne() {
                                     <i className="fa-duotone fa-regular fa-bell text-accent-content" />
                                 </div>
                                 <div>
-                                    <div className="text-2xl font-black">{totalUnread}</div>
+                                    <div className="text-2xl font-black">
+                                        {totalUnread}
+                                    </div>
                                     <div className="text-xs uppercase tracking-wider opacity-60">
                                         Unread
                                     </div>
@@ -679,7 +711,11 @@ export default function MessagesOne() {
                                 </div>
                                 <div>
                                     <div className="text-2xl font-black">
-                                        {conversations.filter((c) => c.contact.online).length}
+                                        {
+                                            conversations.filter(
+                                                (c) => c.contact.online,
+                                            ).length
+                                        }
                                     </div>
                                     <div className="text-xs uppercase tracking-wider opacity-60">
                                         Online Now
@@ -720,30 +756,40 @@ export default function MessagesOne() {
                                     type="text"
                                     placeholder="Search conversations..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="input input-sm w-full pl-9 bg-base-100 border-base-300 focus:border-primary focus:outline-none"
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                    className="input input-sm w-full pl-9 bg-base-100 border-base-300 focus:border-coral focus:outline-none"
                                 />
                             </div>
 
                             {/* Role filter pills */}
                             <div className="flex gap-1.5 flex-wrap">
-                                {(["all", "recruiter", "company", "candidate", "admin"] as const).map(
-                                    (role) => (
-                                        <button
-                                            key={role}
-                                            onClick={() => setFilterRole(role)}
-                                            className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
-                                                filterRole === role
-                                                    ? role === "all"
-                                                        ? "bg-neutral text-neutral-content"
-                                                        : roleMeta[role].bgClass
-                                                    : "bg-base-100 text-base-content/60 hover:bg-base-300"
-                                            }`}
-                                        >
-                                            {role === "all" ? "All" : roleMeta[role].label}
-                                        </button>
-                                    ),
-                                )}
+                                {(
+                                    [
+                                        "all",
+                                        "recruiter",
+                                        "company",
+                                        "candidate",
+                                        "admin",
+                                    ] as const
+                                ).map((role) => (
+                                    <button
+                                        key={role}
+                                        onClick={() => setFilterRole(role)}
+                                        className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
+                                            filterRole === role
+                                                ? role === "all"
+                                                    ? "bg-neutral text-neutral-content"
+                                                    : roleMeta[role].bgClass
+                                                : "bg-base-100 text-base-content/60 hover:bg-base-300"
+                                        }`}
+                                    >
+                                        {role === "all"
+                                            ? "All"
+                                            : roleMeta[role].label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -752,18 +798,23 @@ export default function MessagesOne() {
                             {filtered.length === 0 && (
                                 <div className="flex flex-col items-center justify-center h-full opacity-40">
                                     <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3" />
-                                    <p className="text-sm">No conversations found</p>
+                                    <p className="text-sm">
+                                        No conversations found
+                                    </p>
                                 </div>
                             )}
                             {filtered.map((conv) => {
-                                const lastMsg = conv.messages[conv.messages.length - 1];
+                                const lastMsg =
+                                    conv.messages[conv.messages.length - 1];
                                 const isActive = conv.id === selectedId;
                                 const meta = roleMeta[conv.contact.role];
 
                                 return (
                                     <button
                                         key={conv.id}
-                                        onClick={() => selectConversation(conv.id)}
+                                        onClick={() =>
+                                            selectConversation(conv.id)
+                                        }
                                         className={`conv-item opacity-0 w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
                                             isActive
                                                 ? "bg-base-100 border-l-4 border-l-primary"
@@ -807,8 +858,12 @@ export default function MessagesOne() {
 
                                                 {/* Role badge */}
                                                 <div className="flex items-center gap-1.5 mb-1">
-                                                    <i className={`${meta.icon} text-[10px] ${meta.textClass}`} />
-                                                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}>
+                                                    <i
+                                                        className={`${meta.icon} text-[10px] ${meta.textClass}`}
+                                                    />
+                                                    <span
+                                                        className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}
+                                                    >
                                                         {meta.label}
                                                     </span>
                                                 </div>
@@ -822,8 +877,11 @@ export default function MessagesOne() {
                                                                 : "text-base-content/50"
                                                         }`}
                                                     >
-                                                        {lastMsg.senderId === "me" && (
-                                                            <span className="text-base-content/30 mr-1">You:</span>
+                                                        {lastMsg.senderId ===
+                                                            "me" && (
+                                                            <span className="text-base-content/30 mr-1">
+                                                                You:
+                                                            </span>
                                                         )}
                                                         {lastMsg.text}
                                                     </p>
@@ -862,7 +920,8 @@ export default function MessagesOne() {
                                 <div className="relative">
                                     <div
                                         className={`w-10 h-10 flex items-center justify-center font-bold text-sm ${
-                                            roleMeta[selected.contact.role].bgClass
+                                            roleMeta[selected.contact.role]
+                                                .bgClass
                                         }`}
                                     >
                                         {selected.contact.initials}
@@ -882,11 +941,18 @@ export default function MessagesOne() {
                                         <span
                                             className={`text-[10px] font-semibold uppercase tracking-wider ${roleMeta[selected.contact.role].textClass}`}
                                         >
-                                            {roleMeta[selected.contact.role].label}
+                                            {
+                                                roleMeta[selected.contact.role]
+                                                    .label
+                                            }
                                         </span>
-                                        <span className="text-base-content/30 mx-1">|</span>
+                                        <span className="text-base-content/30 mx-1">
+                                            |
+                                        </span>
                                         <span className="text-[10px] text-base-content/50">
-                                            {selected.contact.online ? "Online" : "Offline"}
+                                            {selected.contact.online
+                                                ? "Online"
+                                                : "Offline"}
                                         </span>
                                     </div>
                                 </div>
@@ -894,13 +960,22 @@ export default function MessagesOne() {
 
                             {/* Thread actions */}
                             <div className="flex gap-1">
-                                <button className="btn btn-ghost btn-sm btn-square" title="Search in conversation">
+                                <button
+                                    className="btn btn-ghost btn-sm btn-square"
+                                    title="Search in conversation"
+                                >
                                     <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/50" />
                                 </button>
-                                <button className="btn btn-ghost btn-sm btn-square" title="View profile">
+                                <button
+                                    className="btn btn-ghost btn-sm btn-square"
+                                    title="View profile"
+                                >
                                     <i className="fa-duotone fa-regular fa-user text-base-content/50" />
                                 </button>
-                                <button className="btn btn-ghost btn-sm btn-square" title="More options">
+                                <button
+                                    className="btn btn-ghost btn-sm btn-square"
+                                    title="More options"
+                                >
                                     <i className="fa-duotone fa-regular fa-ellipsis-vertical text-base-content/50" />
                                 </button>
                             </div>
@@ -915,7 +990,9 @@ export default function MessagesOne() {
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="flex-1 h-px bg-base-300" />
                                 <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
-                                    {selected.messages[0]?.timestamp.includes(":")
+                                    {selected.messages[0]?.timestamp.includes(
+                                        ":",
+                                    )
                                         ? "Today"
                                         : selected.messages[0]?.timestamp}
                                 </span>
@@ -931,7 +1008,8 @@ export default function MessagesOne() {
 
                                 /* Group consecutive messages from same sender */
                                 const prevMsg = selected.messages[idx - 1];
-                                const isGrouped = prevMsg?.senderId === msg.senderId;
+                                const isGrouped =
+                                    prevMsg?.senderId === msg.senderId;
 
                                 return (
                                     <div
@@ -967,7 +1045,9 @@ export default function MessagesOne() {
                                                     }`}
                                                 >
                                                     <span className="text-xs font-bold">
-                                                        {isMine ? "You" : sender.name}
+                                                        {isMine
+                                                            ? "You"
+                                                            : sender.name}
                                                     </span>
                                                     <span className="text-[10px] text-base-content/40">
                                                         {msg.timestamp}
@@ -984,14 +1064,16 @@ export default function MessagesOne() {
                                                 style={
                                                     isMine
                                                         ? {
-                                                              clipPath: isGrouped
-                                                                  ? undefined
-                                                                  : "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0% 8px)",
+                                                              clipPath:
+                                                                  isGrouped
+                                                                      ? undefined
+                                                                      : "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0% 8px)",
                                                           }
                                                         : {
-                                                              clipPath: isGrouped
-                                                                  ? undefined
-                                                                  : "polygon(0 0, 100% 0, 100% 100%, 0% 100%, 0 8px)",
+                                                              clipPath:
+                                                                  isGrouped
+                                                                      ? undefined
+                                                                      : "polygon(0 0, 100% 0, 100% 100%, 0% 100%, 0 8px)",
                                                           }
                                                 }
                                             >
@@ -1011,18 +1093,37 @@ export default function MessagesOne() {
                                 {selected.contact.online && (
                                     <p className="text-[11px] text-base-content/30 flex items-center gap-1.5">
                                         <span className="inline-flex gap-0.5">
-                                            <span className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                                            <span className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                                            <span className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                                            <span
+                                                className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: "0ms",
+                                                }}
+                                            />
+                                            <span
+                                                className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: "150ms",
+                                                }}
+                                            />
+                                            <span
+                                                className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: "300ms",
+                                                }}
+                                            />
                                         </span>
-                                        {selected.contact.name.split(" ")[0]} is online
+                                        {selected.contact.name.split(" ")[0]} is
+                                        online
                                     </p>
                                 )}
                             </div>
 
                             <div className="flex gap-2 items-end">
                                 {/* Attachment */}
-                                <button className="btn btn-ghost btn-sm btn-square flex-shrink-0 self-end" title="Attach file">
+                                <button
+                                    className="btn btn-ghost btn-sm btn-square flex-shrink-0 self-end"
+                                    title="Attach file"
+                                >
                                     <i className="fa-duotone fa-regular fa-paperclip text-base-content/50" />
                                 </button>
 
@@ -1030,22 +1131,34 @@ export default function MessagesOne() {
                                 <div className="flex-1 relative">
                                     <textarea
                                         value={composeText}
-                                        onChange={(e) => setComposeText(e.target.value)}
+                                        onChange={(e) =>
+                                            setComposeText(e.target.value)
+                                        }
                                         onKeyDown={(e) => {
-                                            if (e.key === "Enter" && !e.shiftKey) {
+                                            if (
+                                                e.key === "Enter" &&
+                                                !e.shiftKey
+                                            ) {
                                                 e.preventDefault();
                                                 handleSend();
                                             }
                                         }}
                                         placeholder={`Message ${selected.contact.name}...`}
                                         rows={1}
-                                        className="textarea textarea-sm w-full bg-base-200 border-base-300 focus:border-primary focus:outline-none resize-none leading-relaxed min-h-[2.5rem] max-h-32"
-                                        style={{ fieldSizing: "content" } as React.CSSProperties}
+                                        className="textarea textarea-sm w-full bg-base-200 border-base-300 focus:border-coral focus:outline-none resize-none leading-relaxed min-h-[2.5rem] max-h-32"
+                                        style={
+                                            {
+                                                fieldSizing: "content",
+                                            } as React.CSSProperties
+                                        }
                                     />
                                 </div>
 
                                 {/* Emoji */}
-                                <button className="btn btn-ghost btn-sm btn-square flex-shrink-0 self-end" title="Emoji">
+                                <button
+                                    className="btn btn-ghost btn-sm btn-square flex-shrink-0 self-end"
+                                    title="Emoji"
+                                >
                                     <i className="fa-duotone fa-regular fa-face-smile text-base-content/50" />
                                 </button>
 
@@ -1056,7 +1169,9 @@ export default function MessagesOne() {
                                     className="btn btn-primary btn-sm flex-shrink-0 self-end"
                                 >
                                     <i className="fa-duotone fa-regular fa-paper-plane-top" />
-                                    <span className="hidden sm:inline">Send</span>
+                                    <span className="hidden sm:inline">
+                                        Send
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -1079,7 +1194,8 @@ export default function MessagesOne() {
                                     Splits Network Messaging
                                 </p>
                                 <p className="text-xs opacity-50">
-                                    Secure, real-time communication across the entire recruiting ecosystem
+                                    Secure, real-time communication across the
+                                    entire recruiting ecosystem
                                 </p>
                             </div>
                         </div>

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 interface OwnershipBadgeProps {
     sourcer: {
         sourcer_user_id: string;
-        sourcer_type: 'recruiter' | 'tsn';
+        sourcer_type: "recruiter" | "tsn";
         sourced_at: string;
         protection_expires_at?: string;
         notes?: string;
@@ -11,7 +11,10 @@ interface OwnershipBadgeProps {
     compact?: boolean;
 }
 
-export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBadgeProps) {
+export default function OwnershipBadge({
+    sourcer,
+    compact = false,
+}: OwnershipBadgeProps) {
     if (!sourcer) {
         return null;
     }
@@ -21,10 +24,10 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
         : false;
 
     const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
+        return new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
         });
     };
 
@@ -32,13 +35,13 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
         return (
             <div className="badge badge-primary gap-1">
                 <i className="fa-duotone fa-regular fa-shield-halved"></i>
-                {sourcer.sourcer_type === 'tsn' ? 'TSN Sourced' : 'Sourced'}
+                {sourcer.sourcer_type === "tsn" ? "TSN Sourced" : "Sourced"}
             </div>
         );
     }
 
     return (
-        <div className="card bg-primary/10 border border-primary/20">
+        <div className="card bg-primary/10 border border-coral/20">
             <div className="card-body p-4">
                 <div className="flex items-start gap-3">
                     <div className="flex-shrink-0">
@@ -49,10 +52,14 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold text-sm">
-                                {sourcer.sourcer_type === 'tsn' ? 'TSN Sourced' : 'Sourced by Recruiter'}
+                                {sourcer.sourcer_type === "tsn"
+                                    ? "TSN Sourced"
+                                    : "Sourced by Recruiter"}
                             </span>
                             {isProtected && (
-                                <span className="badge badge-success badge-sm">Protected</span>
+                                <span className="badge badge-success badge-sm">
+                                    Protected
+                                </span>
                             )}
                         </div>
                         <div className="text-xs text-base-content/70 space-y-1">
@@ -63,7 +70,10 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
                             {sourcer.protection_expires_at && (
                                 <div>
                                     <i className="fa-duotone fa-regular fa-clock mr-1"></i>
-                                    {isProtected ? 'Protected until' : 'Protection expired'} {formatDate(sourcer.protection_expires_at)}
+                                    {isProtected
+                                        ? "Protected until"
+                                        : "Protection expired"}{" "}
+                                    {formatDate(sourcer.protection_expires_at)}
                                 </div>
                             )}
                         </div>

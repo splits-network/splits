@@ -646,7 +646,7 @@ export function ForRecruitersContent() {
                                     your kitchen table at 6 AM.
                                 </p>
 
-                                <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-primary">
+                                <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-coral">
                                     <p className="font-medium text-primary mb-2">
                                         The future of recruiting is flexible
                                     </p>

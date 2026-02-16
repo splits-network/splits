@@ -69,7 +69,7 @@ function DetailPanel({
         <div
             className={`detail-panel bg-base-100 overflow-y-auto ${
                 variant === "sidebar"
-                    ? "border-l-4 border-primary"
+                    ? "border-l-4 border-coral"
                     : "border-l-2 border-base-300"
             }`}
         >
@@ -282,9 +282,7 @@ function DetailPanel({
                         <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Deadline
                         </p>
-                        <p className="font-bold">
-                            {formatDate(job.deadline)}
-                        </p>
+                        <p className="font-bold">{formatDate(job.deadline)}</p>
                     </div>
                 </div>
 
@@ -332,13 +330,14 @@ export default function ListsOnePage() {
                 job.tags.some((tag) =>
                     tag.toLowerCase().includes(searchQuery.toLowerCase()),
                 );
-            const matchesType =
-                filterType === "all" || job.type === filterType;
+            const matchesType = filterType === "all" || job.type === filterType;
             const matchesStatus =
                 filterStatus === "all" || job.status === filterStatus;
             const matchesLevel =
                 filterLevel === "all" || job.experienceLevel === filterLevel;
-            return matchesSearch && matchesType && matchesStatus && matchesLevel;
+            return (
+                matchesSearch && matchesType && matchesStatus && matchesLevel
+            );
         });
     }, [searchQuery, filterType, filterStatus, filterLevel]);
 
@@ -376,12 +375,9 @@ export default function ListsOnePage() {
     );
 
     // Select job with animation
-    const selectJob = useCallback(
-        (job: JobListing) => {
-            setSelectedJob((prev) => (prev?.id === job.id ? null : job));
-        },
-        [],
-    );
+    const selectJob = useCallback((job: JobListing) => {
+        setSelectedJob((prev) => (prev?.id === job.id ? null : job));
+    }, []);
 
     // Hero animations
     useGSAP(
@@ -392,10 +388,8 @@ export default function ListsOnePage() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             // Hero entrance
             const heroTl = gsap.timeline({
@@ -463,7 +457,10 @@ export default function ListsOnePage() {
     );
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen bg-base-100">
+        <main
+            ref={mainRef}
+            className="overflow-hidden min-h-screen bg-base-100"
+        >
             {/* ═══════════════════════════════════════════════════════
                 HERO — Compact split-screen header
                ═══════════════════════════════════════════════════════ */}
@@ -560,7 +557,7 @@ export default function ListsOnePage() {
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
                                     }
-                                    className="input input-bordered w-full pl-9 bg-base-200 border-base-300 text-sm font-medium focus:border-primary focus:outline-none"
+                                    className="input input-bordered w-full pl-9 bg-base-200 border-base-300 text-sm font-medium focus:border-coral focus:outline-none"
                                 />
                             </div>
 
@@ -855,9 +852,9 @@ function GridView({
                             <div
                                 key={job.id}
                                 onClick={() => onSelect(job)}
-                                className={`group cursor-pointer bg-base-100 border-2 p-6 transition-all hover:border-primary/30 ${
+                                className={`group cursor-pointer bg-base-100 border-2 p-6 transition-all hover:border-coral/30 ${
                                     selectedJob?.id === job.id
-                                        ? "border-primary border-l-4"
+                                        ? "border-coral border-l-4"
                                         : "border-base-300"
                                 }`}
                             >

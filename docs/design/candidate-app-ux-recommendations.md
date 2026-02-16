@@ -674,7 +674,7 @@ useEffect(() => {
 </div>
 
 // Job alert setup
-<div className="alert bg-primary/10 border-primary/20">
+<div className="alert bg-primary/10 border-coral/20">
     <i className="fa-duotone fa-regular fa-bell text-primary"></i>
     <div>
         <h3 className="font-bold">Get notified about new jobs</h3>

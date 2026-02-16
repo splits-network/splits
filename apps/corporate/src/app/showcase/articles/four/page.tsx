@@ -114,10 +114,26 @@ const timeline = [
 
 /* ─── Impact Metrics ────────────────────────────────────────────────────── */
 const impactMetrics = [
-    { value: "73%", label: "Higher Recruiter Earnings", detail: "compared to solo placements" },
-    { value: "3x", label: "Faster Time-to-Fill", detail: "versus single-agency search" },
-    { value: "40%", label: "Less Admin Overhead", detail: "with platform automation" },
-    { value: "92%", label: "Partner Satisfaction", detail: "among active split-fee users" },
+    {
+        value: "73%",
+        label: "Higher Recruiter Earnings",
+        detail: "compared to solo placements",
+    },
+    {
+        value: "3x",
+        label: "Faster Time-to-Fill",
+        detail: "versus single-agency search",
+    },
+    {
+        value: "40%",
+        label: "Less Admin Overhead",
+        detail: "with platform automation",
+    },
+    {
+        value: "92%",
+        label: "Partner Satisfaction",
+        detail: "among active split-fee users",
+    },
 ];
 
 /* ─── Pull Quotes ───────────────────────────────────────────────────────── */
@@ -145,13 +161,12 @@ export default function ArticleFourPage() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
-                gsap.set(
-                    containerRef.current.querySelectorAll(".cin-reveal"),
-                    { opacity: 1, y: 0, x: 0 },
-                );
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                gsap.set(containerRef.current.querySelectorAll(".cin-reveal"), {
+                    opacity: 1,
+                    y: 0,
+                    x: 0,
+                });
                 return;
             }
 
@@ -539,7 +554,8 @@ export default function ArticleFourPage() {
                     <h1 className="cin-hero-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-white mb-8 max-w-4xl opacity-0">
                         The Future of Recruiting:
                         <br />
-                        How <span className="text-primary">Split-Fee Models</span>
+                        How{" "}
+                        <span className="text-primary">Split-Fee Models</span>
                         <br />
                         Are Changing The Industry
                     </h1>
@@ -628,9 +644,7 @@ export default function ArticleFourPage() {
                             more time on administrative tasks than actual
                             recruiting.
                         </p>
-                        <p>
-                            Something has to change. And it is.
-                        </p>
+                        <p>Something has to change. And it is.</p>
                     </div>
                 </div>
             </section>
@@ -655,7 +669,7 @@ export default function ArticleFourPage() {
                         {timeline.map((m, i) => (
                             <div
                                 key={i}
-                                className="cin-milestone flex gap-8 items-start opacity-0 border-l-4 border-primary/30 pl-8 pb-12 last:pb-0 relative"
+                                className="cin-milestone flex gap-8 items-start opacity-0 border-l-4 border-coral/30 pl-8 pb-12 last:pb-0 relative"
                             >
                                 <div className="absolute -left-[11px] top-0 w-[18px] h-[18px] rounded-full bg-primary" />
                                 <div>
@@ -677,10 +691,10 @@ export default function ArticleFourPage() {
                         <p className="text-lg text-white/60 leading-relaxed">
                             In a split-fee arrangement, two or more recruiters
                             share a placement fee. Typically, one party has the
-                            job order (the hiring company relationship) while the
-                            other has the candidate. When the placement closes,
-                            the fee is split based on pre-agreed terms, usually
-                            50/50 or weighted by contribution.
+                            job order (the hiring company relationship) while
+                            the other has the candidate. When the placement
+                            closes, the fee is split based on pre-agreed terms,
+                            usually 50/50 or weighted by contribution.
                         </p>
                     </div>
                 </div>
@@ -718,9 +732,10 @@ export default function ArticleFourPage() {
                         </h2>
                         <p className="text-lg text-base-content/60 leading-relaxed mb-10">
                             Split-fee recruiting is not new, but its explosive
-                            growth is. Several converging forces have turned what
-                            was once a niche practice into the fastest-growing
-                            segment of the $200B staffing industry.
+                            growth is. Several converging forces have turned
+                            what was once a niche practice into the
+                            fastest-growing segment of the $200B staffing
+                            industry.
                         </p>
 
                         <div className="grid sm:grid-cols-2 gap-4">
@@ -761,11 +776,8 @@ export default function ArticleFourPage() {
 
                     <div className="cin-quotes-grid grid md:grid-cols-3 gap-8">
                         {pullQuotes.map((q, i) => (
-                            <div
-                                key={i}
-                                className="cin-quote opacity-0"
-                            >
-                                <div className="border-l-4 border-primary pl-6 mb-6">
+                            <div key={i} className="cin-quote opacity-0">
+                                <div className="border-l-4 border-coral pl-6 mb-6">
                                     <p className="text-xl md:text-2xl font-bold leading-snug text-white/90 italic">
                                         &ldquo;{q.quote}&rdquo;
                                     </p>
@@ -800,9 +812,9 @@ export default function ArticleFourPage() {
                         </h2>
                         <p className="text-lg text-base-content/60 leading-relaxed mb-10">
                             The real accelerant behind the split-fee revolution
-                            is technology. Modern platforms eliminate the friction
-                            that historically made collaboration between
-                            recruiters impractical at scale.
+                            is technology. Modern platforms eliminate the
+                            friction that historically made collaboration
+                            between recruiters impractical at scale.
                         </p>
 
                         <div className="grid sm:grid-cols-2 gap-4">
@@ -937,11 +949,11 @@ export default function ArticleFourPage() {
                                     If you are a company,
                                 </strong>{" "}
                                 stop managing a dozen recruiter contracts with a
-                                dozen different fee structures. One platform, one
-                                set of terms, access to an entire network. Your
-                                cost-per-hire drops, your time-to-fill
-                                accelerates, and your visibility into the process
-                                goes from opaque to transparent.
+                                dozen different fee structures. One platform,
+                                one set of terms, access to an entire network.
+                                Your cost-per-hire drops, your time-to-fill
+                                accelerates, and your visibility into the
+                                process goes from opaque to transparent.
                             </p>
                             <p className="text-lg">
                                 <strong className="text-base-content">

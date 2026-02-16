@@ -270,7 +270,12 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     />
                 )}
                 {activeTab === "resume" && (
-                    <ResumeTab resumeMetadata={(candidate.resume_metadata as ResumeMetadata | null) ?? undefined} />
+                    <ResumeTab
+                        resumeMetadata={
+                            (candidate.resume_metadata as ResumeMetadata | null) ??
+                            undefined
+                        }
+                    />
                 )}
                 {activeTab === "applications" && (
                     <ApplicationsTab
@@ -784,7 +789,7 @@ function OverviewTab({
                                         (industry, i) => (
                                             <span
                                                 key={i}
-                                                className="badge badge-lg bg-primary/10 border-primary/20 text-primary p-3"
+                                                className="badge badge-lg bg-primary/10 border-coral/20 text-primary p-3"
                                             >
                                                 {industry}
                                             </span>
@@ -836,7 +841,7 @@ function OverviewTab({
                                         (skill, i) => (
                                             <span
                                                 key={i}
-                                                className="badge badge-lg bg-accent/10 border-accent/20 text-accent p-3"
+                                                className="badge badge-lg bg-accent/10 border-yellow/20 text-accent p-3"
                                             >
                                                 {skill}
                                             </span>
@@ -928,7 +933,10 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
             <div className="p-8 text-center text-sm text-base-content/60">
                 <i className="fa-duotone fa-regular fa-file-circle-question text-3xl mb-2 block" />
                 <p>No resume metadata available.</p>
-                <p className="text-xs mt-1">Upload a resume and set it as primary to extract structured data.</p>
+                <p className="text-xs mt-1">
+                    Upload a resume and set it as primary to extract structured
+                    data.
+                </p>
             </div>
         );
     }
@@ -938,16 +946,24 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
         const [year, month] = dateStr.split("-");
         if (!month) return year;
         const date = new Date(Number(year), Number(month) - 1);
-        return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            year: "numeric",
+        });
     };
 
     const proficiencyColor = (p?: string): string => {
         switch (p) {
-            case "expert": return "badge-primary";
-            case "advanced": return "badge-secondary";
-            case "intermediate": return "badge-accent";
-            case "beginner": return "badge-ghost";
-            default: return "bg-base-200 border-base-300";
+            case "expert":
+                return "badge-primary";
+            case "advanced":
+                return "badge-secondary";
+            case "intermediate":
+                return "badge-accent";
+            case "beginner":
+                return "badge-ghost";
+            default:
+                return "bg-base-200 border-base-300";
         }
     };
 
@@ -956,23 +972,28 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
             {/* Summary Stats */}
             <div className="flex flex-wrap gap-3">
                 {resumeMetadata.total_years_experience != null && (
-                    <div className="badge badge-lg gap-1.5 p-3 bg-primary/10 border-primary/20 text-primary">
+                    <div className="badge badge-lg gap-1.5 p-3 bg-primary/10 border-coral/20 text-primary">
                         <i className="fa-duotone fa-regular fa-clock" />
                         {resumeMetadata.total_years_experience} years experience
                     </div>
                 )}
-                {resumeMetadata.highest_degree && resumeMetadata.highest_degree !== "none" && (
-                    <div className="badge badge-lg gap-1.5 p-3 bg-secondary/10 border-secondary/20 text-secondary">
-                        <i className="fa-duotone fa-regular fa-graduation-cap" />
-                        {resumeMetadata.highest_degree.charAt(0).toUpperCase() + resumeMetadata.highest_degree.slice(1)}
-                    </div>
-                )}
-                {resumeMetadata.skills_count != null && resumeMetadata.skills_count > 0 && (
-                    <div className="badge badge-lg gap-1.5 p-3 bg-accent/10 border-accent/20 text-accent">
-                        <i className="fa-duotone fa-regular fa-code" />
-                        {resumeMetadata.skills_count} skills
-                    </div>
-                )}
+                {resumeMetadata.highest_degree &&
+                    resumeMetadata.highest_degree !== "none" && (
+                        <div className="badge badge-lg gap-1.5 p-3 bg-secondary/10 border-secondary/20 text-secondary">
+                            <i className="fa-duotone fa-regular fa-graduation-cap" />
+                            {resumeMetadata.highest_degree
+                                .charAt(0)
+                                .toUpperCase() +
+                                resumeMetadata.highest_degree.slice(1)}
+                        </div>
+                    )}
+                {resumeMetadata.skills_count != null &&
+                    resumeMetadata.skills_count > 0 && (
+                        <div className="badge badge-lg gap-1.5 p-3 bg-accent/10 border-yellow/20 text-accent">
+                            <i className="fa-duotone fa-regular fa-code" />
+                            {resumeMetadata.skills_count} skills
+                        </div>
+                    )}
             </div>
 
             {/* Professional Summary */}
@@ -999,35 +1020,60 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
                     </div>
                     <div className="p-4 space-y-4">
                         {resumeMetadata.experience.map((exp, i) => (
-                            <div key={i} className={`flex gap-4 ${i > 0 ? "pt-4 border-t border-base-200" : ""}`}>
+                            <div
+                                key={i}
+                                className={`flex gap-4 ${i > 0 ? "pt-4 border-t border-base-200" : ""}`}
+                            >
                                 <div className="flex flex-col items-center pt-1">
-                                    <div className={`w-3 h-3 rounded-full ${exp.is_current ? "bg-success" : "bg-base-300"}`} />
-                                    {i < resumeMetadata.experience.length - 1 && (
+                                    <div
+                                        className={`w-3 h-3 rounded-full ${exp.is_current ? "bg-success" : "bg-base-300"}`}
+                                    />
+                                    {i <
+                                        resumeMetadata.experience.length -
+                                            1 && (
                                         <div className="w-px flex-1 bg-base-300 mt-1" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-semibold">{exp.title}</div>
+                                    <div className="font-semibold">
+                                        {exp.title}
+                                    </div>
                                     <div className="text-sm text-base-content/70">
                                         {exp.company}
-                                        {exp.location && <span className="text-base-content/50"> - {exp.location}</span>}
+                                        {exp.location && (
+                                            <span className="text-base-content/50">
+                                                {" "}
+                                                - {exp.location}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="text-xs text-base-content/50 mt-0.5">
-                                        {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                        {formatDate(exp.start_date)} -{" "}
+                                        {exp.is_current
+                                            ? "Present"
+                                            : formatDate(exp.end_date)}
                                     </div>
                                     {exp.description && (
-                                        <p className="text-sm text-base-content/70 mt-2">{exp.description}</p>
+                                        <p className="text-sm text-base-content/70 mt-2">
+                                            {exp.description}
+                                        </p>
                                     )}
-                                    {exp.highlights && exp.highlights.length > 0 && (
-                                        <ul className="mt-2 space-y-1">
-                                            {exp.highlights.map((h, j) => (
-                                                <li key={j} className="text-sm text-base-content/70 flex gap-2">
-                                                    <span className="text-primary mt-0.5">&#8226;</span>
-                                                    <span>{h}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                    {exp.highlights &&
+                                        exp.highlights.length > 0 && (
+                                            <ul className="mt-2 space-y-1">
+                                                {exp.highlights.map((h, j) => (
+                                                    <li
+                                                        key={j}
+                                                        className="text-sm text-base-content/70 flex gap-2"
+                                                    >
+                                                        <span className="text-primary mt-0.5">
+                                                            &#8226;
+                                                        </span>
+                                                        <span>{h}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                 </div>
                             </div>
                         ))}
@@ -1046,20 +1092,33 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
                     </div>
                     <div className="p-4 space-y-4">
                         {resumeMetadata.education.map((edu, i) => (
-                            <div key={i} className={`${i > 0 ? "pt-4 border-t border-base-200" : ""}`}>
-                                <div className="font-semibold">{edu.institution}</div>
+                            <div
+                                key={i}
+                                className={`${i > 0 ? "pt-4 border-t border-base-200" : ""}`}
+                            >
+                                <div className="font-semibold">
+                                    {edu.institution}
+                                </div>
                                 {(edu.degree || edu.field_of_study) && (
                                     <div className="text-sm text-base-content/70">
-                                        {[edu.degree, edu.field_of_study].filter(Boolean).join(" in ")}
+                                        {[edu.degree, edu.field_of_study]
+                                            .filter(Boolean)
+                                            .join(" in ")}
                                     </div>
                                 )}
                                 {(edu.start_date || edu.end_date) && (
                                     <div className="text-xs text-base-content/50 mt-0.5">
-                                        {formatDate(edu.start_date)}{edu.start_date && edu.end_date ? " - " : ""}{formatDate(edu.end_date)}
+                                        {formatDate(edu.start_date)}
+                                        {edu.start_date && edu.end_date
+                                            ? " - "
+                                            : ""}
+                                        {formatDate(edu.end_date)}
                                     </div>
                                 )}
                                 {edu.gpa && (
-                                    <div className="text-xs text-base-content/50 mt-0.5">GPA: {edu.gpa}</div>
+                                    <div className="text-xs text-base-content/50 mt-0.5">
+                                        GPA: {edu.gpa}
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -1085,8 +1144,12 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
                                     title={[
                                         skill.category?.replace(/_/g, " "),
                                         skill.proficiency,
-                                        skill.years_used ? `${skill.years_used}y` : null,
-                                    ].filter(Boolean).join(" - ")}
+                                        skill.years_used
+                                            ? `${skill.years_used}y`
+                                            : null,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" - ")}
                                 >
                                     {skill.name}
                                 </span>
@@ -1107,16 +1170,27 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
                     </div>
                     <div className="p-4 space-y-3">
                         {resumeMetadata.certifications.map((cert, i) => (
-                            <div key={i} className={`${i > 0 ? "pt-3 border-t border-base-200" : ""}`}>
+                            <div
+                                key={i}
+                                className={`${i > 0 ? "pt-3 border-t border-base-200" : ""}`}
+                            >
                                 <div className="font-semibold">{cert.name}</div>
                                 {cert.issuer && (
-                                    <div className="text-sm text-base-content/70">{cert.issuer}</div>
+                                    <div className="text-sm text-base-content/70">
+                                        {cert.issuer}
+                                    </div>
                                 )}
                                 {(cert.date_obtained || cert.expiry_date) && (
                                     <div className="text-xs text-base-content/50 mt-0.5">
-                                        {cert.date_obtained ? `Obtained ${formatDate(cert.date_obtained)}` : ""}
-                                        {cert.date_obtained && cert.expiry_date ? " - " : ""}
-                                        {cert.expiry_date ? `Expires ${formatDate(cert.expiry_date)}` : ""}
+                                        {cert.date_obtained
+                                            ? `Obtained ${formatDate(cert.date_obtained)}`
+                                            : ""}
+                                        {cert.date_obtained && cert.expiry_date
+                                            ? " - "
+                                            : ""}
+                                        {cert.expiry_date
+                                            ? `Expires ${formatDate(cert.expiry_date)}`
+                                            : ""}
                                     </div>
                                 )}
                             </div>
@@ -1130,7 +1204,12 @@ function ResumeTab({ resumeMetadata }: { resumeMetadata?: ResumeMetadata }) {
                 <i className="fa-duotone fa-regular fa-robot" />
                 Extracted from resume
                 {resumeMetadata.extracted_at && (
-                    <span>on {new Date(resumeMetadata.extracted_at).toLocaleDateString()}</span>
+                    <span>
+                        on{" "}
+                        {new Date(
+                            resumeMetadata.extracted_at,
+                        ).toLocaleDateString()}
+                    </span>
                 )}
             </div>
         </div>
@@ -1269,7 +1348,7 @@ function DocumentsTab({
             </div>
 
             {!isRecruiter && (
-                <button className="mt-3 w-full border border-dashed border-base-300 rounded-xl p-3 hover:border-primary/50 hover:bg-base-50 transition-all text-center flex items-center justify-center gap-2 text-base-content/50 hover:text-primary">
+                <button className="mt-3 w-full border border-dashed border-base-300 rounded-xl p-3 hover:border-coral/50 hover:bg-base-50 transition-all text-center flex items-center justify-center gap-2 text-base-content/50 hover:text-primary">
                     <i className="fa-duotone fa-regular fa-plus" />
                     <span className="text-xs font-medium">Upload Resume</span>
                 </button>

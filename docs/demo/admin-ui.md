@@ -213,7 +213,7 @@ function DemoTypeSelector({
             {demoTypes.map((type) => (
                 <button
                     key={type.id}
-                    className="card bg-base-100 border border-base-300 hover:border-primary transition-colors text-left"
+                    className="card bg-base-100 border border-base-300 hover:border-coral transition-colors text-left"
                     onClick={() => onSelect(type.id as DemoType)}
                 >
                     <div className="card-body p-6">

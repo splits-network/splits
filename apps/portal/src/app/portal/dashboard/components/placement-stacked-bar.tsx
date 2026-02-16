@@ -3,23 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Tooltip,
-    Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { ChartLoadingState } from '@splits-network/shared-ui';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+import { ACCENT } from './accent';
 
 interface PlacementStackedBarProps {
     trendPeriod?: number;
     refreshKey?: number;
-    height?: number;
 }
 
 interface ChartData {
@@ -27,36 +15,16 @@ interface ChartData {
     datasets: {
         label: string;
         data: number[];
-        backgroundColor?: string | string[];
-        borderColor?: string | string[];
-        borderWidth?: number;
     }[];
 }
 
-function getGridColor(): string {
-    if (typeof window === 'undefined') return 'rgba(229,231,235,0.5)';
-    const val = getComputedStyle(document.documentElement).getPropertyValue('--color-base-300').trim();
-    return val ? `${val}40` : 'rgba(229,231,235,0.5)';
-}
+// Memphis accent colors for chart bars
+const BAR_CLASSES = ['bg-coral', 'bg-teal', 'bg-yellow', 'bg-purple'];
 
-export default function PlacementStackedBar({
-    trendPeriod = 6,
-    refreshKey,
-    height = 140,
-}: PlacementStackedBarProps) {
+export default function PlacementStackedBar({ trendPeriod = 6, refreshKey }: PlacementStackedBarProps) {
     const { getToken } = useAuth();
     const [chartData, setChartData] = useState<ChartData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [gridColor, setGridColor] = useState(getGridColor());
-
-    useEffect(() => {
-        const update = () => setGridColor(getGridColor());
-        update();
-
-        const observer = new MutationObserver(update);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
 
     useEffect(() => {
         loadData();
@@ -94,58 +62,78 @@ export default function PlacementStackedBar({
     };
 
     if (loading) {
-        return <ChartLoadingState height={height} />;
+        return (
+            <div className="h-36 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-dark/20 border-t-coral animate-spin" />
+            </div>
+        );
     }
 
     if (!chartData || !chartData.datasets?.length) {
         return (
-            <div style={{ height }} className="flex items-center justify-center text-base-content/50">
+            <div className="h-36 flex items-center justify-center text-dark/30">
                 <div className="text-center">
-                    <i className="fa-duotone fa-regular fa-chart-bar fa-2x mb-1 opacity-20"></i>
-                    <p className="text-xs">No placement data</p>
+                    <i className="fa-duotone fa-regular fa-chart-bar text-xl mb-1" />
+                    <p className="text-[10px] font-black uppercase tracking-wider">No data</p>
                 </div>
             </div>
         );
     }
 
+    // Compute max stacked height for scaling
+    const stackedTotals = chartData.labels.map((_, colIdx) =>
+        chartData.datasets.reduce((sum, ds) => sum + (ds.data[colIdx] || 0), 0)
+    );
+    const maxStacked = Math.max(...stackedTotals, 1);
+
     return (
-        <div style={{ height }}>
-            <Bar
-                data={chartData}
-                options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                boxWidth: 8,
-                                padding: 8,
-                                font: { size: 10 },
-                            },
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                    },
-                    scales: {
-                        x: {
-                            stacked: true,
-                            ticks: { font: { size: 9 } },
-                            grid: { display: false },
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true,
-                            ticks: { precision: 0, font: { size: 9 } },
-                            grid: { color: gridColor },
-                        },
-                    },
-                }}
-            />
+        <div>
+            {/* Legend */}
+            <div className="flex flex-wrap gap-3 mb-3">
+                {chartData.datasets.map((ds, i) => (
+                    <div key={ds.label} className="flex items-center gap-1.5">
+                        <div className={`w-3 h-3 border-4 border-dark ${BAR_CLASSES[i % BAR_CLASSES.length]}`} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-dark/50">
+                            {ds.label}
+                        </span>
+                    </div>
+                ))}
+            </div>
+
+            {/* CSS Stacked bar chart */}
+            <div className="flex items-end gap-1 h-28">
+                {chartData.labels.map((label, colIdx) => {
+                    const colTotal = stackedTotals[colIdx];
+                    const heightPct = maxStacked > 0 ? (colTotal / maxStacked) * 100 : 0;
+
+                    return (
+                        <div key={label} className="flex-1 flex flex-col items-stretch" title={`${label}: ${colTotal}`}>
+                            {/* Stacked segments */}
+                            <div
+                                className="flex flex-col-reverse border-4 border-dark overflow-hidden transition-all duration-500"
+                                style={{ height: `${Math.max(heightPct, 5)}%` }}
+                            >
+                                {chartData.datasets.map((ds, dsIdx) => {
+                                    const val = ds.data[colIdx] || 0;
+                                    const segPct = colTotal > 0 ? (val / colTotal) * 100 : 0;
+                                    if (segPct === 0) return null;
+                                    return (
+                                        <div
+                                            key={ds.label}
+                                            className={`${BAR_CLASSES[dsIdx % BAR_CLASSES.length]}`}
+                                            style={{ height: `${segPct}%` }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                            {/* Label */}
+                            <div className="text-[8px] font-bold text-dark/30 text-center mt-1 uppercase truncate">
+                                {label}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

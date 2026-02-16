@@ -1,0 +1,163 @@
+.stats {
+    @layer memphis.component {
+        @apply rounded-box relative inline-grid grid-flow-col overflow-x-auto;
+    }
+}
+
+.stat {
+    @layer memphis.component {
+        @apply inline-grid w-full gap-x-4 px-6 py-4;
+        grid-template-columns: repeat(1, 1fr);
+
+        &:not(:last-child) {
+            border-inline-end: var(--border) dashed color-mix(in oklab, currentColor 10%, #0000);
+            border-block-end: none;
+        }
+    }
+}
+
+.stat-figure {
+    @layer memphis.component {
+        @apply col-start-2 row-span-3 row-start-1 place-self-center justify-self-end;
+    }
+}
+
+.stat-title {
+    @layer memphis.component {
+        @apply text-base-content/60 col-start-1 whitespace-nowrap;
+        font-size: 0.75rem;
+    }
+}
+
+.stat-value {
+    @layer memphis.component {
+        @apply col-start-1 whitespace-nowrap;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+}
+
+.stat-desc {
+    @layer memphis.component {
+        @apply text-base-content/60 col-start-1 whitespace-nowrap;
+        font-size: 0.75rem;
+    }
+}
+
+.stat-actions {
+    @layer memphis.component {
+        @apply col-start-1 whitespace-nowrap;
+    }
+}
+
+.stats-horizontal {
+    @layer memphis.modifier {
+        @apply grid-flow-col overflow-x-auto;
+
+        .stat:not(:last-child) {
+            border-inline-end: var(--border) dashed color-mix(in oklab, currentColor 10%, #0000);
+            border-block-end: none;
+        }
+    }
+}
+
+.stats-vertical {
+    @layer memphis.modifier {
+        @apply grid-flow-row overflow-y-auto;
+
+        .stat:not(:last-child) {
+            border-inline-end: none;
+            border-block-end: var(--border) dashed color-mix(in oklab, currentColor 10%, #0000);
+        }
+    }
+}
+
+/* ═══ Memphis Additions ═══ */
+
+.stat-title {
+    @layer memphis.modifier {
+        text-transform: uppercase;
+        letter-spacing: var(--ls-wide);
+    }
+}
+
+.stat-figure {
+    @layer memphis.modifier {
+        color: var(--color-dark);
+    }
+}
+
+/* ─── Retro Metrics — bold color-blocked counters ────────────────────────── */
+/* Set --metric-color and --metric-fg on .metric-block to theme each block.  */
+
+.retro-metrics {
+    @layer memphis.component {
+        @apply overflow-hidden;
+        padding: 0;
+    }
+}
+
+.metric-block {
+    @layer memphis.component {
+        @apply text-center;
+        padding: var(--metric-pad, 2rem);
+        background-color: var(--metric-color);
+        color: var(--metric-fg, var(--color-neutral-content));
+    }
+}
+
+.metric-block-xs {
+    @layer memphis.modifier {
+        --metric-pad: 0.75rem;
+        --metric-value-size: 1.25rem;
+        --metric-label-size: 0.625rem;
+    }
+}
+
+.metric-block-sm {
+    @layer memphis.modifier {
+        --metric-pad: 1.25rem;
+        --metric-value-size: 1.75rem;
+        --metric-label-size: 0.7rem;
+    }
+}
+
+.metric-block-lg {
+    @layer memphis.modifier {
+        --metric-pad: 3rem;
+        --metric-value-size: clamp(2rem, 5vw, 4.5rem);
+        --metric-label-size: clamp(0.8rem, 1.4vw, 1.125rem);
+    }
+}
+
+.metric-block-xl {
+    @layer memphis.modifier {
+        --metric-pad: 4rem;
+        --metric-value-size: clamp(2.5rem, 6vw, 5.5rem);
+        --metric-label-size: clamp(0.875rem, 1.6vw, 1.25rem);
+    }
+}
+
+.metric-block-2xl {
+    @layer memphis.modifier {
+        --metric-pad: 5rem;
+        --metric-value-size: clamp(3rem, 8vw, 7rem);
+        --metric-label-size: clamp(1rem, 1.8vw, 1.5rem);
+    }
+}
+
+.retro-metric-value {
+    @layer memphis.component {
+        @apply font-black;
+        font-size: var(--metric-value-size, clamp(1.5rem, 4vw, 3.75rem));
+        margin-bottom: 0.5rem;
+    }
+}
+
+.retro-metric-label {
+    @layer memphis.component {
+        @apply font-bold uppercase;
+        font-size: var(--metric-label-size, clamp(0.75rem, 1.2vw, 1rem));
+        letter-spacing: 0.15em;
+    }
+}

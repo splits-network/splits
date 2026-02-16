@@ -46,9 +46,11 @@ The Memphis version:
 
 ## Styling Hierarchy (CRITICAL — follow this order)
 
+**Before writing ANY raw HTML/className**, check the Memphis UI component inventory at `packages/memphis-ui/src/react/components/index.ts`. If a component exists for your use case, USE IT. Do not write raw markup for something a component or plugin class already handles.
+
 **Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
 
-1. **Memphis UI React components** — Use `@splits-network/memphis-ui` (86+ components) FIRST. Design decisions (border tier, colors, typography) are already correct.
+1. **Memphis UI React components** — Use `@splits-network/memphis-ui` (101 components in `src/react/components/`) FIRST. Design decisions (border tier, colors, typography) are already correct.
 2. **Memphis plugin CSS classes** — `btn`, `badge`, `card`, `input`, etc. Border tiers are baked in.
 3. **Memphis CSS theme classes** — `bg-coral`, `text-dark`, `border-interactive`, etc.
 4. **Local components** — Page-specific widgets in `{feature}-memphis/components/` (must use memphis-ui internally)
@@ -58,7 +60,7 @@ The Memphis version:
 
 1. Reads target file to extract DATA LAYER ONLY (API calls, hooks, handlers, types)
 2. Identifies similar Memphis showcase page in `apps/corporate/src/app/showcase/` as design reference
-3. Checks `packages/memphis-ui/src/components/index.ts` for available components
+3. Checks `packages/memphis-ui/src/react/components/index.ts` for available components
 4. Creates a NEW parallel page at `{feature}-memphis/page.tsx`
 5. Designs the Memphis version FROM SCRATCH using showcase patterns and **memphis-ui components first**, then plugin CSS classes, then theme classes
 6. Applies Memphis design principles:

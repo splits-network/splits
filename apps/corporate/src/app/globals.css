@@ -3,4 +3,3 @@
 @import "tailwindcss";
 
 @plugin "@splits-network/memphis-ui/plugin";
-@import "./themes/memphis.css";

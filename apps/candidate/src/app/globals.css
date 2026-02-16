@@ -2,10 +2,7 @@
 
 @import "tailwindcss";
 
-@plugin "daisyui" {
-    //themes: splits-light --default, splits-dark --prefers-dark;
-    themes: false;
-}
+@plugin "memphis-ui/plugin";
 
 @import "./themes/light.css";
 @import "./themes/dark.css";

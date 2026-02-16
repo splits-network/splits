@@ -186,10 +186,7 @@ export default function ModalsOne() {
 
     useEffect(() => {
         if (showConfirm) {
-            animateModalOpen(
-                confirmBackdropRef.current,
-                confirmBoxRef.current,
-            );
+            animateModalOpen(confirmBackdropRef.current, confirmBoxRef.current);
         }
     }, [showConfirm]);
 
@@ -247,10 +244,8 @@ export default function ModalsOne() {
     }, []);
 
     const closeWizard = useCallback(() => {
-        animateModalClose(
-            wizardBackdropRef.current,
-            wizardBoxRef.current,
-            () => setShowWizard(false),
+        animateModalClose(wizardBackdropRef.current, wizardBoxRef.current, () =>
+            setShowWizard(false),
         );
     }, []);
 
@@ -335,7 +330,7 @@ export default function ModalsOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {/* Standard Modal Card */}
-                        <div className="modal-trigger border-t-4 border-primary bg-base-100 p-8 opacity-0">
+                        <div className="modal-trigger border-t-4 border-coral bg-base-100 p-8 opacity-0">
                             <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mb-5">
                                 <i className="fa-duotone fa-regular fa-file-lines text-2xl text-primary"></i>
                             </div>
@@ -755,7 +750,10 @@ export default function ModalsOne() {
                         ) : (
                             <div className="p-8">
                                 {/* Step content */}
-                                <div ref={wizardStepRef} className="min-h-[280px]">
+                                <div
+                                    ref={wizardStepRef}
+                                    className="min-h-[280px]"
+                                >
                                     {/* Step 1: Job Details */}
                                     {wizardStep === 0 && (
                                         <div className="space-y-5">
@@ -1116,9 +1114,7 @@ export default function ModalsOne() {
                                                         Description
                                                     </p>
                                                     <p className="text-sm text-base-content/70 leading-relaxed bg-base-200 p-4">
-                                                        {
-                                                            wizardData.description
-                                                        }
+                                                        {wizardData.description}
                                                     </p>
                                                 </div>
                                             )}
@@ -1195,7 +1191,8 @@ export default function ModalsOne() {
                                     Job Deleted
                                 </h4>
                                 <p className="text-base-content/60 mb-8">
-                                    The job listing has been permanently removed.
+                                    The job listing has been permanently
+                                    removed.
                                 </p>
                                 <button
                                     onClick={closeConfirm}

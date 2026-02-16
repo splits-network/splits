@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useUserProfile } from '@/contexts';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { ContentCard, EmptyState } from '@/components/ui/cards';
-import { SkeletonList } from '@splits-network/shared-ui';
+import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
+import { ACCENT } from './accent';
 
 interface BillingReadiness {
     status: 'not_started' | 'incomplete' | 'ready';
@@ -52,12 +52,12 @@ const BILLING_TERMS_LABELS: Record<string, string> = {
     net_90: 'Net 90',
 };
 
-const STATUS_BADGES: Record<string, { class: string; label: string }> = {
-    draft: { class: 'badge-ghost', label: 'Draft' },
-    open: { class: 'badge-warning', label: 'Due' },
-    paid: { class: 'badge-success', label: 'Paid' },
-    void: { class: 'badge-ghost', label: 'Void' },
-    uncollectible: { class: 'badge-error', label: 'Failed' },
+const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
+    draft: { bg: 'bg-dark/10', text: 'text-dark/50', label: 'Draft' },
+    open: { bg: 'bg-yellow/20', text: 'text-dark', label: 'Due' },
+    paid: { bg: 'bg-teal/20', text: 'text-teal', label: 'Paid' },
+    void: { bg: 'bg-dark/10', text: 'text-dark/40', label: 'Void' },
+    uncollectible: { bg: 'bg-coral/20', text: 'text-coral', label: 'Failed' },
 };
 
 function formatCurrency(amount: number, currency: string = 'usd'): string {
@@ -70,10 +70,7 @@ function formatCurrency(amount: number, currency: string = 'usd'): string {
 }
 
 function formatShortDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-    });
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export default function BillingSummary() {
@@ -85,15 +82,12 @@ export default function BillingSummary() {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
     const [invoices, setInvoices] = useState<RecentInvoice[]>([]);
 
-    // Resolve company ID from profile context (no extra /users/me call)
     useEffect(() => {
         if (!profile?.organization_ids?.length) return;
-
         const resolve = async () => {
             try {
                 const token = await getToken();
                 if (!token) return;
-
                 const client = createAuthenticatedClient(token);
                 const companiesRes: any = await client.get('/companies');
                 const companies = companiesRes?.data || [];
@@ -105,40 +99,30 @@ export default function BillingSummary() {
                 console.error('[BillingSummary] Failed to resolve company ID:', err);
             }
         };
-
         resolve();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile?.organization_ids]);
 
-    // Fetch billing data once company ID is resolved
     const fetchBillingData = useCallback(async () => {
         if (!companyId) return;
-
         try {
             setLoading(true);
             const token = await getToken();
             if (!token) return;
-
             const client = createAuthenticatedClient(token);
 
             const [readinessRes, pmRes, invoicesRes] = await Promise.allSettled([
                 client.get(`/company-billing-profiles/${companyId}/billing-readiness`),
                 client.get(`/company-billing-profiles/${companyId}/payment-method`),
-                client.get(`/company-billing-profiles/${companyId}/invoices`, {
-                    params: { page: '1', limit: '5' },
-                }),
+                client.get(`/company-billing-profiles/${companyId}/invoices`, { params: { page: '1', limit: '5' } }),
             ]);
 
-            if (readinessRes.status === 'fulfilled') {
-                setReadiness(readinessRes.value?.data || null);
-            }
+            if (readinessRes.status === 'fulfilled') setReadiness(readinessRes.value?.data || null);
             if (pmRes.status === 'fulfilled') {
                 const pmData = pmRes.value?.data as PaymentMethodResponse | undefined;
                 setPaymentMethod(pmData?.default_payment_method || null);
             }
-            if (invoicesRes.status === 'fulfilled') {
-                setInvoices(invoicesRes.value?.data || []);
-            }
+            if (invoicesRes.status === 'fulfilled') setInvoices(invoicesRes.value?.data || []);
         } catch (err) {
             console.error('[BillingSummary] Failed to load billing data:', err);
         } finally {
@@ -151,96 +135,91 @@ export default function BillingSummary() {
         if (companyId) fetchBillingData();
     }, [companyId, fetchBillingData]);
 
+    const headerRight = (
+        <MemphisBtn href="/portal/billing" accent={ACCENT[2]} variant="ghost" size="sm">
+            Manage <i className="fa-duotone fa-regular fa-arrow-right" />
+        </MemphisBtn>
+    );
+
     if (loading) {
         return (
-            <ContentCard title="Billing" icon="fa-credit-card" className="bg-base-200">
-                <SkeletonList count={3} variant="text-block" gap="gap-3" />
-            </ContentCard>
+            <MemphisCard title="Billing" icon="fa-credit-card" accent={ACCENT[2]} headerRight={headerRight}>
+                <MemphisSkeleton count={3} />
+            </MemphisCard>
         );
     }
 
     const status = readiness?.status || 'not_started';
 
-    // Not set up — show setup CTA
     if (status === 'not_started') {
         return (
-            <ContentCard title="Billing" icon="fa-credit-card" className="bg-base-200">
-                <EmptyState
+            <MemphisCard title="Billing" icon="fa-credit-card" accent={ACCENT[2]} headerRight={headerRight}>
+                <MemphisEmpty
                     icon="fa-file-invoice-dollar"
                     title="Set up billing"
-                    description="Configure billing to enable placement invoicing for your hires."
-                    size="sm"
+                    description="Configure billing to enable placement invoicing."
                     action={
-                        <Link href="/portal/company/settings" className="btn btn-primary btn-sm">
-                            <i className="fa-duotone fa-regular fa-rocket mr-1"></i>
-                            Get Started
-                        </Link>
+                        <MemphisBtn href="/portal/company/settings" accent={ACCENT[1]}>
+                            <i className="fa-duotone fa-regular fa-rocket" /> Get Started
+                        </MemphisBtn>
                     }
                 />
-            </ContentCard>
+            </MemphisCard>
         );
     }
 
-    const billingTerms = BILLING_TERMS_LABELS[readiness?.billing_terms || ''] || readiness?.billing_terms || '—';
+    const billingTerms = BILLING_TERMS_LABELS[readiness?.billing_terms || ''] || readiness?.billing_terms || '\u2014';
     const openInvoices = invoices.filter(inv => inv.invoice_status === 'open');
     const openTotal = openInvoices.reduce((sum, inv) => sum + inv.amount_due, 0);
 
     return (
-        <ContentCard
-            title="Billing"
-            icon="fa-credit-card"
-            className="bg-base-200"
-            headerActions={
-                <Link href="/portal/billing" className="btn btn-sm btn-ghost text-xs">
-                    Manage
-                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                </Link>
-            }
-        >
+        <MemphisCard title="Billing" icon="fa-credit-card" accent={ACCENT[2]} headerRight={headerRight}>
             <div className="space-y-4">
-                {/* Status indicators */}
+                {/* Incomplete warning */}
                 {status === 'incomplete' && (
-                    <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning text-sm"></i>
-                        <span className="text-xs font-medium text-warning">Billing setup incomplete</span>
-                        <Link href="/portal/company/settings" className="ml-auto text-xs font-semibold text-warning hover:underline">
+                    <div className="border-4 border-yellow bg-yellow/10 p-3 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-dark" />
+                        <span className="text-[10px] font-black uppercase tracking-wider text-dark flex-1">
+                            Setup incomplete
+                        </span>
+                        <Link href="/portal/company/settings" className="text-[10px] font-black uppercase tracking-wider text-coral hover:underline">
                             Complete
                         </Link>
                     </div>
                 )}
 
-                {/* Billing details row */}
+                {/* Details */}
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <div className="text-xs text-base-content/50 mb-0.5">Payment terms</div>
-                        <div className="text-sm font-semibold">{billingTerms}</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-dark/40 mb-0.5">Terms</div>
+                        <div className="text-sm font-bold text-dark">{billingTerms}</div>
                     </div>
                     <div>
-                        <div className="text-xs text-base-content/50 mb-0.5">Payment method</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-dark/40 mb-0.5">Payment</div>
                         {paymentMethod ? (
-                            <div className="text-sm font-semibold flex items-center gap-1.5">
-                                <i className={`fa-brands fa-${paymentMethod.brand?.toLowerCase() || 'credit-card'} text-base`}></i>
+                            <div className="text-sm font-bold text-dark flex items-center gap-1.5">
+                                <i className={`fa-brands fa-${paymentMethod.brand?.toLowerCase() || 'credit-card'}`} />
                                 <span className="tabular-nums">
                                     {paymentMethod.brand ? `${paymentMethod.brand} ` : ''}
                                     ••{paymentMethod.last4}
                                 </span>
                             </div>
                         ) : (
-                            <div className="text-sm text-base-content/40">Not set</div>
+                            <div className="text-sm text-dark/30">Not set</div>
                         )}
                     </div>
                 </div>
 
-                {/* Outstanding balance */}
+                {/* Open balance */}
                 {openInvoices.length > 0 && (
-                    <div className="flex items-center justify-between p-2.5 rounded-lg bg-info/10 border border-info/20">
+                    <div className="border-4 border-teal bg-teal/10 p-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-file-invoice text-info text-sm"></i>
-                            <span className="text-xs text-base-content/70">
+                            <i className="fa-duotone fa-regular fa-file-invoice text-teal" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-dark/70">
                                 {openInvoices.length} open invoice{openInvoices.length !== 1 ? 's' : ''}
                             </span>
                         </div>
-                        <span className="text-sm font-bold tabular-nums text-info">
+                        <span className="text-sm font-black tabular-nums text-teal">
                             {formatCurrency(openTotal)}
                         </span>
                     </div>
@@ -249,25 +228,26 @@ export default function BillingSummary() {
                 {/* Recent invoices */}
                 {invoices.length > 0 && (
                     <div>
-                        <div className="text-xs text-base-content/50 mb-2">Recent invoices</div>
-                        <div className="space-y-1 -mx-2">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-dark/40 mb-2">
+                            Recent Invoices
+                        </div>
+                        <div className="space-y-1">
                             {invoices.slice(0, 4).map((invoice) => {
-                                const badge = STATUS_BADGES[invoice.invoice_status] || STATUS_BADGES.draft;
+                                const cfg = STATUS_CONFIG[invoice.invoice_status] || STATUS_CONFIG.draft;
                                 return (
-                                    <div
-                                        key={invoice.id}
-                                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-300/50 transition-all"
-                                    >
-                                        <div className="min-w-0 flex-1">
+                                    <div key={invoice.id} className="flex items-center gap-3 p-2 border-b border-dark/10 last:border-0">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium tabular-nums">
+                                                <span className="text-sm font-bold tabular-nums text-dark">
                                                     {formatCurrency(invoice.amount_due, invoice.currency)}
                                                 </span>
-                                                <span className={`badge badge-xs ${badge.class}`}>{badge.label}</span>
+                                                <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border-4 border-dark ${cfg.bg} ${cfg.text}`}>
+                                                    {cfg.label}
+                                                </span>
                                             </div>
-                                            <div className="text-xs text-base-content/50 mt-0.5">
+                                            <div className="text-[10px] text-dark/40 mt-0.5">
                                                 {invoice.stripe_invoice_number || `INV-${invoice.id.slice(0, 8)}`}
-                                                <span className="text-base-content/30 mx-1">&middot;</span>
+                                                <span className="mx-1">&middot;</span>
                                                 {formatShortDate(invoice.created_at)}
                                             </div>
                                         </div>
@@ -276,9 +256,9 @@ export default function BillingSummary() {
                                                 href={invoice.hosted_invoice_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-xs btn-ghost shrink-0"
+                                                className="text-dark/30 hover:text-coral transition-colors"
                                             >
-                                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square"></i>
+                                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                                             </a>
                                         )}
                                     </div>
@@ -290,10 +270,10 @@ export default function BillingSummary() {
 
                 {invoices.length === 0 && status === 'ready' && (
                     <div className="text-center py-3">
-                        <p className="text-xs text-base-content/40">No invoices yet</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-dark/30">No invoices yet</p>
                     </div>
                 )}
             </div>
-        </ContentCard>
+        </MemphisCard>
     );
 }

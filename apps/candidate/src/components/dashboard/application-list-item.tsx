@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Presence } from '@/components/presense';
+import Link from "next/link";
+import { Presence } from "@/components/presense";
 
 interface ApplicationListItemProps {
     application: {
@@ -18,7 +18,7 @@ interface ApplicationListItemProps {
         recruiter_user_id?: string | null;
     };
     onChatClick?: (e: React.MouseEvent) => void;
-    presenceStatus?: 'online' | 'idle' | 'offline' | null;
+    presenceStatus?: "online" | "idle" | "offline" | null;
     startingChat?: boolean;
 }
 
@@ -40,33 +40,33 @@ function getStageProgress(stage: string): number {
 
 // Get status indicator color
 function getStatusColor(stage: string): string {
-    if (['interview', 'final_interview', 'offer'].includes(stage)) {
-        return 'bg-success';
+    if (["interview", "final_interview", "offer"].includes(stage)) {
+        return "bg-success";
     }
-    if (['submitted', 'screen'].includes(stage)) {
-        return 'bg-warning';
+    if (["submitted", "screen"].includes(stage)) {
+        return "bg-warning";
     }
-    if (['rejected', 'withdrawn'].includes(stage)) {
-        return 'bg-error';
+    if (["rejected", "withdrawn"].includes(stage)) {
+        return "bg-error";
     }
-    return 'bg-info';
+    return "bg-info";
 }
 
 // Get status badge color
 function getStatusBadgeClass(stage: string): string {
-    if (['interview', 'final_interview'].includes(stage)) {
-        return 'badge-info';
+    if (["interview", "final_interview"].includes(stage)) {
+        return "badge-info";
     }
-    if (stage === 'offer') {
-        return 'badge-warning';
+    if (stage === "offer") {
+        return "badge-warning";
     }
-    if (['rejected', 'withdrawn'].includes(stage)) {
-        return 'badge-error';
+    if (["rejected", "withdrawn"].includes(stage)) {
+        return "badge-error";
     }
-    if (['submitted', 'screen'].includes(stage)) {
-        return 'badge-success';
+    if (["submitted", "screen"].includes(stage)) {
+        return "badge-success";
     }
-    return 'badge-ghost';
+    return "badge-ghost";
 }
 
 // Format relative time
@@ -79,26 +79,29 @@ function getRelativeTime(dateString: string): string {
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
     if (diffDays > 30) {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+        });
     }
     if (diffDays > 0) {
-        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
     }
     if (diffHours > 0) {
-        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
     }
     if (diffMinutes > 0) {
-        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+        return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
     }
-    return 'Just now';
+    return "Just now";
 }
 
 // Format salary range
 function formatSalaryRange(min?: number, max?: number): string | null {
     if (!min && !max) return null;
-    const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+    const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });
@@ -121,13 +124,18 @@ export default function ApplicationListItem({
     const statusColor = getStatusColor(application.status);
     const badgeClass = getStatusBadgeClass(application.status);
     const appliedTime = getRelativeTime(application.applied_at);
-    const updatedTime = application.updated_at ? getRelativeTime(application.updated_at) : null;
-    const salaryRange = formatSalaryRange(application.salary_min, application.salary_max);
+    const updatedTime = application.updated_at
+        ? getRelativeTime(application.updated_at)
+        : null;
+    const salaryRange = formatSalaryRange(
+        application.salary_min,
+        application.salary_max,
+    );
     const canChat = Boolean(application.recruiter_user_id);
 
     return (
         <Link href={`/portal/applications?applicationId=${application.id}`}>
-            <div className="group relative p-2.5 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-lg hover:border-primary/50 border border-transparent transition-all cursor-pointer">
+            <div className="group relative p-2.5 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-lg hover:border-coral/50 border border-transparent transition-all cursor-pointer">
                 {/* Header row with title and status dot */}
                 <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
@@ -209,7 +217,7 @@ export default function ApplicationListItem({
                 {/* Status badge and progress percentage */}
                 <div className="flex items-center justify-between">
                     <span className={`badge ${badgeClass} badge-xs uppercase`}>
-                        {application.status.replace('_', ' ')}
+                        {application.status.replace("_", " ")}
                     </span>
                     <div className="flex items-center gap-2 text-[11px]">
                         {updatedTime && (

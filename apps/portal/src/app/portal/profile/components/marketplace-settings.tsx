@@ -294,7 +294,7 @@ export function MarketplaceSettings() {
             <ConnectStatusCard variant="compact" />
 
             {/* Profile Completeness Indicator */}
-            <div className="card bg-primary/10 border border-primary/20">
+            <div className="card bg-primary/10 border border-coral/20">
                 <div className="card-body">
                     <div className="flex items-center gap-6">
                         {/* Progress Ring */}

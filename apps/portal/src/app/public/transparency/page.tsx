@@ -1,587 +1,644 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ScrollAnimator } from "@/components/scroll-animator";
-import { RTICalculator } from "@/components/calculator/rti-calculator";
 import { buildCanonical } from "@/lib/seo";
+import { TransparencyAnimator } from "./transparency-animator";
 
 export const metadata: Metadata = {
-    title: "Transparency",
+    title: "Transparency | Splits Network",
     description:
-        "Complete transparency on how placement fees are split between recruiters on Splits Network. Clear pricing and processes for collaborative recruiting.",
+        "Radical transparency in recruiting. See exactly how fees are split, how data is handled, and why we believe openness builds trust. No hidden costs, no surprises.",
     openGraph: {
-        title: "Transparency",
+        title: "Transparency | Splits Network",
         description:
-            "Complete transparency on how placement fees are split between recruiters on Splits Network. Clear pricing and processes for collaborative recruiting.",
+            "Radical transparency in recruiting. See exactly how fees are split, how data is handled, and why we believe openness builds trust.",
         url: "https://splits.network/public/transparency",
     },
     ...buildCanonical("/public/transparency"),
 };
 
-interface TierInfo {
-    name: string;
-    monthlyPrice: number;
-    candidateRecruiterShare: number;
-    platformTake: number;
-    description: string;
-    highlight?: boolean;
-}
+// ─── Page data ──────────────────────────────────────────────────────────────
 
-const tierData: TierInfo[] = [
+const keyStats = [
+    { value: "100%", label: "Fee Visibility", color: "#FF6B6B" },
+    { value: "Real-Time", label: "Placement Tracking", color: "#4ECDC4" },
+    { value: "Open", label: "Platform Economics", color: "#FFE66D" },
+    { value: "Zero", label: "Hidden Costs", color: "#A78BFA" },
+];
+
+const oldWayItems = [
+    "Opaque fees buried in fine print that recruiters never see",
+    "Placement splits negotiated behind closed doors after the fact",
+    "No visibility into where your candidates go or what happens next",
+    "Platform economics hidden -- you never know the real take rate",
+    "Payment timelines undefined, disputes common, resolution slow",
+    "Recruiter performance data locked away and inaccessible",
+];
+
+const newWayItems = [
+    "Every fee breakdown visible before you start working a role",
+    "Split percentages set upfront by tier -- no surprises, no renegotiation",
+    "Real-time tracking of every candidate through the full lifecycle",
+    "Platform take rate published openly for every subscription tier",
+    "Automated payouts tied to verified milestones with clear timelines",
+    "Your performance stats, placement history, and earnings -- always accessible",
+];
+
+const shareFeatures = [
     {
-        name: "Starter",
-        monthlyPrice: 0,
-        candidateRecruiterShare: 20,
-        platformTake: 48,
-        description: "Perfect for getting started with split placements",
+        icon: "fa-duotone fa-regular fa-chart-pie",
+        title: "Fee Breakdowns",
+        text: "See exactly how placement fees are calculated and distributed across every role in a split. No guesswork, no hidden margins.",
+        color: "#FF6B6B",
     },
     {
-        name: "Pro",
-        monthlyPrice: 99,
-        candidateRecruiterShare: 30,
-        platformTake: 24,
-        description: "For active recruiters making regular placements",
-        highlight: true,
+        icon: "fa-duotone fa-regular fa-chart-line",
+        title: "Recruiter Performance",
+        text: "Your placement rate, average time-to-fill, candidate satisfaction scores, and earnings history -- all visible in your dashboard.",
+        color: "#4ECDC4",
     },
     {
-        name: "Partner",
-        monthlyPrice: 249,
-        candidateRecruiterShare: 40,
-        platformTake: 0,
-        description: "Maximum earnings for established recruiting partners",
+        icon: "fa-duotone fa-regular fa-route",
+        title: "Placement Tracking",
+        text: "Follow every candidate from submission to placement in real-time. Know exactly where things stand at every stage of the process.",
+        color: "#FFE66D",
+    },
+    {
+        icon: "fa-duotone fa-regular fa-coins",
+        title: "Platform Economics",
+        text: "Our take rates are published for every tier. Starter, Pro, Partner -- you always know what the platform earns and what you keep.",
+        color: "#A78BFA",
+    },
+    {
+        icon: "fa-duotone fa-regular fa-file-contract",
+        title: "Contract Terms",
+        text: "Standardized agreements mean every split deal has the same clear terms. No custom side deals, no ambiguity, no disputes.",
+        color: "#FF6B6B",
+    },
+    {
+        icon: "fa-duotone fa-regular fa-bell",
+        title: "Status Notifications",
+        text: "Get notified at every milestone -- submission received, interview scheduled, offer extended, placement confirmed, payment processed.",
+        color: "#4ECDC4",
     },
 ];
 
-const roleDefinitions = [
+const privacyCommitments = [
     {
-        role: "Candidate Recruiter",
-        description:
-            "The recruiter who sourced and represents the candidate throughout the process",
-        example:
-            "You find a software engineer through your network and guide them through the hiring process",
-        icon: "fa-user-tie",
+        icon: "fa-duotone fa-regular fa-shield-check",
+        title: "Data Minimization",
+        text: "We collect only what we need to operate the platform. No surplus data harvesting, no selling information to third parties.",
     },
     {
-        role: "Job Owner",
-        description:
-            "The external recruiter assigned by the company to fill the specific role",
-        example:
-            "An independent recruiter contracted to manage hiring for a specific position",
-        icon: "fa-briefcase",
+        icon: "fa-duotone fa-regular fa-lock",
+        title: "Encryption Everywhere",
+        text: "All data is encrypted in transit and at rest. Your candidate information, financial details, and communications are protected at every layer.",
     },
     {
-        role: "Company Recruiter",
-        description:
-            "An external recruiter with a preferred relationship or contract with the company",
-        example:
-            "A recruiting firm that regularly works with the company on multiple roles",
-        icon: "fa-building",
+        icon: "fa-duotone fa-regular fa-eye",
+        title: "Access Controls",
+        text: "Role-based permissions ensure people only see what they need. Candidates control their own data visibility. Companies see only their roles.",
     },
     {
-        role: "Candidate Sourcer",
-        description:
-            "Recruiter who brought the candidate to the Splits Network platform originally",
-        example:
-            "You recruited a candidate to join the platform, and later another recruiter represents them in a placement",
-        icon: "fa-search",
-    },
-    {
-        role: "Company Sourcer",
-        description:
-            "Recruiter who brought the company to the Splits Network platform originally",
-        example:
-            "You onboarded a company to the platform, and later other recruiters fill their roles",
-        icon: "fa-handshake",
+        icon: "fa-duotone fa-regular fa-trash-can-clock",
+        title: "Data Retention",
+        text: "Clear retention policies. When data is no longer needed, it is removed. You can request deletion of your account and data at any time.",
     },
 ];
 
-const processSteps = [
-    {
-        step: 1,
-        title: "Placement is Made",
-        description: "A candidate you referred gets hired by the company",
-        details:
-            "The hiring company confirms the placement and records the final salary and placement fee",
-    },
-    {
-        step: 2,
-        title: "Fee Calculation",
-        description:
-            "Total placement fee is calculated based on candidate's salary",
-        details:
-            "Example: $150,000 salary x 20% fee = $30,000 total placement fee",
-    },
-    {
-        step: 3,
-        title: "Role Identification",
-        description:
-            "System identifies all recruiters who contributed to the placement",
-        details:
-            "Automatically assigns roles like Candidate Recruiter, Job Owner, etc.",
-    },
-    {
-        step: 4,
-        title: "Split Calculation",
-        description: "Fee is divided based on roles and your subscription tier",
-        details:
-            "Each role gets a percentage based on their contribution level",
-    },
-    {
-        step: 5,
-        title: "Payout Processing",
-        description: "Your earnings are calculated and processed for payment",
-        details:
-            "Transparent breakdown showing exactly how your share was calculated",
-    },
-];
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function TransparencyPage() {
     return (
-        <ScrollAnimator>
-            <div className="min-h-screen bg-base-100">
-                {/* Hero Section */}
-                <section className="relative bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 py-24 px-4">
-                    <div className="max-w-7xl mx-auto text-center">
-                        <div>
-                            <div className="badge badge-primary badge-lg mb-6">
-                                <i className="fa-duotone fa-regular fa-chart-pie mr-2"></i>
-                                Complete Transparency
-                            </div>
-                            <h1 className="text-5xl md:text-7xl font-bold text-base-content mb-8">
-                                Fee{" "}
-                                <span className="text-primary">Transparency</span>
-                            </h1>
-                            <p className="text-xl md:text-2xl text-base-content/80 max-w-4xl mx-auto mb-12 leading-relaxed">
-                                Understanding placement fee distribution on Splits
-                                Network. Clear, transparent, and designed to reward
-                                collaboration in recruiting.
+        <TransparencyAnimator>
+            {/* ══════════════════════════════════════════════════════════════
+                HERO HEADER
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-hero relative min-h-[70vh] overflow-hidden flex items-center"
+                style={{ backgroundColor: "#1A1A2E" }}>
+                {/* Memphis decorations */}
+                <div className="memphis-shapes absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="memphis-shape absolute top-[8%] left-[6%] w-24 h-24 rounded-full border-[5px] opacity-0"
+                        style={{ borderColor: "#FF6B6B" }} />
+                    <div className="memphis-shape absolute top-[55%] right-[10%] w-20 h-20 rounded-full opacity-0"
+                        style={{ backgroundColor: "#4ECDC4" }} />
+                    <div className="memphis-shape absolute bottom-[12%] left-[15%] w-12 h-12 rounded-full opacity-0"
+                        style={{ backgroundColor: "#FFE66D" }} />
+                    <div className="memphis-shape absolute top-[22%] right-[20%] w-16 h-16 rotate-12 opacity-0"
+                        style={{ backgroundColor: "#A78BFA" }} />
+                    <div className="memphis-shape absolute bottom-[30%] right-[30%] w-24 h-10 -rotate-6 border-[4px] opacity-0"
+                        style={{ borderColor: "#FF6B6B" }} />
+                    <div className="memphis-shape absolute top-[40%] left-[25%] w-10 h-10 rotate-45 opacity-0"
+                        style={{ backgroundColor: "#FF6B6B" }} />
+                    {/* Triangle */}
+                    <div className="memphis-shape absolute top-[18%] left-[45%] opacity-0"
+                        style={{
+                            width: 0, height: 0,
+                            borderLeft: "25px solid transparent",
+                            borderRight: "25px solid transparent",
+                            borderBottom: "43px solid #FFE66D",
+                            transform: "rotate(-10deg)",
+                        }} />
+                    {/* Dots */}
+                    <div className="memphis-shape absolute bottom-[20%] right-[45%] opacity-0">
+                        <div className="grid grid-cols-3 gap-2">
+                            {Array.from({ length: 9 }).map((_, i) => (
+                                <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: "#4ECDC4" }} />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Zigzag */}
+                    <svg className="memphis-shape absolute top-[70%] left-[40%] opacity-0" width="100" height="30" viewBox="0 0 100 30">
+                        <polyline points="0,25 12,5 24,25 36,5 48,25 60,5 72,25 84,5 100,25"
+                            fill="none" stroke="#A78BFA" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    {/* Plus sign */}
+                    <svg className="memphis-shape absolute top-[65%] left-[8%] opacity-0" width="30" height="30" viewBox="0 0 30 30">
+                        <line x1="15" y1="3" x2="15" y2="27" stroke="#FFE66D" strokeWidth="4" strokeLinecap="round" />
+                        <line x1="3" y1="15" x2="27" y2="15" stroke="#FFE66D" strokeWidth="4" strokeLinecap="round" />
+                    </svg>
+                    {/* Eye / transparency symbol */}
+                    <svg className="memphis-shape absolute top-[35%] right-[6%] opacity-0" width="50" height="30" viewBox="0 0 50 30">
+                        <ellipse cx="25" cy="15" rx="22" ry="12" fill="none" stroke="#4ECDC4" strokeWidth="3" />
+                        <circle cx="25" cy="15" r="6" fill="#4ECDC4" />
+                    </svg>
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10 py-20">
+                    <div className="max-w-4xl mx-auto">
+                        {/* Category tag */}
+                        <div className="hero-meta flex flex-wrap items-center gap-4 mb-8 opacity-0">
+                            <span className="inline-flex items-center gap-2 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em]"
+                                style={{ backgroundColor: "#4ECDC4", color: "#1A1A2E" }}>
+                                <i className="fa-duotone fa-regular fa-eye"></i>
+                                Our Commitment
+                            </span>
+                            <span className="text-xs font-bold uppercase tracking-[0.15em]"
+                                style={{ color: "#FFE66D" }}>
+                                <i className="fa-duotone fa-regular fa-shield-check mr-1"></i>
+                                Trust First
+                            </span>
+                        </div>
+
+                        <h1 className="hero-headline text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-8 opacity-0"
+                            style={{ color: "#FFFFFF" }}>
+                            We Show{" "}
+                            <span className="relative inline-block">
+                                <span style={{ color: "#4ECDC4" }}>Our Work</span>
+                                <span className="absolute -bottom-2 left-0 w-full h-2" style={{ backgroundColor: "#4ECDC4" }} />
+                            </span>
+                        </h1>
+
+                        <p className="hero-subtext text-lg md:text-xl leading-relaxed mb-10 opacity-0"
+                            style={{ color: "rgba(255,255,255,0.7)" }}>
+                            Recruiting has been opaque for too long. Hidden fees, unclear processes,
+                            and black-box economics. We believe transparency isn&apos;t a feature --
+                            it&apos;s the foundation everything else is built on.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                KEY STATS BAR
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-stats py-0 overflow-hidden">
+                <div className="grid grid-cols-2 lg:grid-cols-4">
+                    {keyStats.map((stat, index) => (
+                        <div key={index}
+                            className="stat-block p-6 md:p-8 text-center opacity-0"
+                            style={{
+                                backgroundColor: stat.color,
+                                color: stat.color === "#FFE66D" ? "#1A1A2E" : "#FFFFFF",
+                            }}>
+                            <div className="text-3xl md:text-4xl font-black mb-1">{stat.value}</div>
+                            <div className="text-xs font-bold uppercase tracking-[0.12em]">{stat.label}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                INTRO - Why Transparency Matters
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-intro py-20 overflow-hidden" style={{ backgroundColor: "#F5F0EB" }}>
+                <div className="container mx-auto px-4">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="intro-section opacity-0">
+                            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-6"
+                                style={{ color: "#1A1A2E" }}>
+                                Why Transparency{" "}
+                                <span style={{ color: "#FF6B6B" }}>Matters</span>
+                            </h2>
+
+                            <p className="text-lg leading-relaxed mb-6" style={{ color: "#1A1A2E", opacity: 0.8 }}>
+                                The recruiting industry has operated behind closed doors for decades.
+                                Fees are negotiated in private. Platform economics are hidden. Recruiters
+                                do the work but rarely see the full picture of how their earnings are calculated.
+                                Candidates are kept in the dark about who is representing them and why.
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Link
-                                    href="/portal/dashboard"
-                                    className="btn btn-primary btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-arrow-right mr-2"></i>
-                                    Start Recruiting
-                                </Link>
-                                <Link
-                                    href="#calculator"
-                                    className="btn btn-outline btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-calculator mr-2"></i>
-                                    Calculate Earnings
-                                </Link>
+
+                            <p className="text-lg leading-relaxed mb-6" style={{ color: "#1A1A2E", opacity: 0.8 }}>
+                                We built Splits Network on a different premise: that trust is earned through
+                                visibility. When recruiters can see exactly how fees are split, when candidates
+                                can track their own progress, and when companies know exactly what they are
+                                paying for -- everyone makes better decisions.
+                            </p>
+
+                            <p className="text-lg leading-relaxed" style={{ color: "#1A1A2E", opacity: 0.8 }}>
+                                This page is our commitment in practice. Everything we share, how we handle
+                                data, and what we believe about operating in the open.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                PULL QUOTE 1
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 overflow-hidden" style={{ backgroundColor: "#1A1A2E" }}>
+                <div className="container mx-auto px-4">
+                    <div className="pullquote max-w-4xl mx-auto relative p-8 md:p-12 border-4 opacity-0"
+                        style={{ borderColor: "#4ECDC4" }}>
+                        <div className="absolute -top-8 left-8 text-7xl font-black leading-none"
+                            style={{ color: "#4ECDC4" }}>
+                            &ldquo;
+                        </div>
+                        <p className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-tight mt-4"
+                            style={{ color: "#FFFFFF" }}>
+                            Trust isn&apos;t built by telling people to trust you.
+                            It&apos;s built by showing them everything and letting
+                            them decide for themselves.
+                        </p>
+                        <div className="mt-6 pt-4" style={{ borderTop: "3px solid #4ECDC4" }}>
+                            <span className="text-sm font-bold uppercase tracking-wider" style={{ color: "#4ECDC4" }}>
+                                -- Splits Network Founding Principle
+                            </span>
+                        </div>
+                        {/* Corner decoration */}
+                        <div className="absolute top-0 right-0 w-10 h-10"
+                            style={{ backgroundColor: "#4ECDC4" }} />
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                TRANSPARENCY COMMITMENTS - Old Way vs New Way
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-comparison py-20 overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="container mx-auto px-4">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="comparison-heading text-center mb-12 opacity-0">
+                            <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4"
+                                style={{ backgroundColor: "#A78BFA", color: "#FFFFFF" }}>
+                                The Shift
+                            </span>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight"
+                                style={{ color: "#1A1A2E" }}>
+                                Opacity vs{" "}
+                                <span style={{ color: "#4ECDC4" }}>Openness</span>
+                            </h2>
+                        </div>
+
+                        <div className="comparison-grid grid md:grid-cols-2 gap-8">
+                            {/* Old Way */}
+                            <div className="comparison-card p-8 border-4 opacity-0"
+                                style={{ borderColor: "#FF6B6B", backgroundColor: "#FFFFFF" }}>
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-12 h-12 flex items-center justify-center"
+                                        style={{ backgroundColor: "#FF6B6B" }}>
+                                        <i className="fa-duotone fa-regular fa-eye-slash text-xl" style={{ color: "#FFFFFF" }}></i>
+                                    </div>
+                                    <h3 className="font-black text-xl uppercase tracking-wide" style={{ color: "#1A1A2E" }}>
+                                        The Opaque Way
+                                    </h3>
+                                </div>
+                                <ul className="space-y-4">
+                                    {oldWayItems.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-3 text-sm leading-relaxed"
+                                            style={{ color: "#1A1A2E", opacity: 0.8 }}>
+                                            <i className="fa-duotone fa-regular fa-xmark mt-0.5 flex-shrink-0"
+                                                style={{ color: "#FF6B6B" }}></i>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* New Way */}
+                            <div className="comparison-card p-8 border-4 opacity-0"
+                                style={{ borderColor: "#4ECDC4", backgroundColor: "#FFFFFF" }}>
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-12 h-12 flex items-center justify-center"
+                                        style={{ backgroundColor: "#4ECDC4" }}>
+                                        <i className="fa-duotone fa-regular fa-eye text-xl" style={{ color: "#1A1A2E" }}></i>
+                                    </div>
+                                    <h3 className="font-black text-xl uppercase tracking-wide" style={{ color: "#1A1A2E" }}>
+                                        The Splits Way
+                                    </h3>
+                                </div>
+                                <ul className="space-y-4">
+                                    {newWayItems.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-3 text-sm leading-relaxed"
+                                            style={{ color: "#1A1A2E", opacity: 0.8 }}>
+                                            <i className="fa-duotone fa-regular fa-check mt-0.5 flex-shrink-0"
+                                                style={{ color: "#4ECDC4" }}></i>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* Core Concept Section */}
-                <section className="py-24 px-4 bg-base-200/50">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                The Split Concept
+            {/* ══════════════════════════════════════════════════════════════
+                IMAGE BREAK
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="relative overflow-hidden" style={{ minHeight: "400px" }}>
+                <img
+                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1600&q=80"
+                    alt="Open collaborative workspace with transparent glass walls"
+                    className="w-full h-full object-cover absolute inset-0"
+                    style={{ minHeight: "400px" }}
+                />
+                {/* Retro color overlay */}
+                <div className="absolute inset-0" style={{ backgroundColor: "#1A1A2E", opacity: 0.75 }} />
+                {/* Memphis border frame */}
+                <div className="absolute inset-4 md:inset-8 border-4 pointer-events-none"
+                    style={{ borderColor: "#FFE66D" }} />
+
+                <div className="relative z-10 flex items-center justify-center py-24 px-8">
+                    <div className="image-caption text-center max-w-3xl opacity-0">
+                        <p className="text-2xl md:text-4xl font-black uppercase tracking-tight leading-tight"
+                            style={{ color: "#FFFFFF" }}>
+                            When everyone can see the{" "}
+                            <span style={{ color: "#FFE66D" }}>whole picture</span>
+                            , better decisions follow.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                WHAT WE SHARE - Transparency Features Grid
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-share py-20 overflow-hidden" style={{ backgroundColor: "#F5F0EB" }}>
+                <div className="container mx-auto px-4">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="share-heading text-center mb-12 opacity-0">
+                            <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4"
+                                style={{ backgroundColor: "#FF6B6B", color: "#FFFFFF" }}>
+                                Full Visibility
+                            </span>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight"
+                                style={{ color: "#1A1A2E" }}>
+                                What We{" "}
+                                <span style={{ color: "#FF6B6B" }}>Share</span>
                             </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                When multiple recruiters contribute to a placement,
-                                the fee is shared based on their roles and
-                                contributions.
-                            </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-8 mb-16" data-animate-stagger>
-                            <div className="opacity-0 card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all">
-                                <div className="card-body text-center">
-                                    <div className="text-primary text-6xl mb-4">
-                                        <i className="fa-duotone fa-regular fa-users"></i>
+                        <div className="share-grid grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {shareFeatures.map((feature, index) => (
+                                <div key={index}
+                                    className="share-card relative p-6 md:p-8 border-4 opacity-0"
+                                    style={{ borderColor: feature.color, backgroundColor: "#FFFFFF" }}>
+                                    <div className="absolute top-0 right-0 w-10 h-10"
+                                        style={{ backgroundColor: feature.color }} />
+                                    <div className="w-14 h-14 flex items-center justify-center mb-4 border-4"
+                                        style={{ borderColor: feature.color }}>
+                                        <i className={`${feature.icon} text-2xl`} style={{ color: feature.color }}></i>
                                     </div>
-                                    <h3 className="card-title text-2xl justify-center mb-4">
-                                        Collaboration
+                                    <h3 className="font-black text-lg uppercase tracking-wide mb-3"
+                                        style={{ color: "#1A1A2E" }}>
+                                        {feature.title}
                                     </h3>
-                                    <p className="text-base-content/80">
-                                        Multiple recruiters can work together on the
-                                        same placement, each contributing their
-                                        unique strengths.
+                                    <p className="text-sm leading-relaxed" style={{ color: "#1A1A2E", opacity: 0.75 }}>
+                                        {feature.text}
                                     </p>
                                 </div>
-                            </div>
-
-                            <div className="opacity-0 card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all">
-                                <div className="card-body text-center">
-                                    <div className="text-secondary text-6xl mb-4">
-                                        <i className="fa-duotone fa-regular fa-chart-pie"></i>
-                                    </div>
-                                    <h3 className="card-title text-2xl justify-center mb-4">
-                                        Fair Distribution
-                                    </h3>
-                                    <p className="text-base-content/80">
-                                        Placement fees are automatically split based
-                                        on each recruiter's role and contribution
-                                        level.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="opacity-0 card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all">
-                                <div className="card-body text-center">
-                                    <div className="text-accent text-6xl mb-4">
-                                        <i className="fa-duotone fa-regular fa-transparent"></i>
-                                    </div>
-                                    <h3 className="card-title text-2xl justify-center mb-4">
-                                        Transparency
-                                    </h3>
-                                    <p className="text-base-content/80">
-                                        See exactly how much you'll earn before you
-                                        start, with clear breakdowns of every split.
-                                    </p>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* Tier Comparison Section */}
-                <section className="py-24 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                Earning Tiers
-                            </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                Your subscription tier determines your share of
-                                placement fees. Higher tiers mean bigger payouts.
-                            </p>
+            {/* ══════════════════════════════════════════════════════════════
+                PULL QUOTE 2
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 overflow-hidden" style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="container mx-auto px-4">
+                    <div className="pullquote max-w-4xl mx-auto relative p-8 md:p-12 border-4 opacity-0"
+                        style={{ borderColor: "#FF6B6B" }}>
+                        <div className="absolute -top-8 left-8 text-7xl font-black leading-none"
+                            style={{ color: "#FF6B6B" }}>
+                            &ldquo;
                         </div>
+                        <p className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-tight mt-4"
+                            style={{ color: "#1A1A2E" }}>
+                            The platforms that hide their economics are the ones
+                            with something to hide. We publish ours because we
+                            are proud of them.
+                        </p>
+                        <div className="mt-6 pt-4" style={{ borderTop: "3px solid #FF6B6B" }}>
+                            <span className="text-sm font-bold uppercase tracking-wider" style={{ color: "#FF6B6B" }}>
+                                -- Splits Network Team
+                            </span>
+                        </div>
+                        <div className="absolute bottom-0 left-0 w-10 h-10"
+                            style={{ backgroundColor: "#FF6B6B" }} />
+                    </div>
+                </div>
+            </section>
 
-                        <div className="grid md:grid-cols-3 gap-8 mb-16" data-animate-stagger>
-                            {tierData.map((tier) => (
-                                <div
-                                    key={tier.name}
-                                    className={`opacity-0 card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all ${tier.highlight ? "ring-2 ring-primary" : ""}`}
-                                >
-                                    {tier.highlight && (
-                                        <div className="badge badge-primary absolute -top-3 left-1/2 transform -translate-x-1/2">
-                                            Most Popular
+            {/* ══════════════════════════════════════════════════════════════
+                DATA & PRIVACY
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-privacy py-20 overflow-hidden" style={{ backgroundColor: "#1A1A2E" }}>
+                <div className="container mx-auto px-4">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="privacy-section opacity-0">
+                            <div className="text-center mb-12">
+                                <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4"
+                                    style={{ backgroundColor: "#FFE66D", color: "#1A1A2E" }}>
+                                    Your Data
+                                </span>
+                                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight"
+                                    style={{ color: "#FFFFFF" }}>
+                                    Privacy &amp;{" "}
+                                    <span style={{ color: "#FFE66D" }}>Protection</span>
+                                </h2>
+                                <p className="text-lg leading-relaxed mt-6 max-w-3xl mx-auto"
+                                    style={{ color: "rgba(255,255,255,0.7)" }}>
+                                    Transparency goes both ways. We are open about our business, and we are
+                                    equally serious about protecting yours. Here is how we handle data.
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {privacyCommitments.map((item, index) => (
+                                    <div key={index}
+                                        className="p-6 md:p-8 border-4"
+                                        style={{ borderColor: "#FFE66D", backgroundColor: "rgba(255,255,255,0.03)" }}>
+                                        <div className="w-12 h-12 flex items-center justify-center mb-4"
+                                            style={{ backgroundColor: "#FFE66D" }}>
+                                            <i className={`${item.icon} text-xl`} style={{ color: "#1A1A2E" }}></i>
                                         </div>
-                                    )}
-                                    <div className="card-body">
-                                        <h3 className="card-title text-2xl text-center justify-center mb-2">
-                                            {tier.name}
+                                        <h3 className="font-black text-lg uppercase tracking-wide mb-3"
+                                            style={{ color: "#FFE66D" }}>
+                                            {item.title}
                                         </h3>
-                                        <div className="text-center mb-6">
-                                            <div className="text-3xl font-bold text-primary">
-                                                ${tier.monthlyPrice}
-                                                <span className="text-base font-normal text-base-content/60">
-                                                    /month
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-base-content/80 mt-2">
-                                                {tier.description}
-                                            </p>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="stat bg-base-200 rounded-lg">
-                                                <div className="stat-title text-center">
-                                                    As Candidate Recruiter
-                                                </div>
-                                                <div className="stat-value text-center text-primary text-2xl">
-                                                    {tier.candidateRecruiterShare}%
-                                                </div>
-                                                <div className="stat-desc text-center">
-                                                    of placement fee
-                                                </div>
-                                            </div>
-
-                                            <div className="stat bg-base-200 rounded-lg">
-                                                <div className="stat-title text-center">
-                                                    Platform Take
-                                                </div>
-                                                <div className="stat-value text-center text-base-content/60 text-2xl">
-                                                    {tier.platformTake}%
-                                                </div>
-                                                <div className="stat-desc text-center">
-                                                    network fee
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="card-actions justify-center mt-6">
-                                            <Link
-                                                href="/portal/dashboard"
-                                                className={`btn ${tier.highlight ? "btn-primary" : "btn-outline"} btn-wide`}
-                                            >
-                                                {tier.monthlyPrice === 0
-                                                    ? "Start Free"
-                                                    : "Upgrade"}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* Role Definitions Section */}
-                <section className="py-24 px-4 bg-base-200/50">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                Recruiter Roles
-                            </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                Different roles in a placement earn different
-                                percentages. Understanding these roles helps you
-                                maximize your earnings.
-                            </p>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" data-animate-stagger>
-                            {roleDefinitions.map((role) => (
-                                <div
-                                    key={role.role}
-                                    className="opacity-0 card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <div className="card-body">
-                                        <div className="flex items-center mb-4">
-                                            <div className="text-primary text-3xl mr-3">
-                                                <i
-                                                    className={`fa-duotone fa-regular ${role.icon}`}
-                                                ></i>
-                                            </div>
-                                            <h3 className="card-title text-lg">
-                                                {role.role}
-                                            </h3>
-                                        </div>
-                                        <p className="text-base-content/80 mb-4">
-                                            {role.description}
+                                        <p className="text-sm leading-relaxed"
+                                            style={{ color: "rgba(255,255,255,0.65)" }}>
+                                            {item.text}
                                         </p>
-                                        <div className="bg-primary/5 p-3 rounded-lg">
-                                            <p className="text-sm font-medium">
-                                                Example:
-                                            </p>
-                                            <p className="text-sm text-base-content/80">
-                                                {role.example}
-                                            </p>
-                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Important Note */}
-                        <div className="mt-16">
-                            <div className="card bg-warning/10 border border-warning/20 max-w-4xl mx-auto">
-                                <div className="card-body">
-                                    <div className="flex items-start gap-4">
-                                        <div className="text-warning text-3xl flex-shrink-0">
-                                            <i className="fa-duotone fa-regular fa-shield-exclamation"></i>
-                                        </div>
-                                        <div>
-                                            <h3 className="card-title text-xl mb-3 text-warning">
-                                                Important: External Recruiters Only
-                                            </h3>
-                                            <div className="space-y-2 text-base-content/80">
-                                                <p>
-                                                    <strong>
-                                                        All payment roles must be
-                                                        filled by external
-                                                        recruiters
-                                                    </strong>{" "}
-                                                    - never by internal company
-                                                    staff members. This includes:
-                                                </p>
-                                                <ul className="list-disc list-inside ml-4 space-y-1">
-                                                    <li>Job Owner</li>
-                                                    <li>Company Recruiter</li>
-                                                    <li>Company Sourcer</li>
-                                                </ul>
-                                                <p>
-                                                    Internal staff members paying
-                                                    themselves would violate
-                                                    platform integrity and could
-                                                    constitute fraud. Our system
-                                                    ensures all payment roles are
-                                                    assigned only to legitimate
-                                                    external recruiting partners.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* Process Timeline Section */}
-                <section className="py-24 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                How Payouts Work
-                            </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                From placement to payout, here's exactly how the
-                                process works when you make a successful referral.
+            {/* ══════════════════════════════════════════════════════════════
+                FINAL QUOTE
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 overflow-hidden" style={{ backgroundColor: "#F5F0EB" }}>
+                <div className="container mx-auto px-4">
+                    <div className="pullquote max-w-4xl mx-auto relative p-8 md:p-12 border-4 opacity-0"
+                        style={{ borderColor: "#A78BFA" }}>
+                        <div className="absolute -top-8 left-8 text-7xl font-black leading-none"
+                            style={{ color: "#A78BFA" }}>
+                            &ldquo;
+                        </div>
+                        <p className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-tight mt-4"
+                            style={{ color: "#1A1A2E" }}>
+                            Radical transparency is not a marketing strategy.
+                            It is how we operate. Every fee, every process,
+                            every decision -- visible by default.
+                        </p>
+                        <div className="mt-6 pt-4" style={{ borderTop: "3px solid #A78BFA" }}>
+                            <span className="text-sm font-bold uppercase tracking-wider" style={{ color: "#A78BFA" }}>
+                                -- Splits Network, 2026
+                            </span>
+                        </div>
+                        <div className="absolute top-0 left-0 w-10 h-10"
+                            style={{ backgroundColor: "#A78BFA" }} />
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════
+                CTA SECTION - 3 Audience Cards
+               ══════════════════════════════════════════════════════════════ */}
+            <section className="transparency-cta relative py-24 overflow-hidden" style={{ backgroundColor: "#1A1A2E" }}>
+                {/* Memphis decorations */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[12%] right-[6%] w-16 h-16 rounded-full border-4"
+                        style={{ borderColor: "#FF6B6B" }} />
+                    <div className="absolute bottom-[18%] left-[10%] w-12 h-12 rotate-45"
+                        style={{ backgroundColor: "#4ECDC4" }} />
+                    <div className="absolute top-[45%] left-[4%] w-10 h-10 rounded-full"
+                        style={{ backgroundColor: "#FFE66D" }} />
+                    <svg className="absolute bottom-[25%] right-[18%]" width="70" height="25" viewBox="0 0 70 25">
+                        <polyline points="0,20 9,5 18,20 27,5 36,20 45,5 54,20 63,5 70,20"
+                            fill="none" stroke="#A78BFA" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="cta-content text-center mb-12 opacity-0 max-w-4xl mx-auto">
+                        <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-6"
+                            style={{ backgroundColor: "#4ECDC4", color: "#1A1A2E" }}>
+                            See For Yourself
+                        </span>
+                        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-6 leading-[1]"
+                            style={{ color: "#FFFFFF" }}>
+                            Experience{" "}
+                            <span style={{ color: "#4ECDC4" }}>Transparency</span>{" "}
+                            First-Hand
+                        </h2>
+                        <p className="text-lg mb-10" style={{ color: "rgba(255,255,255,0.7)" }}>
+                            Join a platform where every fee is visible, every process is trackable,
+                            and every commitment is backed by action.
+                        </p>
+                    </div>
+
+                    <div className="cta-cards grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+                        {/* Recruiters */}
+                        <div className="cta-card p-6 border-4 text-center opacity-0"
+                            style={{ borderColor: "#FF6B6B", backgroundColor: "rgba(255,255,255,0.03)" }}>
+                            <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center"
+                                style={{ backgroundColor: "#FF6B6B" }}>
+                                <i className="fa-duotone fa-regular fa-user-tie text-xl" style={{ color: "#FFFFFF" }}></i>
+                            </div>
+                            <h3 className="font-black text-base uppercase mb-2" style={{ color: "#FFFFFF" }}>
+                                Recruiters
+                            </h3>
+                            <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                                See your splits before you start
                             </p>
+                            <a href="https://splits.network/sign-up"
+                                className="block w-full py-3 font-bold uppercase tracking-wider border-4 text-center text-sm transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: "#FF6B6B", borderColor: "#FF6B6B", color: "#FFFFFF" }}>
+                                Join Network
+                            </a>
                         </div>
 
-                        <div className="relative" data-animate-stagger>
-                            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-1 bg-primary/20 h-full"></div>
+                        {/* Companies */}
+                        <div className="cta-card p-6 border-4 text-center opacity-0"
+                            style={{ borderColor: "#FFE66D", backgroundColor: "rgba(255,255,255,0.03)" }}>
+                            <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center"
+                                style={{ backgroundColor: "#FFE66D" }}>
+                                <i className="fa-duotone fa-regular fa-building text-xl" style={{ color: "#1A1A2E" }}></i>
+                            </div>
+                            <h3 className="font-black text-base uppercase mb-2" style={{ color: "#FFFFFF" }}>
+                                Companies
+                            </h3>
+                            <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                                Know exactly what you pay for
+                            </p>
+                            <a href="https://splits.network/sign-up"
+                                className="block w-full py-3 font-bold uppercase tracking-wider border-4 text-center text-sm transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: "#FFE66D", borderColor: "#FFE66D", color: "#1A1A2E" }}>
+                                Post a Role
+                            </a>
+                        </div>
 
-                            {processSteps.map((step, index) => (
-                                <div
-                                    key={step.step}
-                                    className={`opacity-0 relative flex items-center mb-16 ${
-                                        index % 2 === 0 ? "md:flex-row-reverse" : ""
-                                    }`}
-                                >
-                                    <div
-                                        className={`w-full md:w-1/2 ${index % 2 === 0 ? "md:pl-16" : "md:pr-16"}`}
-                                    >
-                                        <div className="card bg-base-100 shadow-lg hover:-translate-y-1 hover:shadow-lg transition-all">
-                                            <div className="card-body">
-                                                <div className="flex items-center mb-4">
-                                                    <div className="badge badge-primary badge-lg mr-3">
-                                                        {step.step}
-                                                    </div>
-                                                    <h3 className="card-title text-xl">
-                                                        {step.title}
-                                                    </h3>
-                                                </div>
-                                                <p className="text-base-content/80 mb-4">
-                                                    {step.description}
-                                                </p>
-                                                <div className="bg-base-200 p-3 rounded-lg">
-                                                    <p className="text-sm text-base-content/70">
-                                                        {step.details}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-primary rounded-full items-center justify-center text-primary-content font-bold text-lg">
-                                        {step.step}
-                                    </div>
-                                </div>
-                            ))}
+                        {/* Candidates */}
+                        <div className="cta-card p-6 border-4 text-center opacity-0"
+                            style={{ borderColor: "#4ECDC4", backgroundColor: "rgba(255,255,255,0.03)" }}>
+                            <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center"
+                                style={{ backgroundColor: "#4ECDC4" }}>
+                                <i className="fa-duotone fa-regular fa-user text-xl" style={{ color: "#1A1A2E" }}></i>
+                            </div>
+                            <h3 className="font-black text-base uppercase mb-2" style={{ color: "#FFFFFF" }}>
+                                Candidates
+                            </h3>
+                            <p className="text-xs mb-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                                Track your journey in real-time
+                            </p>
+                            <a href="https://applicant.network/sign-up"
+                                className="block w-full py-3 font-bold uppercase tracking-wider border-4 text-center text-sm transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: "#4ECDC4", borderColor: "#4ECDC4", color: "#1A1A2E" }}>
+                                Create Profile
+                            </a>
                         </div>
                     </div>
-                </section>
 
-                {/* Interactive Calculator Section */}
-                <section id="calculator" className="py-24 px-4 bg-base-200/50">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                Calculate Your Earnings
-                            </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                Use our interactive calculator to see how much you
-                                could earn based on your roles and subscription
-                                tier.
-                            </p>
-                        </div>
-
-                        <div>
-                            <RTICalculator animate={true} />
-                        </div>
-
-                        <div className="text-center mt-12">
-                            <p className="text-lg text-base-content/80 mb-6">
-                                Ready to start earning? Join thousands of external
-                                recruiters making collaborative placements.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Link
-                                    href="/portal/dashboard"
-                                    className="btn btn-primary btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-rocket mr-2"></i>
-                                    Start Recruiting
-                                </Link>
-                                <Link
-                                    href="/public/pricing"
-                                    className="btn btn-outline btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-tag mr-2"></i>
-                                    View All Pricing
-                                </Link>
-                            </div>
-                        </div>
+                    <div className="cta-footer text-center opacity-0">
+                        <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
+                            Questions about our transparency commitments? We are always open.
+                        </p>
+                        <a href="mailto:hello@splits.network"
+                            className="inline-flex items-center gap-2 font-bold uppercase tracking-wider text-sm"
+                            style={{ color: "#FFE66D" }}>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
+                            hello@splits.network
+                        </a>
                     </div>
-                </section>
-
-                {/* CTA Section */}
-                <section className="py-24 px-4 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10">
-                    <div className="max-w-7xl mx-auto text-center">
-                        <div>
-                            <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                                Ready to Start Splitting?
-                            </h2>
-                            <p className="text-xl text-base-content/80 max-w-3xl mx-auto mb-12">
-                                Join the collaborative recruiting revolution.
-                                Transparent fees, fair splits, and unlimited earning
-                                potential.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                                <Link
-                                    href="/portal/dashboard"
-                                    className="btn btn-primary btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
-                                    Create Account
-                                </Link>
-                                <Link
-                                    href="/public/how-it-works"
-                                    className="btn btn-outline btn-lg hover:-translate-y-1 hover:shadow-lg transition-all"
-                                >
-                                    <i className="fa-duotone fa-regular fa-circle-info mr-2"></i>
-                                    Learn More
-                                </Link>
-                            </div>
-
-                            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto" data-animate-stagger>
-                                <div className="stat opacity-0">
-                                    <div className="stat-title">
-                                        Active Recruiters
-                                    </div>
-                                    <div className="stat-value text-primary">
-                                        2,500+
-                                    </div>
-                                    <div className="stat-desc">Growing network</div>
-                                </div>
-                                <div className="stat opacity-0">
-                                    <div className="stat-title">
-                                        Total Placements
-                                    </div>
-                                    <div className="stat-value text-secondary">
-                                        12,000+
-                                    </div>
-                                    <div className="stat-desc">
-                                        Successful referrals
-                                    </div>
-                                </div>
-                                <div className="stat opacity-0">
-                                    <div className="stat-title">
-                                        Fees Distributed
-                                    </div>
-                                    <div className="stat-value text-accent">
-                                        $85M+
-                                    </div>
-                                    <div className="stat-desc">
-                                        To our recruiters
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </ScrollAnimator>
+                </div>
+            </section>
+        </TransparencyAnimator>
     );
 }

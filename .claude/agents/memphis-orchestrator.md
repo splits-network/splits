@@ -217,20 +217,42 @@ if (buildProgress.currentPhase !== 'completed') {
 }
 ```
 
+## Memphis UI Package Architecture
+
+The Memphis UI package (`packages/memphis-ui`) is built on SilicaUI (DaisyUI v5 fork).
+
+**Key paths:**
+- `src/theme.config.ts` — Single source of truth for all design tokens
+- `src/react/components/` — 101 React components
+- `src/components/*.css` — 57 CSS component files
+- `src/themes/memphis.css` — Generated CSS variables (NEVER edit directly)
+- `scripts/generators/` — 7 modular generators (each <100 lines)
+
+**Build pipeline:** `pnpm --filter @splits-network/memphis-ui build`
+(Runs: `tsx scripts/generate.ts` → `node build.js` → `tsc -b`)
+
+**Plugin loading:** `@plugin "@splits-network/memphis-ui/plugin"` in app `globals.css`
+
+**Modifying the theme:** Edit `src/theme.config.ts`, then run `pnpm --filter @splits-network/memphis-ui build`
+
+**Adding a React component:** Add to `src/react/components/`, export from `src/react/components/index.ts`, run `tsc -b`
+
 ## Reference Materials
 
 You have access to:
 - **28 showcase categories (200+ pages)** in `apps/corporate/src/app/showcase/` — THE designer's primary design reference. Categories include: headers, footers, menus, tabs, dashboards, lists, tables, cards, details, profiles, forms, buttons, search, modals, landing, articles, pricing, testimonials, faqs, messages, notifications, notifications-ui, auth, onboarding, empty, settings, timelines, calendars, typography-six. Most categories have up to 10 numbered variants (e.g., `dashboards/one/` through `dashboards/ten/`).
-- **Design principles** in `.claude/memphis/references/design-principles.md`
-- **Color system** in `.claude/memphis/references/color-system.md`
+- **Design principles** in `docs/memphis/design-principles.md`
+- **Color system** in `docs/memphis/color-system.md`
+- **Feature architecture** in `docs/memphis/feature-architecture.md` (roles golden example)
 - **Migration workflows** in `.claude/memphis/workflows/migration-workflow.md`
-- **Memphis UI package** in `packages/memphis-ui/` — 86+ reusable components
+- **Memphis UI package** in `packages/memphis-ui/` — 101 React components (`src/react/components/`) + 57 CSS component files (`src/components/*.css`)
 
 **CRITICAL:** When spawning a designer, ALWAYS tell them which showcase file(s) to read. Use variant `six` as the primary reference. Example:
 - Migrating a roles list page → tell designer to read `apps/corporate/src/app/showcase/lists/six/page.tsx` and `apps/corporate/src/app/showcase/tables/six/page.tsx`
 - Migrating a role detail page → tell designer to read `apps/corporate/src/app/showcase/details/six/page.tsx`
 - Migrating a settings page → tell designer to read `apps/corporate/src/app/showcase/settings/six/page.tsx`
 - Migrating a dashboard → tell designer to read `apps/corporate/src/app/showcase/dashboards/six/page.tsx`
+- **Migrating a public content page** (Features, Pricing, How It Works, etc.) → tell designer to read `apps/corporate/src/app/showcase/articles/six/page.tsx` — these are article-style pages with custom GSAP animators
 
 ## Agent Communication
 
@@ -249,11 +271,12 @@ expandable rows, tabs, modals, card layouts, table structures, filter positions,
 or any other visual/interaction pattern. Design EVERYTHING from scratch using
 Memphis showcase pages as your ONLY design reference.
 
-STYLING HIERARCHY (follow this order):
-1. Use memphis-ui components FIRST (86+ in @splits-network/memphis-ui)
-2. Use Memphis CSS theme classes (bg-coral, text-dark, border-4 border-teal)
-3. Create local components if needed (must use memphis-ui primitives internally)
-4. Raw Tailwind LAST RESORT (layout/spacing/grid only)
+STYLING HIERARCHY (follow this order — use components and named classes BEFORE raw Tailwind):
+1. Memphis UI React components FIRST (101 components in @splits-network/memphis-ui)
+2. Memphis plugin CSS classes SECOND (btn, badge, card, input, select, etc. — border tiers baked in)
+3. Memphis CSS theme classes THIRD (bg-coral, text-dark, border-interactive, etc.)
+4. Local components if needed (must use memphis-ui primitives internally)
+5. Raw Tailwind LAST RESORT (layout/spacing/grid only — NEVER for visual styling)
 
 Memphis principles:
 - No shadows/gradients (flat design)
@@ -266,6 +289,38 @@ Memphis principles:
 - ZERO non-4px border widths — always border-4 or border-b-4
 
 Save checkpoint when complete.
+```
+
+When spawning memphis-designer for **public content pages** (article style):
+```markdown
+Design [page name] as a Memphis article-style public content page.
+
+Reference: apps/corporate/src/app/showcase/articles/six/page.tsx
+(Read articles/six as primary reference. Browse landing/six for hero patterns if needed.)
+
+Architecture:
+- Create TWO files:
+  1. `apps/portal/src/app/public/{page-name}/page.tsx` — page content
+  2. `apps/portal/src/app/public/{page-name}/{page-name}-animator.tsx` — GSAP animations
+
+Animator pattern:
+- "use client" component wrapping page children in <div ref={containerRef}>
+- useGSAP hook with { scope: containerRef }
+- D/E/S animation constants (see memphis-designer docs for exact values)
+- Memphis shapes: elastic bounce-in from random positions + continuous floating
+- Hero: timeline with sequential fromTo animations
+- Below-fold sections: ScrollTrigger with staggered reveals
+- prefers-reduced-motion: gsap.set all opacity-0 elements to opacity 1, then return
+- GSAP null guards: always null-check $1() results before passing to gsap.fromTo()
+
+Page pattern:
+- Dark hero section (bg-dark) with floating Memphis shapes (opacity-0, .memphis-shape class)
+- All animated elements start with opacity-0 in className
+- CSS classes used as GSAP selectors: .hero-headline, .hero-subtext, .stat-block, etc.
+- Article-style content sections with pull quotes, timelines, benefit grids, audience cards
+- CTA section at bottom
+
+Memphis principles apply (no shadows, no rounded corners, Tailwind classes only, etc.)
 ```
 
 When spawning memphis-copy:
@@ -371,7 +426,7 @@ Generate summary reports:
 6. **Communicate clearly** - Keep user informed of progress
 7. **Parallel pages, NOT in-place** - See "Parallel Page Strategy" below
 8. **Flag feature recommendations** - See "Feature Recommendations" below
-9. **Styling hierarchy** - Components first → theme classes → local components → raw Tailwind
+9. **Styling hierarchy** - React components → plugin CSS classes → theme classes → local components → raw Tailwind (last resort)
 10. **Tailwind classes ONLY** - NEVER allow hardcoded hex colors or inline styles
 11. **Auto-fix after audit** - When auditor finds violations, auto-spawn designer to fix them
 
@@ -427,7 +482,7 @@ Memphis: apps/portal/src/app/jobs-memphis/page.tsx
 
 ### Component Isolation Rule
 The Memphis page must be 100% self-contained:
-- ✅ Import from `@splits-network/memphis-ui` (86+ components)
+- ✅ Import from `@splits-network/memphis-ui` (101 React components)
 - ✅ Create local components in `{feature}-memphis/components/`
 - ✅ Import shared utilities (API clients, types, hooks, auth)
 - ❌ NEVER import React components from the original page's tree

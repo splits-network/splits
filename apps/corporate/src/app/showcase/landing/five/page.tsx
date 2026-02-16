@@ -126,7 +126,7 @@ const constellationNodes = [
         icon: "fa-duotone fa-regular fa-microchip-ai",
         color: "text-accent",
         bg: "bg-accent/20",
-        border: "border-accent/40",
+        border: "border-yellow/40",
         description: "Smart matching, fraud detection, insights",
     },
 ];
@@ -176,7 +176,7 @@ const observatoryModules = [
             "Track every placement from first contact to start date. Full lifecycle visibility for all parties.",
         stat: "147 this month",
         color: "text-accent",
-        borderColor: "border-accent/20",
+        borderColor: "border-yellow/20",
     },
     {
         title: "Revenue Stream",
@@ -258,10 +258,10 @@ export default function LandingFivePage() {
 
                         {/* Main headline */}
                         <h1 className="hero-headline text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 opacity-0">
-                            <span className="block text-[#e5e7eb]">See the</span>
-                            <span className="block text-info">
-                                Big Picture
+                            <span className="block text-[#e5e7eb]">
+                                See the
                             </span>
+                            <span className="block text-info">Big Picture</span>
                         </h1>
 
                         <p className="hero-subtext text-xl md:text-2xl text-[#e5e7eb]/60 mb-12 max-w-3xl leading-relaxed font-light opacity-0">
@@ -468,7 +468,9 @@ export default function LandingFivePage() {
                             <div className="absolute -inset-3 rounded-full border border-info/10 animate-ping" />
                         </div>
                         <div className="ml-6">
-                            <div className="font-bold text-lg">Employment Networks Hub</div>
+                            <div className="font-bold text-lg">
+                                Employment Networks Hub
+                            </div>
                             <div className="font-mono text-xs text-[#e5e7eb]/40 uppercase tracking-wider">
                                 Orchestrating all data flows
                             </div>

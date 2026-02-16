@@ -375,7 +375,7 @@ export default function Header() {
                                         </h3>
                                         <Link
                                             href="/public/for-recruiters"
-                                            className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg bg-primary/5 border border-primary/20"
+                                            className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg bg-primary/5 border border-coral/20"
                                             onClick={closeAllDropdowns}
                                         >
                                             <i className="fa-duotone fa-regular fa-user-tie text-primary text-lg"></i>

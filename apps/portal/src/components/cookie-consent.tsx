@@ -53,7 +53,7 @@ export default function CookieConsent() {
         };
 
         syncConsentToDatabase();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSignedIn]);
 
     const saveConsent = async (preferences: any) => {
@@ -132,7 +132,7 @@ export default function CookieConsent() {
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-100 p-4 bg-base-100 shadow border-t-4 border-primary animate-slide-up">
+        <div className="fixed bottom-0 left-0 right-0 z-100 p-4 bg-base-100 shadow border-t-4 border-coral animate-slide-up">
             <div className="container mx-auto max-w-6xl">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                     <div className="flex-1">

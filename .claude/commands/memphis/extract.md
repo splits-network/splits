@@ -28,7 +28,7 @@
 1. Analyzes Designer Six showcase pages for the pattern
 2. Identifies reusable component structure
 3. Extracts component with Memphis design intact
-4. Adds to `packages/memphis-ui/src/components/`
+4. Adds to `packages/memphis-ui/src/react/components/`
 5. Creates TypeScript types and props interface
 6. Adds Storybook documentation (if configured)
 7. Updates package exports
@@ -55,7 +55,7 @@
   </div>
 </div>
 
-// To: packages/memphis-ui/src/components/NotificationCard.tsx
+// To: packages/memphis-ui/src/react/components/NotificationCard.tsx
 export interface NotificationCardProps {
   icon: string;
   iconColor: 'coral' | 'teal' | 'yellow' | 'purple';
@@ -103,9 +103,17 @@ export function NotificationCard({
 
 ### 3. Update Package
 ```typescript
-// packages/memphis-ui/src/index.ts
-export { NotificationCard } from './components/NotificationCard';
-export type { NotificationCardProps } from './components/NotificationCard';
+// packages/memphis-ui/src/react/components/index.ts (barrel)
+export { NotificationCard } from './NotificationCard';
+export type { NotificationCardProps } from './NotificationCard';
+
+// packages/memphis-ui/src/react/index.ts (re-exports)
+export * from './components';
+```
+
+### 4. Rebuild
+```bash
+pnpm --filter @splits-network/memphis-ui build
 ```
 
 ## Common Extractions
@@ -158,8 +166,8 @@ Extracted components maintain:
 When invoked:
 1. Reads source showcase page
 2. Identifies component pattern
-3. Extracts to new file in memphis-ui package
+3. Extracts to new file in `packages/memphis-ui/src/react/components/`
 4. Adds TypeScript types
-5. Updates package exports
-6. Runs tests
+5. Updates barrel exports (`src/react/components/index.ts`)
+6. Rebuilds: `pnpm --filter @splits-network/memphis-ui build`
 7. Updates build progress state

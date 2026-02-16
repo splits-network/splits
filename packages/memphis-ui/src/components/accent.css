@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Accent Color Utilities
+   Sets --accent, --accent-content, --accent-light CSS custom properties
+   that child utility classes consume. Used by Memphis React components
+   to avoid inline styles and ACCENT_HEX lookups.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Modifier classes: set the accent context ───────────────────────────── */
+
+.accent-coral {
+    @layer memphis.modifier {
+        --accent: var(--color-coral);
+        --accent-content: var(--color-coral-content);
+        --accent-light: var(--color-coral-light);
+    }
+}
+
+.accent-teal {
+    @layer memphis.modifier {
+        --accent: var(--color-teal);
+        --accent-content: var(--color-teal-content);
+        --accent-light: var(--color-teal-light);
+    }
+}
+
+.accent-yellow {
+    @layer memphis.modifier {
+        --accent: var(--color-yellow);
+        --accent-content: var(--color-yellow-content);
+        --accent-light: var(--color-yellow-light);
+    }
+}
+
+.accent-purple {
+    @layer memphis.modifier {
+        --accent: var(--color-purple);
+        --accent-content: var(--color-purple-content);
+        --accent-light: var(--color-purple-light);
+    }
+}
+
+/* ─── Consumer classes: use the accent context ───────────────────────────── */
+
+.bg-accent {
+    @layer memphis.component {
+        background-color: var(--accent);
+    }
+}
+
+.bg-accent-light {
+    @layer memphis.component {
+        background-color: var(--accent-light);
+    }
+}
+
+.text-accent {
+    @layer memphis.component {
+        color: var(--accent);
+    }
+}
+
+.text-on-accent {
+    @layer memphis.component {
+        color: var(--accent-content);
+    }
+}
+
+.border-accent {
+    @layer memphis.component {
+        border-color: var(--accent);
+    }
+}
+
+.border-l-accent {
+    @layer memphis.component {
+        border-left-color: var(--accent);
+    }
+}
+
+.border-t-accent {
+    @layer memphis.component {
+        border-top-color: var(--accent);
+    }
+}
+
+.border-b-accent {
+    @layer memphis.component {
+        border-bottom-color: var(--accent);
+    }
+}
+
+.fill-accent {
+    @layer memphis.component {
+        fill: var(--accent);
+    }
+}
+
+.stroke-accent {
+    @layer memphis.component {
+        stroke: var(--accent);
+    }
+}

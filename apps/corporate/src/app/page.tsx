@@ -96,9 +96,15 @@ const recruiterBenefits = [
 ];
 
 const recruiterFeatures = [
-    { label: "Split-fee marketplace", icon: "fa-duotone fa-regular fa-handshake" },
+    {
+        label: "Split-fee marketplace",
+        icon: "fa-duotone fa-regular fa-handshake",
+    },
     { label: "Built-in ATS", icon: "fa-duotone fa-regular fa-table-columns" },
-    { label: "Placement tracking", icon: "fa-duotone fa-regular fa-chart-line-up" },
+    {
+        label: "Placement tracking",
+        icon: "fa-duotone fa-regular fa-chart-line-up",
+    },
     { label: "Team collaboration", icon: "fa-duotone fa-regular fa-users" },
 ];
 
@@ -144,8 +150,14 @@ const candidateBenefits = [
 
 const candidateFeatures = [
     { label: "One-click apply", icon: "fa-duotone fa-regular fa-bolt" },
-    { label: "Real-time tracking", icon: "fa-duotone fa-regular fa-chart-line" },
-    { label: "Interview prep", icon: "fa-duotone fa-regular fa-graduation-cap" },
+    {
+        label: "Real-time tracking",
+        icon: "fa-duotone fa-regular fa-chart-line",
+    },
+    {
+        label: "Interview prep",
+        icon: "fa-duotone fa-regular fa-graduation-cap",
+    },
     { label: "100% free", icon: "fa-duotone fa-regular fa-badge-check" },
 ];
 
@@ -190,7 +202,10 @@ const companyBenefits = [
 ];
 
 const companyFeatures = [
-    { label: "Recruiter network", icon: "fa-duotone fa-regular fa-network-wired" },
+    {
+        label: "Recruiter network",
+        icon: "fa-duotone fa-regular fa-network-wired",
+    },
     { label: "Pipeline visibility", icon: "fa-duotone fa-regular fa-eye" },
     { label: "Consistent terms", icon: "fa-duotone fa-regular fa-handshake" },
     { label: "Pay on hire", icon: "fa-duotone fa-regular fa-badge-check" },
@@ -307,9 +322,10 @@ export default function HomePage() {
                             </h1>
 
                             <p className="hero-subtext text-xl md:text-2xl text-base-content/70 mb-10 max-w-3xl mx-auto leading-relaxed opacity-0">
-                                Employment Networks powers modern recruiting through two
-                                innovative platforms—connecting recruiters, companies,
-                                and candidates in one seamless ecosystem.
+                                Employment Networks powers modern recruiting
+                                through two innovative platforms—connecting
+                                recruiters, companies, and candidates in one
+                                seamless ecosystem.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
@@ -320,7 +336,9 @@ export default function HomePage() {
                                         className="h-8"
                                     />
                                     <div className="text-left">
-                                        <div className="font-semibold">Splits Network</div>
+                                        <div className="font-semibold">
+                                            Splits Network
+                                        </div>
                                         <div className="text-sm text-base-content/60">
                                             For Recruiters &amp; Companies
                                         </div>
@@ -333,7 +351,9 @@ export default function HomePage() {
                                         className="h-8"
                                     />
                                     <div className="text-left">
-                                        <div className="font-semibold">Applicant Network</div>
+                                        <div className="font-semibold">
+                                            Applicant Network
+                                        </div>
                                         <div className="text-sm text-base-content/60">
                                             For Job Seekers
                                         </div>
@@ -379,7 +399,8 @@ export default function HomePage() {
                             </p>
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Recruiting is{" "}
-                                <span className="text-error">broken</span> for everyone
+                                <span className="text-error">broken</span> for
+                                everyone
                             </h2>
                             <p className="text-lg opacity-70">
                                 Whether you&apos;re hiring, recruiting, or job
@@ -394,7 +415,9 @@ export default function HomePage() {
                                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                                         <i className="fa-duotone fa-regular fa-user-tie text-xl text-primary"></i>
                                     </div>
-                                    <h3 className="font-bold text-xl">For Recruiters</h3>
+                                    <h3 className="font-bold text-xl">
+                                        For Recruiters
+                                    </h3>
                                 </div>
                                 <div className="space-y-4">
                                     {recruiterPains.map((pain, index) => (
@@ -402,8 +425,12 @@ export default function HomePage() {
                                             key={index}
                                             className="pain-item flex items-start gap-3 opacity-0"
                                         >
-                                            <i className={`${pain.icon} text-error mt-1`}></i>
-                                            <span className="text-sm opacity-80">{pain.text}</span>
+                                            <i
+                                                className={`${pain.icon} text-error mt-1`}
+                                            ></i>
+                                            <span className="text-sm opacity-80">
+                                                {pain.text}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -415,7 +442,9 @@ export default function HomePage() {
                                     <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
                                         <i className="fa-duotone fa-regular fa-user text-xl text-secondary"></i>
                                     </div>
-                                    <h3 className="font-bold text-xl">For Candidates</h3>
+                                    <h3 className="font-bold text-xl">
+                                        For Candidates
+                                    </h3>
                                 </div>
                                 <div className="space-y-4">
                                     {candidatePains.map((pain, index) => (
@@ -423,8 +452,12 @@ export default function HomePage() {
                                             key={index}
                                             className="pain-item flex items-start gap-3 opacity-0"
                                         >
-                                            <i className={`${pain.icon} text-error mt-1`}></i>
-                                            <span className="text-sm opacity-80">{pain.text}</span>
+                                            <i
+                                                className={`${pain.icon} text-error mt-1`}
+                                            ></i>
+                                            <span className="text-sm opacity-80">
+                                                {pain.text}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -436,7 +469,9 @@ export default function HomePage() {
                                     <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
                                         <i className="fa-duotone fa-regular fa-building text-xl text-accent"></i>
                                     </div>
-                                    <h3 className="font-bold text-xl">For Companies</h3>
+                                    <h3 className="font-bold text-xl">
+                                        For Companies
+                                    </h3>
                                 </div>
                                 <div className="space-y-4">
                                     {companyPains.map((pain, index) => (
@@ -444,8 +479,12 @@ export default function HomePage() {
                                             key={index}
                                             className="pain-item flex items-start gap-3 opacity-0"
                                         >
-                                            <i className={`${pain.icon} text-error mt-1`}></i>
-                                            <span className="text-sm opacity-80">{pain.text}</span>
+                                            <i
+                                                className={`${pain.icon} text-error mt-1`}
+                                            ></i>
+                                            <span className="text-sm opacity-80">
+                                                {pain.text}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -470,9 +509,9 @@ export default function HomePage() {
                                 </span>
                             </h2>
                             <p className="text-lg text-base-content/70">
-                                Employment Networks creates platforms where transparency,
-                                technology, and trust work together to make recruiting
-                                work for everyone.
+                                Employment Networks creates platforms where
+                                transparency, technology, and trust work
+                                together to make recruiting work for everyone.
                             </p>
                         </div>
 
@@ -483,10 +522,16 @@ export default function HomePage() {
                                     className="pillar-card text-center p-8 bg-base-200 rounded-2xl opacity-0"
                                 >
                                     <div className="pillar-icon w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6">
-                                        <i className={`${pillar.icon} text-3xl text-primary`}></i>
+                                        <i
+                                            className={`${pillar.icon} text-3xl text-primary`}
+                                        ></i>
                                     </div>
-                                    <h3 className="font-bold text-xl mb-3">{pillar.title}</h3>
-                                    <p className="text-base-content/70">{pillar.text}</p>
+                                    <h3 className="font-bold text-xl mb-3">
+                                        {pillar.title}
+                                    </h3>
+                                    <p className="text-base-content/70">
+                                        {pillar.text}
+                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -506,28 +551,44 @@ export default function HomePage() {
                             <div>
                                 <div className="recruiters-heading opacity-0">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <img src="/splits.png" alt="Splits Network" className="h-8" />
-                                        <span className="badge badge-outline">For Recruiters</span>
+                                        <img
+                                            src="/splits.png"
+                                            alt="Splits Network"
+                                            className="h-8"
+                                        />
+                                        <span className="badge badge-outline">
+                                            For Recruiters
+                                        </span>
                                     </div>
                                     <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                                         Turn your network into
                                         <br />
-                                        <span className="opacity-90">recurring revenue</span>
+                                        <span className="opacity-90">
+                                            recurring revenue
+                                        </span>
                                     </h2>
                                     <p className="text-lg opacity-80 mb-8">
-                                        Join a collaborative marketplace where split-fee
-                                        recruiting actually works. Stop chasing roles—let
-                                        opportunities come to you.
+                                        Join a collaborative marketplace where
+                                        split-fee recruiting actually works.
+                                        Stop chasing roles—let opportunities
+                                        come to you.
                                     </p>
                                 </div>
 
                                 <div className="recruiters-benefits space-y-4 mb-8">
                                     {recruiterBenefits.map((benefit, index) => (
-                                        <div key={index} className="benefit-item flex items-start gap-4 opacity-0">
+                                        <div
+                                            key={index}
+                                            className="benefit-item flex items-start gap-4 opacity-0"
+                                        >
                                             <div className="benefit-icon w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <i className={`${benefit.icon} text-sm`}></i>
+                                                <i
+                                                    className={`${benefit.icon} text-sm`}
+                                                ></i>
                                             </div>
-                                            <p className="opacity-90 leading-relaxed">{benefit.text}</p>
+                                            <p className="opacity-90 leading-relaxed">
+                                                {benefit.text}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -538,7 +599,9 @@ export default function HomePage() {
                                             key={index}
                                             className="feature-badge badge badge-lg bg-white/10 border-white/20 gap-2 opacity-0"
                                         >
-                                            <i className={`${feature.icon} text-xs`}></i>
+                                            <i
+                                                className={`${feature.icon} text-xs`}
+                                            ></i>
                                             {feature.label}
                                         </span>
                                     ))}
@@ -560,28 +623,53 @@ export default function HomePage() {
                                 <div className="bg-base-100 text-base-content rounded-2xl shadow-2xl p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <div>
-                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">Your Dashboard</div>
-                                            <div className="font-bold text-lg">Active Roles</div>
+                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">
+                                                Your Dashboard
+                                            </div>
+                                            <div className="font-bold text-lg">
+                                                Active Roles
+                                            </div>
                                         </div>
-                                        <div className="badge badge-primary">3 roles</div>
+                                        <div className="badge badge-primary">
+                                            3 roles
+                                        </div>
                                     </div>
                                     <div className="space-y-3 mb-4">
-                                        {recruiterDashboardRoles.map((role, index) => (
-                                            <div key={index} className="flex justify-between items-center p-3 bg-base-200 rounded-lg">
-                                                <div>
-                                                    <div className="font-medium text-sm">{role.title}</div>
-                                                    <div className="text-xs text-base-content/60">{role.company}</div>
+                                        {recruiterDashboardRoles.map(
+                                            (role, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-3 bg-base-200 rounded-lg"
+                                                >
+                                                    <div>
+                                                        <div className="font-medium text-sm">
+                                                            {role.title}
+                                                        </div>
+                                                        <div className="text-xs text-base-content/60">
+                                                            {role.company}
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        className={`badge ${role.color} badge-sm`}
+                                                    >
+                                                        {role.status}
+                                                    </span>
                                                 </div>
-                                                <span className={`badge ${role.color} badge-sm`}>{role.status}</span>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </div>
                                     <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-4">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">This Month</div>
-                                                <div className="text-3xl font-bold text-primary">$12,450</div>
-                                                <div className="text-xs text-base-content/60 mt-1">from 3 placements</div>
+                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">
+                                                    This Month
+                                                </div>
+                                                <div className="text-3xl font-bold text-primary">
+                                                    $12,450
+                                                </div>
+                                                <div className="text-xs text-base-content/60 mt-1">
+                                                    from 3 placements
+                                                </div>
                                             </div>
                                             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                                                 <i className="fa-duotone fa-regular fa-chart-line-up text-2xl text-primary"></i>
@@ -610,28 +698,53 @@ export default function HomePage() {
                                 <div className="bg-base-100 text-base-content rounded-2xl shadow-2xl p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <div>
-                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">Your Applications</div>
-                                            <div className="font-bold text-lg">Active Pipeline</div>
+                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">
+                                                Your Applications
+                                            </div>
+                                            <div className="font-bold text-lg">
+                                                Active Pipeline
+                                            </div>
                                         </div>
-                                        <div className="badge badge-secondary">5 active</div>
+                                        <div className="badge badge-secondary">
+                                            5 active
+                                        </div>
                                     </div>
                                     <div className="space-y-3 mb-4">
-                                        {candidateDashboardApps.map((app, index) => (
-                                            <div key={index} className="flex justify-between items-center p-3 bg-base-200 rounded-lg">
-                                                <div>
-                                                    <div className="font-medium text-sm">{app.title}</div>
-                                                    <div className="text-xs text-base-content/60">{app.company}</div>
+                                        {candidateDashboardApps.map(
+                                            (app, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-3 bg-base-200 rounded-lg"
+                                                >
+                                                    <div>
+                                                        <div className="font-medium text-sm">
+                                                            {app.title}
+                                                        </div>
+                                                        <div className="text-xs text-base-content/60">
+                                                            {app.company}
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        className={`badge ${app.color} badge-sm`}
+                                                    >
+                                                        {app.status}
+                                                    </span>
                                                 </div>
-                                                <span className={`badge ${app.color} badge-sm`}>{app.status}</span>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </div>
                                     <div className="bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl p-4">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">Your Recruiter</div>
-                                                <div className="font-bold text-lg text-secondary">Sarah Chen</div>
-                                                <div className="text-xs text-base-content/60 mt-1">Tech Recruiting Specialist</div>
+                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">
+                                                    Your Recruiter
+                                                </div>
+                                                <div className="font-bold text-lg text-secondary">
+                                                    Sarah Chen
+                                                </div>
+                                                <div className="text-xs text-base-content/60 mt-1">
+                                                    Tech Recruiting Specialist
+                                                </div>
                                             </div>
                                             <div className="avatar">
                                                 <div className="w-14 h-14 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-xl font-bold">
@@ -649,28 +762,43 @@ export default function HomePage() {
                             <div className="order-1 lg:order-2">
                                 <div className="candidates-heading opacity-0">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <img src="/applicant.png" alt="Applicant Network" className="h-8" />
-                                        <span className="badge badge-outline">For Job Seekers</span>
+                                        <img
+                                            src="/applicant.png"
+                                            alt="Applicant Network"
+                                            className="h-8"
+                                        />
+                                        <span className="badge badge-outline">
+                                            For Job Seekers
+                                        </span>
                                     </div>
                                     <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                                         Your job search,
                                         <br />
-                                        <span className="opacity-90">with backup</span>
+                                        <span className="opacity-90">
+                                            with backup
+                                        </span>
                                     </h2>
                                     <p className="text-lg opacity-80 mb-8">
-                                        Get matched with expert recruiters who open doors,
-                                        prep you for interviews, and make sure you never
-                                        get ghosted again.
+                                        Get matched with expert recruiters who
+                                        open doors, prep you for interviews, and
+                                        make sure you never get ghosted again.
                                     </p>
                                 </div>
 
                                 <div className="candidates-benefits space-y-4 mb-8">
                                     {candidateBenefits.map((benefit, index) => (
-                                        <div key={index} className="benefit-item flex items-start gap-4 opacity-0">
+                                        <div
+                                            key={index}
+                                            className="benefit-item flex items-start gap-4 opacity-0"
+                                        >
                                             <div className="benefit-icon w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <i className={`${benefit.icon} text-sm`}></i>
+                                                <i
+                                                    className={`${benefit.icon} text-sm`}
+                                                ></i>
                                             </div>
-                                            <p className="opacity-90 leading-relaxed">{benefit.text}</p>
+                                            <p className="opacity-90 leading-relaxed">
+                                                {benefit.text}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -681,7 +809,9 @@ export default function HomePage() {
                                             key={index}
                                             className="feature-badge badge badge-lg bg-white/10 border-white/20 gap-2 opacity-0"
                                         >
-                                            <i className={`${feature.icon} text-xs`}></i>
+                                            <i
+                                                className={`${feature.icon} text-xs`}
+                                            ></i>
                                             {feature.label}
                                         </span>
                                     ))}
@@ -714,28 +844,43 @@ export default function HomePage() {
                             <div>
                                 <div className="companies-heading opacity-0">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <img src="/splits.png" alt="Splits Network" className="h-8" />
-                                        <span className="badge badge-accent">For Companies</span>
+                                        <img
+                                            src="/splits.png"
+                                            alt="Splits Network"
+                                            className="h-8"
+                                        />
+                                        <span className="badge badge-accent">
+                                            For Companies
+                                        </span>
                                     </div>
                                     <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                                         A network of recruiters,
                                         <br />
-                                        <span className="text-accent">one simple platform</span>
+                                        <span className="text-accent">
+                                            one simple platform
+                                        </span>
                                     </h2>
                                     <p className="text-lg text-base-content/70 mb-8">
-                                        Stop managing dozens of contracts. Get qualified
-                                        candidates from vetted recruiters with complete
-                                        transparency.
+                                        Stop managing dozens of contracts. Get
+                                        qualified candidates from vetted
+                                        recruiters with complete transparency.
                                     </p>
                                 </div>
 
                                 <div className="companies-benefits space-y-4 mb-8">
                                     {companyBenefits.map((benefit, index) => (
-                                        <div key={index} className="benefit-item flex items-start gap-4 opacity-0">
+                                        <div
+                                            key={index}
+                                            className="benefit-item flex items-start gap-4 opacity-0"
+                                        >
                                             <div className="benefit-icon w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <i className={`${benefit.icon} text-sm text-accent`}></i>
+                                                <i
+                                                    className={`${benefit.icon} text-sm text-accent`}
+                                                ></i>
                                             </div>
-                                            <p className="text-base-content/80 leading-relaxed">{benefit.text}</p>
+                                            <p className="text-base-content/80 leading-relaxed">
+                                                {benefit.text}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -744,9 +889,11 @@ export default function HomePage() {
                                     {companyFeatures.map((feature, index) => (
                                         <span
                                             key={index}
-                                            className="feature-badge badge badge-lg bg-accent/10 border-accent/20 text-accent gap-2 opacity-0"
+                                            className="feature-badge badge badge-lg bg-accent/10 border-yellow/20 text-accent gap-2 opacity-0"
                                         >
-                                            <i className={`${feature.icon} text-xs`}></i>
+                                            <i
+                                                className={`${feature.icon} text-xs`}
+                                            ></i>
                                             {feature.label}
                                         </span>
                                     ))}
@@ -768,33 +915,60 @@ export default function HomePage() {
                                 <div className="bg-base-100 rounded-2xl shadow-2xl p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <div>
-                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">Company Dashboard</div>
-                                            <div className="font-bold text-lg">Your Open Roles</div>
+                                            <div className="text-xs text-base-content/50 uppercase tracking-wider">
+                                                Company Dashboard
+                                            </div>
+                                            <div className="font-bold text-lg">
+                                                Your Open Roles
+                                            </div>
                                         </div>
-                                        <div className="badge badge-accent">3 active</div>
+                                        <div className="badge badge-accent">
+                                            3 active
+                                        </div>
                                     </div>
                                     <div className="space-y-3 mb-4">
-                                        {companyDashboardRoles.map((role, index) => (
-                                            <div key={index} className="p-3 bg-base-200 rounded-lg">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <div className="font-medium text-sm">{role.title}</div>
-                                                        <div className="text-xs text-base-content/60">{role.location}</div>
+                                        {companyDashboardRoles.map(
+                                            (role, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="p-3 bg-base-200 rounded-lg"
+                                                >
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <div className="font-medium text-sm">
+                                                                {role.title}
+                                                            </div>
+                                                            <div className="text-xs text-base-content/60">
+                                                                {role.location}
+                                                            </div>
+                                                        </div>
+                                                        <span className="badge badge-success badge-sm">
+                                                            {role.candidates}{" "}
+                                                            candidates
+                                                        </span>
                                                     </div>
-                                                    <span className="badge badge-success badge-sm">{role.candidates} candidates</span>
+                                                    <div className="flex gap-2 text-xs">
+                                                        <span className="badge badge-ghost badge-sm">
+                                                            {role.recruiters}{" "}
+                                                            recruiters
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2 text-xs">
-                                                    <span className="badge badge-ghost badge-sm">{role.recruiters} recruiters</span>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </div>
                                     <div className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-xl p-4">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">Total Candidates</div>
-                                                <div className="text-3xl font-bold text-accent">15</div>
-                                                <div className="text-xs text-base-content/60 mt-1">across 3 active roles</div>
+                                                <div className="text-xs text-base-content/60 uppercase tracking-wider">
+                                                    Total Candidates
+                                                </div>
+                                                <div className="text-3xl font-bold text-accent">
+                                                    15
+                                                </div>
+                                                <div className="text-xs text-base-content/60 mt-1">
+                                                    across 3 active roles
+                                                </div>
                                             </div>
                                             <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
                                                 <i className="fa-duotone fa-regular fa-users text-2xl text-accent"></i>
@@ -825,8 +999,9 @@ export default function HomePage() {
                                 </span>
                             </h2>
                             <p className="text-lg text-base-content/70">
-                                Companies, recruiters, and candidates all connected
-                                through platforms designed to work together seamlessly.
+                                Companies, recruiters, and candidates all
+                                connected through platforms designed to work
+                                together seamlessly.
                             </p>
                         </div>
 
@@ -838,15 +1013,48 @@ export default function HomePage() {
                                 preserveAspectRatio="xMidYMid meet"
                             >
                                 <defs>
-                                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <linearGradient
+                                        id="lineGradient"
+                                        x1="0%"
+                                        y1="0%"
+                                        x2="100%"
+                                        y2="0%"
+                                    >
                                         <stop offset="0%" stopColor="#233876" />
-                                        <stop offset="100%" stopColor="#0f9d8a" />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="#0f9d8a"
+                                        />
                                     </linearGradient>
                                 </defs>
-                                <path d="M 160 200 Q 280 200 400 200" stroke="url(#lineGradient)" strokeWidth="3" fill="none" strokeLinecap="round" />
-                                <path d="M 640 200 Q 520 200 400 200" stroke="url(#lineGradient)" strokeWidth="3" fill="none" strokeLinecap="round" />
-                                <path d="M 400 80 Q 400 140 400 200" stroke="url(#lineGradient)" strokeWidth="3" fill="none" strokeLinecap="round" />
-                                <path d="M 400 320 Q 400 260 400 200" stroke="url(#lineGradient)" strokeWidth="3" fill="none" strokeLinecap="round" />
+                                <path
+                                    d="M 160 200 Q 280 200 400 200"
+                                    stroke="url(#lineGradient)"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M 640 200 Q 520 200 400 200"
+                                    stroke="url(#lineGradient)"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M 400 80 Q 400 140 400 200"
+                                    stroke="url(#lineGradient)"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M 400 320 Q 400 260 400 200"
+                                    stroke="url(#lineGradient)"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                />
                             </svg>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 items-center min-h-[400px]">
@@ -855,19 +1063,26 @@ export default function HomePage() {
                                     <div className="flex items-center gap-3 mb-4">
                                         <i className="fa-duotone fa-regular fa-user-tie text-2xl"></i>
                                         <div>
-                                            <div className="font-bold">Recruiters</div>
-                                            <div className="text-xs opacity-70">Splits Network</div>
+                                            <div className="font-bold">
+                                                Recruiters
+                                            </div>
+                                            <div className="text-xs opacity-70">
+                                                Splits Network
+                                            </div>
                                         </div>
                                     </div>
                                     <ul className="text-sm space-y-2 opacity-90">
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Access roles
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Access roles
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Submit candidates
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Submit candidates
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Earn splits
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Earn splits
                                         </li>
                                     </ul>
                                 </div>
@@ -878,19 +1093,26 @@ export default function HomePage() {
                                         <div className="flex items-center gap-3 mb-4">
                                             <i className="fa-duotone fa-regular fa-building text-2xl text-accent"></i>
                                             <div>
-                                                <div className="font-bold">Companies</div>
-                                                <div className="text-xs text-base-content/60">Splits Network</div>
+                                                <div className="font-bold">
+                                                    Companies
+                                                </div>
+                                                <div className="text-xs text-base-content/60">
+                                                    Splits Network
+                                                </div>
                                             </div>
                                         </div>
                                         <ul className="text-sm space-y-2 text-base-content/80">
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>Post roles
+                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>
+                                                Post roles
                                             </li>
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>Review candidates
+                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>
+                                                Review candidates
                                             </li>
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>Make hires
+                                                <i className="fa-duotone fa-regular fa-check text-xs text-accent"></i>
+                                                Make hires
                                             </li>
                                         </ul>
                                     </div>
@@ -900,7 +1122,9 @@ export default function HomePage() {
                                     </div>
 
                                     <div className="text-center">
-                                        <div className="text-sm font-semibold text-base-content/60">Seamless Data Flow</div>
+                                        <div className="text-sm font-semibold text-base-content/60">
+                                            Seamless Data Flow
+                                        </div>
                                     </div>
                                 </div>
 
@@ -909,19 +1133,26 @@ export default function HomePage() {
                                     <div className="flex items-center gap-3 mb-4">
                                         <i className="fa-duotone fa-regular fa-user text-2xl"></i>
                                         <div>
-                                            <div className="font-bold">Candidates</div>
-                                            <div className="text-xs opacity-70">Applicant Network</div>
+                                            <div className="font-bold">
+                                                Candidates
+                                            </div>
+                                            <div className="text-xs opacity-70">
+                                                Applicant Network
+                                            </div>
                                         </div>
                                     </div>
                                     <ul className="text-sm space-y-2 opacity-90">
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Apply to jobs
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Apply to jobs
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Get matched
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Get matched
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>Track progress
+                                            <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                            Track progress
                                         </li>
                                     </ul>
                                 </div>
@@ -943,8 +1174,8 @@ export default function HomePage() {
                                 A Growing Ecosystem
                             </h2>
                             <p className="text-lg opacity-70">
-                                Thousands of recruiters, companies, and candidates
-                                building transparent partnerships
+                                Thousands of recruiters, companies, and
+                                candidates building transparent partnerships
                             </p>
                         </div>
 
@@ -954,8 +1185,12 @@ export default function HomePage() {
                                     key={index}
                                     className="metric-card bg-base-100/5 border border-base-100/10 rounded-2xl p-8 text-center opacity-0"
                                 >
-                                    <div className={`metric-icon w-16 h-16 rounded-full bg-${metric.color}/20 flex items-center justify-center mx-auto mb-6`}>
-                                        <i className={`${metric.icon} text-2xl text-${metric.color}`}></i>
+                                    <div
+                                        className={`metric-icon w-16 h-16 rounded-full bg-${metric.color}/20 flex items-center justify-center mx-auto mb-6`}
+                                    >
+                                        <i
+                                            className={`${metric.icon} text-2xl text-${metric.color}`}
+                                        ></i>
                                     </div>
                                     <div
                                         className={`metric-value text-4xl md:text-5xl font-bold text-${metric.color} mb-2`}
@@ -967,8 +1202,12 @@ export default function HomePage() {
                                             : metric.value}
                                         {metric.suffix}
                                     </div>
-                                    <div className="font-semibold text-lg mb-1">{metric.label}</div>
-                                    <div className="text-sm opacity-60">{metric.description}</div>
+                                    <div className="font-semibold text-lg mb-1">
+                                        {metric.label}
+                                    </div>
+                                    <div className="text-sm opacity-60">
+                                        {metric.description}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -1036,8 +1275,8 @@ export default function HomePage() {
                                 Ready to transform how you recruit?
                             </h2>
                             <p className="text-xl opacity-90">
-                                Join the ecosystem that&apos;s making recruiting work
-                                for everyone
+                                Join the ecosystem that&apos;s making recruiting
+                                work for everyone
                             </p>
                         </div>
 
@@ -1049,13 +1288,17 @@ export default function HomePage() {
                                         <i className="fa-duotone fa-regular fa-user-tie text-xl"></i>
                                     </div>
                                     <div>
-                                        <div className="font-bold">Recruiters</div>
-                                        <div className="text-xs opacity-70">Splits Network</div>
+                                        <div className="font-bold">
+                                            Recruiters
+                                        </div>
+                                        <div className="text-xs opacity-70">
+                                            Splits Network
+                                        </div>
                                     </div>
                                 </div>
                                 <p className="text-sm opacity-80 mb-6">
-                                    Join a collaborative marketplace with curated roles
-                                    and transparent splits.
+                                    Join a collaborative marketplace with
+                                    curated roles and transparent splits.
                                 </p>
                                 <a
                                     href="https://splits.network/sign-up"
@@ -1073,13 +1316,17 @@ export default function HomePage() {
                                         <i className="fa-duotone fa-regular fa-building text-xl"></i>
                                     </div>
                                     <div>
-                                        <div className="font-bold">Companies</div>
-                                        <div className="text-xs opacity-70">Splits Network</div>
+                                        <div className="font-bold">
+                                            Companies
+                                        </div>
+                                        <div className="text-xs opacity-70">
+                                            Splits Network
+                                        </div>
                                     </div>
                                 </div>
                                 <p className="text-sm opacity-80 mb-6">
-                                    Access a network of recruiters with full pipeline
-                                    visibility and pay-on-hire.
+                                    Access a network of recruiters with full
+                                    pipeline visibility and pay-on-hire.
                                 </p>
                                 <a
                                     href="https://splits.network/sign-up"
@@ -1097,13 +1344,17 @@ export default function HomePage() {
                                         <i className="fa-duotone fa-regular fa-user text-xl"></i>
                                     </div>
                                     <div>
-                                        <div className="font-bold">Candidates</div>
-                                        <div className="text-xs opacity-70">Applicant Network</div>
+                                        <div className="font-bold">
+                                            Candidates
+                                        </div>
+                                        <div className="text-xs opacity-70">
+                                            Applicant Network
+                                        </div>
                                     </div>
                                 </div>
                                 <p className="text-sm opacity-80 mb-6">
-                                    Get matched with expert recruiters and never get
-                                    ghosted again. Free forever.
+                                    Get matched with expert recruiters and never
+                                    get ghosted again. Free forever.
                                 </p>
                                 <a
                                     href="https://applicant.network/sign-up"

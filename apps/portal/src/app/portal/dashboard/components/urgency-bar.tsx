@@ -14,39 +14,39 @@ export default function UrgencyBar({ stats }: UrgencyBarProps) {
     if (stale === 0 && pending === 0) return null;
 
     return (
-        <div className="alert alert-warning shadow-md border border-warning/20">
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center shrink-0">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning-content"></i>
+        <div className="border-4 border-yellow bg-yellow/10 flex items-center justify-between gap-4 p-4">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border-4 border-dark bg-yellow flex items-center justify-center shrink-0">
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-dark" />
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     {stale > 0 && (
                         <Link
                             href="/portal/applications?stale=true"
-                            className="font-semibold hover:underline underline-offset-2"
+                            className="text-sm font-black uppercase tracking-wider text-dark hover:underline underline-offset-2"
                         >
-                            <span className="tabular-nums">{stale}</span> candidate{stale !== 1 ? 's' : ''} need follow-up (14+ days idle)
+                            <span className="tabular-nums">{stale}</span> candidate{stale !== 1 ? 's' : ''} need follow-up
                         </Link>
                     )}
                     {stale > 0 && pending > 0 && (
-                        <span className="text-warning-content/30 select-none">|</span>
+                        <span className="text-dark/30 select-none">|</span>
                     )}
                     {pending > 0 && (
                         <Link
                             href="/portal/applications?stage=company_review"
-                            className="font-semibold hover:underline underline-offset-2"
+                            className="text-sm font-black uppercase tracking-wider text-dark hover:underline underline-offset-2"
                         >
-                            <span className="tabular-nums">{pending}</span> application{pending !== 1 ? 's' : ''} awaiting company review
+                            <span className="tabular-nums">{pending}</span> awaiting review
                         </Link>
                     )}
                 </div>
             </div>
             <Link
                 href="/portal/applications"
-                className="btn btn-sm btn-outline border-warning-content/30 hover:bg-warning-content/10 hover:border-warning-content/50 text-warning-content shrink-0"
+                className="border-4 border-dark bg-dark text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shrink-0 hover:-translate-y-0.5 transition-transform"
             >
                 Review now
-                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
+                <i className="fa-duotone fa-regular fa-arrow-right ml-2" />
             </Link>
         </div>
     );

@@ -1,87 +1,91 @@
 {
-  "permissions": {
-    "defaultMode": "acceptEdits",
-    "allow": [
-      "Edit(/apps/corporate/src/app/landing/**/*)",
-      "Edit(/apps/corporate/src/app/articles/**/*)",
-      "Edit(/apps/corporate/src/app/lists/**/*)",
-      "Edit(/apps/corporate/src/app/modals/**/*)",
-      "Edit(/apps/corporate/src/app/dashboards/**/*)",
-      "Edit(/apps/corporate/src/app/messages/**/*)",
-      "Edit(/apps/corporate/src/app/headers/**/*)",
-      "Edit(/apps/corporate/src/app/footers/**/*)",
-      "Edit(/apps/corporate/src/app/forms/**/*)",
-      "Edit(/apps/corporate/src/app/details/**/*)",
-      "Edit(/apps/corporate/src/app/cards/**/*)",
-      "Edit(/apps/corporate/src/app/search/**/*)",
-      "Edit(/apps/corporate/src/app/empty/**/*)",
-      "Edit(/apps/corporate/src/app/profiles/**/*)",
-      "Edit(/apps/corporate/src/app/settings/**/*)",
-      "Edit(/apps/corporate/src/app/onboarding/**/*)",
-      "Edit(/apps/corporate/src/app/tables/**/*)",
-      "Edit(/apps/corporate/src/app/pricing/**/*)",
-      "Edit(/apps/corporate/src/app/auth/**/*)",
-      "Edit(/apps/corporate/src/app/notifications/**/*)",
-      "Edit(/apps/corporate/src/app/notifications-ui/**/*)",
-      "Edit(/apps/corporate/src/app/tabs/**/*)",
-      "Edit(/apps/corporate/src/app/timelines/**/*)",
-      "Edit(/apps/corporate/src/app/calendars/**/*)",
-      "Edit(/apps/corporate/src/app/testimonials/**/*)",
-      "Edit(/apps/corporate/src/app/faqs/**/*)",
-      "Edit(/packages/memphis-ui/**/*)",
-      "Write(/apps/corporate/src/app/articles/**/*)",
-      "Write(/apps/corporate/src/app/lists/**/*)",
-      "Write(/apps/corporate/src/app/modals/**/*)",
-      "Write(/apps/corporate/src/app/dashboards/**/*)",
-      "Write(/apps/corporate/src/app/messages/**/*)",
-      "Write(/apps/corporate/src/app/headers/**/*)",
-      "Write(/apps/corporate/src/app/footers/**/*)",
-      "Write(/apps/corporate/src/app/forms/**/*)",
-      "Write(/apps/corporate/src/app/details/**/*)",
-      "Write(/apps/corporate/src/app/cards/**/*)",
-      "Write(/apps/corporate/src/app/search/**/*)",
-      "Write(/apps/corporate/src/app/empty/**/*)",
-      "Write(/apps/corporate/src/app/profiles/**/*)",
-      "Write(/apps/corporate/src/app/settings/**/*)",
-      "Write(/apps/corporate/src/app/onboarding/**/*)",
-      "Write(/apps/corporate/src/app/tables/**/*)",
-      "Write(/apps/corporate/src/app/pricing/**/*)",
-      "Write(/apps/corporate/src/app/auth/**/*)",
-      "Write(/apps/corporate/src/app/notifications/**/*)",
-      "Write(/apps/corporate/src/app/notifications-ui/**/*)",
-      "Write(/apps/corporate/src/app/tabs/**/*)",
-      "Write(/apps/corporate/src/app/timelines/**/*)",
-      "Write(/apps/corporate/src/app/calendars/**/*)",
-      "Write(/apps/corporate/src/app/testimonials/**/*)",
-      "Write(/apps/corporate/src/app/faqs/**/*)",
-      "Write(/packages/memphis-ui/**/*)",
-      "Write(/apps/corporate/src/themes/**/*)",
-      "Write(/.claude/agents/**/*)",
-      "Write(/.claude/skills/**/*)",
-      "Write(/.claude/docs/**/*)",
-      "Write(/.claude/commands/**/*)",
-      "Write(/.claude/memphis/**/*)",
-      "Edit(/.claude/commands/**/*)",
-      "Edit(/.claude/memphis/**/*)",
-      "Bash(ls -la apps/corporate/src/app/landing/*)",
-      "Bash(find apps/corporate/src/app/landing -name \"*.tsx\")",
-      "Bash(npx tsc:*)"
-    ]
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/gsd-check-update.js"
-          }
+    "permissions": {
+        "defaultMode": "acceptEdits",
+        "allow": [
+            "Edit(/apps/corporate/src/app/landing/**/*)",
+            "Edit(/apps/corporate/src/app/articles/**/*)",
+            "Edit(/apps/corporate/src/app/lists/**/*)",
+            "Edit(/apps/corporate/src/app/modals/**/*)",
+            "Edit(/apps/corporate/src/app/dashboards/**/*)",
+            "Edit(/apps/corporate/src/app/messages/**/*)",
+            "Edit(/apps/corporate/src/app/headers/**/*)",
+            "Edit(/apps/corporate/src/app/footers/**/*)",
+            "Edit(/apps/corporate/src/app/forms/**/*)",
+            "Edit(/apps/corporate/src/app/details/**/*)",
+            "Edit(/apps/corporate/src/app/cards/**/*)",
+            "Edit(/apps/corporate/src/app/search/**/*)",
+            "Edit(/apps/corporate/src/app/empty/**/*)",
+            "Edit(/apps/corporate/src/app/profiles/**/*)",
+            "Edit(/apps/corporate/src/app/settings/**/*)",
+            "Edit(/apps/corporate/src/app/onboarding/**/*)",
+            "Edit(/apps/corporate/src/app/tables/**/*)",
+            "Edit(/apps/corporate/src/app/pricing/**/*)",
+            "Edit(/apps/corporate/src/app/auth/**/*)",
+            "Edit(/apps/corporate/src/app/notifications/**/*)",
+            "Edit(/apps/corporate/src/app/notifications-ui/**/*)",
+            "Edit(/apps/corporate/src/app/tabs/**/*)",
+            "Edit(/apps/corporate/src/app/timelines/**/*)",
+            "Edit(/apps/corporate/src/app/calendars/**/*)",
+            "Edit(/apps/corporate/src/app/testimonials/**/*)",
+            "Edit(/apps/corporate/src/app/faqs/**/*)",
+            "Edit(/packages/memphis-ui/**/*)",
+            "Write(/apps/corporate/src/app/articles/**/*)",
+            "Write(/apps/corporate/src/app/lists/**/*)",
+            "Write(/apps/corporate/src/app/modals/**/*)",
+            "Write(/apps/corporate/src/app/dashboards/**/*)",
+            "Write(/apps/corporate/src/app/messages/**/*)",
+            "Write(/apps/corporate/src/app/headers/**/*)",
+            "Write(/apps/corporate/src/app/footers/**/*)",
+            "Write(/apps/corporate/src/app/forms/**/*)",
+            "Write(/apps/corporate/src/app/details/**/*)",
+            "Write(/apps/corporate/src/app/cards/**/*)",
+            "Write(/apps/corporate/src/app/search/**/*)",
+            "Write(/apps/corporate/src/app/empty/**/*)",
+            "Write(/apps/corporate/src/app/profiles/**/*)",
+            "Write(/apps/corporate/src/app/settings/**/*)",
+            "Write(/apps/corporate/src/app/onboarding/**/*)",
+            "Write(/apps/corporate/src/app/tables/**/*)",
+            "Write(/apps/corporate/src/app/pricing/**/*)",
+            "Write(/apps/corporate/src/app/auth/**/*)",
+            "Write(/apps/corporate/src/app/notifications/**/*)",
+            "Write(/apps/corporate/src/app/notifications-ui/**/*)",
+            "Write(/apps/corporate/src/app/tabs/**/*)",
+            "Write(/apps/corporate/src/app/timelines/**/*)",
+            "Write(/apps/corporate/src/app/calendars/**/*)",
+            "Write(/apps/corporate/src/app/testimonials/**/*)",
+            "Write(/apps/corporate/src/app/faqs/**/*)",
+            "Write(/packages/memphis-ui/**/*)",
+            "Write(/apps/corporate/src/themes/**/*)",
+            "Write(/.claude/agents/**/*)",
+            "Write(/.claude/skills/**/*)",
+            "Write(/.claude/docs/**/*)",
+            "Write(/.claude/commands/**/*)",
+            "Write(/.claude/memphis/**/*)",
+            "Edit(/.claude/commands/**/*)",
+            "Edit(/.claude/memphis/**/*)",
+            "Bash(ls -la apps/corporate/src/app/landing/*)",
+            "Bash(find apps/corporate/src/app/landing -name \"*.tsx\")",
+            "Bash(npx tsc:*)"
         ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "node .claude/hooks/gsd-statusline.js"
-  }
+    },
+    "hooks": {
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node .claude/hooks/gsd-check-update.js"
+                    }
+                ]
+            }
+        ]
+    },
+    "statusLine": {
+        "type": "command",
+        "command": "node .claude/hooks/gsd-statusline.js"
+    },
+    "env": {
+        "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+        "CLAUDE_CODE_ENABLE_TASKS": "true"
+    }
 }

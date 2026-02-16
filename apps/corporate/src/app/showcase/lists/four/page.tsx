@@ -10,14 +10,42 @@ type ViewMode = "table" | "grid" | "gmail";
 
 /* ─── Sidebar Nav Items ───────────────────────────────────────────────────── */
 const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: "fa-duotone fa-regular fa-grid-2" },
+    {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: "fa-duotone fa-regular fa-grid-2",
+    },
     { id: "roles", label: "Roles", icon: "fa-duotone fa-regular fa-briefcase" },
-    { id: "recruiters", label: "Recruiters", icon: "fa-duotone fa-regular fa-user-tie" },
-    { id: "candidates", label: "Candidates", icon: "fa-duotone fa-regular fa-users" },
-    { id: "companies", label: "Companies", icon: "fa-duotone fa-regular fa-building" },
-    { id: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-file-lines" },
-    { id: "messages", label: "Messages", icon: "fa-duotone fa-regular fa-comments" },
-    { id: "placements", label: "Placements", icon: "fa-duotone fa-regular fa-handshake" },
+    {
+        id: "recruiters",
+        label: "Recruiters",
+        icon: "fa-duotone fa-regular fa-user-tie",
+    },
+    {
+        id: "candidates",
+        label: "Candidates",
+        icon: "fa-duotone fa-regular fa-users",
+    },
+    {
+        id: "companies",
+        label: "Companies",
+        icon: "fa-duotone fa-regular fa-building",
+    },
+    {
+        id: "applications",
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
+    {
+        id: "messages",
+        label: "Messages",
+        icon: "fa-duotone fa-regular fa-comments",
+    },
+    {
+        id: "placements",
+        label: "Placements",
+        icon: "fa-duotone fa-regular fa-handshake",
+    },
 ];
 
 const ACTIVE_NAV = "roles";
@@ -240,7 +268,9 @@ function DetailPanel({
                             Type
                         </div>
                         <div className="font-bold text-sm flex items-center gap-2 capitalize">
-                            <i className={`${typeIcon(job.type)} text-primary`} />
+                            <i
+                                className={`${typeIcon(job.type)} text-primary`}
+                            />
                             {job.type}
                         </div>
                     </div>
@@ -259,7 +289,9 @@ function DetailPanel({
                 <div className="flex gap-6 text-sm text-base-content/50">
                     <span className="flex items-center gap-2">
                         <i className="fa-duotone fa-regular fa-users text-primary" />
-                        <strong className="text-base-content">{job.applicants}</strong>{" "}
+                        <strong className="text-base-content">
+                            {job.applicants}
+                        </strong>{" "}
                         applicants
                     </span>
                     <span className="flex items-center gap-2">
@@ -380,7 +412,9 @@ function DetailPanel({
                             className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
                         />
                         <div>
-                            <div className="font-bold">{job.recruiter.name}</div>
+                            <div className="font-bold">
+                                {job.recruiter.name}
+                            </div>
                             <div className="text-sm text-base-content/50">
                                 {job.recruiter.agency}
                             </div>
@@ -472,7 +506,10 @@ export default function ListsFourPage() {
     }, []);
 
     return (
-        <div ref={containerRef} className="cin-page min-h-screen bg-base-100 flex">
+        <div
+            ref={containerRef}
+            className="cin-page min-h-screen bg-base-100 flex"
+        >
             {/* ══════════════════════════════════════════════════════════════
                 SIDEBAR — Desktop (persistent) + Mobile (overlay)
                ══════════════════════════════════════════════════════════════ */}
@@ -517,11 +554,15 @@ export default function ListsFourPage() {
                                     Cinematic Editorial
                                 </p>
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-3">
-                                    Job <span className="text-primary">Listings</span>
+                                    Job{" "}
+                                    <span className="text-primary">
+                                        Listings
+                                    </span>
                                 </h1>
                                 <p className="text-base text-white/50 max-w-xl leading-relaxed">
-                                    Explore open positions from top companies. Three view
-                                    modes to browse exactly how you prefer.
+                                    Explore open positions from top companies.
+                                    Three view modes to browse exactly how you
+                                    prefer.
                                 </p>
                             </div>
                         </div>
@@ -541,16 +582,20 @@ export default function ListsFourPage() {
                                         type="text"
                                         placeholder="Search jobs, companies, skills..."
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="input input-bordered w-full pl-10 bg-base-200 border-base-content/10 focus:border-primary focus:outline-none"
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        className="input input-bordered w-full pl-10 bg-base-200 border-base-content/10 focus:border-coral focus:outline-none"
                                     />
                                 </div>
 
                                 {/* Type Filter */}
                                 <select
                                     value={filterType}
-                                    onChange={(e) => setFilterType(e.target.value)}
-                                    className="select select-bordered bg-base-200 border-base-content/10 focus:border-primary font-medium"
+                                    onChange={(e) =>
+                                        setFilterType(e.target.value)
+                                    }
+                                    className="select select-bordered bg-base-200 border-base-content/10 focus:border-coral font-medium"
                                 >
                                     <option value="all">All Types</option>
                                     <option value="full-time">Full-Time</option>
@@ -562,8 +607,10 @@ export default function ListsFourPage() {
                                 {/* Status Filter */}
                                 <select
                                     value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="select select-bordered bg-base-200 border-base-content/10 focus:border-primary font-medium"
+                                    onChange={(e) =>
+                                        setFilterStatus(e.target.value)
+                                    }
+                                    className="select select-bordered bg-base-200 border-base-content/10 focus:border-coral font-medium"
                                 >
                                     <option value="all">All Statuses</option>
                                     <option value="open">Open</option>
@@ -634,8 +681,8 @@ export default function ListsFourPage() {
                                 No jobs found
                             </h3>
                             <p className="text-base-content/50 max-w-md">
-                                Try adjusting your search query or filters to find what
-                                you are looking for.
+                                Try adjusting your search query or filters to
+                                find what you are looking for.
                             </p>
                         </div>
                     ) : viewMode === "table" ? (
@@ -675,7 +722,8 @@ export default function ListsFourPage() {
                                                 className="cin-list-item hover:bg-base-200/50 cursor-pointer transition-colors border-b border-base-content/5 last:border-0"
                                                 onClick={() =>
                                                     setSelectedJob(
-                                                        selectedJob?.id === job.id
+                                                        selectedJob?.id ===
+                                                            job.id
                                                             ? null
                                                             : job,
                                                     )
@@ -758,8 +806,8 @@ export default function ListsFourPage() {
                                             onClick={() => handleSelectJob(job)}
                                             className={`cin-list-item group cursor-pointer rounded-xl border transition-all duration-200 p-5 ${
                                                 selectedJob?.id === job.id
-                                                    ? "border-primary bg-primary/5 shadow-lg"
-                                                    : "border-base-content/5 bg-base-100 hover:border-primary/30 hover:shadow-md"
+                                                    ? "border-coral bg-primary/5 shadow-lg"
+                                                    : "border-base-content/5 bg-base-100 hover:border-coral/30 hover:shadow-md"
                                             }`}
                                         >
                                             {/* Card Header */}
@@ -791,7 +839,9 @@ export default function ListsFourPage() {
                                                 <div className="flex items-center gap-2">
                                                     <i className="fa-duotone fa-regular fa-money-bill-wave text-primary text-xs w-4 text-center" />
                                                     <span className="font-semibold text-base-content">
-                                                        {formatSalary(job.salary)}
+                                                        {formatSalary(
+                                                            job.salary,
+                                                        )}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2 capitalize">
@@ -804,14 +854,16 @@ export default function ListsFourPage() {
 
                                             {/* Tags */}
                                             <div className="flex flex-wrap gap-1">
-                                                {job.tags.slice(0, 3).map((tag, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="badge badge-sm bg-base-200 border-0 text-base-content/60 font-medium"
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                ))}
+                                                {job.tags
+                                                    .slice(0, 3)
+                                                    .map((tag, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="badge badge-sm bg-base-200 border-0 text-base-content/60 font-medium"
+                                                        >
+                                                            {tag}
+                                                        </span>
+                                                    ))}
                                                 {job.tags.length > 3 && (
                                                     <span className="badge badge-sm bg-base-200 border-0 text-base-content/40 font-medium">
                                                         +{job.tags.length - 3}
@@ -885,18 +937,22 @@ export default function ListsFourPage() {
                                                         {job.location}
                                                     </span>
                                                     <span className="font-semibold text-base-content/60">
-                                                        {formatSalary(job.salary)}
+                                                        {formatSalary(
+                                                            job.salary,
+                                                        )}
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1 mt-2">
-                                                    {job.tags.slice(0, 2).map((tag, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className="badge badge-xs bg-base-200 border-0 text-base-content/50"
-                                                        >
-                                                            {tag}
-                                                        </span>
-                                                    ))}
+                                                    {job.tags
+                                                        .slice(0, 2)
+                                                        .map((tag, i) => (
+                                                            <span
+                                                                key={i}
+                                                                className="badge badge-xs bg-base-200 border-0 text-base-content/50"
+                                                            >
+                                                                {tag}
+                                                            </span>
+                                                        ))}
                                                 </div>
                                             </div>
                                             <div className="text-right shrink-0">
@@ -927,8 +983,9 @@ export default function ListsFourPage() {
                                             Select a job
                                         </h3>
                                         <p className="text-base-content/40 max-w-sm">
-                                            Click on a job listing from the panel on
-                                            the left to see its full details here.
+                                            Click on a job listing from the
+                                            panel on the left to see its full
+                                            details here.
                                         </p>
                                     </div>
                                 )}

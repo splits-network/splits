@@ -31,7 +31,7 @@ When fixing violations, apply this hierarchy in order:
 
 ### 1. Memphis UI React Components (FIRST CHOICE)
 
-Use pre-built components from `@splits-network/memphis-ui` (86+ components).
+Use pre-built components from `@splits-network/memphis-ui` (101 components in `src/react/components/`).
 Design decisions (border tier, colors, typography) are already correct.
 
 ```tsx

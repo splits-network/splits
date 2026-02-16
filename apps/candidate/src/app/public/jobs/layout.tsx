@@ -1,17 +1,7 @@
-"use client";
-
-import { PageTitleProvider } from "@/contexts/page-title-context";
-import { PortalToolbar } from "@/components/portal-toolbar";
-
-export default function JobsNewLayout({
+export default function JobsLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <PageTitleProvider>
-            <PortalToolbar />
-            {children}
-        </PageTitleProvider>
-    );
+    return <div data-theme="memphis">{children}</div>;
 }

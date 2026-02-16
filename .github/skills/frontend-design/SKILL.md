@@ -3,33 +3,71 @@ name: frontend-design
 description: UI/UX design patterns using DaisyUI v5 and TailwindCSS for Splits Network
 alwaysApply: false
 applyTo:
-  - "apps/portal/src/**/*.{tsx,jsx}"
-  - "apps/candidate/src/**/*.{tsx,jsx}"
-  - "apps/corporate/src/**/*.{tsx,jsx}"
-  - "apps/portal/src/**/*.css"
-  - "apps/candidate/src/**/*.css"
-  - "apps/corporate/src/**/*.css"
+    - "apps/portal/src/**/*.{tsx,jsx}"
+    - "apps/candidate/src/**/*.{tsx,jsx}"
+    - "apps/corporate/src/**/*.{tsx,jsx}"
+    - "apps/portal/src/**/*.css"
+    - "apps/candidate/src/**/*.css"
+    - "apps/corporate/src/**/*.css"
 ---
 
 # Frontend Design Skill
 
 This skill provides UI/UX design patterns and visual implementation guidelines for Splits Network applications using DaisyUI v5 and TailwindCSS.
 
-## Core Principles
+## Memphis Design System (CRITICAL — Read First)
+
+Memphis pages (`*-memphis/` routes, showcase pages in `apps/corporate/src/app/showcase/`) use the Memphis design system (`@splits-network/memphis-ui`) instead of standard DaisyUI. **The rest of this skill applies to non-Memphis pages only.**
+
+### When to Use Memphis vs Standard DaisyUI
+
+- **Memphis**: Any file in a `*-memphis/` directory, any showcase page, any new page being migrated to Memphis
+- **Standard DaisyUI**: Existing non-Memphis pages, utility components in `packages/shared-ui/`
+
+### Memphis Styling Hierarchy (use components and named classes BEFORE raw Tailwind)
+
+1. **Memphis UI React components** (`@splits-network/memphis-ui`) — FIRST. 101 components with correct styling baked in. Check `packages/memphis-ui/src/react/components/index.ts`.
+2. **Memphis plugin CSS classes** (`btn`, `badge`, `card`, `input`, `select`, etc.) — named classes with border tiers baked in.
+3. **Memphis CSS theme classes** (`bg-coral`, `text-dark`, `border-interactive`) — for elements not covered above.
+4. **Local components** (`{feature}-memphis/components/`) — must use memphis-ui primitives internally.
+5. **Raw Tailwind** — LAST RESORT, only for layout/spacing/grid. Never for visual styling when a component or class exists.
+
+```tsx
+// ❌ WRONG on Memphis pages — raw Tailwind for a button
+<button className="bg-coral text-dark border-4 border-dark font-bold uppercase px-6 py-3">Submit</button>
+
+// ✅ CORRECT — use the Memphis UI component
+import { Button } from '@splits-network/memphis-ui';
+<Button variant="primary" size="md">Submit</Button>
+
+// ✅ ALSO ACCEPTABLE — use the plugin CSS class
+<button className="btn btn-coral btn-md">Submit</button>
+```
+
+Memphis design rules: no shadows, no rounded corners, no gradients, Memphis palette only (coral, teal, yellow, purple, dark, cream), geometric decorations.
+
+See `.claude/memphis/references/design-principles.md` for full Memphis guidelines.
+
+---
+
+## Core Principles (Standard DaisyUI — Non-Memphis Pages)
 
 ### Design System Foundation
+
 - **DaisyUI v5**: Primary component library with semantic components
 - **TailwindCSS**: Utility-first CSS framework for custom styling
 - **Semantic Colors**: Use DaisyUI color names (`primary`, `secondary`, `base-100`, etc.) for theme compatibility
 - **Consistency**: Follow established patterns for predictable user experience
 
 ### Visual Hierarchy
+
 - Clear information hierarchy with typography scales
 - Appropriate use of color for emphasis and status
 - Strategic use of whitespace for content grouping
 - Consistent spacing using Tailwind's spacing scale
 
 ### Accessibility First
+
 - Semantic HTML elements (`<button>`, `<fieldset>`, `<nav>`)
 - ARIA labels where needed
 - Keyboard navigation support
@@ -52,23 +90,27 @@ This skill provides UI/UX design patterns and visual implementation guidelines f
 ### Color Categories
 
 **Brand Colors:**
+
 - `primary` - Primary brand actions (submit, confirm)
 - `secondary` - Secondary brand actions
 - `accent` - Accent highlights
 
 **UI Colors:**
+
 - `base-100` - Page background (lightest)
 - `base-200` - Elevated surface
 - `base-300` - More elevated surface
 - `base-content` - Text on base colors
 
 **Semantic Status:**
+
 - `success` - Success states and confirmations
 - `warning` - Warning states and cautions
 - `error` - Error states and destructive actions
 - `info` - Informational messages
 
 **Neutral:**
+
 - `neutral` - Neutral actions and content
 - `neutral-content` - Text on neutral backgrounds
 
@@ -113,6 +155,7 @@ This skill provides UI/UX design patterns and visual implementation guidelines f
 ```
 
 ### Font Weights
+
 - `font-normal` (400) - Body text
 - `font-medium` (500) - Emphasis, labels
 - `font-semibold` (600) - Subheadings
@@ -206,6 +249,7 @@ This skill provides UI/UX design patterns and visual implementation guidelines f
 ### Spacing Scale
 
 Use consistent spacing from Tailwind's scale (0.25rem increments):
+
 - `gap-1` (0.25rem / 4px)
 - `gap-2` (0.5rem / 8px)
 - `gap-4` (1rem / 16px) - Common for components
@@ -318,7 +362,7 @@ Use consistent spacing from Tailwind's scale (0.25rem increments):
 // Text input with label
 <fieldset className="fieldset">
   <legend className="fieldset-legend">Email Address *</legend>
-  <input 
+  <input
     type="email"
     className="input w-full"
     placeholder="you@example.com"
@@ -673,6 +717,7 @@ Use consistent spacing from Tailwind's scale (0.25rem increments):
 ### Breakpoints
 
 Tailwind breakpoints:
+
 - `sm:` - 640px and up
 - `md:` - 768px and up
 - `lg:` - 1024px and up
@@ -733,29 +778,34 @@ Tailwind breakpoints:
 /* apps/portal/src/app/globals.css */
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
-  
-  /* Or custom theme */
-  themes: light, dark, custom --default;
+    themes:
+        light --default,
+        dark --prefersdark;
+
+    /* Or custom theme */
+    themes:
+        light,
+        dark,
+        custom --default;
 }
 
 /* Custom theme definition */
 @plugin "daisyui/theme" {
-  name: "custom";
-  default: true;
-  color-scheme: light;
-  
-  --color-primary: oklch(55% 0.3 240);
-  --color-secondary: oklch(70% 0.25 200);
-  --color-accent: oklch(65% 0.25 160);
-  
-  --color-base-100: oklch(98% 0.02 240);
-  --color-base-200: oklch(95% 0.03 240);
-  --color-base-300: oklch(92% 0.04 240);
-  --color-base-content: oklch(20% 0.05 240);
-  
-  --radius-box: 0.5rem;
-  --radius-field: 0.25rem;
+    name: "custom";
+    default: true;
+    color-scheme: light;
+
+    --color-primary: oklch(55% 0.3 240);
+    --color-secondary: oklch(70% 0.25 200);
+    --color-accent: oklch(65% 0.25 160);
+
+    --color-base-100: oklch(98% 0.02 240);
+    --color-base-200: oklch(95% 0.03 240);
+    --color-base-300: oklch(92% 0.04 240);
+    --color-base-content: oklch(20% 0.05 240);
+
+    --radius-box: 0.5rem;
+    --radius-field: 0.25rem;
 }
 ```
 
@@ -844,49 +894,51 @@ Tailwind breakpoints:
 ## Common Mistakes to Avoid
 
 1. **❌ Using Tailwind color names instead of semantic DaisyUI colors**
-   ```tsx
-   // Bad - won't adapt to theme changes
-   <div className="bg-blue-500 text-white">Content</div>
-   
-   // Good - theme-aware
-   <div className="bg-primary text-primary-content">Content</div>
-   ```
+
+    ```tsx
+    // Bad - won't adapt to theme changes
+    <div className="bg-blue-500 text-white">Content</div>
+
+    // Good - theme-aware
+    <div className="bg-primary text-primary-content">Content</div>
+    ```
 
 2. **❌ Inconsistent spacing**
-   ```tsx
-   // Bad - random spacing values
-   <div className="mb-3">
-   <div className="mb-5">
-   <div className="mb-7">
-   
-   // Good - consistent spacing scale
-   <div className="mb-4">
-   <div className="mb-4">
-   <div className="mb-4">
-   ```
+
+    ```tsx
+    // Bad - random spacing values
+    <div className="mb-3">
+    <div className="mb-5">
+    <div className="mb-7">
+
+    // Good - consistent spacing scale
+    <div className="mb-4">
+    <div className="mb-4">
+    <div className="mb-4">
+    ```
 
 3. **❌ Fighting DaisyUI component styles**
-   ```tsx
-   // Bad - overriding with !important
-   <button className="btn !bg-red-500 !text-white">Button</button>
-   
-   // Good - use DaisyUI modifiers
-   <button className="btn btn-error">Button</button>
-   ```
+
+    ```tsx
+    // Bad - overriding with !important
+    <button className="btn !bg-red-500 !text-white">Button</button>
+
+    // Good - use DaisyUI modifiers
+    <button className="btn btn-error">Button</button>
+    ```
 
 4. **❌ Not using responsive utilities**
-   ```tsx
-   // Bad - not responsive
-   <div className="grid grid-cols-3">
-   
-   // Good - responsive columns
-   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-   ```
+
+    ```tsx
+    // Bad - not responsive
+    <div className="grid grid-cols-3">
+
+    // Good - responsive columns
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    ```
 
 ## Resources
 
-- [DaisyUI v5 Documentation](https://daisyui.com)
 - [TailwindCSS Documentation](https://tailwindcss.com)
 - [Tailwind Color Reference](https://tailwindcss.com/docs/customizing-colors)
-- [DaisyUI Theme Generator](https://daisyui.com/theme-generator/)
 - Project: `docs/guidance/form-controls.md` - Form implementation patterns

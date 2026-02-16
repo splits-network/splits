@@ -222,20 +222,22 @@ export default function LandingPageTwo() {
             });
 
             // Divider lines draw-in
-            gsap.utils.toArray<HTMLElement>("[data-divider]").forEach((line) => {
-                gsap.from(line, {
-                    scaleX: 0,
-                    transformOrigin: "left center",
-                    duration: 1,
-                    ease: "power2.inOut",
-                    scrollTrigger: {
-                        trigger: line,
-                        start: "top 90%",
-                    },
+            gsap.utils
+                .toArray<HTMLElement>("[data-divider]")
+                .forEach((line) => {
+                    gsap.from(line, {
+                        scaleX: 0,
+                        transformOrigin: "left center",
+                        duration: 1,
+                        ease: "power2.inOut",
+                        scrollTrigger: {
+                            trigger: line,
+                            start: "top 90%",
+                        },
+                    });
                 });
-            });
         },
-        { scope: containerRef }
+        { scope: containerRef },
     );
 
     return (
@@ -365,7 +367,8 @@ export default function LandingPageTwo() {
                                             data-feature-text
                                             className="text-xs uppercase tracking-[0.3em] text-base-content/50 font-medium"
                                         >
-                                            Feature {String(i + 1).padStart(2, "0")}
+                                            Feature{" "}
+                                            {String(i + 1).padStart(2, "0")}
                                         </span>
                                     </div>
                                     <h3
@@ -499,10 +502,7 @@ export default function LandingPageTwo() {
                         </h2>
                     </div>
 
-                    <div
-                        data-divider
-                        className="h-px bg-base-300 mb-16"
-                    />
+                    <div data-divider className="h-px bg-base-300 mb-16" />
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                         {closingPoints.map((point) => (
@@ -548,7 +548,7 @@ export default function LandingPageTwo() {
                         </a>
                         <a
                             href="https://applicant.network"
-                            className="btn btn-ghost btn-lg text-base font-semibold px-10 border border-primary-content/30 text-primary-content hover:bg-primary-content/10"
+                            className="btn btn-ghost btn-lg text-base font-semibold px-10 border border-coral-content/30 text-primary-content hover:bg-primary-content/10"
                         >
                             Candidate Portal
                         </a>

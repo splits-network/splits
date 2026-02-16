@@ -17,8 +17,7 @@ const img = {
         "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80",
     handshake:
         "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80",
-    office:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+    office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     teamwork:
         "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
     interview:
@@ -132,10 +131,8 @@ export default function LandingOne() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             // ── Hero ────────────────────────────────────────────
             const heroTl = gsap.timeline({
@@ -177,7 +174,13 @@ export default function LandingOne() {
             gsap.fromTo(
                 $1(".hero-img-wrap"),
                 { opacity: 0, scale: 1.08 },
-                { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", delay: 0.2 },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 1.4,
+                    ease: "power2.out",
+                    delay: 0.2,
+                },
             );
 
             gsap.to($1(".hero-img-wrap img"), {
@@ -422,7 +425,9 @@ export default function LandingOne() {
                 {/* Right image panel — sits behind on mobile, 40% on desktop */}
                 <div
                     className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
-                    style={{ clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
                 >
                     <img
                         src={img.heroRecruiter}
@@ -456,9 +461,10 @@ export default function LandingOne() {
                         </h1>
 
                         <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
-                            Two platforms. One connected ecosystem. Splits Network
-                            for recruiters and companies. Applicant Network for
-                            candidates. Transparent, modern, and built to work.
+                            Two platforms. One connected ecosystem. Splits
+                            Network for recruiters and companies. Applicant
+                            Network for candidates. Transparent, modern, and
+                            built to work.
                         </p>
 
                         <div className="flex flex-wrap gap-4">
@@ -654,7 +660,7 @@ export default function LandingOne() {
                                 key={i}
                                 className={`platform-card border-t-4 ${
                                     p.color === "primary"
-                                        ? "border-primary"
+                                        ? "border-coral"
                                         : "border-secondary"
                                 } bg-base-200 p-10 opacity-0`}
                             >
@@ -666,9 +672,7 @@ export default function LandingOne() {
                                                 : "bg-secondary text-secondary-content"
                                         }`}
                                     >
-                                        <i
-                                            className={`${p.icon} text-2xl`}
-                                        ></i>
+                                        <i className={`${p.icon} text-2xl`}></i>
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-black">
@@ -811,7 +815,7 @@ export default function LandingOne() {
                         {testimonials.map((t, i) => (
                             <div
                                 key={i}
-                                className="testimonial-card border-l-4 border-primary bg-base-200 p-8 opacity-0"
+                                className="testimonial-card border-l-4 border-coral bg-base-200 p-8 opacity-0"
                             >
                                 <i className="fa-duotone fa-regular fa-quote-left text-3xl text-primary/20 mb-4 block"></i>
                                 <p className="text-base-content/80 leading-relaxed mb-6 italic">

@@ -1,166 +1,82 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Radar } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    RadialLinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import { useCompanyHealth } from '../hooks/use-company-health';
-import { ContentCard, EmptyState } from '@/components/ui/cards';
-import { ChartLoadingState } from '@splits-network/shared-ui';
-
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+import { MemphisCard, MemphisEmpty, MemphisSkeleton } from './primitives';
+import { ACCENT, accentAt } from './accent';
 
 interface CompanyHealthRadarProps {
     refreshKey?: number;
 }
 
-interface ThemeColors {
-    primary: string;
-    text: string;
-    grid: string;
-    surface: string;
-}
+const METRIC_LABELS = ['Time-to-Fill', 'Candidate Flow', 'Interview Rate', 'Offer Rate', 'Fill Rate'] as const;
+type MetricKey = 'timeToFill' | 'candidateFlow' | 'interviewRate' | 'offerRate' | 'fillRate';
+const METRIC_KEYS: MetricKey[] = ['timeToFill', 'candidateFlow', 'interviewRate', 'offerRate', 'fillRate'];
 
-function getThemeColors(): ThemeColors {
-    if (typeof window === 'undefined') {
-        return { primary: '#233876', text: '#111827', grid: '#e5e7eb', surface: '#ffffff' };
-    }
-    const style = getComputedStyle(document.documentElement);
-    const read = (prop: string, fallback: string) => style.getPropertyValue(prop).trim() || fallback;
-    return {
-        primary: read('--color-primary', '#233876'),
-        text: read('--color-base-content', '#18181b'),
-        grid: read('--color-base-300', '#e4e4e7'),
-        surface: read('--color-base-100', '#ffffff'),
-    };
-}
-
-function computeOverallScore(metrics: { timeToFill: number; candidateFlow: number; interviewRate: number; offerRate: number; fillRate: number }) {
-    const values = [metrics.timeToFill, metrics.candidateFlow, metrics.interviewRate, metrics.offerRate, metrics.fillRate];
+function computeOverallScore(metrics: Record<MetricKey, number>) {
+    const values = METRIC_KEYS.map(k => metrics[k]);
     return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length);
 }
 
 export default function CompanyHealthRadar({ refreshKey }: CompanyHealthRadarProps) {
     const { metrics, loading, error } = useCompanyHealth();
-    const [colors, setColors] = useState<ThemeColors>(getThemeColors());
 
-    useEffect(() => {
-        const update = () => setColors(getThemeColors());
-        update();
-
-        const observer = new MutationObserver(update);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
+    const headerRight = (
+        <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-dark/40">Health</span>
+            <span className="text-sm font-black tabular-nums text-teal">
+                {loading ? '—' : computeOverallScore(metrics)}/100
+            </span>
+        </div>
+    );
 
     if (loading) {
         return (
-            <ContentCard title="Role health" icon="fa-heart-pulse" className="bg-base-200 h-full">
-                <ChartLoadingState height={240} />
-            </ContentCard>
+            <MemphisCard title="Role Health" icon="fa-heart-pulse" accent={ACCENT[1]} className="h-full" headerRight={headerRight}>
+                <MemphisSkeleton count={5} />
+            </MemphisCard>
         );
     }
 
-    const hasData = metrics.timeToFill > 0 || metrics.candidateFlow > 0 || metrics.interviewRate > 0 ||
-        metrics.offerRate > 0 || metrics.fillRate > 0;
+    const hasData = METRIC_KEYS.some(k => metrics[k] > 0);
 
     if (error || !hasData) {
         return (
-            <ContentCard title="Role health" icon="fa-heart-pulse" className="bg-base-200 h-full">
-                <EmptyState
+            <MemphisCard title="Role Health" icon="fa-heart-pulse" accent={ACCENT[1]} className="h-full" headerRight={headerRight}>
+                <MemphisEmpty
                     icon="fa-heart-pulse"
-                    title="No health data yet"
-                    description="Post roles and receive candidates to see your hiring health metrics across five dimensions."
-                    size="sm"
+                    title="No health data"
+                    description="Post roles and receive candidates to see your hiring health metrics."
                 />
-            </ContentCard>
+            </MemphisCard>
         );
     }
 
-    const overallScore = computeOverallScore(metrics);
-
-    const chartData = {
-        labels: ['Time-to-Fill', 'Candidate Flow', 'Interview Rate', 'Offer Rate', 'Fill Rate'],
-        datasets: [{
-            label: 'Health scores',
-            data: [metrics.timeToFill, metrics.candidateFlow, metrics.interviewRate, metrics.offerRate, metrics.fillRate],
-            backgroundColor: `${colors.primary}20`,
-            borderColor: colors.primary,
-            borderWidth: 2,
-            pointBackgroundColor: colors.primary,
-            pointBorderColor: colors.surface,
-            pointHoverBackgroundColor: colors.surface,
-            pointHoverBorderColor: colors.primary,
-            pointRadius: 4,
-            pointBorderWidth: 2,
-            pointHoverRadius: 6,
-        }],
-    };
-
     return (
-        <ContentCard
-            title="Role health"
-            icon="fa-heart-pulse"
-            className="bg-base-200 h-full"
-            headerActions={
-                <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-base-content/60 font-medium">Health score</span>
-                    <span className="text-sm font-bold tabular-nums text-primary">{overallScore}/100</span>
-                </div>
-            }
-        >
-            <div className="h-56 lg:h-72">
-                <Radar
-                    data={chartData}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    stepSize: 25,
-                                    display: false,
-                                },
-                                pointLabels: {
-                                    color: colors.text,
-                                    font: { size: 10, weight: 500 },
-                                },
-                                grid: {
-                                    circular: true,
-                                    color: `${colors.grid}80`,
-                                },
-                                angleLines: {
-                                    color: `${colors.grid}60`,
-                                },
-                            },
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: colors.surface,
-                                titleColor: colors.text,
-                                bodyColor: colors.text,
-                                borderColor: `${colors.text}20`,
-                                borderWidth: 1,
-                                padding: 10,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) => ` ${ctx.label}: ${ctx.parsed.r}/100`,
-                                },
-                            },
-                        },
-                    }}
-                />
+        <MemphisCard title="Role Health" icon="fa-heart-pulse" accent={ACCENT[1]} className="h-full" headerRight={headerRight}>
+            <div className="space-y-3">
+                {METRIC_KEYS.map((key, i) => {
+                    const value = metrics[key];
+                    const accent = accentAt(i);
+                    return (
+                        <div key={key}>
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-dark/60">
+                                    {METRIC_LABELS[i]}
+                                </span>
+                                <span className={`text-xs font-black tabular-nums ${accent.text}`}>
+                                    {value}
+                                </span>
+                            </div>
+                            <div className="h-3 border-4 border-dark overflow-hidden">
+                                <div
+                                    className={`h-full ${accent.bg} transition-all duration-700`}
+                                    style={{ width: `${value}%` }}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
-        </ContentCard>
+        </MemphisCard>
     );
 }

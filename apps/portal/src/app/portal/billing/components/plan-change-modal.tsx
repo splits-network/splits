@@ -155,7 +155,7 @@ function PlanCard({
         <div
             className={`card bg-base-100 border-2 cursor-pointer transition-all hover:shadow-lg relative ${
                 isSelected
-                    ? "border-primary shadow-lg"
+                    ? "border-coral shadow-lg"
                     : isCurrentPlan
                       ? "border-success/50"
                       : "border-base-300"
@@ -263,7 +263,7 @@ function PlanCard({
                     <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                             isSelected
-                                ? "border-primary bg-primary"
+                                ? "border-coral bg-primary"
                                 : "border-base-300 hover:border-base-content/50"
                         }`}
                     >
@@ -345,7 +345,7 @@ export default function PlanChangeModal({
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**
@@ -366,7 +366,7 @@ export default function PlanChangeModal({
             // Assume no payment method if check fails
             setHasPaymentMethod(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**
@@ -923,7 +923,11 @@ export default function PlanChangeModal({
                                 }
                             >
                                 {creatingSetupIntent ? (
-                                    <ButtonLoading loading={true} text="Continue" loadingText="Preparing..." />
+                                    <ButtonLoading
+                                        loading={true}
+                                        text="Continue"
+                                        loadingText="Preparing..."
+                                    />
                                 ) : (
                                     <>
                                         Continue

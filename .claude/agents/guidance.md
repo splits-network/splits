@@ -38,6 +38,17 @@ You are the Guidance Documentation agent for Splits Network. You maintain the `d
 | `user-roles-and-permissions.md` | RBAC system | STANDARD |
 | `wizard-pattern.md` | Multi-step wizard standard | STANDARD |
 
+### Memphis Design Docs (separate location)
+
+Memphis-specific documentation lives in `docs/memphis/` (not `docs/guidance/`):
+
+| Document | Topic |
+|----------|-------|
+| `docs/memphis/README.md` | Overview and quick reference |
+| `docs/memphis/feature-architecture.md` | Golden example: roles feature pattern |
+| `docs/memphis/design-principles.md` | The 5 rules, styling hierarchy, typography |
+| `docs/memphis/color-system.md` | 6-color palette, combinations, accessibility |
+
 ## Document Format
 
 Every guidance document should follow this structure:

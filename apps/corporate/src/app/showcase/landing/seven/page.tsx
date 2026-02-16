@@ -104,28 +104,32 @@ const processSteps = [
     {
         phase: "01",
         title: "INTAKE",
-        description: "Company posts role with terms, fee structure, and requirements.",
+        description:
+            "Company posts role with terms, fee structure, and requirements.",
         icon: "fa-duotone fa-regular fa-file-import",
         output: "Job specification published to network",
     },
     {
         phase: "02",
         title: "ROUTING",
-        description: "System matches role to qualified recruiters by niche and capacity.",
+        description:
+            "System matches role to qualified recruiters by niche and capacity.",
         icon: "fa-duotone fa-regular fa-route",
         output: "Recruiter assignments dispatched",
     },
     {
         phase: "03",
         title: "PIPELINE",
-        description: "Recruiters submit candidates. Full tracking from submission to interview.",
+        description:
+            "Recruiters submit candidates. Full tracking from submission to interview.",
         icon: "fa-duotone fa-regular fa-diagram-project",
         output: "Candidate pipeline active",
     },
     {
         phase: "04",
         title: "PLACEMENT",
-        description: "Hire confirmed. Fees calculated automatically. Payouts triggered.",
+        description:
+            "Hire confirmed. Fees calculated automatically. Payouts triggered.",
         icon: "fa-duotone fa-regular fa-circle-check",
         output: "Split-fee settlement complete",
     },
@@ -137,21 +141,24 @@ const userInterfaces = [
         label: "Recruiter Terminal",
         icon: "fa-duotone fa-regular fa-user-tie",
         color: "text-primary",
-        borderColor: "border-primary/30",
+        borderColor: "border-coral/30",
         features: [
             "Curated role feed matched to your niche",
             "Pipeline management with stage tracking",
             "Earnings dashboard with payout history",
             "Team collaboration and shared candidates",
         ],
-        cta: { text: "Access Terminal", href: "https://splits.network/sign-up" },
+        cta: {
+            text: "Access Terminal",
+            href: "https://splits.network/sign-up",
+        },
     },
     {
         role: "COMPANY",
         label: "Company Console",
         icon: "fa-duotone fa-regular fa-building",
         color: "text-accent",
-        borderColor: "border-accent/30",
+        borderColor: "border-yellow/30",
         features: [
             "Post roles to the entire recruiter network",
             "Real-time pipeline visibility per role",
@@ -172,12 +179,19 @@ const userInterfaces = [
             "Interview preparation resources",
             "100% free, always",
         ],
-        cta: { text: "Enter Portal", href: "https://applicant.network/sign-up" },
+        cta: {
+            text: "Enter Portal",
+            href: "https://applicant.network/sign-up",
+        },
     },
 ];
 
 const diagnostics = [
-    { label: "Avg. Time to First Submission", value: "< 72h", status: "NOMINAL" },
+    {
+        label: "Avg. Time to First Submission",
+        value: "< 72h",
+        status: "NOMINAL",
+    },
     { label: "Pipeline Visibility", value: "100%", status: "NOMINAL" },
     { label: "Fee Transparency", value: "100%", status: "NOMINAL" },
     { label: "Ghosting Rate", value: "0%", status: "OPTIMAL" },
@@ -216,9 +230,16 @@ export default function LandingSevenPage() {
                         {/* System status bar */}
                         <div className="bp-status-bar flex flex-wrap gap-6 mb-12 font-mono text-xs opacity-0">
                             {systemSpecs.map((spec) => (
-                                <div key={spec.label} className="flex items-center gap-2">
-                                    <span className="text-[#3b5ccc]/60 uppercase">{spec.label}:</span>
-                                    <span className="text-[#14b8a6]">{spec.value}</span>
+                                <div
+                                    key={spec.label}
+                                    className="flex items-center gap-2"
+                                >
+                                    <span className="text-[#3b5ccc]/60 uppercase">
+                                        {spec.label}:
+                                    </span>
+                                    <span className="text-[#14b8a6]">
+                                        {spec.value}
+                                    </span>
                                 </div>
                             ))}
                             <div className="flex items-center gap-2">
@@ -233,14 +254,19 @@ export default function LandingSevenPage() {
                                 // SYSTEM DESIGNATION
                             </div>
                             <h1 className="bp-hero-headline text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 opacity-0">
-                                <span className="text-white">Precision-Engineered</span>
+                                <span className="text-white">
+                                    Precision-Engineered
+                                </span>
                                 <br />
-                                <span className="text-[#3b5ccc]">Recruiting Infrastructure</span>
+                                <span className="text-[#3b5ccc]">
+                                    Recruiting Infrastructure
+                                </span>
                             </h1>
                             <p className="bp-hero-sub text-lg md:text-xl text-[#c8ccd4]/60 max-w-2xl leading-relaxed font-light opacity-0">
-                                Split-fee marketplace, built-in ATS, and transparent
-                                pipelines. Every component designed for one purpose:
-                                placements that work for everyone.
+                                Split-fee marketplace, built-in ATS, and
+                                transparent pipelines. Every component designed
+                                for one purpose: placements that work for
+                                everyone.
                             </p>
                         </div>
 
@@ -347,7 +373,9 @@ export default function LandingSevenPage() {
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 border border-[#3b5ccc]/30 flex items-center justify-center">
-                                                <i className={`${mod.icon} text-lg text-[#3b5ccc]`}></i>
+                                                <i
+                                                    className={`${mod.icon} text-lg text-[#3b5ccc]`}
+                                                ></i>
                                             </div>
                                             <h3 className="font-bold text-white text-lg">
                                                 {mod.name}
@@ -370,8 +398,12 @@ export default function LandingSevenPage() {
                                                 key={spec}
                                                 className="flex items-center gap-2 text-sm"
                                             >
-                                                <span className="font-mono text-[#3b5ccc]/60 text-xs">--</span>
-                                                <span className="text-[#c8ccd4]/70">{spec}</span>
+                                                <span className="font-mono text-[#3b5ccc]/60 text-xs">
+                                                    --
+                                                </span>
+                                                <span className="text-[#c8ccd4]/70">
+                                                    {spec}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
@@ -408,7 +440,10 @@ export default function LandingSevenPage() {
 
                         <div className="bp-process-steps space-y-0">
                             {processSteps.map((step, index) => (
-                                <div key={step.phase} className="bp-process-step opacity-0">
+                                <div
+                                    key={step.phase}
+                                    className="bp-process-step opacity-0"
+                                >
                                     <div className="flex gap-6 md:gap-10 relative">
                                         {/* Phase number + connector line */}
                                         <div className="flex flex-col items-center flex-shrink-0">
@@ -417,7 +452,8 @@ export default function LandingSevenPage() {
                                                     {step.phase}
                                                 </span>
                                             </div>
-                                            {index < processSteps.length - 1 && (
+                                            {index <
+                                                processSteps.length - 1 && (
                                                 <div className="w-px h-full bg-[#3b5ccc]/20 min-h-[60px]"></div>
                                             )}
                                         </div>
@@ -425,7 +461,9 @@ export default function LandingSevenPage() {
                                         {/* Content */}
                                         <div className="pb-10 flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <i className={`${step.icon} text-[#3b5ccc]`}></i>
+                                                <i
+                                                    className={`${step.icon} text-[#3b5ccc]`}
+                                                ></i>
                                                 <h3 className="font-mono font-bold text-white tracking-wider">
                                                     {step.title}
                                                 </h3>
@@ -461,8 +499,8 @@ export default function LandingSevenPage() {
                                 Access Points
                             </h2>
                             <p className="text-[#c8ccd4]/50 max-w-xl">
-                                Three purpose-built interfaces. Each optimized for
-                                its operator. One connected system.
+                                Three purpose-built interfaces. Each optimized
+                                for its operator. One connected system.
                             </p>
                         </div>
 
@@ -479,10 +517,16 @@ export default function LandingSevenPage() {
 
                                     {/* Icon + Label */}
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className={`w-10 h-10 border border-current ${ui.color} flex items-center justify-center opacity-60`}>
-                                            <i className={`${ui.icon} text-lg`}></i>
+                                        <div
+                                            className={`w-10 h-10 border border-current ${ui.color} flex items-center justify-center opacity-60`}
+                                        >
+                                            <i
+                                                className={`${ui.icon} text-lg`}
+                                            ></i>
                                         </div>
-                                        <h3 className="font-bold text-white">{ui.label}</h3>
+                                        <h3 className="font-bold text-white">
+                                            {ui.label}
+                                        </h3>
                                     </div>
 
                                     {/* Features */}
@@ -492,8 +536,14 @@ export default function LandingSevenPage() {
                                                 key={feature}
                                                 className="flex items-start gap-2 text-sm"
                                             >
-                                                <span className={`font-mono text-xs ${ui.color} mt-0.5`}>&gt;</span>
-                                                <span className="text-[#c8ccd4]/60">{feature}</span>
+                                                <span
+                                                    className={`font-mono text-xs ${ui.color} mt-0.5`}
+                                                >
+                                                    &gt;
+                                                </span>
+                                                <span className="text-[#c8ccd4]/60">
+                                                    {feature}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
@@ -533,9 +583,15 @@ export default function LandingSevenPage() {
                         <div className="bp-diagnostics-table border border-[#3b5ccc]/20">
                             {/* Table header */}
                             <div className="grid grid-cols-3 gap-px bg-[#3b5ccc]/10 font-mono text-[10px] tracking-[0.2em] text-[#3b5ccc]/60 uppercase">
-                                <div className="bg-[#0d1220] px-6 py-3">METRIC</div>
-                                <div className="bg-[#0d1220] px-6 py-3">VALUE</div>
-                                <div className="bg-[#0d1220] px-6 py-3">STATUS</div>
+                                <div className="bg-[#0d1220] px-6 py-3">
+                                    METRIC
+                                </div>
+                                <div className="bg-[#0d1220] px-6 py-3">
+                                    VALUE
+                                </div>
+                                <div className="bg-[#0d1220] px-6 py-3">
+                                    STATUS
+                                </div>
                             </div>
 
                             {/* Table rows */}
@@ -551,7 +607,13 @@ export default function LandingSevenPage() {
                                         {diag.value}
                                     </div>
                                     <div className="bg-[#0d1220] px-6 py-4 font-mono text-[10px] tracking-wider">
-                                        <span className={diag.status === "OPTIMAL" ? "text-[#14b8a6]" : "text-[#22c55e]"}>
+                                        <span
+                                            className={
+                                                diag.status === "OPTIMAL"
+                                                    ? "text-[#14b8a6]"
+                                                    : "text-[#22c55e]"
+                                            }
+                                        >
                                             [{diag.status}]
                                         </span>
                                     </div>
@@ -586,7 +648,8 @@ export default function LandingSevenPage() {
                             </h2>
                             <p className="text-lg text-[#c8ccd4]/50 mb-10 max-w-lg mx-auto">
                                 The recruiting infrastructure your team has been
-                                waiting for. Built different. Engineered to last.
+                                waiting for. Built different. Engineered to
+                                last.
                             </p>
                         </div>
 

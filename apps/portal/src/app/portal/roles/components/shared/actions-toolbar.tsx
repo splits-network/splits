@@ -1,47 +1,35 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
-import { ButtonLoading, ModalPortal } from "@splits-network/shared-ui";
-import { useRolesFilterOptional } from "../../contexts/roles-filter-context";
+import { ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "../modals/role-wizard-modal";
-import SubmitCandidateWizard from "../wizards/submit-candidate-wizard";
+import SubmitCandidateModal from "../modals/submit-candidate-modal";
+import type { Job } from "../../types";
+import { ExpandableButton } from "./expandable-button";
 
 // ===== TYPES =====
-
-export interface Job {
-    id: string;
-    title: string | null;
-    company_id: string | null;
-    company?: {
-        name: string | null;
-        identity_organization_id?: string | null;
-        [key: string]: any;
-    };
-    status: "active" | "paused" | "filled" | "closed" | string | null;
-    [key: string]: any;
-}
 
 export interface RoleActionsToolbarProps {
     job: Job;
     variant: "icon-only" | "descriptive";
     layout?: "horizontal" | "vertical";
-    size?: "xs" | "sm" | "md";
+    size?: "xs" | "sm" | "md" | "lg";
     showActions?: {
         viewDetails?: boolean;
-        viewPipeline?: boolean; // NEW: Show pipeline button
+        viewPipeline?: boolean;
         submitCandidate?: boolean;
         edit?: boolean;
         statusActions?: boolean;
-        share?: boolean; // NEW: Share job button
+        share?: boolean;
     };
     onRefresh?: () => void;
     onViewDetails?: (jobId: string) => void;
-    onViewPipeline?: (jobId: string) => void; // NEW: Pipeline callback
+    onViewPipeline?: (jobId: string) => void;
     className?: string;
 }
 
@@ -62,8 +50,7 @@ export default function RoleActionsToolbar({
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, manageableCompanyIds } =
         useUserProfile();
-    const filterContext = useRolesFilterOptional();
-    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
+    const refresh = onRefresh ?? (() => {});
 
     // Modal states
     const [showEditModal, setShowEditModal] = useState(false);
@@ -78,12 +65,8 @@ export default function RoleActionsToolbar({
 
     const canManageRole = useMemo(() => {
         if (isAdmin) return true;
-
-        // Company admin can manage roles
         const isCompanyAdmin = profile?.roles?.includes("company_admin");
         if (isCompanyAdmin) return true;
-
-        // Recruiter with can_manage_company_jobs for this job's company
         if (
             isRecruiter &&
             job.company_id &&
@@ -91,7 +74,6 @@ export default function RoleActionsToolbar({
         ) {
             return true;
         }
-
         return false;
     }, [isAdmin, profile, isRecruiter, job.company_id, manageableCompanyIds]);
 
@@ -105,18 +87,14 @@ export default function RoleActionsToolbar({
         newStatus: "active" | "paused" | "filled" | "closed",
     ) => {
         const confirmMessage = `Are you sure you want to change the status to ${newStatus}?`;
-        if (!confirm(confirmMessage)) {
-            return;
-        }
+        if (!confirm(confirmMessage)) return;
 
         setUpdatingStatus(true);
         setStatusAction(newStatus);
 
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error("No auth token");
-            }
+            if (!token) throw new Error("No auth token");
 
             const client = createAuthenticatedClient(token);
             await client.patch(`/jobs/${job.id}`, { status: newStatus });
@@ -150,7 +128,6 @@ export default function RoleActionsToolbar({
         };
 
         try {
-            // Check if native Web Share API is available
             if (
                 navigator.share &&
                 navigator.canShare &&
@@ -158,17 +135,15 @@ export default function RoleActionsToolbar({
             ) {
                 await navigator.share(shareData);
             } else {
-                // Fallback: Copy to clipboard
                 await navigator.clipboard.writeText(shareUrl);
                 toast.success("Job link copied to clipboard!");
             }
         } catch (error: any) {
             if (error.name !== "AbortError") {
-                // Fallback on any error except user cancellation
                 try {
                     await navigator.clipboard.writeText(shareUrl);
                     toast.success("Job link copied to clipboard!");
-                } catch (clipboardError) {
+                } catch {
                     toast.error("Failed to share job link");
                 }
             }
@@ -180,24 +155,11 @@ export default function RoleActionsToolbar({
     // ===== ACTION HANDLERS =====
 
     const handleViewDetails = () => {
-        if (onViewDetails) {
-            onViewDetails(job.id);
-        }
-        // If no callback, Link component handles navigation
+        if (onViewDetails) onViewDetails(job.id);
     };
 
     const handleViewPipeline = () => {
-        if (onViewPipeline) {
-            onViewPipeline(job.id);
-        }
-    };
-
-    const handleEditClick = () => {
-        setShowEditModal(true);
-    };
-
-    const handleSubmitClick = () => {
-        setShowSubmitModal(true);
+        if (onViewPipeline) onViewPipeline(job.id);
     };
 
     const handleEditSuccess = () => {
@@ -209,385 +171,388 @@ export default function RoleActionsToolbar({
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
-        viewPipeline: showActions.viewPipeline === true, // Only show if explicitly enabled
+        viewPipeline: showActions.viewPipeline === true,
         submitCandidate:
             showActions.submitCandidate !== false && canSubmitCandidate,
         edit: showActions.edit !== false && canManageRole,
         statusActions: showActions.statusActions !== false && canManageRole,
-        share: showActions.share !== false, // Default enabled
+        share: showActions.share !== false,
     };
 
     // ===== RENDER HELPERS =====
 
-    const getSizeClass = () => {
-        return `btn-${size}`;
-    };
+    const getSizeClass = () => `btn-${size}`;
 
-    const getLayoutClass = () => {
-        return layout === "horizontal" ? "gap-1" : "flex-col gap-2";
-    };
+    const getLayoutClass = () =>
+        layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
-    // Quick status action for icon-only variant
     const renderQuickStatusButton = () => {
         if (variant !== "icon-only" || !actions.statusActions) return null;
 
-        const isLoading = updatingStatus && statusAction;
-
         if (job.status === "active") {
             return (
-                <button
+                <ExpandableButton
+                    icon="fa-duotone fa-regular fa-pause"
+                    label="Pause"
+                    variant="btn-secondary"
+                    size={size}
                     onClick={() => handleStatusChange("paused")}
-                    className={`btn ${getSizeClass()} btn-square btn-warning`}
-                    title="Pause Role"
                     disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "paused" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-pause" />
-                    )}
-                </button>
+                    loading={updatingStatus && statusAction === "paused"}
+                    title="Pause Role"
+                />
             );
         }
 
         if (job.status === "paused") {
             return (
-                <button
+                <ExpandableButton
+                    icon="fa-duotone fa-regular fa-play"
+                    label="Activate"
+                    variant="btn-success"
+                    size={size}
                     onClick={() => handleStatusChange("active")}
-                    className={`btn ${getSizeClass()} btn-square btn-success`}
-                    title="Activate Role"
                     disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "active" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-play" />
-                    )}
-                </button>
+                    loading={updatingStatus && statusAction === "active"}
+                    title="Activate Role"
+                />
             );
         }
 
         return null;
     };
 
-    // Status buttons for descriptive variant
-    const renderStatusButtons = () => {
-        if (variant !== "descriptive" || !actions.statusActions) return null;
+    // ===== STATUS DROPDOWN =====
 
-        const buttons = [];
-        const isLoading = updatingStatus && statusAction;
+    const statusDropdownRef = useRef<HTMLDetailsElement>(null);
 
-        // Activate button (if not active)
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (
+                statusDropdownRef.current &&
+                !statusDropdownRef.current.contains(e.target as Node)
+            ) {
+                statusDropdownRef.current.removeAttribute("open");
+            }
+        };
+        document.addEventListener("click", handleClick);
+        return () => document.removeEventListener("click", handleClick);
+    }, []);
+
+    const statusItems = useMemo(() => {
+        const items: {
+            key: string;
+            status: "active" | "paused" | "filled" | "closed";
+            label: string;
+            icon: string;
+            btnClass: string;
+        }[] = [];
+
         if (job.status !== "active") {
-            buttons.push(
-                <button
-                    key="activate"
-                    onClick={() => handleStatusChange("active")}
-                    className={`btn ${getSizeClass()} btn-success gap-2`}
-                    disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "active" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-play"></i>
-                    )}
-                    Activate
-                </button>,
-            );
+            items.push({
+                key: "activate",
+                status: "active",
+                label: "Activate",
+                icon: "fa-duotone fa-regular fa-play",
+                btnClass: "text-success",
+            });
         }
-
-        // Pause button (if active)
         if (job.status === "active") {
-            buttons.push(
-                <button
-                    key="pause"
-                    onClick={() => handleStatusChange("paused")}
-                    className={`btn ${getSizeClass()} btn-warning gap-2`}
-                    disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "paused" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-pause"></i>
-                    )}
-                    Pause
-                </button>,
-            );
+            items.push({
+                key: "pause",
+                status: "paused",
+                label: "Pause",
+                icon: "fa-duotone fa-regular fa-pause",
+                btnClass: "text-warning",
+            });
         }
-
-        // Mark as Filled button (if not filled)
         if (job.status !== "filled") {
-            buttons.push(
-                <button
-                    key="filled"
-                    onClick={() => handleStatusChange("filled")}
-                    className={`btn ${getSizeClass()} btn-info gap-2`}
-                    disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "filled" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-check"></i>
-                    )}
-                    Mark Filled
-                </button>,
-            );
+            items.push({
+                key: "filled",
+                status: "filled",
+                label: "Mark Filled",
+                icon: "fa-duotone fa-regular fa-check",
+                btnClass: "text-info",
+            });
         }
-
-        // Close button (if not closed)
         if (job.status !== "closed") {
-            buttons.push(
-                <button
-                    key="closed"
-                    onClick={() => handleStatusChange("closed")}
-                    className={`btn ${getSizeClass()} btn-error gap-2`}
-                    disabled={updatingStatus}
-                >
-                    {isLoading && statusAction === "closed" ? (
-                        <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-xmark"></i>
-                    )}
-                    Close
-                </button>,
-            );
+            items.push({
+                key: "closed",
+                status: "closed",
+                label: "Close",
+                icon: "fa-duotone fa-regular fa-xmark",
+                btnClass: "text-error",
+            });
         }
+        return items;
+    }, [job.status]);
 
-        return <>{buttons}</>;
+    const renderStatusDropdown = () => {
+        if (!actions.statusActions || statusItems.length === 0) return null;
+
+        return (
+            <details ref={statusDropdownRef} className="dropdown dropdown-end">
+                <summary
+                    className={`btn ${getSizeClass()} btn-ghost gap-2 list-none`}
+                    title="Change Status"
+                >
+                    {updatingStatus ? (
+                        <span className="loading loading-spinner loading-xs" />
+                    ) : (
+                        <i className="fa-duotone fa-regular fa-ellipsis-vertical" />
+                    )}
+                    <span className="hidden md:inline">Status</span>
+                </summary>
+                <ul className="dropdown-content menu bg-white border-4 border-dark p-2 w-48 z-50 mt-1">
+                    {statusItems.map((item) => (
+                        <li key={item.key}>
+                            <button
+                                onClick={() => {
+                                    statusDropdownRef.current?.removeAttribute(
+                                        "open",
+                                    );
+                                    handleStatusChange(item.status);
+                                }}
+                                className={`${item.btnClass} font-bold`}
+                                disabled={updatingStatus}
+                            >
+                                {updatingStatus &&
+                                statusAction === item.status ? (
+                                    <span className="loading loading-spinner loading-xs" />
+                                ) : (
+                                    <i className={item.icon} />
+                                )}
+                                {item.label}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </details>
+        );
     };
 
-    // ===== RENDER VARIANTS =====
+    // ===== MODALS (shared between both variants) =====
+
+    const modals = (
+        <ModalPortal>
+            {showEditModal && (
+                <RoleWizardModal
+                    isOpen={showEditModal}
+                    jobId={job.id}
+                    mode="edit"
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={handleEditSuccess}
+                />
+            )}
+            {showSubmitModal && (
+                <SubmitCandidateModal
+                    roleId={job.id}
+                    roleTitle={job.title || "Untitled Role"}
+                    companyName={
+                        job.company?.name || job.company_id || undefined
+                    }
+                    onClose={() => setShowSubmitModal(false)}
+                    onSuccess={refresh}
+                />
+            )}
+        </ModalPortal>
+    );
+
+    // ===== ICON-ONLY VARIANT =====
 
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex ${getLayoutClass()} ${className}`}>
-                    {/* Submit Candidate - CTA */}
+                <div
+                    className={`flex items-center ${getLayoutClass()} ${className}`}
+                >
                     {actions.submitCandidate && (
-                        <button
-                            onClick={handleSubmitClick}
-                            className={`btn ${getSizeClass()} btn-square btn-primary`}
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-user-plus"
+                            label="Submit"
+                            variant="btn-primary"
+                            size={size}
+                            onClick={() => setShowSubmitModal(true)}
                             title="Submit Candidate"
-                        >
-                            <i className="fa-duotone fa-regular fa-user-plus" />
-                        </button>
+                        />
                     )}
 
-                    {/* Edit Role */}
                     {actions.edit && (
-                        <button
-                            onClick={handleEditClick}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-pen-to-square"
+                            label="Edit"
+                            variant="btn-ghost"
+                            size={size}
+                            onClick={() => setShowEditModal(true)}
                             title="Edit Role"
-                        >
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        </button>
+                        />
                     )}
 
-                    {/* Share Job */}
                     {actions.share && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-share-nodes"
+                            label="Share"
+                            variant="btn-ghost"
+                            size={size}
                             onClick={handleShare}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                            title="Share Job"
                             disabled={isSharing}
-                        >
-                            {isSharing ? (
-                                <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-share-nodes" />
-                            )}
-                        </button>
+                            loading={isSharing}
+                            title="Share Job"
+                        />
                     )}
 
-                    {/* Quick Status Action */}
                     {renderQuickStatusButton()}
 
-                    {/* Divider before View Pipeline */}
                     {actions.viewPipeline &&
                         (actions.submitCandidate ||
                             actions.edit ||
                             actions.share ||
                             actions.statusActions) && (
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
                         )}
 
-                    {/* View Pipeline */}
                     {actions.viewPipeline && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-users-line"
+                            label="Pipeline"
+                            variant="btn-ghost"
+                            size={size}
                             onClick={handleViewPipeline}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost`}
                             title="View Pipeline"
-                        >
-                            <i className="fa-duotone fa-regular fa-users-line" />
-                        </button>
+                        />
                     )}
 
-                    {/* View Details - far right */}
                     {actions.viewDetails && (
                         <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
                             {onViewDetails ? (
-                                <button
+                                <ExpandableButton
+                                    icon="fa-duotone fa-regular fa-eye"
+                                    label="Details"
+                                    variant="btn-primary"
+                                    size={size}
                                     onClick={handleViewDetails}
-                                    className={`btn ${getSizeClass()} btn-square btn-primary`}
                                     title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </button>
+                                />
                             ) : (
-                                <Link
+                                <ExpandableButton
+                                    icon="fa-duotone fa-regular fa-eye"
+                                    label="Details"
+                                    variant="btn-primary"
+                                    size={size}
                                     href={`/portal/roles/${job.id}`}
-                                    className={`btn ${getSizeClass()} btn-square btn-primary`}
                                     title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </Link>
+                                />
                             )}
                         </>
                     )}
                 </div>
 
-                {/* Modals - portaled to body to escape drawer stacking context */}
-                <ModalPortal>
-                    {showEditModal && (
-                        <RoleWizardModal
-                            isOpen={showEditModal}
-                            jobId={job.id}
-                            mode="edit"
-                            onClose={() => setShowEditModal(false)}
-                            onSuccess={handleEditSuccess}
-                        />
-                    )}
-
-                    {showSubmitModal && (
-                        <SubmitCandidateWizard
-                            roleId={job.id}
-                            roleTitle={job.title || "Untitled Role"}
-                            companyName={
-                                job.company?.name || job.company_id || undefined
-                            }
-                            onClose={() => setShowSubmitModal(false)}
-                        />
-                    )}
-                </ModalPortal>
+                {modals}
             </>
         );
     }
 
-    // Descriptive variant
+    // ===== DESCRIPTIVE VARIANT =====
+
     return (
         <>
-            <div className={`flex ${getLayoutClass()} ${className}`}>
-                {/* Submit Candidate - CTA */}
+            <div
+                className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
+            >
                 {actions.submitCandidate && (
                     <button
-                        onClick={handleSubmitClick}
+                        onClick={() => setShowSubmitModal(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
+                        title="Submit Candidate"
                     >
                         <i className="fa-duotone fa-regular fa-user-plus" />
-                        Submit Candidate
+                        <span className="hidden md:inline">
+                            Submit Candidate
+                        </span>
                     </button>
                 )}
 
-                {/* Edit Role */}
                 {actions.edit && (
                     <button
-                        onClick={handleEditClick}
+                        onClick={() => setShowEditModal(true)}
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        title="Edit Role"
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        Edit
+                        <span className="hidden md:inline">Edit</span>
                     </button>
                 )}
 
-                {/* Share Job */}
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-circle gap-2`}
+                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        title="Share Job"
                         disabled={isSharing}
                     >
                         {isSharing ? (
-                            <span className="loading loading-spinner loading-xs"></span>
+                            <span className="loading loading-spinner loading-xs" />
                         ) : (
                             <i className="fa-duotone fa-regular fa-share-nodes" />
                         )}
+                        <span className="hidden md:inline">Share</span>
                     </button>
                 )}
 
-                {/* Status Action Buttons */}
-                {renderStatusButtons()}
+                {renderStatusDropdown()}
 
-                {/* Divider before View Pipeline */}
                 {actions.viewPipeline &&
                     (actions.submitCandidate ||
                         actions.edit ||
                         actions.share ||
                         actions.statusActions) && (
-                        <div className="divider divider-horizontal mx-0" />
+                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
                     )}
 
-                {/* View Pipeline */}
                 {actions.viewPipeline && (
                     <button
                         onClick={handleViewPipeline}
                         className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        title="View Pipeline"
                     >
                         <i className="fa-duotone fa-regular fa-users-line" />
-                        Pipeline
+                        <span className="hidden md:inline">Pipeline</span>
                     </button>
                 )}
 
-                {/* View Details - far right */}
                 {actions.viewDetails && (
                     <>
-                        <div className="divider divider-horizontal mx-0" />
+                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
                         {onViewDetails ? (
                             <button
                                 onClick={handleViewDetails}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
+                                <span className="hidden md:inline">
+                                    View Details
+                                </span>
                             </button>
                         ) : (
                             <Link
                                 href={`/portal/roles/${job.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
+                                <span className="hidden md:inline">
+                                    View Details
+                                </span>
                             </Link>
                         )}
                     </>
                 )}
             </div>
 
-            {/* Modals - portaled to body to escape drawer stacking context */}
-            <ModalPortal>
-                {showEditModal && (
-                    <RoleWizardModal
-                        isOpen={showEditModal}
-                        jobId={job.id}
-                        mode="edit"
-                        onClose={() => setShowEditModal(false)}
-                        onSuccess={handleEditSuccess}
-                    />
-                )}
-
-                {showSubmitModal && (
-                    <SubmitCandidateWizard
-                        roleId={job.id}
-                        roleTitle={job.title || "Untitled Role"}
-                        companyName={
-                            job.company?.name || job.company_id || undefined
-                        }
-                        onClose={() => setShowSubmitModal(false)}
-                        onSuccess={refresh}
-                    />
-                )}
-            </ModalPortal>
+            {modals}
         </>
     );
 }

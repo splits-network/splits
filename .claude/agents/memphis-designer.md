@@ -130,6 +130,8 @@ import { SearchBar, FilterBar, JobCard } from '@splits-network/memphis-ui';
 
 **Where components/styling come from (in priority order — FOLLOW THIS HIERARCHY):**
 
+**BEFORE writing ANY element**, check `packages/memphis-ui/src/react/components/index.ts` for an existing component. If one exists, USE IT. Do not write raw HTML/className for something a component or plugin class already handles.
+
 **Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
 
 1. **Memphis-UI React components** (Button, Badge, etc. from `@splits-network/memphis-ui`) — ALWAYS check here FIRST. If a component exists for your use case, USE IT. Design decisions (border tier, colors, typography) are already correct.
@@ -268,9 +270,9 @@ className="text-cream/40"
 
 **Why this matters:**
 - Hardcoded hex values bypass the theme system entirely
-- If a color changes in `theme.css`, hardcoded values won't update
+- If a color changes in `theme.config.ts`, hardcoded values won't update
 - It creates maintenance burden and inconsistency
-- The whole point of `packages/memphis-ui` and `theme.css` is centralized styling
+- The whole point of `packages/memphis-ui` and `theme.config.ts` is centralized styling
 
 **The Rule: ZERO inline `style={}` for colors, borders, backgrounds, or spacing.**
 
@@ -353,6 +355,69 @@ className="border-4 border-dark bg-coral text-white font-bold uppercase"
 // ✅ CORRECT — button using interactive tier via plugin
 className="btn btn-coral btn-md"
 ```
+
+### 8. Typography Size Policy (CRITICAL)
+
+Body text MUST use `text-base` (16px) as the default. The `text-sm` and `text-xs` classes are restricted:
+
+**Default body text = `text-base`**
+```tsx
+// ✅ CORRECT — body text uses text-base (or inherits it)
+<p className="text-base text-dark opacity-70">Description of the role and its requirements.</p>
+<p className="text-dark opacity-70">Inherited text-base is also fine.</p>
+
+// ❌ WRONG — text-sm as default body text
+<p className="text-sm text-dark opacity-70">Description of the role...</p>
+```
+
+**`text-sm` — secondary/supporting content only:**
+```tsx
+// ✅ ACCEPTABLE — genuinely secondary metadata
+<span className="text-sm text-dark opacity-50">Posted by Jane Doe</span>
+<p className="text-sm text-dark opacity-60">3 active applications</p>
+
+// ❌ WRONG — text-sm on primary content
+<p className="text-sm">Welcome to your dashboard. Here you can manage your roles...</p>
+```
+
+**`text-xs` — afterthought content ONLY:**
+```tsx
+// ✅ ACCEPTABLE — timestamps, footnotes, version info
+<span className="text-xs text-dark opacity-50">Updated 2 hours ago</span>
+<span className="text-xs text-dark opacity-50">v2.4.1</span>
+
+// ❌ WRONG — text-xs on meaningful content
+<p className="text-xs text-dark opacity-60">Enter your company details below</p>
+<label className="text-xs font-semibold">Job Title</label>
+```
+
+Badge text (`text-xs`) is acceptable because the badge component's design inherently uses small text within a bordered container.
+
+## Memphis UI Package Architecture
+
+The Memphis UI package (`packages/memphis-ui`) is built on SilicaUI (a DaisyUI v5 fork).
+
+**Key paths:**
+- `src/theme.config.ts` — Single source of truth for all design tokens
+- `src/react/components/` — 101 React components (Button, Badge, Card, etc.)
+- `src/components/*.css` — 57 CSS component files (SilicaUI base + Memphis additions)
+- `src/themes/memphis.css` — Generated CSS variables (NEVER edit directly)
+- `functions/` — Runtime plugin handlers
+- `dist/` — Generated build output (gitignored)
+
+**Build pipeline:** `tsx scripts/generate.ts` → `node build.js` → `tsc -b`
+Combined: `pnpm --filter @splits-network/memphis-ui build`
+
+**Plugin loading:** `@plugin "@splits-network/memphis-ui/plugin"` in app `globals.css`
+
+**CSS Variable Pattern (CRITICAL for component colors):**
+SilicaUI components use CSS custom properties internally. When creating color variants:
+- Buttons use `--btn-color` and `--btn-fg` (NOT `background-color` directly)
+- Badges use `--badge-color` and `--badge-fg` (NOT `background-color` directly)
+- Setting the variable cascades through the component's internal styling chain
+
+**CSS Specificity Warning:**
+The plugin's component CSS (e.g., `input.css`, `select.css`) applies default styles to base elements. When wrapping these in React components, plugin styles can override Tailwind utility classes like `border-none`. Use inline `style={{ border: "none" }}` to win specificity battles against plugin CSS.
 
 ## Migration Process
 
@@ -536,6 +601,133 @@ Before marking task complete, run ALL of these checks on your output file:
 12. ✅ **Correct border tiers** — Buttons/inputs/badges use interactive tier (3px/btn/badge), cards/modals use container tier (4px/card), checkboxes/toggles use detail tier (2px/checkbox)
 13. ✅ **Component isolation** - Verify NO imports from original page's component tree
 
+## Public Content Pages (Article Style)
+
+Public-facing content pages (Features, Pricing, How It Works, Transparency, Integrations, Updates, etc.) follow a distinct pattern from app pages. They use `articles/six` as the primary showcase reference and include custom per-page GSAP animators.
+
+### Reference Showcase
+- **Primary**: `apps/corporate/src/app/showcase/articles/six/page.tsx` — THE reference for all public content pages
+- **Secondary**: `landing/six` for hero patterns, `pricing/six` for pricing sections
+
+### Architecture: Per-Page GSAP Animator
+
+Each public content page gets its own animator component that wraps the page content:
+
+```
+apps/portal/src/app/public/{page-name}/
+├── page.tsx                    ← Page content with CSS animation classes
+└── {page-name}-animator.tsx    ← GSAP animations (separate "use client" component)
+```
+
+**The animator pattern:**
+```tsx
+"use client";
+import { useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+    gsap.registerPlugin(ScrollTrigger);
+}
+
+// Memphis animation constants (use these exact values for consistency)
+const D = { fast: 0.3, normal: 0.5, slow: 0.8, hero: 1.0, counter: 1.5 };
+const E = {
+    smooth: "power2.out",
+    bounce: "back.out(1.7)",
+    elastic: "elastic.out(1, 0.4)",
+    pop: "back.out(2.0)",
+};
+const S = { tight: 0.06, normal: 0.1, loose: 0.15 };
+
+export function PageNameAnimator({ children }: { children: ReactNode }) {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useGSAP(() => {
+        if (!containerRef.current) return;
+        // Respect reduced motion preference
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            gsap.set(containerRef.current.querySelectorAll("[class*='opacity-0']"), { opacity: 1 });
+            return;
+        }
+
+        const $ = (sel: string) => containerRef.current!.querySelectorAll(sel);
+        const $1 = (sel: string) => containerRef.current!.querySelector(sel);
+
+        // Memphis shapes — elastic bounce in
+        gsap.fromTo($(".memphis-shape"),
+            { opacity: 0, scale: 0, rotation: -180 },
+            { opacity: 0.4, scale: 1, rotation: 0, duration: D.slow, ease: E.elastic,
+              stagger: { each: S.tight, from: "random" }, delay: 0.2 });
+
+        // Continuous floating for Memphis shapes
+        $(".memphis-shape").forEach((shape, i) => {
+            gsap.to(shape, {
+                y: `+=${8 + (i % 3) * 4}`, x: `+=${4 + (i % 2) * 6}`,
+                rotation: `+=${(i % 2 === 0 ? 1 : -1) * (4 + i * 2)}`,
+                duration: 3 + i * 0.4, ease: "sine.inOut", repeat: -1, yoyo: true,
+            });
+        });
+
+        // Hero timeline, scroll-triggered sections, etc.
+    }, { scope: containerRef });
+
+    return <div ref={containerRef}>{children}</div>;
+}
+```
+
+### GSAP Null Guards (CRITICAL)
+
+When using `$1()` to select elements that may not exist (conditionally rendered), **always null-check before passing to GSAP**:
+
+```tsx
+// ❌ WRONG — crashes with "GSAP target null not found" warning
+tl.fromTo($1(".nav-cta-secondary"), { opacity: 0 }, { opacity: 1 });
+
+// ✅ CORRECT — null guard for conditional elements
+const ctaSecondary = $1(".nav-cta-secondary");
+if (ctaSecondary) tl.fromTo(ctaSecondary, { opacity: 0 }, { opacity: 1 });
+```
+
+This is especially important for elements that depend on auth state (logged in vs logged out).
+
+### Page Content Pattern
+
+Article-style pages use CSS classes as GSAP animation targets. Elements start with `opacity-0` and GSAP animates them to visible:
+
+```tsx
+{/* Hero — starts invisible, GSAP animates in */}
+<h1 className="hero-headline opacity-0 text-5xl font-black uppercase text-cream">
+    Page Title Here
+</h1>
+
+{/* Memphis floating shapes — start invisible, elastic bounce in */}
+<div className="memphis-shape absolute top-20 left-10 w-16 h-16 bg-coral rotate-12 opacity-0" />
+<div className="memphis-shape absolute top-40 right-20 w-12 h-12 rounded-full bg-teal opacity-0" />
+
+{/* Scroll-triggered sections use CSS class selectors */}
+<div className="timeline-item opacity-0">...</div>
+<div className="audience-card opacity-0">...</div>
+```
+
+### Dark Hero Sections
+
+Article pages typically have a dark hero section. Use Tailwind theme classes:
+
+```tsx
+{/* ✅ CORRECT — Tailwind classes for dark hero */}
+<section className="bg-dark relative overflow-hidden min-h-[60vh]">
+    <h1 className="text-cream font-black uppercase">Title</h1>
+    <p className="text-cream/70">Subtitle</p>
+</section>
+
+{/* ❌ WRONG — inline styles (even though showcase may use them) */}
+<section style={{ backgroundColor: "#1A1A2E" }}>
+```
+
+**Note:** The `articles/six` showcase reference may contain inline `style={{}}` for colors. Always convert these to Tailwind theme classes (`bg-dark`, `text-cream`, `text-coral/70`, etc.) when building pages.
+
 ## Error Handling
 
 If migration fails:
@@ -613,3 +805,4 @@ The orchestrator will spawn `memphis-copy` to produce the text in the Designer S
 15. **ALWAYS** use Memphis plugin classes first (btn, badge, input, card) — they have correct border tiers baked in
 16. **ALWAYS** run quality checks (section above) before marking complete
 17. **NEVER** write user-facing copy — delegate to `memphis-copy` agent
+18. **ALWAYS** use `text-base` as the default body text size — never `text-sm` or `text-xs` for main content. `text-xs` is restricted to afterthought content only (timestamps, footnotes, copyright)

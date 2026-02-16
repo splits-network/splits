@@ -1,15 +1,9 @@
 import type { MDXComponents } from "mdx/types";
 
 export const pressComponents: MDXComponents = {
-    h1: (props) => (
-        <h1 className="text-4xl font-bold mb-6" {...props} />
-    ),
-    h2: (props) => (
-        <h2 className="text-2xl font-bold mt-10 mb-4" {...props} />
-    ),
-    h3: (props) => (
-        <h3 className="text-xl font-bold mt-8 mb-3" {...props} />
-    ),
+    h1: (props) => <h1 className="text-4xl font-bold mb-6" {...props} />,
+    h2: (props) => <h2 className="text-2xl font-bold mt-10 mb-4" {...props} />,
+    h3: (props) => <h3 className="text-xl font-bold mt-8 mb-3" {...props} />,
     p: (props) => (
         <p
             className="text-base text-base-content/80 mb-4 leading-relaxed"
@@ -31,13 +25,11 @@ export const pressComponents: MDXComponents = {
     li: (props) => <li className="leading-relaxed" {...props} />,
     blockquote: (props) => (
         <blockquote
-            className="border-l-4 border-primary pl-4 italic text-base-content/70 my-6"
+            className="border-l-4 border-coral pl-4 italic text-base-content/70 my-6"
             {...props}
         />
     ),
-    a: (props) => (
-        <a className="link link-hover text-primary" {...props} />
-    ),
+    a: (props) => <a className="link link-hover text-primary" {...props} />,
     code: (props) => (
         <code
             className="bg-base-200 px-1.5 py-0.5 rounded text-sm"

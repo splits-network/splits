@@ -65,7 +65,6 @@ export default function AcceptInvitationClient({
 
                 const client = createAuthenticatedClient(token);
 
-                // Fetch invitation details
                 const invitationResponse = await client.get(
                     `/invitations/${invitationId}?email=${encodeURIComponent(userEmail)}`,
                 );
@@ -80,20 +79,17 @@ export default function AcceptInvitationClient({
 
                 setInvitation(invitationData);
 
-                // Check if invitation is still pending
                 if (invitationData.status !== "pending") {
                     setLoading(false);
-                    return; // Let the UI show the status message
+                    return;
                 }
 
-                // Check if invitation has expired
                 const expiresAt = new Date(invitationData.expires_at);
                 if (expiresAt < new Date()) {
                     setLoading(false);
-                    return; // Let the UI show the expired message
+                    return;
                 }
 
-                // Check if user email matches invitation email
                 if (
                     userEmail.toLowerCase() !==
                     invitationData.email.toLowerCase()
@@ -105,7 +101,6 @@ export default function AcceptInvitationClient({
                     return;
                 }
 
-                // Fetch organization details
                 try {
                     const orgResponse = await client.get(
                         `/organizations/${invitationData.organization_id}`,
@@ -117,11 +112,9 @@ export default function AcceptInvitationClient({
 
                 setLoading(false);
             } catch (err: any) {
-                // Parse error to provide specific feedback
                 let errorMessage = "Failed to load invitation details";
 
                 if (err.response) {
-                    // API returned an error response
                     const status = err.response.status;
                     const message = err.response.data?.message || err.message;
 
@@ -148,14 +141,11 @@ export default function AcceptInvitationClient({
     }, [invitationId, userEmail]);
 
     function getRoleBasedRedirect(role: string): string {
-        // All roles redirect to the main dashboard
         return "/portal/dashboard";
     }
 
     async function handleAccept() {
-        if (!invitation) {
-            return;
-        }
+        if (!invitation) return;
 
         setAccepting(true);
         setError(null);
@@ -172,19 +162,11 @@ export default function AcceptInvitationClient({
                 user_email: userEmail,
             });
 
-            // Backend has set onboarding_status: 'completed' and created membership with roles
-            // Refresh the UserProfileContext to get the updated profile with roles
-            console.log(
-                "[AcceptInvitation] Refreshing user profile to load new roles...",
-            );
             await refreshProfile();
-            console.log("[AcceptInvitation] Profile refreshed");
 
-            // Show success modal
             setAcceptedRole(invitation.role);
             setShowSuccess(true);
 
-            // Redirect after 2 seconds to role-specific landing page
             setTimeout(() => {
                 const redirectPath = getRoleBasedRedirect(invitation.role);
                 router.push(redirectPath);
@@ -202,69 +184,60 @@ export default function AcceptInvitationClient({
         router.push("/");
     }
 
+    // Loading
     if (loading) {
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body">
-                        {/* Header skeleton */}
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="skeleton h-16 w-16 rounded-full"></div>
-                            <div className="skeleton h-8 w-48"></div>
-                        </div>
-
-                        {/* Content skeleton */}
-                        <div className="space-y-4 mt-6">
-                            <div className="skeleton h-4 w-full"></div>
-                            <div className="skeleton h-4 w-3/4"></div>
-                            <div className="skeleton h-12 w-full"></div>
-                            <div className="skeleton h-12 w-full"></div>
-                        </div>
-                    </div>
+            <>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="skeleton h-16 w-16 rounded-full"></div>
+                    <div className="skeleton h-8 w-48"></div>
                 </div>
-            </div>
+                <div className="space-y-4 mt-6">
+                    <div className="skeleton h-4 w-full"></div>
+                    <div className="skeleton h-4 w-3/4"></div>
+                    <div className="skeleton h-12 w-full"></div>
+                    <div className="skeleton h-12 w-full"></div>
+                </div>
+            </>
         );
     }
 
+    // Success
     if (showSuccess) {
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body text-center">
-                        <div className="flex justify-center mb-4">
-                            <div className="rounded-full bg-success/10 p-6">
-                                <i className="fa-duotone fa-regular fa-check-circle text-6xl text-success"></i>
-                            </div>
-                        </div>
-
-                        <h1 className="card-title text-2xl justify-center mb-2">
-                            Welcome to{" "}
-                            {organization?.display_name ||
-                                organization?.name ||
-                                "the team"}
-                            !
-                        </h1>
-
-                        <p className="text-base-content/70 mb-4">
-                            You've successfully joined as a{" "}
-                            <strong>
-                                {roleLabels[acceptedRole || ""] || acceptedRole}
-                            </strong>
-                            .
-                        </p>
-
-                        <div className="flex items-center justify-center gap-2 text-sm text-base-content/60">
-                            <span className="loading loading-spinner loading-sm"></span>
-                            <span>Redirecting you to your dashboard...</span>
-                        </div>
+            <div className="text-center">
+                <div className="flex justify-center mb-4">
+                    <div className="rounded-full bg-success/10 p-6">
+                        <i className="fa-duotone fa-regular fa-check-circle text-6xl text-success"></i>
                     </div>
+                </div>
+
+                <h2 className="card-title text-2xl justify-center mb-2">
+                    Welcome to{" "}
+                    {organization?.display_name ||
+                        organization?.name ||
+                        "the team"}
+                    !
+                </h2>
+
+                <p className="text-base-content/70 mb-4">
+                    You've successfully joined as a{" "}
+                    <strong>
+                        {roleLabels[acceptedRole || ""] || acceptedRole}
+                    </strong>
+                    .
+                </p>
+
+                <div className="flex items-center justify-center gap-2 text-sm text-base-content/60">
+                    <span className="loading loading-spinner loading-sm"></span>
+                    <span>Redirecting you to your dashboard...</span>
                 </div>
             </div>
         );
     }
 
+    // Error
     if (error) {
-        // Define specific error scenarios with helpful messaging
         const errorScenarios: Record<
             string,
             {
@@ -328,7 +301,6 @@ export default function AcceptInvitationClient({
                             router.push(
                                 `/sign-in?redirect_url=${encodeURIComponent(`/accept-invitation/${invitationId}`)}`,
                             ),
-                        variant: "primary",
                     },
                 ],
             },
@@ -340,12 +312,11 @@ export default function AcceptInvitationClient({
             title: "Something Went Wrong",
             message:
                 error ||
-                "We encountered an unexpected error while loading your invitation. Please try again or contact support if the problem persists.",
+                "We encountered an unexpected error while loading your invitation.",
             actions: [
                 {
                     label: "Try Again",
                     onClick: () => window.location.reload(),
-                    variant: "primary",
                 },
                 {
                     label: "Go to Dashboard",
@@ -361,105 +332,96 @@ export default function AcceptInvitationClient({
         };
 
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body text-center">
-                        <div className="flex justify-center mb-4">
-                            <i
-                                className={`fa-duotone fa-regular ${scenario.icon} text-6xl ${scenario.iconColor}`}
-                            ></i>
-                        </div>
-
-                        <h1 className="card-title text-2xl justify-center mb-2">
-                            {scenario.title}
-                        </h1>
-
-                        <p className="text-base-content/70 mb-6 leading-relaxed">
-                            {scenario.message}
-                        </p>
-
-                        <div className="divider text-xs text-base-content/40">
-                            What would you like to do?
-                        </div>
-
-                        <div className="flex flex-col gap-2 mt-4">
-                            {scenario.actions.map((action, index) => (
-                                <button
-                                    key={index}
-                                    onClick={action.onClick}
-                                    className={`btn ${action.variant ? `btn-${action.variant}` : "btn-primary"} w-full`}
-                                >
-                                    {action.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <p className="text-xs text-base-content/50 mt-6">
-                            Invitation ID:{" "}
-                            <code className="text-xs">{invitationId}</code>
-                        </p>
-                    </div>
+            <div className="text-center">
+                <div className="flex justify-center mb-4">
+                    <i
+                        className={`fa-duotone fa-regular ${scenario.icon} text-5xl ${scenario.iconColor}`}
+                    ></i>
                 </div>
+
+                <h2 className="card-title text-2xl justify-center mb-2">
+                    {scenario.title}
+                </h2>
+
+                <p className="text-base-content/70 mb-6 leading-relaxed">
+                    {scenario.message}
+                </p>
+
+                <div className="divider text-sm text-base-content/40">
+                    What would you like to do?
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4">
+                    {scenario.actions.map((action, index) => (
+                        <button
+                            key={index}
+                            onClick={action.onClick}
+                            className={`btn btn-block ${action.variant ? `btn-${action.variant}` : "btn-coral"}`}
+                        >
+                            {action.label}
+                        </button>
+                    ))}
+                </div>
+
+                <p className="text-sm text-base-content/50 mt-6">
+                    Invitation ID:{" "}
+                    <code className="text-sm">{invitationId}</code>
+                </p>
             </div>
         );
     }
 
+    // Not found
     if (!invitation) {
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body text-center">
-                        <div className="flex justify-center mb-4">
-                            <i className="fa-duotone fa-regular fa-envelope-circle-check text-6xl text-warning"></i>
-                        </div>
-
-                        <h1 className="card-title text-2xl justify-center mb-2">
-                            Invitation Not Found
-                        </h1>
-
-                        <p className="text-base-content/70 mb-6 leading-relaxed">
-                            This invitation link appears to be invalid or may
-                            have been removed. This can happen if:
-                        </p>
-
-                        <ul className="text-left text-sm text-base-content/70 space-y-2 mb-6 list-disc list-inside">
-                            <li>
-                                The invitation was cancelled by the organization
-                            </li>
-                            <li>The link was mistyped or incomplete</li>
-                            <li>The invitation already expired</li>
-                        </ul>
-
-                        <div className="divider text-xs text-base-content/40">
-                            What would you like to do?
-                        </div>
-
-                        <div className="flex flex-col gap-2 mt-4">
-                            <button
-                                onClick={() => router.push("/portal/dashboard")}
-                                className="btn btn-primary w-full"
-                            >
-                                Go to Dashboard
-                            </button>
-                            <button
-                                onClick={() => router.push("/support")}
-                                className="btn btn-outline w-full"
-                            >
-                                Contact Support
-                            </button>
-                        </div>
-
-                        <p className="text-xs text-base-content/50 mt-6">
-                            Invitation ID:{" "}
-                            <code className="text-xs">{invitationId}</code>
-                        </p>
-                    </div>
+            <div className="text-center">
+                <div className="flex justify-center mb-4">
+                    <i className="fa-duotone fa-regular fa-envelope-circle-check text-5xl text-warning"></i>
                 </div>
+
+                <h2 className="card-title text-2xl justify-center mb-2">
+                    Invitation Not Found
+                </h2>
+
+                <p className="text-base-content/70 mb-6 leading-relaxed">
+                    This invitation link appears to be invalid or may
+                    have been removed. This can happen if:
+                </p>
+
+                <ul className="text-left text-sm text-base-content/70 space-y-2 mb-6 list-disc list-inside">
+                    <li>The invitation was cancelled by the organization</li>
+                    <li>The link was mistyped or incomplete</li>
+                    <li>The invitation already expired</li>
+                </ul>
+
+                <div className="divider text-sm text-base-content/40">
+                    What would you like to do?
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4">
+                    <button
+                        onClick={() => router.push("/portal/dashboard")}
+                        className="btn btn-coral btn-block"
+                    >
+                        Go to Dashboard
+                    </button>
+                    <button
+                        onClick={() => router.push("/support")}
+                        className="btn btn-outline btn-block"
+                    >
+                        Contact Support
+                    </button>
+                </div>
+
+                <p className="text-sm text-base-content/50 mt-6">
+                    Invitation ID:{" "}
+                    <code className="text-sm">{invitationId}</code>
+                </p>
             </div>
         );
     }
 
-    // Check if invitation is not pending
+    // Non-pending status
     if (invitation.status !== "pending") {
         const statusScenarios: Record<
             string,
@@ -502,127 +464,120 @@ export default function AcceptInvitationClient({
             statusScenarios[invitation.status] || statusScenarios.revoked;
 
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body text-center">
-                        <div className="flex justify-center mb-4">
-                            <i
-                                className={`fa-duotone fa-regular ${scenario.icon} text-6xl ${scenario.iconColor}`}
-                            ></i>
-                        </div>
-
-                        <h1 className="card-title text-2xl justify-center mb-2">
-                            {scenario.title}
-                        </h1>
-
-                        <p className="text-base-content/70 mb-3 leading-relaxed">
-                            {scenario.message}
-                        </p>
-
-                        {scenario.details && (
-                            <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
-                                {scenario.details}
-                            </p>
-                        )}
-
-                        <div className="divider text-xs text-base-content/40">
-                            What would you like to do?
-                        </div>
-
-                        <div className="flex flex-col gap-2 mt-4">
-                            <button
-                                onClick={() => router.push("/portal/dashboard")}
-                                className="btn btn-primary w-full"
-                            >
-                                Go to Dashboard
-                            </button>
-                            {invitation.status === "expired" ||
-                            invitation.status === "revoked" ? (
-                                <button
-                                    onClick={() => router.push("/support")}
-                                    className="btn btn-outline w-full"
-                                >
-                                    Contact Support
-                                </button>
-                            ) : null}
-                        </div>
-
-                        <p className="text-xs text-base-content/50 mt-6">
-                            Organization:{" "}
-                            {organization?.display_name ||
-                                organization?.name ||
-                                "Unknown"}
-                        </p>
-                    </div>
+            <div className="text-center">
+                <div className="flex justify-center mb-4">
+                    <i
+                        className={`fa-duotone fa-regular ${scenario.icon} text-5xl ${scenario.iconColor}`}
+                    ></i>
                 </div>
+
+                <h2 className="card-title text-2xl justify-center mb-2">
+                    {scenario.title}
+                </h2>
+
+                <p className="text-base-content/70 mb-3 leading-relaxed">
+                    {scenario.message}
+                </p>
+
+                {scenario.details && (
+                    <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
+                        {scenario.details}
+                    </p>
+                )}
+
+                <div className="divider text-sm text-base-content/40">
+                    What would you like to do?
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4">
+                    <button
+                        onClick={() => router.push("/portal/dashboard")}
+                        className="btn btn-coral btn-block"
+                    >
+                        Go to Dashboard
+                    </button>
+                    {(invitation.status === "expired" ||
+                        invitation.status === "revoked") && (
+                        <button
+                            onClick={() => router.push("/support")}
+                            className="btn btn-outline btn-block"
+                        >
+                            Contact Support
+                        </button>
+                    )}
+                </div>
+
+                <p className="text-sm text-base-content/50 mt-6">
+                    Organization:{" "}
+                    {organization?.display_name ||
+                        organization?.name ||
+                        "Unknown"}
+                </p>
             </div>
         );
     }
 
-    // Check if invitation has expired
+    // Expired
     const expiresAt = new Date(invitation.expires_at);
     if (expiresAt < new Date()) {
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow max-w-md w-full">
-                    <div className="card-body text-center">
-                        <div className="flex justify-center mb-4">
-                            <i className="fa-duotone fa-regular fa-clock-rotate-left text-6xl text-warning"></i>
-                        </div>
-
-                        <h1 className="card-title text-2xl justify-center mb-2">
-                            Invitation Expired
-                        </h1>
-
-                        <p className="text-base-content/70 mb-3 leading-relaxed">
-                            This invitation expired on{" "}
-                            <strong>
-                                {expiresAt.toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric",
-                                })}
-                            </strong>
-                            .
-                        </p>
-
-                        <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
-                            Invitations have a limited validity period for
-                            security reasons. Contact the organization
-                            administrator to request a new invitation link.
-                        </p>
-
-                        <div className="divider text-xs text-base-content/40">
-                            What would you like to do?
-                        </div>
-
-                        <div className="flex flex-col gap-2 mt-4">
-                            <button
-                                onClick={() => router.push("/portal/dashboard")}
-                                className="btn btn-primary w-full"
-                            >
-                                Go to Dashboard
-                            </button>
-                            <button
-                                onClick={() => router.push("/support")}
-                                className="btn btn-outline w-full"
-                            >
-                                Contact Support
-                            </button>
-                        </div>
-
-                        <p className="text-xs text-base-content/50 mt-6">
-                            Organization:{" "}
-                            {organization?.display_name ||
-                                organization?.name ||
-                                "Unknown"}
-                        </p>
-                    </div>
+            <div className="text-center">
+                <div className="flex justify-center mb-4">
+                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-5xl text-warning"></i>
                 </div>
+
+                <h2 className="card-title text-2xl justify-center mb-2">
+                    Invitation Expired
+                </h2>
+
+                <p className="text-base-content/70 mb-3 leading-relaxed">
+                    This invitation expired on{" "}
+                    <strong>
+                        {expiresAt.toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                        })}
+                    </strong>
+                    .
+                </p>
+
+                <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
+                    Invitations have a limited validity period for
+                    security reasons. Contact the organization
+                    administrator to request a new invitation link.
+                </p>
+
+                <div className="divider text-sm text-base-content/40">
+                    What would you like to do?
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4">
+                    <button
+                        onClick={() => router.push("/portal/dashboard")}
+                        className="btn btn-coral btn-block"
+                    >
+                        Go to Dashboard
+                    </button>
+                    <button
+                        onClick={() => router.push("/support")}
+                        className="btn btn-outline btn-block"
+                    >
+                        Contact Support
+                    </button>
+                </div>
+
+                <p className="text-sm text-base-content/50 mt-6">
+                    Organization:{" "}
+                    {organization?.display_name ||
+                        organization?.name ||
+                        "Unknown"}
+                </p>
             </div>
         );
     }
 
+    // Main accept/decline UI
     const roleLabel = roleLabels[invitation.role] || invitation.role;
     const orgName =
         organization?.display_name ||
@@ -631,95 +586,91 @@ export default function AcceptInvitationClient({
         "the organization";
 
     return (
-        <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-            <div className="card bg-base-100 shadow max-w-md w-full">
-                <div className="card-body">
-                    <div className="text-center mb-6">
-                        <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-primary mb-4"></i>
-                        <h1 className="card-title text-2xl justify-center">
-                            You've Been Invited!
-                        </h1>
-                    </div>
+        <>
+            <div className="text-center mb-6">
+                <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-coral mb-4"></i>
+                <h2 className="card-title text-2xl justify-center">
+                    You've Been Invited!
+                </h2>
+            </div>
 
-                    <div className="space-y-4">
-                        <div>
-                            <p className="text-sm text-base-content/60 mb-1">
-                                Organization
-                            </p>
-                            <p className="text-lg font-semibold">{orgName}</p>
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-base-content/60 mb-1">
-                                Your Role
-                            </p>
-                            <p className="text-lg">
-                                <span className="badge badge-primary badge-lg">
-                                    {roleLabel}
-                                </span>
-                            </p>
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-base-content/60 mb-1">
-                                Invitation Expires
-                            </p>
-                            <p className="text-base">
-                                {expiresAt.toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                })}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="divider"></div>
-
-                    {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <p className="text-sm text-base-content/70 text-center mb-4">
-                        By accepting this invitation, you will become a member
-                        of this organization with {roleLabel} privileges.
+            <div className="space-y-4">
+                <div>
+                    <p className="text-sm text-base-content/60 mb-1">
+                        Organization
                     </p>
+                    <p className="text-lg font-semibold">{orgName}</p>
+                </div>
 
-                    <div className="card-actions justify-center gap-3">
-                        <button
-                            type="button"
-                            className="btn btn-outline"
-                            onClick={handleDecline}
-                            disabled={accepting}
-                        >
-                            Decline
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={handleAccept}
-                            disabled={accepting}
-                        >
-                            {accepting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Accepting...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                    Accept Invitation
-                                </>
-                            )}
-                        </button>
-                    </div>
+                <div>
+                    <p className="text-sm text-base-content/60 mb-1">
+                        Your Role
+                    </p>
+                    <p className="text-lg">
+                        <span className="badge badge-primary badge-lg">
+                            {roleLabel}
+                        </span>
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-base-content/60 mb-1">
+                        Invitation Expires
+                    </p>
+                    <p className="text-base">
+                        {expiresAt.toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                        })}
+                    </p>
                 </div>
             </div>
-        </div>
+
+            <div className="divider"></div>
+
+            {error && (
+                <div className="alert alert-error mb-4">
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                    <span>{error}</span>
+                </div>
+            )}
+
+            <p className="text-sm text-base-content/70 text-center mb-4">
+                By accepting this invitation, you will become a member
+                of this organization with {roleLabel} privileges.
+            </p>
+
+            <div className="flex justify-center gap-3">
+                <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleDecline}
+                    disabled={accepting}
+                >
+                    Decline
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-coral"
+                    onClick={handleAccept}
+                    disabled={accepting}
+                >
+                    {accepting ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm"></span>
+                            Accepting...
+                        </>
+                    ) : (
+                        <>
+                            <i className="fa-duotone fa-regular fa-check"></i>
+                            Accept Invitation
+                        </>
+                    )}
+                </button>
+            </div>
+        </>
     );
 }

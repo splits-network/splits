@@ -41,7 +41,7 @@ const SEVERITY_STYLES: Record<
     },
     primary: {
         text: "text-primary",
-        border: "border-primary/20",
+        border: "border-coral/20",
         icon: "fa-duotone fa-regular fa-bullhorn",
         btnClass: "btn-primary btn-ghost",
     },
@@ -53,7 +53,7 @@ const SEVERITY_STYLES: Record<
     },
     accent: {
         text: "text-accent",
-        border: "border-accent/20",
+        border: "border-yellow/20",
         icon: "fa-duotone fa-regular fa-star",
         btnClass: "btn-accent btn-ghost",
     },

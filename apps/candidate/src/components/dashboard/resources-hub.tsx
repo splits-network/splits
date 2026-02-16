@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 
 interface ResourceItem {
     title: string;
@@ -12,32 +12,32 @@ interface ResourceItem {
 
 const RESOURCES: ResourceItem[] = [
     {
-        title: 'Career Guides',
-        description: 'Expert advice on career growth',
-        icon: 'fa-book-open',
-        href: '/public/resources/career-guides',
-        color: 'text-primary',
+        title: "Career Guides",
+        description: "Expert advice on career growth",
+        icon: "fa-book-open",
+        href: "/public/resources/career-guides",
+        color: "text-primary",
     },
     {
-        title: 'Salary Insights',
-        description: 'Know your market value',
-        icon: 'fa-chart-line',
-        href: '/public/resources/salary-insights',
-        color: 'text-success',
+        title: "Salary Insights",
+        description: "Know your market value",
+        icon: "fa-chart-line",
+        href: "/public/resources/salary-insights",
+        color: "text-success",
     },
     {
-        title: 'Interview Prep',
-        description: 'Ace your next interview',
-        icon: 'fa-clipboard-question',
-        href: '/public/resources/interview-prep',
-        color: 'text-info',
+        title: "Interview Prep",
+        description: "Ace your next interview",
+        icon: "fa-clipboard-question",
+        href: "/public/resources/interview-prep",
+        color: "text-info",
     },
     {
-        title: 'Success Stories',
-        description: 'Get inspired by others',
-        icon: 'fa-trophy',
-        href: '/public/resources/success-stories',
-        color: 'text-warning',
+        title: "Success Stories",
+        description: "Get inspired by others",
+        icon: "fa-trophy",
+        href: "/public/resources/success-stories",
+        color: "text-warning",
     },
 ];
 
@@ -56,9 +56,13 @@ export default function ResourcesHub({ compact = false }: ResourcesHubProps) {
                         className="block p-2 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow transition-all"
                     >
                         <div className="flex items-center gap-2">
-                            <i className={`fa-duotone fa-regular ${resource.icon} ${resource.color} text-sm`}></i>
+                            <i
+                                className={`fa-duotone fa-regular ${resource.icon} ${resource.color} text-sm`}
+                            ></i>
                             <div className="flex-1 min-w-0">
-                                <div className="text-xs font-medium truncate">{resource.title}</div>
+                                <div className="text-xs font-medium truncate">
+                                    {resource.title}
+                                </div>
                             </div>
                             <i className="fa-duotone fa-regular fa-chevron-right text-[10px] text-base-content/30"></i>
                         </div>
@@ -74,11 +78,13 @@ export default function ResourcesHub({ compact = false }: ResourcesHubProps) {
                 <Link
                     key={resource.href}
                     href={resource.href}
-                    className="block p-3 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-md hover:border-primary/30 border border-transparent transition-all group"
+                    className="block p-3 bg-base-100 rounded-lg hover:bg-base-200/70 hover:shadow-md hover:border-coral/30 border border-transparent transition-all group"
                 >
                     <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center flex-shrink-0 group-hover:bg-base-300 transition-colors">
-                            <i className={`fa-duotone fa-regular ${resource.icon} ${resource.color} text-lg`}></i>
+                            <i
+                                className={`fa-duotone fa-regular ${resource.icon} ${resource.color} text-lg`}
+                            ></i>
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm mb-0.5 group-hover:text-primary transition-colors">

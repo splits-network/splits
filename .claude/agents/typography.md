@@ -42,17 +42,23 @@ The platform uses system fonts (no custom fonts loaded):
 - **Class**: `text-base font-semibold` or `font-bold`
 - Inside card components (`base-card`, `entity-card`, etc.)
 
-### Body Text (Portal App — Compact UI)
-- **Class**: `text-sm` (14px — default for data-dense portal interfaces)
+### Body Text (All Apps)
+- **Class**: `text-base` (16px — the standard body text size across all apps)
 - Line height: TailwindCSS default `leading-normal`
+- Applies to: portal, candidate, corporate — no exceptions for "data-dense" interfaces
+- Rationale: `text-sm` (14px) is too small for sustained reading and harms accessibility
 
-### Body Text (Marketing / Documentation)
-- **Class**: `text-base` (16px — for readability on content pages)
-- Used in `apps/corporate/`, `apps/portal/src/app/public/`, `apps/candidate/src/app/public/`
+### Secondary / Supporting Text
+- **Class**: `text-sm text-base-content/70`
+- Used SPARINGLY for: metadata lines, captions, supporting details beneath primary content
+- NOT the default — only for genuinely secondary information
+- If the text is meaningful content (descriptions, instructions, form labels), use `text-base` instead
 
-### Small / Helper Text
+### Afterthought Text (RESTRICTED)
 - **Class**: `text-xs text-base-content/60`
-- Used for: form helper text (`fieldset-label`), timestamps, secondary info
+- **ONLY for**: timestamps, footnotes, copyright notices, "last updated" lines, version numbers
+- **NEVER for**: form labels, descriptions, body paragraphs, instructions, button labels, helper text users need to read
+- Badge text (`text-xs font-semibold`) is acceptable because it is inherent to the badge component's design
 
 ### Badge Text
 - **Class**: `text-xs font-semibold`
@@ -128,8 +134,10 @@ Reference: `services/notification-service/src/templates/components.ts`
 - Hardcoded color values: `text-gray-600`, `text-slate-800`, `text-black`
 - Inconsistent text sizes across similar page types (e.g., two list pages using different body sizes)
 - `text-white` or `text-black` instead of `text-base-content` (breaks theme switching)
-- Using `text-lg` for body text in the portal (should be `text-sm`)
+- Using `text-lg` for body text (too large for standard body — should be `text-base`)
 - Using `text-sm` for body text on marketing pages (should be `text-base`)
+- Using `text-sm` as the default body text size anywhere (too small for sustained reading — should be `text-base`)
+- Using `text-xs` for meaningful content (descriptions, form labels, help text, instructions) — `text-xs` is ONLY for afterthought content (timestamps, footnotes, copyright)
 - Mixing px and Tailwind size classes
 
 ## Audit Mode
@@ -139,5 +147,5 @@ When auditing typography on a page:
 2. Verify heading hierarchy (h1 → h2 → h3, no skips)
 3. Check for hardcoded color values in text
 4. Verify font weight hierarchy (not everything bold)
-5. Confirm body text size matches context (portal=text-sm, marketing=text-base)
+5. Confirm body text uses `text-base` as the default across all apps (flag `text-sm` body text as undersized, flag `text-xs` on meaningful content as a violation)
 6. Check that muted/helper text uses opacity modifiers, not hardcoded grays

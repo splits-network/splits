@@ -4,6 +4,10 @@ import { useSignIn, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
+import {
+    AuthInput,
+    SocialLoginButton,
+} from "@splits-network/memphis-ui";
 
 export default function SignInPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
@@ -18,7 +22,6 @@ export default function SignInPage() {
     const [errorType, setErrorType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect URL from search params (Clerk preserves this)
     const redirectUrl = searchParams.get("redirect_url");
     const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
 
@@ -44,51 +47,34 @@ export default function SignInPage() {
 
             if (signInAttempt.status === "complete") {
                 await setActive({ session: signInAttempt.createdSessionId });
-
-                // Redirect to the URL Clerk preserved
                 router.push(redirectUrl || "/portal/dashboard");
             } else {
-                // Handle incomplete sign-in with specific error types
                 switch (signInAttempt.status) {
                     case "needs_second_factor":
                         setErrorType("needs_2fa");
-                        setError(
-                            "Two-factor authentication required. Please complete the second authentication step.",
-                        );
+                        setError("Two-factor authentication required. Please complete the second authentication step.");
                         break;
                     case "needs_identifier":
                         setErrorType("missing_identifier");
-                        setError(
-                            "Please provide your email address to continue.",
-                        );
+                        setError("Please provide your email address to continue.");
                         break;
                     case "needs_first_factor":
                         setErrorType("needs_verification");
-                        setError(
-                            "Additional authentication required. Please complete the verification step.",
-                        );
+                        setError("Additional authentication required. Please complete the verification step.");
                         break;
                     case "needs_new_password":
                         setErrorType("password_reset_required");
-                        setError(
-                            "Password reset required. Please update your password.",
-                        );
+                        setError("Password reset required. Please update your password.");
                         break;
                     default:
                         setErrorType("unknown_status");
-                        setError(
-                            `Authentication incomplete (${signInAttempt.status}). Please contact support if this continues.`,
-                        );
+                        setError(`Authentication incomplete (${signInAttempt.status}). Please contact support if this continues.`);
                 }
             }
         } catch (err: any) {
-            // Provide specific feedback based on error type
             if (err.errors && err.errors.length > 0) {
-                const error = err.errors[0];
-                const errorCode = error.code;
-                const errorMessage = error.message;
-
-                switch (errorCode) {
+                const clerkError = err.errors[0];
+                switch (clerkError.code) {
                     case "form_identifier_not_found":
                         setErrorType("account_not_found");
                         setError("No account found with this email address.");
@@ -98,49 +84,30 @@ export default function SignInPage() {
                         setError("Incorrect password. Please try again.");
                         break;
                     case "session_exists":
+                    case "identifier_already_signed_in":
                         setErrorType("already_signed_in");
                         setError("You are already signed in. Redirecting...");
-                        setTimeout(() => {
-                            router.push(redirectUrl || "/portal/dashboard");
-                        }, 1500);
+                        setTimeout(() => router.push(redirectUrl || "/portal/dashboard"), 1500);
                         break;
                     case "too_many_requests":
                         setErrorType("rate_limited");
-                        setError(
-                            "Too many sign-in attempts. Please wait a moment and try again.",
-                        );
-                        break;
-                    case "identifier_already_signed_in":
-                        setErrorType("already_signed_in");
-                        setError(
-                            "Already signed in with this account. Redirecting...",
-                        );
-                        setTimeout(() => {
-                            router.push(redirectUrl || "/portal/dashboard");
-                        }, 1500);
+                        setError("Too many sign-in attempts. Please wait a moment and try again.");
                         break;
                     default:
                         setErrorType("clerk_error");
-                        // Use the original error message from Clerk for other cases
-                        setError(errorMessage || "Invalid email or password");
+                        setError(clerkError.message || "Invalid email or password");
                 }
             } else {
                 setErrorType("generic_error");
-                setError(
-                    err.message ||
-                        "An unexpected error occurred. Please try again.",
-                );
+                setError(err.message || "An unexpected error occurred. Please try again.");
             }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const signInWithOAuth = (
-        provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
-    ) => {
+    const signInWithOAuth = (provider: "oauth_google" | "oauth_github" | "oauth_microsoft") => {
         if (!isLoaded) return;
-
         signIn.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
@@ -148,7 +115,6 @@ export default function SignInPage() {
         });
     };
 
-    // Handle redirect when user is already signed in
     useEffect(() => {
         if (isLoaded && isSignedIn) {
             router.push(redirectUrl || "/portal/dashboard");
@@ -156,203 +122,125 @@ export default function SignInPage() {
     }, [isLoaded, isSignedIn, router, redirectUrl]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
-                        <Link href="/" className="mb-6">
-                            <img
-                                src="/logo.svg"
-                                alt="Applicant Network"
-                                className="h-12"
-                            />
-                        </Link>
-                        Sign In to Splits Network
-                    </h2>
-
-                    {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    {/* Enhanced contextual help based on error type */}
-                    {errorType === "needs_2fa" && (
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-shield-check"></i>
-                            <div className="text-sm">
-                                <p className="font-semibold">
-                                    Two-factor authentication is enabled
-                                </p>
-                                <p>
-                                    Check your authenticator app or SMS for the
-                                    verification code. Contact support if you
-                                    need help accessing your account.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {errorType === "account_not_found" && (
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-info-circle"></i>
-                            <div className="text-sm">
-                                <p className="font-semibold">
-                                    Don't have an account yet?
-                                </p>
-                                <p>
-                                    <Link
-                                        href={
-                                            redirectUrl
-                                                ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
-                                                : "/sign-up"
-                                        }
-                                        className="link link-primary"
-                                    >
-                                        Create your Splits Network account
-                                    </Link>{" "}
-                                    to get started.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {errorType === "incorrect_password" && (
-                        <div className="alert alert-warning mb-4">
-                            <i className="fa-duotone fa-regular fa-key"></i>
-                            <div className="text-sm">
-                                <p className="font-semibold">
-                                    Password incorrect
-                                </p>
-                                <p>
-                                    Double-check your password or{" "}
-                                    <Link
-                                        href="/forgot-password"
-                                        className="link link-primary"
-                                    >
-                                        reset your password
-                                    </Link>{" "}
-                                    if you've forgotten it.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {errorType === "rate_limited" && (
-                        <div className="alert alert-warning mb-4">
-                            <i className="fa-duotone fa-regular fa-clock"></i>
-                            <div className="text-sm">
-                                <p className="font-semibold">
-                                    Too many attempts
-                                </p>
-                                <p>
-                                    For security, please wait a few minutes
-                                    before trying again. This helps protect your
-                                    account from unauthorized access.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div id="clerk-captcha"></div>
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email</legend>
-                            <input
-                                type="email"
-                                placeholder="you@example.com"
-                                className="input w-full"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </fieldset>
-
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Password
-                            </legend>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="input w-full"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                            <p className="fieldset-label">
-                                <Link
-                                    href="/forgot-password"
-                                    className="link link-hover"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </p>
-                        </fieldset>
-
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-full"
-                            disabled={isLoading || !isLoaded}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="loading loading-spinner"></span>
-                                    Signing in...
-                                </>
-                            ) : (
-                                "Sign In"
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="divider">OR</div>
-
-                    <div className="space-y-2">
-                        <button
-                            onClick={() => signInWithOAuth("oauth_google")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-google"></i>
-                            Continue with Google
-                        </button>
-                        <button
-                            onClick={() => signInWithOAuth("oauth_github")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-github"></i>
-                            Continue with GitHub
-                        </button>
-                        <button
-                            onClick={() => signInWithOAuth("oauth_microsoft")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-microsoft"></i>
-                            Continue with Microsoft
-                        </button>
-                    </div>
-
-                    <p className="text-center text-sm mt-4">
-                        Don't have an account?{" "}
-                        <Link
-                            href={
-                                redirectUrl
-                                    ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
-                                    : "/sign-up"
-                            }
-                            className="link link-primary"
-                        >
-                            Sign up
-                        </Link>
-                    </p>
-                </div>
+        <div className="space-y-4">
+            <div>
+                <h2 className="card-title text-lg">Welcome Back</h2>
+                <p className="text-base-content/50">Sign in to your account</p>
             </div>
+
+            {error && (
+                <div className="alert alert-outline alert-coral" role="alert">
+                    <i className="fa-solid fa-circle-xmark" />
+                    <span>{error}</span>
+                </div>
+            )}
+
+            {errorType === "needs_2fa" && (
+                <div className="alert alert-soft alert-purple" role="alert">
+                    <i className="fa-duotone fa-regular fa-shield-check" />
+                    <div>
+                        <p className="font-bold">Two-factor authentication is enabled</p>
+                        <p>Check your authenticator app or SMS for the verification code.</p>
+                    </div>
+                </div>
+            )}
+
+            {errorType === "account_not_found" && (
+                <div className="alert alert-soft alert-teal" role="alert">
+                    <i className="fa-duotone fa-regular fa-info-circle" />
+                    <div>
+                        <p className="font-bold">Don&apos;t have an account yet?</p>
+                        <p>
+                            <Link
+                                href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
+                                className="font-bold text-coral"
+                            >
+                                Create your Splits Network account
+                            </Link>{" "}
+                            to get started.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {errorType === "incorrect_password" && (
+                <div className="alert alert-soft alert-yellow" role="alert">
+                    <i className="fa-duotone fa-regular fa-key" />
+                    <div>
+                        <p className="font-bold">Password incorrect</p>
+                        <p>
+                            Double-check your password or{" "}
+                            <Link href="/forgot-password" className="font-bold text-coral">reset your password</Link>
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {errorType === "rate_limited" && (
+                <div className="alert alert-soft alert-yellow" role="alert">
+                    <i className="fa-duotone fa-regular fa-clock" />
+                    <div>
+                        <p className="font-bold">Too many attempts</p>
+                        <p>For security, please wait a few minutes before trying again.</p>
+                    </div>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div id="clerk-captcha" />
+
+                <AuthInput
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(v: string) => { setEmail(v); setError(""); }}
+                    placeholder="you@company.com"
+                    error={errorType === "account_not_found" ? " " : undefined}
+                />
+
+                <div>
+                    <AuthInput
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={(v: string) => { setPassword(v); setError(""); }}
+                        placeholder="Enter password"
+                        showPasswordToggle
+                        error={errorType === "incorrect_password" ? " " : undefined}
+                    />
+                    <div className="flex justify-end mt-2">
+                        <Link href="/forgot-password" className="btn btn-link btn-sm text-coral">
+                            Forgot Password?
+                        </Link>
+                    </div>
+                </div>
+
+                <button type="submit" className="btn btn-coral btn-block" disabled={isLoading || !isLoaded}>
+                    {isLoading ? (
+                        <><span className="loading loading-spinner" /> Signing in...</>
+                    ) : (
+                        "Sign In"
+                    )}
+                </button>
+            </form>
+
+            <div className="divider">or</div>
+
+            <div className="grid grid-cols-3 gap-3">
+                <SocialLoginButton label="Google" icon="fa-brands fa-google" color="coral" onClick={() => signInWithOAuth("oauth_google")} />
+                <SocialLoginButton label="GitHub" icon="fa-brands fa-github" color="purple" onClick={() => signInWithOAuth("oauth_github")} />
+                <SocialLoginButton label="Microsoft" icon="fa-brands fa-microsoft" color="teal" onClick={() => signInWithOAuth("oauth_microsoft")} />
+            </div>
+
+            <p className="text-center text-base-content/60">
+                Don&apos;t have an account?{" "}
+                <Link
+                    href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
+                    className="btn btn-link btn-sm text-coral"
+                >
+                    Sign up
+                </Link>
+            </p>
         </div>
     );
 }

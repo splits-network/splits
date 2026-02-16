@@ -210,6 +210,30 @@ grep -rn 'w-\[[0-9]*px\]\|h-\[[0-9]*px\]\|min-w-\[[0-9]*px\]' --include="*.tsx"
 
 **Severity: CRITICAL** — These cause invisible rendering failures with zero console errors.
 
+#### 8. GSAP Animator Files — Special Handling
+
+Public content pages (Features, Pricing, How It Works, etc.) use per-page GSAP animator files (`*-animator.tsx`). These files have patterns that look like violations but are intentional:
+
+**NOT violations in animator files:**
+- `opacity-0` in className — Intentional. GSAP animates elements from `opacity: 0` to visible. Without this, content flashes before GSAP initializes (FOUC).
+- `style={{ transform: ... }}` — Allowed. GSAP sets transform values dynamically.
+- `gsap.set(...)` / `gsap.fromTo(...)` calls — These set inline styles at runtime via JavaScript, not in JSX. The auditor grep for `style={{` won't match these.
+
+**Still violations in animator files:**
+- Hardcoded hex colors in JSX (not in GSAP calls)
+- Shadows, rounded corners, gradients in className
+
+**Expected patterns in article-style page.tsx files:**
+```tsx
+{/* INTENTIONAL — GSAP animation target, starts invisible */}
+<h1 className="hero-headline opacity-0 text-5xl font-black uppercase text-cream">
+
+{/* INTENTIONAL — Memphis floating shapes, start invisible for elastic bounce-in */}
+<div className="memphis-shape absolute top-20 left-10 w-16 h-16 bg-coral rotate-12 opacity-0" />
+```
+
+When auditing `apps/portal/src/app/public/` pages, check for a corresponding `*-animator.tsx` file. If one exists, `opacity-0` classes are intentional and should NOT be flagged.
+
 ### Warning Violations (SHOULD FIX)
 
 #### 4. Non-Memphis Colors
@@ -296,8 +320,52 @@ Look for pages without any decorative elements.
 #### 7. Inconsistent Typography
 Memphis typography:
 - Headlines: font-bold or font-black, uppercase
-- Body: font-normal, normal case
+- Body: font-normal, normal case, `text-base` (16px)
 - Buttons: font-bold, uppercase
+
+#### 7b. Text Size Violations (WARNING — Readability)
+
+**`text-xs` on meaningful content is a WARNING.** The `text-xs` class (12px) is extremely difficult for users to read and should ONLY be used for afterthought content: timestamps, footnotes, copyright notices, "last updated" lines, version numbers.
+
+Search patterns for `text-xs` misuse:
+```bash
+# Find all text-xs usage, then manually verify each is afterthought content
+grep -rn "text-xs" --include="*.tsx" <target>
+```
+
+Flag as WARNING if `text-xs` appears on:
+- `<p>` body paragraphs or descriptions
+- `<label>` or form field labels
+- `<span>` containing instructions, help text, or content the user needs to read
+- `<button>` labels or CTA text
+- `<h1>` through `<h6>` headings
+- `<li>` list items containing substantive content
+- `<td>` or `<th>` table cells with primary data
+
+`text-xs` is ACCEPTABLE on:
+- Timestamps and dates (e.g., `<span className="text-xs ...">2 hours ago</span>`)
+- Copyright notices (e.g., `<span className="text-xs">© 2026 Splits Network</span>`)
+- Badge text (inherent to the `badge` component)
+- Version numbers, footnote markers
+- Content explicitly marked as afterthought/supplementary
+
+**`text-sm` as default body text is a WARNING.** The `text-sm` class (14px) is acceptable for secondary/supporting content but should NOT be the default body text size. Body text should use `text-base` (16px).
+
+Flag as WARNING if `text-sm` is the predominant body text size on a page or component (i.e., used on primary descriptions, main content paragraphs, form instructions). It is acceptable for genuinely secondary metadata lines, captions, or supporting details.
+
+Example violations:
+```tsx
+<p className="text-xs text-base-content/60">Enter your company name</p>  ⚠️ WARNING (form label, not afterthought)
+<p className="text-xs">No candidates match your search criteria</p>       ⚠️ WARNING (meaningful content)
+<td className="text-xs">Senior React Developer</td>                       ⚠️ WARNING (primary table data)
+```
+
+Example acceptable uses:
+```tsx
+<span className="text-xs text-base-content/50">Updated 2 hours ago</span>  ✅ OK (timestamp)
+<span className="badge text-xs font-semibold">Active</span>                ✅ OK (badge component)
+<p className="text-xs text-base-content/60">v2.4.1</p>                     ✅ OK (version number)
+```
 
 ### 8. Missing Memphis-UI Component Usage (Warning)
 When raw markup is used where a memphis-ui component exists, it's a sign the styling hierarchy wasn't followed.
@@ -321,7 +389,7 @@ When raw markup is used where a memphis-ui component exists, it's a sign the sty
 - Tables built from raw `<table>` → should use `Table` with `Pagination`
 - Modals built from raw `<dialog>` → should use `Modal`
 
-**Full component inventory:** See `packages/memphis-ui/src/components/index.ts` for all 86+ available components.
+**Full component inventory:** See `packages/memphis-ui/src/react/components/index.ts` for all 101 available components.
 
 ### 10. Chart.js Usage (Critical — Must Migrate to Recharts)
 Charts must use **Recharts** with Memphis theming. Any Chart.js usage is a violation that must be migrated by `memphis-charts`.
@@ -422,7 +490,7 @@ grep -n "<button.*border-4\|<input.*border-4\|<button.*border-2\|<input.*border-
 interface Violation {
   file: string;
   line: number;
-  type: 'shadow' | 'rounded' | 'gradient' | 'color' | 'border' | 'hardcoded_hex' | 'inline_style' | 'color_constant' | 'border_width' | 'chartjs_usage' | 'chart_styling';
+  type: 'shadow' | 'rounded' | 'gradient' | 'color' | 'border' | 'hardcoded_hex' | 'inline_style' | 'color_constant' | 'border_width' | 'text_size' | 'chartjs_usage' | 'chart_styling';
   severity: 'critical' | 'warning' | 'info';
   code: string;
   fix: string;
@@ -436,6 +504,7 @@ const violations: Violation[] = [];
 - `hardcoded_hex`, `inline_style`, `color_constant`, `border_width` → **critical**
 - `chartjs_usage` → **critical** (must migrate to Recharts)
 - `chart_styling` → **warning** (non-Memphis chart styling)
+- `text_size` (text-xs on meaningful content, text-sm as default body) → **warning**
 - Non-Memphis Tailwind colors (bg-blue-500 etc.) → **warning**
 - Missing geometric decorations → **info**
 
@@ -598,6 +667,12 @@ grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerCha
 
 ### Warning Patterns
 ```bash
+# Text size violations (readability)
+# Find text-xs on meaningful content (manually verify each is afterthought content)
+grep -rn "text-xs" --include="*.tsx" apps/portal/src/ | grep -v "badge\|timestamp\|copyright\|version"
+# Find text-sm used as default body text (flag if predominant on a page)
+grep -rn "text-sm" --include="*.tsx" apps/portal/src/ | grep -v "btn-sm\|badge-sm"
+
 # Non-Memphis colors (Tailwind)
 grep -rn "bg-blue-\|bg-green-\|bg-red-\|bg-orange-\|bg-indigo-\|bg-violet-\|bg-pink-\|bg-gray-\|bg-slate-\|bg-zinc-\|text-blue-\|text-green-\|text-red-\|border-blue-\|border-green-" apps/portal/src/
 
@@ -691,6 +766,8 @@ The auditor can automatically fix violations or spawn designers to fix them.
 | Raw Tailwind button styling | → `btn` + `btn-{color}` + `btn-{size}` |
 | Raw Tailwind badge styling | → `badge` |
 | Raw Tailwind input styling | → `input` |
+| `text-xs` on descriptions/labels/body | → `text-base` (primary content) or `text-sm` (secondary metadata) |
+| `text-sm` as default body text | → `text-base` |
 
 ### Hex → Tailwind Class Mapping
 ```
@@ -748,43 +825,89 @@ Report to orchestrator:
 
 ## Available Memphis Plugin Classes Reference
 
+The Memphis UI plugin is built on SilicaUI (DaisyUI v5 fork). All DaisyUI v5 component classes work.
 When auditing, recommend these plugin classes instead of raw Tailwind equivalents.
 
+### Package Architecture
+- **Source of truth:** `packages/memphis-ui/src/theme.config.ts`
+- **React components:** `packages/memphis-ui/src/react/components/` (101 files)
+- **CSS components:** `packages/memphis-ui/src/components/*.css` (57 files)
+- **Generated theme:** `packages/memphis-ui/src/themes/memphis.css` (NEVER edit)
+- **Plugin loading:** `@plugin "@splits-network/memphis-ui/plugin"` in `globals.css`
+- **Build:** `pnpm --filter @splits-network/memphis-ui build`
+
 ### Buttons
-- `.btn` — base button (3px border, bold, uppercase)
-- `.btn-sm` — small size
-- `.btn-md` — medium size (default)
-- `.btn-lg` — large size
+- `.btn` — base button (uppercase, letter-spacing, border tier by size)
+- `.btn-sm` — small (2px border, 0.875rem font)
+- `.btn-md` — medium (3px border, 1rem font)
+- `.btn-lg` — large (4px border, 1.125rem font)
 - `.btn-outline` — outline variant
-- `.btn-coral` — coral color variant
-- `.btn-teal` — teal color variant
-- `.btn-yellow` — yellow color variant
-- `.btn-purple` — purple color variant
-- `.btn-dark` — dark color variant
+- `.btn-coral`, `.btn-teal`, `.btn-yellow`, `.btn-purple`, `.btn-dark` — Memphis color variants
+- `.btn-primary`, `.btn-secondary`, `.btn-accent`, `.btn-ghost` — DaisyUI semantic variants
 
 ### Badges
-- `.badge` — badge element (3px border, bold, uppercase, small text)
+- `.badge` — base badge (uppercase, letter-spacing)
+- `.badge-sm` — small (2px border, 0.625rem font)
+- `.badge-md` — medium (3px border, 0.75rem font)
+- `.badge-lg` — large (4px border, 0.875rem font)
+- `.badge-coral`, `.badge-teal`, `.badge-yellow`, `.badge-purple`, `.badge-dark`, `.badge-cream` — Memphis color variants
+- `.badge-outline` — outline variant (combine with color: `.badge-outline.badge-coral`)
+- `.badge-soft` — soft variant (combine with color: `.badge-soft.badge-teal`)
+- `.badge-dot` — dot indicator style
+- `.badge-primary`, `.badge-secondary`, `.badge-accent` — DaisyUI semantic variants
 
 ### Forms
-- `.input` — text input (3px border)
-- `.select` — select dropdown (3px border)
-- `.checkbox` — checkbox (2px border)
-- `.toggle` — toggle switch (2px border)
+- `.input` — text input
+- `.select` — select dropdown
+- `.checkbox` — checkbox
+- `.toggle` — toggle switch
+- `.textarea` — text area
+- `.radio` — radio button
+- `.range` — range slider
+- `.rating` — star rating
 
 ### Layout
-- `.card` — card container (4px border)
-- `.card-dark` — dark card variant
-- `.modal` — modal dialog (4px border)
-- `.modal-overlay` — modal backdrop
-- `.table` — table container (4px outer border)
-- `.tabs` — tab bar container (4px border)
-- `.tab` — individual tab
-- `.tab-active` — active tab state
+- `.card`, `.card-body` — card container
+- `.modal`, `.modal-box` — modal dialog
+- `.table` — data table (dark header, alternating cream rows)
+- `.tabs`, `.tab` — tab navigation
+- `.alert` — alert messages
+- `.avatar` — user avatar
+- `.breadcrumbs` — navigation breadcrumbs
+- `.carousel` — image carousel
+- `.collapse` — collapsible section
+- `.divider` — content divider
+- `.drawer` — side drawer
+- `.dropdown` — dropdown menu
+- `.footer` — page footer
+- `.hero` — hero section
+- `.indicator` — indicator badge
+- `.kbd` — keyboard key
+- `.link` — styled link
+- `.loading` — loading spinner
+- `.menu` — vertical menu
+- `.navbar` — navigation bar
+- `.progress` — progress bar
+- `.skeleton` — loading skeleton
+- `.stack` — stacked elements
+- `.stat` — statistic display
+- `.status` — status indicator
+- `.steps` — step progress
+- `.swap` — content swap
+- `.timeline` — vertical timeline
+- `.toast` — toast notification
+- `.tooltip` — tooltip
 
-### Border Tier Utility Classes
-- `.border-memphis` — container tier (4px)
+### Memphis Border Tier Utility Classes
+- `.border-container` — container tier (4px)
 - `.border-interactive` — interactive tier (3px)
 - `.border-detail` — detail tier (2px)
+
+### Memphis Color Utility Classes
+- `bg-coral`, `bg-teal`, `bg-yellow`, `bg-purple`, `bg-dark`, `bg-cream`
+- `bg-coral-light`, `bg-teal-light`, `bg-yellow-light`, `bg-purple-light`
+- `text-coral`, `text-teal`, `text-yellow`, `text-purple`, `text-dark`, `text-cream`
+- `border-coral`, `border-teal`, `border-yellow`, `border-purple`, `border-dark`
 
 ### CSS Custom Properties
 ```css
@@ -792,6 +915,9 @@ When auditing, recommend these plugin classes instead of raw Tailwind equivalent
 --border-interactive: 3px;  /* buttons, inputs, selects, badges */
 --border-detail: 2px;       /* checkboxes, toggles, table cells */
 ```
+
+### CSS Specificity Warning
+Plugin component CSS (e.g., `input.css`) applies default styles to base elements. These can override Tailwind utility classes like `border-none`. Use inline `style={{ border: "none" }}` to win specificity battles against plugin CSS.
 
 ## Critical Rules
 

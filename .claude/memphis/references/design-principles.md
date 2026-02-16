@@ -172,11 +172,13 @@ Memphis pages should include 1-3 decorative geometric elements:
 
 ### 6. Styling Hierarchy (CRITICAL — follow this order)
 
-Before writing ANY markup, follow this hierarchy:
+Before writing ANY markup, check the Memphis UI component inventory first. **Never write a raw className for something a component or plugin class already handles.**
 
-**1. Memphis UI Components (FIRST CHOICE)**
-Use pre-built components from `@splits-network/memphis-ui` (86+ components).
-These already have correct Memphis styling baked in.
+**Why this order matters:** The higher you go, the more design decisions are already made for you. A `<Button>` component already has the correct 3px interactive border, colors, typography, and hover states baked in — you don't need to think about any of it. A `btn` CSS class has the correct border tier built in. Raw Tailwind makes you responsible for every decision, which means more room for error.
+
+**1. Memphis UI React Components (FIRST CHOICE)**
+Use pre-built components from `@splits-network/memphis-ui` (101 components in `src/react/components/`).
+Design decisions (border tier, colors, typography, hover states) are already correct.
 
 ```tsx
 // ❌ WRONG — raw markup when a component exists
@@ -189,20 +191,38 @@ import { Button } from '@splits-network/memphis-ui';
 <Button variant="primary" size="lg">Sign Up</Button>
 ```
 
-Check `packages/memphis-ui/src/components/index.ts` for the full component list.
+Check `packages/memphis-ui/src/react/components/index.ts` for the full component list (101 components).
 Key categories: Header, Footer, Cards, Forms, Tables, Navigation, Feedback, Layout, Profiles.
 
-**2. Memphis CSS Theme Classes (SECOND CHOICE)**
-If no component fits, use theme Tailwind tokens:
+**2. Memphis Plugin CSS Classes (SECOND CHOICE)**
+When you can't use a React component but need Memphis styling on raw HTML, use the plugin's named CSS classes. Border tiers are baked in.
+
+```tsx
+// Buttons → btn + btn-{color} + btn-{size}
+<button className="btn btn-coral btn-md">Submit</button>
+
+// Badges → badge + badge-{color}
+<span className="badge badge-teal">Active</span>
+
+// Forms → input, select, checkbox, toggle
+<input className="input w-full" />
+
+// Cards/Modals → card, modal
+<div className="card p-6">Content</div>
+```
+
+**3. Memphis CSS Theme Classes (THIRD CHOICE)**
+If no component or plugin class fits, use theme Tailwind tokens:
 ```tsx
 className="bg-coral text-dark border-4 border-dark"
 ```
 
-**3. Local Components (THIRD CHOICE)**
-Page-specific widgets in `{feature}-memphis/components/`. Must use memphis-ui primitives internally.
+**4. Local Components (FOURTH CHOICE)**
+Page-specific widgets in `{feature}-memphis/components/`. Must use memphis-ui primitives and plugin classes internally.
 
-**4. Raw Tailwind (LAST RESORT)**
+**5. Raw Tailwind (LAST RESORT)**
 Only for layout/spacing/grid: `className="grid grid-cols-3 gap-6 p-8"`
+Never for visual styling (colors, borders, typography) when a component or plugin class exists.
 
 ### 7. Tailwind Classes ONLY - No Inline Styles
 **ZERO hardcoded hex colors. ZERO inline style={{}} for visual properties.**
@@ -272,6 +292,14 @@ className="border-t-4 border-teal"
 ## Additional Guidelines
 
 ### Typography
+
+**Size Policy (CRITICAL):**
+- `text-base` (16px) = **default body text** across all apps. No exceptions for "compact" or "data-dense" interfaces.
+- `text-sm` (14px) = secondary/supporting content only (metadata, captions, bylines). Not the default.
+- `text-xs` (12px) = **afterthought content ONLY** (timestamps, footnotes, copyright, version numbers). Never for descriptions, labels, instructions, or any content the user needs to actively read.
+
+**Rationale:** 12px text is extremely difficult for users to read. 14px is marginal for body text. 16px is the web standard for readability. Readability is not negotiable — it is a core accessibility requirement.
+
 ```tsx
 /* Headlines - Bold, uppercase */
 <h1 className="text-4xl font-bold uppercase text-dark">
@@ -279,12 +307,35 @@ className="border-t-4 border-teal"
 /* Subheadings - Bold */
 <h2 className="text-2xl font-bold text-dark">
 
-/* Body text - Normal weight, darker with opacity */
+/* Body text - text-base is the default (16px) */
 <p className="text-base text-dark opacity-70">
+
+/* Secondary metadata - text-sm acceptable */
+<span className="text-sm text-dark opacity-50">Posted 3 days ago by Jane</span>
+
+/* Afterthought ONLY - text-xs restricted */
+<span className="text-xs text-dark opacity-50">Updated 2 hours ago</span>  {/* OK: timestamp */}
+<span className="text-xs text-dark opacity-50">v2.4.1</span>                {/* OK: version */}
+<p className="text-xs text-dark opacity-60">Enter your details</p>          {/* VIOLATION: meaningful content */}
 
 /* Buttons - Bold, uppercase, tracked */
 <button className="font-bold uppercase tracking-wider">
 ```
+
+**text-xs acceptable contexts:**
+- Timestamps and relative dates
+- Copyright notices
+- Version numbers and build info
+- Badge text (inherent to component)
+- Footnote markers
+
+**text-xs VIOLATIONS (flag immediately):**
+- Body paragraphs and descriptions
+- Form labels and help text
+- Button labels and CTAs
+- Table cell primary data
+- List item content
+- Instructions and onboarding text
 
 ### Spacing (8px Base Unit)
 ```tsx
@@ -341,9 +392,17 @@ m-8     /* 32px */
 </div>
 ```
 
-### ✅ Memphis Cards
+### ✅ Memphis Cards (prefer component, fallback to plugin class)
 ```tsx
-<div className="card border-4 border-dark bg-cream p-6 relative">
+// BEST — use memphis-ui React component
+import { Card } from '@splits-network/memphis-ui';
+<Card>
+  <h3 className="text-dark font-bold uppercase">Title</h3>
+  <p className="text-dark opacity-70">Content</p>
+</Card>
+
+// ACCEPTABLE — use plugin class when component doesn't fit
+<div className="card p-6 relative">
   <h3 className="text-dark font-bold uppercase">Title</h3>
   <p className="text-dark opacity-70">Content</p>
   <div className="absolute top-4 right-4 w-8 h-8 bg-teal rotate-45" />
@@ -357,11 +416,14 @@ m-8     /* 32px */
 </button>
 ```
 
-### ✅ Memphis Buttons
+### ✅ Memphis Buttons (prefer component, fallback to plugin class)
 ```tsx
-<button className="btn bg-coral text-dark border-4 border-dark font-bold uppercase hover:bg-teal transition-colors">
-  Click
-</button>
+// BEST — use memphis-ui React component
+import { Button } from '@splits-network/memphis-ui';
+<Button variant="primary" size="md">Click</Button>
+
+// ACCEPTABLE — use plugin class
+<button className="btn btn-coral btn-md">Click</button>
 ```
 
 ### ❌ Subtle Inputs
@@ -369,9 +431,14 @@ m-8     /* 32px */
 <input className="input border border-gray-300 rounded-md bg-white" />
 ```
 
-### ✅ Memphis Inputs
+### ✅ Memphis Inputs (prefer component, fallback to plugin class)
 ```tsx
-<input className="input border-4 border-dark bg-cream text-dark font-bold placeholder-dark placeholder-opacity-50" />
+// BEST — use memphis-ui React component
+import { Input } from '@splits-network/memphis-ui';
+<Input placeholder="ENTER NAME" />
+
+// ACCEPTABLE — use plugin class
+<input className="input w-full" placeholder="ENTER NAME" />
 ```
 
 ## Accessibility
@@ -413,12 +480,16 @@ Before marking any page/component as "Memphis compliant":
 - [ ] ❌ No inline style={{}} for visual properties (colors, borders, backgrounds, spacing, opacity)
 - [ ] ❌ No color constant objects (const M = {}, const COLORS = {})
 - [ ] ❌ No non-4px border widths (no 3px, 5px — always border-4)
+- [ ] ✅ Memphis UI components used where available (check 101 components in `src/react/components/`)
+- [ ] ✅ Plugin CSS classes used where no React component fits (btn, badge, card, input, etc.)
 - [ ] ✅ Memphis colors via Tailwind classes only (bg-coral, text-dark, border-teal)
 - [ ] ✅ 4px borders on all interactive elements (border-4 class)
 - [ ] ✅ 1-3 geometric decorations added
 - [ ] ✅ High contrast maintained (WCAG AA)
 - [ ] ✅ Accessibility preserved (ARIA, keyboard nav)
 - [ ] ✅ Flat design aesthetic throughout
+- [ ] ✅ Body text uses `text-base` (16px) as default — not `text-sm`
+- [ ] ✅ `text-xs` only on afterthought content (timestamps, footnotes, copyright) — never on meaningful content
 - [ ] ✅ Component isolation (no imports from original page tree)
 
 **If ANY violation exists, compliance = 0%. Fix before proceeding.**

@@ -129,14 +129,17 @@ export default function ForCompaniesPage() {
                                 </div>
                                 <h1 className="text-5xl md:text-6xl font-bold text-base-content mb-8">
                                     Hire Better.{" "}
-                                    <span className="text-secondary">Faster.</span>{" "}
+                                    <span className="text-secondary">
+                                        Faster.
+                                    </span>{" "}
                                     Smarter.
                                 </h1>
                                 <p className="text-xl text-base-content/80 mb-8 leading-relaxed">
                                     Transform your hiring with our collaborative
-                                    recruiting network. Access specialized talent
-                                    faster while reducing costs by up to 50%
-                                    compared to traditional recruiting agencies.
+                                    recruiting network. Access specialized
+                                    talent faster while reducing costs by up to
+                                    50% compared to traditional recruiting
+                                    agencies.
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -158,7 +161,10 @@ export default function ForCompaniesPage() {
                                     </Link>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4 text-center" data-animate-stagger>
+                                <div
+                                    className="grid grid-cols-3 gap-4 text-center"
+                                    data-animate-stagger
+                                >
                                     <div>
                                         <div className="text-2xl font-bold text-secondary">
                                             1,200+
@@ -221,7 +227,10 @@ export default function ForCompaniesPage() {
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8" data-animate-stagger>
+                        <div
+                            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+                            data-animate-stagger
+                        >
                             {companyBenefits.map((benefit) => (
                                 <div key={benefit.title} className="opacity-0">
                                     <div className="card bg-base-100 shadow-lg h-full hover:-translate-y-1 hover:shadow-lg transition-all">
@@ -258,13 +267,16 @@ export default function ForCompaniesPage() {
                                 Trusted Across Industries
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                Our specialized recruiter network spans every major
-                                industry, ensuring expert knowledge for your
-                                specific hiring needs.
+                                Our specialized recruiter network spans every
+                                major industry, ensuring expert knowledge for
+                                your specific hiring needs.
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6" data-animate-stagger>
+                        <div
+                            className="grid md:grid-cols-3 lg:grid-cols-6 gap-6"
+                            data-animate-stagger
+                        >
                             {industries.map((industry) => (
                                 <div key={industry.name} className="opacity-0">
                                     <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
@@ -296,9 +308,9 @@ export default function ForCompaniesPage() {
                                 Your Hiring Process, Simplified
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                From job posting to successful hire, here's exactly
-                                how our platform streamlines your recruiting
-                                process.
+                                From job posting to successful hire, here's
+                                exactly how our platform streamlines your
+                                recruiting process.
                             </p>
                         </div>
 
@@ -309,7 +321,9 @@ export default function ForCompaniesPage() {
                                 <div
                                     key={step.step}
                                     className={`opacity-0 relative flex items-center mb-16 ${
-                                        index % 2 === 0 ? "md:flex-row-reverse" : ""
+                                        index % 2 === 0
+                                            ? "md:flex-row-reverse"
+                                            : ""
                                     }`}
                                 >
                                     <div
@@ -362,15 +376,15 @@ export default function ForCompaniesPage() {
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
                                 Beyond faster hiring - here are the concrete
-                                advantages that companies gain when they join Splits
-                                Network.
+                                advantages that companies gain when they join
+                                Splits Network.
                             </p>
                         </div>
 
                         <div className="grid lg:grid-cols-2 gap-12">
                             <div>
                                 <div className="space-y-8">
-                                    <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-primary">
+                                    <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-coral">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-primary/20 p-3 rounded-lg flex-shrink-0">
                                                 <i className="fa-duotone fa-regular fa-network-wired text-primary text-xl"></i>
@@ -380,20 +394,21 @@ export default function ForCompaniesPage() {
                                                     Massive Network Expansion
                                                 </h3>
                                                 <p className="text-base-content/80 mb-4">
-                                                    Instead of being limited to one
-                                                    recruiting firm's network, you
-                                                    instantly gain access to
-                                                    thousands of specialized
-                                                    recruiters across industries,
+                                                    Instead of being limited to
+                                                    one recruiting firm's
+                                                    network, you instantly gain
+                                                    access to thousands of
+                                                    specialized recruiters
+                                                    across industries,
                                                     geographies, and skill sets.
-                                                    Your difficult-to-fill roles get
-                                                    exposed to talent pools you
-                                                    never knew existed.
+                                                    Your difficult-to-fill roles
+                                                    get exposed to talent pools
+                                                    you never knew existed.
                                                 </p>
                                                 <div className="text-sm font-medium text-primary">
                                                     Real Impact: Roles that
-                                                    typically sit open for months
-                                                    get filled in weeks
+                                                    typically sit open for
+                                                    months get filled in weeks
                                                 </div>
                                             </div>
                                         </div>
@@ -409,25 +424,26 @@ export default function ForCompaniesPage() {
                                                     Complete Process Visibility
                                                 </h3>
                                                 <p className="text-base-content/80 mb-4">
-                                                    Track exactly which recruiters
-                                                    are working on your roles, see
-                                                    real candidate pipelines, and
-                                                    get detailed insights into your
-                                                    hiring funnel. No more wondering
-                                                    "what's happening with my
-                                                    search?" - you see everything in
-                                                    real-time.
+                                                    Track exactly which
+                                                    recruiters are working on
+                                                    your roles, see real
+                                                    candidate pipelines, and get
+                                                    detailed insights into your
+                                                    hiring funnel. No more
+                                                    wondering "what's happening
+                                                    with my search?" - you see
+                                                    everything in real-time.
                                                 </p>
                                                 <div className="text-sm font-medium text-secondary">
-                                                    Real Impact: Cut hiring manager
-                                                    stress and improve stakeholder
-                                                    communication
+                                                    Real Impact: Cut hiring
+                                                    manager stress and improve
+                                                    stakeholder communication
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-accent/5 p-6 rounded-xl border-l-4 border-accent">
+                                    <div className="bg-accent/5 p-6 rounded-xl border-l-4 border-yellow">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-accent/20 p-3 rounded-lg flex-shrink-0">
                                                 <i className="fa-duotone fa-regular fa-shield-check text-accent text-xl"></i>
@@ -438,17 +454,19 @@ export default function ForCompaniesPage() {
                                                 </h3>
                                                 <p className="text-base-content/80 mb-4">
                                                     When multiple recruiters
-                                                    evaluate the same candidates,
-                                                    you get natural quality control.
-                                                    Bad fits get filtered out early,
-                                                    good candidates get validated by
-                                                    multiple professionals, and your
-                                                    hiring decisions become more
-                                                    confident.
+                                                    evaluate the same
+                                                    candidates, you get natural
+                                                    quality control. Bad fits
+                                                    get filtered out early, good
+                                                    candidates get validated by
+                                                    multiple professionals, and
+                                                    your hiring decisions become
+                                                    more confident.
                                                 </p>
                                                 <div className="text-sm font-medium text-accent">
-                                                    Real Impact: Higher retention
-                                                    rates and fewer costly mis-hires
+                                                    Real Impact: Higher
+                                                    retention rates and fewer
+                                                    costly mis-hires
                                                 </div>
                                             </div>
                                         </div>
@@ -468,18 +486,20 @@ export default function ForCompaniesPage() {
                                                     Flexible Scaling Power
                                                 </h3>
                                                 <p className="text-base-content/80 mb-4">
-                                                    Need to hire 1 person? Great.
-                                                    Need to hire 50 people in 6
-                                                    months? No problem. Our network
-                                                    scales up or down based on your
-                                                    actual needs without requiring
-                                                    long-term contracts or minimum
+                                                    Need to hire 1 person?
+                                                    Great. Need to hire 50
+                                                    people in 6 months? No
+                                                    problem. Our network scales
+                                                    up or down based on your
+                                                    actual needs without
+                                                    requiring long-term
+                                                    contracts or minimum
                                                     commitments.
                                                 </p>
                                                 <div className="text-sm font-medium text-info">
                                                     Real Impact: Handle growth
-                                                    spurts and urgent hiring without
-                                                    panic
+                                                    spurts and urgent hiring
+                                                    without panic
                                                 </div>
                                             </div>
                                         </div>
@@ -498,14 +518,16 @@ export default function ForCompaniesPage() {
                                                     Know your recruiting costs
                                                     upfront with transparent,
                                                     flat-rate fees. No surprise
-                                                    markups, no hidden charges for
-                                                    "rush" searches, no arbitrary
-                                                    fee increases. Budget accurately
-                                                    for your hiring needs.
+                                                    markups, no hidden charges
+                                                    for "rush" searches, no
+                                                    arbitrary fee increases.
+                                                    Budget accurately for your
+                                                    hiring needs.
                                                 </p>
                                                 <div className="text-sm font-medium text-success">
-                                                    Real Impact: Better financial
-                                                    planning and lower cost-per-hire
+                                                    Real Impact: Better
+                                                    financial planning and lower
+                                                    cost-per-hire
                                                 </div>
                                             </div>
                                         </div>
@@ -518,20 +540,22 @@ export default function ForCompaniesPage() {
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-base-content mb-3">
-                                                    Specialized Expertise On-Demand
+                                                    Specialized Expertise
+                                                    On-Demand
                                                 </h3>
                                                 <p className="text-base-content/80 mb-4">
                                                     Get access to recruiters who
                                                     specialize in your exact
-                                                    industry, technology stack, or
-                                                    role type. Instead of working
-                                                    with generalists, connect with
-                                                    experts who understand your
-                                                    specific hiring challenges.
+                                                    industry, technology stack,
+                                                    or role type. Instead of
+                                                    working with generalists,
+                                                    connect with experts who
+                                                    understand your specific
+                                                    hiring challenges.
                                                 </p>
                                                 <div className="text-sm font-medium text-warning">
-                                                    Real Impact: Better candidate
-                                                    quality and faster
+                                                    Real Impact: Better
+                                                    candidate quality and faster
                                                     time-to-productivity
                                                 </div>
                                             </div>
@@ -547,10 +571,11 @@ export default function ForCompaniesPage() {
                                     Ready to Experience Better Hiring?
                                 </h3>
                                 <p className="text-lg text-base-content/80 max-w-3xl mx-auto mb-6">
-                                    Stop settling for the limitations of traditional
-                                    recruiting. Join companies who've discovered
-                                    that collaborative recruiting isn't just faster
-                                    - it's fundamentally better.
+                                    Stop settling for the limitations of
+                                    traditional recruiting. Join companies
+                                    who've discovered that collaborative
+                                    recruiting isn't just faster - it's
+                                    fundamentally better.
                                 </p>
                                 <Link
                                     href="/sign-up"
@@ -576,9 +601,9 @@ export default function ForCompaniesPage() {
                                 ?
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                See how our collaborative approach delivers better
-                                results than traditional recruiting firms or
-                                individual recruiters.
+                                See how our collaborative approach delivers
+                                better results than traditional recruiting firms
+                                or individual recruiters.
                             </p>
                         </div>
 
@@ -600,12 +625,13 @@ export default function ForCompaniesPage() {
                                                     recruiter per role, creating
                                                     bottlenecks and limited
                                                     networks. Splits Network
-                                                    connects your open positions to
-                                                    thousands of specialized
-                                                    recruiters, each bringing their
-                                                    unique networks and expertise.
-                                                    When multiple minds work on your
-                                                    hiring challenge, you get faster
+                                                    connects your open positions
+                                                    to thousands of specialized
+                                                    recruiters, each bringing
+                                                    their unique networks and
+                                                    expertise. When multiple
+                                                    minds work on your hiring
+                                                    challenge, you get faster
                                                     results and higher-quality
                                                     candidates.
                                                 </p>
@@ -620,21 +646,22 @@ export default function ForCompaniesPage() {
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-base-content mb-2">
-                                                    Performance-Driven Results vs.
-                                                    Hourly Billing
+                                                    Performance-Driven Results
+                                                    vs. Hourly Billing
                                                 </h3>
                                                 <p className="text-base-content/80">
                                                     Unlike consulting firms that
-                                                    charge by the hour regardless of
-                                                    results, our recruiters only get
-                                                    paid when they successfully
-                                                    place candidates. This alignment
+                                                    charge by the hour
+                                                    regardless of results, our
+                                                    recruiters only get paid
+                                                    when they successfully place
+                                                    candidates. This alignment
                                                     means every recruiter is
                                                     motivated to find the best
-                                                    talent quickly, not to maximize
-                                                    billable hours. You get faster
-                                                    placements with better candidate
-                                                    fit.
+                                                    talent quickly, not to
+                                                    maximize billable hours. You
+                                                    get faster placements with
+                                                    better candidate fit.
                                                 </p>
                                             </div>
                                         </div>
@@ -651,21 +678,22 @@ export default function ForCompaniesPage() {
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-base-content mb-2">
-                                                    Transparent Economics vs. Hidden
-                                                    Markups
+                                                    Transparent Economics vs.
+                                                    Hidden Markups
                                                 </h3>
                                                 <p className="text-base-content/80">
                                                     Traditional recruiting firms
-                                                    often mark up fees by 200-300%
-                                                    above what they pay their
-                                                    recruiters. Our transparent
-                                                    model shows exactly how fees are
-                                                    split, ensuring you get
-                                                    competitive rates while
-                                                    recruiters earn fair
-                                                    compensation. No hidden charges,
-                                                    no surprise invoices, no
-                                                    inflated overhead costs.
+                                                    often mark up fees by
+                                                    200-300% above what they pay
+                                                    their recruiters. Our
+                                                    transparent model shows
+                                                    exactly how fees are split,
+                                                    ensuring you get competitive
+                                                    rates while recruiters earn
+                                                    fair compensation. No hidden
+                                                    charges, no surprise
+                                                    invoices, no inflated
+                                                    overhead costs.
                                                 </p>
                                             </div>
                                         </div>
@@ -683,15 +711,17 @@ export default function ForCompaniesPage() {
                                                 </h3>
                                                 <p className="text-base-content/80">
                                                     When you work with a single
-                                                    recruiter, you're dependent on
-                                                    their judgment and network
-                                                    limitations. Our platform
-                                                    creates natural quality checks
-                                                    as multiple recruiters evaluate
-                                                    candidates, share insights, and
-                                                    collaborate on the best matches.
-                                                    The result is higher-quality
-                                                    placements with better long-term
+                                                    recruiter, you're dependent
+                                                    on their judgment and
+                                                    network limitations. Our
+                                                    platform creates natural
+                                                    quality checks as multiple
+                                                    recruiters evaluate
+                                                    candidates, share insights,
+                                                    and collaborate on the best
+                                                    matches. The result is
+                                                    higher-quality placements
+                                                    with better long-term
                                                     retention.
                                                 </p>
                                             </div>
@@ -708,16 +738,17 @@ export default function ForCompaniesPage() {
                                 </h3>
                                 <p className="text-lg text-base-content/80 max-w-4xl mx-auto leading-relaxed">
                                     While traditional recruiting firms focus on
-                                    maintaining margins and individual recruiters
-                                    are limited by their personal networks, Splits
-                                    Network is designed around a simple principle:{" "}
+                                    maintaining margins and individual
+                                    recruiters are limited by their personal
+                                    networks, Splits Network is designed around
+                                    a simple principle:{" "}
                                     <strong className="text-secondary">
                                         the best hiring happens when great
                                         recruiters collaborate
                                     </strong>
-                                    . Our platform removes the barriers that prevent
-                                    excellent recruiters from working together on
-                                    your most important roles.
+                                    . Our platform removes the barriers that
+                                    prevent excellent recruiters from working
+                                    together on your most important roles.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
                                     <Link
@@ -770,7 +801,10 @@ export default function ForCompaniesPage() {
                                 </Link>
                             </div>
 
-                            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto" data-animate-stagger>
+                            <div
+                                className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+                                data-animate-stagger
+                            >
                                 <div className="stat opacity-0">
                                     <div className="stat-title">Setup Time</div>
                                     <div className="stat-value text-secondary">

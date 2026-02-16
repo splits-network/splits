@@ -164,7 +164,7 @@ export function ResumeStep() {
                     </div>
                 ) : (
                     // Show upload input
-                    <div className="border-2 border-dashed border-base-300 rounded-lg p-8 hover:border-primary transition-colors">
+                    <div className="border-2 border-dashed border-base-300 rounded-lg p-8 hover:border-coral transition-colors">
                         <div className="text-center">
                             {uploading ? (
                                 <>

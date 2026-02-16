@@ -99,10 +99,8 @@ export default function FootersOne() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             /* Hero entrance */
             const heroTl = gsap.timeline({
@@ -262,7 +260,9 @@ export default function FootersOne() {
                 {/* Diagonal accent panel */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                    style={{ clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
                 />
 
                 {/* Top accent line */}
@@ -288,11 +288,13 @@ export default function FootersOne() {
                         </h1>
 
                         <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl opacity-0">
-                            A comprehensive footer system built on the editorial grid. Features
-                            a bold CTA band, newsletter signup with split-screen layout, organized
-                            navigation columns, social links, trust signals, and a legal baseline.
-                            Every section uses the characteristic angular geometry and typographic
-                            hierarchy of the Split-Screen Editorial design.
+                            A comprehensive footer system built on the editorial
+                            grid. Features a bold CTA band, newsletter signup
+                            with split-screen layout, organized navigation
+                            columns, social links, trust signals, and a legal
+                            baseline. Every section uses the characteristic
+                            angular geometry and typographic hierarchy of the
+                            Split-Screen Editorial design.
                         </p>
 
                         <div className="flex flex-wrap gap-3 mt-10">
@@ -338,26 +340,29 @@ export default function FootersOne() {
                                 {[
                                     {
                                         title: "AI-Powered Candidate Matching Now Live",
-                                        excerpt: "Our new matching algorithm uses deep learning to connect recruiters with ideal candidates based on skills, culture fit, and career trajectory.",
+                                        excerpt:
+                                            "Our new matching algorithm uses deep learning to connect recruiters with ideal candidates based on skills, culture fit, and career trajectory.",
                                         date: "Feb 12, 2026",
                                         tag: "Product",
                                     },
                                     {
                                         title: "Q4 Marketplace Report: Record Placements",
-                                        excerpt: "The Splits Network marketplace saw a 34% increase in placements quarter-over-quarter, with average time-to-hire dropping to 28 days.",
+                                        excerpt:
+                                            "The Splits Network marketplace saw a 34% increase in placements quarter-over-quarter, with average time-to-hire dropping to 28 days.",
                                         date: "Feb 8, 2026",
                                         tag: "Insights",
                                     },
                                     {
                                         title: "New Integration: Connect Your ATS in One Click",
-                                        excerpt: "Seamlessly sync candidates, jobs, and pipeline data between Splits Network and your existing ATS with our new one-click integration.",
+                                        excerpt:
+                                            "Seamlessly sync candidates, jobs, and pipeline data between Splits Network and your existing ATS with our new one-click integration.",
                                         date: "Feb 4, 2026",
                                         tag: "Feature",
                                     },
                                 ].map((post, i) => (
                                     <article
                                         key={i}
-                                        className="border-l-4 border-primary bg-base-200 p-6 hover:bg-base-300/50 transition-colors cursor-pointer"
+                                        className="border-l-4 border-coral bg-base-200 p-6 hover:bg-base-300/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-3 mb-2">
                                             <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary">
@@ -367,7 +372,9 @@ export default function FootersOne() {
                                                 {post.date}
                                             </span>
                                         </div>
-                                        <h3 className="font-bold text-lg mb-2">{post.title}</h3>
+                                        <h3 className="font-bold text-lg mb-2">
+                                            {post.title}
+                                        </h3>
                                         <p className="text-sm text-base-content/60 leading-relaxed">
                                             {post.excerpt}
                                         </p>
@@ -378,14 +385,31 @@ export default function FootersOne() {
 
                         <div className="lg:col-span-2">
                             <div className="bg-base-200 p-8 border-t-4 border-secondary mb-8">
-                                <h3 className="text-xl font-black mb-4">Trending Roles</h3>
+                                <h3 className="text-xl font-black mb-4">
+                                    Trending Roles
+                                </h3>
                                 <div className="space-y-3">
                                     {[
-                                        { title: "Senior Engineer", count: "142 open" },
-                                        { title: "Product Manager", count: "89 open" },
-                                        { title: "Data Scientist", count: "67 open" },
-                                        { title: "DevOps Engineer", count: "54 open" },
-                                        { title: "UX Designer", count: "43 open" },
+                                        {
+                                            title: "Senior Engineer",
+                                            count: "142 open",
+                                        },
+                                        {
+                                            title: "Product Manager",
+                                            count: "89 open",
+                                        },
+                                        {
+                                            title: "Data Scientist",
+                                            count: "67 open",
+                                        },
+                                        {
+                                            title: "DevOps Engineer",
+                                            count: "54 open",
+                                        },
+                                        {
+                                            title: "UX Designer",
+                                            count: "43 open",
+                                        },
                                     ].map((role) => (
                                         <div
                                             key={role.title}
@@ -407,10 +431,13 @@ export default function FootersOne() {
                                     Ready to start?
                                 </h3>
                                 <p className="text-sm opacity-80 mb-6 leading-relaxed">
-                                    Join thousands of recruiters and companies building
-                                    the future of hiring.
+                                    Join thousands of recruiters and companies
+                                    building the future of hiring.
                                 </p>
-                                <a href="#" className="btn bg-white text-primary hover:bg-white/90 border-0 btn-sm w-full">
+                                <a
+                                    href="#"
+                                    className="btn bg-white text-primary hover:bg-white/90 border-0 btn-sm w-full"
+                                >
                                     <i className="fa-duotone fa-regular fa-rocket" />
                                     Create Free Account
                                 </a>
@@ -430,7 +457,8 @@ export default function FootersOne() {
                         The footer begins below.
                     </h2>
                     <p className="text-base-content/50 text-sm">
-                        Multiple sections work together to close the page with editorial impact.
+                        Multiple sections work together to close the page with
+                        editorial impact.
                     </p>
                     <div className="mt-8">
                         <i className="fa-duotone fa-regular fa-chevron-down text-2xl text-primary animate-bounce" />
@@ -484,9 +512,13 @@ export default function FootersOne() {
                                     <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black">Stay in the loop</h3>
+                                    <h3 className="text-lg font-black">
+                                        Stay in the loop
+                                    </h3>
                                     <p className="text-xs opacity-50">
-                                        Weekly insights on recruiting, marketplace trends, and platform updates.
+                                        Weekly insights on recruiting,
+                                        marketplace trends, and platform
+                                        updates.
                                     </p>
                                 </div>
                             </div>
@@ -499,21 +531,30 @@ export default function FootersOne() {
                                             You are subscribed!
                                         </p>
                                         <p className="text-xs opacity-50">
-                                            Check your inbox for a confirmation email.
+                                            Check your inbox for a confirmation
+                                            email.
                                         </p>
                                     </div>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubscribe} className="flex gap-2">
+                                <form
+                                    onSubmit={handleSubscribe}
+                                    className="flex gap-2"
+                                >
                                     <input
                                         type="email"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
                                         placeholder="you@company.com"
                                         required
-                                        className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                                        className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-coral focus:outline-none"
                                     />
-                                    <button type="submit" className="btn btn-primary btn-sm">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary btn-sm"
+                                    >
                                         <i className="fa-duotone fa-regular fa-paper-plane" />
                                         Subscribe
                                     </button>
@@ -521,7 +562,8 @@ export default function FootersOne() {
                             )}
 
                             <p className="text-[10px] opacity-30 mt-3">
-                                No spam. Unsubscribe anytime. We respect your privacy.
+                                No spam. Unsubscribe anytime. We respect your
+                                privacy.
                             </p>
                         </div>
 
@@ -541,8 +583,9 @@ export default function FootersOne() {
                                 </div>
                             </div>
                             <p className="text-sm opacity-50 leading-relaxed mb-4">
-                                The split-fee recruiting marketplace that connects recruiters,
-                                companies, and candidates in a single transparent ecosystem.
+                                The split-fee recruiting marketplace that
+                                connects recruiters, companies, and candidates
+                                in a single transparent ecosystem.
                             </p>
 
                             {/* Social links */}
@@ -554,7 +597,9 @@ export default function FootersOne() {
                                         title={social.label}
                                         className="social-icon w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all opacity-0"
                                     >
-                                        <i className={`${social.icon} text-sm`} />
+                                        <i
+                                            className={`${social.icon} text-sm`}
+                                        />
                                     </a>
                                 ))}
                             </div>
@@ -566,7 +611,10 @@ export default function FootersOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="footer-columns grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-b border-neutral-content/10">
                         {footerSections.map((section) => (
-                            <div key={section.title} className="footer-col opacity-0">
+                            <div
+                                key={section.title}
+                                className="footer-col opacity-0"
+                            >
                                 <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
                                     {section.title}
                                 </h4>
@@ -591,7 +639,10 @@ export default function FootersOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="footer-stats-bar grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-b border-neutral-content/10">
                         {trustStats.map((stat) => (
-                            <div key={stat.label} className="footer-stat text-center opacity-0">
+                            <div
+                                key={stat.label}
+                                className="footer-stat text-center opacity-0"
+                            >
                                 <div className="text-2xl font-black text-primary">
                                     {stat.value}
                                 </div>
@@ -609,7 +660,8 @@ export default function FootersOne() {
                         <div className="flex items-center gap-1 text-[11px] opacity-30">
                             <i className="fa-duotone fa-regular fa-copyright" />
                             <span>
-                                {new Date().getFullYear()} Employment Networks LLC. All rights reserved.
+                                {new Date().getFullYear()} Employment Networks
+                                LLC. All rights reserved.
                             </span>
                         </div>
 

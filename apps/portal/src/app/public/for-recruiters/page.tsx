@@ -115,8 +115,8 @@ export default function ForRecruitersPage() {
                                 </h1>
                                 <p className="text-xl text-base-content/80 mb-8 leading-relaxed">
                                     Join the largest network of collaborative
-                                    recruiters. Increase your income, expand your
-                                    reach, and build lasting professional
+                                    recruiters. Increase your income, expand
+                                    your reach, and build lasting professional
                                     relationships while placing top talent.
                                 </p>
 
@@ -137,7 +137,10 @@ export default function ForRecruitersPage() {
                                     </Link>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4 text-center" data-animate-stagger>
+                                <div
+                                    className="grid grid-cols-3 gap-4 text-center"
+                                    data-animate-stagger
+                                >
                                     <div>
                                         <div className="text-2xl font-bold text-primary">
                                             2,500+
@@ -194,12 +197,16 @@ export default function ForRecruitersPage() {
                                 Why Choose Splits Network
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                We've built the most transparent, profitable, and
-                                collaborative recruiting platform in the industry.
+                                We've built the most transparent, profitable,
+                                and collaborative recruiting platform in the
+                                industry.
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8" data-animate-stagger>
+                        <div
+                            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+                            data-animate-stagger
+                        >
                             {recruiterBenefits.map((benefit) => (
                                 <div key={benefit.title} className="opacity-0">
                                     <div className="card bg-base-100 shadow-lg h-full hover:-translate-y-1 hover:shadow-lg transition-all">
@@ -236,9 +243,9 @@ export default function ForRecruitersPage() {
                                 Transform Your Recruiting Business
                             </h2>
                             <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                                Join a platform built specifically for professional
-                                recruiters who want to scale their business and
-                                maximize earnings.
+                                Join a platform built specifically for
+                                professional recruiters who want to scale their
+                                business and maximize earnings.
                             </p>
                         </div>
 
@@ -253,16 +260,18 @@ export default function ForRecruitersPage() {
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold mb-2">
-                                                Access to Exclusive Opportunities
+                                                Access to Exclusive
+                                                Opportunities
                                             </h3>
                                             <p className="text-base-content/80">
                                                 Get first access to high-paying
-                                                roles from vetted companies actively
-                                                looking to hire. Our platform
-                                                connects you with roles that match
-                                                your expertise and offer competitive
-                                                compensation packages that make your
-                                                time investment worthwhile.
+                                                roles from vetted companies
+                                                actively looking to hire. Our
+                                                platform connects you with roles
+                                                that match your expertise and
+                                                offer competitive compensation
+                                                packages that make your time
+                                                investment worthwhile.
                                             </p>
                                         </div>
                                     </div>
@@ -281,12 +290,13 @@ export default function ForRecruitersPage() {
                                                 Work alongside other skilled
                                                 recruiters to fill challenging
                                                 positions. Share candidates,
-                                                leverage diverse networks, and earn
-                                                from placements even when you didn't
-                                                source the final candidate. Our
-                                                collaborative approach means more
-                                                successful placements and higher
-                                                overall earnings for everyone.
+                                                leverage diverse networks, and
+                                                earn from placements even when
+                                                you didn't source the final
+                                                candidate. Our collaborative
+                                                approach means more successful
+                                                placements and higher overall
+                                                earnings for everyone.
                                             </p>
                                         </div>
                                     </div>
@@ -302,14 +312,15 @@ export default function ForRecruitersPage() {
                                                 Complete Transparency & Trust
                                             </h3>
                                             <p className="text-base-content/80">
-                                                No hidden fees, unclear commission
-                                                structures, or surprise deductions.
-                                                See exactly what you'll earn before
-                                                submitting a candidate, track your
-                                                progress in real-time, and get paid
-                                                fairly and on time. We believe
-                                                transparency builds trust and
-                                                long-term success.
+                                                No hidden fees, unclear
+                                                commission structures, or
+                                                surprise deductions. See exactly
+                                                what you'll earn before
+                                                submitting a candidate, track
+                                                your progress in real-time, and
+                                                get paid fairly and on time. We
+                                                believe transparency builds
+                                                trust and long-term success.
                                             </p>
                                         </div>
                                     </div>
@@ -346,7 +357,8 @@ export default function ForRecruitersPage() {
                                                         14 days
                                                     </div>
                                                     <div className="stat-desc">
-                                                        Average for new recruiters
+                                                        Average for new
+                                                        recruiters
                                                     </div>
                                                 </div>
 
@@ -358,7 +370,8 @@ export default function ForRecruitersPage() {
                                                         2,500+
                                                     </div>
                                                     <div className="stat-desc">
-                                                        Active recruiting partners
+                                                        Active recruiting
+                                                        partners
                                                     </div>
                                                 </div>
                                             </div>
@@ -400,7 +413,9 @@ export default function ForRecruitersPage() {
                                 <div
                                     key={step.step}
                                     className={`opacity-0 relative flex items-center mb-16 ${
-                                        index % 2 === 0 ? "md:flex-row-reverse" : ""
+                                        index % 2 === 0
+                                            ? "md:flex-row-reverse"
+                                            : ""
                                     }`}
                                 >
                                     <div
@@ -456,46 +471,52 @@ export default function ForRecruitersPage() {
                             <div>
                                 <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-8">
                                     Your Office is{" "}
-                                    <span className="text-primary">Everywhere</span>
+                                    <span className="text-primary">
+                                        Everywhere
+                                    </span>
                                 </h2>
 
                                 <div className="space-y-6 text-lg text-base-content/80 leading-relaxed">
                                     <p>
-                                        Whether you're a solo recruiter working from
-                                        your home office, a small team operating
-                                        from a co-working space, or an established
-                                        recruiting firm with distributed talent,
-                                        Splits Network empowers you to maximize your
-                                        potential from anywhere in the world.{" "}
+                                        Whether you're a solo recruiter working
+                                        from your home office, a small team
+                                        operating from a co-working space, or an
+                                        established recruiting firm with
+                                        distributed talent, Splits Network
+                                        empowers you to maximize your potential
+                                        from anywhere in the world.{" "}
                                         <strong className="text-base-content">
                                             No corporate office required.
                                         </strong>
                                     </p>
 
                                     <p>
-                                        Our cloud-based platform gives you instant
-                                        access to thousands of high-quality
-                                        opportunities, collaborative tools that
-                                        connect you with top recruiters worldwide,
-                                        and transparent earning structures that put
+                                        Our cloud-based platform gives you
+                                        instant access to thousands of
+                                        high-quality opportunities,
+                                        collaborative tools that connect you
+                                        with top recruiters worldwide, and
+                                        transparent earning structures that put
                                         more money in your pocket. Scale your
-                                        recruiting business on your terms – whether
-                                        that's from a coffee shop in downtown
-                                        Seattle, a beachside villa in Costa Rica, or
-                                        your kitchen table at 6 AM.
+                                        recruiting business on your terms –
+                                        whether that's from a coffee shop in
+                                        downtown Seattle, a beachside villa in
+                                        Costa Rica, or your kitchen table at 6
+                                        AM.
                                     </p>
 
-                                    <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-primary">
+                                    <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-coral">
                                         <p className="font-medium text-primary mb-2">
                                             The future of recruiting is flexible
                                         </p>
                                         <p className="text-base">
-                                            Join thousands of independent recruiters
-                                            and recruiting teams who've discovered
-                                            that the most successful placements
-                                            happen when talent is free to work at
-                                            their peak performance – wherever that
-                                            might be.
+                                            Join thousands of independent
+                                            recruiters and recruiting teams
+                                            who've discovered that the most
+                                            successful placements happen when
+                                            talent is free to work at their peak
+                                            performance – wherever that might
+                                            be.
                                         </p>
                                     </div>
                                 </div>
@@ -569,9 +590,14 @@ export default function ForRecruitersPage() {
                                 </Link>
                             </div>
 
-                            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto" data-animate-stagger>
+                            <div
+                                className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+                                data-animate-stagger
+                            >
                                 <div className="stat opacity-0">
-                                    <div className="stat-title">Quick Setup</div>
+                                    <div className="stat-title">
+                                        Quick Setup
+                                    </div>
                                     <div className="stat-value text-primary">
                                         5 min
                                     </div>

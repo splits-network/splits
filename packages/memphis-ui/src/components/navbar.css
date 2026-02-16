@@ -1,0 +1,361 @@
+/* ═══ SilicaUI Base — Navbar Layout ═══ */
+
+.navbar {
+    @layer memphis.component {
+        @apply flex w-full items-center;
+        padding: 0.5rem;
+        min-height: 4rem;
+    }
+}
+
+:where(.navbar) {
+    @layer memphis.modifier {
+        @apply relative;
+    }
+}
+
+.navbar-start {
+    @layer memphis.component {
+        @apply inline-flex items-center;
+        width: 50%;
+        justify-content: flex-start;
+    }
+}
+
+.navbar-center {
+    @layer memphis.component {
+        @apply inline-flex items-center;
+        @apply shrink-0;
+    }
+}
+
+.navbar-end {
+    @layer memphis.component {
+        @apply inline-flex items-center;
+        width: 50%;
+        justify-content: flex-end;
+    }
+}
+
+/* ═══ Memphis Additions ═══ */
+
+.navbar {
+    @layer memphis.modifier {
+        text-transform: uppercase;
+        letter-spacing: var(--ls);
+    }
+}
+
+/* ─── Nav Item ────────────────────────────────────────────────────────
+   Use .nav-item-{color} modifier for accent. Active state fires via
+   .nav-item-active OR CSS-only .dropdown-hover. */
+.nav-item {
+    @layer memphis.component {
+        @apply flex items-center gap-2 px-3.5 py-2;
+        @apply text-xs font-black uppercase tracking-[0.12em];
+        @apply cursor-pointer;
+        border-width: var(--border-interactive);
+        border-style: solid;
+        border-color: transparent;
+        background-color: transparent;
+        color: var(--color-neutral-content);
+        transition: border-color 0.15s, background-color 0.15s, color 0.15s, transform 0.15s;
+
+        .nav-item-icon {
+            @apply text-[10px];
+            color: var(--nav-accent);
+        }
+
+        .nav-item-chevron {
+            @apply text-[8px] transition-transform;
+            opacity: 0.5;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+}
+
+/* Active state: via .nav-item-active OR parent .dropdown-hover:hover */
+.nav-item-active,
+.dropdown-hover:hover > .nav-item {
+    @layer memphis.modifier {
+        border-color: var(--nav-accent);
+        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--nav-accent);
+
+        .nav-item-chevron {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+/* Nav item color modifiers — set accent via CSS class, not inline style */
+.nav-item-coral { @layer memphis.modifier { --nav-accent: #FF6B6B; } }
+.nav-item-teal { @layer memphis.modifier { --nav-accent: #4ECDC4; } }
+.nav-item-yellow { @layer memphis.modifier { --nav-accent: #FFE66D; } }
+.nav-item-purple { @layer memphis.modifier { --nav-accent: #A78BFA; } }
+
+/* ─── Nav Action ──────────────────────────────────────────────────────
+   Square action buttons (search, notifications, dashboard link). */
+.nav-action {
+    @layer memphis.component {
+        @apply w-10 h-10 flex items-center justify-center;
+        border-width: var(--border-interactive);
+        border-style: solid;
+        border-color: var(--color-dark-gray);
+        color: rgba(255, 255, 255, 0.5);
+        background-color: transparent;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s, background-color 0.15s, transform 0.15s;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+}
+
+/* Nav action active state */
+.nav-action-active {
+    @layer memphis.modifier {
+        border-color: #4ECDC4;
+        color: #4ECDC4;
+    }
+}
+
+/* ─── Nav CTA ─────────────────────────────────────────────────────────
+   Use .nav-cta-{color} modifier for accent.
+   .nav-cta-outline for border-only variant. */
+.nav-cta {
+    @layer memphis.component {
+        @apply flex items-center gap-2;
+        @apply text-xs font-black uppercase tracking-[0.12em];
+        padding: 0.625rem 1rem;
+        border-width: var(--border-interactive);
+        border-style: solid;
+        border-color: var(--cta-color);
+        background-color: var(--cta-color);
+        color: var(--cta-fg, #FFFFFF);
+        cursor: pointer;
+        transition: transform 0.15s, opacity 0.15s;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+}
+
+.nav-cta-outline {
+    @layer memphis.modifier {
+        background-color: transparent;
+        color: var(--cta-color);
+    }
+}
+
+/* CTA color modifiers */
+.nav-cta-coral { @layer memphis.modifier { --cta-color: #FF6B6B; --cta-fg: #FFFFFF; } }
+.nav-cta-teal { @layer memphis.modifier { --cta-color: #4ECDC4; --cta-fg: #FFFFFF; } }
+.nav-cta-yellow { @layer memphis.modifier { --cta-color: #FFE66D; --cta-fg: #1A1A2E; } }
+.nav-cta-purple { @layer memphis.modifier { --cta-color: #A78BFA; --cta-fg: #FFFFFF; } }
+
+/* ─── Header Utility Bar ──────────────────────────────────────────────
+   Top bar above the main nav. */
+.header-utility-bar {
+    @layer memphis.component {
+        @apply flex items-center justify-between;
+        padding: 0.375rem 1.5rem;
+        border-bottom: var(--border-interactive) solid var(--color-dark-gray);
+    }
+}
+
+/* ─── Dropdown Panel ──────────────────────────────────────────────────
+   Use .nav-dropdown-{color} modifier for accent. */
+.nav-dropdown {
+    @layer memphis.component {
+        @apply p-2 z-50;
+        border-width: var(--border-container);
+        border-style: solid;
+        border-color: var(--dropdown-accent);
+        background-color: var(--color-dark);
+    }
+}
+
+.nav-dropdown-title {
+    @layer memphis.component {
+        @apply px-3 py-2 mb-1;
+        @apply text-[9px] font-black uppercase tracking-[0.2em];
+        color: var(--dropdown-accent);
+    }
+}
+
+.nav-dropdown-item {
+    @layer memphis.component {
+        @apply flex items-center gap-3 px-3 py-2.5;
+        transition: transform 0.15s;
+        border-left: var(--border-interactive) solid transparent;
+
+        &:hover {
+            transform: translateX(4px);
+            border-left-color: var(--item-accent);
+        }
+    }
+}
+
+.nav-dropdown-item-icon {
+    @layer memphis.component {
+        @apply w-9 h-9 flex items-center justify-center flex-shrink-0;
+        border-width: var(--border-detail);
+        border-style: solid;
+        border-color: var(--item-accent);
+
+        i {
+            color: var(--item-accent);
+        }
+    }
+}
+
+.nav-dropdown-item-label {
+    @layer memphis.component {
+        @apply text-xs font-black uppercase tracking-wide;
+        color: var(--color-neutral-content);
+    }
+}
+
+.nav-dropdown-item-desc {
+    @layer memphis.component {
+        @apply text-[10px];
+        color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+/* Dropdown color modifiers */
+.nav-dropdown-coral { @layer memphis.modifier { --dropdown-accent: #FF6B6B; } }
+.nav-dropdown-teal { @layer memphis.modifier { --dropdown-accent: #4ECDC4; } }
+.nav-dropdown-yellow { @layer memphis.modifier { --dropdown-accent: #FFE66D; } }
+.nav-dropdown-purple { @layer memphis.modifier { --dropdown-accent: #A78BFA; } }
+
+/* Dropdown item color modifiers */
+.nav-dropdown-item-coral { @layer memphis.modifier { --item-accent: #FF6B6B; } }
+.nav-dropdown-item-teal { @layer memphis.modifier { --item-accent: #4ECDC4; } }
+.nav-dropdown-item-yellow { @layer memphis.modifier { --item-accent: #FFE66D; } }
+.nav-dropdown-item-purple { @layer memphis.modifier { --item-accent: #A78BFA; } }
+
+/* ─── Header Logo ─────────────────────────────────────────────────────
+   Brand mark + wordmark. Use .header-logo-{brand} for colors. */
+.header-logo {
+    @layer memphis.component {
+        @apply flex items-center gap-3;
+    }
+}
+
+/* Brand modifiers — set logo color variables via CSS */
+.header-logo-splits {
+    @layer memphis.modifier {
+        --logo-color: #FF6B6B;
+        --logo-dot: #4ECDC4;
+        --logo-fg: #FFFFFF;
+    }
+}
+
+.header-logo-applicant {
+    @layer memphis.modifier {
+        --logo-color: #4ECDC4;
+        --logo-dot: #FF6B6B;
+        --logo-fg: #FFFFFF;
+    }
+}
+
+.header-logo-employment {
+    @layer memphis.modifier {
+        --logo-color: #FFE66D;
+        --logo-dot: #A78BFA;
+        --logo-fg: #1A1A2E;
+    }
+}
+
+.header-logo-mark {
+    @layer memphis.component {
+        @apply relative inline-flex;
+    }
+}
+
+.header-logo-box {
+    @layer memphis.component {
+        @apply flex items-center justify-center font-black tracking-tight;
+        border-width: var(--border-interactive);
+        border-style: solid;
+        border-color: var(--logo-color);
+        background-color: var(--logo-color);
+        color: var(--logo-fg, var(--color-neutral-content));
+    }
+}
+
+.header-logo-box-sm {
+    @layer memphis.modifier {
+        @apply w-9 h-9 text-[11px];
+    }
+}
+
+.header-logo-box-md {
+    @layer memphis.modifier {
+        @apply w-11 h-11 text-sm;
+    }
+}
+
+.header-logo-dot {
+    @layer memphis.component {
+        @apply absolute -top-1 -right-1 rounded-full;
+        background-color: var(--logo-dot);
+    }
+}
+
+.header-logo-dot-sm {
+    @layer memphis.modifier {
+        @apply w-2.5 h-2.5;
+    }
+}
+
+.header-logo-dot-md {
+    @layer memphis.modifier {
+        @apply w-3 h-3;
+    }
+}
+
+.header-logo-name {
+    @layer memphis.component {
+        @apply font-black uppercase leading-none;
+        color: var(--color-neutral-content);
+    }
+}
+
+.header-logo-name-sm {
+    @layer memphis.modifier {
+        @apply text-sm tracking-[0.12em];
+    }
+}
+
+.header-logo-name-md {
+    @layer memphis.modifier {
+        @apply text-base tracking-[0.15em];
+    }
+}
+
+.header-logo-sub {
+    @layer memphis.component {
+        @apply font-bold uppercase tracking-[0.25em];
+        color: var(--logo-color);
+    }
+}
+
+.header-logo-sub-sm {
+    @layer memphis.modifier {
+        @apply text-[8px];
+    }
+}
+
+.header-logo-sub-md {
+    @layer memphis.modifier {
+        @apply text-[9px];
+    }
+}

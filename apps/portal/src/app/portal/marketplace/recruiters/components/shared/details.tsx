@@ -192,7 +192,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                         {specialties.map((specialty, i) => (
                             <span
                                 key={`specialty-${i}`}
-                                className="badge badge-lg bg-primary/10 text-primary border-primary/20 p-3"
+                                className="badge badge-lg bg-primary/10 text-primary border-coral/20 p-3"
                             >
                                 {specialty}
                             </span>

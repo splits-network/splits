@@ -30,7 +30,10 @@ const benefits = [
 ];
 
 const features = [
-    { label: "Recruiter network", icon: "fa-duotone fa-regular fa-network-wired" },
+    {
+        label: "Recruiter network",
+        icon: "fa-duotone fa-regular fa-network-wired",
+    },
     { label: "Pipeline visibility", icon: "fa-duotone fa-regular fa-eye" },
     { label: "Consistent terms", icon: "fa-duotone fa-regular fa-handshake" },
     { label: "Pay on hire", icon: "fa-duotone fa-regular fa-badge-check" },
@@ -209,9 +212,11 @@ export function ForCompaniesSection() {
                             {features.map((feature, index) => (
                                 <span
                                     key={index}
-                                    className="feature-badge badge badge-lg bg-accent/10 border-accent/20 text-accent gap-2 opacity-0"
+                                    className="feature-badge badge badge-lg bg-accent/10 border-yellow/20 text-accent gap-2 opacity-0"
                                 >
-                                    <i className={`${feature.icon} text-xs`}></i>
+                                    <i
+                                        className={`${feature.icon} text-xs`}
+                                    ></i>
                                     {feature.label}
                                 </span>
                             ))}
@@ -240,7 +245,9 @@ export function ForCompaniesSection() {
                                         Your Open Roles
                                     </div>
                                 </div>
-                                <div className="badge badge-accent">3 active</div>
+                                <div className="badge badge-accent">
+                                    3 active
+                                </div>
                             </div>
 
                             <div className="space-y-3 mb-4">

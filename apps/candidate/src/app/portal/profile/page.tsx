@@ -117,7 +117,9 @@ export default function ProfilePage() {
         relationship_end_date: string;
         days_until_expiry?: number;
     }
-    const [activeRecruiters, setActiveRecruiters] = useState<RecruiterRelationship[]>([]);
+    const [activeRecruiters, setActiveRecruiters] = useState<
+        RecruiterRelationship[]
+    >([]);
     const [recruitersLoading, setRecruitersLoading] = useState(true);
 
     // GPT Sessions state
@@ -130,7 +132,9 @@ export default function ProfilePage() {
     }
     const [gptSessions, setGptSessions] = useState<GptSession[]>([]);
     const [gptSessionsLoading, setGptSessionsLoading] = useState(true);
-    const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
+    const [revokingSessionId, setRevokingSessionId] = useState<string | null>(
+        null,
+    );
 
     // Calculate profile completeness
     const completeness = useMemo(() => {
@@ -179,14 +183,14 @@ export default function ProfilePage() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/recruiter-candidates');
+            const response = await client.get("/recruiter-candidates");
             const allRelationships = response.data || [];
             const active = allRelationships.filter(
-                (rel: RecruiterRelationship) => rel.status === 'active'
+                (rel: RecruiterRelationship) => rel.status === "active",
             );
             setActiveRecruiters(active);
         } catch (err) {
-            console.error('Failed to load recruiter relationships:', err);
+            console.error("Failed to load recruiter relationships:", err);
         } finally {
             setRecruitersLoading(false);
         }
@@ -198,19 +202,23 @@ export default function ProfilePage() {
             const token = await getToken();
             if (!token || !userId) return;
 
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-            const response = await fetch(`${API_BASE}/api/v1/gpt/oauth/sessions`, {
-                headers: {
-                    'x-gpt-clerk-user-id': userId,
+            const API_BASE =
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+            const response = await fetch(
+                `${API_BASE}/api/v1/gpt/oauth/sessions`,
+                {
+                    headers: {
+                        "x-gpt-clerk-user-id": userId,
+                    },
                 },
-            });
+            );
 
             if (response.ok) {
                 const result = await response.json();
                 setGptSessions(result.data || []);
             }
         } catch (err) {
-            console.error('Failed to load GPT sessions:', err);
+            console.error("Failed to load GPT sessions:", err);
         } finally {
             setGptSessionsLoading(false);
         }
@@ -222,25 +230,31 @@ export default function ProfilePage() {
             const token = await getToken();
             if (!token || !userId) return;
 
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-            const response = await fetch(`${API_BASE}/api/v1/gpt/oauth/revoke`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-gpt-clerk-user-id': userId,
+            const API_BASE =
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+            const response = await fetch(
+                `${API_BASE}/api/v1/gpt/oauth/revoke`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-gpt-clerk-user-id": userId,
+                    },
+                    body: JSON.stringify({ session_id: sessionId }),
                 },
-                body: JSON.stringify({ session_id: sessionId }),
-            });
+            );
 
             if (response.ok) {
-                setGptSessions(prev => prev.filter(s => s.id !== sessionId));
-                toast.success('Session revoked successfully');
+                setGptSessions((prev) =>
+                    prev.filter((s) => s.id !== sessionId),
+                );
+                toast.success("Session revoked successfully");
             } else {
-                throw new Error('Failed to revoke session');
+                throw new Error("Failed to revoke session");
             }
         } catch (err) {
-            console.error('Failed to revoke GPT session:', err);
-            toast.error('Failed to revoke session');
+            console.error("Failed to revoke GPT session:", err);
+            toast.error("Failed to revoke session");
         } finally {
             setRevokingSessionId(null);
         }
@@ -472,7 +486,7 @@ export default function ProfilePage() {
                 {/* Left Column - Main Settings */}
                 <div className="lg:col-span-2 space-y-4">
                     {/* Profile Completeness Indicator */}
-                    <div className="card bg-primary/10 border border-primary/20">
+                    <div className="card bg-primary/10 border border-coral/20">
                         <div className="card-body">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                                 {/* Progress Ring */}
@@ -1298,13 +1312,17 @@ export default function ProfilePage() {
                                 <div className="space-y-3 mt-2">
                                     {activeRecruiters.map((rel) => {
                                         const formatDate = (d: string) =>
-                                            new Date(d).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                            });
+                                            new Date(d).toLocaleDateString(
+                                                "en-US",
+                                                {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                },
+                                            );
                                         const expiresSoon =
-                                            rel.days_until_expiry !== undefined &&
+                                            rel.days_until_expiry !==
+                                                undefined &&
                                             rel.days_until_expiry <= 30;
 
                                         return (
@@ -1326,14 +1344,21 @@ export default function ProfilePage() {
                                                         {rel.recruiter_name}
                                                     </div>
                                                     <div className="text-xs text-base-content/60">
-                                                        {formatDate(rel.relationship_start_date)} -{' '}
-                                                        {formatDate(rel.relationship_end_date)}
+                                                        {formatDate(
+                                                            rel.relationship_start_date,
+                                                        )}{" "}
+                                                        -{" "}
+                                                        {formatDate(
+                                                            rel.relationship_end_date,
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <span
-                                                    className={`badge badge-sm ${expiresSoon ? 'badge-warning' : 'badge-success'}`}
+                                                    className={`badge badge-sm ${expiresSoon ? "badge-warning" : "badge-success"}`}
                                                 >
-                                                    {expiresSoon ? 'Expires Soon' : 'Active'}
+                                                    {expiresSoon
+                                                        ? "Expires Soon"
+                                                        : "Active"}
                                                 </span>
                                             </div>
                                         );
@@ -1344,7 +1369,8 @@ export default function ProfilePage() {
                                     <p>No active recruiter relationship.</p>
                                     <p className="mt-1">
                                         Recruiters will invite you when they
-                                        start representing you for opportunities.
+                                        start representing you for
+                                        opportunities.
                                     </p>
                                 </div>
                             )}
@@ -1368,33 +1394,87 @@ export default function ProfilePage() {
                                 </div>
                             ) : gptSessions.length > 0 ? (
                                 <div className="space-y-3 mt-2">
-                                    {gptSessions.map(session => (
-                                        <div key={session.id} className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
+                                    {gptSessions.map((session) => (
+                                        <div
+                                            key={session.id}
+                                            className="flex items-start gap-3 p-3 bg-base-100 rounded-lg"
+                                        >
                                             <div className="shrink-0 mt-1">
                                                 <i className="fa-duotone fa-regular fa-robot text-primary text-lg"></i>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-semibold text-sm">AI Job Copilot</div>
+                                                <div className="font-semibold text-sm">
+                                                    AI Job Copilot
+                                                </div>
                                                 <div className="text-xs text-base-content/60 space-y-0.5">
-                                                    <div>Connected {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                                                    <div>Last active {new Date(session.last_active).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                                                    <div>Expires {new Date(session.refresh_token_expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                                    <div>
+                                                        Connected{" "}
+                                                        {new Date(
+                                                            session.created_at,
+                                                        ).toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                year: "numeric",
+                                                            },
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        Last active{" "}
+                                                        {new Date(
+                                                            session.last_active,
+                                                        ).toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                year: "numeric",
+                                                            },
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        Expires{" "}
+                                                        {new Date(
+                                                            session.refresh_token_expires_at,
+                                                        ).toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                year: "numeric",
+                                                            },
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1 mt-1">
-                                                    {session.scopes.map(scope => (
-                                                        <span key={scope} className="badge badge-xs badge-outline">{scope}</span>
-                                                    ))}
+                                                    {session.scopes.map(
+                                                        (scope) => (
+                                                            <span
+                                                                key={scope}
+                                                                className="badge badge-xs badge-outline"
+                                                            >
+                                                                {scope}
+                                                            </span>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </div>
                                             <button
                                                 className="btn btn-xs btn-error btn-outline shrink-0"
-                                                onClick={() => revokeGptSession(session.id)}
-                                                disabled={revokingSessionId === session.id}
+                                                onClick={() =>
+                                                    revokeGptSession(session.id)
+                                                }
+                                                disabled={
+                                                    revokingSessionId ===
+                                                    session.id
+                                                }
                                             >
-                                                {revokingSessionId === session.id ? (
+                                                {revokingSessionId ===
+                                                session.id ? (
                                                     <span className="loading loading-spinner loading-xs"></span>
                                                 ) : (
-                                                    'Revoke'
+                                                    "Revoke"
                                                 )}
                                             </button>
                                         </div>

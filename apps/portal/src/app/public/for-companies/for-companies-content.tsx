@@ -543,7 +543,7 @@ export function ForCompaniesContent() {
                     <div className="grid lg:grid-cols-2 gap-12">
                         <div className="animate-section">
                             <div className="space-y-8">
-                                <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-primary">
+                                <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-coral">
                                     <div className="flex items-start gap-4">
                                         <div className="bg-primary/20 p-3 rounded-lg flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-network-wired text-primary text-xl"></i>
@@ -600,7 +600,7 @@ export function ForCompaniesContent() {
                                     </div>
                                 </div>
 
-                                <div className="bg-accent/5 p-6 rounded-xl border-l-4 border-accent">
+                                <div className="bg-accent/5 p-6 rounded-xl border-l-4 border-yellow">
                                     <div className="flex items-start gap-4">
                                         <div className="bg-accent/20 p-3 rounded-lg flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-shield-check text-accent text-xl"></i>

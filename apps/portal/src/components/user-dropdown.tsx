@@ -5,6 +5,34 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { useUserProfile } from "@/contexts/user-profile-context";
+import { ACCENT_HEX } from "@splits-network/memphis-ui";
+
+// ─── Role → Memphis color mapping ───────────────────────────────────────────
+const ROLE_COLORS: Record<string, string> = {
+    Administrator: ACCENT_HEX.coral,
+    Recruiter: ACCENT_HEX.teal,
+    "Recruiter & Company": ACCENT_HEX.teal,
+    "Company User": ACCENT_HEX.purple,
+    Candidate: ACCENT_HEX.yellow,
+    User: "var(--color-cream)",
+};
+
+const MENU_ITEMS = [
+    {
+        href: "/portal/profile",
+        icon: "fa-duotone fa-regular fa-user-pen",
+        label: "Profile",
+        description: "Manage your account",
+        color: ACCENT_HEX.teal,
+    },
+    {
+        href: "/portal/billing",
+        icon: "fa-duotone fa-regular fa-credit-card",
+        label: "Billing",
+        description: "Plans & payments",
+        color: ACCENT_HEX.yellow,
+    },
+];
 
 export function UserDropdown() {
     const { user } = useUser();
@@ -80,146 +108,135 @@ export function UserDropdown() {
               ? "fa-user"
               : "fa-user";
 
-    const menuItems = [
-        {
-            href: "/portal/profile",
-            icon: "fa-user-pen",
-            label: "Profile",
-            description: "Manage your account",
-        },
-        {
-            href: "/portal/billing",
-            icon: "fa-credit-card",
-            label: "Billing",
-            description: "Plans & payments",
-        },
-    ];
+    const roleColor = ROLE_COLORS[roleDisplay] || "var(--color-cream)";
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Trigger */}
+            {/* ── Trigger ── */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`
-                    group flex items-center gap-2.5 px-2 py-1.5 rounded-xl
-                    transition-all duration-200 cursor-pointer
-                    hover:bg-base-200/80
-                    ${isOpen ? "bg-base-200/80" : ""}
-                `}
+                className="flex items-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5"
             >
-                <div className="relative">
+                {/* Square avatar */}
+                <div
+                    className="w-9 h-9 flex items-center justify-center border-container text-[10px] font-black overflow-hidden"
+                    style={{
+                        borderColor: ACCENT_HEX.teal,
+                        backgroundColor: user.imageUrl ? "transparent" : ACCENT_HEX.teal,
+                        color: user.imageUrl ? "var(--color-cream)" : "var(--color-dark)",
+                    }}
+                >
                     {user.imageUrl ? (
                         <img
                             src={user.imageUrl}
                             alt={userName}
-                            className="w-8 h-8 rounded-full object-cover ring-2 ring-base-300 group-hover:ring-primary/30 transition-all duration-200"
+                            className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-xs ring-2 ring-primary/20">
-                            {userInitials}
-                        </div>
+                        userInitials
                     )}
-                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-success rounded-full ring-2 ring-base-100" />
                 </div>
-
-                <div className="hidden md:flex flex-col leading-tight text-left">
-                    <span className="text-sm font-medium text-base-content truncate max-w-[120px]">
-                        {user.firstName || userName}
-                    </span>
-                </div>
-
                 <i
-                    className={`
-                        fa-duotone fa-regular fa-chevron-down text-[10px] text-base-content/40
-                        transition-transform duration-200 hidden md:block
-                        ${isOpen ? "rotate-180" : ""}
-                    `}
+                    className={`fa-solid fa-chevron-down text-[8px] text-cream/30 transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
             </button>
 
-            {/* Dropdown Panel */}
-            <div
-                className={`
-                    absolute right-0 mt-2 w-72 bg-base-100 rounded-2xl shadow-lg
-                    border border-base-200 overflow-hidden z-[100]
-                    transition-all duration-200 origin-top-right
-                    ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}
-                `}
-            >
-                {/* User Header */}
-                <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
-                    <div className="flex items-center gap-3">
-                        <div className="relative shrink-0">
-                            {user.imageUrl ? (
-                                <img
-                                    src={user.imageUrl}
-                                    alt={userName}
-                                    className="w-11 h-11 rounded-full object-cover ring-2 ring-base-300"
-                                />
-                            ) : (
-                                <div className="w-11 h-11 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-sm ring-2 ring-primary/20">
-                                    {userInitials}
-                                </div>
-                            )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-sm text-base-content truncate">
-                                {userName}
+            {/* ── Dropdown Panel ── */}
+            {isOpen && (
+                <div
+                    className="absolute right-0 mt-2 border-container border-teal z-[100] bg-dark"
+                    style={{ minWidth: '288px' }}
+                >
+                    {/* User header */}
+                    <div className="p-4 border-b-4 border-dark-gray">
+                        <div className="flex items-center gap-3">
+                            {/* Large square avatar */}
+                            <div
+                                className="w-11 h-11 flex items-center justify-center border-container text-sm font-black flex-shrink-0 overflow-hidden"
+                                style={{
+                                    borderColor: roleColor,
+                                    backgroundColor: user.imageUrl ? "transparent" : roleColor,
+                                    color: user.imageUrl ? "var(--color-cream)" : "var(--color-dark)",
+                                }}
+                            >
+                                {user.imageUrl ? (
+                                    <img
+                                        src={user.imageUrl}
+                                        alt={userName}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    userInitials
+                                )}
                             </div>
-                            {userEmail && (
-                                <div className="text-xs text-base-content/50 truncate mt-0.5">
-                                    {userEmail}
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs font-black uppercase tracking-wide truncate text-white">
+                                    {userName}
                                 </div>
-                            )}
-                            <div className="mt-1.5">
-                                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                                    <i className={`fa-duotone fa-regular ${roleIcon} text-[10px]`}></i>
-                                    {roleDisplay}
-                                </span>
+                                {userEmail && (
+                                    <div className="text-[10px] truncate mt-0.5 text-cream/40">
+                                        {userEmail}
+                                    </div>
+                                )}
+                                <div className="mt-1.5">
+                                    <span
+                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 border-interactive"
+                                        style={{ borderColor: roleColor, color: roleColor }}
+                                    >
+                                        <i className={`fa-duotone fa-regular ${roleIcon} text-[8px]`} />
+                                        {roleDisplay}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Menu Items */}
-                <div className="p-2">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setIsOpen(false)}
-                            className="group/item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-base-200/70 transition-all duration-150"
+                    {/* Menu items */}
+                    <div className="p-2">
+                        {MENU_ITEMS.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 transition-all hover:translate-x-1 border-l-4 border-transparent"
+                                onMouseEnter={(e) => { e.currentTarget.style.borderLeftColor = item.color; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.borderLeftColor = "transparent"; }}
+                            >
+                                <div
+                                    className="w-8 h-8 flex items-center justify-center border-interactive flex-shrink-0"
+                                    style={{ borderColor: item.color }}
+                                >
+                                    <i className={`${item.icon} text-sm`} style={{ color: item.color }} />
+                                </div>
+                                <div>
+                                    <div className="text-xs font-black uppercase tracking-wide text-white">
+                                        {item.label}
+                                    </div>
+                                    <div className="text-[10px] text-cream/40">
+                                        {item.description}
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Sign out */}
+                    <div className="p-2 border-t-4 border-dark-gray">
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-3 w-full px-3 py-2.5 transition-all hover:translate-x-1 cursor-pointer border-l-4 border-transparent hover:border-coral"
                         >
-                            <span className="w-8 h-8 rounded-lg bg-base-200/60 flex items-center justify-center group-hover/item:bg-primary/10 group-hover/item:text-primary transition-colors duration-150">
-                                <i className={`fa-duotone fa-regular ${item.icon} text-sm text-base-content/50 group-hover/item:text-primary transition-colors duration-150`}></i>
-                            </span>
-                            <div>
-                                <div className="text-sm font-medium text-base-content">
-                                    {item.label}
-                                </div>
-                                <div className="text-[11px] text-base-content/45">
-                                    {item.description}
-                                </div>
+                            <div className="w-8 h-8 flex items-center justify-center border-interactive border-coral flex-shrink-0">
+                                <i className="fa-duotone fa-regular fa-right-from-bracket text-sm text-coral" />
                             </div>
-                        </Link>
-                    ))}
-                </div>
+                            <span className="text-xs font-black uppercase tracking-wide text-coral">
+                                Sign Out
+                            </span>
+                        </button>
+                    </div>
 
-                {/* Sign Out */}
-                <div className="p-2 border-t border-base-200">
-                    <button
-                        onClick={handleSignOut}
-                        className="group/signout flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-error/8 transition-all duration-150"
-                    >
-                        <span className="w-8 h-8 rounded-lg bg-base-200/60 flex items-center justify-center group-hover/signout:bg-error/10 transition-colors duration-150">
-                            <i className="fa-duotone fa-regular fa-right-from-bracket text-sm text-base-content/50 group-hover/signout:text-error transition-colors duration-150"></i>
-                        </span>
-                        <span className="text-sm font-medium text-base-content group-hover/signout:text-error transition-colors duration-150">
-                            Sign out
-                        </span>
-                    </button>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

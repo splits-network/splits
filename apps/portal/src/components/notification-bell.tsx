@@ -1,24 +1,49 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { NotificationItem, ColorBar } from "@splits-network/memphis-ui";
+import type { AccentColor } from "@splits-network/memphis-ui";
 import {
     formatNotificationTime,
     getNotificationIcon,
     InAppNotification,
-} from '@/lib/notifications';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
-import { useNotificationTabIndicator } from '@/hooks/use-notification-tab-indicator';
+} from "@/lib/notifications";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useNotificationTabIndicator } from "@/hooks/use-notification-tab-indicator";
 
-interface NotificationBellProps {
-    /** Position of the dropdown. Use 'right' when in a sidebar */
-    position?: 'end' | 'right' | 'top';
+// ─── Category → Memphis accent color ────────────────────────────────────────
+function getCategoryAccent(category?: string): AccentColor {
+    switch (category) {
+        case "application": return "coral";
+        case "placement": return "teal";
+        case "proposal": return "yellow";
+        case "candidate": return "purple";
+        case "collaboration": return "teal";
+        case "invitation": return "coral";
+        case "system": return "purple";
+        default: return "coral";
+    }
 }
 
-export default function NotificationBell({ position = 'end' }: NotificationBellProps) {
+function getCategoryLabel(category?: string): string | undefined {
+    switch (category) {
+        case "application": return "Application";
+        case "placement": return "Placement";
+        case "proposal": return "Proposal";
+        case "candidate": return "Candidate";
+        case "collaboration": return "Team";
+        case "invitation": return "Invitation";
+        case "system": return "System";
+        default: return undefined;
+    }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+export default function NotificationBell() {
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
@@ -26,13 +51,24 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-
-    // Track previous count to detect new notifications (useRef to avoid re-render loops)
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const previousUnreadCount = useRef<number | null>(null);
 
     // Browser tab indicator
     useNotificationTabIndicator(unreadCount);
+
+    // Click outside to close
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isOpen]);
 
     // Fetch unread count every 15 seconds
     const loadUnreadCount = useCallback(async () => {
@@ -41,28 +77,23 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get('/notifications/unread-count');
+            const res = await client.get("/notifications/unread-count");
             const count = res?.data?.count ?? 0;
 
-            // Detect new notifications and show toast
             if (previousUnreadCount.current !== null && count > previousUnreadCount.current) {
                 const newCount = count - previousUnreadCount.current;
                 toast.info(
                     newCount === 1
-                        ? 'You have a new notification'
-                        : `You have ${newCount} new notifications`
+                        ? "You have a new notification"
+                        : `You have ${newCount} new notifications`,
                 );
             }
             previousUnreadCount.current = count;
-
             setUnreadCount(count);
-            setError(false);
         } catch (err) {
-            // Silently fail - notification count is non-critical
-            console.warn('Failed to fetch unread count:', err);
-            setError(true);
+            console.warn("Failed to fetch unread count:", err);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [toast]);
 
     // Fetch recent notifications when dropdown opens
@@ -70,63 +101,49 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
         setLoading(true);
         try {
             const token = await getToken();
-            if (!token) {
-                setLoading(false);
-                return;
-            }
+            if (!token) { setLoading(false); return; }
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get('/notifications', { params: { limit: 10 } });
+            const res = await client.get("/notifications", { params: { limit: 10 } });
             const data = res?.data ?? [];
             setNotifications(Array.isArray(data) ? data : []);
-            setError(false);
         } catch (err) {
-            console.warn('Failed to fetch notifications:', err);
+            console.warn("Failed to fetch notifications:", err);
             setNotifications([]);
-            setError(true);
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Initial load and polling
     useEffect(() => {
         loadUnreadCount();
-        const interval = setInterval(loadUnreadCount, 15000); // Poll every 15 seconds
+        const interval = setInterval(loadUnreadCount, 15000);
         return () => clearInterval(interval);
     }, [loadUnreadCount]);
 
     // Load notifications when dropdown opens
     useEffect(() => {
-        if (isOpen) {
-            loadNotifications();
-        }
+        if (isOpen) loadNotifications();
     }, [isOpen, loadNotifications]);
 
     const handleNotificationClick = async (notification: InAppNotification) => {
-        // Mark as read if unread
         if (!notification.read) {
             try {
                 const token = await getToken();
                 if (!token) return;
-
                 const client = createAuthenticatedClient(token);
                 await client.patch(`/notifications/${notification.id}`, { read: true });
-
                 setUnreadCount((prev) => Math.max(0, prev - 1));
                 previousUnreadCount.current = Math.max(0, (previousUnreadCount.current ?? 1) - 1);
                 setNotifications((prev) =>
-                    prev.map((n) =>
-                        n.id === notification.id ? { ...n, read: true } : n
-                    )
+                    prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
                 );
             } catch (error) {
-                console.error('Failed to mark as read:', error);
+                console.error("Failed to mark as read:", error);
             }
         }
-
-        // Navigate to action URL if present
         if (notification.action_url) {
             setIsOpen(false);
             router.push(notification.action_url);
@@ -137,175 +154,170 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
         try {
             const token = await getToken();
             if (!token) return;
-
             const client = createAuthenticatedClient(token);
-            await client.post('/notifications/mark-all-read', {});
+            await client.post("/notifications/mark-all-read", {});
             setUnreadCount(0);
             previousUnreadCount.current = 0;
-            setNotifications((prev) =>
-                prev.map((n) => ({ ...n, read: true }))
-            );
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         } catch (error) {
-            console.error('Failed to mark all as read:', error);
+            console.error("Failed to mark all as read:", error);
         }
     };
 
-    const handleDismiss = async (notificationId: string, event: React.MouseEvent) => {
-        event.stopPropagation();
+    const handleToggleRead = async (notification: InAppNotification) => {
         try {
             const token = await getToken();
             if (!token) return;
-
             const client = createAuthenticatedClient(token);
-            await client.delete(`/notifications/${notificationId}`);
+            const newRead = !notification.read;
+            await client.patch(`/notifications/${notification.id}`, { read: newRead });
             setNotifications((prev) =>
-                prev.filter((n) => n.id !== notificationId)
+                prev.map((n) => (n.id === notification.id ? { ...n, read: newRead } : n)),
             );
-            // Refresh unread count
-            loadUnreadCount();
+            setUnreadCount((prev) => newRead ? Math.max(0, prev - 1) : prev + 1);
+            previousUnreadCount.current = newRead
+                ? Math.max(0, (previousUnreadCount.current ?? 1) - 1)
+                : (previousUnreadCount.current ?? 0) + 1;
         } catch (err) {
-            console.warn('Failed to dismiss notification:', err);
+            console.warn("Failed to toggle read:", err);
         }
     };
 
-    // Determine dropdown position class
-    const dropdownPositionClass = position === 'right'
-        ? 'dropdown-right dropdown-end'
-        : position === 'top'
-            ? 'dropdown-top dropdown-end'
-            : 'dropdown-end';
+    const handleDismiss = async (notificationId: string) => {
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/notifications/${notificationId}`);
+            setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+            loadUnreadCount();
+        } catch (err) {
+            console.warn("Failed to dismiss notification:", err);
+        }
+    };
 
     return (
-        <div className={`dropdown relative ${dropdownPositionClass}`}>
+        <div className="relative" ref={dropdownRef}>
+            {/* ── Bell Button ── */}
             <button
-                type="button"
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle relative indicator"
-                onFocus={() => setIsOpen(true)}
-                onBlur={() => setIsOpen(false)}
+                onClick={() => setIsOpen(!isOpen)}
+                className="nav-action relative"
                 aria-label="Notifications"
-                title='Notifications'
+                title="Notifications"
             >
-                <i className="fa-duotone fa-regular fa-bell text-lg text-content/50"></i>
+                <i className="fa-duotone fa-regular fa-bell text-sm" />
                 {unreadCount > 0 && (
-                    <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                    <span className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center px-1 text-[10px] font-black bg-coral text-dark border-detail border-dark">
+                        {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
             </button>
 
-            <div
-                tabIndex={-1}
-                className="dropdown-content z-100 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
-            >
-                {/* Header */}
-                <div className="flex items-center justify-between px-3 py-2 border-b border-base-300">
-                    <h3 className="font-semibold text-sm">Notifications</h3>
-                    <div className="flex gap-1">
-                        {unreadCount > 0 && (
-                            <button
-                                type="button"
-                                className="btn btn-ghost btn-xs"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={handleMarkAllRead}
+            {/* ── Dropdown Panel ── */}
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-96 border-4 border-coral bg-dark z-[100]">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b-4 border-dark-gray">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-5 bg-coral" />
+                            <span className="text-xs font-black uppercase tracking-[0.15em] text-white">
+                                Notifications
+                            </span>
+                            {unreadCount > 0 && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 border-detail border-coral text-coral">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {unreadCount > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={handleMarkAllRead}
+                                    className="text-[9px] font-bold uppercase tracking-wider text-teal transition-colors hover:text-white cursor-pointer"
+                                >
+                                    Mark all read
+                                </button>
+                            )}
+                            <Link
+                                href="/portal/notifications"
+                                onClick={() => setIsOpen(false)}
+                                className="text-[9px] font-bold uppercase tracking-wider text-white/40 transition-colors hover:text-white"
                             >
-                                Mark all read
-                            </button>
-                        )}
-                        <Link
-                            href="/portal/notifications"
-                            className="btn btn-ghost btn-xs"
-                            onMouseDown={(e) => e.preventDefault()}
-                        >
-                            View all
-                        </Link>
+                                View all
+                            </Link>
+                        </div>
                     </div>
-                </div>
 
-                {/* Notification List */}
-                <div className="max-h-96 overflow-y-auto">
-                    {loading ? (
-                        <div className="flex justify-center items-center py-6">
-                            <span className="loading loading-spinner loading-sm"></span>
-                        </div>
-                    ) : notifications.length === 0 ? (
-                        <div className="text-center py-6 text-base-content/60">
-                            <i className="fa-duotone fa-regular fa-inbox text-3xl mb-1"></i>
-                            <p className="text-sm">No notifications</p>
-                        </div>
-                    ) : (
-                        notifications.map((notification) => (
-                            <div
-                                key={notification.id}
-                                className={`
-                                        flex gap-2 px-3 py-2 border-b border-base-200 cursor-pointer
-                                        hover:bg-base-200 transition-colors
-                                        ${!notification.read ? 'bg-primary/5' : ''}
-                                    `}
-                                onClick={() => handleNotificationClick(notification)}
-                            >
-                                {/* Icon */}
-                                <div className="shrink-0">
-                                    <div className={`
-                                            w-8 h-8 rounded-full flex items-center justify-center text-xs
-                                            ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
-                                        `}>
-                                        <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-1">
-                                        <p className={`text-xs leading-snug line-clamp-2 ${!notification.read ? 'font-semibold' : ''}`}>
-                                            {notification.subject}
-                                        </p>
-                                        <button
-                                            type="button"
-                                            className="btn btn-ghost btn-xs btn-circle shrink-0"
-                                            onClick={(e) => handleDismiss(notification.id, e)}
-                                            aria-label="Dismiss"
-                                        >
-                                            <i className="fa-duotone fa-regular fa-times text-xs"></i>
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className="text-[10px] text-base-content/50">
-                                            {formatNotificationTime(notification.created_at)}
-                                        </span>
-                                        {notification.action_label && (
-                                            <span className="text-[10px] text-primary">
-                                                {notification.action_label} →
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Unread indicator */}
-                                {!notification.read && (
-                                    <div className="shrink-0 mt-1">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                                    </div>
-                                )}
+                    {/* Notification List */}
+                    <div className="max-h-[400px] overflow-y-auto">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-10 gap-2">
+                                <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xl text-coral" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">
+                                    Loading...
+                                </span>
                             </div>
-                        ))
-                    )}
-                </div>
-
-                {/* Footer */}
-                {notifications.length > 0 && (
-                    <div className="px-2 py-1.5 border-t border-base-300 text-center">
-                        <Link
-                            href="/portal/notifications"
-                            className="btn btn-ghost btn-xs btn-block"
-                            onMouseDown={(e) => e.preventDefault()}
-                        >
-                            View all notifications
-                        </Link>
+                        ) : notifications.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 gap-3">
+                                <div className="w-14 h-14 flex items-center justify-center border-container border-dark-gray">
+                                    <i className="fa-duotone fa-regular fa-inbox text-2xl text-white/20" />
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs font-black uppercase tracking-wider text-white/40">
+                                        All Clear
+                                    </div>
+                                    <div className="text-[10px] text-white/20 mt-1">
+                                        No notifications yet
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-2 space-y-2">
+                                {notifications.map((notification) => {
+                                    const accent = getCategoryAccent(notification.category);
+                                    return (
+                                        <div
+                                            key={notification.id}
+                                            className="cursor-pointer"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
+                                            <NotificationItem
+                                                title={notification.subject}
+                                                description={notification.action_label || notification.event_type || ""}
+                                                time={formatNotificationTime(notification.created_at)}
+                                                icon={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}
+                                                color={accent}
+                                                categoryLabel={getCategoryLabel(notification.category)}
+                                                read={notification.read}
+                                                onToggleRead={() => handleToggleRead(notification)}
+                                                onDelete={() => handleDismiss(notification.id)}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
+
+                    {/* Footer */}
+                    {notifications.length > 0 && (
+                        <div className="border-t-4 border-dark-gray">
+                            <Link
+                                href="/portal/notifications"
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white/40 transition-colors hover:text-coral"
+                            >
+                                <i className="fa-duotone fa-regular fa-arrow-right text-[8px]" />
+                                View all notifications
+                            </Link>
+                        </div>
+                    )}
+
+                    {/* Memphis accent bar */}
+                    <ColorBar height="h-1" />
+                </div>
+            )}
         </div>
     );
 }
