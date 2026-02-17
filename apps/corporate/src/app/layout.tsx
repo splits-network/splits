@@ -92,7 +92,7 @@ export default function RootLayout({
         url: "https://employment-networks.com",
     };
     return (
-        <html lang="en" data-theme="splits-light">
+        <html lang="en">
             <head>
                 <JsonLd data={organizationJsonLd} id="corporate-org-jsonld" />
                 <JsonLd

@@ -96,136 +96,93 @@ export function DynamicPricingSection({
     // Error state
     if (error && !loading && plans.length === 0) {
         return (
-            <div className="py-20 bg-base-100">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="alert alert-error">
-                            <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                            <div>
-                                <h3 className="font-bold">
-                                    Unable to Load Pricing
-                                </h3>
-                                <div className="text-xs">{error}</div>
-                            </div>
-                        </div>
+            <div className="text-center">
+                <div className="p-6 border-4 border-coral bg-cream/50 mb-8">
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-coral text-3xl mb-3"></i>
+                    <h3 className="font-black uppercase tracking-wider mb-2 text-dark">
+                        Unable to Load Pricing
+                    </h3>
+                    <div className="text-xs text-dark/70">{error}</div>
+                </div>
 
-                        {/* Fallback content - basic pricing info */}
-                        <div className="mt-8 text-center">
-                            <p className="text-base-content/70 mb-4">
-                                We're experiencing issues loading our current
-                                pricing. Here's our standard pricing structure:
-                            </p>
-                            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto text-sm">
-                                <div className="card bg-base-200 shadow">
-                                    <div className="card-body p-4">
-                                        <h4 className="font-bold">Starter</h4>
-                                        <div className="text-lg font-bold">
-                                            Free
-                                        </div>
-                                        <p className="text-base-content/70 text-xs">
-                                            Perfect for getting started
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="card bg-primary text-primary-content shadow">
-                                    <div className="card-body p-4">
-                                        <h4 className="font-bold">Pro</h4>
-                                        <div className="text-lg font-bold">
-                                            $99/month
-                                        </div>
-                                        <p className="opacity-80 text-xs">
-                                            For serious recruiters
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="card bg-base-200 shadow">
-                                    <div className="card-body p-4">
-                                        <h4 className="font-bold">Partner</h4>
-                                        <div className="text-lg font-bold">
-                                            $249/month
-                                        </div>
-                                        <p className="text-base-content/70 text-xs">
-                                            For firms and power users
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mt-6">
-                                <a href="/sign-up" className="btn btn-primary">
-                                    Get Started
-                                </a>
-                            </div>
-                        </div>
+                {/* Fallback content - basic pricing info */}
+                <p className="text-dark/70 mb-8">
+                    We're experiencing issues loading our current pricing. Here's our standard pricing structure:
+                </p>
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    <div className="p-6 border-4 border-teal bg-white">
+                        <div className="absolute top-0 right-0 w-10 h-10 bg-teal" />
+                        <h4 className="font-black uppercase tracking-wider mb-2 text-dark">Starter</h4>
+                        <div className="text-2xl font-black mb-2 text-dark">Free</div>
+                        <p className="text-dark/70 text-sm">Perfect for getting started</p>
+                    </div>
+                    <div className="p-6 border-4 border-coral bg-dark">
+                        <div className="absolute top-0 right-0 w-10 h-10 bg-coral" />
+                        <h4 className="font-black uppercase tracking-wider mb-2 text-cream">Pro</h4>
+                        <div className="text-2xl font-black mb-2 text-cream">$99/month</div>
+                        <p className="text-cream/70 text-sm">For serious recruiters</p>
+                    </div>
+                    <div className="p-6 border-4 border-purple bg-white">
+                        <div className="absolute top-0 right-0 w-10 h-10 bg-purple" />
+                        <h4 className="font-black uppercase tracking-wider mb-2 text-dark">Partner</h4>
+                        <div className="text-2xl font-black mb-2 text-dark">$249/month</div>
+                        <p className="text-dark/70 text-sm">For firms and power users</p>
                     </div>
                 </div>
+                <a href="/sign-up" className="inline-block px-8 py-4 font-bold uppercase tracking-wider border-4 border-coral bg-coral text-cream transition-transform hover:-translate-y-1">
+                    Get Started
+                </a>
             </div>
         );
     }
 
     return (
-        <div className="py-20 bg-base-100">
-            <div className="container mx-auto px-4">
-                <div className="max-w-7xl mx-auto">
-                    {/* Billing Toggle */}
-                    {showBillingToggle &&
-                        plans.some(
-                            (plan) =>
-                                plan.price_annual &&
-                                plan.price_annual !== plan.price_monthly * 12,
-                        ) && (
-                            <div className="text-center mb-12">
-                                <div className="tabs tabs-box inline-flex">
-                                    <button
-                                        className={`tab ${!isAnnual ? "tab-active" : ""}`}
-                                        onClick={() => setIsAnnual(false)}
-                                    >
-                                        Monthly
-                                    </button>
-                                    <button
-                                        className={`tab ${isAnnual ? "tab-active" : ""}`}
-                                        onClick={() => setIsAnnual(true)}
-                                    >
-                                        Annual
-                                        {plans.some((plan) => {
-                                            const monthlyTotal =
-                                                plan.price_monthly * 12;
-                                            return (
-                                                plan.price_annual > 0 &&
-                                                plan.price_annual < monthlyTotal
-                                            );
-                                        }) && (
-                                            <span className="badge badge-success badge-sm ml-2">
-                                                Save 20%
-                                            </span>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                    {/* Pricing Cards */}
-                    <PricingCardGrid
-                        plans={plans}
-                        selectedPlanId={selectedPlanId}
-                        onSelectPlan={selectable ? onPlanSelect : undefined}
-                        isAnnual={isAnnual}
-                        variant={variant}
-                        loading={loading}
-                    />
-
-                    {/* Global Disclaimer */}
-                    {!loading && plans.length > 0 && (
-                        <div className="text-center mt-12 text-base-content/60 text-sm max-w-3xl mx-auto">
-                            <p>
-                                Splits Network does not guarantee placements,
-                                income, or role availability. All payouts are
-                                finalized at hire time based on participation,
-                                role, and subscription tier.
-                            </p>
+        <div>
+            {/* Billing Toggle */}
+            {showBillingToggle &&
+                plans.some(
+                    (plan) =>
+                        plan.price_annual &&
+                        plan.price_annual !== plan.price_monthly * 12,
+                ) && (
+                    <div className="text-center mb-12">
+                        <div className="inline-flex border-4 border-dark">
+                            <button
+                                className={`px-6 py-3 font-bold uppercase tracking-wider text-sm transition-colors ${!isAnnual ? "bg-dark text-cream" : "bg-white text-dark"}`}
+                                onClick={() => setIsAnnual(false)}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                className={`px-6 py-3 font-bold uppercase tracking-wider text-sm transition-colors ${isAnnual ? "bg-dark text-cream" : "bg-white text-dark"}`}
+                                onClick={() => setIsAnnual(true)}
+                            >
+                                Annual
+                                {plans.some((plan) => {
+                                    const monthlyTotal = plan.price_monthly * 12;
+                                    return (
+                                        plan.price_annual > 0 &&
+                                        plan.price_annual < monthlyTotal
+                                    );
+                                }) && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-black bg-yellow text-dark">
+                                        Save 20%
+                                    </span>
+                                )}
+                            </button>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+                )}
+
+            {/* Pricing Cards */}
+            <PricingCardGrid
+                plans={plans}
+                selectedPlanId={selectedPlanId}
+                onSelectPlan={selectable ? onPlanSelect : undefined}
+                isAnnual={isAnnual}
+                variant={variant}
+                loading={loading}
+            />
         </div>
     );
 }

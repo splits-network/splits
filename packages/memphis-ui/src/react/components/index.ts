@@ -326,3 +326,13 @@ export type { FooterBottomBarProps, FooterBottomBarLegalLink } from './FooterBot
 
 export { SocialLink } from './SocialLink';
 export type { SocialLinkProps } from './SocialLink';
+
+// Memphis Shape Components (use MemphisCoreColor, MemphisSize from utils/types)
+export { MemphisZigzag } from './MemphisZigzag';
+export type { MemphisZigzagProps } from './MemphisZigzag';
+
+export { MemphisTriangle } from './MemphisTriangle';
+export type { MemphisTriangleProps } from './MemphisTriangle';
+
+export { MemphisPlus } from './MemphisPlus';
+export type { MemphisPlusProps } from './MemphisPlus';

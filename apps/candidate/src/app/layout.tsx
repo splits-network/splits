@@ -120,20 +120,6 @@ export default function RootLayout({
         <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
             <html lang="en" suppressHydrationWarning>
                 <head>
-                    <script
-                        dangerouslySetInnerHTML={{
-                            __html: `
-                                (function() {
-                                    try {
-                                        var theme = localStorage.getItem('theme') || 'applicant-light';
-                                        document.documentElement.setAttribute('data-theme', theme);
-                                    } catch (e) {
-                                        document.documentElement.setAttribute('data-theme', 'applicant-light');
-                                    }
-                                })();
-                            `,
-                        }}
-                    />
                     <JsonLd data={webAppJsonLd} id="applicant-webapp-jsonld" />
                     <JsonLd
                         data={websiteJsonLd}

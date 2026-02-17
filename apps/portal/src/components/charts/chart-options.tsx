@@ -1,6 +1,6 @@
 export function getCssVar(name: string, el?: HTMLElement) {
-    if (typeof document === 'undefined') {
-        return '#000000'; // Fallback for SSR
+    if (typeof document === "undefined") {
+        return "#000000"; // Fallback for SSR
     }
     const element = el || document.documentElement;
     return getComputedStyle(element).getPropertyValue(name).trim();
@@ -8,7 +8,13 @@ export function getCssVar(name: string, el?: HTMLElement) {
 
 function hexToRgba(hex: string, a = 1) {
     const h = hex.replace("#", "").trim();
-    const full = h.length === 3 ? h.split("").map(c => c + c).join("") : h;
+    const full =
+        h.length === 3
+            ? h
+                  .split("")
+                  .map((c) => c + c)
+                  .join("")
+            : h;
     const r = parseInt(full.slice(0, 2), 16);
     const g = parseInt(full.slice(2, 4), 16);
     const b = parseInt(full.slice(4, 6), 16);
@@ -18,23 +24,25 @@ function hexToRgba(hex: string, a = 1) {
 // Initialize color values on first client-side call
 let colorCache: Record<string, string> = {};
 function getColorCache() {
-    if (typeof document === 'undefined' || Object.keys(colorCache).length === 0) {
+    if (
+        typeof document === "undefined" ||
+        Object.keys(colorCache).length === 0
+    ) {
         // SSR or initial load - set defaults
-        if (typeof document === 'undefined') {
-
+        if (typeof document === "undefined") {
             return {
-                primaryHex: '#0000ff',
-                secondaryHex: '#ff00ff',
-                accentHex: '#00ffff',
-                neutralHex: '#888888',
-                infoHex: '#0066ff',
-                successHex: '#00bb00',
-                warningHex: '#ffaa00',
-                errorHex: '#ff0000',
-                base100Hex: '#ffffff',
-                base200Hex: '#f0f0f0',
-                base300Hex: '#e0e0e0',
-                baseContentHex: '#ffffff',
+                primaryHex: "#0000ff",
+                secondaryHex: "#ff00ff",
+                accentHex: "#00ffff",
+                neutralHex: "#888888",
+                infoHex: "#0066ff",
+                successHex: "#00bb00",
+                warningHex: "#ffaa00",
+                errorHex: "#ff0000",
+                base100Hex: "#ffffff",
+                base200Hex: "#f0f0f0",
+                base300Hex: "#e0e0e0",
+                baseContentHex: "#ffffff",
             };
         }
         // Client-side: read actual colors
@@ -59,7 +67,7 @@ function getColorCache() {
 export const dataset = (() => {
     const colors = getColorCache();
     return {
-        primaryBorderColor: colors.primaryHex,                 // solid line
+        primaryBorderColor: colors.primaryHex, // solid line
         primaryBackgroundColor: hexToRgba(colors.primaryHex, 0.2), // translucent fill
         secondaryBorderColor: colors.secondaryHex,
         secondaryBackgroundColor: hexToRgba(colors.secondaryHex, 0.2),
@@ -130,13 +138,19 @@ export function applyThemeToChart(chart: any) {
     const opts: any = chart.options || {};
     if (opts.scales) {
         if (opts.scales.x) {
-            opts.scales.x.ticks = { ...(opts.scales.x.ticks || {}), color: baseContentHex };
+            opts.scales.x.ticks = {
+                ...(opts.scales.x.ticks || {}),
+                color: baseContentHex,
+            };
             if (opts.scales.x.grid) {
                 opts.scales.x.grid.color = hexToRgba(base300Hex, 0.4);
             }
         }
         if (opts.scales.y) {
-            opts.scales.y.ticks = { ...(opts.scales.y.ticks || {}), color: baseContentHex };
+            opts.scales.y.ticks = {
+                ...(opts.scales.y.ticks || {}),
+                color: baseContentHex,
+            };
             if (opts.scales.y.grid) {
                 opts.scales.y.grid.color = hexToRgba(base300Hex, 0.4);
             }
@@ -161,16 +175,7 @@ const chartRegistry = new Set<any>();
 
 export function registerChart(chart: any) {
     chartRegistry.add(chart);
-    return () => { chartRegistry.delete(chart); }; // Return cleanup function with void return
-}
-
-export function initThemeListener() {
-    if (typeof window === 'undefined') return;
-
-    new MutationObserver(() => {
-        chartRegistry.forEach(chart => applyThemeToChart(chart));
-    }).observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-theme'],
-    });
+    return () => {
+        chartRegistry.delete(chart);
+    }; // Return cleanup function with void return
 }

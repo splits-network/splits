@@ -3,7 +3,6 @@ import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
-import { ThemeInitializer } from "./theme-initializer";
 import { ServiceStatusBanner } from "@/components/service-status-banner";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
@@ -111,21 +110,6 @@ export default async function RootLayout({
                         name="helpninja-verification"
                         content="b49754f5-9bd5-4f3d-895d-1ef14b050375"
                     />
-
-                    <script
-                        dangerouslySetInnerHTML={{
-                            __html: `
-                                (function() {
-                                    try {
-                                        var theme = localStorage.getItem('theme') || 'splits-light';
-                                        document.documentElement.setAttribute('data-theme', theme);
-                                    } catch (e) {
-                                        document.documentElement.setAttribute('data-theme', 'splits-light');
-                                    }
-                                })();
-                            `,
-                        }}
-                    />
                     <JsonLd data={webAppJsonLd} id="splits-webapp-jsonld" />
 
                     {/* Preconnect to critical origins for faster API/auth requests */}
@@ -155,7 +139,6 @@ export default async function RootLayout({
                     <UserProfileProvider>
                         <ToastProvider>
                             <Header />
-                            <ThemeInitializer />
                             <ServiceStatusBanner statusHref="/public/status" />
                             <main className="grow">{children}</main>
                             <Footer />

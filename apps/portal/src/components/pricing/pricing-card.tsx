@@ -2,11 +2,10 @@
 
 /**
  * PricingCard Component
- * Reusable pricing card for plan display and selection
+ * Reusable pricing card for plan display and selection (Memphis Design)
  */
 
 import { PricingCardProps } from "./types";
-import Link from "next/link";
 
 export function PricingCard({
     plan,
@@ -42,7 +41,7 @@ export function PricingCard({
 
     // Calculate display price and period
     const displayPrice = isAnnual ? plan.price_annual : plan.price_monthly;
-    const pricePeriod = isAnnual ? "/year" : "/month";
+    const pricePeriod = isAnnual ? "/mo" : "/mo";
 
     // Calculate savings for annual plans
     const annualSavings = isFree
@@ -53,27 +52,18 @@ export function PricingCard({
 
     const isCompact = variant === "compact";
 
-    // Determine styles based on selection and popularity
-    const cardClasses = isPopular
-        ? `card shadow-lg ${isSelected ? "ring-4 ring-primary" : ""} ${isCompact ? "" : "scale-105"} bg-primary text-primary-content`
-        : `card shadow ${isSelected ? "ring-4 ring-primary" : ""} bg-base-200`;
+    // Memphis tier-specific colors
+    const tierColors = {
+        starter: { border: "border-teal", bg: "bg-teal", text: "text-dark", barBg: "bg-teal", checkColor: "text-teal", cardBg: "bg-white", cardText: "text-dark" },
+        pro: { border: "border-coral", bg: "bg-coral", text: "text-cream", barBg: "bg-coral", checkColor: "text-coral", cardBg: "bg-dark", cardText: "text-cream" },
+        partner: { border: "border-purple", bg: "bg-purple", text: "text-cream", barBg: "bg-purple", checkColor: "text-purple", cardBg: "bg-white", cardText: "text-dark" },
+    };
 
-    const badgeClass = isPopular
-        ? "badge badge-secondary"
-        : plan.tier === "partner"
-          ? "badge badge-accent"
-          : "badge badge-primary";
+    const tierKey = plan.tier?.toLowerCase() as keyof typeof tierColors;
+    const colors = tierColors[tierKey] || tierColors.starter;
 
-    const checkIconClass = isPopular ? "text-secondary" : "text-success";
-    const xIconClass = isPopular ? "opacity-50" : "text-base-content/50";
-    const priceSubtextClass = isPopular ? "opacity-80" : "text-base-content/60";
-    const subtitleClass = isPopular ? "opacity-90" : "text-base-content/70";
-
-    // Limit features in compact mode
-    const maxIncludedFeatures = isCompact ? 4 : planFeatures.included.length;
-    const maxNotIncludedFeatures = isCompact
-        ? 2
-        : planFeatures.not_included.length;
+    // Memphis card styling - Pro tier (popular) uses dark background
+    const cardClasses = `pricing-card relative p-8 border-4 ${colors.border} ${colors.cardBg} ${isCompact ? "" : isPopular ? "md:-mt-4 md:mb-[-16px]" : ""}`;
 
     const handleClick = () => {
         if (!disabled && onSelect) {
@@ -82,149 +72,118 @@ export function PricingCard({
     };
 
     return (
-        <div className={cardClasses}>
-            <div className={`card-body ${isCompact ? "p-4" : ""}`}>
-                {/* Badge */}
-                <div className={badgeClass}>
-                    {isPopular ? "MOST POPULAR" : plan.name.toUpperCase()}
+        <div className={`${cardClasses} flex flex-col`}>
+            {/* Corner decoration */}
+            <div className={`absolute top-0 right-0 w-10 h-10 ${colors.bg}`} />
+
+            {/* Popular badge (Pro tier only) */}
+            {isPopular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] bg-yellow text-dark">
+                    Most Popular
                 </div>
+            )}
 
-                {/* Price */}
-                <h3
-                    className={`card-title ${isCompact ? "text-2xl" : "text-3xl"} mb-2`}
-                >
-                    {isFree ? (
-                        "Free"
-                    ) : (
-                        <>
-                            ${displayPrice}
-                            <span
-                                className={`${isCompact ? "text-sm" : "text-lg"} font-normal ${priceSubtextClass}`}
-                            >
-                                {pricePeriod}
-                            </span>
-                        </>
-                    )}
-                </h3>
+            {/* Tier badge */}
+            <span className={`inline-block max-w-[50%] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 ${colors.bg} ${colors.text}`}>
+                {plan.name}
+            </span>
 
-                {/* Monthly equivalent for annual plans */}
-                {!isFree && isAnnual && monthlySavingsEquivalent && (
-                    <div
-                        className={`${isCompact ? "text-xs" : "text-sm"} ${priceSubtextClass} -mt-2 mb-1`}
-                    >
-                        ${monthlySavingsEquivalent}/month when paid annually
-                    </div>
+            {/* Price */}
+            <div className={`text-4xl font-black mb-2 ${colors.cardText}`}>
+                {isFree ? (
+                    "Free"
+                ) : (
+                    <>
+                        ${displayPrice}
+                        <span className={`text-lg font-bold ${colors.cardText}/50`}>
+                            {pricePeriod}
+                        </span>
+                    </>
                 )}
-
-                {/* Annual savings badge */}
-                {!isFree && isAnnual && annualSavings > 0 && (
-                    <div className="badge badge-success badge-sm mb-2">
-                        Save ${annualSavings}
-                        {planFeatures.annual_savings_text &&
-                            ` (${planFeatures.annual_savings_text.replace("Save ", "")})`}
-                    </div>
-                )}
-
-                <div>
-                    <span className={`${subtitleClass} font-bold`}>
-                        {planFeatures.headline}
-                    </span>
-                </div>
-
-                {/* Headline/Subheadline (default variant only) */}
-                {!isCompact && (
-                    <div className={`${subtitleClass} `}>
-                        {planFeatures.subheadline}
-                    </div>
-                )}
-
-                <div className="divider my-2"></div>
-
-                {/* Features List */}
-                <ul className={`space-y-2 ${isCompact ? "text-sm" : ""} mb-4`}>
-                    {/* Included features */}
-                    {planFeatures.included
-                        .slice(0, maxIncludedFeatures)
-                        .map((feature: string, index: number) => (
-                            <li
-                                key={`included-${index}`}
-                                className="flex items-start gap-2"
-                            >
-                                <i
-                                    className={`fa-duotone fa-regular fa-check ${checkIconClass} mt-0.5 flex-shrink-0`}
-                                ></i>
-                                <span>{feature}</span>
-                            </li>
-                        ))}
-
-                    {/* Show more indicator in compact mode */}
-                    {isCompact &&
-                        planFeatures.included.length > maxIncludedFeatures && (
-                            <li className="flex items-start gap-2 opacity-70">
-                                <i
-                                    className={`fa-duotone fa-regular fa-plus mt-0.5 flex-shrink-0 ${checkIconClass}`}
-                                ></i>
-                                <span>
-                                    {planFeatures.included.length -
-                                        maxIncludedFeatures}{" "}
-                                    more features
-                                </span>
-                            </li>
-                        )}
-
-                    {/* Not included features */}
-                    {planFeatures.not_included
-                        .slice(0, maxNotIncludedFeatures)
-                        .map((feature: string, index: number) => (
-                            <li
-                                key={`not-included-${index}`}
-                                className={`flex items-start gap-2 ${xIconClass}`}
-                            >
-                                <i className="fa-duotone fa-regular fa-x mt-0.5 text-sm flex-shrink-0"></i>
-                                <span>{feature}</span>
-                            </li>
-                        ))}
-                    <div className="h-2">
-                        <Link href="/pricing" className="text-xs underline">
-                            See full pricing details
-                        </Link>
-                    </div>
-                </ul>
-                <div className="mt-auto">
-                    {/* Selection indicator or CTA */}
-                    {onSelect ? (
-                        <button
-                            onClick={handleClick}
-                            disabled={disabled}
-                            className={`btn ${isSelected ? "btn-success" : isPopular ? "btn-secondary" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
-                        >
-                            {isSelected ? (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                    Selected
-                                </>
-                            ) : (
-                                planFeatures.cta
-                            )}
-                        </button>
-                    ) : (
-                        <div
-                            className={`btn ${isPopular ? "btn-secondary" : plan.tier === "partner" ? "btn-accent" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
-                        >
-                            {planFeatures.cta}
-                        </div>
-                    )}
-
-                    {/* Footnote (default variant only) */}
-                    {!isCompact && planFeatures.footnote && (
-                        <p
-                            className={`text-xs ${subtitleClass} mt-2 text-center`}
-                        >
-                            {planFeatures.footnote}
-                        </p>
-                    )}
-                </div>
             </div>
+
+            {/* Annual savings text */}
+            {!isFree && isAnnual && monthlySavingsEquivalent && (
+                <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${colors.cardText}/50`}>
+                    ${monthlySavingsEquivalent}/mo billed annually -- save 20%
+                </div>
+            )}
+            {isFree && (
+                <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${colors.cardText}/50`}>
+                    Forever -- no credit card required
+                </div>
+            )}
+
+            {/* Headline from database */}
+            {planFeatures.headline && (
+                <h3 className={`text-base font-bold mb-3 ${colors.cardText}`}>
+                    {planFeatures.headline}
+                </h3>
+            )}
+
+            {/* Subheadline from database */}
+            {planFeatures.subheadline && (
+                <p className={`text-sm leading-relaxed mb-6 ${colors.cardText}/70`}>
+                    {planFeatures.subheadline}
+                </p>
+            )}
+
+            {/* Color bar divider */}
+            <div className={`w-full h-1 mb-6 ${colors.barBg}`} />
+
+            {/* Features list - flex-grow pushes button to bottom */}
+            <ul className="space-y-3 mb-8 flex-grow">
+                {/* Included features (with checkmarks) */}
+                {planFeatures.included.map((feat: string, i: number) => (
+                    <li key={`inc-${i}`} className={`flex items-start gap-3 text-sm leading-relaxed ${colors.cardText}/80`}>
+                        <i className={`fa-duotone fa-regular fa-check mt-0.5 flex-shrink-0 ${colors.checkColor}`}></i>
+                        {feat}
+                    </li>
+                ))}
+
+                {/* Not-included features (with X marks) */}
+                {planFeatures.not_included && planFeatures.not_included.length > 0 && planFeatures.not_included.map((feat: string, i: number) => (
+                    <li key={`exc-${i}`} className={`flex items-start gap-3 text-sm leading-relaxed ${colors.cardText}/30`}>
+                        <i className={`fa-duotone fa-regular fa-xmark mt-0.5 flex-shrink-0 ${colors.cardText}/25`}></i>
+                        {feat}
+                    </li>
+                ))}
+            </ul>
+
+            {/* CTA Button */}
+            {onSelect ? (
+                <button
+                    onClick={handleClick}
+                    disabled={disabled}
+                    className={`block w-full py-3 font-bold uppercase tracking-wider border-4 ${colors.border} ${isSelected ? "bg-white" : colors.bg} ${isSelected ? colors.cardText : colors.text} text-center text-sm transition-transform hover:-translate-y-1`}
+                >
+                    {isSelected ? (
+                        <>
+                            <i className="fa-duotone fa-regular fa-check mr-2"></i>
+                            Selected
+                        </>
+                    ) : (
+                        planFeatures.cta || "Get Started"
+                    )}
+                </button>
+            ) : (
+                <a
+                    href="/sign-up"
+                    className={`block w-full py-3 font-bold uppercase tracking-wider border-4 ${colors.border} ${colors.bg} ${colors.text} text-center text-sm transition-transform hover:-translate-y-1`}
+                >
+                    {planFeatures.cta ||
+                        (tierKey === "starter" ? "Start Free" :
+                         tierKey === "pro" ? "Go Pro" :
+                         "Become a Partner")}
+                </a>
+            )}
+
+            {/* Footnote from database */}
+            {planFeatures.footnote && (
+                <p className={`text-xs leading-relaxed mt-4 ${colors.cardText}/50`}>
+                    {planFeatures.footnote}
+                </p>
+            )}
         </div>
     );
 }

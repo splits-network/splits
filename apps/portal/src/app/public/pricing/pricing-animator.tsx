@@ -146,22 +146,6 @@ export function PricingAnimator({ children }: PricingAnimatorProps) {
             });
 
             // ════════════════════════════════════════
-            // BILLING TOGGLE
-            // ════════════════════════════════════════
-            const toggleSection = $1(".billing-toggle-section");
-            if (toggleSection) {
-                gsap.fromTo(
-                    toggleSection,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1, y: 0,
-                        duration: D.normal, ease: E.smooth,
-                        scrollTrigger: { trigger: $1(".pricing-cards-section"), start: "top 85%" },
-                    },
-                );
-            }
-
-            // ════════════════════════════════════════
             // PRICING CARDS (centerpiece)
             // ════════════════════════════════════════
             const cardsHeading = $1(".pricing-cards-heading");
@@ -177,6 +161,21 @@ export function PricingAnimator({ children }: PricingAnimatorProps) {
                 );
             }
 
+            // Animate entire pricing grid wrapper (includes billing toggle + cards)
+            const pricingGrid = $1(".pricing-cards-grid");
+            if (pricingGrid) {
+                gsap.fromTo(
+                    pricingGrid,
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1, y: 0,
+                        duration: D.normal, ease: E.smooth,
+                        scrollTrigger: { trigger: pricingGrid, start: "top 85%" },
+                    },
+                );
+            }
+
+            // Individual pricing cards animate in with stagger after grid appears
             gsap.fromTo(
                 $(".pricing-card"),
                 { opacity: 0, y: 60, scale: 0.85, rotation: -2 },
@@ -185,7 +184,8 @@ export function PricingAnimator({ children }: PricingAnimatorProps) {
                     duration: D.slow,
                     ease: E.bounce,
                     stagger: S.loose,
-                    scrollTrigger: { trigger: $1(".pricing-cards-grid"), start: "top 80%" },
+                    delay: 0.3, // Slight delay after grid wrapper appears
+                    scrollTrigger: { trigger: pricingGrid, start: "top 80%" },
                 },
             );
 

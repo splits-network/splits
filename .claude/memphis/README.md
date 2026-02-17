@@ -331,6 +331,41 @@ All Memphis designs maintain WCAG AA compliance:
 - Dark on Yellow: 9.2:1 (AAA)
 - Dark on Purple: 5.1:1 (AA)
 
+## Marketplace Memphis (Latest Implementation)
+
+A complete Memphis-styled recruiter marketplace demonstrating all design principles in action.
+
+**Location**: `apps/candidate/src/app/public/marketplace-memphis/`
+**Files**: 10 components (~49 KB)
+**Status**: ✅ Production Ready
+
+### Documentation
+
+- **[📋 Complete Report](./MARKETPLACE-MEMPHIS-COMPLETE.md)** - Executive summary and sign-off
+- **[🚀 Quick Start](./marketplace-memphis-quick-start.md)** - Get up and running
+- **[🎨 Visual Guide](./marketplace-memphis-visual-guide.md)** - Design patterns and best practices
+- **[📊 Before/After](./marketplace-before-after.md)** - See the transformation
+- **[🏗️ Architecture](./marketplace-memphis-architecture.md)** - Component hierarchy
+- **[🔧 Implementation](./marketplace-memphis-implementation.md)** - Technical details
+
+### Features
+
+- Grid and table views with accent cycling
+- GSAP entrance animations with reduced motion support
+- Client-side filtering for instant results
+- Individual detail pages with hero sections
+- 100% Memphis compliant (4px borders, theme colors, sharp corners)
+
+### Quick Start
+
+```bash
+# Start dev server
+pnpm --filter @splits-network/candidate dev
+
+# Visit marketplace
+http://localhost:3000/public/marketplace-memphis
+```
+
 ## Resources
 
 - **Design Principles**: [references/design-principles.md](./references/design-principles.md)
@@ -338,6 +373,7 @@ All Memphis designs maintain WCAG AA compliance:
 - **Migration Workflow**: [workflows/migration-workflow.md](./workflows/migration-workflow.md)
 - **Page Template**: [templates/page-template.tsx](./templates/page-template.tsx)
 - **Component Template**: [templates/component-template.tsx](./templates/component-template.tsx)
+- **Marketplace Example**: [MARKETPLACE-MEMPHIS-COMPLETE.md](./MARKETPLACE-MEMPHIS-COMPLETE.md)
 
 ## Support
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useUserProfile } from "@/contexts";
 import { usePageTitle } from "@/contexts/page-title-context";
@@ -14,25 +14,6 @@ export function PortalHeader() {
     const { user } = useUser();
     const { isAdmin, isRecruiter, isCompanyUser, logout } = useUserProfile();
     const { title, subtitle, children: titleChildren } = usePageTitle();
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
-        // Sync state with pre-rendered theme from localStorage
-        try {
-            const saved = localStorage.getItem("theme") || "splits-light";
-            setIsDark(saved === "splits-dark");
-        } catch {}
-    }, []);
-
-    const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const checked = e.currentTarget.checked;
-        const theme = checked ? "splits-dark" : "splits-light";
-        document.documentElement.setAttribute("data-theme", theme);
-        setIsDark(checked);
-        try {
-            localStorage.setItem("theme", theme);
-        } catch {}
-    };
 
     // Get user initials for avatar
     const userInitials = useMemo(() => {
@@ -80,21 +61,6 @@ export function PortalHeader() {
                 <div className="flex-none flex items-center gap-1 ml-auto">
                     {/* Plan indicator badge */}
                     <PlanBadge />
-
-                    {/* Theme toggle */}
-                    <label
-                        className="swap swap-rotate cursor-pointer btn btn-ghost btn-square ml-2"
-                        title="Toggle Theme"
-                    >
-                        <input
-                            type="checkbox"
-                            checked={isDark}
-                            onChange={handleThemeChange}
-                            className="theme-controller"
-                        />
-                        <i className="fa-duotone fa-regular fa-sun-bright swap-off text-xl"></i>
-                        <i className="fa-duotone fa-regular fa-moon swap-on text-xl"></i>
-                    </label>
 
                     <NotificationBell />
                     <UserDropdown />

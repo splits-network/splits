@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SplitFeesAnimator } from "./split-fees-animator";
+import { MemphisTriangle, MemphisZigzag, MemphisPlus } from "@splits-network/memphis-ui";
 
 export const metadata: Metadata = {
     title: "Split Fees - Fair & Transparent | Splits Network",
@@ -135,30 +136,9 @@ export default function SplitFeesMemphisPage() {
                     <div className="memphis-shape absolute top-[25%] right-[20%] w-20 h-20 rotate-12 bg-purple-500 opacity-0" />
                     <div className="memphis-shape absolute bottom-[30%] right-[30%] w-24 h-10 -rotate-6 border-4 border-teal-500 opacity-0" />
                     <div className="memphis-shape absolute top-[50%] left-[25%] w-12 h-12 rotate-45 bg-teal-500 opacity-0" />
-                    <div
-                        className="memphis-shape absolute top-[35%] left-[45%] opacity-0"
-                        style={{
-                            width: 0,
-                            height: 0,
-                            borderLeft: "25px solid transparent",
-                            borderRight: "25px solid transparent",
-                            borderBottom: "43px solid rgb(255 224 102)",
-                            transform: "rotate(-15deg)",
-                        }}
-                    />
-                    <svg className="memphis-shape absolute bottom-[15%] right-[45%] opacity-0" width="100" height="35" viewBox="0 0 100 35">
-                        <polyline
-                            points="0,25 12,8 25,25 38,8 50,25 62,8 75,25 88,8 100,25"
-                            fill="none"
-                            stroke="rgb(168 139 250)"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                        />
-                    </svg>
-                    <svg className="memphis-shape absolute top-[75%] left-[38%] opacity-0" width="35" height="35" viewBox="0 0 35 35">
-                        <line x1="17.5" y1="5" x2="17.5" y2="30" stroke="rgb(255 224 102)" strokeWidth="4" strokeLinecap="round" />
-                        <line x1="5" y1="17.5" x2="30" y2="17.5" stroke="rgb(255 224 102)" strokeWidth="4" strokeLinecap="round" />
-                    </svg>
+                    <MemphisTriangle color="yellow" size="md" rotation={-15} className="absolute top-[35%] left-[45%] opacity-0" />
+                    <MemphisZigzag color="purple" size="md" className="absolute bottom-[15%] right-[45%] opacity-0" />
+                    <MemphisPlus color="yellow" size="md" className="absolute top-[75%] left-[38%] opacity-0" />
                 </div>
 
                 <div className="container mx-auto px-4 relative z-10 py-20">

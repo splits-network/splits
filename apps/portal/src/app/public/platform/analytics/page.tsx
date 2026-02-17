@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsAnimator } from "./analytics-animator";
+import { MemphisZigzag } from "@splits-network/memphis-ui";
 
 export const metadata: Metadata = {
     title: "Analytics - Real-Time Insights | Splits Network",
@@ -110,9 +111,7 @@ export default function AnalyticsMemphisPage() {
                     <div className="memphis-shape absolute top-[25%] right-[20%] w-20 h-20 rotate-12 bg-purple-500 opacity-0" />
                     <div className="memphis-shape absolute bottom-[30%] right-[30%] w-24 h-10 -rotate-6 border-4 border-yellow-500 opacity-0" />
                     <div className="memphis-shape absolute top-[50%] left-[25%] w-12 h-12 rotate-45 bg-yellow-500 opacity-0" />
-                    <svg className="memphis-shape absolute bottom-[15%] right-[45%] opacity-0" width="100" height="35" viewBox="0 0 100 35">
-                        <polyline points="0,25 12,8 25,25 38,8 50,25 62,8 75,25 88,8 100,25" fill="none" stroke="rgb(168 139 250)" strokeWidth="3" strokeLinecap="round" />
-                    </svg>
+                    <MemphisZigzag color="purple" size="md" className="absolute bottom-[15%] right-[45%] opacity-0" />
                 </div>
 
                 <div className="container mx-auto px-4 relative z-10 py-20">

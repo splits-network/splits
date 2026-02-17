@@ -291,108 +291,14 @@ export default function PricingPage() {
                                 </h2>
                             </div>
 
-                            {/* Dynamic pricing from API */}
-                            <div className="billing-toggle-section opacity-0">
+                            {/* Dynamic pricing cards with Memphis styling */}
+                            <div className="pricing-cards-grid opacity-0">
                                 <DynamicPricingSection
                                     showBillingToggle={true}
                                     defaultAnnual={false}
                                     variant="default"
                                     selectable={false}
                                 />
-                            </div>
-
-                            {/* Static Memphis-styled pricing cards as visual complement */}
-                            <div className="pricing-cards-grid grid md:grid-cols-3 gap-8 mt-16">
-                                {/* Starter Card */}
-                                <div className="pricing-card relative p-8 border-4 border-teal bg-white opacity-0">
-                                    <div className="absolute top-0 right-0 w-10 h-10 bg-teal" />
-                                    <div className="mb-6">
-                                        <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-3 bg-teal text-dark">
-                                            Starter
-                                        </span>
-                                        <div className="text-4xl font-black mb-1 text-dark">
-                                            Free
-                                        </div>
-                                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50">
-                                            Forever -- no credit card
-                                        </div>
-                                    </div>
-                                    <div className="w-full h-1 mb-6 bg-teal" />
-                                    <ul className="space-y-3 mb-8">
-                                        {starterFeatures.map((feat, i) => (
-                                            <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-dark/80">
-                                                <i className="fa-duotone fa-regular fa-check mt-0.5 flex-shrink-0 text-teal"></i>
-                                                {feat}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <a href="/sign-up"
-                                        className="block w-full py-3 font-bold uppercase tracking-wider border-4 border-teal bg-teal text-dark text-center text-sm transition-transform hover:-translate-y-1">
-                                        Start Free
-                                    </a>
-                                </div>
-
-                                {/* Pro Card (featured) */}
-                                <div className="pricing-card relative p-8 border-4 border-coral bg-dark opacity-0 md:-mt-4 md:mb-[-16px]">
-                                    <div className="absolute top-0 right-0 w-10 h-10 bg-coral" />
-                                    {/* Popular badge */}
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] bg-yellow text-dark">
-                                        Most Popular
-                                    </div>
-                                    <div className="mb-6 mt-2">
-                                        <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-3 bg-coral text-cream">
-                                            Pro
-                                        </span>
-                                        <div className="text-4xl font-black mb-1 text-cream">
-                                            $99<span className="text-lg font-bold text-cream/50">/mo</span>
-                                        </div>
-                                        <div className="text-xs font-bold uppercase tracking-wider text-cream/50">
-                                            $79/mo billed annually -- save 20%
-                                        </div>
-                                    </div>
-                                    <div className="w-full h-1 mb-6 bg-coral" />
-                                    <ul className="space-y-3 mb-8">
-                                        {proFeatures.map((feat, i) => (
-                                            <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-cream/80">
-                                                <i className="fa-duotone fa-regular fa-check mt-0.5 flex-shrink-0 text-coral"></i>
-                                                {feat}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <a href="/sign-up"
-                                        className="block w-full py-3 font-bold uppercase tracking-wider border-4 border-coral bg-coral text-cream text-center text-sm transition-transform hover:-translate-y-1">
-                                        Go Pro
-                                    </a>
-                                </div>
-
-                                {/* Partner Card */}
-                                <div className="pricing-card relative p-8 border-4 border-purple bg-white opacity-0">
-                                    <div className="absolute top-0 right-0 w-10 h-10 bg-purple" />
-                                    <div className="mb-6">
-                                        <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-3 bg-purple text-cream">
-                                            Partner
-                                        </span>
-                                        <div className="text-4xl font-black mb-1 text-dark">
-                                            $249<span className="text-lg font-bold text-dark/50">/mo</span>
-                                        </div>
-                                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50">
-                                            $199/mo billed annually -- save 20%
-                                        </div>
-                                    </div>
-                                    <div className="w-full h-1 mb-6 bg-purple" />
-                                    <ul className="space-y-3 mb-8">
-                                        {partnerFeatures.map((feat, i) => (
-                                            <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-dark/80">
-                                                <i className="fa-duotone fa-regular fa-check mt-0.5 flex-shrink-0 text-purple"></i>
-                                                {feat}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <a href="/sign-up"
-                                        className="block w-full py-3 font-bold uppercase tracking-wider border-4 border-purple bg-purple text-cream text-center text-sm transition-transform hover:-translate-y-1">
-                                        Become a Partner
-                                    </a>
-                                </div>
                             </div>
 
                             {/* Disclaimer */}

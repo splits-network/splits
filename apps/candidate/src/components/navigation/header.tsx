@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { HeaderLogo } from "@splits-network/memphis-ui";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
@@ -10,41 +10,77 @@ import NotificationBell from "./notification-bell";
 // ─── Nav Data ───────────────────────────────────────────────────────────────
 
 const RESOURCE_LINKS = [
-    { name: "Career Guides", href: "/public/resources/career-guides", icon: "fa-book", color: "coral" },
-    { name: "Salary Insights", href: "/public/resources/salary-insights", icon: "fa-chart-line", color: "teal" },
-    { name: "Interview Prep", href: "/public/resources/interview-prep", icon: "fa-user-tie", color: "yellow" },
-    { name: "Success Stories", href: "/public/resources/success-stories", icon: "fa-star", color: "purple" },
-    { name: "Resume Tips", href: "/public/resources/resume-tips", icon: "fa-file-alt", color: "coral" },
-    { name: "Industry Trends", href: "/public/resources/industry-trends", icon: "fa-display-chart-up", color: "teal" },
+    {
+        name: "Career Guides",
+        href: "/public/resources/career-guides",
+        icon: "fa-book",
+        color: "coral",
+    },
+    {
+        name: "Salary Insights",
+        href: "/public/resources/salary-insights",
+        icon: "fa-chart-line",
+        color: "teal",
+    },
+    {
+        name: "Interview Prep",
+        href: "/public/resources/interview-prep",
+        icon: "fa-user-tie",
+        color: "yellow",
+    },
+    {
+        name: "Success Stories",
+        href: "/public/resources/success-stories",
+        icon: "fa-star",
+        color: "purple",
+    },
+    {
+        name: "Resume Tips",
+        href: "/public/resources/resume-tips",
+        icon: "fa-file-alt",
+        color: "coral",
+    },
+    {
+        name: "Industry Trends",
+        href: "/public/resources/industry-trends",
+        icon: "fa-display-chart-up",
+        color: "teal",
+    },
 ];
 
 const COMPANY_LINKS = [
-    { name: "Browse All Companies", href: "/public/companies", icon: "fa-building" },
-    { name: "Featured Employers", href: "/public/companies/featured", icon: "fa-crown" },
-    { name: "Company Reviews", href: "/public/companies/reviews", icon: "fa-star" },
+    {
+        name: "Browse All Companies",
+        href: "/public/companies",
+        icon: "fa-building",
+    },
+    {
+        name: "Featured Employers",
+        href: "/public/companies/featured",
+        icon: "fa-crown",
+    },
+    {
+        name: "Company Reviews",
+        href: "/public/companies/reviews",
+        icon: "fa-star",
+    },
 ];
 
 // ─── Memphis Header Component ──────────────────────────────────────────────
 
 export default function Header() {
     const { isSignedIn } = useAuth();
-    const [isDark, setIsDark] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const headerRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
-        // Sync theme state
-        try {
-            const saved = localStorage.getItem("theme") || "applicant-light";
-            setIsDark(saved === "applicant-dark");
-        } catch {}
-    }, []);
-
-    useEffect(() => {
         // Close dropdowns when clicking outside
         const handleClickOutside = (e: MouseEvent) => {
-            if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+            if (
+                headerRef.current &&
+                !headerRef.current.contains(e.target as Node)
+            ) {
                 setActiveDropdown(null);
                 setMenuOpen(false);
             }
@@ -54,22 +90,15 @@ export default function Header() {
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
-    const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const checked = e.currentTarget.checked;
-        const theme = checked ? "applicant-dark" : "applicant-light";
-        document.documentElement.setAttribute("data-theme", theme);
-        setIsDark(checked);
-        try {
-            localStorage.setItem("theme", theme);
-        } catch {}
-    };
-
     const toggleDropdown = (dropdown: string) => {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
     };
 
     return (
-        <header ref={headerRef} className="sticky top-0 z-50 bg-dark overflow-hidden">
+        <header
+            ref={headerRef}
+            className="sticky top-0 z-50 bg-dark overflow-hidden"
+        >
             {/* Memphis decorations */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
                 <div className="absolute top-2 right-12 w-6 h-6 rounded-full border-4 border-teal" />
@@ -91,7 +120,10 @@ export default function Header() {
                                 Expert Recruiters
                             </span>
                         </div>
-                        <Link href="/public/status" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors">
+                        <Link
+                            href="/public/status"
+                            className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors"
+                        >
                             System Status
                         </Link>
                     </div>
@@ -104,7 +136,11 @@ export default function Header() {
                     <div className="flex items-center justify-between py-3">
                         {/* Logo */}
                         <Link href="/" className="flex-shrink-0">
-                            <HeaderLogo brand="employment" size="md" variant="light" />
+                            <HeaderLogo
+                                brand="employment"
+                                size="md"
+                                variant="light"
+                            />
                         </Link>
 
                         {/* Desktop Nav */}
@@ -137,9 +173,13 @@ export default function Header() {
                                 >
                                     <i className="fa-duotone fa-regular fa-book-open text-[9px] text-yellow"></i>
                                     Resources
-                                    <i className={`fa-duotone fa-regular fa-chevron-down text-[8px] transition-transform ${
-                                        activeDropdown === "resources" ? "rotate-180" : ""
-                                    }`}></i>
+                                    <i
+                                        className={`fa-duotone fa-regular fa-chevron-down text-[8px] transition-transform ${
+                                            activeDropdown === "resources"
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    ></i>
                                 </button>
 
                                 {activeDropdown === "resources" && (
@@ -149,10 +189,14 @@ export default function Header() {
                                                 <Link
                                                     key={link.href}
                                                     href={link.href}
-                                                    onClick={() => setActiveDropdown(null)}
+                                                    onClick={() =>
+                                                        setActiveDropdown(null)
+                                                    }
                                                     className={`flex items-center gap-3 p-3 border-4 border-transparent hover:border-${link.color} hover:bg-${link.color}/10 transition-all`}
                                                 >
-                                                    <i className={`fa-duotone fa-regular fa-${link.icon} text-sm text-${link.color}`}></i>
+                                                    <i
+                                                        className={`fa-duotone fa-regular fa-${link.icon} text-sm text-${link.color}`}
+                                                    ></i>
                                                     <span className="text-xs font-black uppercase tracking-[0.12em] text-white">
                                                         {link.name}
                                                     </span>
@@ -183,9 +227,13 @@ export default function Header() {
                                 >
                                     <i className="fa-duotone fa-regular fa-building text-[9px] text-teal"></i>
                                     Companies
-                                    <i className={`fa-duotone fa-regular fa-chevron-down text-[8px] transition-transform ${
-                                        activeDropdown === "companies" ? "rotate-180" : ""
-                                    }`}></i>
+                                    <i
+                                        className={`fa-duotone fa-regular fa-chevron-down text-[8px] transition-transform ${
+                                            activeDropdown === "companies"
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    ></i>
                                 </button>
 
                                 {activeDropdown === "companies" && (
@@ -195,10 +243,14 @@ export default function Header() {
                                                 <Link
                                                     key={link.href}
                                                     href={link.href}
-                                                    onClick={() => setActiveDropdown(null)}
+                                                    onClick={() =>
+                                                        setActiveDropdown(null)
+                                                    }
                                                     className="flex items-center gap-3 p-3 border-4 border-transparent hover:border-teal hover:bg-teal/10 transition-all"
                                                 >
-                                                    <i className={`fa-duotone fa-regular fa-${link.icon} text-sm text-teal`}></i>
+                                                    <i
+                                                        className={`fa-duotone fa-regular fa-${link.icon} text-sm text-teal`}
+                                                    ></i>
                                                     <span className="text-xs font-black uppercase tracking-[0.12em] text-white">
                                                         {link.name}
                                                     </span>
@@ -212,24 +264,6 @@ export default function Header() {
 
                         {/* Right Actions */}
                         <div className="flex items-center gap-3">
-                            {/* Theme Toggle */}
-                            <label
-                                className="w-10 h-10 flex items-center justify-center border-4 border-white/20 hover:border-yellow hover:bg-yellow/10 cursor-pointer transition-all"
-                                title="Toggle Theme"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={isDark}
-                                    onChange={handleThemeChange}
-                                    className="hidden"
-                                />
-                                {isDark ? (
-                                    <i className="fa-duotone fa-regular fa-moon text-sm text-yellow"></i>
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-sun-bright text-sm text-yellow"></i>
-                                )}
-                            </label>
-
                             {isSignedIn ? (
                                 <>
                                     <Link
@@ -270,7 +304,9 @@ export default function Header() {
                                         : "border-coral bg-transparent text-coral"
                                 }`}
                             >
-                                <i className={`fa-duotone fa-regular ${menuOpen ? "fa-xmark" : "fa-bars"} text-sm`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${menuOpen ? "fa-xmark" : "fa-bars"} text-sm`}
+                                ></i>
                             </button>
                         </div>
                     </div>

@@ -24,7 +24,7 @@ export type SemanticColor = 'primary' | 'secondary' | 'accent' | 'neutral' | 'in
 export type AnyMemphisColor = MemphisColor | SemanticColor;
 
 /** Standard component size variants */
-export type MemphisSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type MemphisSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 /** Border tier hierarchy */
 export type BorderTier = 'container' | 'interactive' | 'detail';
