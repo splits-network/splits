@@ -1,7 +1,7 @@
 /**
  * Generates src/components/progress.css — Memphis progress styles.
  *
- * Reads SilicaUI's progress.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's progress.css as the base, then appends Memphis-specific
  * additions: palette color variants for the progress fill.
  */
 

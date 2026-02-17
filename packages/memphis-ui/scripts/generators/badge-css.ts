@@ -1,7 +1,7 @@
 /**
  * Generates src/components/badge.css — Memphis badge styles.
  *
- * Reads SilicaUI's badge.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's badge.css as the base, then appends Memphis-specific
  * additions: uppercase text, palette variants, dot/soft/outline variants.
  */
 
@@ -18,17 +18,17 @@ export async function generateBadgeCss() {
     lines.push('/* ═══ Memphis Additions (generated) ═══ */');
     lines.push('');
 
-    // Memphis uppercase + letter-spacing + thinner default border
+    // Memphis uppercase + letter-spacing + default border (md)
     lines.push('.badge {');
     lines.push('  @layer memphis.modifier {');
     lines.push('    text-transform: uppercase;');
     lines.push('    letter-spacing: var(--ls);');
-    lines.push('    border-width: var(--border-interactive);');
+    lines.push('    border-width: var(--border-md);');
     lines.push('  }');
     lines.push('}');
     lines.push('');
 
-    // Palette color variants — use SilicaUI CSS variable pattern
+    // Palette color variants — use MemphisUI CSS variable pattern
     // Dark border in a separate :not(.badge-outline) rule (pre-flattened, no CSS nesting)
     for (const name of config.badgeColors) {
         const def = config.colors[name];
@@ -50,24 +50,19 @@ export async function generateBadgeCss() {
     }
     lines.push('');
 
-    // Size variants with border tiers + font-size + padding
-    // Badge borders step down one tier from the shared size config
-    const badgeBorderTier: Record<string, string> = {
-        container: 'interactive',
-        interactive: 'detail',
-        detail: 'detail',
-    };
+    // Size variants with Memphis sizing + font-size + padding + gap + letter-spacing
     for (const [size, def] of Object.entries(config.sizes)) {
-        const rules = [];
-        rules.push(`border-width: var(--border-${badgeBorderTier[def.border] || def.border});`);
-        rules.push(`font-size: ${def.badgeFs};`);
-        rules.push(`padding-inline: ${def.badgePad};`);
-        if (def.badgeLs) rules.push(`letter-spacing: ${def.badgeLs};`);
-        if (def.badgeGap) rules.push(`gap: ${def.badgeGap};`);
-
         lines.push(`.badge-${size} {`);
         lines.push('  @layer memphis.modifier {');
-        for (const rule of rules) lines.push(`    ${rule}`);
+        lines.push(`    border-width: var(--border-${def.border});`);
+        lines.push(`    font-size: ${def.badgeFs};`);
+        lines.push(`    padding: ${def.badgePad};`);
+        if (def.badgeGap) {
+            lines.push(`    gap: ${def.badgeGap};`);
+        }
+        if (def.badgeLs) {
+            lines.push(`    letter-spacing: ${def.badgeLs};`);
+        }
         lines.push('  }');
         lines.push('}');
     }
@@ -112,11 +107,14 @@ export async function generateBadgeCss() {
     lines.push('  }');
     lines.push('}');
 
-    // Border override utilities
+    // Border override utilities - full xs-2xl range
     lines.push('');
-    lines.push('.badge-border-thin { @layer memphis.modifier { border-width: var(--border-detail); } }');
-    lines.push('.badge-border-default { @layer memphis.modifier { border-width: var(--border-interactive); } }');
-    lines.push('.badge-border-thick { @layer memphis.modifier { border-width: var(--border-container); } }');
+    lines.push('.badge-border-xs { @layer memphis.modifier { border-width: var(--border-xs); } }');
+    lines.push('.badge-border-sm { @layer memphis.modifier { border-width: var(--border-sm); } }');
+    lines.push('.badge-border-md { @layer memphis.modifier { border-width: var(--border-md); } }');
+    lines.push('.badge-border-lg { @layer memphis.modifier { border-width: var(--border-lg); } }');
+    lines.push('.badge-border-xl { @layer memphis.modifier { border-width: var(--border-xl); } }');
+    lines.push('.badge-border-2xl { @layer memphis.modifier { border-width: var(--border-2xl); } }');
 
     await writeFile('src/components/badge.css', base + '\n' + lines.join('\n') + '\n');
     console.log('  ✓ src/components/badge.css (Memphis additions)');

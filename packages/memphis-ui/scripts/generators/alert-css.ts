@@ -1,7 +1,7 @@
 /**
  * Generates src/components/alert.css — Memphis alert styles.
  *
- * Reads SilicaUI's alert.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's alert.css as the base, then appends Memphis-specific
  * additions: border hierarchy, typography, palette color variants, soft variants.
  */
 
@@ -18,10 +18,10 @@ export async function generateAlertCss() {
     lines.push('/* ═══ Memphis Alert Additions (generated) ═══ */');
     lines.push('');
 
-    // Memphis base alert: border + typography
+    // Memphis base alert: border (md) + typography
     lines.push('.alert {');
     lines.push('  @layer memphis.modifier {');
-    lines.push('    border: var(--border-interactive) solid var(--color-dark);');
+    lines.push('    border: var(--border-md) solid var(--color-dark);');
     lines.push('    text-transform: uppercase;');
     lines.push('    letter-spacing: var(--ls);');
     lines.push('  }');

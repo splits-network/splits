@@ -65,7 +65,7 @@ export function HorizontalTimeline({
                             </span>
                             {m.status && (
                                 <span
-                                    className={`accent-${statusAccent} px-2 py-0.5 text-[10px] font-black uppercase text-dark border-detail bg-accent`}
+                                    className={`accent-${statusAccent} px-2 py-0.5 text-[10px] font-black uppercase text-dark border-xs bg-accent`}
                                 >
                                     {m.status}
                                 </span>

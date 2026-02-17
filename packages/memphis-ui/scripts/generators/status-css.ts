@@ -1,7 +1,7 @@
 /**
  * Generates src/components/status.css — Memphis status styles.
  *
- * Reads SilicaUI's status.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's status.css as the base, then appends Memphis-specific
  * additions: palette color variants for the status dot.
  */
 

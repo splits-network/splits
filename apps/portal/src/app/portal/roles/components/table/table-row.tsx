@@ -72,7 +72,7 @@ export function TableRow({
                     {job.fee_percentage}%
                 </td>
                 <td className="px-4 py-3">
-                    <Badge variant={statusVariant(job.status)}>
+                    <Badge color={statusVariant(job.status)}>
                         {formatStatus(job.status)}
                     </Badge>
                 </td>

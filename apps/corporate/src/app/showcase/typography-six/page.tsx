@@ -57,7 +57,7 @@ export default function TypographySixShowcase() {
 
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-5xl mx-auto text-center">
-                        <Badge variant="yellow" className="mb-8">
+                        <Badge color="yellow" className="mb-8">
                             <i className="fa-duotone fa-regular fa-font mr-2" />
                             Designer Six Type Bible
                         </Badge>
@@ -485,11 +485,11 @@ export default function TypographySixShowcase() {
                                     Badge Text
                                 </span>
                                 <div className="mt-4 flex flex-wrap gap-3">
-                                    <Badge variant="coral">Active</Badge>
-                                    <Badge variant="teal">Open</Badge>
-                                    <Badge variant="yellow">Featured</Badge>
-                                    <Badge variant="purple">New</Badge>
-                                    <Badge variant="dark">Closed</Badge>
+                                    <Badge color="coral">Active</Badge>
+                                    <Badge color="teal">Open</Badge>
+                                    <Badge color="yellow">Featured</Badge>
+                                    <Badge color="purple">New</Badge>
+                                    <Badge color="dark">Closed</Badge>
                                 </div>
                                 <ClassLabelDark>
                                     text-xs font-bold uppercase tracking-wider (Badge component){"\n"}
@@ -1091,9 +1091,9 @@ export default function TypographySixShowcase() {
 
                                 <div className="border-4 border-teal p-6">
                                     <div className="flex gap-3">
-                                        <Badge variant="coral">Active</Badge>
-                                        <Badge variant="teal">Open</Badge>
-                                        <Badge variant="purple">New</Badge>
+                                        <Badge color="coral">Active</Badge>
+                                        <Badge color="teal">Open</Badge>
+                                        <Badge color="purple">New</Badge>
                                     </div>
                                     <p className="text-xs font-mono text-cream/30 mt-3">
                                         Use Memphis Badge component for status labels

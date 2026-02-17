@@ -135,7 +135,7 @@
 
 .dock {
     @layer memphis.modifier {
-        border-top: var(--border-container) solid var(--color-dark);
+        border-top: var(--border-lg) solid var(--color-dark);
         text-transform: uppercase;
         letter-spacing: var(--ls);
         font-size: 0.75rem;

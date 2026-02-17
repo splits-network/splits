@@ -35,7 +35,7 @@ export function InlineEmptyState({
 }: InlineEmptyStateProps) {
     return (
         <div
-            className={[`accent-${accent}`, 'border-container bg-white p-6 flex items-center gap-6', className]
+            className={[`accent-${accent}`, 'border-lg bg-white p-6 flex items-center gap-6', className]
                 .filter(Boolean)
                 .join(' ')}
         >

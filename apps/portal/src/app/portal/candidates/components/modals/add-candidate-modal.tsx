@@ -3,6 +3,8 @@
 import { useState, FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { Button } from "@splits-network/memphis-ui";
+import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface AddCandidateModalProps {
     isOpen: boolean;
@@ -45,7 +47,9 @@ export default function AddCandidateModal({
         } catch (error: any) {
             console.error("Failed to create candidate:", error);
             const errorMessage =
-                error.message || error.response?.data?.error?.message || "";
+                error.message ||
+                error.response?.data?.error?.message ||
+                "";
 
             if (
                 errorMessage.includes("candidates_email_key") ||
@@ -80,48 +84,60 @@ export default function AddCandidateModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-base-100 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold">Add New Candidate</h2>
-                        <button
-                            type="button"
-                            className="btn btn-ghost btn-sm btn-square"
-                            onClick={handleClose}
-                            disabled={submitting}
-                        >
-                            <i className="fa-duotone fa-regular fa-times" />
-                        </button>
-                    </div>
+        <dialog className="modal modal-open" onClick={handleClose}>
+            <div
+                className="modal-box bg-white border-4 border-dark rounded-none max-w-md w-full p-0"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="bg-coral px-6 py-4 border-b-4 border-dark flex items-center justify-between">
+                    <h2 className="text-xl font-black uppercase tracking-tight text-coral-content">
+                        Add New Candidate
+                    </h2>
+                    <button
+                        type="button"
+                        className="w-8 h-8 flex items-center justify-center bg-dark text-white font-black text-lg leading-none hover:bg-dark/80 transition-colors"
+                        onClick={handleClose}
+                        disabled={submitting}
+                        aria-label="Close"
+                    >
+                        <i className="fa-duotone fa-regular fa-times" />
+                    </button>
+                </div>
 
-                    <p className="text-base-content/70 mb-6">
+                <div className="p-6">
+                    <p className="text-dark/70 font-bold text-sm uppercase tracking-wider mb-6">
                         Send a candidate an invitation to join your network
                     </p>
 
+                    {/* Error Alert */}
                     {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation" />
-                            <div className="flex-1">
-                                <span>{error}</span>
-                                {error.includes("already exists") && (
-                                    <p className="text-sm mt-1 opacity-80">
-                                        You can search for existing candidates
-                                        from the candidates list.
-                                    </p>
-                                )}
+                        <div className="bg-coral/10 border-4 border-coral p-4 mb-4">
+                            <div className="flex gap-3 items-start">
+                                <i className="fa-duotone fa-regular fa-circle-exclamation text-coral text-lg mt-0.5" />
+                                <div className="flex-1">
+                                    <span className="font-bold text-dark text-sm">{error}</span>
+                                    {error.includes("already exists") && (
+                                        <p className="text-sm mt-1 text-dark/60 font-medium">
+                                            You can search for existing candidates
+                                            from the candidates list.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Full Name *
-                            </legend>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Full Name Field */}
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
+                                Full Name <span className="text-coral">*</span>
+                            </label>
                             <input
                                 type="text"
-                                className="input w-full"
+                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark placeholder:text-dark/30 placeholder:font-medium focus:outline-none focus:border-coral transition-colors"
+                                style={{ borderRadius: 0 }}
                                 value={formData.full_name}
                                 onChange={(e) =>
                                     setFormData({
@@ -134,13 +150,17 @@ export default function AddCandidateModal({
                                 disabled={submitting}
                                 autoFocus
                             />
-                        </fieldset>
+                        </div>
 
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email *</legend>
+                        {/* Email Field */}
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
+                                Email <span className="text-coral">*</span>
+                            </label>
                             <input
                                 type="email"
-                                className="input w-full"
+                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark placeholder:text-dark/30 placeholder:font-medium focus:outline-none focus:border-teal transition-colors"
+                                style={{ borderRadius: 0 }}
                                 value={formData.email}
                                 onChange={(e) =>
                                     setFormData({
@@ -152,62 +172,63 @@ export default function AddCandidateModal({
                                 required
                                 disabled={submitting}
                             />
-                            <p className="fieldset-label">
+                            <p className="text-xs font-bold text-dark/50 mt-2 uppercase tracking-wider">
                                 They'll receive an invitation to join and accept
                                 your representation
                             </p>
-                        </fieldset>
+                        </div>
 
-                        <div className="flex gap-2 justify-end pt-4">
-                            <button
+                        {/* Actions */}
+                        <div className="flex gap-3 justify-end pt-2">
+                            <Button
                                 type="button"
-                                className="btn"
+                                color="dark"
+                                variant="outline"
+                                size="md"
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="submit"
-                                className="btn btn-primary"
+                                color="coral"
+                                size="md"
                                 disabled={
                                     submitting ||
                                     !formData.full_name.trim() ||
                                     !formData.email.trim()
                                 }
                             >
-                                {submitting ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm" />
-                                        Creating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-paper-plane" />
-                                        Send Invitation
-                                    </>
-                                )}
-                            </button>
+                                <ButtonLoading
+                                    loading={submitting}
+                                    text="Send Invitation"
+                                    loadingText="Creating..."
+                                />
+                            </Button>
                         </div>
                     </form>
 
-                    <div className="alert alert-info mt-4">
-                        <i className="fa-duotone fa-regular fa-handshake" />
-                        <div className="text-sm">
-                            <p>
-                                <strong>What happens next:</strong>
-                            </p>
-                            <p>
-                                The candidate will receive an invitation email
-                                to join Splits Network and accept your "right to
-                                represent" agreement. Once accepted, they can
-                                complete their profile and you can submit them
-                                to relevant job roles.
-                            </p>
+                    {/* Info Box */}
+                    <div className="bg-teal/10 border-4 border-teal p-4 mt-6">
+                        <div className="flex gap-3 items-start">
+                            <i className="fa-duotone fa-regular fa-handshake text-teal text-lg mt-0.5" />
+                            <div className="text-sm">
+                                <p className="font-black text-dark uppercase tracking-wider text-xs mb-1">
+                                    What happens next:
+                                </p>
+                                <p className="text-dark/70 font-medium leading-relaxed">
+                                    The candidate will receive an invitation email
+                                    to join Splits Network and accept your "right to
+                                    represent" agreement. Once accepted, they can
+                                    complete their profile and you can submit them to
+                                    relevant job roles.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </dialog>
     );
 }

@@ -37,7 +37,7 @@ export function SettingsNav({
 }: SettingsNavProps) {
     return (
         <ul
-            className={['menu w-full border-container bg-white p-4', className].filter(Boolean).join(' ')}
+            className={['menu w-full border-lg bg-white p-4', className].filter(Boolean).join(' ')}
         >
             {items.map((item) => {
                 const isActive = active === item.key;

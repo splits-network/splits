@@ -48,7 +48,7 @@ export function VerticalTabs({
     return (
         <div
             className={[
-                `accent-${accent} flex bg-base-100 border-container`,
+                `accent-${accent} flex bg-base-100 border-lg`,
                 className,
             ].filter(Boolean).join(' ')}
         >

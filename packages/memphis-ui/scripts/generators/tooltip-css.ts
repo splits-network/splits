@@ -1,7 +1,7 @@
 /**
  * Generates src/components/tooltip.css — Memphis tooltip styles.
  *
- * Reads SilicaUI's tooltip.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's tooltip.css as the base, then appends Memphis-specific
  * additions: palette color variants for tooltip background and text.
  */
 

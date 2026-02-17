@@ -11,11 +11,16 @@ import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Candidate } from "../../types";
+import type { Candidate } from "../../types";
+import { ExpandableButton } from "./expandable-button";
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
+import EditCandidateModal from "../modals/edit-candidate-modal";
+import VerificationModal from "../modals/verification-modal";
 
-export interface ActionsToolbarProps {
+// ===== TYPES =====
+
+export interface CandidateActionsToolbarProps {
     candidate: Candidate;
     variant: "icon-only" | "descriptive";
     layout?: "horizontal" | "vertical";
@@ -41,7 +46,9 @@ export interface ActionsToolbarProps {
     className?: string;
 }
 
-export default function ActionsToolbar({
+// ===== COMPONENT =====
+
+export default function CandidateActionsToolbar({
     candidate,
     variant,
     layout = "horizontal",
@@ -53,15 +60,23 @@ export default function ActionsToolbar({
     onVerify,
     onMessage,
     className = "",
-}: ActionsToolbarProps) {
+}: CandidateActionsToolbarProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const toast = useToast();
     const { isAdmin, isRecruiter } = useUserProfile();
+    const refresh = onRefresh ?? (() => {});
 
-    const [startingChat, setStartingChat] = useState(false);
+    // Modal states
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
+
+    // Loading states
+    const [startingChat, setStartingChat] = useState(false);
+
+    // Chat presence
     const canChat = Boolean(candidate.user_id);
     const chatDisabledReason = canChat
         ? null
@@ -70,6 +85,8 @@ export default function ActionsToolbar({
     const presenceStatus = candidate.user_id
         ? presence[candidate.user_id]?.status
         : undefined;
+
+    // ===== PERMISSION LOGIC =====
 
     const canManageCandidate = useMemo(() => {
         if (isAdmin) return true;
@@ -85,6 +102,8 @@ export default function ActionsToolbar({
     const canSendJobOpportunity = useMemo(() => {
         return isRecruiter || isAdmin;
     }, [isRecruiter, isAdmin]);
+
+    // ===== ACTION HANDLERS =====
 
     const handleStartChat = async () => {
         if (!candidate.user_id) return;
@@ -133,8 +152,14 @@ export default function ActionsToolbar({
         });
 
         setShowSubmitWizard(false);
-        onRefresh?.();
+        refresh();
     };
+
+    const handleViewDetails = () => {
+        if (onViewDetails) onViewDetails(candidate.id);
+    };
+
+    // ===== ACTION VISIBILITY =====
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
@@ -143,162 +168,210 @@ export default function ActionsToolbar({
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
         edit: showActions.edit !== false && canManageCandidate,
         verify: showActions.verify !== false && canVerifyCandidate,
-        endRepresentation: showActions.endRepresentation !== false && isRecruiter && candidate.has_active_relationship,
+        endRepresentation:
+            showActions.endRepresentation !== false &&
+            isRecruiter &&
+            candidate.has_active_relationship,
     };
 
-    const sizeClass = `btn-${size}`;
-    const layoutClass = layout === "horizontal" ? "gap-1" : "flex-col gap-2";
+    // ===== RENDER HELPERS =====
+
+    const getSizeClass = () => `btn-${size}`;
+
+    const getLayoutClass = () =>
+        layout === "horizontal" ? "gap-1" : "flex-col gap-2";
+
+    // ===== MODALS (shared between both variants) =====
+
+    const modals = (
+        <ModalPortal>
+            {showSubmitWizard && (
+                <SubmitToJobWizard
+                    candidateId={candidate.id}
+                    candidateName={candidate.full_name || "Unknown"}
+                    onClose={() => setShowSubmitWizard(false)}
+                    onSubmit={handleSubmitToJob}
+                />
+            )}
+            {showTerminateModal && (
+                <TerminateCandidateModal
+                    isOpen={showTerminateModal}
+                    onClose={() => setShowTerminateModal(false)}
+                    onSuccess={() => {
+                        setShowTerminateModal(false);
+                        refresh();
+                    }}
+                    candidateId={candidate.id}
+                    candidateName={candidate.full_name || "Unknown"}
+                />
+            )}
+            {showEditModal && (
+                <EditCandidateModal
+                    candidateId={candidate.id}
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={() => {
+                        setShowEditModal(false);
+                        refresh();
+                    }}
+                />
+            )}
+            {showVerifyModal && (
+                <VerificationModal
+                    candidate={candidate}
+                    isOpen={showVerifyModal}
+                    onClose={() => setShowVerifyModal(false)}
+                    onUpdate={(updatedCandidate) => {
+                        setShowVerifyModal(false);
+                        refresh();
+                    }}
+                />
+            )}
+        </ModalPortal>
+    );
+
+    // ===== ICON-ONLY VARIANT =====
 
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex items-center ${layoutClass} ${className}`}>
-                    {/* Send Job Opportunity - CTA */}
+                <div
+                    className={`flex items-center ${getLayoutClass()} ${className}`}
+                >
+                    {/* Send Job Opportunity - Primary CTA */}
                     {actions.sendJobOpportunity && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-paper-plane"
+                            label="Send Job"
+                            variant="btn-primary"
+                            size={size}
                             onClick={() => setShowSubmitWizard(true)}
-                            className={`btn ${sizeClass} btn-square btn-primary`}
                             title="Send Job Opportunity"
-                        >
-                            <i className="fa-duotone fa-regular fa-paper-plane" />
-                        </button>
+                        />
                     )}
 
                     {/* Edit */}
                     {actions.edit && (
-                        <button
-                            onClick={() => onEdit?.(candidate.id)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-pen-to-square"
+                            label="Edit"
+                            variant="btn-ghost"
+                            size={size}
+                            onClick={() => setShowEditModal(true)}
                             title="Edit Candidate"
-                        >
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        </button>
+                        />
                     )}
 
                     {/* Verify */}
                     {actions.verify &&
                         candidate.verification_status !== "verified" && (
-                            <button
-                                onClick={() => onVerify?.(candidate)}
-                                className={`btn ${sizeClass} btn-square btn-success`}
+                            <ExpandableButton
+                                icon="fa-duotone fa-regular fa-badge-check"
+                                label="Verify"
+                                variant="btn-success"
+                                size={size}
+                                onClick={() => setShowVerifyModal(true)}
                                 title="Verify Candidate"
-                            >
-                                <i className="fa-duotone fa-regular fa-badge-check" />
-                            </button>
+                            />
                         )}
 
                     {/* End Representation */}
                     {actions.endRepresentation && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-link-slash"
+                            label="End Rep"
+                            variant="btn-error"
+                            size={size}
                             onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-error btn-outline`}
                             title="End Representation"
-                        >
-                            <i className="fa-duotone fa-regular fa-link-slash" />
-                        </button>
+                        />
                     )}
 
                     {/* Divider before Message */}
-                    {actions.message && (actions.sendJobOpportunity || actions.edit || actions.verify || actions.endRepresentation) && (
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                    )}
+                    {actions.message &&
+                        (actions.sendJobOpportunity ||
+                            actions.edit ||
+                            actions.verify ||
+                            actions.endRepresentation) && (
+                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                        )}
 
                     {/* Message */}
                     {actions.message && (
                         <span title={chatDisabledReason || undefined}>
-                            <button
+                            <ExpandableButton
+                                icon="fa-duotone fa-regular fa-messages"
+                                label="Message"
+                                variant="btn-ghost"
+                                size={size}
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-square btn-ghost relative`}
-                                title="Message Candidate"
                                 disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-1 -right-1"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages" />
-                                )}
-                            </button>
+                                loading={startingChat}
+                                title="Message Candidate"
+                            />
                         </span>
                     )}
 
-                    {/* View Details - far right */}
+                    {/* Divider before View Details */}
                     {actions.viewDetails && (
                         <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
                             {onViewDetails ? (
-                                <button
-                                    onClick={() => onViewDetails(candidate.id)}
-                                    className={`btn ${sizeClass} btn-square btn-primary`}
+                                <ExpandableButton
+                                    icon="fa-duotone fa-regular fa-eye"
+                                    label="Details"
+                                    variant="btn-primary"
+                                    size={size}
+                                    onClick={handleViewDetails}
                                     title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </button>
+                                />
                             ) : (
-                                <Link
+                                <ExpandableButton
+                                    icon="fa-duotone fa-regular fa-eye"
+                                    label="Details"
+                                    variant="btn-primary"
+                                    size={size}
                                     href={`/portal/candidates/${candidate.id}`}
-                                    className={`btn ${sizeClass} btn-square btn-primary`}
                                     title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </Link>
+                                />
                             )}
                         </>
                     )}
                 </div>
 
-                <ModalPortal>
-                    {showSubmitWizard && (
-                        <SubmitToJobWizard
-                            candidateId={candidate.id}
-                            candidateName={candidate.full_name || "Unknown"}
-                            onClose={() => setShowSubmitWizard(false)}
-                            onSubmit={handleSubmitToJob}
-                        />
-                    )}
-                </ModalPortal>
-                {showTerminateModal && (
-                    <TerminateCandidateModal
-                        isOpen={showTerminateModal}
-                        onClose={() => setShowTerminateModal(false)}
-                        onSuccess={() => {
-                            setShowTerminateModal(false);
-                            onRefresh?.();
-                        }}
-                        candidateId={candidate.id}
-                        candidateName={candidate.full_name || "Unknown"}
-                    />
-                )}
+                {modals}
             </>
         );
     }
 
-    // Descriptive variant
+    // ===== DESCRIPTIVE VARIANT =====
+
     return (
         <>
-            <div className={`flex ${layoutClass} ${className}`}>
-                {/* Send Job Opportunity - CTA */}
+            <div
+                className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
+            >
+                {/* Send Job Opportunity - Primary CTA */}
                 {actions.sendJobOpportunity && (
                     <button
                         onClick={() => setShowSubmitWizard(true)}
-                        className={`btn ${sizeClass} btn-primary gap-2`}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
+                        title="Send Job Opportunity"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
-                        Send Job
+                        <span className="hidden md:inline">Send Job</span>
                     </button>
                 )}
 
                 {/* Edit */}
                 {actions.edit && (
                     <button
-                        onClick={() => onEdit?.(candidate.id)}
-                        className={`btn ${sizeClass} btn-ghost gap-2`}
+                        onClick={() => setShowEditModal(true)}
+                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        title="Edit Candidate"
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        Edit
+                        <span className="hidden md:inline">Edit</span>
                     </button>
                 )}
 
@@ -306,11 +379,12 @@ export default function ActionsToolbar({
                 {actions.verify &&
                     candidate.verification_status !== "verified" && (
                         <button
-                            onClick={() => onVerify?.(candidate)}
-                            className={`btn ${sizeClass} btn-success gap-2`}
+                            onClick={() => setShowVerifyModal(true)}
+                            className={`btn ${getSizeClass()} btn-success gap-2`}
+                            title="Verify Candidate"
                         >
                             <i className="fa-duotone fa-regular fa-badge-check" />
-                            Verify
+                            <span className="hidden md:inline">Verify</span>
                         </button>
                     )}
 
@@ -318,33 +392,41 @@ export default function ActionsToolbar({
                 {actions.endRepresentation && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${sizeClass} btn-error btn-outline gap-2`}
+                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                        title="End Representation"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
-                        End Representation
+                        <span className="hidden md:inline">
+                            End Representation
+                        </span>
                     </button>
                 )}
 
                 {/* Divider before Message */}
-                {actions.message && (actions.sendJobOpportunity || actions.edit || actions.verify || actions.endRepresentation) && (
-                    <div className="divider divider-horizontal mx-0" />
-                )}
+                {actions.message &&
+                    (actions.sendJobOpportunity ||
+                        actions.edit ||
+                        actions.verify ||
+                        actions.endRepresentation) && (
+                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                    )}
 
                 {/* Message */}
                 {actions.message && (
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn ${sizeClass} btn-outline gap-2`}
+                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            title="Message Candidate"
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
                             {startingChat ? (
-                                <span className="loading loading-spinner loading-xs"></span>
+                                <span className="loading loading-spinner loading-xs" />
                             ) : (
                                 <i className="fa-duotone fa-regular fa-messages" />
                             )}
-                            Message
+                            <span className="hidden md:inline">Message</span>
                         </button>
                     </span>
                 )}
@@ -352,50 +434,35 @@ export default function ActionsToolbar({
                 {/* View Details - far right */}
                 {actions.viewDetails && (
                     <>
-                        <div className="divider divider-horizontal mx-0" />
+                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
                         {onViewDetails ? (
                             <button
-                                onClick={() => onViewDetails(candidate.id)}
-                                className={`btn ${sizeClass} btn-outline gap-2`}
+                                onClick={handleViewDetails}
+                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
+                                <span className="hidden md:inline">
+                                    View Details
+                                </span>
                             </button>
                         ) : (
                             <Link
                                 href={`/portal/candidates/${candidate.id}`}
-                                className={`btn ${sizeClass} btn-outline gap-2`}
+                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
-                                View Details
+                                <span className="hidden md:inline">
+                                    View Details
+                                </span>
                             </Link>
                         )}
                     </>
                 )}
             </div>
 
-            <ModalPortal>
-                {showSubmitWizard && (
-                    <SubmitToJobWizard
-                        candidateId={candidate.id}
-                        candidateName={candidate.full_name || "Unknown"}
-                        onClose={() => setShowSubmitWizard(false)}
-                        onSubmit={handleSubmitToJob}
-                    />
-                )}
-            </ModalPortal>
-            {showTerminateModal && (
-                <TerminateCandidateModal
-                    isOpen={showTerminateModal}
-                    onClose={() => setShowTerminateModal(false)}
-                    onSuccess={() => {
-                        setShowTerminateModal(false);
-                        onRefresh?.();
-                    }}
-                    candidateId={candidate.id}
-                    candidateName={candidate.full_name || "Unknown"}
-                />
-            )}
+            {modals}
         </>
     );
 }

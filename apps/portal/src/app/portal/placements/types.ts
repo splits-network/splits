@@ -52,7 +52,7 @@ export interface PlacementFilters {
 
 export interface PlacementStatusDisplay {
     label: string;
-    badgeClass: string;
+    badge: "coral" | "teal" | "yellow" | "purple" | "dark" | "cream";
     icon: string;
 }
 
@@ -62,22 +62,22 @@ export function getStatusDisplay(placement: Placement): PlacementStatusDisplay {
     const statusMap: Record<string, PlacementStatusDisplay> = {
         hired: {
             label: "Hired",
-            badgeClass: "badge-info",
+            badge: "teal",
             icon: "fa-user-check",
         },
         active: {
             label: "Active",
-            badgeClass: "badge-primary",
+            badge: "purple",
             icon: "fa-briefcase",
         },
         completed: {
             label: "Completed",
-            badgeClass: "badge-success",
+            badge: "yellow",
             icon: "fa-check",
         },
         failed: {
             label: "Failed",
-            badgeClass: "badge-error",
+            badge: "coral",
             icon: "fa-xmark",
         },
     };
@@ -85,7 +85,7 @@ export function getStatusDisplay(placement: Placement): PlacementStatusDisplay {
     return (
         statusMap[state] || {
             label: state.charAt(0).toUpperCase() + state.slice(1),
-            badgeClass: "badge-ghost",
+            badge: "dark",
             icon: "fa-circle-question",
         }
     );

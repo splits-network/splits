@@ -40,7 +40,7 @@ export function SplitFeeBar({
                     </p>
                 </div>
                 <div
-                    className="w-8 h-8 flex items-center justify-center border-detail"
+                    className="w-8 h-8 flex items-center justify-center border-xs"
                 >
                     <i className="fa-solid fa-slash text-xs text-dark" />
                 </div>

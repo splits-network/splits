@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import gsap from "gsap";
+import SimilarRecruiters from "./similar-recruiters";
 
 const C = { coral: "#FF6B6B", teal: "#4ECDC4", mint: "#95E1D3", yellow: "#FFE66D", purple: "#A78BFA", dark: "#1A1A2E", cream: "#F5F0EB", white: "#FFFFFF" };
 
@@ -269,8 +270,15 @@ export default function RecruiterDetailMemphis({ recruiter }: RecruiterDetailMem
                             </div>
                         </div>
 
+                        {/* Similar Recruiters */}
+                        <SimilarRecruiters
+                            currentRecruiterId={recruiter.id}
+                            industries={recruiter.industries}
+                            specialties={recruiter.specialties}
+                        />
+
                         {/* Availability */}
-                        <div className="border-4 p-6" style={{ borderColor: C.teal, backgroundColor: C.white }}>
+                        <div className="border-4 p-6" style={{ borderColor: C.yellow, backgroundColor: C.white }}>
                             <h3 className="text-xs font-black uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: C.dark }}>
                                 <span className="w-6 h-6 flex items-center justify-center" style={{ backgroundColor: C.teal }}>
                                     <i className="fa-duotone fa-regular fa-calendar-check text-xs" style={{ color: C.dark }}></i>

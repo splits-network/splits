@@ -40,7 +40,7 @@ export function TestimonialCard({
         <div
             className={[
                 `accent-${color}`,
-                'p-6 flex flex-col transition-all hover:opacity-90 bg-white border-container',
+                'p-6 flex flex-col transition-all hover:opacity-90 bg-white border-lg',
                 className,
             ].filter(Boolean).join(' ')}
         >
@@ -67,7 +67,7 @@ export function TestimonialCard({
             {/* Author */}
             <div className="flex items-center gap-3 pt-4 border-t-3 border-dark/20">
                 {initials && (
-                    <div className="w-10 h-10 flex items-center justify-center font-black text-xs uppercase bg-accent border-container text-dark">
+                    <div className="w-10 h-10 flex items-center justify-center font-black text-xs uppercase bg-accent border-lg text-dark">
                         {initials}
                     </div>
                 )}

@@ -7,14 +7,14 @@ import { GridCard } from "./grid-card";
 
 export function GridView({
     jobs,
-    onSelect,
+    onSelectAction,
     selectedId,
-    onRefresh,
+    onRefreshAction,
 }: {
     jobs: Job[];
-    onSelect: (j: Job) => void;
+    onSelectAction: (j: Job) => void;
     selectedId: string | null;
-    onRefresh?: () => void;
+    onRefreshAction?: () => void;
 }) {
     const selectedJob = jobs.find((j) => j.id === selectedId);
     const selectedAc = selectedJob
@@ -27,8 +27,8 @@ export function GridView({
                 <div
                     className={`grid gap-4 w-full ${
                         selectedJob
-                            ? "grid-cols-1 lg:grid-cols-2"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                            ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
+                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
                     }`}
                 >
                     {jobs.map((job, idx) => (
@@ -37,8 +37,8 @@ export function GridView({
                             job={job}
                             accent={accentAt(idx)}
                             isSelected={selectedId === job.id}
-                            onSelect={() => onSelect(job)}
-                            onRefresh={onRefresh}
+                            onSelect={() => onSelectAction(job)}
+                            onRefresh={onRefreshAction}
                         />
                     ))}
                 </div>
@@ -52,8 +52,8 @@ export function GridView({
                     <DetailLoader
                         jobId={selectedJob.id}
                         accent={selectedAc}
-                        onClose={() => onSelect(selectedJob)}
-                        onRefresh={onRefresh}
+                        onClose={() => onSelectAction(selectedJob)}
+                        onRefresh={onRefreshAction}
                     />
                 </div>
             )}

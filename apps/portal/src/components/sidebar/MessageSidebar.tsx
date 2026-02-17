@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import ThreadPanel from "@/app/portal/messages-memphis/components/shared/thread-panel";
+import ThreadPanel from "@/components/chat/thread-panel";
 
 interface MessageSidebarProps {
     conversationId: string | null;

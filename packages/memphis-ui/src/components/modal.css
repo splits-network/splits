@@ -177,6 +177,6 @@
 
 .modal-box {
     @layer memphis.modifier {
-        border: var(--border-container) solid var(--color-dark);
+        border: var(--border-lg) solid var(--color-dark);
     }
 }

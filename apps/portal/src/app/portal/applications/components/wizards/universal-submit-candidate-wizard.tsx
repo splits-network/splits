@@ -509,8 +509,8 @@ export default function UniversalSubmitCandidateWizard({
                     {/* Step 1: Job Selection */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
-                            <div className="card bg-base-200">
-                                <div className="card-body py-4">
+                            <div className="bg-cream border-4 border-dark">
+                                <div className="p-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend">
@@ -596,7 +596,7 @@ export default function UniversalSubmitCandidateWizard({
                                             matching "{debouncedJobSearch}"
                                         </div>
                                     )}
-                                    <div className="overflow-x-auto border border-base-300 rounded-lg">
+                                    <div className="overflow-x-auto border-4 border-dark/20 rounded-lg">
                                         <table className="table table-zebra">
                                             <thead>
                                                 <tr>
@@ -658,11 +658,11 @@ export default function UniversalSubmitCandidateWizard({
                                                                 className={`badge ${
                                                                     job.status ===
                                                                     "active"
-                                                                        ? "badge-success"
+                                                                        ? "bg-teal"
                                                                         : job.status ===
                                                                             "paused"
-                                                                          ? "badge-warning"
-                                                                          : "badge-neutral"
+                                                                          ? "bg-yellow"
+                                                                          : "bg-dark/20"
                                                                 }`}
                                                             >
                                                                 {job.status}
@@ -753,8 +753,8 @@ export default function UniversalSubmitCandidateWizard({
                             {candidateMode === "select" ? (
                                 <>
                                     {/* Search */}
-                                    <div className="card bg-base-200">
-                                        <div className="card-body py-4">
+                                    <div className="bg-cream border-4 border-dark">
+                                        <div className="p-4">
                                             <fieldset className="fieldset">
                                                 <legend className="fieldset-legend">
                                                     Search Candidates
@@ -812,7 +812,7 @@ export default function UniversalSubmitCandidateWizard({
                                                     {debouncedCandidateSearch}"
                                                 </div>
                                             )}
-                                            <div className="overflow-x-auto border border-base-300 rounded-lg">
+                                            <div className="overflow-x-auto border-4 border-dark/20 rounded-lg">
                                                 <table className="table table-zebra">
                                                     <thead>
                                                         <tr>
@@ -1130,8 +1130,8 @@ export default function UniversalSubmitCandidateWizard({
                         <div className="space-y-6">
                             {/* Selected Job and Candidate Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="card bg-base-200">
-                                    <div className="card-body py-3">
+                                <div className="bg-cream border-4 border-dark">
+                                    <div className="p-3">
                                         <h4 className="font-semibold mb-2">
                                             <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                             Selected Job
@@ -1147,8 +1147,8 @@ export default function UniversalSubmitCandidateWizard({
                                     </div>
                                 </div>
 
-                                <div className="card bg-base-200">
-                                    <div className="card-body py-3">
+                                <div className="bg-cream border-4 border-dark">
+                                    <div className="p-3">
                                         <h4 className="font-semibold mb-2">
                                             <i className="fa-duotone fa-regular fa-user mr-2"></i>
                                             Selected Candidate
@@ -1282,8 +1282,8 @@ export default function UniversalSubmitCandidateWizard({
                             </div>
 
                             {/* Job Summary */}
-                            <div className="card bg-base-200">
-                                <div className="card-body">
+                            <div className="bg-cream border-4 border-dark">
+                                <div className="p-4">
                                     <h4 className="font-semibold mb-2">
                                         <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                         Job
@@ -1307,8 +1307,8 @@ export default function UniversalSubmitCandidateWizard({
                             </div>
 
                             {/* Candidate Summary */}
-                            <div className="card bg-base-200">
-                                <div className="card-body">
+                            <div className="bg-cream border-4 border-dark">
+                                <div className="p-4">
                                     <h4 className="font-semibold mb-2">
                                         <i className="fa-duotone fa-regular fa-user mr-2"></i>
                                         Candidate
@@ -1345,8 +1345,8 @@ export default function UniversalSubmitCandidateWizard({
                             </div>
 
                             {/* Pitch Preview */}
-                            <div className="card bg-base-200">
-                                <div className="card-body">
+                            <div className="bg-cream border-4 border-dark">
+                                <div className="p-4">
                                     <h4 className="font-semibold mb-2">
                                         <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                         Your Pitch
@@ -1359,8 +1359,8 @@ export default function UniversalSubmitCandidateWizard({
 
                             {/* Documents Summary */}
                             {(selectedDocIds.size > 0 || resumeFile) && (
-                                <div className="card bg-base-200">
-                                    <div className="card-body">
+                                <div className="bg-cream border-4 border-dark">
+                                    <div className="p-4">
                                         <h4 className="font-semibold mb-2">
                                             <i className="fa-duotone fa-regular fa-file mr-2"></i>
                                             Documents

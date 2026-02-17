@@ -1,7 +1,7 @@
 /**
  * Generates src/components/steps.css — Memphis step styles.
  *
- * Reads SilicaUI's steps.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's steps.css as the base, then appends Memphis-specific
  * additions: uppercase text, letter-spacing, palette color variants.
  */
 

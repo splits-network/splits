@@ -31,8 +31,8 @@ export default function RolesPage() {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedJobId, setSelectedJobId] = useState<string | null>(
-        () => searchParams.get("roleId"),
+    const [selectedJobId, setSelectedJobId] = useState<string | null>(() =>
+        searchParams.get("roleId"),
     );
     const [showAddModal, setShowAddModal] = useState(false);
 
@@ -57,7 +57,9 @@ export default function RolesPage() {
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
         const currentQuery = searchParamsRef.current.toString();
-        const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+        const currentUrl = currentQuery
+            ? `${pathname}?${currentQuery}`
+            : pathname;
 
         if (newUrl !== currentUrl) {
             router.replace(newUrl, { scroll: false });
@@ -121,94 +123,94 @@ export default function RolesPage() {
         [jobs, pagination],
     );
 
-
     if (error) {
         return <ErrorState message={error} onRetry={refresh} />;
     }
 
     return (
         <>
-        <ListsSixAnimator>
-            <HeaderSection stats={stats} />
+            <ListsSixAnimator>
+                <HeaderSection stats={stats} />
 
-            <section className="min-h-screen bg-cream">
-                <div className="py-8 px-4 lg:px-8">
-                    <ControlsBar
-                        searchInput={searchInput}
-                        onSearchChange={setSearchInput}
-                        filters={filters}
-                        onFilterChange={setFilter}
-                        viewMode={viewMode}
-                        onViewModeChange={handleViewModeChange}
-                        canCreateRole={canCreateRole}
-                        onAddRole={() => setShowAddModal(true)}
-                    />
+                <section className="min-h-screen bg-cream">
+                    <div className="py-8 px-4 lg:px-8">
+                        <ControlsBar
+                            searchInput={searchInput}
+                            onSearchChange={setSearchInput}
+                            filters={filters}
+                            onFilterChange={setFilter}
+                            viewMode={viewMode}
+                            onViewModeChange={handleViewModeChange}
+                            canCreateRole={canCreateRole}
+                            onAddRole={() => setShowAddModal(true)}
+                        />
 
-                    {/* Listing Count */}
-                    <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                        Showing {jobs.length} of {pagination?.total ?? jobs.length} listings
-                    </p>
+                        {/* Listing Count */}
+                        <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
+                            Showing {jobs.length} of{" "}
+                            {pagination?.total ?? jobs.length} listings
+                        </p>
 
-                    {/* Content Area */}
-                    <div className="listings-content opacity-0">
-                        {loading && jobs.length === 0 ? (
-                            <LoadingState message="Loading roles..." />
-                        ) : jobs.length === 0 ? (
-                            <EmptyState
-                                icon="fa-briefcase"
-                                title="No Roles Found"
-                                description="Try adjusting your search or filters"
-                                action={{
-                                    label: "Reset Filters",
-                                    onClick: () => {
-                                        clearSearch();
-                                        clearFilters();
-                                    },
-                                }}
-                            />
-                        ) : (
-                            <>
-                                {viewMode === "table" && (
-                                    <TableView
-                                        jobs={jobs}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefresh={refresh}
-                                    />
-                                )}
-                                {viewMode === "grid" && (
-                                    <GridView
-                                        jobs={jobs}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefresh={refresh}
-                                    />
-                                )}
-                                {viewMode === "split" && (
-                                    <SplitView
-                                        jobs={jobs}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefresh={refresh}
-                                    />
-                                )}
-                            </>
-                        )}
+                        {/* Content Area */}
+                        <div className="listings-content opacity-0">
+                            {loading && jobs.length === 0 ? (
+                                <LoadingState message="Loading roles..." />
+                            ) : jobs.length === 0 ? (
+                                <EmptyState
+                                    icon="fa-briefcase"
+                                    title="No Roles Found"
+                                    description="Try adjusting your search or filters"
+                                    action={{
+                                        label: "Reset Filters",
+                                        onClick: () => {
+                                            clearSearch();
+                                            clearFilters();
+                                        },
+                                    }}
+                                />
+                            ) : (
+                                <>
+                                    {viewMode === "table" && (
+                                        <TableView
+                                            jobs={jobs}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefresh={refresh}
+                                        />
+                                    )}
+                                    {viewMode === "grid" && (
+                                        <GridView
+                                            jobs={jobs}
+                                            onSelectAction={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefreshAction={refresh}
+                                        />
+                                    )}
+                                    {viewMode === "split" && (
+                                        <SplitView
+                                            jobs={jobs}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefresh={refresh}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        {/* Pagination */}
+                        <PaginationControls
+                            page={page}
+                            totalPages={totalPages}
+                            total={total}
+                            limit={limit}
+                            onPageChange={goToPage}
+                            onLimitChange={setLimit}
+                            loading={loading}
+                        />
                     </div>
-
-                    {/* Pagination */}
-                    <PaginationControls
-                        page={page}
-                        totalPages={totalPages}
-                        total={total}
-                        limit={limit}
-                        onPageChange={goToPage}
-                        onLimitChange={setLimit}
-                        loading={loading}
-                    />
-                </div>
-            </section>
-        </ListsSixAnimator>
+                </section>
+            </ListsSixAnimator>
 
             <ModalPortal>
                 {showAddModal && (

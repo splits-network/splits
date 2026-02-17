@@ -2,7 +2,7 @@
  * Generates src/components/table.css — Memphis table styles.
  *
  * Memphis tables have: dark header, alternating cream rows, container border.
- * This replaces SilicaUI's table.css entirely.
+ * This replaces MemphisUI's table.css entirely.
  */
 
 import { readFile, writeFile } from 'fs/promises';

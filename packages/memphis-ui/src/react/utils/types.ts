@@ -26,7 +26,10 @@ export type AnyMemphisColor = MemphisColor | SemanticColor;
 /** Standard component size variants */
 export type MemphisSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
-/** Border tier hierarchy */
+/** Border width variants (xs-2xl system) */
+export type BorderSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+/** Border tier hierarchy (legacy mapping) */
 export type BorderTier = 'container' | 'interactive' | 'detail';
 
 /**

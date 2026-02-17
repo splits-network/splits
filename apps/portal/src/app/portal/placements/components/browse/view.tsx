@@ -45,7 +45,7 @@ export default function BrowseView() {
         <BrowseLayout>
             {/* Left Panel - List */}
             <div
-                className={`flex flex-col border-r border-base-300 bg-base-200 w-full md:w-96 lg:w-[420px] ${
+                className={`flex flex-col border-r-4 border-dark bg-cream w-full md:w-96 lg:w-[420px] ${
                     selectedId ? "hidden md:flex" : "flex"
                 }`}
             >
@@ -75,24 +75,24 @@ export default function BrowseView() {
 
                 {/* Pagination Footer */}
                 {totalPages > 1 && (
-                    <div className="border-t border-base-300 p-2 flex items-center justify-between text-xs text-base-content/60">
-                        <span>
+                    <div className="border-t-4 border-dark p-3 flex items-center justify-between bg-white">
+                        <span className="text-xs font-black uppercase tracking-wider text-dark opacity-60">
                             Page {page} of {totalPages}
                         </span>
-                        <div className="join">
+                        <div className="flex gap-1">
                             <button
-                                className="join-item btn btn-xs"
+                                className="w-8 h-8 border-2 border-dark flex items-center justify-center disabled:opacity-30 font-bold hover:bg-coral hover:text-white transition-colors"
                                 disabled={page <= 1}
                                 onClick={() => goToPage(page - 1)}
                             >
-                                <i className="fa-duotone fa-regular fa-chevron-left" />
+                                <i className="fa-solid fa-chevron-left text-xs" />
                             </button>
                             <button
-                                className="join-item btn btn-xs"
+                                className="w-8 h-8 border-2 border-dark flex items-center justify-center disabled:opacity-30 font-bold hover:bg-coral hover:text-white transition-colors"
                                 disabled={page >= totalPages}
                                 onClick={() => goToPage(page + 1)}
                             >
-                                <i className="fa-duotone fa-regular fa-chevron-right" />
+                                <i className="fa-solid fa-chevron-right text-xs" />
                             </button>
                         </div>
                     </div>
@@ -101,7 +101,7 @@ export default function BrowseView() {
 
             {/* Right Panel - Detail */}
             <div
-                className={`flex-1 flex-col bg-base-100 min-w-0 ${
+                className={`flex-1 flex-col bg-white min-w-0 ${
                     selectedId
                         ? "fixed inset-0 z-50 flex md:static md:z-auto"
                         : "hidden md:flex"
@@ -114,10 +114,20 @@ export default function BrowseView() {
                         onClose={handleClose}
                     />
                 ) : (
-                    <div className="flex-1 flex items-center justify-center text-base-content/60">
-                        <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-trophy text-4xl mb-3 block" />
-                            <p>Select a placement to view details</p>
+                    <div className="flex-1 flex items-center justify-center">
+                        <div className="text-center p-8">
+                            {/* Memphis decoration */}
+                            <div className="flex justify-center gap-3 mb-6">
+                                <div className="w-8 h-8 rotate-12 bg-coral" />
+                                <div className="w-8 h-8 rounded-full bg-teal" />
+                                <div className="w-8 h-8 rotate-45 bg-yellow" />
+                            </div>
+                            <h3 className="font-black text-xl uppercase tracking-tight mb-2 text-dark">
+                                Select a Placement
+                            </h3>
+                            <p className="text-sm text-dark opacity-50 font-bold">
+                                Click a placement to view details
+                            </p>
                         </div>
                     </div>
                 )}

@@ -219,21 +219,21 @@ export default function ButtonsSixPage() {
 
                     <SubLabel>Default Variants</SubLabel>
                     <ButtonRow>
-                        <Button variant="coral" size="md">
+                        <Button color="coral" size="md">
                             Primary Action
                         </Button>
-                        <Button variant="coral" size="md">
+                        <Button color="coral" size="md">
                             <i className="fa-duotone fa-regular fa-plus mr-2" />
                             With Left Icon
                         </Button>
-                        <Button variant="coral" size="md">
+                        <Button color="coral" size="md">
                             Continue
                             <i className="fa-duotone fa-regular fa-arrow-right ml-2" />
                         </Button>
-                        <Button variant="coral" size="md" className="!px-3">
+                        <Button color="coral" size="md" className="!px-3">
                             <i className="fa-duotone fa-regular fa-star" />
                         </Button>
-                        <Button variant="coral" size="md" disabled>
+                        <Button color="coral" size="md" disabled>
                             Disabled
                         </Button>
                     </ButtonRow>
@@ -243,13 +243,13 @@ export default function ButtonsSixPage() {
                         <button className="border-4 border-dark bg-coral text-white font-bold uppercase tracking-wide transition-colors cursor-pointer px-3 py-1 text-xs">
                             Extra Small
                         </button>
-                        <Button variant="coral" size="sm">
+                        <Button color="coral" size="sm">
                             Small
                         </Button>
-                        <Button variant="coral" size="md">
+                        <Button color="coral" size="md">
                             Medium
                         </Button>
-                        <Button variant="coral" size="lg">
+                        <Button color="coral" size="lg">
                             Large
                         </Button>
                     </ButtonRow>
@@ -279,21 +279,21 @@ export default function ButtonsSixPage() {
 
                     <SubLabel>Default Variants</SubLabel>
                     <ButtonRow>
-                        <Button variant="teal" size="md">
+                        <Button color="teal" size="md">
                             Secondary Action
                         </Button>
-                        <Button variant="teal" size="md">
+                        <Button color="teal" size="md">
                             <i className="fa-duotone fa-regular fa-filter mr-2" />
                             With Left Icon
                         </Button>
-                        <Button variant="teal" size="md">
+                        <Button color="teal" size="md">
                             Export
                             <i className="fa-duotone fa-regular fa-download ml-2" />
                         </Button>
-                        <Button variant="teal" size="md" className="!px-3">
+                        <Button color="teal" size="md" className="!px-3">
                             <i className="fa-duotone fa-regular fa-gear" />
                         </Button>
-                        <Button variant="teal" size="md" disabled>
+                        <Button color="teal" size="md" disabled>
                             Disabled
                         </Button>
                     </ButtonRow>
@@ -303,13 +303,13 @@ export default function ButtonsSixPage() {
                         <button className="border-4 border-dark bg-teal text-dark font-bold uppercase tracking-wide transition-colors cursor-pointer px-3 py-1 text-xs">
                             Extra Small
                         </button>
-                        <Button variant="teal" size="sm">
+                        <Button color="teal" size="sm">
                             Small
                         </Button>
-                        <Button variant="teal" size="md">
+                        <Button color="teal" size="md">
                             Medium
                         </Button>
-                        <Button variant="teal" size="lg">
+                        <Button color="teal" size="lg">
                             Large
                         </Button>
                     </ButtonRow>
@@ -340,21 +340,21 @@ export default function ButtonsSixPage() {
 
                     <SubLabel>Yellow Accent</SubLabel>
                     <ButtonRow>
-                        <Button variant="yellow" size="md">
+                        <Button color="yellow" size="md">
                             Highlight Action
                         </Button>
-                        <Button variant="yellow" size="md">
+                        <Button color="yellow" size="md">
                             <i className="fa-duotone fa-regular fa-lightbulb mr-2" />
                             With Icon
                         </Button>
-                        <Button variant="yellow" size="md">
+                        <Button color="yellow" size="md">
                             Upgrade
                             <i className="fa-duotone fa-regular fa-arrow-up ml-2" />
                         </Button>
-                        <Button variant="yellow" size="md" className="!px-3">
+                        <Button color="yellow" size="md" className="!px-3">
                             <i className="fa-duotone fa-regular fa-bell" />
                         </Button>
-                        <Button variant="yellow" size="md" disabled>
+                        <Button color="yellow" size="md" disabled>
                             Disabled
                         </Button>
                     </ButtonRow>
@@ -364,34 +364,34 @@ export default function ButtonsSixPage() {
                         <button className="border-4 border-dark bg-yellow text-dark font-bold uppercase tracking-wide transition-colors cursor-pointer px-3 py-1 text-xs">
                             Extra Small
                         </button>
-                        <Button variant="yellow" size="sm">
+                        <Button color="yellow" size="sm">
                             Small
                         </Button>
-                        <Button variant="yellow" size="md">
+                        <Button color="yellow" size="md">
                             Medium
                         </Button>
-                        <Button variant="yellow" size="lg">
+                        <Button color="yellow" size="lg">
                             Large
                         </Button>
                     </ButtonRow>
 
                     <SubLabel>Purple Accent</SubLabel>
                     <ButtonRow>
-                        <Button variant="purple" size="md">
+                        <Button color="purple" size="md">
                             Premium Action
                         </Button>
-                        <Button variant="purple" size="md">
+                        <Button color="purple" size="md">
                             <i className="fa-duotone fa-regular fa-wand-magic-sparkles mr-2" />
                             With Icon
                         </Button>
-                        <Button variant="purple" size="md">
+                        <Button color="purple" size="md">
                             AI Match
                             <i className="fa-duotone fa-regular fa-sparkles ml-2" />
                         </Button>
-                        <Button variant="purple" size="md" className="!px-3">
+                        <Button color="purple" size="md" className="!px-3">
                             <i className="fa-duotone fa-regular fa-crown" />
                         </Button>
-                        <Button variant="purple" size="md" disabled>
+                        <Button color="purple" size="md" disabled>
                             Disabled
                         </Button>
                     </ButtonRow>
@@ -401,13 +401,13 @@ export default function ButtonsSixPage() {
                         <button className="border-4 border-dark bg-purple text-white font-bold uppercase tracking-wide transition-colors cursor-pointer px-3 py-1 text-xs">
                             Extra Small
                         </button>
-                        <Button variant="purple" size="sm">
+                        <Button color="purple" size="sm">
                             Small
                         </Button>
-                        <Button variant="purple" size="md">
+                        <Button color="purple" size="md">
                             Medium
                         </Button>
-                        <Button variant="purple" size="lg">
+                        <Button color="purple" size="lg">
                             Large
                         </Button>
                     </ButtonRow>
@@ -598,7 +598,7 @@ export default function ButtonsSixPage() {
                                 return (
                                     <Button
                                         key={i}
-                                        variant={color}
+                                        color={color}
                                         size="sm"
                                         className={i > 0 ? "-ml-1" : ""}
                                     >
@@ -753,7 +753,7 @@ export default function ButtonsSixPage() {
                     <SubLabel>Interactive Loading (Click to Test)</SubLabel>
                     <ButtonRow>
                         <Button
-                            variant="coral"
+                            color="coral"
                             size="md"
                             disabled={loadingStates["save"]}
                             className={loadingStates["save"] ? "opacity-80" : ""}
@@ -772,7 +772,7 @@ export default function ButtonsSixPage() {
                             )}
                         </Button>
                         <Button
-                            variant="teal"
+                            color="teal"
                             size="md"
                             disabled={loadingStates["export"]}
                             className={loadingStates["export"] ? "opacity-80" : ""}
@@ -791,7 +791,7 @@ export default function ButtonsSixPage() {
                             )}
                         </Button>
                         <Button
-                            variant="purple"
+                            color="purple"
                             size="md"
                             disabled={loadingStates["match"]}
                             className={loadingStates["match"] ? "opacity-80" : ""}
@@ -849,11 +849,11 @@ export default function ButtonsSixPage() {
 
                     <SubLabel>Delete / Remove / Cancel</SubLabel>
                     <ButtonRow>
-                        <Button variant="coral" size="md">
+                        <Button color="coral" size="md">
                             <i className="fa-duotone fa-regular fa-trash mr-2" />
                             Delete
                         </Button>
-                        <Button variant="coral" size="sm">
+                        <Button color="coral" size="sm">
                             <i className="fa-duotone fa-regular fa-user-minus mr-2" />
                             Remove
                         </Button>
@@ -882,7 +882,7 @@ export default function ButtonsSixPage() {
                             <button className="border-4 border-white/20 bg-transparent text-white/70 font-bold uppercase tracking-wide px-5 py-2.5 text-sm transition-colors cursor-pointer hover:border-white hover:text-white">
                                 Cancel
                             </button>
-                            <Button variant="coral" size="sm">
+                            <Button color="coral" size="sm">
                                 <i className="fa-duotone fa-regular fa-trash mr-2" />
                                 Yes, Delete
                             </Button>

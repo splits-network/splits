@@ -5,6 +5,7 @@ import {
     ExpandedDetailGrid,
     ExpandedDetailItem,
 } from "@/components/ui/tables";
+import { Badge } from "@splits-network/memphis-ui";
 import {
     Placement,
     getStatusDisplay,
@@ -12,6 +13,7 @@ import {
     formatPlacementDate,
 } from "../../types";
 import ActionsToolbar from "../shared/actions-toolbar";
+import { statusVariant } from "../shared/accent";
 
 interface RowProps {
     item: Placement;
@@ -34,7 +36,8 @@ export default function Row({ item, onViewDetails }: RowProps) {
                 <div className="flex items-center gap-3">
                     <div className="avatar avatar-placeholder shrink-0">
                         <div className="bg-primary/10 text-base-content/70 w-10 rounded-full flex items-center justify-center text-sm font-semibold">
-                            {(item.candidate?.full_name || "C")[0].toUpperCase()}
+                            {(item.candidate?.full_name ||
+                                "C")[0].toUpperCase()}
                         </div>
                     </div>
                     <div className="text-sm min-w-0">
@@ -74,18 +77,27 @@ export default function Row({ item, onViewDetails }: RowProps) {
             </td>
             {/* Your Share */}
             <td className="text-right">
-                <span className="text-sm font-semibold text-success">
+                <span className="text-sm font-black text-teal">
                     {formatCurrency(item.recruiter_share || 0)}
                 </span>
             </td>
             {/* Status */}
             <td>
-                <span
-                    className={`badge ${status.badgeClass} badge-sm gap-1.5`}
+                <Badge
+                    color={
+                        status.badge as
+                            | "coral"
+                            | "teal"
+                            | "yellow"
+                            | "purple"
+                            | "dark"
+                            | "cream"
+                    }
+                    size="sm"
                 >
-                    <i className={`fa-duotone fa-regular ${status.icon}`} />
+                    <i className={`${status.icon} mr-1`} />
                     {status.label}
-                </span>
+                </Badge>
             </td>
             {/* Actions */}
             <td onClick={(e) => e.stopPropagation()}>
@@ -121,13 +133,7 @@ export default function Row({ item, onViewDetails }: RowProps) {
                 <ExpandedDetailItem
                     icon="fa-circle-check"
                     label="Status"
-                    value={
-                        <span
-                            className={`badge badge-sm ${status.badgeClass}`}
-                        >
-                            {status.label}
-                        </span>
-                    }
+                    value={status.label}
                 />
                 {item.guarantee_days && (
                     <ExpandedDetailItem
@@ -139,8 +145,8 @@ export default function Row({ item, onViewDetails }: RowProps) {
             </ExpandedDetailGrid>
 
             {/* Financial Breakdown */}
-            <div className="bg-base-200 rounded-lg p-3">
-                <h4 className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+            <div className="bg-cream border-4 border-dark p-4">
+                <h4 className="text-xs font-black text-dark uppercase tracking-wider mb-3">
                     Financial Breakdown
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -169,10 +175,10 @@ export default function Row({ item, onViewDetails }: RowProps) {
                         </div>
                     </div>
                     <div>
-                        <span className="text-xs text-base-content/50">
+                        <span className="text-xs text-dark opacity-60 font-bold uppercase tracking-wider">
                             Your Share
                         </span>
-                        <div className="font-bold text-success">
+                        <div className="font-black text-teal text-lg">
                             {formatCurrency(item.recruiter_share || 0)}
                         </div>
                     </div>

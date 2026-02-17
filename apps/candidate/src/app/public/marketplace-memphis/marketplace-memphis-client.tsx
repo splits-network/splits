@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { StandardListResponse } from "@splits-network/shared-types";
+import {
+    useStandardList,
+    PaginationControls,
+    LoadingState,
+    EmptyState,
+    ErrorState,
+} from "@/hooks/use-standard-list";
 import MarketplaceAnimator from "./marketplace-animator";
 import RecruiterGrid from "./components/recruiter-grid";
 import RecruiterTable from "./components/recruiter-table";
-import SearchFiltersMemphis from "./components/search-filters-memphis";
 import { Input, Button } from "@splits-network/memphis-ui";
 
 export interface Recruiter {
@@ -29,6 +35,12 @@ export interface Recruiter {
     };
 }
 
+interface RecruiterFilters {
+    marketplace_enabled?: boolean;
+    specialization?: string;
+    location?: string;
+}
+
 interface MarketplaceMemphisClientProps {
     initialData?: Recruiter[];
     initialPagination?: StandardListResponse<Recruiter>["pagination"];
@@ -41,33 +53,53 @@ export default function MarketplaceMemphisClient({
     initialPagination,
 }: MarketplaceMemphisClientProps) {
     const [viewMode, setViewMode] = useState<ViewMode>("grid");
-    const [searchQuery, setSearchQuery] = useState("");
     const [selectedRecruiter, setSelectedRecruiter] = useState<Recruiter | null>(null);
 
-    const filteredRecruiters = useMemo(() => {
-        if (!searchQuery) return initialData;
+    const {
+        data: recruiters,
+        loading,
+        error,
+        pagination,
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        clearFilters,
+        page,
+        limit,
+        goToPage,
+        setLimit,
+        total,
+        totalPages,
+        refresh,
+    } = useStandardList<Recruiter, RecruiterFilters>({
+        endpoint: "/recruiters",
+        defaultFilters: { marketplace_enabled: true },
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
+        defaultLimit: 24,
+        syncToUrl: true,
+        include: "user",
+        initialData,
+        initialPagination,
+        requireAuth: false,
+    });
 
-        const query = searchQuery.toLowerCase();
-        return initialData.filter((recruiter) => {
-            const name = recruiter.users?.name || recruiter.name || "";
-            const tagline = recruiter.tagline || "";
-            const specialization = recruiter.specialization || "";
-            const location = recruiter.location || "";
-
-            return (
-                name.toLowerCase().includes(query) ||
-                tagline.toLowerCase().includes(query) ||
-                specialization.toLowerCase().includes(query) ||
-                location.toLowerCase().includes(query)
-            );
-        });
-    }, [initialData, searchQuery]);
-
-    const handleSelectRecruiter = (recruiter: Recruiter) => {
-        setSelectedRecruiter(
-            selectedRecruiter?.id === recruiter.id ? null : recruiter
+    const handleSelectRecruiter = useCallback((recruiter: Recruiter) => {
+        setSelectedRecruiter((prev) =>
+            prev?.id === recruiter.id ? null : recruiter
         );
-    };
+    }, []);
+
+    const stats = useMemo(
+        () => ({
+            total: pagination?.total || recruiters.length,
+            experienced: recruiters.filter((r) => (r.total_placements ?? 0) > 10).length,
+            topRated: recruiters.filter((r) => (r.reputation_score ?? 0) >= 4.5).length,
+        }),
+        [recruiters, pagination],
+    );
 
     return (
         <MarketplaceAnimator>
@@ -100,14 +132,14 @@ export default function MarketplaceMemphisClient({
                                     <Input
                                         type="text"
                                         placeholder="Search by name, specialty, or location..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        value={searchInput}
+                                        onChange={(e) => setSearchInput(e.target.value)}
                                         className="w-full border-4 border-teal bg-white text-dark"
                                     />
                                 </div>
-                                {searchQuery && (
+                                {searchInput && (
                                     <Button
-                                        onClick={() => setSearchQuery("")}
+                                        onClick={clearSearch}
                                         className="bg-coral text-white border-4 border-coral"
                                     >
                                         Clear
@@ -120,7 +152,7 @@ export default function MarketplaceMemphisClient({
                         <div className="flex flex-wrap gap-6 mt-10">
                             <div className="stat-item opacity-0">
                                 <div className="text-3xl font-black text-coral">
-                                    {initialData.length}
+                                    {stats.total}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider text-cream/50">
                                     Active Recruiters
@@ -128,7 +160,7 @@ export default function MarketplaceMemphisClient({
                             </div>
                             <div className="stat-item opacity-0">
                                 <div className="text-3xl font-black text-teal">
-                                    {initialData.filter((r) => (r.total_placements ?? 0) > 10).length}
+                                    {stats.experienced}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider text-cream/50">
                                     Experienced
@@ -136,7 +168,7 @@ export default function MarketplaceMemphisClient({
                             </div>
                             <div className="stat-item opacity-0">
                                 <div className="text-3xl font-black text-mint">
-                                    {initialData.filter((r) => (r.reputation_score ?? 0) >= 4.5).length}
+                                    {stats.topRated}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider text-cream/50">
                                     Top Rated
@@ -153,11 +185,11 @@ export default function MarketplaceMemphisClient({
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                         <div className="flex items-center gap-3">
                             <span className="text-xs uppercase tracking-wider text-dark/40 font-bold">
-                                {filteredRecruiters.length} recruiters
+                                Showing {recruiters.length} of {pagination?.total ?? recruiters.length} recruiters
                             </span>
-                            {searchQuery && (
+                            {searchInput && (
                                 <span className="text-xs uppercase tracking-wider text-coral font-bold">
-                                    Filtered by: &ldquo;{searchQuery}&rdquo;
+                                    Filtered by: &ldquo;{searchInput}&rdquo;
                                 </span>
                             )}
                         </div>
@@ -194,7 +226,11 @@ export default function MarketplaceMemphisClient({
             {/* Content Area */}
             <section className="content-area py-12 opacity-0">
                 <div className="container mx-auto px-6 lg:px-12">
-                    {filteredRecruiters.length === 0 ? (
+                    {error ? (
+                        <ErrorState message={error} onRetry={refresh} />
+                    ) : loading && recruiters.length === 0 ? (
+                        <LoadingState message="Loading recruiters..." />
+                    ) : recruiters.length === 0 ? (
                         <div className="text-center py-20 border-4 border-dark bg-white">
                             <div className="flex justify-center gap-3 mb-6">
                                 <div className="w-8 h-8 rotate-12 bg-coral" />
@@ -207,9 +243,9 @@ export default function MarketplaceMemphisClient({
                             <p className="text-sm text-dark/50 mb-4">
                                 Try adjusting your search or check back later
                             </p>
-                            {searchQuery && (
+                            {searchInput && (
                                 <Button
-                                    onClick={() => setSearchQuery("")}
+                                    onClick={clearSearch}
                                     className="bg-coral text-white border-4 border-coral"
                                 >
                                     Clear Search
@@ -218,16 +254,31 @@ export default function MarketplaceMemphisClient({
                         </div>
                     ) : viewMode === "grid" ? (
                         <RecruiterGrid
-                            recruiters={filteredRecruiters}
+                            recruiters={recruiters}
                             selectedRecruiter={selectedRecruiter}
                             onSelect={handleSelectRecruiter}
                         />
                     ) : (
                         <RecruiterTable
-                            recruiters={filteredRecruiters}
+                            recruiters={recruiters}
                             selectedRecruiter={selectedRecruiter}
                             onSelect={handleSelectRecruiter}
                         />
+                    )}
+
+                    {/* Pagination */}
+                    {recruiters.length > 0 && totalPages > 1 && (
+                        <div className="mt-12">
+                            <PaginationControls
+                                page={page}
+                                totalPages={totalPages}
+                                total={total}
+                                limit={limit}
+                                onPageChange={goToPage}
+                                onLimitChange={setLimit}
+                                loading={loading}
+                            />
+                        </div>
                     )}
                 </div>
             </section>

@@ -254,7 +254,7 @@ function PreScreenQuestionCard({
                             placeholder="Type an option and press Enter..."
                         />
                         <Button
-                            variant="teal"
+                            color="teal"
                             size="sm"
                             onClick={handleAddOption}
                             disabled={!newOption.trim()}
@@ -870,7 +870,7 @@ export default function RoleWizardModal({
 
                 {/* ── Step Badge ── */}
                 <div className="flex items-center gap-2 mb-5">
-                    <Badge variant={WIZARD_STEPS[currentStep].accent} size="md">
+                    <Badge color={WIZARD_STEPS[currentStep].accent} size="md">
                         Step {currentStep + 1}
                     </Badge>
                     <span className="text-md font-bold uppercase tracking-wide text-dark">
@@ -1205,7 +1205,7 @@ export default function RoleWizardModal({
                                                 </span>
                                             </div>
                                             <Button
-                                                variant="coral"
+                                                color="coral"
                                                 size="sm"
                                                 onClick={addMandatory}
                                             >
@@ -1268,7 +1268,7 @@ export default function RoleWizardModal({
                                                 </span>
                                             </div>
                                             <Button
-                                                variant="teal"
+                                                color="teal"
                                                 size="sm"
                                                 onClick={addPreferred}
                                             >
@@ -1341,7 +1341,7 @@ export default function RoleWizardModal({
                                             </span>
                                         </div>
                                         <Button
-                                            variant="coral"
+                                            color="coral"
                                             size="sm"
                                             onClick={addQuestion}
                                         >
@@ -1388,7 +1388,7 @@ export default function RoleWizardModal({
                 {/* ── Footer Navigation ── */}
                 <div className="mt-6 pt-4 border-t-4 border-dark flex items-center justify-between">
                     <Button
-                        variant="dark"
+                        color="dark"
                         onClick={currentStep === 0 ? handleClose : handleBack}
                         disabled={submitting}
                     >
@@ -1408,7 +1408,7 @@ export default function RoleWizardModal({
 
                     {currentStep < totalSteps - 1 ? (
                         <Button
-                            variant={WIZARD_STEPS[currentStep].accent}
+                            color={WIZARD_STEPS[currentStep].accent}
                             onClick={handleNext}
                             disabled={loading || submitting}
                         >
@@ -1417,7 +1417,7 @@ export default function RoleWizardModal({
                         </Button>
                     ) : (
                         <Button
-                            variant="teal"
+                            color="teal"
                             onClick={handleSubmit}
                             disabled={submitting}
                         >

@@ -47,7 +47,7 @@ export function BadgeTabs({
     return (
         <div
             role="tablist"
-            className={['tabs border-container bg-base-100', className].filter(Boolean).join(' ')}
+            className={['tabs border-lg bg-base-100', className].filter(Boolean).join(' ')}
         >
             {tabs.map((tab, i) => {
                 const isActive = tab.key === activeKey;

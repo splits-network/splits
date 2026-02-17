@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { Input, Select, Button } from "@splits-network/memphis-ui";
 import { PlacementFilters } from "../../types";
 
 interface HeaderFiltersProps {
@@ -36,94 +37,73 @@ export default function HeaderFilters({
     const activeFilterCount = [filters.status].filter(Boolean).length;
 
     return (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
             {/* Search Input */}
-            <label className="input input-sm w-48 lg:w-64">
-                <i className="fa-duotone fa-regular fa-search" />
+            <div className="flex border-4 border-dark w-48 lg:w-64">
+                <div className="flex items-center px-3 bg-cream">
+                    <i className="fa-duotone fa-regular fa-search text-xs text-dark" />
+                </div>
                 <input
                     type="text"
-                    placeholder="Search placements..."
+                    placeholder="Search..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     disabled={loading}
+                    className="flex-1 px-3 py-2 text-xs font-semibold outline-none text-dark"
                 />
                 {searchInput && (
                     <button
                         onClick={clearSearch}
-                        className="btn btn-ghost btn-xs btn-square"
+                        className="px-3 hover:bg-coral hover:text-white transition-colors"
                     >
-                        <i className="fa-duotone fa-regular fa-xmark" />
+                        <i className="fa-duotone fa-regular fa-xmark text-xs" />
                     </button>
                 )}
-            </label>
+            </div>
 
             {/* Stats Toggle */}
             <button
                 onClick={() => setShowStats(!showStats)}
-                className={`btn btn-sm btn-ghost ${showStats ? "text-primary" : ""}`}
+                className={`w-10 h-10 border-4 border-dark flex items-center justify-center font-bold hover:bg-coral hover:text-white transition-colors ${showStats ? "bg-coral text-white" : "bg-white text-dark"}`}
             >
-                <i className="fa-duotone fa-regular fa-chart-simple" />
+                <i className="fa-duotone fa-regular fa-chart-simple text-sm" />
             </button>
 
             {/* Refresh */}
             <button
                 onClick={refresh}
-                className="btn btn-sm btn-ghost"
+                className="w-10 h-10 border-4 border-dark bg-white text-dark flex items-center justify-center font-bold hover:bg-teal hover:text-white transition-colors disabled:opacity-50"
                 disabled={loading}
             >
                 <i
-                    className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
+                    className={`fa-duotone fa-regular fa-arrows-rotate text-sm ${loading ? "animate-spin" : ""}`}
                 />
             </button>
 
-            {/* Filters Dropdown */}
-            <div className="dropdown dropdown-end">
-                <div
-                    tabIndex={0}
-                    role="button"
-                    className="btn btn-sm btn-ghost"
-                >
-                    <i className="fa-duotone fa-regular fa-filter" />
-                    <span className="hidden sm:inline">Filters</span>
-                    {activeFilterCount > 0 && (
-                        <span className="badge badge-primary badge-xs">
-                            {activeFilterCount}
-                        </span>
-                    )}
-                </div>
-                <div
-                    tabIndex={0}
-                    className="dropdown-content menu p-4 shadow-lg bg-base-100 rounded-box w-72 z-[50] border border-base-200 space-y-4"
-                >
-                    <div className="flex justify-between items-center pb-2 border-b border-base-200">
-                        <span className="font-semibold">Filters</span>
-                        <button
-                            onClick={handleReset}
-                            className="text-xs text-base-content/60 hover:text-primary"
-                        >
-                            Reset
-                        </button>
-                    </div>
+            {/* Status Filter */}
+            <Select
+                value={filters.status || ""}
+                onChange={(e) =>
+                    setFilter("status", e.target.value || undefined)
+                }
+                options={[
+                    { value: "", label: "All Statuses" },
+                    { value: "hired", label: "Hired" },
+                    { value: "active", label: "Active" },
+                    { value: "completed", label: "Completed" },
+                    { value: "failed", label: "Failed" },
+                ]}
+                className="select-sm w-40"
+            />
 
-                    {/* Status Filter */}
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Status</legend>
-                        <select
-                            className="select select-sm w-full"
-                            value={filters.status || ""}
-                            onChange={(e) =>
-                                setFilter("status", e.target.value || undefined)
-                            }
-                        >
-                            <option value="">All Statuses</option>
-                            <option value="hired">Hired</option>
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                            <option value="failed">Failed</option>
-                        </select>
-                    </fieldset>
-                </div>
-            </div>
+            {activeFilterCount > 0 && (
+                <button
+                    onClick={handleReset}
+                    className="text-xs font-black uppercase tracking-wider text-coral hover:text-dark transition-colors"
+                >
+                    Reset Filters
+                </button>
+            )}
         </div>
     );
 }

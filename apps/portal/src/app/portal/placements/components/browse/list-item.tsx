@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@splits-network/memphis-ui";
 import { Placement, getStatusDisplay, formatCurrency } from "../../types";
 
 interface ListItemProps {
@@ -21,20 +22,20 @@ export default function ListItem({
         <div
             onClick={() => onSelect(item.id)}
             className={`
-                group relative p-3 sm:p-4 border-b border-base-300 cursor-pointer transition-all duration-200
-                hover:bg-base-100
-                ${isSelected ? "bg-base-100 border-l-4 border-l-primary shadow-sm z-10" : "border-l-4 border-l-transparent"}
+                group relative p-3 sm:p-4 border-b-2 border-dark cursor-pointer transition-all duration-200
+                hover:bg-white
+                ${isSelected ? "bg-white border-l-4 border-l-coral" : "border-l-4 border-l-transparent bg-cream"}
             `}
         >
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="truncate text-sm font-medium text-base-content/90">
+                        <h3 className="truncate text-sm font-black text-dark uppercase tracking-tight">
                             {candidate?.full_name || "Unknown Candidate"}
                         </h3>
                     </div>
 
-                    <div className="text-xs text-base-content/60 truncate mb-1.5">
+                    <div className="text-xs text-dark opacity-70 truncate mb-2 font-bold">
                         {job?.title || "Unknown Job"}
                         {job?.company?.name && (
                             <span className="opacity-70">
@@ -45,25 +46,32 @@ export default function ListItem({
                     </div>
 
                     {/* Status + Earnings Badges */}
-                    <div className="flex flex-wrap gap-1.5">
-                        <span
-                            className={`badge badge-sm ${status.badgeClass} badge-soft gap-1 border-0`}
+                    <div className="flex flex-wrap gap-2">
+                        <Badge
+                            color={
+                                item.state === "hired"
+                                    ? "teal"
+                                    : item.state === "pending_payout"
+                                      ? "yellow"
+                                      : "purple"
+                            }
+                            size="sm"
                         >
                             <i
-                                className={`fa-duotone fa-regular ${status.icon} text-[10px]`}
-                            />
+                                className={`fa-duotone fa-regular ${status.icon} mr-1`}
+                            ></i>
                             {status.label}
-                        </span>
-                        <span className="badge badge-sm badge-success badge-soft gap-1 border-0">
-                            <i className="fa-duotone fa-regular fa-dollar-sign text-[10px]" />
+                        </Badge>
+                        <Badge color="coral" size="sm">
+                            <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
                             {formatCurrency(item.recruiter_share || 0)}
-                        </span>
+                        </Badge>
                     </div>
                 </div>
 
                 {/* Date / Quick Actions */}
                 <div className="shrink-0 flex flex-col items-end gap-1">
-                    <span className="text-[10px] text-base-content/40">
+                    <span className="text-[10px] text-dark opacity-40 font-bold uppercase tracking-wider">
                         {item.hired_at
                             ? new Date(item.hired_at).toLocaleDateString(
                                   undefined,

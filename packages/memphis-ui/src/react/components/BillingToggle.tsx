@@ -49,7 +49,7 @@ export function BillingToggle({
                 ].join(' ')}
             >
                 <div
-                    className="absolute top-1 w-5 h-5 transition-all border-detail bg-white"
+                    className="absolute top-1 w-5 h-5 transition-all border-xs bg-white"
                     style={{
                         left: annual ? 'calc(100% - 24px)' : '3px',
                     }}

@@ -51,7 +51,7 @@ export function JobDetail({
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         {isNew(job) && (
-                            <Badge variant="yellow" className="mb-3">
+                            <Badge color="yellow" className="mb-3">
                                 <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                                 New
                             </Badge>
@@ -84,16 +84,16 @@ export function JobDetail({
 
                 {/* Meta pills */}
                 <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge variant={statusVariant(job.status)} outline>
+                    <Badge color={statusVariant(job.status)} variant="outline">
                         {formatStatus(job.status)}
                     </Badge>
                     {job.employment_type && (
-                        <Badge variant="dark" outline>
+                        <Badge color="dark" variant="outline">
                             {formatEmploymentType(job.employment_type)}
                         </Badge>
                     )}
                     {level && (
-                        <Badge variant="dark" outline>
+                        <Badge color="dark" variant="outline">
                             {level}
                         </Badge>
                     )}

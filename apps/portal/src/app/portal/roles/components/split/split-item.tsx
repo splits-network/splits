@@ -57,7 +57,7 @@ export function SplitItem({
                         {job.location}
                     </span>
                 )}
-                <Badge variant={statusVariant(job.status)}>
+                <Badge color={statusVariant(job.status)}>
                     {formatStatus(job.status)}
                 </Badge>
             </div>

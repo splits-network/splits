@@ -127,7 +127,7 @@
 
 .alert {
   @layer memphis.modifier {
-    border: var(--border-interactive) solid var(--color-dark);
+    border: var(--border-md) solid var(--color-dark);
     text-transform: uppercase;
     letter-spacing: var(--ls);
   }

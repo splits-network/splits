@@ -1,7 +1,7 @@
 /* @layer base; */
 
 @import "tailwindcss";
-
+/* @import '@splits-network/memphis-ui/dist/index.css'; */
 @plugin "@splits-network/memphis-ui/plugin";
 
 /* Cookie Consent Banner Animation */

@@ -219,7 +219,7 @@
 
 .textarea {
     @layer memphis.modifier {
-        border-width: var(--border-interactive);
+        border-width: var(--border-md);
         border-color: var(--color-dark);
         box-shadow: none;
 

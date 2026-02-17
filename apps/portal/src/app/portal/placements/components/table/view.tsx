@@ -81,31 +81,33 @@ export default function TableView() {
     return (
         <>
             <div className="space-y-6">
-                <DataTable
-                    columns={columns}
-                    sortBy={sortBy}
-                    sortOrder={sortOrder}
-                    onSort={handleSort}
-                    loading={loading}
-                    isEmpty={data.length === 0}
-                    emptyState={
-                        <EmptyState
-                            title="No placements found"
-                            description="Try adjusting your search or filters"
-                        />
-                    }
-                    showExpandColumn
-                    card
-                    zebra
-                >
-                    {data.map((item) => (
-                        <Row
-                            key={item.id}
-                            item={item}
-                            onViewDetails={() => handleViewDetails(item)}
-                        />
-                    ))}
-                </DataTable>
+                <div className="border-4 border-dark bg-white">
+                    <DataTable
+                        columns={columns}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                        loading={loading}
+                        isEmpty={data.length === 0}
+                        emptyState={
+                            <EmptyState
+                                title="No placements found"
+                                description="Try adjusting your search or filters"
+                            />
+                        }
+                        showExpandColumn
+                        card={false}
+                        zebra
+                    >
+                        {data.map((item) => (
+                            <Row
+                                key={item.id}
+                                item={item}
+                                onViewDetails={() => handleViewDetails(item)}
+                            />
+                        ))}
+                    </DataTable>
+                </div>
 
                 {pagination && pagination.total_pages > 1 && (
                     <PaginationControls

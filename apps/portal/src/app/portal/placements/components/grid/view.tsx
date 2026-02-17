@@ -52,12 +52,21 @@ export default function GridView() {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="border-4 border-dark bg-cream p-6">
                 {data.length === 0 ? (
-                    <EmptyState
-                        title="No placements found"
-                        description="Try adjusting your search or filters"
-                    />
+                    <div className="text-center py-20 border-4 border-dark bg-white">
+                        <div className="flex justify-center gap-3 mb-6">
+                            <div className="w-8 h-8 rotate-12 bg-coral" />
+                            <div className="w-8 h-8 rounded-full bg-teal" />
+                            <div className="w-8 h-8 rotate-45 bg-yellow" />
+                        </div>
+                        <h3 className="font-black text-2xl uppercase tracking-tight mb-2 text-dark">
+                            No Placements Found
+                        </h3>
+                        <p className="text-sm text-dark opacity-50 font-bold">
+                            Try adjusting your search or filters
+                        </p>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {data.map((item) => (
@@ -71,11 +80,13 @@ export default function GridView() {
                 )}
 
                 {pagination && pagination.total_pages > 1 && (
-                    <PaginationControls
-                        page={page}
-                        totalPages={pagination.total_pages}
-                        onPageChange={goToPage}
-                    />
+                    <div className="mt-6">
+                        <PaginationControls
+                            page={page}
+                            totalPages={pagination.total_pages}
+                            onPageChange={goToPage}
+                        />
+                    </div>
                 )}
             </div>
 

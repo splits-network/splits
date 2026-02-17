@@ -29,17 +29,17 @@
         border-color: var(--btn-border);
         text-shadow: 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 0.15));
         touch-action: manipulation;
-        box-shadow:
+        /* box-shadow:
             0 0.5px 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 6%)) inset,
-            var(--btn-shadow);
+            var(--btn-shadow); */
         --size: calc(var(--size-field, 0.25rem) * 10);
         --btn-bg: var(--btn-color, var(--color-base-200));
         --btn-fg: var(--color-base-content);
         --btn-p: 1rem;
         --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
-        --btn-shadow:
-            0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
-            0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000);
+        /* --btn-shadow:
+            0 3px 2px -2px color-mix(in oklab, #000 calc(var(--depth) * 30%), #0000),
+            0 4px 3px -2px color-mix(in oklab, #000 calc(var(--depth) * 30%), #0000); */
         --btn-noise: var(--fx-noise);
 
         .prose & {
@@ -384,14 +384,6 @@
     }
 }
 
-.btn-square {
-    @layer memphis.modifier {
-        @apply rounded-full px-0;
-        width: var(--size);
-        height: var(--size);
-    }
-}
-
 .btn-wide {
     @layer memphis.modifier {
         @apply w-full max-w-64;
@@ -444,25 +436,46 @@
   }
 }
 
+.btn-xs {
+  @layer memphis.modifier {
+    border-width: var(--border-xs);
+    --fontsize: var(--text-xs);
+    --btn-p: var(--spacing-3);
+  }
+}
 .btn-sm {
   @layer memphis.modifier {
-    border-width: var(--border-detail);
-    --fontsize: 0.875rem;
-    --btn-p: 1rem;
+    border-width: var(--border-sm);
+    --fontsize: var(--text-sm);
+    --btn-p: var(--spacing-4);
   }
 }
 .btn-md {
   @layer memphis.modifier {
-    border-width: var(--border-interactive);
-    --fontsize: 1rem;
-    --btn-p: 1.5rem;
+    border-width: var(--border-md);
+    --fontsize: var(--text-base);
+    --btn-p: var(--spacing-6);
   }
 }
 .btn-lg {
   @layer memphis.modifier {
-    border-width: var(--border-container);
-    --fontsize: 1.125rem;
-    --btn-p: 2rem;
+    border-width: var(--border-lg);
+    --fontsize: var(--text-lg);
+    --btn-p: var(--spacing-8);
+  }
+}
+.btn-xl {
+  @layer memphis.modifier {
+    border-width: var(--border-xl);
+    --fontsize: var(--text-xl);
+    --btn-p: var(--spacing-10);
+  }
+}
+.btn-2xl {
+  @layer memphis.modifier {
+    border-width: var(--border-2xl);
+    --fontsize: var(--text-2xl);
+    --btn-p: var(--spacing-12);
   }
 }
 
@@ -507,6 +520,9 @@
   }
 }
 
-.btn-border-thin { @layer memphis.modifier { border-width: var(--border-detail); } }
-.btn-border-default { @layer memphis.modifier { border-width: var(--border-interactive); } }
-.btn-border-thick { @layer memphis.modifier { border-width: var(--border-container); } }
+.btn-border-xs { @layer memphis.modifier { border-width: var(--border-xs); } }
+.btn-border-sm { @layer memphis.modifier { border-width: var(--border-sm); } }
+.btn-border-md { @layer memphis.modifier { border-width: var(--border-md); } }
+.btn-border-lg { @layer memphis.modifier { border-width: var(--border-lg); } }
+.btn-border-xl { @layer memphis.modifier { border-width: var(--border-xl); } }
+.btn-border-2xl { @layer memphis.modifier { border-width: var(--border-2xl); } }

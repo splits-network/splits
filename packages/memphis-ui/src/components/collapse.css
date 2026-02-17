@@ -305,7 +305,7 @@
 .collapse-arrow,
 .collapse-plus {
     @layer memphis.modifier {
-        border-width: var(--border-interactive);
+        border-width: var(--border-md);
         border-color: var(--color-dark);
     }
 }

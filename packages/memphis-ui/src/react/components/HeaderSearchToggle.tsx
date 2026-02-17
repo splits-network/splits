@@ -49,7 +49,7 @@ export function HeaderSearchToggle({
                 />
             </button>
             {isOpen && (
-                <div className="absolute top-full right-0 mt-2 w-[300px] p-3 z-50 border-interactive border-teal bg-dark">
+                <div className="absolute top-full right-0 mt-2 w-[300px] p-3 z-50 border-md border-teal bg-dark">
                     <input
                         type="text"
                         placeholder={placeholder}
@@ -61,7 +61,7 @@ export function HeaderSearchToggle({
                                 : undefined
                         }
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm font-bold uppercase tracking-wider outline-none border-detail border-teal bg-white/[0.03] text-white"
+                        className="w-full px-3 py-2 text-sm font-bold uppercase tracking-wider outline-none border-xs border-teal bg-white/[0.03] text-white"
                     />
                 </div>
             )}

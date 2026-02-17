@@ -1,16 +1,49 @@
 import React from "react";
-import type { AccentColor } from "../utils/accent-cycle";
+import type { AnyMemphisColor, MemphisSize } from "../utils/types";
+
+export type ButtonVariant = "solid" | "outline" | "ghost" | "soft" | "dash" | "link";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: AccentColor | "dark";
-    size?: "sm" | "md" | "lg";
+    color?: AnyMemphisColor;
+    variant?: ButtonVariant;
+    size?: MemphisSize;
     children: React.ReactNode;
 }
 
 const SIZE_CLASSES: Record<string, string> = {
+    xs: "btn-xs",
     sm: "btn-sm",
     md: "btn-md",
     lg: "btn-lg",
+    xl: "btn-xl",
+    "2xl": "btn-2xl",
+};
+
+const COLOR_CLASSES: Record<string, string> = {
+    // Memphis core
+    coral: "btn-coral",
+    teal: "btn-teal",
+    yellow: "btn-yellow",
+    purple: "btn-purple",
+    dark: "btn-dark",
+    // Semantic
+    primary: "btn-primary",
+    secondary: "btn-secondary",
+    accent: "btn-accent",
+    neutral: "btn-neutral",
+    info: "btn-info",
+    success: "btn-success",
+    warning: "btn-warning",
+    error: "btn-error",
+};
+
+const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+    solid: "",
+    outline: "btn-outline",
+    ghost: "btn-ghost",
+    soft: "btn-soft",
+    dash: "btn-dash",
+    link: "btn-link",
 };
 
 /**
@@ -24,7 +57,8 @@ const SIZE_CLASSES: Record<string, string> = {
  * No shadows, no gradients, no border-radius.
  */
 export function Button({
-    variant = "coral",
+    color = "coral",
+    variant = "solid",
     size = "md",
     children,
     className = "",
@@ -36,7 +70,8 @@ export function Button({
             className={[
                 "btn",
                 SIZE_CLASSES[size],
-                `btn-${variant}`,
+                COLOR_CLASSES[color],
+                VARIANT_CLASSES[variant],
                 className,
             ]
                 .filter(Boolean)

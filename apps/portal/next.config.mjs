@@ -2,21 +2,22 @@
 const nextConfig = {
     reactStrictMode: true,
     transpilePackages: [
-        '@splits-network/shared-types',
-        '@splits-network/shared-config',
-        '@splits-network/shared-ui',
+        "@splits-network/shared-types",
+        "@splits-network/shared-config",
+        "@splits-network/shared-ui",
+        "@splits-network/memphis-ui",
     ],
-    serverExternalPackages: ['@supabase/supabase-js'],
+    serverExternalPackages: ["@supabase/supabase-js"],
     images: {
         remotePatterns: [
             {
-                protocol: 'https',
-                hostname: '**.supabase.co',
-                pathname: '/storage/v1/object/public/**',
+                protocol: "https",
+                hostname: "**.supabase.co",
+                pathname: "/storage/v1/object/public/**",
             },
             {
-                protocol: 'https',
-                hostname: 'img.clerk.com',
+                protocol: "https",
+                hostname: "img.clerk.com",
             },
         ],
     },

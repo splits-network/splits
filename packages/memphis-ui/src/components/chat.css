@@ -162,6 +162,6 @@
 
 .chat-bubble {
     @layer memphis.modifier {
-        border: var(--border-detail) solid var(--color-dark);
+        border: var(--border-xs) solid var(--color-dark);
     }
 }

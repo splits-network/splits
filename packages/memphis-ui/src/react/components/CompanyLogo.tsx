@@ -29,7 +29,7 @@ export function CompanyLogo({
             className={[
                 'px-8 py-4 font-black text-sm uppercase tracking-wider',
                 'transition-all hover:opacity-80',
-                'border-container text-dark',
+                'border-lg text-dark',
                 `accent-${color}`,
                 'bg-accent',
                 className,

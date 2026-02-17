@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { StatCard, StatCardGrid } from "@/components/ui/cards";
+import { StatCard } from "@splits-network/memphis-ui";
 import { formatCurrency } from "../../types";
 
 interface PlacementStats {
@@ -87,37 +87,31 @@ export default function Stats() {
     }, [isLoaded]);
 
     return (
-        <div className="card bg-base-200">
-            <StatCardGrid className="m-2 shadow-lg">
-                <StatCard
-                    title="Total Placements"
-                    value={stats.total}
-                    icon="fa-duotone fa-regular fa-trophy"
-                    color="primary"
-                    description="All time"
-                />
-                <StatCard
-                    title="Total Earnings"
-                    value={formatCurrency(stats.totalEarnings)}
-                    icon="fa-duotone fa-regular fa-sack-dollar"
-                    color="success"
-                    description="All placements"
-                />
-                <StatCard
-                    title={`${new Date().getFullYear()} Earnings`}
-                    value={formatCurrency(stats.thisYearEarnings)}
-                    icon="fa-duotone fa-regular fa-calendar-days"
-                    color="secondary"
-                    description="This year"
-                />
-                <StatCard
-                    title="Avg. Commission"
-                    value={formatCurrency(stats.avgCommission)}
-                    icon="fa-duotone fa-regular fa-dollar-sign"
-                    color="info"
-                    description="Per placement"
-                />
-            </StatCardGrid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 border-4 border-dark p-4 bg-cream">
+            <StatCard
+                label="Total Placements"
+                value={stats.total.toString()}
+                icon="fa-trophy"
+                color="coral"
+            />
+            <StatCard
+                label="Total Earnings"
+                value={formatCurrency(stats.totalEarnings)}
+                icon="fa-sack-dollar"
+                color="teal"
+            />
+            <StatCard
+                label={`${new Date().getFullYear()} Earnings`}
+                value={formatCurrency(stats.thisYearEarnings)}
+                icon="fa-calendar-days"
+                color="yellow"
+            />
+            <StatCard
+                label="Avg. Commission"
+                value={formatCurrency(stats.avgCommission)}
+                icon="fa-dollar-sign"
+                color="purple"
+            />
         </div>
     );
 }

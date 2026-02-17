@@ -1,7 +1,7 @@
 /**
  * Generates src/components/controlsbar.css — Memphis controls bar.
  *
- * This component is Memphis-only (no SilicaUI equivalent).
+ * This component is Memphis-only (no MemphisUI equivalent).
  * Flex column on mobile, row on desktop, with container border.
  */
 
@@ -18,7 +18,7 @@ export async function generateControlsbarCss() {
     gap: 1rem;
     padding: 1rem;
     background-color: var(--color-base-100);
-    border: var(--border-container) solid var(--color-dark);
+    border: var(--border-lg) solid var(--color-dark);
     border-radius: 0;
 
     @media (min-width: 768px) {

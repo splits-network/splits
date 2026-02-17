@@ -5,11 +5,10 @@ import type {
     RecruiterCandidateWithCandidate,
 } from "@splits-network/shared-types";
 
-export type { MarketplaceProfile, ResumeMetadata };
+export type { MarketplaceProfile, ResumeMetadata, RecruiterCandidateWithCandidate };
 
 export type CandidateScope = "mine" | "all";
 
-// Enriched candidate type with computed fields for UI
 export interface Candidate
     extends Omit<BaseCandidate, "created_at" | "updated_at" | "marketplace_profile"> {
     created_at: string;
@@ -35,25 +34,41 @@ export interface CandidateFilters {
     open_to_remote?: string;
 }
 
-export function getVerificationBadgeClass(status?: string): string {
-    switch (status) {
-        case "verified":
-            return "badge-success";
-        case "pending":
-            return "badge-warning";
-        case "unverified":
-            return "badge-ghost";
-        case "rejected":
-            return "badge-error";
-        default:
-            return "";
-    }
+// ===== LABEL MAPS =====
+
+export const VERIFICATION_STATUS_LABELS: Record<string, string> = {
+    verified: "Verified",
+    pending: "Pending",
+    unverified: "Unverified",
+    rejected: "Rejected",
+};
+
+export const JOB_TYPE_LABELS: Record<string, string> = {
+    full_time: "Full Time",
+    contract: "Contract",
+    freelance: "Freelance",
+    part_time: "Part Time",
+};
+
+export const AVAILABILITY_LABELS: Record<string, string> = {
+    immediate: "Immediate",
+    two_weeks: "2 Weeks",
+    one_month: "1 Month",
+    three_months: "3 Months",
+    not_looking: "Not Looking",
+};
+
+export function formatVerificationStatus(status?: string | null): string {
+    if (!status) return "Unverified";
+    return VERIFICATION_STATUS_LABELS[status] || status;
 }
 
-export function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+export function formatJobType(type?: string | null): string {
+    if (!type) return "Not specified";
+    return JOB_TYPE_LABELS[type] || type.replace(/_/g, " ");
+}
+
+export function formatAvailability(availability?: string | null): string {
+    if (!availability) return "Not specified";
+    return AVAILABILITY_LABELS[availability] || availability.replace(/_/g, " ");
 }

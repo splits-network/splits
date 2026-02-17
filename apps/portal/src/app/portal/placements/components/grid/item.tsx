@@ -1,113 +1,100 @@
 "use client";
 
-import { DataRow, DataList, MetricCard } from "@/components/ui/cards";
+import { Badge } from "@splits-network/memphis-ui";
 import {
     Placement,
     getStatusDisplay,
     formatCurrency,
     formatPlacementDate,
 } from "../../types";
-import ActionsToolbar from "../shared/actions-toolbar";
 
 interface ItemProps {
     item: Placement;
     onViewDetails: () => void;
 }
 
+// Cycle through accent colors
+const ACCENT_COLORS = ["coral", "teal", "yellow", "purple"] as const;
+
 export default function Item({ item, onViewDetails }: ItemProps) {
     const status = getStatusDisplay(item);
+    const accentColor =
+        ACCENT_COLORS[
+            Math.abs(
+                item.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0),
+            ) % 4
+        ];
 
     return (
-        <MetricCard className="group hover:shadow-lg transition-all duration-200">
-            <MetricCard.Header>
-                <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-3 min-w-0">
-                        {/* Avatar */}
-                        <div className="avatar avatar-placeholder shrink-0">
-                            <div className="bg-primary/10 text-primary w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold">
-                                {(
-                                    item.candidate?.full_name || "U"
-                                )[0].toUpperCase()}
-                            </div>
-                        </div>
-                        <div className="min-w-0">
-                            <h3 className="font-semibold text-base-content group-hover:text-primary transition-colors truncate">
-                                {item.candidate?.full_name || "Unknown"}
-                            </h3>
-                            <p className="text-sm text-base-content/60 truncate">
-                                {item.candidate?.email || "N/A"}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                        <span
-                            className={`badge ${status.badgeClass} badge-sm gap-1.5`}
-                        >
-                            <i
-                                className={`fa-duotone fa-regular ${status.icon}`}
-                            />
-                            {status.label}
-                        </span>
-                    </div>
-                </div>
-            </MetricCard.Header>
+        <div
+            className="border-4 border-dark bg-white p-5 transition-transform hover:-translate-y-1 cursor-pointer relative"
+            onClick={onViewDetails}
+        >
+            {/* Corner accent */}
+            <div
+                className={`absolute top-0 right-0 w-8 h-8 bg-${accentColor}`}
+            />
 
-            <MetricCard.Body>
-                <DataList compact>
-                    <DataRow
-                        icon="fa-briefcase"
-                        label="Job"
-                        value={item.job?.title || "Unknown"}
-                    />
-                    <DataRow
-                        icon="fa-building"
-                        label="Company"
-                        value={item.job?.company?.name || "N/A"}
-                    />
-                    <DataRow
-                        icon="fa-dollar-sign"
-                        label="Salary"
-                        value={formatCurrency(item.salary || 0)}
-                    />
-                    <DataRow
-                        icon="fa-calendar-check"
-                        label="Hired"
-                        value={formatPlacementDate(item.hired_at)}
-                    />
-                </DataList>
-            </MetricCard.Body>
-
-            <MetricCard.Footer>
-                <div className="flex items-center justify-between w-full gap-2">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-success">
-                            {formatCurrency(item.recruiter_share || 0)}
-                        </span>
-                        <ActionsToolbar
-                            placement={item}
-                            variant="icon-only"
-                            size="sm"
-                            showActions={{
-                                viewDetails: false,
-                                viewJob: false,
-                                viewCandidate: false,
-                                viewApplication: false,
-                                viewCompany: false,
-                                statusActions: true,
-                            }}
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        className="btn btn-ghost btn-sm gap-2"
-                        onClick={onViewDetails}
-                        title="View details"
-                    >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        Details
-                    </button>
+            {/* Header */}
+            <div className="mb-4">
+                <h3 className="font-black text-base uppercase tracking-tight leading-tight mb-1 text-dark">
+                    {item.candidate?.full_name || "Unknown Candidate"}
+                </h3>
+                <div className="text-sm font-bold text-${accentColor}">
+                    {item.job?.company?.name || "N/A"}
                 </div>
-            </MetricCard.Footer>
-        </MetricCard>
+            </div>
+
+            {/* Job Title */}
+            <div className="mb-3">
+                <div className="flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-briefcase text-xs text-dark opacity-60" />
+                    <span className="text-xs font-bold text-dark">
+                        {item.job?.title || "Unknown Job"}
+                    </span>
+                </div>
+            </div>
+
+            {/* Salary and Earnings */}
+            <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-black text-dark">
+                    {formatCurrency(item.salary || 0)}
+                </span>
+                <span className={`text-xs font-bold text-${accentColor}`}>
+                    {formatCurrency(item.recruiter_share || 0)} earned
+                </span>
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex items-center justify-between mb-3">
+                <Badge
+                    color={
+                        item.state === "hired"
+                            ? "teal"
+                            : item.state === "pending_payout"
+                              ? "yellow"
+                              : "purple"
+                    }
+                    size="sm"
+                >
+                    <i
+                        className={`fa-duotone fa-regular ${status.icon} mr-1`}
+                    ></i>
+                    {status.label}
+                </Badge>
+            </div>
+
+            {/* Date */}
+            <div
+                className={`pt-3 border-t-2 border-${accentColor} border-opacity-30`}
+            >
+                <div className="flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-calendar-check text-xs text-dark opacity-60" />
+                    <span className="text-xs text-dark opacity-60 font-bold uppercase tracking-wider">
+                        {formatPlacementDate(item.hired_at)}
+                    </span>
+                </div>
+            </div>
+        </div>
     );
 }

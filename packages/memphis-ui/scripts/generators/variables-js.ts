@@ -53,10 +53,12 @@ ${entries}
         field: "var(--radius-field)",
         box: "var(--radius-box)",
     },
+    // Legacy semantic border names - DEPRECATED: use xs-2xl directly
+    // Kept only for backward compatibility with base MemphisUI CSS
     borderWidth: {
-        container: "var(--border-container)",
-        interactive: "var(--border-interactive)",
-        detail: "var(--border-detail)",
+        container: "var(--border-lg)",      // DEPRECATED: use border-lg
+        interactive: "var(--border-md)",    // DEPRECATED: use border-md
+        detail: "var(--border-xs)",         // DEPRECATED: use border-xs
     },
 }
 `;

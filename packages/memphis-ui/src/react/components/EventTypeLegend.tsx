@@ -33,7 +33,7 @@ export function EventTypeLegend({
                 <div
                     key={item.label}
                     className={[
-                        'flex items-center gap-2 px-4 py-2 border-interactive text-dark',
+                        'flex items-center gap-2 px-4 py-2 border-md text-dark',
                         `accent-${item.color || 'teal'}`,
                         'bg-accent',
                     ].join(' ')}

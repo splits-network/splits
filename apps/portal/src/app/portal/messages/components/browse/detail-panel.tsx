@@ -2,7 +2,7 @@
 
 import type { ConversationRow } from "../../types";
 import DetailHeader from "./detail-header";
-import ThreadPanel from "../shared/thread-panel";
+import ThreadPanel from "@/components/chat/thread-panel";
 
 interface DetailPanelProps {
     id: string;

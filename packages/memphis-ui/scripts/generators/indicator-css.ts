@@ -1,7 +1,7 @@
 /**
  * Generates src/components/indicator.css — Memphis indicator styles.
  *
- * Reads SilicaUI's indicator.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's indicator.css as the base, then appends Memphis-specific
  * additions: palette color variants for indicator items.
  */
 

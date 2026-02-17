@@ -10,7 +10,9 @@
             "types": "./dist/react/index.d.ts",
             "default": "./dist/react/index.js"
         },
-        "./plugin": "./index.js"
+        "./plugin": "./index.js",
+        "./dist/index.css": "./dist/index.css",
+        "./dist/*": "./dist/*"
     },
     "scripts": {
         "generate": "tsx scripts/generate.ts",

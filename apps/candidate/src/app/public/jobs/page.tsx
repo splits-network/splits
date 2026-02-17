@@ -102,7 +102,7 @@ function JobDetail({
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         {isNew(job) && (
-                            <Badge variant="yellow" className="mb-3">
+                            <Badge color="yellow" className="mb-3">
                                 <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                                 New
                             </Badge>
@@ -133,16 +133,16 @@ function JobDetail({
 
                 {/* Meta pills */}
                 <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge variant={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"} outline>
+                    <Badge color={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"} variant="outline">
                         {formatStatus(job.status)}
                     </Badge>
                     {job.employment_type && (
-                        <Badge variant="dark" outline>
+                        <Badge color="dark" variant="outline">
                             {formatEmploymentType(job.employment_type)}
                         </Badge>
                     )}
                     {level && (
-                        <Badge variant="dark" outline>
+                        <Badge color="dark" variant="outline">
                             {level}
                         </Badge>
                     )}
@@ -388,7 +388,7 @@ function TableView({
                                         {salaryDisplay(job) || "—"}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <Badge variant={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"}>
+                                        <Badge color={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"}>
                                             {formatStatus(job.status)}
                                         </Badge>
                                     </td>
@@ -465,7 +465,7 @@ function GridView({
                             />
 
                             {isNew(job) && (
-                                <Badge variant="yellow" className="mb-2">
+                                <Badge color="yellow" className="mb-2">
                                     <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                                     New
                                 </Badge>
@@ -489,19 +489,19 @@ function GridView({
                                 <span className="text-sm font-black text-dark">
                                     {salaryDisplay(job) || "Competitive"}
                                 </span>
-                                <Badge variant={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"}>
+                                <Badge color={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"}>
                                     {formatStatus(job.status)}
                                 </Badge>
                             </div>
 
                             <div className="flex flex-wrap gap-1">
                                 {job.employment_type && (
-                                    <Badge variant={accentAt(0) === ac ? "teal" : "coral"} outline className="text-[10px]">
+                                    <Badge color={accentAt(0) === ac ? "teal" : "coral"} variant="outline" className="text-[10px]">
                                         {formatEmploymentType(job.employment_type)}
                                     </Badge>
                                 )}
                                 {job.job_level && (
-                                    <Badge variant="purple" outline className="text-[10px]">
+                                    <Badge color="purple" variant="outline" className="text-[10px]">
                                         {formatJobLevel(job.job_level)}
                                     </Badge>
                                 )}
@@ -614,7 +614,7 @@ function SplitView({
                                         {job.location}
                                     </span>
                                 )}
-                                <Badge variant={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"} className="text-[9px]">
+                                <Badge color={statusAccent(job.status) === ACCENT[1] ? "teal" : statusAccent(job.status) === ACCENT[0] ? "coral" : statusAccent(job.status) === ACCENT[2] ? "yellow" : "purple"} className="text-[9px]">
                                     {formatStatus(job.status)}
                                 </Badge>
                             </div>

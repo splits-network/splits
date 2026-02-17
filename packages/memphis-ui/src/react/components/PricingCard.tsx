@@ -88,7 +88,7 @@ export function PricingCard({
                 .filter(Boolean)
                 .join(' ')}
             style={{
-                borderWidth: 'var(--border-container)',
+                borderWidth: 'var(--border-lg)',
                 borderStyle: 'solid',
                 borderColor: accentVar,
             }}
@@ -142,7 +142,7 @@ export function PricingCard({
                         style={{
                             '--btn-color': popular ? accentVar : 'transparent',
                             '--btn-fg': popular ? contentVar : accentVar,
-                            borderWidth: 'var(--border-interactive)',
+                            borderWidth: 'var(--border-md)',
                             borderStyle: 'solid',
                             borderColor: accentVar,
                         } as React.CSSProperties}

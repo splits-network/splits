@@ -1,0 +1,201 @@
+:root {
+    /* ═══ Spacing Scale ═══ */
+    --spacing-0: 0px;
+    --spacing-0-5: 0.125rem;
+    /* 2px */
+    --spacing-0-75: 0.1875rem;
+    /* 3px */
+    --spacing-1: 0.25rem;
+    /* 4px */
+    --spacing-1-5: 0.375rem;
+    /* 6px */
+    --spacing-2: 0.5rem;
+    /* 8px */
+    --spacing-2-5: 0.625rem;
+    /* 10px */
+    --spacing-3: 0.75rem;
+    /* 12px */
+    --spacing-4: 1rem;
+    /* 16px */
+    --spacing-5: 1.25rem;
+    /* 20px */
+    --spacing-6: 1.5rem;
+    /* 24px */
+    --spacing-8: 2rem;
+    /* 32px */
+    --spacing-10: 2.5rem;
+    /* 40px */
+    --spacing-12: 3rem;
+    /* 48px */
+    --spacing-16: 4rem;
+    /* 64px */
+
+    /* ═══ Typography Scale ═══ */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+    --text-4xl: 2.25rem;
+    /* 36px */
+    --text-5xl: 3rem;
+    /* 48px */
+
+    /* ═══ Font Weights ═══ */
+    --font-thin: 100;
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+    --font-black: 900;
+
+    /* ═══ Letter Spacing ═══ */
+    --ls-tighter: -0.05em;
+    --ls-tight: -0.025em;
+    --ls: 0em;
+    --ls-wide: 0.025em;
+    --ls-wider: 0.05em;
+    --ls-wider-custom: 0.08em;
+    /* Custom Memphis letter spacing */
+    --ls-widest: 0.1em;
+
+    /* ═══ Size Scale ═══ */
+    --size-0: 0px;
+    --size-0-5: 0.125rem;
+    /* 2px */
+    --size-1: 0.25rem;
+    /* 4px */
+    --size-1-5: 0.375rem;
+    /* 6px */
+    --size-2: 0.5rem;
+    /* 8px */
+    --size-2-5: 0.625rem;
+    /* 10px */
+    --size-3: 0.75rem;
+    /* 12px */
+    --size-3-5: 0.875rem;
+    /* 14px */
+    --size-4: 1rem;
+    /* 16px */
+    --size-5: 1.25rem;
+    /* 20px */
+    --size-6: 1.5rem;
+    /* 24px */
+    --size-7: 1.75rem;
+    /* 28px */
+    --size-8: 2rem;
+    /* 32px */
+    --size-9: 2.25rem;
+    /* 36px */
+    --size-10: 2.5rem;
+    /* 40px */
+    --size-12: 3rem;
+    /* 48px */
+    --size-16: 4rem;
+    /* 64px */
+    --size-20: 5rem;
+    /* 80px */
+
+    /* ═══ Border Radius ═══ */
+    --radius-none: 0px;
+    --radius-sm: 0.125rem;
+    /* 2px */
+    --radius: 0.25rem;
+    /* 4px */
+    --radius-md: 0.375rem;
+    /* 6px */
+    --radius-lg: 0.5rem;
+    /* 8px */
+    --radius-xl: 0.75rem;
+    /* 12px */
+    --radius-2xl: 1rem;
+    /* 16px */
+    --radius-3xl: 1.5rem;
+    /* 24px */
+    --radius-full: 9999px;
+
+    /* ═══ Opacity Values ═══ */
+    --opacity-0: 0;
+    --opacity-5: 0.05;
+    --opacity-10: 0.1;
+    --opacity-15: 0.15;
+    --opacity-20: 0.2;
+    --opacity-25: 0.25;
+    --opacity-30: 0.3;
+    --opacity-40: 0.4;
+    --opacity-50: 0.5;
+    --opacity-60: 0.6;
+    --opacity-70: 0.7;
+    --opacity-75: 0.75;
+    --opacity-80: 0.8;
+    --opacity-90: 0.9;
+    --opacity-95: 0.95;
+    --opacity-100: 1;
+
+    /* ═══ Memphis Design Tokens ═══ */
+    --opacity-soft: var(--opacity-15);
+
+    /* ═══ Border Widths ═══ */
+    --border-xs: 1px;
+    /* Extra small - fine details */
+    --border-sm: 2px;
+    /* Small - subtle emphasis */
+    --border-md: 3px;
+    /* Medium - interactive elements */
+    --border-lg: 4px;
+    /* Large - containers */
+    --border-xl: 6px;
+    /* Extra large - strong emphasis */
+    --border-2xl: 8px;
+    /* 2X large - maximum emphasis */
+    /* ═══ Animation Duration ═══ */
+    --duration-75: 75ms;
+    --duration-100: 100ms;
+    --duration-150: 150ms;
+    --duration-200: 200ms;
+    --duration-300: 300ms;
+    --duration-500: 500ms;
+    --duration-700: 700ms;
+    --duration-1000: 1000ms;
+
+    /* ═══ Animation Easing ═══ */
+    --ease-linear: linear;
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    /* ═══ Memphis Custom Variables ═══ */
+    --text-2xs: 0.625rem;
+    /* 10px - custom badge size */
+    --btn-active-scale: 0.97;
+    /* Button active scale */
+    --toggle-w: 2.75rem;
+    /* Toggle width */
+    --color-base-100: #FFFFFF;
+    /* Base white */
+    --color-base-200: #F5F0EB;
+    /* Base cream light */
+    --color-base-300: #E8E0D8;
+    /* Base cream medium */
+    --color-base-content: #1A1A2E;
+    /* Base content dark */
+    --color-dark-gray: #2D2D44;
+    /* Dark gray variant */
+    --color-dark-overlay: #1A1A2E50;
+    /* Dark overlay with opacity */
+    /* Memphis Accent Cycle Colors */
+    --accent-cycle-coral: #FF6B6B;
+    --accent-cycle-teal: #4ECDC4;
+    --accent-cycle-yellow: #FFE66D;
+    --accent-cycle-purple: #A78BFA;
+}

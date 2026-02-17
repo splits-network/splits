@@ -44,7 +44,7 @@ export function DataTableToolbar({
         >
             {/* Search */}
             <div
-                className="flex border-interactive flex-1 min-w-[200px] max-w-sm"
+                className="flex border-md flex-1 min-w-[200px] max-w-sm"
             >
                 <div
                     className="flex items-center px-3 bg-cream"

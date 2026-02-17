@@ -13,6 +13,8 @@ import {
     formatCurrency,
     getStatusDisplay,
 } from "../../types";
+import { Badge } from "@splits-network/memphis-ui";
+import { statusVariant } from "./accent";
 
 interface DetailsProps {
     itemId: string;
@@ -127,12 +129,17 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span
-                        className={`badge ${status.badgeClass} badge-lg gap-1`}
+                    <Badge
+                        color={statusVariant(placement.state || undefined)}
+                        size="lg"
                     >
-                        <i className={`fa-duotone fa-regular ${status.icon}`} />
+                        {getStatusDisplay(placement).icon && (
+                            <i
+                                className={`fa-duotone fa-regular ${getStatusDisplay(placement).icon} mr-1`}
+                            />
+                        )}
                         {status.label}
-                    </span>
+                    </Badge>
                     <span className="badge badge-success badge-lg">
                         {formatCurrency(placement.recruiter_share || 0)}
                     </span>

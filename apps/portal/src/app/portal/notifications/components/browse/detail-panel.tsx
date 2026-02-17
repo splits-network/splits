@@ -10,8 +10,9 @@ import {
     formatNotificationTime,
     getNotificationIcon,
 } from "@/lib/notifications";
-import ApplicationDetails from "@/app/portal/applications-memphis/components/shared/details";
-import CandidateDetails from "@/app/portal/candidates/components/shared/details";
+import ApplicationDetails from "@/app/portal/applications/components/shared/details";
+import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
+import { accentAt as candidateAccentAt } from "@/app/portal/candidates/components/shared/accent";
 import PlacementDetails from "@/app/portal/placements/components/shared/details";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
 import { accentAt } from "@/app/portal/roles/components/shared/accent";
@@ -226,7 +227,7 @@ function FeatureDetails({
         case "application":
             return <ApplicationDetails itemId={entityId} />;
         case "candidate":
-            return <CandidateDetails itemId={entityId} />;
+            return <CandidateDetailLoader candidateId={entityId} accent={candidateAccentAt(0)} onClose={() => {}} />;
         case "placement":
             return <PlacementDetails itemId={entityId} />;
         case "proposal":

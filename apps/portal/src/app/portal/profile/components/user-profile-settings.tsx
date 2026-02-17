@@ -4,7 +4,13 @@ import { useState, useEffect, FormEvent } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
-import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
+import ProfileImageUpload from "./profile-image-upload";
+import {
+    Button,
+    Input,
+    AlertBanner,
+    SettingsField,
+} from "@splits-network/memphis-ui";
 
 interface UserProfileData {
     id: string;
@@ -13,7 +19,11 @@ interface UserProfileData {
     profile_image_url?: string;
 }
 
-export function UserProfileSettings() {
+interface UserProfileSettingsProps {
+    activeSection: "account" | "security";
+}
+
+export function UserProfileSettings({ activeSection }: UserProfileSettingsProps) {
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
     const {
@@ -38,7 +48,6 @@ export function UserProfileSettings() {
     const [passwordSuccess, setPasswordSuccess] = useState("");
     const [changingPassword, setChangingPassword] = useState(false);
 
-    // Initialize from context when available
     useEffect(() => {
         if (!contextLoading && contextProfile) {
             setProfile({
@@ -182,287 +191,266 @@ export function UserProfileSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow border border-base-200">
-                <div className="card-body">
-                    <div className="flex items-center justify-center py-12">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
-                </div>
+            <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-4 border-dark border-t-transparent animate-spin" />
             </div>
         );
     }
 
-    return (
-        <div className="space-y-6">
-            {/* Profile Card */}
-            <div className="card bg-base-200 shadow border border-base-200">
-                <form onSubmit={handleSubmit}>
-                    <div className="card-body">
-                        <h2 className="card-title">
-                            <i className="fa-duotone fa-regular fa-user"></i>
-                            Profile
-                        </h2>
+    // Account section: profile info, avatar, name, email
+    if (activeSection === "account") {
+        return (
+            <form onSubmit={handleSubmit}>
+                {error && (
+                    <AlertBanner type="error" className="mb-4">
+                        {error}
+                    </AlertBanner>
+                )}
+                {success && (
+                    <AlertBanner type="success" className="mb-4">
+                        {success}
+                    </AlertBanner>
+                )}
 
-                        {error && (
-                            <div className="alert alert-error">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                <span>{error}</span>
-                            </div>
+                {/* Avatar */}
+                <div className="flex justify-center py-6 mb-4 border-b-2 border-cream">
+                    <ProfileImageUpload
+                        currentImageUrl={profile?.profile_image_url}
+                        onImageUpdate={(newImageUrl) => {
+                            setProfile((prev) =>
+                                prev
+                                    ? {
+                                          ...prev,
+                                          profile_image_url:
+                                              newImageUrl ?? undefined,
+                                      }
+                                    : null,
+                            );
+                            refreshContext();
+                        }}
+                    />
+                </div>
+
+                <div className="space-y-0">
+                    <SettingsField
+                        label="Full Name"
+                        description="Your display name across the platform"
+                    >
+                        <Input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Enter your full name"
+                            required
+                            className="w-64"
+                        />
+                    </SettingsField>
+
+                    <SettingsField
+                        label="Email Address"
+                        description="Contact support to change your email"
+                    >
+                        <Input
+                            type="email"
+                            value={profile?.email || ""}
+                            disabled
+                            className="w-64"
+                        />
+                    </SettingsField>
+                </div>
+
+                {/* Save Actions */}
+                <div className="flex gap-3 justify-end mt-8">
+                    <Button
+                        type="button"
+                        color="dark"
+                        onClick={resetForm}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        color="teal"
+                        disabled={submitting || !name.trim()}
+                    >
+                        {submitting ? (
+                            <>
+                                <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xs" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-floppy-disk text-xs" />
+                                Save Changes
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </form>
+        );
+    }
+
+    // Security section: password, 2FA
+    if (activeSection === "security") {
+        return (
+            <div className="space-y-0">
+                {passwordSuccess && (
+                    <AlertBanner type="success" className="mb-4">
+                        {passwordSuccess}
+                    </AlertBanner>
+                )}
+
+                <SettingsField
+                    label="Password"
+                    description={
+                        showPasswordChange
+                            ? "Enter your current password and choose a new one"
+                            : "Change your account password"
+                    }
+                >
+                    {!showPasswordChange && (
+                        <Button
+                            color="coral"
+                            size="sm"
+                            onClick={() => setShowPasswordChange(true)}
+                        >
+                            Change Password
+                        </Button>
+                    )}
+                </SettingsField>
+
+                {showPasswordChange && (
+                    <form
+                        onSubmit={handlePasswordChange}
+                        className="space-y-6 py-4"
+                    >
+                        {passwordError && (
+                            <AlertBanner type="error">
+                                {passwordError}
+                            </AlertBanner>
                         )}
 
-                        {success && (
-                            <div className="alert alert-success">
-                                <i className="fa-duotone fa-regular fa-circle-check"></i>
-                                <span>{success}</span>
-                            </div>
-                        )}
-
-                        {/* Avatar */}
-                        <div className="flex justify-center py-4">
-                            <ProfileImageUpload
-                                currentImageUrl={profile?.profile_image_url}
-                                onImageUpdate={(newImageUrl) => {
-                                    setProfile((prev) =>
-                                        prev
-                                            ? {
-                                                  ...prev,
-                                                  profile_image_url:
-                                                      newImageUrl ?? undefined,
-                                              }
-                                            : null,
-                                    );
-                                    refreshContext();
-                                }}
+                        <div>
+                            <label className="text-xs font-black uppercase tracking-wider mb-2 block text-dark">
+                                Current Password
+                            </label>
+                            <Input
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) =>
+                                    setCurrentPassword(e.target.value)
+                                }
+                                placeholder="Enter current password"
+                                required
+                                disabled={changingPassword}
+                                className="w-full"
                             />
                         </div>
 
-                        {/* Form Fields */}
-                        <div className="space-y-4">
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Full Name
-                                </legend>
-                                <input
-                                    type="text"
-                                    className="input w-full"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Enter your full name"
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-black uppercase tracking-wider mb-2 block text-dark">
+                                    New Password
+                                </label>
+                                <Input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) =>
+                                        setNewPassword(e.target.value)
+                                    }
+                                    placeholder="Enter new password"
                                     required
+                                    minLength={8}
+                                    disabled={changingPassword}
+                                    className="w-full"
                                 />
-                            </fieldset>
-
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Email Address
-                                </legend>
-                                <input
-                                    type="email"
-                                    className="input w-full"
-                                    value={profile?.email || ""}
-                                    disabled
-                                />
-                                <p className="fieldset-label">
-                                    Contact support to change your email
+                                <p className="text-xs mt-2 text-dark/50 font-bold">
+                                    At least 8 characters
                                 </p>
-                            </fieldset>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-black uppercase tracking-wider mb-2 block text-dark">
+                                    Confirm Password
+                                </label>
+                                <Input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                    placeholder="Confirm new password"
+                                    required
+                                    disabled={changingPassword}
+                                    className="w-full"
+                                />
+                            </div>
                         </div>
 
-                        <div className="card-actions justify-end mt-4">
-                            <button
+                        <div className="flex gap-3 justify-end">
+                            <Button
                                 type="button"
-                                className="btn btn-ghost"
-                                onClick={resetForm}
-                                disabled={submitting}
+                                color="dark"
+                                size="sm"
+                                onClick={() => {
+                                    setShowPasswordChange(false);
+                                    setCurrentPassword("");
+                                    setNewPassword("");
+                                    setConfirmPassword("");
+                                    setPasswordError("");
+                                }}
+                                disabled={changingPassword}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="submit"
-                                className="btn btn-primary"
-                                disabled={submitting || !name.trim()}
+                                color="purple"
+                                size="sm"
+                                disabled={changingPassword}
                             >
-                                {submitting ? (
+                                {changingPassword ? (
                                     <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Saving...
+                                        <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xs" />
+                                        Updating...
                                     </>
                                 ) : (
-                                    "Save Changes"
+                                    "Update Password"
                                 )}
-                            </button>
+                            </Button>
                         </div>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                )}
 
-            {/* Security Card */}
-            <div className="card bg-base-100 shadow border border-base-200">
-                <div className="card-body">
-                    <h2 className="card-title">
-                        <i className="fa-duotone fa-regular fa-shield-halved"></i>
-                        Security
-                    </h2>
-
-                    {passwordSuccess && (
-                        <div className="alert alert-success">
-                            <i className="fa-duotone fa-regular fa-circle-check"></i>
-                            <span>{passwordSuccess}</span>
-                        </div>
-                    )}
-
-                    {/* Password Section */}
-                    <div className="flex items-center justify-between py-2">
-                        <div>
-                            <div className="font-medium">Password</div>
-                            <div className="text-sm text-base-content/60">
-                                {showPasswordChange
-                                    ? "Enter your current password and choose a new one"
-                                    : "Change your password"}
-                            </div>
-                        </div>
-                        {!showPasswordChange && (
-                            <button
-                                className="btn btn-sm btn-outline"
-                                onClick={() => setShowPasswordChange(true)}
-                            >
-                                Change
-                            </button>
+                <SettingsField
+                    label="Two-Factor Authentication"
+                    description={
+                        clerkUser?.twoFactorEnabled
+                            ? "Your account is protected with 2FA"
+                            : "Add extra security to your account"
+                    }
+                >
+                    <div className="flex items-center gap-2">
+                        {clerkUser?.twoFactorEnabled && (
+                            <span className="px-2 py-1 text-[10px] font-black uppercase tracking-wider bg-teal text-dark">
+                                Enabled
+                            </span>
                         )}
-                    </div>
-
-                    {showPasswordChange && (
-                        <form
-                            onSubmit={handlePasswordChange}
-                            className="space-y-4 mt-2"
-                        >
-                            {passwordError && (
-                                <div className="alert alert-error">
-                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                    <span>{passwordError}</span>
-                                </div>
-                            )}
-
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Current Password
-                                </legend>
-                                <input
-                                    type="password"
-                                    className="input w-full"
-                                    value={currentPassword}
-                                    onChange={(e) =>
-                                        setCurrentPassword(e.target.value)
-                                    }
-                                    placeholder="Enter current password"
-                                    required
-                                    disabled={changingPassword}
-                                />
-                            </fieldset>
-
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        New Password
-                                    </legend>
-                                    <input
-                                        type="password"
-                                        className="input w-full"
-                                        value={newPassword}
-                                        onChange={(e) =>
-                                            setNewPassword(e.target.value)
-                                        }
-                                        placeholder="Enter new password"
-                                        required
-                                        minLength={8}
-                                        disabled={changingPassword}
-                                    />
-                                    <p className="fieldset-label">
-                                        At least 8 characters
-                                    </p>
-                                </fieldset>
-
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        Confirm Password
-                                    </legend>
-                                    <input
-                                        type="password"
-                                        className="input w-full"
-                                        value={confirmPassword}
-                                        onChange={(e) =>
-                                            setConfirmPassword(e.target.value)
-                                        }
-                                        placeholder="Confirm new password"
-                                        required
-                                        disabled={changingPassword}
-                                    />
-                                </fieldset>
-                            </div>
-
-                            <div className="flex gap-2 justify-end">
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost btn-sm"
-                                    onClick={() => {
-                                        setShowPasswordChange(false);
-                                        setCurrentPassword("");
-                                        setNewPassword("");
-                                        setConfirmPassword("");
-                                        setPasswordError("");
-                                    }}
-                                    disabled={changingPassword}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary btn-sm"
-                                    disabled={changingPassword}
-                                >
-                                    {changingPassword ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-xs"></span>
-                                            Updating...
-                                        </>
-                                    ) : (
-                                        "Update Password"
-                                    )}
-                                </button>
-                            </div>
-                        </form>
-                    )}
-
-                    <div className="divider my-2"></div>
-
-                    {/* Two-Factor Authentication Section */}
-                    <div className="flex items-center justify-between py-2">
-                        <div>
-                            <div className="font-medium flex items-center gap-2">
-                                Two-Factor Authentication
-                                {clerkUser?.twoFactorEnabled && (
-                                    <span className="badge badge-success badge-sm">
-                                        Enabled
-                                    </span>
-                                )}
-                            </div>
-                            <div className="text-sm text-base-content/60">
-                                {clerkUser?.twoFactorEnabled
-                                    ? "Your account is protected with 2FA"
-                                    : "Add extra security to your account"}
-                            </div>
-                        </div>
-                        <button
-                            className="btn btn-sm btn-outline"
+                        <Button
+                            color="purple"
+                            size="sm"
                             onClick={() =>
                                 window.open("/user-profile#security", "_blank")
                             }
                         >
                             {clerkUser?.twoFactorEnabled ? "Manage" : "Enable"}
-                        </button>
+                        </Button>
                     </div>
-                </div>
+                </SettingsField>
             </div>
-        </div>
-    );
+        );
+    }
+
+    return null;
 }

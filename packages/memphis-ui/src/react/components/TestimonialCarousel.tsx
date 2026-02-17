@@ -52,13 +52,13 @@ export function TestimonialCarousel({
 
     return (
         <div
-            className={[`accent-${t.color || 'teal'} p-8 bg-white border-container`, className].filter(Boolean).join(' ')}
+            className={[`accent-${t.color || 'teal'} p-8 bg-white border-lg`, className].filter(Boolean).join(' ')}
         >
             <div className="text-center">
                 {/* Avatar */}
                 {t.initials && (
                     <div className="flex justify-center mb-6">
-                        <div className="w-20 h-20 flex items-center justify-center font-black text-xl uppercase bg-accent border-container text-dark">
+                        <div className="w-20 h-20 flex items-center justify-center font-black text-xl uppercase bg-accent border-lg text-dark">
                             {t.initials}
                         </div>
                     </div>
@@ -93,7 +93,7 @@ export function TestimonialCarousel({
             <div className="flex items-center justify-center gap-4 mt-8">
                 <button
                     onClick={prev}
-                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-teal border-interactive text-dark"
+                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-teal border-md text-dark"
                 >
                     <i className="fa-duotone fa-solid fa-chevron-left" />
                 </button>
@@ -104,14 +104,14 @@ export function TestimonialCarousel({
                         <button
                             key={i}
                             onClick={() => setCurrent(i)}
-                            className={`w-4 h-4 transition-all border-detail ${i === current ? 'bg-coral' : 'bg-[#ddd]'}`}
+                            className={`w-4 h-4 transition-all border-xs ${i === current ? 'bg-coral' : 'bg-[#ddd]'}`}
                         />
                     ))}
                 </div>
 
                 <button
                     onClick={next}
-                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-teal border-interactive text-dark"
+                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-teal border-md text-dark"
                 >
                     <i className="fa-duotone fa-solid fa-chevron-right" />
                 </button>

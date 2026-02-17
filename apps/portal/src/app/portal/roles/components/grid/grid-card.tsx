@@ -36,16 +36,11 @@ export function GridCard({
             className={`cursor-pointer border-4 transition-transform hover:-translate-y-1 relative ${isSelected ? ac.border : "border-dark/30"}`}
         >
             {/* Corner accent */}
-            <div
-                className={`absolute top-0 right-0 w-8 h-8 ${ac.bg}`}
-            />
+            <div className={`absolute top-0 right-0 w-8 h-8 ${ac.bg}`} />
 
             <div className="card-body">
                 {isNew(job) && (
-                    <Badge
-                        variant="yellow"
-                        className="mb-2"
-                    >
+                    <Badge color="yellow" className="mb-2" size="sm">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </Badge>
@@ -53,9 +48,7 @@ export function GridCard({
                 <h3 className="font-black text-base uppercase tracking-tight leading-tight mb-1 text-dark">
                     {job.title}
                 </h3>
-                <div
-                    className={`text-sm font-bold mb-2 ${ac.text}`}
-                >
+                <div className={`text-sm font-bold mb-2 ${ac.text}`}>
                     {companyName(job)}
                 </div>
 
@@ -68,12 +61,9 @@ export function GridCard({
 
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-black text-dark">
-                        {salaryDisplay(job) ||
-                            "Competitive"}
+                        {salaryDisplay(job) || "Competitive"}
                     </span>
-                    <Badge
-                        variant={statusVariant(job.status)}
-                    >
+                    <Badge color={statusVariant(job.status)}>
                         {formatStatus(job.status)}
                     </Badge>
                 </div>
@@ -93,23 +83,14 @@ export function GridCard({
                 <div className="flex flex-wrap gap-1">
                     {job.employment_type && (
                         <Badge
-                            variant={
-                                accentAt(0) === ac
-                                    ? "teal"
-                                    : "coral"
-                            }
-                            style="outline"
+                            color={accentAt(0) === ac ? "teal" : "coral"}
+                            variant="outline"
                         >
-                            {formatEmploymentType(
-                                job.employment_type,
-                            )}
+                            {formatEmploymentType(job.employment_type)}
                         </Badge>
                     )}
                     {job.job_level && (
-                        <Badge
-                            variant="purple"
-                            style="outline"
-                        >
+                        <Badge color="purple" variant="outline">
                             {formatJobLevel(job.job_level)}
                         </Badge>
                     )}
@@ -130,9 +111,7 @@ export function GridCard({
                         <div
                             className={`w-10 h-10 shrink-0 flex items-center justify-center border-2 ${ac.border} bg-cream text-sm font-bold text-dark`}
                         >
-                            {companyInitials(
-                                companyName(job),
-                            )}
+                            {companyInitials(companyName(job))}
                         </div>
                     )}
                     <div className="min-w-0">

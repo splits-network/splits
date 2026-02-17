@@ -201,7 +201,7 @@
 .card-border,
 .card-dash {
     @layer memphis.modifier {
-        border-width: var(--border-container);
+        border-width: var(--border-lg);
         border-color: var(--color-dark);
     }
 }

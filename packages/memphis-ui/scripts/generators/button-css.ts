@@ -1,7 +1,7 @@
 /**
  * Generates src/components/button.css — Memphis button styles.
  *
- * Reads SilicaUI's button.css as the base, then appends Memphis-specific
+ * Reads MemphisUI's button.css as the base, then appends Memphis-specific
  * additions: uppercase text, letter-spacing, palette color variants, border tiers.
  */
 
@@ -9,7 +9,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { config } from '../../src/theme.config.js';
 
 export async function generateButtonCss() {
-    // Read SilicaUI button base, stripping any previous Memphis additions
+    // Read MemphisUI button base, stripping any previous Memphis additions
     const raw = await readFile('src/components/button.css', 'utf-8');
     const base = raw.split('/* ═══ Memphis Additions (generated) ═══ */')[0].trimEnd();
 
@@ -72,11 +72,14 @@ export async function generateButtonCss() {
         lines.push('}');
     }
 
-    // Border override utilities
+    // Border override utilities - full xs-2xl range
     lines.push('');
-    lines.push('.btn-border-thin { @layer memphis.modifier { border-width: var(--border-detail); } }');
-    lines.push('.btn-border-default { @layer memphis.modifier { border-width: var(--border-interactive); } }');
-    lines.push('.btn-border-thick { @layer memphis.modifier { border-width: var(--border-container); } }');
+    lines.push('.btn-border-xs { @layer memphis.modifier { border-width: var(--border-xs); } }');
+    lines.push('.btn-border-sm { @layer memphis.modifier { border-width: var(--border-sm); } }');
+    lines.push('.btn-border-md { @layer memphis.modifier { border-width: var(--border-md); } }');
+    lines.push('.btn-border-lg { @layer memphis.modifier { border-width: var(--border-lg); } }');
+    lines.push('.btn-border-xl { @layer memphis.modifier { border-width: var(--border-xl); } }');
+    lines.push('.btn-border-2xl { @layer memphis.modifier { border-width: var(--border-2xl); } }');
 
     await writeFile('src/components/button.css', base + '\n' + lines.join('\n') + '\n');
     console.log('  ✓ src/components/button.css (Memphis additions)');

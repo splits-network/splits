@@ -714,7 +714,7 @@ export default function SubmitCandidateModal({
                                     Resume
                                 </h4>
                                 <div className="flex items-center gap-2">
-                                    <Badge variant="purple" size="sm">
+                                    <Badge color="purple" size="sm">
                                         <i className="fa-duotone fa-regular fa-file-pdf mr-1" />
                                         {resumeFile.name}
                                     </Badge>
@@ -727,20 +727,20 @@ export default function SubmitCandidateModal({
 
             {/* ── Footer Navigation ── */}
             <div className="mt-6 pt-4 border-t-4 border-dark flex items-center justify-between">
-                <Button variant="dark" size="sm" onClick={onClose}>
+                <Button color="dark" size="sm" onClick={onClose}>
                     Cancel
                 </Button>
 
                 <div className="flex items-center gap-3">
                     {currentStep > 0 && (
-                        <Button variant="dark" size="sm" onClick={handleBack} disabled={submitting}>
+                        <Button color="dark" size="sm" onClick={handleBack} disabled={submitting}>
                             <i className="fa-solid fa-arrow-left text-xs mr-1" />
                             Back
                         </Button>
                     )}
                     {currentStep < 2 ? (
                         <Button
-                            variant={WIZARD_STEPS[currentStep].accent}
+                            color={WIZARD_STEPS[currentStep].accent}
                             size="sm"
                             onClick={handleNext}
                             disabled={
@@ -753,7 +753,7 @@ export default function SubmitCandidateModal({
                         </Button>
                     ) : (
                         <Button
-                            variant="teal"
+                            color="teal"
                             size="sm"
                             onClick={handleSubmit}
                             disabled={submitting}

@@ -41,7 +41,7 @@ export function CalendarHeader({
             <div className="flex items-center gap-3">
                 <button
                     onClick={onPrev}
-                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-white border-interactive text-dark"
+                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-white border-md text-dark"
                 >
                     <i className="fa-duotone fa-solid fa-chevron-left" />
                 </button>
@@ -52,7 +52,7 @@ export function CalendarHeader({
                 </h2>
                 <button
                     onClick={onNext}
-                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-white border-interactive text-dark"
+                    className="w-10 h-10 flex items-center justify-center font-black transition-all hover:opacity-80 bg-white border-md text-dark"
                 >
                     <i className="fa-duotone fa-solid fa-chevron-right" />
                 </button>
@@ -60,7 +60,7 @@ export function CalendarHeader({
 
             {/* View mode toggle */}
             {viewModes && onViewModeChange && (
-                <div className="flex gap-0 border-container">
+                <div className="flex gap-0 border-lg">
                     {viewModes.map((v, i) => (
                         <button
                             key={v}

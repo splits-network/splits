@@ -123,8 +123,8 @@ color-scheme: light;
 /* ═══ Base Colors ═══ */
 --color-white: #FFFFFF;
 --color-black: #000000;
---color-dark-gray: #2D2D44;
---color-dark-overlay: #1A1A2E50;
+--color-dark-gray: var(--color-dark-gray);
+--color-dark-overlay: var(--color-dark-overlay);
 
 /* ═══ Semantic Colors ═══ */
 --color-primary: #FF6B6B;
@@ -145,10 +145,10 @@ color-scheme: light;
 --color-error-content: #FFFFFF;
 
 /* ═══ Base Scale ═══ */
---color-base-100: #FFFFFF;
---color-base-200: #F5F0EB;
---color-base-300: #E8E0D8;
---color-base-content: #1A1A2E;
+--color-base-100: var(--color-base-100);
+--color-base-200: var(--color-base-200);
+--color-base-300: var(--color-base-300);
+--color-base-content: var(--color-base-content);
 
 /* ═══ Geometry ═══ */
 --radius-selector: 0;
@@ -156,36 +156,37 @@ color-scheme: light;
 --radius-box: 0;
 --size-selector: 0.25rem;
 --size-field: 0.25rem;
---border: 4px;
+--border: var(--border-lg);
 --depth: 0;
 --noise: 0;
 
 /* ═══ Border Tiers ═══ */
---border-container: 4px;
---border-interactive: 3px;
---border-detail: 2px;
+--border-emphasis: var(--border-xl);
+--border-container: var(--border-lg);
+--border-interactive: var(--border-md);
+--border-detail: var(--border-xs);
 
 /* ═══ Design Tokens ═══ */
---ls: 0.05em;
---ls-wide: 0.08em;
---speed: 150ms;
---btn-active-scale: 0.97;
---disabled-opacity: 0.5;
---toggle-w: 2.75rem;
---toggle-h: 1.5rem;
---cell-px: 1rem;
---cell-py: 0.75rem;
---tab-px: 1.5rem;
+--ls: var(--ls-wider);
+--ls-wide: var(--ls-wider-custom);
+--speed: var(--duration-150);
+--btn-active-scale: var(--btn-active-scale);
+--disabled-opacity: var(--opacity-50);
+--toggle-w: var(--toggle-w);
+--toggle-h: var(--spacing-6);
+--cell-px: var(--spacing-4);
+--cell-py: var(--spacing-3);
+--tab-px: var(--spacing-6);
 
 /* ═══ Legacy Geometry ═══ */
 --rounded-box: 0;
 --rounded-btn: 0;
 --rounded-badge: 0;
---border-btn: 4px;
---btn-focus-scale: 0.97;
+--border-btn: var(--border-lg);
+--btn-focus-scale: var(--btn-active-scale);
 --animation-btn: 0;
 --animation-input: 0;
---tab-border: 4px;
+--tab-border: var(--border-lg);
 --tab-radius: 0;
 
---accent-cycle: [#FF6B6B, #4ECDC4, #FFE66D, #A78BFA];
+--accent-cycle: [var(--accent-cycle-coral), var(--accent-cycle-teal), var(--accent-cycle-yellow), var(--accent-cycle-purple)];

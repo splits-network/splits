@@ -58,7 +58,7 @@ export function ProfileHeader({
                             </div>
                             {verified && (
                                 <div
-                                    className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center border-detail accent-teal bg-accent"
+                                    className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center border-xs accent-teal bg-accent"
                                 >
                                     <i className="fa-solid fa-check text-xs text-dark" />
                                 </div>
