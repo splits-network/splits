@@ -26,7 +26,7 @@ export class DomainEventConsumer {
         private resumeExtractionRepository: ResumeExtractionRepository,
         private eventPublisher: EventPublisher | undefined,
         private logger: Logger
-    ) {}
+    ) { }
 
     async connect(): Promise<void> {
         try {
@@ -37,7 +37,7 @@ export class DomainEventConsumer {
 
             // Assert exchange exists
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
-            
+
             // Create durable queue for AI service
             await this.channel.assertQueue(this.queue, { durable: true });
 
@@ -76,36 +76,56 @@ export class DomainEventConsumer {
                 try {
                     const event: DomainEvent = JSON.parse(msg.content.toString());
 
+                    // Create event-type-aware payload summary to avoid accessing undefined fields
+                    let payload_summary: any = {};
+
+                    if (event.event_type === 'document.processed') {
+                        payload_summary = {
+                            document_id: event.payload.document_id,
+                            entity_type: event.payload.entity_type,
+                            entity_id: event.payload.entity_id,
+                            processing_status: event.payload.processing_status,
+                        };
+                    } else if (event.event_type === 'application.created' || event.event_type === 'application.stage_changed') {
+                        payload_summary = {
+                            application_id: event.payload.application_id,
+                            candidate_id: event.payload.candidate_id,
+                            job_id: event.payload.job_id,
+                            stage: event.payload.stage || event.payload.new_stage,
+                        };
+                    } else {
+                        // Fallback for unknown event types - log what we can safely
+                        payload_summary = {
+                            available_fields: Object.keys(event.payload || {}),
+                        };
+                    }
+
                     this.logger.info({
                         event_type: event.event_type,
                         event_id: event.event_id,
-                        payload_summary: {
-                            application_id: event.payload.application_id,
-                            document_id: event.payload.document_id,
-                            stage: event.payload.stage || event.payload.new_stage,
-                        }
+                        payload_summary
                     }, 'Received event');
 
                     await this.handleEvent(event);
-                    
+
                     // Acknowledge message after successful processing
                     this.channel?.ack(msg);
-                    
+
                     this.logger.info({
                         event_type: event.event_type,
                         event_id: event.event_id
                     }, 'Event processed successfully');
-                    
+
                 } catch (error) {
-                    const errorDetails = error instanceof Error 
+                    const errorDetails = error instanceof Error
                         ? { message: error.message, stack: error.stack }
                         : { error: String(error) };
-                    
+
                     this.logger.error({
                         ...errorDetails,
                         message: msg.content.toString()
                     }, 'Error processing event');
-                    
+
                     // Negative acknowledge - requeue the message
                     this.channel?.nack(msg, false, true);
                 }
