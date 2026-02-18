@@ -73,6 +73,7 @@ export function formatJobForGpt(job: any): GptJobSearchResult {
         salary_range: salaryRange,
         job_level: job.job_level || '',
         summary,
+        view_url: `https://applicant.network/public/jobs/${job.id}`,
     };
 }
 

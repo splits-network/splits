@@ -393,6 +393,7 @@ components:
         - posted_date
         - job_level
         - summary
+        - view_url
       properties:
         id:
           type: string
@@ -444,6 +445,12 @@ components:
         summary:
           type: string
           description: Brief job summary (1-2 sentences, ~200 characters)
+        view_url:
+          type: string
+          format: uri
+          description: >-
+            Direct link to the full job listing on Applicant Network. Always include this
+            as a clickable link in job cards so candidates can view the full posting.
 
     GptJobDetail:
       allOf:

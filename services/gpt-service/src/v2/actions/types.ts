@@ -27,6 +27,7 @@ export interface GptJobSearchResult {
     salary_range: string | null; // "$80k-$120k" or null
     job_level: string;
     summary: string; // 1-2 sentences, ~200 chars
+    view_url: string; // Deep link to job detail page on applicant.network
 }
 
 export interface GptJobSearchResponse {
