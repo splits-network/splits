@@ -3,6 +3,7 @@
 import type { Candidate } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { DetailLoader } from "../shared/candidate-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -23,7 +24,7 @@ export function GridView({
 
     return (
         <div className="flex gap-6">
-            <div className="flex flex-col w-full">
+            <div className={`flex flex-col w-full ${selectedCandidate ? "hidden md:flex" : "flex"}`}>
                 <div
                     className={`grid gap-4 w-full ${
                         selectedCandidate
@@ -46,9 +47,9 @@ export function GridView({
 
             {/* Detail Sidebar */}
             {selectedCandidate && (
-                <div
-                    className={`w-1/2 border-4 flex-shrink-0 self-start bg-white overflow-y-auto ${selectedAc.border}`}
-                    style={{ maxHeight: 800 }}
+                <MobileDetailOverlay
+                    isOpen
+                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white overflow-y-auto ${selectedAc.border}`}
                 >
                     <DetailLoader
                         candidateId={selectedCandidate.id}
@@ -56,7 +57,7 @@ export function GridView({
                         onClose={() => onSelect(selectedCandidate)}
                         onRefresh={onRefresh}
                     />
-                </div>
+                </MobileDetailOverlay>
             )}
         </div>
     );

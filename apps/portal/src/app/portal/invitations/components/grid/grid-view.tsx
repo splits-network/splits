@@ -3,6 +3,7 @@
 import type { Invitation } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { InvitationDetail } from "../shared/invitation-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -25,7 +26,7 @@ export function GridView({
 
     return (
         <div className="flex gap-6">
-            <div className="flex flex-col w-full">
+            <div className={`flex flex-col w-full ${selectedInvitation ? "hidden md:flex" : "flex"}`}>
                 <div
                     className={`grid gap-4 w-full ${
                         selectedInvitation
@@ -48,8 +49,9 @@ export function GridView({
 
             {/* Detail Sidebar */}
             {selectedInvitation && (
-                <div
-                    className={`w-1/2 border-4 flex-shrink-0 self-start bg-white ${selectedAc.border}`}
+                <MobileDetailOverlay
+                    isOpen
+                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white ${selectedAc.border}`}
                 >
                     <InvitationDetail
                         invitation={selectedInvitation}
@@ -57,7 +59,7 @@ export function GridView({
                         onClose={() => onSelect(selectedInvitation)}
                         onRefresh={onRefresh}
                     />
-                </div>
+                </MobileDetailOverlay>
             )}
         </div>
     );

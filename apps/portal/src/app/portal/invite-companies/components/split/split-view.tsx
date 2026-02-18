@@ -3,6 +3,7 @@
 import type { CompanyInvitation } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { InvitationDetail } from "../shared/invitation-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -22,7 +23,7 @@ export function SplitView({
     return (
         <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
             {/* Left list */}
-            <div className="w-2/5 border-r-4 border-dark">
+            <div className={`w-full md:w-2/5 border-r-4 border-dark ${selectedId ? "hidden md:block" : "block"}`}>
                 {invitations.map((inv, idx) => (
                     <SplitItem
                         key={inv.id}
@@ -35,7 +36,10 @@ export function SplitView({
             </div>
 
             {/* Right detail */}
-            <div className="w-3/5 bg-white">
+            <MobileDetailOverlay
+                isOpen={!!selectedInv}
+                className="md:w-3/5 w-full bg-white"
+            >
                 {selectedInv ? (
                     <InvitationDetail
                         invitation={selectedInv}
@@ -60,7 +64,7 @@ export function SplitView({
                         </div>
                     </div>
                 )}
-            </div>
+            </MobileDetailOverlay>
         </div>
     );
 }

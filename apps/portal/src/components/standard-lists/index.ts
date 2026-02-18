@@ -5,3 +5,4 @@ export { EmptyState } from './empty-state';
 export { LoadingState } from './loading-state';
 export { ErrorState } from './error-state';
 export { ViewModeToggle } from './view-mode-toggle';
+export { MobileDetailOverlay } from './mobile-detail-overlay';

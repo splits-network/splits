@@ -190,6 +190,86 @@ export function PricingAnimator({ children }: PricingAnimatorProps) {
             );
 
             // ════════════════════════════════════════
+            // ROI CALCULATOR
+            // ════════════════════════════════════════
+            const calcSection = $1(".roi-calculator-section");
+            if (calcSection) {
+                // Heading
+                gsap.fromTo(
+                    $1(".calc-heading"),
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1, y: 0,
+                        duration: D.normal, ease: E.smooth,
+                        scrollTrigger: { trigger: calcSection, start: "top 75%" },
+                    },
+                );
+
+                // Input panel (left side)
+                gsap.fromTo(
+                    $1(".calc-input-panel"),
+                    { opacity: 0, x: -40 },
+                    {
+                        opacity: 1, x: 0,
+                        duration: D.slow, ease: E.bounce,
+                        scrollTrigger: { trigger: calcSection, start: "top 70%" },
+                    },
+                );
+
+                // Results panel (right side)
+                gsap.fromTo(
+                    $1(".calc-results-panel"),
+                    { opacity: 0, x: 40 },
+                    {
+                        opacity: 1, x: 0,
+                        duration: D.slow, ease: E.bounce,
+                        scrollTrigger: { trigger: calcSection, start: "top 70%" },
+                    },
+                );
+
+                // Tier cards stagger in
+                gsap.fromTo(
+                    $(".calc-tier-card"),
+                    { opacity: 0, y: 30, scale: 0.85 },
+                    {
+                        opacity: 1, y: 0, scale: 1,
+                        duration: D.normal,
+                        ease: E.bounce,
+                        stagger: S.normal,
+                        scrollTrigger: { trigger: calcSection, start: "top 65%" },
+                    },
+                );
+
+                // ROI callout
+                const roiCallout = $1(".calc-roi-callout");
+                if (roiCallout) {
+                    gsap.fromTo(
+                        roiCallout,
+                        { opacity: 0, y: 20, scale: 0.95 },
+                        {
+                            opacity: 1, y: 0, scale: 1,
+                            duration: D.normal, ease: E.smooth,
+                            scrollTrigger: { trigger: roiCallout, start: "top 85%" },
+                        },
+                    );
+                }
+
+                // Breakdown table
+                const breakdown = $1(".calc-breakdown");
+                if (breakdown) {
+                    gsap.fromTo(
+                        breakdown,
+                        { opacity: 0, y: 20 },
+                        {
+                            opacity: 1, y: 0,
+                            duration: D.normal, ease: E.smooth,
+                            scrollTrigger: { trigger: breakdown, start: "top 85%" },
+                        },
+                    );
+                }
+            }
+
+            // ════════════════════════════════════════
             // FOR COMPANIES SECTION
             // ════════════════════════════════════════
             const companiesSection = $1(".companies-section");

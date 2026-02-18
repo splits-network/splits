@@ -6,3 +6,4 @@ export * from './role-selector';
 export * from './animated-payout';
 export * from './tier-comparison';
 export * from './rti-calculator';
+export * from './memphis-calculator';

@@ -3,6 +3,7 @@
 import type { Application } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { DetailLoader } from "../shared/application-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -21,7 +22,7 @@ export function GridView({
 
     return (
         <div className="flex gap-6">
-            <div className="flex flex-col w-full">
+            <div className={`flex flex-col w-full ${selectedApplication ? "hidden md:flex" : "flex"}`}>
                 <div
                     className={`grid gap-4 w-full ${
                         selectedApplication
@@ -43,14 +44,17 @@ export function GridView({
             </div>
 
             {selectedApplication && (
-                <div className={`w-1/2 border-4 flex-shrink-0 self-start bg-white ${selectedAc.border}`}>
+                <MobileDetailOverlay
+                    isOpen
+                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white ${selectedAc.border}`}
+                >
                     <DetailLoader
                         applicationId={selectedApplication.id}
                         accent={selectedAc}
                         onClose={() => onSelect(selectedApplication)}
                         onRefresh={onRefresh}
                     />
-                </div>
+                </MobileDetailOverlay>
             )}
         </div>
     );

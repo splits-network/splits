@@ -2,6 +2,7 @@
 
 import type { Placement } from "../../types";
 import { accentAt, ACCENT } from "../shared/accent";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitCard } from "./split-card";
 import { DetailLoader } from "../shared/detail-loader";
 
@@ -24,7 +25,7 @@ export function SplitView({
     return (
         <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
             {/* Left list */}
-            <div className="w-2/5 overflow-y-auto border-r-4 border-dark bg-cream" style={{ maxHeight: "calc(100vh - 16rem)" }}>
+            <div className={`w-full md:w-2/5 overflow-y-auto border-r-4 border-dark bg-cream ${selectedId ? "hidden md:block" : "block"}`} style={{ maxHeight: "calc(100vh - 16rem)" }}>
                 {placements.map((placement, idx) => (
                     <SplitCard
                         key={placement.id}
@@ -37,7 +38,10 @@ export function SplitView({
             </div>
 
             {/* Right detail */}
-            <div className="w-3/5 overflow-hidden bg-white">
+            <MobileDetailOverlay
+                isOpen={!!selectedPlacement}
+                className="md:w-3/5 w-full overflow-hidden bg-white"
+            >
                 {selectedPlacement ? (
                     <DetailLoader
                         placement={selectedPlacement}
@@ -61,7 +65,7 @@ export function SplitView({
                         </div>
                     </div>
                 )}
-            </div>
+            </MobileDetailOverlay>
         </div>
     );
 }

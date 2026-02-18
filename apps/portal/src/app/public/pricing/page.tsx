@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@splits-network/shared-ui";
 import { PricingAnimator } from "./pricing-animator";
 import { DynamicPricingSection } from "@/components/pricing";
+import { MemphisCalculator } from "@/components/calculator";
 import { pricingFaqs } from "./pricing-faq-data";
 import { PricingFaqAccordion } from "./pricing-faq-accordion";
 import { buildCanonical } from "@/lib/seo";
@@ -305,6 +306,39 @@ export default function PricingPage() {
                             <div className="text-center mt-8 text-sm text-dark/50">
                                 Splits Network does not guarantee placements, income, or role availability.
                                 All payouts are finalized at hire time based on participation, role, and subscription tier.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ══════════════════════════════════════════════════════════════
+                    ROI CALCULATOR
+                   ══════════════════════════════════════════════════════════════ */}
+                <section className="roi-calculator-section py-20 overflow-hidden bg-dark">
+                    <div className="container mx-auto px-4">
+                        <div className="max-w-6xl mx-auto">
+                            {/* Section heading */}
+                            <div className="calc-heading text-center mb-12 opacity-0">
+                                <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 bg-teal text-dark">
+                                    ROI Calculator
+                                </span>
+                                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-cream">
+                                    See What You&apos;ll{" "}
+                                    <span className="text-teal">Actually Earn</span>
+                                </h2>
+                                <p className="mt-4 text-lg text-cream/60 max-w-2xl mx-auto">
+                                    Enter a placement scenario and see exactly how much
+                                    you&apos;d earn at each tier. Higher tiers mean bigger payouts.
+                                </p>
+                            </div>
+
+                            <MemphisCalculator />
+
+                            {/* Disclaimer */}
+                            <div className="text-center mt-8 text-xs text-cream/40">
+                                <i className="fa-duotone fa-regular fa-info-circle mr-1"></i>
+                                Payouts are illustrative and based on current commission rates.
+                                Actual payouts are finalized at hire time.
                             </div>
                         </div>
                     </div>

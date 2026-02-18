@@ -9,7 +9,6 @@ import {
     ACCENT_HEX,
     HeaderLogo,
     NavItem,
-    NavDropdown,
     NavDropdownItem,
     HeaderSearchToggle,
     HeaderCta,
@@ -132,10 +131,27 @@ function DesktopNav() {
     const { isSignedIn, isLoaded } = useAuth();
     const [searchOpen, setSearchOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const navRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Close dropdowns when clicking outside the nav
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (navRef.current && !navRef.current.contains(e.target as Node)) {
+                setActiveDropdown(null);
+            }
+        };
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
+
+    const toggleDropdown = (label: string) => {
+        setActiveDropdown(activeDropdown === label ? null : label);
+    };
 
     const showSignedIn = mounted && isLoaded && isSignedIn;
 
@@ -177,15 +193,12 @@ function DesktopNav() {
                         </Link>
                     </div>
 
-                    {/* Nav items — CSS-only hover dropdowns via .dropdown-hover */}
-                    <nav className="navbar-center gap-1">
+                    {/* Nav items — click-to-open dropdowns */}
+                    <nav ref={navRef} className="navbar-center gap-1">
                         {NAV_ITEMS.map((item) => (
                             <div
                                 key={item.label}
-                                className={item.hasDropdown
-                                    ? "dropdown dropdown-hover dropdown-bottom dropdown-start"
-                                    : "relative"
-                                }
+                                className="relative"
                             >
                                 {item.href && !item.hasDropdown ? (
                                     <Link href={item.href}>
@@ -202,22 +215,33 @@ function DesktopNav() {
                                         icon={item.icon}
                                         color={item.color}
                                         hasDropdown={item.hasDropdown}
+                                        isActive={activeDropdown === item.label}
+                                        onClick={() => item.hasDropdown && toggleDropdown(item.label)}
                                     />
                                 )}
 
-                                {item.hasDropdown && item.subItems && (
-                                    <NavDropdown accentColor={item.color} title={`${item.label} Tools`}>
-                                        {item.subItems.map((sub, i) => (
-                                            <NavDropdownItem
-                                                key={i}
-                                                icon={sub.icon}
-                                                label={sub.label}
-                                                desc={sub.desc}
-                                                color={sub.color}
-                                                href={sub.href}
-                                            />
-                                        ))}
-                                    </NavDropdown>
+                                {item.hasDropdown && item.subItems && activeDropdown === item.label && (
+                                    <div
+                                        className={`absolute top-full left-0 mt-1 z-50 p-2 nav-dropdown nav-dropdown-${item.color}`}
+                                        style={{ width: item.subItems.length > 3 ? "520px" : "340px" }}
+                                    >
+                                        {item.label && (
+                                            <div className="nav-dropdown-title">{item.label} Tools</div>
+                                        )}
+                                        <div className={item.subItems.length > 3 ? "grid grid-cols-2 gap-0.5" : ""}>
+                                            {item.subItems.map((sub, i) => (
+                                                <NavDropdownItem
+                                                    key={i}
+                                                    icon={sub.icon}
+                                                    label={sub.label}
+                                                    desc={sub.desc}
+                                                    color={sub.color}
+                                                    href={sub.href}
+                                                    onClick={() => setActiveDropdown(null)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         ))}

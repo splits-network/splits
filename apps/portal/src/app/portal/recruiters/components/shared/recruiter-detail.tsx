@@ -96,7 +96,7 @@ export function RecruiterDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className={`btn btn-xs btn-square btn-ghost flex-shrink-0 ${accent.text}`}
+                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                         </button>

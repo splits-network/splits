@@ -97,7 +97,7 @@ export default function Header() {
     return (
         <header
             ref={headerRef}
-            className="sticky top-0 z-50 bg-dark overflow-hidden"
+            className="sticky top-0 z-50 bg-dark"
         >
             {/* Memphis decorations */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
@@ -137,7 +137,7 @@ export default function Header() {
                         {/* Logo */}
                         <Link href="/" className="flex-shrink-0">
                             <HeaderLogo
-                                brand="employment"
+                                brand="applicant"
                                 size="md"
                                 variant="light"
                             />

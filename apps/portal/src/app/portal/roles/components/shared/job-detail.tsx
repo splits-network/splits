@@ -75,7 +75,7 @@ export function JobDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className={`btn btn-xs btn-square btn-ghost flex-shrink-0 ${accent.text}`}
+                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                         </button>
@@ -168,7 +168,7 @@ export function JobDetail({
                 )}
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                     {commute && (
                         <div className="p-3 border-2 border-dark/20">
                             <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">

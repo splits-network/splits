@@ -3,6 +3,7 @@
 import type { Application } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { DetailLoader } from "../shared/application-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -21,7 +22,7 @@ export function SplitView({
 
     return (
         <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
-            <div className="w-2/5 border-r-4 border-dark overflow-y-auto">
+            <div className={`w-full md:w-2/5 border-r-4 border-dark overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}>
                 {applications.map((application, idx) => (
                     <SplitItem
                         key={application.id}
@@ -33,7 +34,10 @@ export function SplitView({
                 ))}
             </div>
 
-            <div className="w-3/5 bg-white overflow-y-auto">
+            <MobileDetailOverlay
+                isOpen={!!selectedApplication}
+                className="md:w-3/5 w-full bg-white overflow-y-auto"
+            >
                 {selectedApplication ? (
                     <DetailLoader
                         applicationId={selectedApplication.id}
@@ -54,7 +58,7 @@ export function SplitView({
                         </div>
                     </div>
                 )}
-            </div>
+            </MobileDetailOverlay>
         </div>
     );
 }

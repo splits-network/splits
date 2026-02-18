@@ -3,6 +3,7 @@
 import type { Candidate } from "../../types";
 import { ACCENT, accentAt } from "../shared/accent";
 import { DetailLoader } from "../shared/candidate-detail";
+import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -24,7 +25,7 @@ export function SplitView({
     return (
         <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
             {/* Left list */}
-            <div className="w-2/5 border-r-4 border-dark overflow-y-auto">
+            <div className={`w-full md:w-2/5 border-r-4 border-dark overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}>
                 {candidates.map((candidate, idx) => (
                     <SplitItem
                         key={candidate.id}
@@ -37,7 +38,10 @@ export function SplitView({
             </div>
 
             {/* Right detail */}
-            <div className="w-3/5 bg-white overflow-y-auto">
+            <MobileDetailOverlay
+                isOpen={!!selectedCandidate}
+                className="md:w-3/5 w-full bg-white overflow-y-auto"
+            >
                 {selectedCandidate ? (
                     <DetailLoader
                         candidateId={selectedCandidate.id}
@@ -62,7 +66,7 @@ export function SplitView({
                         </div>
                     </div>
                 )}
-            </div>
+            </MobileDetailOverlay>
         </div>
     );
 }

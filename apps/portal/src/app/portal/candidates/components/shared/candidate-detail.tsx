@@ -192,7 +192,7 @@ export function CandidateDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className={`btn btn-xs btn-square btn-ghost flex-shrink-0 ${accent.text}`}
+                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                         </button>
@@ -360,7 +360,7 @@ function OverviewTab({
                         Career Preferences
                     </h3>
                 </div>
-                <div className="p-4 grid grid-cols-2 gap-4">
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
                             Desired Salary
@@ -427,7 +427,7 @@ function OverviewTab({
             </div>
 
             {/* Profile Status Grid */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="p-3 border-2 border-dark/20">
                     <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
                         Verification
