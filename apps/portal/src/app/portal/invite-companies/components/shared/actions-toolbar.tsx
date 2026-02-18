@@ -4,14 +4,15 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { useInvitationFilterOptional } from "../../contexts/filter-context";
-import { CompanyInvitation, getInviteLink } from "../../types";
+import type { CompanyInvitation } from "../../types";
+import { getInviteLink } from "./helpers";
+import { ExpandableButton } from "./expandable-button";
 
 export interface InvitationActionsToolbarProps {
     invitation: CompanyInvitation;
     variant: "icon-only" | "descriptive";
     layout?: "horizontal" | "vertical";
-    size?: "xs" | "sm" | "md";
+    size?: "xs" | "sm" | "md" | "lg";
     showActions?: {
         copyCode?: boolean;
         copyLink?: boolean;
@@ -20,7 +21,6 @@ export interface InvitationActionsToolbarProps {
         revoke?: boolean;
     };
     onRefresh?: () => void;
-    onViewDetails?: (id: string) => void;
     className?: string;
 }
 
@@ -31,13 +31,11 @@ export default function InvitationActionsToolbar({
     size = "sm",
     showActions = {},
     onRefresh,
-    onViewDetails,
     className = "",
 }: InvitationActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const filterContext = useInvitationFilterOptional();
-    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
+    const refresh = onRefresh ?? (() => {});
 
     const [resending, setResending] = useState(false);
     const [revoking, setRevoking] = useState(false);
@@ -139,10 +137,6 @@ export default function InvitationActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast, onRefresh]);
 
-    const handleViewDetails = useCallback(() => {
-        onViewDetails?.(invitation.id);
-    }, [invitation.id, onViewDetails]);
-
     const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
@@ -153,71 +147,60 @@ export default function InvitationActionsToolbar({
                 className={`flex items-center ${getLayoutClass()} ${className}`}
             >
                 {actions.copyCode && (
-                    <button
+                    <ExpandableButton
+                        icon="fa-duotone fa-regular fa-copy"
+                        label="Code"
+                        variant="btn-ghost"
+                        size={size}
                         onClick={handleCopyCode}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                        title="Copy code"
-                    >
-                        <i className="fa-duotone fa-regular fa-copy" />
-                    </button>
+                        title="Copy invite code"
+                    />
                 )}
                 {actions.copyLink && (
-                    <button
+                    <ExpandableButton
+                        icon="fa-duotone fa-regular fa-link"
+                        label="Link"
+                        variant="btn-ghost"
+                        size={size}
                         onClick={handleCopyLink}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                        title="Copy link"
-                    >
-                        <i className="fa-duotone fa-regular fa-link" />
-                    </button>
+                        title="Copy invite link"
+                    />
                 )}
                 {actions.share && (
-                    <button
+                    <ExpandableButton
+                        icon="fa-duotone fa-regular fa-share-nodes"
+                        label="Share"
+                        variant="btn-ghost"
+                        size={size}
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                        title="Share"
-                    >
-                        <i className="fa-duotone fa-regular fa-share" />
-                    </button>
+                        title="Share invitation"
+                    />
                 )}
                 {actions.resend && (
-                    <button
+                    <ExpandableButton
+                        icon="fa-duotone fa-regular fa-envelope"
+                        label="Resend"
+                        variant="btn-secondary"
+                        size={size}
                         onClick={handleResend}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
                         disabled={resending}
+                        loading={resending}
                         title="Resend email"
-                    >
-                        {resending ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-envelope" />
-                        )}
-                    </button>
+                    />
                 )}
                 {actions.revoke && (
-                    <button
-                        onClick={handleRevoke}
-                        className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
-                        disabled={revoking}
-                        title="Revoke"
-                    >
-                        {revoking ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-ban" />
-                        )}
-                    </button>
-                )}
-                {/* View Details - far right */}
-                {onViewDetails && (
                     <>
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                        <button
-                            onClick={handleViewDetails}
-                            className={`btn ${getSizeClass()} btn-square btn-primary`}
-                            title="View Details"
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                        </button>
+                        <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-ban"
+                            label="Revoke"
+                            variant="btn-ghost"
+                            size={size}
+                            onClick={handleRevoke}
+                            disabled={revoking}
+                            loading={revoking}
+                            title="Revoke invitation"
+                        />
                     </>
                 )}
             </div>
@@ -227,73 +210,68 @@ export default function InvitationActionsToolbar({
     // Descriptive variant
     return (
         <div
-            className={`flex ${layout === "horizontal" ? "flex-wrap gap-2" : "flex-col gap-2"} ${className}`}
+            className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
         >
             {actions.copyCode && (
                 <button
                     onClick={handleCopyCode}
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
+                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    title="Copy invite code"
                 >
                     <i className="fa-duotone fa-regular fa-copy" />
-                    Copy Code
+                    <span className="hidden md:inline">Copy Code</span>
                 </button>
             )}
             {actions.copyLink && (
                 <button
                     onClick={handleCopyLink}
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
+                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    title="Copy invite link"
                 >
                     <i className="fa-duotone fa-regular fa-link" />
-                    Copy Link
+                    <span className="hidden md:inline">Copy Link</span>
                 </button>
             )}
             {actions.share && (
                 <button
                     onClick={handleShare}
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
+                    className={`btn ${getSizeClass()} btn-primary gap-2`}
+                    title="Share invitation"
                 >
-                    <i className="fa-duotone fa-regular fa-share" />
-                    Share
+                    <i className="fa-duotone fa-regular fa-share-nodes" />
+                    <span className="hidden md:inline">Share</span>
                 </button>
             )}
             {actions.resend && (
                 <button
                     onClick={handleResend}
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
+                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
                     disabled={resending}
+                    title="Resend email"
                 >
                     {resending ? (
                         <span className="loading loading-spinner loading-xs" />
                     ) : (
                         <i className="fa-duotone fa-regular fa-envelope" />
                     )}
-                    Resend Email
+                    <span className="hidden md:inline">Resend</span>
                 </button>
             )}
             {actions.revoke && (
-                <button
-                    onClick={handleRevoke}
-                    className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
-                    disabled={revoking}
-                >
-                    {revoking ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-ban" />
-                    )}
-                    Revoke
-                </button>
-            )}
-            {/* View Details - far right */}
-            {onViewDetails && (
                 <>
-                    <div className="divider divider-horizontal mx-0" />
+                    <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
                     <button
-                        onClick={handleViewDetails}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        onClick={handleRevoke}
+                        className={`btn ${getSizeClass()} btn-ghost gap-2 text-coral`}
+                        disabled={revoking}
+                        title="Revoke invitation"
                     >
-                        <i className="fa-duotone fa-regular fa-eye" />
-                        View Details
+                        {revoking ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-ban" />
+                        )}
+                        <span className="hidden md:inline">Revoke</span>
                     </button>
                 </>
             )}

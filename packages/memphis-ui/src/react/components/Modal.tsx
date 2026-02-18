@@ -16,6 +16,18 @@ export interface ModalProps {
     padding?: boolean;
 }
 
+/** Map Tailwind max-w class names to CSS values so we can apply via inline style (wins specificity over plugin CSS). */
+function resolveMaxWidth(tw: string): string {
+    const map: Record<string, string> = {
+        'max-w-xs': '20rem', 'max-w-sm': '24rem', 'max-w-md': '28rem',
+        'max-w-lg': '32rem', 'max-w-xl': '36rem', 'max-w-2xl': '42rem',
+        'max-w-3xl': '48rem', 'max-w-4xl': '56rem', 'max-w-5xl': '64rem',
+        'max-w-6xl': '72rem', 'max-w-7xl': '80rem', 'max-w-full': '100%',
+        'max-w-screen': '100vw', 'max-w-none': 'none',
+    };
+    return map[tw] || tw; // pass through raw CSS values like '72rem'
+}
+
 /**
  * Memphis Modal
  *
@@ -88,9 +100,9 @@ export function Modal({
                 className={[
                     'modal-box',
                     'overflow-y-auto max-h-[90vh]',
-                    maxWidth,
                     className,
                 ].filter(Boolean).join(' ')}
+                style={{ maxWidth: resolveMaxWidth(maxWidth) }}
             >
                 {usePadding ? (
                     <div>

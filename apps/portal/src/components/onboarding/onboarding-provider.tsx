@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Onboarding Context Provider
+ * Onboarding Context Provider (Memphis Edition)
  * Manages state for the onboarding wizard across components
  *
  * Includes fallback user creation for SSO sign-ups where
@@ -29,6 +29,7 @@ import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import { SplashLoading } from "@splits-network/shared-ui";
+import { Button } from "@splits-network/memphis-ui";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -466,8 +467,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             submitting: false,
                         }));
                     }
-                    // organizationName = userData.name || userData.email?.split('@')[0] || 'Recruiter';
-                    // organizationType = 'recruiter';
                 } else if (selectedRole === "company_admin") {
                     if (!companyInfo?.name) {
                         throw new Error("Company name is required");
@@ -607,37 +606,39 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         return <SplashLoading message={message} />;
     }
 
-    // Show error state with retry options
+    // Show error state with Memphis styling
     if (initStatus === "error") {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="card w-full max-w-md bg-base-100 shadow-xl">
-                    <div className="card-body items-center text-center">
-                        <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-3xl text-error"></i>
+            <div className="min-h-screen bg-dark flex items-center justify-center p-4">
+                <div className="w-full max-w-md bg-cream border-4 border-coral p-8">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 bg-coral/10 border-4 border-coral flex items-center justify-center mb-4">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-3xl text-coral"></i>
                         </div>
-                        <h2 className="card-title mt-4">
+                        <h2 className="text-xl font-black uppercase tracking-tight text-dark mt-2">
                             Unable to Load Profile
                         </h2>
-                        <p className="text-base-content/70">{initMessage}</p>
-                        <p className="text-sm text-base-content/50 mt-2">
+                        <p className="text-dark/60 text-sm mt-2">{initMessage}</p>
+                        <p className="text-xs text-dark/40 mt-2">
                             Please try again or sign out and sign back in.
                         </p>
-                        <div className="card-actions mt-4 gap-2">
-                            <button
-                                className="btn btn-primary"
+                        <div className="flex gap-3 mt-6">
+                            <Button
+                                color="coral"
+                                variant="solid"
                                 onClick={handleRetry}
                             >
                                 <i className="fa-duotone fa-regular fa-arrows-rotate mr-2"></i>
                                 Try Again
-                            </button>
-                            <button
-                                className="btn btn-ghost"
+                            </Button>
+                            <Button
+                                color="dark"
+                                variant="outline"
                                 onClick={handleSignOut}
                             >
                                 <i className="fa-duotone fa-regular fa-right-from-bracket mr-2"></i>
                                 Sign Out
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

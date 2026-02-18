@@ -26,8 +26,8 @@ export class SupportEmailService {
     private renderStatusContactEmail(data: StatusContactEmailData) {
         return `
             <html>
-                <body style="font-family: Arial, sans-serif; color: #111827;">
-                    <h2 style="color:#111827;">New Status Page Contact</h2>
+                <body style="font-family: Arial, sans-serif; color: #1A1A2E;">
+                    <h2 style="color:#1A1A2E;">New Status Page Contact</h2>
                     <p><strong>Name:</strong> ${data.name}</p>
                     <p><strong>Email:</strong> ${data.email}</p>
                     <p><strong>Topic:</strong> ${data.topic}</p>
@@ -35,9 +35,9 @@ export class SupportEmailService {
                     <p><strong>Source:</strong> ${data.source}</p>
                     <p><strong>Submitted:</strong> ${new Date(data.submittedAt).toLocaleString()}</p>
                     <p><strong>Message:</strong></p>
-                    <p style="white-space:pre-line; background:#f3f4f6; padding:12px; border-radius:8px;">${data.message}</p>
+                    <p style="white-space:pre-line; background:#F5F0EB; padding:12px; border-radius:4px;">${data.message}</p>
                     <hr />
-                    <p style="font-size:12px; color:#6b7280;">
+                    <p style="font-size:12px; color:#1A1A2E;">
                         IP Address: ${data.ipAddress || 'unknown'}<br/>
                         User Agent: ${data.userAgent || 'unknown'}
                     </p>

@@ -1,6 +1,6 @@
 /**
  * Reusable Email Components
- * Pre-built UI elements matching Splits Network brand
+ * Memphis Design System — flat colors, bold borders, coral/teal/dark palette
  */
 
 import { renderMarkdownToHTMLSync } from '../utils/markdown-renderer';
@@ -14,9 +14,9 @@ export interface ButtonProps {
 
 export function button({ href, text, variant = 'primary', theme }: ButtonProps): string {
     const defaultColors = {
-        primary: { bg: '#233876', text: '#ffffff' }, // Brand blue
-        secondary: { bg: '#0d9488', text: '#ffffff' }, // Teal
-        accent: { bg: '#10b981', text: '#ffffff' }, // Success green
+        primary: { bg: '#FF6B6B', text: '#ffffff' }, // Memphis Coral
+        secondary: { bg: '#1A1A2E', text: '#ffffff' }, // Memphis Dark
+        accent: { bg: '#4ECDC4', text: '#1A1A2E' }, // Memphis Teal
     };
 
     // Use theme colors if provided
@@ -31,8 +31,8 @@ export function button({ href, text, variant = 'primary', theme }: ButtonProps):
     return `
 <table cellpadding="0" cellspacing="0" role="presentation">
   <tr>
-    <td style="border-radius: 8px; background-color: ${color.bg};">
-      <a href="${href}" style="display: inline-block; padding: 14px 32px; font-size: 16px; font-weight: 600; line-height: 1; color: ${color.text}; text-decoration: none; border-radius: 8px;">
+    <td style="border-radius: 4px; background-color: ${color.bg}; border: 2px solid #1A1A2E;">
+      <a href="${href}" style="display: inline-block; padding: 14px 32px; font-size: 16px; font-weight: 700; line-height: 1; color: ${color.text}; text-decoration: none; border-radius: 4px;">
         ${text}
       </a>
     </td>
@@ -49,9 +49,9 @@ export interface InfoCardProps {
 
 export function infoCard({ title, items, theme }: InfoCardProps): string {
     const defaultTheme = {
-        primary: '#233876',
-        border: '#e5e7eb',
-        background: '#f9fafb'
+        primary: '#FF6B6B',
+        border: '#1A1A2E',
+        background: '#F5F0EB'
     };
 
     const colors = theme || defaultTheme;
@@ -59,11 +59,11 @@ export function infoCard({ title, items, theme }: InfoCardProps): string {
         .map(
             (item) => `
 <tr>
-  <td style="padding: 12px 20px; border-bottom: 1px solid ${colors.border};">
-    <span style="font-size: 13px; color: #6b7280; font-weight: 500;">${item.label}</span>
+  <td style="padding: 12px 20px; border-bottom: 1px solid #E5E0DB;">
+    <span style="font-size: 13px; color: #1A1A2E; font-weight: 500;">${item.label}</span>
   </td>
-  <td style="padding: 12px 20px; border-bottom: 1px solid ${colors.border}; text-align: right;">
-    <span style="font-size: 14px; color: ${item.highlight ? colors.primary : '#111827'}; font-weight: ${item.highlight ? '700' : '600'};">
+  <td style="padding: 12px 20px; border-bottom: 1px solid #E5E0DB; text-align: right;">
+    <span style="font-size: 14px; color: ${item.highlight ? colors.primary : '#1A1A2E'}; font-weight: ${item.highlight ? '700' : '600'};">
       ${item.value}
     </span>
   </td>
@@ -73,10 +73,10 @@ export function infoCard({ title, items, theme }: InfoCardProps): string {
         .join('\n');
 
     return `
-<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; border: 1px solid ${colors.border}; border-radius: 12px; overflow: hidden; margin: 24px 0;">
+<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; border: 2px solid ${colors.border}; border-radius: 4px; overflow: hidden; margin: 24px 0;">
   <tr>
     <td colspan="2" style="background-color: ${colors.background}; padding: 16px 20px; border-bottom: 2px solid ${colors.border};">
-      <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1A1A2E;">
         ${title}
       </h3>
     </td>
@@ -94,16 +94,16 @@ export interface AlertProps {
 
 export function alert({ type, title, message }: AlertProps): string {
     const styles = {
-        info: { bg: '#dbeafe', border: '#60a5fa', text: '#1e40af' },
-        success: { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
-        warning: { bg: '#fef3c7', border: '#eab308', text: '#854d0e' },
-        error: { bg: '#fee2e2', border: '#dc2626', text: '#991b1b' },
+        info: { bg: '#EDE9FE', border: '#A78BFA', text: '#1A1A2E' },    // Memphis Purple
+        success: { bg: '#D5F5F0', border: '#4ECDC4', text: '#1A1A2E' }, // Memphis Teal
+        warning: { bg: '#FFF8D6', border: '#FFE66D', text: '#1A1A2E' }, // Memphis Yellow
+        error: { bg: '#FFE0E0', border: '#FF6B6B', text: '#1A1A2E' },   // Memphis Coral
     };
 
     const style = styles[type];
 
     return `
-<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; background-color: ${style.bg}; border-left: 4px solid ${style.border}; border-radius: 8px; margin: 20px 0;">
+<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; background-color: ${style.bg}; border-left: 4px solid ${style.border}; border-radius: 4px; margin: 20px 0;">
   <tr>
     <td style="padding: 16px 20px;">
       ${title ? `<p style="margin: 0 0 8px; font-size: 14px; font-weight: 700; color: ${style.text};">${title}</p>` : ''}
@@ -126,8 +126,8 @@ export function divider({ text }: DividerProps = {}): string {
 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; margin: 32px 0;">
   <tr>
     <td style="width: 100%; position: relative; text-align: center;">
-      <div style="border-bottom: 1px solid #e5e7eb; position: absolute; width: 100%; top: 50%; left: 0;"></div>
-      <span style="background-color: #ffffff; padding: 0 16px; font-size: 13px; color: #6b7280; font-weight: 500; position: relative; z-index: 1;">
+      <div style="border-bottom: 1px solid #E5E0DB; position: absolute; width: 100%; top: 50%; left: 0;"></div>
+      <span style="background-color: #ffffff; padding: 0 16px; font-size: 13px; color: #1A1A2E; font-weight: 500; position: relative; z-index: 1;">
         ${text}
       </span>
     </td>
@@ -136,7 +136,7 @@ export function divider({ text }: DividerProps = {}): string {
         `.trim();
     }
 
-    return `<div style="border-bottom: 1px solid #e5e7eb; margin: 32px 0;"></div>`;
+    return `<div style="border-bottom: 1px solid #E5E0DB; margin: 32px 0;"></div>`;
 }
 
 export interface HeadingProps {
@@ -154,14 +154,14 @@ export function heading({ level, text }: HeadingProps): string {
     const style = sizes[level];
 
     return `
-<h${level} style="margin: ${style.margin}; font-size: ${style.size}; font-weight: ${style.weight}; color: #111827; line-height: 1.2;">
+<h${level} style="margin: ${style.margin}; font-size: ${style.size}; font-weight: ${style.weight}; color: #1A1A2E; line-height: 1.2;">
   ${text}
 </h${level}>
     `.trim();
 }
 
 export function paragraph(text: string): string {
-    return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 24px; color: #374151;">${text}</p>`;
+    return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 24px; color: #1A1A2E;">${text}</p>`;
 }
 
 export interface ListItem {
@@ -173,7 +173,7 @@ export function list(items: ListItem[]): string {
     const listItems = items
         .map(
             (item) => `
-<li style="margin-bottom: 8px; font-size: 15px; line-height: 24px; color: #374151;">
+<li style="margin-bottom: 8px; font-size: 15px; line-height: 24px; color: #1A1A2E;">
   ${item.bold ? `<strong>${item.text}</strong>` : item.text}
 </li>
     `.trim()
@@ -194,18 +194,18 @@ export interface BadgeProps {
 
 export function badge({ text, variant = 'neutral' }: BadgeProps): string {
     const colors = {
-        primary: { bg: '#dbeafe', text: '#233876' },
-        secondary: { bg: '#ccfbf1', text: '#0f9d8a' },
-        success: { bg: '#dcfce7', text: '#166534' },
-        warning: { bg: '#fef3c7', text: '#854d0e' },
-        error: { bg: '#fee2e2', text: '#991b1b' },
-        neutral: { bg: '#f3f4f6', text: '#374151' },
+        primary: { bg: '#FFE0E0', text: '#1A1A2E' },   // Memphis Coral light
+        secondary: { bg: '#1A1A2E', text: '#F5F0EB' },  // Memphis Dark
+        success: { bg: '#D5F5F0', text: '#1A1A2E' },    // Memphis Teal light
+        warning: { bg: '#FFF8D6', text: '#1A1A2E' },    // Memphis Yellow light
+        error: { bg: '#FFE0E0', text: '#1A1A2E' },      // Memphis Coral light
+        neutral: { bg: '#F5F0EB', text: '#1A1A2E' },    // Memphis Cream
     };
 
     const color = colors[variant];
 
     return `
-<span style="display: inline-block; padding: 4px 12px; font-size: 13px; font-weight: 600; color: ${color.text}; background-color: ${color.bg}; border-radius: 6px;">
+<span style="display: inline-block; padding: 4px 12px; font-size: 13px; font-weight: 700; color: ${color.text}; background-color: ${color.bg}; border-radius: 4px; border: 1px solid #1A1A2E;">
   ${text}
 </span>
     `.trim();
@@ -225,17 +225,17 @@ export function markdownToHtml(content: string): string {
         // Apply additional email-specific styling
         html = html
             .replace(/<p>/g, '<p style="margin: 8px 0; line-height: 1.5;">')
-            .replace(/<h1>/g, '<h1 style="margin: 16px 0 8px 0; font-size: 24px; font-weight: 600; color: #233876;">')
-            .replace(/<h2>/g, '<h2 style="margin: 12px 0 6px 0; font-size: 20px; font-weight: 600; color: #233876;">')
-            .replace(/<h3>/g, '<h3 style="margin: 8px 0 4px 0; font-size: 18px; font-weight: 600; color: #233876;">')
-            .replace(/<a\s/g, '<a style="color: #233876; text-decoration: none; font-weight: 600;" ')
+            .replace(/<h1>/g, '<h1 style="margin: 16px 0 8px 0; font-size: 24px; font-weight: 700; color: #1A1A2E;">')
+            .replace(/<h2>/g, '<h2 style="margin: 12px 0 6px 0; font-size: 20px; font-weight: 700; color: #1A1A2E;">')
+            .replace(/<h3>/g, '<h3 style="margin: 8px 0 4px 0; font-size: 18px; font-weight: 700; color: #1A1A2E;">')
+            .replace(/<a\s/g, '<a style="color: #FF6B6B; text-decoration: none; font-weight: 700;" ')
             .replace(/<strong>/g, '<strong style="font-weight: 600;">')
             .replace(/<em>/g, '<em style="font-style: italic;">')
-            .replace(/<code>/g, '<code style="background: #f1f5f9; padding: 2px 4px; border-radius: 3px; font-family: monospace; font-size: 14px;">')
+            .replace(/<code>/g, '<code style="background: #F5F0EB; padding: 2px 4px; border-radius: 2px; font-family: monospace; font-size: 14px;">')
             .replace(/<ul>/g, '<ul style="margin: 8px 0; padding-left: 20px; line-height: 1.5;">')
             .replace(/<ol>/g, '<ol style="margin: 8px 0; padding-left: 20px; line-height: 1.5;">')
             .replace(/<li>/g, '<li style="margin: 4px 0;">')
-            .replace(/<blockquote>/g, '<blockquote style="margin: 16px 0; padding: 8px 16px; border-left: 4px solid #233876; background: #f8fafc; font-style: italic;">');
+            .replace(/<blockquote>/g, '<blockquote style="margin: 16px 0; padding: 8px 16px; border-left: 4px solid #FF6B6B; background: #F5F0EB; font-style: italic;">');
 
         return html;
     } catch (error) {

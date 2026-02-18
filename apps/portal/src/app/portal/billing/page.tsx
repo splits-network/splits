@@ -1,9 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import BillingContent from "./components/billing-content";
-import { PageTitle } from "@/components/page-title";
+import BillingContent from "./billing-content";
 
-export default async function BillingPage() {
+export default async function BillingMemphisPage() {
     const { getToken } = await auth();
 
     const token = await getToken();
@@ -11,13 +10,5 @@ export default async function BillingPage() {
         redirect("/sign-in");
     }
 
-    return (
-        <>
-            <PageTitle
-                title="Billing"
-                subtitle="Manage your subscription and payments"
-            />
-            <BillingContent />
-        </>
-    );
+    return <BillingContent />;
 }

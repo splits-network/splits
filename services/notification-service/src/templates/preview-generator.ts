@@ -149,7 +149,7 @@ function generatePreviews() {
     <style>
         body {
             font-family: -apple-system, 'Segoe UI', sans-serif;
-            background: #f3f4f6;
+            background: #F5F0EB;
             padding: 40px;
             margin: 0;
         }
@@ -157,12 +157,12 @@ function generatePreviews() {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 40px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 4px solid #1A1A2E;
         }
         h1 {
-            color: #233876;
+            color: #1A1A2E;
             margin-bottom: 24px;
         }
         .links {
@@ -172,43 +172,44 @@ function generatePreviews() {
         a {
             display: block;
             padding: 16px 20px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            background: #F5F0EB;
+            border: 2px solid #1A1A2E;
+            border-radius: 4px;
             text-decoration: none;
-            color: #233876;
-            font-weight: 600;
+            color: #1A1A2E;
+            font-weight: 700;
             transition: all 0.2s;
         }
         a:hover {
-            background: #233876;
+            background: #FF6B6B;
             color: white;
         }
         .badge {
             display: inline-block;
             padding: 4px 12px;
-            background: #dbeafe;
-            color: #233876;
-            border-radius: 6px;
+            background: #FFE0E0;
+            color: #1A1A2E;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             margin-left: 8px;
+            border: 1px solid #1A1A2E;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Email Template Previews</h1>
-        <p style="color: #6b7280; margin-bottom: 32px;">
+        <p style="color: #1A1A2E; margin-bottom: 32px;">
             Click any template below to preview how it looks in an email client.
         </p>
         <div class="links">
-            <h3 style="color: #111827; margin: 24px 0 12px;">Application Emails</h3>
+            <h3 style="color: #1A1A2E; margin: 24px 0 12px;">Application Emails</h3>
             <a href="application-created.html">Application Created <span class="badge">New Candidate</span></a>
             <a href="application-stage-changed.html">Stage Changed <span class="badge">Update</span></a>
             <a href="application-accepted.html">Application Accepted <span class="badge">Success</span></a>
-            
-            <h3 style="color: #111827; margin: 24px 0 12px;">Placement Emails</h3>
+
+            <h3 style="color: #1A1A2E; margin: 24px 0 12px;">Placement Emails</h3>
             <a href="placement-created.html">Placement Created <span class="badge">Celebration</span></a>
             <a href="placement-activated.html">Placement Activated <span class="badge">Started</span></a>
             <a href="placement-completed.html">Placement Completed <span class="badge">Success</span></a>

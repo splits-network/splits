@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * Step 3a: Recruiter Profile Form
+ * Step 3a: Recruiter Profile Form (Memphis Edition)
  * Shown when user selects "Recruiter" role
  */
 
 import { useState, FormEvent } from "react";
 import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
+import { Input, Button } from "@splits-network/memphis-ui";
 import { useOnboarding } from "../onboarding-provider";
 
 const INDUSTRY_OPTIONS = [
@@ -45,21 +46,17 @@ const SPECIALTY_OPTIONS = [
     "Administrative",
 ];
 
+/** Accent color cycle for specialty toggle buttons */
+const ACCENT_CYCLE = ["coral", "teal", "yellow", "purple"] as const;
+
 export function RecruiterProfileStep() {
     const { state, actions } = useOnboarding();
-
-    // Debug logging
-    console.log("[RecruiterProfileStep] Component rendering");
-    console.log("[RecruiterProfileStep] State:", {
-        currentStep: state.currentStep,
-        selectedRole: state.selectedRole,
-    });
 
     const [formData, setFormData] = useState({
         bio: state.recruiterProfile?.bio || "",
         phone: state.recruiterProfile?.phone || "",
-        industries: state.recruiterProfile?.industries || [],
-        specialties: state.recruiterProfile?.specialties || [],
+        industries: state.recruiterProfile?.industries || ([] as string[]),
+        specialties: state.recruiterProfile?.specialties || ([] as string[]),
         location: state.recruiterProfile?.location || "",
         tagline: state.recruiterProfile?.tagline || "",
         years_experience:
@@ -91,7 +88,6 @@ export function RecruiterProfileStep() {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        // Use arrays directly instead of parsing comma-separated strings
         const profile = {
             bio: formData.bio,
             phone: formData.phone,
@@ -113,190 +109,179 @@ export function RecruiterProfileStep() {
     };
 
     return (
-        <div className="space-y-6 max-w-3xl w-2xl mx-auto">
+        <div className="space-y-6 max-w-2xl mx-auto">
+            {/* Heading */}
             <div className="text-center">
-                <h2 className="text-2xl font-bold">
-                    Complete Your Recruiter Profile
+                <h2 className="text-3xl font-black uppercase tracking-tight text-dark">
+                    Complete Your Profile
                 </h2>
-                <p className="text-base-content/70 mt-2">
+                <p className="text-dark/60 mt-2 text-sm">
                     Tell us a bit about yourself and your recruiting experience
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Bio */}
-                <MarkdownEditor
-                    className="fieldset"
-                    label="Bio / About You"
-                    value={formData.bio}
-                    onChange={(value) => handleChange("bio", value)}
-                    placeholder="Share your recruiting experience, specializations, and what makes you great at finding talent..."
-                    helperText="Help companies understand your expertise"
-                    height={160}
-                />
+                <div>
+                    <label className="flex items-center gap-1 text-sm font-black uppercase tracking-[0.15em] text-dark mb-2">
+                        Bio / About You
+                    </label>
+                    <MarkdownEditor
+                        className="fieldset"
+                        value={formData.bio}
+                        onChange={(value) => handleChange("bio", value)}
+                        placeholder="Share your recruiting experience, specializations, and what makes you great at finding talent..."
+                        helperText="Help companies understand your expertise"
+                        height={160}
+                    />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Phone */}
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">
-                            Phone Number *
-                        </legend>
-                        <input
-                            type="tel"
-                            className="input w-full"
-                            value={formData.phone}
-                            onChange={(e) =>
-                                handleChange("phone", e.target.value)
-                            }
-                            placeholder="+1 (555) 123-4567"
-                            required
-                        />
-                    </fieldset>
+                    <Input
+                        label="Phone Number *"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleChange("phone", e.target.value)}
+                        placeholder="+1 (555) 123-4567"
+                        required
+                    />
 
                     {/* Location */}
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Location</legend>
-                        <input
-                            type="text"
-                            className="input w-full"
-                            value={formData.location}
-                            onChange={(e) =>
-                                handleChange("location", e.target.value)
-                            }
-                            placeholder="e.g., New York, NY"
-                        />
-                        <p className="fieldset-label">
-                            Your primary work location
-                        </p>
-                    </fieldset>
+                    <Input
+                        label="Location"
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => handleChange("location", e.target.value)}
+                        placeholder="e.g., New York, NY"
+                    />
                 </div>
 
                 {/* Industries */}
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Industries</legend>
+                <div>
+                    <label className="flex items-center gap-1 text-sm font-black uppercase tracking-[0.15em] text-dark mb-2">
+                        Industries
+                    </label>
                     <div className="flex flex-wrap gap-2">
-                        {INDUSTRY_OPTIONS.map((industry) => (
-                            <button
-                                key={industry}
-                                type="button"
-                                onClick={() => toggleIndustry(industry)}
-                                className={`btn btn-sm ${
-                                    formData.industries.includes(industry)
-                                        ? "btn-primary"
-                                        : "btn-outline"
-                                }`}
-                            >
-                                {industry}
-                            </button>
-                        ))}
+                        {INDUSTRY_OPTIONS.map((industry) => {
+                            const isSelected = formData.industries.includes(industry);
+                            return (
+                                <button
+                                    key={industry}
+                                    type="button"
+                                    onClick={() => toggleIndustry(industry)}
+                                    className={[
+                                        "px-3 py-2 text-xs font-black uppercase tracking-wider border-4 transition-all",
+                                        isSelected
+                                            ? "bg-coral text-cream border-coral"
+                                            : "bg-transparent text-dark border-dark/15",
+                                    ].join(" ")}
+                                >
+                                    {isSelected && (
+                                        <i className="fa-solid fa-check text-[10px] mr-1"></i>
+                                    )}
+                                    {industry}
+                                </button>
+                            );
+                        })}
                     </div>
-                    <p className="fieldset-label">
+                    <p className="text-xs text-dark/40 mt-1.5">
                         Select the industries you recruit in
                     </p>
-                </fieldset>
-
-                {/* Specialties */}
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Specialties</legend>
-                    <div className="flex flex-wrap gap-2">
-                        {SPECIALTY_OPTIONS.map((specialty) => (
-                            <button
-                                key={specialty}
-                                type="button"
-                                onClick={() => toggleSpecialty(specialty)}
-                                className={`btn btn-sm ${
-                                    formData.specialties.includes(specialty)
-                                        ? "btn-primary"
-                                        : "btn-outline"
-                                }`}
-                            >
-                                {specialty}
-                            </button>
-                        ))}
-                    </div>
-                    <p className="fieldset-label">
-                        Select your recruiting specialties
-                    </p>
-                </fieldset>
-
-                {/* Tagline and Years Experience - Side by Side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Tagline</legend>
-                        <input
-                            type="text"
-                            className="input"
-                            value={formData.tagline}
-                            onChange={(e) =>
-                                handleChange("tagline", e.target.value)
-                            }
-                            placeholder="e.g., Tech Recruiting Expert"
-                        />
-                        <p className="fieldset-label">
-                            Brief headline about your expertise
-                        </p>
-                    </fieldset>
-
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">
-                            Years of Experience
-                        </legend>
-                        <input
-                            type="number"
-                            className="input"
-                            min="0"
-                            value={formData.years_experience}
-                            onChange={(e) =>
-                                handleChange("years_experience", e.target.value)
-                            }
-                            placeholder="5"
-                        />
-                        <p className="fieldset-label">Years in recruiting</p>
-                    </fieldset>
                 </div>
 
-                {/* Team Invite Code (Optional) */}
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">
-                        Team Invite Code (Optional)
-                    </legend>
-                    <input
-                        type="text"
-                        className="input w-full"
-                        value={formData.teamInviteCode}
-                        onChange={(e) =>
-                            handleChange(
-                                "teamInviteCode",
-                                e.target.value.toUpperCase(),
-                            )
-                        }
-                        placeholder="TEAM-ABC123"
-                    />
-                    <p className="fieldset-label">
-                        If you were invited by a team, enter the code here
+                {/* Specialties */}
+                <div>
+                    <label className="flex items-center gap-1 text-sm font-black uppercase tracking-[0.15em] text-dark mb-2">
+                        Specialties
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {SPECIALTY_OPTIONS.map((specialty, idx) => {
+                            const isSelected = formData.specialties.includes(specialty);
+                            const accent = ACCENT_CYCLE[idx % ACCENT_CYCLE.length];
+                            return (
+                                <button
+                                    key={specialty}
+                                    type="button"
+                                    onClick={() => toggleSpecialty(specialty)}
+                                    className={[
+                                        "px-3 py-2 text-xs font-black uppercase tracking-wider border-4 transition-all",
+                                        isSelected
+                                            ? `bg-${accent} text-cream border-${accent}`
+                                            : "bg-transparent text-dark border-dark/15",
+                                    ].join(" ")}
+                                >
+                                    {isSelected && (
+                                        <i className="fa-solid fa-check text-[10px] mr-1"></i>
+                                    )}
+                                    {specialty}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-xs text-dark/40 mt-1.5">
+                        Select your recruiting specialties
                     </p>
-                </fieldset>
+                </div>
 
+                {/* Tagline and Years Experience */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                        label="Tagline"
+                        type="text"
+                        value={formData.tagline}
+                        onChange={(e) => handleChange("tagline", e.target.value)}
+                        placeholder="e.g., Tech Recruiting Expert"
+                    />
+
+                    <Input
+                        label="Years of Experience"
+                        type="number"
+                        min={0}
+                        value={formData.years_experience}
+                        onChange={(e) => handleChange("years_experience", e.target.value)}
+                        placeholder="5"
+                    />
+                </div>
+
+                {/* Team Invite Code */}
+                <Input
+                    label="Team Invite Code (Optional)"
+                    type="text"
+                    value={formData.teamInviteCode}
+                    onChange={(e) =>
+                        handleChange("teamInviteCode", e.target.value.toUpperCase())
+                    }
+                    placeholder="TEAM-ABC123"
+                />
+                <p className="text-xs text-dark/40 -mt-3">
+                    If you were invited by a team, enter the code here
+                </p>
+
+                {/* Error */}
                 {state.error && (
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{state.error}</span>
+                    <div className="border-4 border-coral bg-coral/10 p-4 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
+                        <span className="text-sm font-bold text-dark">{state.error}</span>
                     </div>
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="flex gap-2 justify-between">
-                    <button
+                <div className="flex gap-2 justify-between pt-2">
+                    <Button
+                        color="dark"
+                        variant="outline"
                         type="button"
                         onClick={handleBack}
-                        className="btn"
                         disabled={state.submitting}
                     >
-                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                         Back
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        color="coral"
+                        variant="solid"
                         type="submit"
-                        className="btn btn-primary"
                         disabled={state.submitting}
                     >
                         {state.submitting ? (
@@ -308,10 +293,10 @@ export function RecruiterProfileStep() {
                         ) : (
                             <>
                                 Continue
-                                <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right ml-2"></i>
                             </>
                         )}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>

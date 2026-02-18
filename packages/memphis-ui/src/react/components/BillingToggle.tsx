@@ -1,5 +1,4 @@
 import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
 
 export interface BillingToggleProps {
     /** Whether annual billing is selected */
@@ -8,68 +7,47 @@ export interface BillingToggleProps {
     onChange: (annual: boolean) => void;
     /** Savings badge text */
     savingsBadge?: string;
-    /** Accent color for the toggle */
-    accent?: AccentColor;
     /** Custom class name */
     className?: string;
 }
 
 /**
- * BillingToggle - Monthly/Annual billing toggle
+ * BillingToggle - Monthly/Annual segmented toggle
  *
- * Memphis compliant toggle switch with monthly/annual labels and savings badge.
- * Extracted from pricing-six showcase.
+ * Memphis-styled segmented button group that works on any background.
+ * Active segment uses bg-dark text-cream, inactive uses bg-white text-dark.
  */
 export function BillingToggle({
     annual,
     onChange,
     savingsBadge = 'Save 20%',
-    accent = 'coral',
     className = '',
 }: BillingToggleProps) {
     return (
-        <div
-            className={[`accent-${accent}`, 'flex items-center justify-center gap-4', className]
-                .filter(Boolean)
-                .join(' ')}
-        >
-            <span
+        <div className={['inline-flex border-4 border-dark', className].filter(Boolean).join(' ')}>
+            <button
+                onClick={() => onChange(false)}
                 className={[
-                    'text-sm font-bold uppercase tracking-wider',
-                    annual ? 'text-white/40' : 'text-white',
+                    'px-6 py-3 font-bold uppercase tracking-wider text-sm transition-colors',
+                    !annual ? 'bg-dark text-cream' : 'bg-white text-dark',
                 ].join(' ')}
             >
                 Monthly
-            </span>
-            <button
-                onClick={() => onChange(!annual)}
-                className={[
-                    'w-14 h-8 relative border-3 border-accent',
-                    annual ? 'bg-accent' : 'bg-transparent',
-                ].join(' ')}
-            >
-                <div
-                    className="absolute top-1 w-5 h-5 transition-all border-xs bg-white"
-                    style={{
-                        left: annual ? 'calc(100% - 24px)' : '3px',
-                    }}
-                />
             </button>
-            <span
+            <button
+                onClick={() => onChange(true)}
                 className={[
-                    'text-sm font-bold uppercase tracking-wider flex items-center gap-2',
-                    annual ? 'text-white' : 'text-white/40',
+                    'px-6 py-3 font-bold uppercase tracking-wider text-sm transition-colors flex items-center gap-2',
+                    annual ? 'bg-dark text-cream' : 'bg-white text-dark',
                 ].join(' ')}
             >
                 Annual
                 {savingsBadge && (
-                    <span
-                        className="accent-yellow px-2 py-0.5 text-[10px] font-black uppercase bg-accent text-on-accent"
-                    >
+                    <span className="px-2 py-0.5 text-xs font-black bg-yellow text-dark">
                         {savingsBadge}
                     </span>
                 )}
-            </span>
+            </button>
         </div>
     );
 }

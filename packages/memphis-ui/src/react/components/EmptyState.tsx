@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface EmptyStateProps {
     /** FontAwesome icon class */
@@ -27,29 +27,29 @@ export function EmptyState({
     icon,
     title,
     description,
-    color = 'teal',
+    color = "teal",
     action,
-    className = '',
+    className = "",
 }: EmptyStateProps) {
     return (
         <div
             className={[
                 `accent-${color}`,
-                'card card-border text-center rounded-none',
+                "card card-border text-center rounded-none",
                 className,
-            ].filter(Boolean).join(' ')}
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             <div className="card-body items-center p-12">
-                <div
-                    className="w-16 h-16 mb-4 flex items-center justify-center border-4 border-solid border-accent"
-                >
+                <div className="w-16 h-16 mb-4 flex items-center justify-center">
                     <i className={`${icon} text-2xl text-accent`} />
                 </div>
-                <h3 className="card-title justify-center mb-2">
-                    {title}
-                </h3>
+                <h3 className="card-title justify-center mb-2">{title}</h3>
                 {description && (
-                    <p className="text-sm text-dark opacity-50">{description}</p>
+                    <p className="text-sm text-dark opacity-50">
+                        {description}
+                    </p>
                 )}
                 {action && <div className="card-actions mt-4">{action}</div>}
             </div>

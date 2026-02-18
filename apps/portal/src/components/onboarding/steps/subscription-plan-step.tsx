@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Step 2: Subscription Plan Selection
+ * Step 2: Subscription Plan Selection (Memphis Edition)
  * Allows recruiters to select a subscription plan and enter payment information
  * for paid plans (Pro/Partner). Charges immediately upon subscription.
  */
@@ -12,6 +12,7 @@ import { useOnboarding } from "../onboarding-provider";
 import { PricingCardGrid } from "@/components/pricing";
 import { StripeProvider, PaymentForm } from "@/components/stripe";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { Button, BillingToggle, Badge } from "@splits-network/memphis-ui";
 import type { Plan } from "@/components/pricing/types";
 import type { SelectedPlan } from "../types";
 
@@ -38,7 +39,6 @@ export function SubscriptionPlanStep() {
 
     // Safety check: redirect non-recruiters if they somehow land here
     useEffect(() => {
-        // Only run this check if we know the role
         if (state.selectedRole && state.selectedRole !== "recruiter") {
             actions.setStep(3);
         }
@@ -58,7 +58,6 @@ export function SubscriptionPlanStep() {
                 const response = await apiClient.get("/plans");
 
                 if (response?.data) {
-                    // Filter to only recruiter plans and sort by price
                     const recruiterPlans = (
                         Array.isArray(response.data)
                             ? response.data
@@ -82,7 +81,7 @@ export function SubscriptionPlanStep() {
         };
 
         fetchPlans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Handle plan selection
@@ -99,7 +98,6 @@ export function SubscriptionPlanStep() {
 
         // For free plan (starter), proceed directly
         if (plan.tier === "starter" || (plan.price_monthly || 0) === 0) {
-            // No payment needed, move to next step
             actions.setStep(3);
             return;
         }
@@ -145,14 +143,12 @@ export function SubscriptionPlanStep() {
             return;
         }
 
-        // Store payment info in onboarding state
         actions.setStripePaymentInfo({
             customerId,
             paymentMethodId,
             appliedDiscount,
         });
 
-        // Move to next step
         actions.setStep(3);
     };
 
@@ -164,12 +160,10 @@ export function SubscriptionPlanStep() {
     // Handle back button
     const handleBack = () => {
         if (viewState === "payment_collection") {
-            // Go back to plan selection
             setViewState("select_plan");
             setClientSecret(null);
             actions.setSelectedPlan(null);
         } else {
-            // Go back to previous step
             actions.setStep(1);
         }
     };
@@ -178,53 +172,54 @@ export function SubscriptionPlanStep() {
     if (viewState === "select_plan") {
         return (
             <div className="space-y-6 max-w-6xl">
+                {/* Heading */}
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-                    <p className="text-base-content/70 mt-2">
-                        Select a subscription plan that fits your recruiting
-                        needs
+                    <h2 className="text-3xl font-black uppercase tracking-tight text-dark">
+                        Choose Your Plan
+                    </h2>
+                    <p className="text-dark/60 mt-2 text-sm">
+                        Select a subscription plan that fits your recruiting needs
                     </p>
                 </div>
 
+                {/* Error alerts */}
                 {plansError && (
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{plansError}</span>
-                        <button
-                            className="btn btn-sm btn-ghost"
+                    <div className="border-4 border-coral bg-coral/10 p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
+                            <span className="text-sm font-bold text-dark">{plansError}</span>
+                        </div>
+                        <Button
+                            color="coral"
+                            variant="outline"
+                            size="sm"
                             onClick={() => window.location.reload()}
                         >
                             Retry
-                        </button>
+                        </Button>
                     </div>
                 )}
 
                 {paymentError && (
-                    <div className="alert alert-warning">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                        <span>{paymentError}</span>
+                    <div className="border-4 border-yellow bg-yellow/10 p-4 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-yellow"></i>
+                        <span className="text-sm font-bold text-dark">{paymentError}</span>
                     </div>
                 )}
 
-                <div className="flex justify-center items-center gap-4 py-2">
-                    <span className={`text-sm ${!isAnnual ? "font-bold" : ""}`}>
-                        Monthly
-                    </span>
-                    <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={isAnnual}
-                        onChange={(e) => setIsAnnual(e.target.checked)}
-                        aria-label="Toggle annual billing"
-                    />
-                    <span className={`text-sm ${isAnnual ? "font-bold" : ""}`}>
-                        Yearly{" "}
-                        <span className="badge badge-sm badge-success ml-1">
-                            Save ~16%
-                        </span>
-                    </span>
+                {/* Billing toggle */}
+                <div className="flex justify-center py-2">
+                    <div className="bg-dark p-3 border-4 border-dark">
+                        <BillingToggle
+                            annual={isAnnual}
+                            onChange={setIsAnnual}
+                            savingsBadge="Save ~16%"
+                            accent="coral"
+                        />
+                    </div>
                 </div>
 
+                {/* Plan cards */}
                 <PricingCardGrid
                     plans={plans}
                     loading={plansLoading}
@@ -235,40 +230,39 @@ export function SubscriptionPlanStep() {
                 />
 
                 {/* Starter plan info */}
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-circle-info"></i>
+                <div className="border-4 border-teal bg-teal/10 p-4 flex items-start gap-3">
+                    <i className="fa-duotone fa-regular fa-circle-info text-teal mt-0.5"></i>
                     <div>
-                        <p className="font-semibold">
+                        <p className="font-black uppercase tracking-[0.15em] text-sm text-dark">
                             Start Free with Starter Plan
                         </p>
-                        <p className="text-sm">
-                            Get started at no cost. Upgrade anytime to unlock
-                            higher payout bonuses and premium features.
+                        <p className="text-xs text-dark/60 mt-1">
+                            Get started at no cost. Upgrade anytime to unlock higher payout bonuses and premium features.
                         </p>
                     </div>
                 </div>
 
                 {state.error && (
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{state.error}</span>
+                    <div className="border-4 border-coral bg-coral/10 p-4 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
+                        <span className="text-sm font-bold text-dark">{state.error}</span>
                     </div>
                 )}
 
                 {/* Navigation */}
-                <div className="flex gap-2 justify-between">
-                    <button
-                        type="button"
+                <div className="flex gap-2 justify-between items-center">
+                    <Button
+                        color="dark"
+                        variant="outline"
                         onClick={handleBack}
-                        className="btn"
                         disabled={state.submitting}
                     >
-                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                         Back
-                    </button>
-                    <div className="text-sm text-base-content/50 self-center">
+                    </Button>
+                    <span className="text-xs font-bold uppercase tracking-[0.15em] text-dark/40">
                         Select a plan to continue
-                    </div>
+                    </span>
                 </div>
             </div>
         );
@@ -279,14 +273,16 @@ export function SubscriptionPlanStep() {
         return (
             <div className="space-y-6">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold">Setting Up Payment</h2>
-                    <p className="text-base-content/70 mt-2">
+                    <h2 className="text-3xl font-black uppercase tracking-tight text-dark">
+                        Setting Up Payment
+                    </h2>
+                    <p className="text-dark/60 mt-2 text-sm">
                         Preparing secure payment form...
                     </p>
                 </div>
 
                 <div className="flex justify-center py-12">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <div className="w-12 h-12 border-4 border-teal border-t-transparent animate-spin" />
                 </div>
             </div>
         );
@@ -297,43 +293,42 @@ export function SubscriptionPlanStep() {
         const selectedPlanData = state.selectedPlan;
 
         return (
-            <div className="space-y-6 max-w-3xl w-xl">
+            <div className="space-y-6 max-w-3xl w-full mx-auto">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-3xl font-black uppercase tracking-tight text-dark">
                         Complete Your Subscription
                     </h2>
-                    <p className="text-base-content/70 mt-2">
+                    <p className="text-dark/60 mt-2 text-sm">
                         Enter your payment details to activate your subscription
                     </p>
                 </div>
 
                 {/* Selected plan summary */}
                 {selectedPlanData && (
-                    <div className="card card-border bg-base-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <span className="font-semibold">
-                                    {selectedPlanData.name}
-                                </span>
-                                <span className="text-base-content/70 ml-2">
-                                    ${selectedPlanData.price_monthly}/month
-                                </span>
-                            </div>
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-ghost"
-                                onClick={handleBack}
-                            >
-                                Change Plan
-                            </button>
+                    <div className="border-4 border-dark p-4 flex items-center justify-between">
+                        <div>
+                            <span className="font-black uppercase tracking-[0.15em] text-sm text-dark">
+                                {selectedPlanData.name}
+                            </span>
+                            <span className="text-dark/60 ml-2 text-sm">
+                                ${selectedPlanData.price_monthly}/month
+                            </span>
                         </div>
+                        <Button
+                            color="dark"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleBack}
+                        >
+                            Change Plan
+                        </Button>
                     </div>
                 )}
 
                 {paymentError && (
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{paymentError}</span>
+                    <div className="border-4 border-coral bg-coral/10 p-4 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
+                        <span className="text-sm font-bold text-dark">{paymentError}</span>
                     </div>
                 )}
 

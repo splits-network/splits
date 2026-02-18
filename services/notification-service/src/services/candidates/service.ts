@@ -372,26 +372,26 @@ export class CandidatesEmailService {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invitation to Join Applicant Network</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Applicant Network</h1>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
+    <div style="background: #FF6B6B; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800;">Welcome to Applicant Network</h1>
     </div>
-    
-    <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+
+    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
         <p style="font-size: 18px; margin-top: 0;">Hi ${data.candidate_name},</p>
         
         <p style="font-size: 16px;">
             <strong>${data.recruiter_name}</strong> wants to represent you and has invited you to join the <strong>Applicant Network</strong>.
         </p>
 
-        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #667eea;">About Your Recruiter</h3>
+        <div style="background: #F5F0EB; padding: 20px; border-radius: 4px; margin: 20px 0; border: 2px solid #1A1A2E;">
+            <h3 style="margin-top: 0; color: #1A1A2E;">About Your Recruiter</h3>
             <p style="margin: 10px 0;"><strong>${data.recruiter_name}</strong></p>
-            <p style="margin: 10px 0; color: #6b7280;">${data.recruiter_bio}</p>
-            <p style="margin: 10px 0; color: #6b7280;">Contact: ${data.recruiter_email}</p>
+            <p style="margin: 10px 0; color: #1A1A2E;">${data.recruiter_bio}</p>
+            <p style="margin: 10px 0; color: #1A1A2E;">Contact: ${data.recruiter_email}</p>
         </div>
 
-        <h3 style="color: #667eea;">What is the Applicant Network?</h3>
+        <h3 style="color: #1A1A2E;">What is the Applicant Network?</h3>
         <p>The Applicant Network is a platform where you can:</p>
         <ul style="padding-left: 20px;">
             <li>Track job opportunities your recruiter finds for you</li>
@@ -400,7 +400,7 @@ export class CandidatesEmailService {
             <li>Stay informed about your job search progress</li>
         </ul>
 
-        <h3 style="color: #667eea;">What is "Right to Represent"?</h3>
+        <h3 style="color: #1A1A2E;">What is "Right to Represent"?</h3>
         <p>
             By accepting this invitation, you're giving ${data.recruiter_name} permission to submit your profile 
             to job opportunities on your behalf. This is a standard agreement in the recruiting industry that:
@@ -413,27 +413,27 @@ export class CandidatesEmailService {
         </ul>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${invitationUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 18px; font-weight: bold;">
+            <a href="${invitationUrl}" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 18px; font-weight: 700; border: 2px solid #1A1A2E;">
                 Review & Accept Invitation
             </a>
         </div>
 
-        <p style="color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+        <p style="color: #1A1A2E; font-size: 14px; border-top: 2px solid #1A1A2E; padding-top: 20px;">
             <strong>Important:</strong> This invitation expires on ${expiryDate}. If you don't respond by then, 
             ${data.recruiter_name} will need to send a new invitation.
         </p>
 
-        <p style="color: #6b7280; font-size: 14px;">
+        <p style="color: #1A1A2E; font-size: 14px;">
             If you didn't expect this invitation or have questions, please contact ${data.recruiter_name} directly at 
-            <a href="mailto:${data.recruiter_email}" style="color: #667eea;">${data.recruiter_email}</a>.
+            <a href="mailto:${data.recruiter_email}" style="color: #1A1A2E;">${data.recruiter_email}</a>.
         </p>
     </div>
 
-    <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
+    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
         <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
         <p>
-            <a href="https://splits.network/public/privacy" style="color: #667eea; text-decoration: none;">Privacy Policy</a> | 
-            <a href="https://splits.network/public/terms" style="color: #667eea; text-decoration: none;">Terms of Service</a>
+            <a href="https://splits.network/public/privacy" style="color: #1A1A2E; text-decoration: none;">Privacy Policy</a> | 
+            <a href="https://splits.network/public/terms" style="color: #1A1A2E; text-decoration: none;">Terms of Service</a>
         </p>
     </div>
 </body>
@@ -474,15 +474,15 @@ export class CandidatesEmailService {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Accepted Your Invitation</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-            <i class="fa-duotone fa-regular fa-check-circle" style="font-size: 48px; color: #10b981;"></i>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
+    <div style="background: #4ECDC4; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
+        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #1A1A2E;">
+            <i class="fa-duotone fa-regular fa-check-circle" style="font-size: 48px; color: #4ECDC4;"></i>
         </div>
-        <h1 style="color: white; margin: 0; font-size: 28px;">Great News!</h1>
+        <h1 style="color: #1A1A2E; margin: 0; font-size: 28px; font-weight: 800;">Great News!</h1>
     </div>
-    
-    <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+
+    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
         <p style="font-size: 18px; margin-top: 0;">Hi ${data.recruiter_name},</p>
         
         <p style="font-size: 16px; line-height: 1.8;">
@@ -490,14 +490,14 @@ export class CandidatesEmailService {
             the right to represent them! You can now submit their profile to job opportunities.
         </p>
 
-        <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 4px;">
-            <h3 style="margin-top: 0; color: #059669;">Candidate Details</h3>
+        <div style="background: #D5F5F0; border-left: 4px solid #4ECDC4; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #1A1A2E;">Candidate Details</h3>
             <p style="margin: 8px 0;"><strong>Name:</strong> ${data.candidate_name}</p>
             <p style="margin: 8px 0;"><strong>Email:</strong> ${data.candidate_email}</p>
             <p style="margin: 8px 0;"><strong>Accepted On:</strong> ${consentDate}</p>
         </div>
 
-        <h3 style="color: #059669;">What's Next?</h3>
+        <h3 style="color: #1A1A2E;">What's Next?</h3>
         <ul style="padding-left: 20px; line-height: 1.8;">
             <li>Review their profile and update any missing information</li>
             <li>Identify suitable job opportunities that match their skills</li>
@@ -506,17 +506,17 @@ export class CandidatesEmailService {
         </ul>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 16px; font-weight: 700; border: 2px solid #1A1A2E;">
                 View Candidate Profile
             </a>
         </div>
 
-        <p style="color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+        <p style="color: #1A1A2E; font-size: 14px; border-top: 2px solid #1A1A2E; padding-top: 20px;">
             Remember to maintain regular communication with ${data.candidate_name} throughout their job search journey.
         </p>
     </div>
 
-    <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
+    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
         <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
     </div>
 </body>
@@ -563,23 +563,23 @@ export class CandidatesEmailService {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Declined Your Invitation</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-            <i class="fa-duotone fa-regular fa-info-circle" style="font-size: 48px; color: #6b7280;"></i>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
+    <div style="background: #1A1A2E; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
+        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #1A1A2E;">
+            <i class="fa-duotone fa-regular fa-info-circle" style="font-size: 48px; color: #A78BFA;"></i>
         </div>
-        <h1 style="color: white; margin: 0; font-size: 28px;">Invitation Response</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800;">Invitation Response</h1>
     </div>
-    
-    <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+
+    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
         <p style="font-size: 18px; margin-top: 0;">Hi ${data.recruiter_name},</p>
         
         <p style="font-size: 16px; line-height: 1.8;">
             <strong>${data.candidate_name}</strong> has declined your invitation to work together on Applicant 
         </p>
 
-        <div style="background: #f9fafb; border-left: 4px solid #6b7280; padding: 20px; margin: 20px 0; border-radius: 4px;">
-            <h3 style="margin-top: 0; color: #4b5563;">Details</h3>
+        <div style="background: #F5F0EB; border-left: 4px solid #A78BFA; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #1A1A2E;">Details</h3>
             <p style="margin: 8px 0;"><strong>Candidate:</strong> ${data.candidate_name}</p>
             <p style="margin: 8px 0;"><strong>Email:</strong> ${data.candidate_email}</p>
             <p style="margin: 8px 0;"><strong>Declined On:</strong> ${declinedDate}</p>
@@ -591,7 +591,7 @@ export class CandidatesEmailService {
             ` : ''}
         </div>
 
-        <h3 style="color: #4b5563;">What Can You Do?</h3>
+        <h3 style="color: #1A1A2E;">What Can You Do?</h3>
         <ul style="padding-left: 20px; line-height: 1.8;">
             <li>If they provided feedback, consider how you might adjust your approach</li>
             <li>You can reach out directly to discuss any concerns or misunderstandings</li>
@@ -599,20 +599,20 @@ export class CandidatesEmailService {
             <li>Review your invitation message and outreach strategy</li>
         </ul>
 
-        <div style="background: #dbeafe; border-radius: 8px; padding: 16px; margin: 20px 0;">
-            <p style="margin: 0; color: #1e40af;">
+        <div style="background: #EDE9FE; border-radius: 4px; padding: 16px; margin: 20px 0; border: 2px solid #A78BFA;">
+            <p style="margin: 0; color: #1A1A2E;">
                 <strong>💡 Tip:</strong> Not every candidate is a perfect fit right now. Keep building your network and focus on candidates who are excited to work with you!
             </p>
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 16px; font-weight: 700; border: 2px solid #1A1A2E;">
                 View Your Candidates
             </a>
         </div>
     </div>
 
-    <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
+    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
         <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
     </div>
 </body>

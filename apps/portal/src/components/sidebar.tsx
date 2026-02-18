@@ -204,7 +204,7 @@ const navItems: NavItemData[] = [
         shortcut: "U",
     },
     {
-        href: "/portal/company/settings-memphis",
+        href: "/portal/company/settings",
         label: "Company",
         icon: "fa-building",
         roles: ["company_admin", "hiring_manager"],

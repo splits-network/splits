@@ -1,6 +1,6 @@
 /**
  * Base HTML Email Template for Splits Network
- * Matches brand styling from the portal with consistent theme colors
+ * Memphis Design System — flat colors, bold borders, cream/coral/teal/dark palette
  * Features white header with dynamic logo switching based on recipient role:
  * - source: 'candidate' → Applicant Network logo
  * - source: 'portal' → Splits Network logo (default for recruiters, admins, etc.)
@@ -21,17 +21,17 @@ export interface EmailTheme {
     border: string;       // Border color
 }
 
-// Brand colors matching the website theme
+// Memphis Design System palette
 export const defaultTheme: EmailTheme = {
-    primary: '#233876',     // Brand blue
-    secondary: '#0d9488',   // Teal
-    accent: '#10b981',      // Success green
-    warning: '#f59e0b',     // Warning orange
-    error: '#ef4444',       // Error red
-    text: '#374151',        // Dark gray text
-    textMuted: '#6b7280',   // Muted gray text
-    background: '#ffffff',  // White background
-    border: '#e5e7eb',      // Light border
+    primary: '#FF6B6B',     // Memphis Coral
+    secondary: '#1A1A2E',   // Memphis Dark
+    accent: '#4ECDC4',      // Memphis Teal
+    warning: '#FFE66D',     // Memphis Yellow
+    error: '#FF6B6B',       // Memphis Coral
+    text: '#1A1A2E',        // Memphis Dark
+    textMuted: '#6B7280',   // Muted gray
+    background: '#F5F0EB',  // Memphis Cream
+    border: '#1A1A2E',      // Memphis Dark
 };
 
 export interface BaseEmailProps {
@@ -126,26 +126,26 @@ export function baseEmailTemplate({ preheader, content, source, theme }: BaseEma
     }
   </style>
 </head>
-<body style="margin: 0; width: 100%; padding: 0; word-break: break-word; -webkit-font-smoothing: antialiased; background-color: #f3f4f6;">
+<body style="margin: 0; width: 100%; padding: 0; word-break: break-word; -webkit-font-smoothing: antialiased; background-color: #F5F0EB;">
   ${preheader ? `<div style="display: none;">${preheader}</div>` : ''}
   
   <div role="article" aria-roledescription="email" aria-label="Splits Network" lang="en">
     <!-- Email Container -->
     <table style="width: 100%; font-family: -apple-system, 'Segoe UI', sans-serif;" cellpadding="0" cellspacing="0" role="presentation">
       <tr>
-        <td align="center" style="background-color: #f3f4f6; padding: 24px 0;">
+        <td align="center" style="background-color: #F5F0EB; padding: 24px 0;">
           
           <!-- Main Email Card -->
           <table style="width: 100%; max-width: 600px;" cellpadding="0" cellspacing="0" role="presentation">
             
             <!-- Header with white background and full-color logo -->
             <tr>
-              <td style="background-color: #ffffff; padding: 40px 24px; text-align: center; border-bottom: 1px solid #e5e7eb;">
+              <td style="background-color: #ffffff; padding: 40px 24px; text-align: center; border-bottom: 4px solid #1A1A2E;">
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center;">
                       <img src="${logoUrl}" alt="Logo" width="180" height="48" style="height: 48px; width: auto; max-width: 180px; margin: 0 auto 12px; display: block; border: 0; outline: none;" />
-                      <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">
+                      <p style="margin: 0; font-size: 14px; color: #1A1A2E; font-weight: 500;">
                         ${tagline}
                       </p>
                     </td>
@@ -163,25 +163,25 @@ export function baseEmailTemplate({ preheader, content, source, theme }: BaseEma
 
             <!-- Footer -->
             <tr>
-              <td style="background-color: #f9fafb; padding: 32px 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <td style="background-color: #F5F0EB; padding: 32px 24px; text-align: center; border-top: 4px solid #1A1A2E;">
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center; padding-bottom: 16px;">
                       <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Splits Network
                       </a>
-                      <span style="color: #9ca3af; margin: 0 12px;">•</span>
+                      <span style="color: #1A1A2E; margin: 0 12px;">•</span>
                       <a href="${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Applicant Network
                       </a>
-                      <span style="color: #9ca3af; margin: 0 12px;">•</span>
+                      <span style="color: #1A1A2E; margin: 0 12px;">•</span>
                       <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/help" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Help Center
                       </a>
                     </td>
                   </tr>
                   <tr>
-                    <td style="text-align: center; color: #6b7280; font-size: 13px; line-height: 20px;">
+                    <td style="text-align: center; color: #1A1A2E; font-size: 13px; line-height: 20px;">
                       © ${new Date().getFullYear()} Employment Networks, Inc. All rights reserved.
                       <br>
                       <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/privacy" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Privacy Policy</a>

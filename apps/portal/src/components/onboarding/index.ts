@@ -1,5 +1,5 @@
 /**
- * Onboarding Components - Public Exports
+ * Onboarding Components (Memphis Edition) - Public Exports
  */
 
 export { OnboardingProvider, useOnboarding } from './onboarding-provider';

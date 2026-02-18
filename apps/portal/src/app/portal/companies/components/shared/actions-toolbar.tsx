@@ -2,23 +2,23 @@
 
 import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { useFilterOptional } from "../../contexts/filter-context";
-import { Company, CompanyRelationship } from "../../types";
+import type { Company, CompanyRelationship } from "../../types";
+import { ExpandableButton } from "./expandable-button";
 import RequestConnectionModal from "../modals/request-connection-modal";
-import TerminateCompanyModal from "../modals/terminate-company-modal";
+import TerminateModal from "../modals/terminate-company-modal";
 
 export interface CompanyActionsToolbarProps {
     company: Company;
     relationship?: CompanyRelationship | null;
     variant: "icon-only" | "descriptive";
     layout?: "horizontal" | "vertical";
-    size?: "xs" | "sm" | "md";
+    size?: "xs" | "sm" | "md" | "lg";
     onViewDetails?: () => void;
     onRefresh?: () => void;
     className?: string;
 }
 
-export default function ActionsToolbar({
+export default function CompanyActionsToolbar({
     company,
     relationship,
     variant,
@@ -28,11 +28,7 @@ export default function ActionsToolbar({
     onRefresh,
     className = "",
 }: CompanyActionsToolbarProps) {
-    const filterContext = useFilterOptional();
-    const refresh = onRefresh ?? (() => {
-        filterContext?.marketplaceContext?.refresh();
-        filterContext?.myCompaniesContext?.refresh();
-    });
+    const refresh = onRefresh ?? (() => {});
 
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
@@ -44,186 +40,21 @@ export default function ActionsToolbar({
     const hasConnection =
         relationship?.status === "active" || relationship?.status === "pending";
 
-    if (variant === "icon-only") {
-        return (
-            <>
-                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
-                    {/* Connect - CTA */}
-                    {!hasConnection && (
-                        <button
-                            onClick={() => setShowRequestModal(true)}
-                            className={`btn ${getSizeClass()} btn-square btn-primary`}
-                            title="Request Connection"
-                        >
-                            <i className="fa-duotone fa-regular fa-link" />
-                        </button>
-                    )}
-
-                    {/* End Relationship */}
-                    {relationship?.status === "active" && (
-                        <button
-                            onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${getSizeClass()} btn-square btn-error btn-outline`}
-                            title="End Relationship"
-                        >
-                            <i className="fa-duotone fa-regular fa-link-slash" />
-                        </button>
-                    )}
-
-                    {/* Pending */}
-                    {relationship?.status === "pending" && (
-                        <button
-                            className={`btn ${getSizeClass()} btn-square btn-warning btn-outline`}
-                            title="Connection Pending"
-                            disabled
-                        >
-                            <i className="fa-duotone fa-regular fa-clock" />
-                        </button>
-                    )}
-
-                    {/* Divider before Message */}
-                    {(!hasConnection || relationship?.status === "active" || relationship?.status === "pending") && (
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                    )}
-
-                    {/* Message - Coming Soon */}
-                    <button
-                        className={`btn ${getSizeClass()} btn-square btn-ghost`}
-                        title="Coming Soon"
-                        disabled
-                    >
-                        <i className="fa-duotone fa-regular fa-messages" />
-                    </button>
-
-                    {/* View Details - far right */}
-                    {onViewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                            <button
-                                onClick={onViewDetails}
-                                className={`btn ${getSizeClass()} btn-square btn-primary`}
-                                title="View Details"
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                            </button>
-                        </>
-                    )}
-                </div>
-
-                <ModalPortal>
-                    {showRequestModal && (
-                        <RequestConnectionModal
-                            isOpen={showRequestModal}
-                            onClose={() => setShowRequestModal(false)}
-                            company={company}
-                            onSuccess={() => {
-                                setShowRequestModal(false);
-                                refresh();
-                            }}
-                        />
-                    )}
-                </ModalPortal>
-                {showTerminateModal && relationship && (
-                    <TerminateCompanyModal
-                        isOpen={showTerminateModal}
-                        onClose={() => setShowTerminateModal(false)}
-                        onSuccess={() => {
-                            setShowTerminateModal(false);
-                            refresh();
-                        }}
-                        relationshipId={relationship.id}
-                        recruiterId={relationship.recruiter_id}
-                        companyId={relationship.company_id}
-                        targetName={company.name}
-                        targetRole="company"
-                    />
-                )}
-            </>
-        );
-    }
-
-    // Descriptive variant
-    return (
-        <>
-            <div className={`flex ${getLayoutClass()} ${className}`}>
-                {/* Connect - CTA */}
-                {!hasConnection && (
-                    <button
-                        onClick={() => setShowRequestModal(true)}
-                        className={`btn ${getSizeClass()} btn-primary gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link" />
-                        Connect
-                    </button>
-                )}
-
-                {/* End Relationship */}
-                {relationship?.status === "active" && (
-                    <button
-                        onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
-                    >
-                        <i className="fa-duotone fa-regular fa-link-slash" />
-                        End Relationship
-                    </button>
-                )}
-
-                {/* Pending */}
-                {relationship?.status === "pending" && (
-                    <button
-                        className={`btn ${getSizeClass()} btn-warning btn-outline gap-2`}
-                        disabled
-                    >
-                        <i className="fa-duotone fa-regular fa-clock" />
-                        Pending
-                    </button>
-                )}
-
-                {/* Divider before Message */}
-                {(!hasConnection || relationship?.status === "active" || relationship?.status === "pending") && (
-                    <div className="divider divider-horizontal mx-0" />
-                )}
-
-                {/* Message - Coming Soon */}
-                <button
-                    className={`btn ${getSizeClass()} btn-outline gap-2`}
-                    title="Coming Soon"
-                    disabled
-                >
-                    <i className="fa-duotone fa-regular fa-messages" />
-                    Message
-                </button>
-
-                {/* View Details - far right */}
-                {onViewDetails && (
-                    <>
-                        <div className="divider divider-horizontal mx-0" />
-                        <button
-                            onClick={onViewDetails}
-                            className={`btn ${getSizeClass()} btn-outline gap-2`}
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                            View Details
-                        </button>
-                    </>
-                )}
-            </div>
-
-            <ModalPortal>
-                {showRequestModal && (
-                    <RequestConnectionModal
-                        isOpen={showRequestModal}
-                        onClose={() => setShowRequestModal(false)}
-                        company={company}
-                        onSuccess={() => {
-                            setShowRequestModal(false);
-                            refresh();
-                        }}
-                    />
-                )}
-            </ModalPortal>
+    const modals = (
+        <ModalPortal>
+            {showRequestModal && (
+                <RequestConnectionModal
+                    isOpen={showRequestModal}
+                    onClose={() => setShowRequestModal(false)}
+                    company={company}
+                    onSuccess={() => {
+                        setShowRequestModal(false);
+                        refresh();
+                    }}
+                />
+            )}
             {showTerminateModal && relationship && (
-                <TerminateCompanyModal
+                <TerminateModal
                     isOpen={showTerminateModal}
                     onClose={() => setShowTerminateModal(false)}
                     onSuccess={() => {
@@ -237,6 +68,129 @@ export default function ActionsToolbar({
                     targetRole="company"
                 />
             )}
+        </ModalPortal>
+    );
+
+    // Icon-only variant (matching roles ExpandableButton pattern)
+    if (variant === "icon-only") {
+        return (
+            <>
+                <div
+                    className={`flex items-center ${getLayoutClass()} ${className}`}
+                >
+                    {/* Connect */}
+                    {!hasConnection && (
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-link"
+                            label="Connect"
+                            variant="btn-primary"
+                            size={size}
+                            onClick={() => setShowRequestModal(true)}
+                            title="Request Connection"
+                        />
+                    )}
+
+                    {/* End Relationship */}
+                    {relationship?.status === "active" && (
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-link-slash"
+                            label="End"
+                            variant="btn-ghost"
+                            size={size}
+                            onClick={() => setShowTerminateModal(true)}
+                            title="End Relationship"
+                        />
+                    )}
+
+                    {/* Pending indicator */}
+                    {relationship?.status === "pending" && (
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-clock"
+                            label="Pending"
+                            variant="btn-ghost"
+                            size={size}
+                            disabled
+                            onClick={() => {}} // No-op handler for disabled pending state
+                            title="Connection Pending"
+                        />
+                    )}
+
+                    {/* View Details */}
+                    {onViewDetails && (
+                        <>
+                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <ExpandableButton
+                                icon="fa-duotone fa-regular fa-eye"
+                                label="Details"
+                                variant="btn-primary"
+                                size={size}
+                                onClick={onViewDetails}
+                                title="View Details"
+                            />
+                        </>
+                    )}
+                </div>
+                {modals}
+            </>
+        );
+    }
+
+    // Descriptive variant
+    return (
+        <>
+            <div
+                className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
+            >
+                {/* Connect */}
+                {!hasConnection && (
+                    <button
+                        onClick={() => setShowRequestModal(true)}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link" />
+                        <span className="hidden md:inline">Connect</span>
+                    </button>
+                )}
+
+                {/* End Relationship */}
+                {relationship?.status === "active" && (
+                    <button
+                        onClick={() => setShowTerminateModal(true)}
+                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-link-slash" />
+                        <span className="hidden md:inline">End</span>
+                    </button>
+                )}
+
+                {/* Pending */}
+                {relationship?.status === "pending" && (
+                    <button
+                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        disabled
+                    >
+                        <i className="fa-duotone fa-regular fa-clock" />
+                        <span className="hidden md:inline">Pending</span>
+                    </button>
+                )}
+
+                {/* View Details */}
+                {onViewDetails && (
+                    <>
+                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <button
+                            onClick={onViewDetails}
+                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                            <span className="hidden md:inline">
+                                View Details
+                            </span>
+                        </button>
+                    </>
+                )}
+            </div>
+            {modals}
         </>
     );
 }

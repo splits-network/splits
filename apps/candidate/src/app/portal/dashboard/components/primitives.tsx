@@ -49,14 +49,18 @@ export function MemphisCard({
     const color = toAccentColor(accent);
 
     return (
-        <Card accent={color} className={`border-4 border-dark relative ${className}`}>
+        <Card accent={color} className={`border-4 ${accent.border} relative ${className}`}>
             {/* Corner accent */}
-            <div className={`absolute -top-1 -right-1 w-4 h-4 ${accent.bg}`} />
+            <div className={`absolute top-0 right-0 w-8 h-8 ${accent.bg}`} />
 
             {/* Header */}
-            <div className="flex items-center justify-between border-b-4 border-dark px-5 py-3">
-                <h3 className="text-xs font-black uppercase tracking-widest text-dark flex items-center gap-2">
-                    {icon && <i className={`fa-duotone fa-regular ${icon} ${accent.text}`} />}
+            <div className="flex items-center justify-between border-b-4 border-dark px-5 py-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-dark flex items-center gap-3">
+                    {icon && (
+                        <div className={`w-8 h-8 ${accent.bg} flex items-center justify-center shrink-0`}>
+                            <i className={`fa-duotone fa-regular ${icon} text-sm ${accent.textOnBg}`} />
+                        </div>
+                    )}
                     {title}
                 </h3>
                 {headerRight}
@@ -92,14 +96,14 @@ export function MemphisKpi({
     href,
 }: MemphisKpiProps) {
     const content = (
-        <div className="border-4 border-dark bg-base-100 relative overflow-hidden group h-full">
-            {/* Top accent bar */}
-            <div className={`h-1.5 ${accent.bg}`} />
+        <div className={`border-4 ${accent.border} bg-base-100 relative overflow-hidden group h-full transition-transform ${href ? 'hover:-translate-y-0.5' : ''}`}>
+            {/* Corner accent */}
+            <div className={`absolute top-0 right-0 w-8 h-8 ${accent.bg}`} />
 
-            <div className="p-4">
+            <div className="p-5">
                 {/* Icon */}
-                <div className={`w-8 h-8 border-4 border-dark ${accent.bg} flex items-center justify-center mb-3`}>
-                    <i className={`fa-duotone fa-regular ${icon} text-xs ${accent.textOnBg}`} />
+                <div className={`w-10 h-10 ${accent.bg} flex items-center justify-center mb-3`}>
+                    <i className={`fa-duotone fa-regular ${icon} text-base ${accent.textOnBg}`} />
                 </div>
 
                 {/* Label */}
@@ -109,14 +113,14 @@ export function MemphisKpi({
 
                 {/* Value */}
                 <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-black tabular-nums text-dark">
+                    <span className="text-2xl font-black tabular-nums text-dark">
                         {value}
                     </span>
                 </div>
 
                 {/* Description */}
                 {description && (
-                    <div className="text-[10px] text-dark/40 mt-1 line-clamp-1">
+                    <div className="text-[10px] text-dark/40 mt-1.5 line-clamp-1">
                         {description}
                     </div>
                 )}
@@ -125,7 +129,7 @@ export function MemphisKpi({
             {/* Hover arrow for linked cards */}
             {href && (
                 <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i className="fa-duotone fa-regular fa-arrow-right text-xs text-dark/30" />
+                    <i className="fa-duotone fa-regular fa-arrow-right text-sm text-dark/30" />
                 </div>
             )}
         </div>
@@ -150,23 +154,26 @@ interface MemphisKpiStripProps {
 export function MemphisKpiStrip({ children, loading, count = 5 }: MemphisKpiStripProps) {
     if (loading) {
         return (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {Array.from({ length: count }).map((_, i) => (
-                    <div key={i} className="border-4 border-dark bg-base-100 overflow-hidden">
-                        <div className="h-1.5 bg-dark/10 animate-pulse" />
-                        <div className="p-4 space-y-3">
-                            <div className="w-8 h-8 bg-dark/10 animate-pulse" />
-                            <div className="h-3 w-16 bg-dark/10 animate-pulse" />
-                            <div className="h-6 w-24 bg-dark/10 animate-pulse" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                {Array.from({ length: count }).map((_, i) => {
+                    const a = accentAt(i);
+                    return (
+                        <div key={i} className={`border-4 ${a.border} bg-base-100 relative overflow-hidden`}>
+                            <div className={`absolute top-0 right-0 w-8 h-8 ${a.bg} opacity-30`} />
+                            <div className="p-5 space-y-3">
+                                <div className="w-10 h-10 bg-dark/10 animate-pulse" />
+                                <div className="h-3 w-16 bg-dark/10 animate-pulse" />
+                                <div className="h-7 w-24 bg-dark/10 animate-pulse" />
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
             {children}
         </div>
     );
@@ -217,6 +224,25 @@ export function MemphisSkeleton({ count = 4 }: MemphisSkeletonProps) {
                 </div>
             ))}
         </div>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * SectionLabel — Colored pill tag for section headings (showcase pattern)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+interface SectionLabelProps {
+    label: string;
+    icon?: string;
+    accent?: AccentClasses;
+}
+
+export function SectionLabel({ label, icon, accent = ACCENT[0] }: SectionLabelProps) {
+    return (
+        <span className={`inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${accent.bg} ${accent.textOnBg}`}>
+            {icon && <i className={`fa-duotone fa-regular ${icon} text-[10px]`} />}
+            {label}
+        </span>
     );
 }
 

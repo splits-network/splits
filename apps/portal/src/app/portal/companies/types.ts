@@ -45,7 +45,7 @@ export interface CompanyRelationship {
 
 export interface CompanyContact {
     id: string;
-    role: 'hiring_manager' | 'company_admin';
+    role: "hiring_manager" | "company_admin";
     user_id: string;
     name: string | null;
     email: string | null;
@@ -59,9 +59,25 @@ export interface CompanyFilters {
     browse_all?: string;
 }
 
-export interface ConnectionRequest {
-    company_id: string;
-    message?: string;
+export const COMPANY_SIZE_LABELS: Record<string, string> = {
+    "1-10": "1-10 employees",
+    "11-50": "11-50 employees",
+    "51-200": "51-200 employees",
+    "201-500": "201-500 employees",
+    "501+": "501+ employees",
+};
+
+export function formatCompanySize(size?: string): string {
+    if (!size) return "Unknown";
+    return COMPANY_SIZE_LABELS[size] || size;
+}
+
+export function formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
 }
 
 export function getRelationshipStatusBadgeClass(status: string): string {
@@ -82,12 +98,4 @@ export function getRelationshipStatusBadgeClass(status: string): string {
 export function getCompanySizeLabel(size?: string): string {
     if (!size) return "Unknown";
     return size;
-}
-
-export function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
 }

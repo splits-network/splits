@@ -5,7 +5,16 @@ import { Badge } from '@splits-network/memphis-ui';
 import type { AccentColor } from '@splits-network/memphis-ui';
 import { usePipelineActivity, PipelineApplication } from '../hooks/use-pipeline-activity';
 import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
-import { ACCENT, stageAccent } from './accent';
+import { ACCENT, stageAccent, accentAt } from './accent';
+
+function getInitials(name: string): string {
+    return (name || 'U')
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+}
 
 function getDaysInStage(updatedAt: string): number {
     return Math.floor(
@@ -89,20 +98,27 @@ export default function PipelineActivity() {
                         </tr>
                     </thead>
                     <tbody>
-                        {applications.map((app: PipelineApplication) => {
+                        {applications.map((app: PipelineApplication, i: number) => {
                             const days = getDaysInStage(app.updated_at);
                             const daysStyle = getDaysStyle(days);
                             const badgeColor = STAGE_BADGE_COLOR[app.stage] || 'teal';
+                            const accent = accentAt(i);
+                            const initials = getInitials(app.candidate_name || 'Unknown');
 
                             return (
                                 <tr key={app.id} className="border-b border-dark/10 hover:bg-dark/5 transition-colors">
                                     <td className="px-5 py-3">
-                                        <Link
-                                            href={`/portal/applications/${app.id}`}
-                                            className="text-sm font-bold text-dark line-clamp-1 hover:text-coral transition-colors"
-                                        >
-                                            {app.candidate_name || 'Unknown'}
-                                        </Link>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 ${accent.bg} flex items-center justify-center shrink-0`}>
+                                                <span className={`text-[10px] font-black ${accent.textOnBg}`}>{initials}</span>
+                                            </div>
+                                            <Link
+                                                href={`/portal/applications/${app.id}`}
+                                                className="text-sm font-bold text-dark line-clamp-1 hover:text-coral transition-colors"
+                                            >
+                                                {app.candidate_name || 'Unknown'}
+                                            </Link>
+                                        </div>
                                     </td>
                                     <td className="px-3 py-3">
                                         <span className="text-xs text-dark/50 line-clamp-1">

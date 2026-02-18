@@ -23,27 +23,27 @@ const tierConfig: Record<
 > = {
     elite: {
         label: 'Elite',
-        color: '#10b981', // green
+        color: '#FF6B6B', // Memphis Coral
         icon: 'crown',
         description:
             'Top-performing recruiter with exceptional placement success rates.',
     },
     pro: {
         label: 'Pro',
-        color: '#2563eb', // blue
+        color: '#4ECDC4', // Memphis Teal
         icon: 'star',
         description:
             'Proven track record of successful placements and collaboration.',
     },
     active: {
         label: 'Active',
-        color: '#6b7280', // gray
+        color: '#A78BFA', // Memphis Purple
         icon: 'check',
         description: 'Building placement history with consistent activity.',
     },
     new: {
         label: 'New',
-        color: '#9ca3af', // light gray
+        color: '#1A1A2E', // Memphis Dark
         icon: 'seedling',
         description: 'Just getting started on the platform.',
     },
@@ -136,7 +136,7 @@ ${infoCard({
 ${paragraph('<strong>Tips to improve your reputation:</strong>')}
 
 ${paragraph(
-        `<ul style="margin: 0; padding-left: 20px; color: #374151;">
+        `<ul style="margin: 0; padding-left: 20px; color: #1A1A2E;">
 <li style="margin-bottom: 8px;"><strong>Complete placements successfully:</strong> Candidates who stay through the guarantee period boost your completion rate.</li>
 <li style="margin-bottom: 8px;"><strong>Submit high-quality candidates:</strong> Focus on candidates who are a strong fit for the role to improve hire rates.</li>
 <li style="margin-bottom: 8px;"><strong>Respond promptly:</strong> Quick responses to information requests show professionalism.</li>
