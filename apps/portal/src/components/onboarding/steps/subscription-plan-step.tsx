@@ -178,7 +178,8 @@ export function SubscriptionPlanStep() {
                         Choose Your Plan
                     </h2>
                     <p className="text-dark/60 mt-2 text-sm">
-                        Select a subscription plan that fits your recruiting needs
+                        Select a subscription plan that fits your recruiting
+                        needs
                     </p>
                 </div>
 
@@ -187,7 +188,9 @@ export function SubscriptionPlanStep() {
                     <div className="border-4 border-coral bg-coral/10 p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
-                            <span className="text-sm font-bold text-dark">{plansError}</span>
+                            <span className="text-sm font-bold text-dark">
+                                {plansError}
+                            </span>
                         </div>
                         <Button
                             color="coral"
@@ -203,7 +206,9 @@ export function SubscriptionPlanStep() {
                 {paymentError && (
                     <div className="border-4 border-yellow bg-yellow/10 p-4 flex items-center gap-3">
                         <i className="fa-duotone fa-regular fa-triangle-exclamation text-yellow"></i>
-                        <span className="text-sm font-bold text-dark">{paymentError}</span>
+                        <span className="text-sm font-bold text-dark">
+                            {paymentError}
+                        </span>
                     </div>
                 )}
 
@@ -214,7 +219,6 @@ export function SubscriptionPlanStep() {
                             annual={isAnnual}
                             onChange={setIsAnnual}
                             savingsBadge="Save ~16%"
-                            accent="coral"
                         />
                     </div>
                 </div>
@@ -237,7 +241,8 @@ export function SubscriptionPlanStep() {
                             Start Free with Starter Plan
                         </p>
                         <p className="text-xs text-dark/60 mt-1">
-                            Get started at no cost. Upgrade anytime to unlock higher payout bonuses and premium features.
+                            Get started at no cost. Upgrade anytime to unlock
+                            higher payout bonuses and premium features.
                         </p>
                     </div>
                 </div>
@@ -245,7 +250,9 @@ export function SubscriptionPlanStep() {
                 {state.error && (
                     <div className="border-4 border-coral bg-coral/10 p-4 flex items-center gap-3">
                         <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
-                        <span className="text-sm font-bold text-dark">{state.error}</span>
+                        <span className="text-sm font-bold text-dark">
+                            {state.error}
+                        </span>
                     </div>
                 )}
 
@@ -328,7 +335,9 @@ export function SubscriptionPlanStep() {
                 {paymentError && (
                     <div className="border-4 border-coral bg-coral/10 p-4 flex items-center gap-3">
                         <i className="fa-duotone fa-regular fa-circle-exclamation text-coral"></i>
-                        <span className="text-sm font-bold text-dark">{paymentError}</span>
+                        <span className="text-sm font-bold text-dark">
+                            {paymentError}
+                        </span>
                     </div>
                 )}
 
