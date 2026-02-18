@@ -3,8 +3,9 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import type { Application } from '../hooks/use-candidate-dashboard-data';
-import { ContentCard, EmptyState } from '@/components/ui/cards';
-import { SkeletonList } from '@splits-network/shared-ui';
+import { Button, EmptyState } from '@splits-network/memphis-ui';
+import { ACCENT, accentAt } from './accent';
+import { MemphisCard, MemphisBtn, MemphisSkeleton } from './primitives';
 
 interface NextStepsFeedProps {
     applications: Application[];
@@ -15,8 +16,7 @@ interface NextStepItem {
     id: string;
     priority: number;
     icon: string;
-    iconColor: string;
-    iconBg: string;
+    accent: number; // index into ACCENT array
     title: string;
     description: string;
     timeLabel: string;
@@ -73,14 +73,13 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
             // Skip terminal + closed
             if (app.job?.status === 'closed' || app.job?.status === 'filled') return;
 
-            // P1: Offers
+            // P1: Offers — yellow accent (index 2)
             if (app.stage === 'offer') {
                 result.push({
                     id: `offer-${app.id}`,
                     priority: 1,
                     icon: 'fa-trophy',
-                    iconColor: 'text-warning',
-                    iconBg: 'bg-warning/10',
+                    accent: 2, // yellow
                     title: `Offer from ${company}`,
                     description: jobTitle,
                     timeLabel: updatedTime,
@@ -90,14 +89,13 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
                 return;
             }
 
-            // P2: Upcoming interviews
+            // P2: Upcoming interviews — teal accent (index 1)
             if (app.stage === 'interview' || app.stage === 'final_interview') {
                 result.push({
                     id: `interview-${app.id}`,
                     priority: 2,
                     icon: 'fa-calendar-check',
-                    iconColor: 'text-success',
-                    iconBg: 'bg-success/10',
+                    accent: 1, // teal
                     title: `Interview with ${company}`,
                     description: jobTitle,
                     timeLabel: updatedTime,
@@ -107,14 +105,13 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
                 return;
             }
 
-            // P3: Recruiter requests
+            // P3: Recruiter requests — purple accent (index 3)
             if (app.stage === 'recruiter_request') {
                 result.push({
                     id: `recruiter-${app.id}`,
                     priority: 3,
                     icon: 'fa-user-tie',
-                    iconColor: 'text-info',
-                    iconBg: 'bg-info/10',
+                    accent: 3, // purple
                     title: `Recruiter wants to discuss`,
                     description: `${jobTitle} at ${company}`,
                     timeLabel: updatedTime,
@@ -134,8 +131,7 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
                         id: `stale-${app.id}`,
                         priority: 5,
                         icon: 'fa-clock',
-                        iconColor: 'text-base-content/50',
-                        iconBg: 'bg-base-200',
+                        accent: 0, // coral (stale = attention)
                         title: `${jobTitle} hasn't moved`,
                         description: `At ${getStageName(app.stage)} for ${daysSinceUpdate} days`,
                         timeLabel: `${daysSinceUpdate}d stale`,
@@ -146,14 +142,13 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
                 }
             }
 
-            // P6: Recent submissions (fallback)
+            // P6: Recent submissions (fallback) — cycling accent
             if (!['rejected', 'withdrawn', 'hired', 'expired', 'draft'].includes(app.stage)) {
                 result.push({
                     id: `recent-${app.id}`,
                     priority: 6,
                     icon: 'fa-paper-plane',
-                    iconColor: 'text-primary',
-                    iconBg: 'bg-primary/10',
+                    accent: 1, // teal
                     title: `Applied to ${jobTitle}`,
                     description: company,
                     timeLabel,
@@ -169,70 +164,74 @@ export default function NextStepsFeed({ applications, loading }: NextStepsFeedPr
     }, [applications]);
 
     return (
-        <ContentCard
-            title="What's next"
+        <MemphisCard
+            title="What's Next"
             icon="fa-compass"
-            className="bg-base-200"
-            headerActions={
-                <Link href="/portal/applications" className="btn btn-sm btn-ghost text-xs">
-                    All applications
-                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                </Link>
+            accent={ACCENT[0]}
+            headerRight={
+                <MemphisBtn href="/portal/applications" accent={ACCENT[0]} variant="ghost" size="sm">
+                    All applications <i className="fa-duotone fa-regular fa-arrow-right" />
+                </MemphisBtn>
             }
         >
             {loading ? (
-                <SkeletonList count={4} variant="text-block" gap="gap-3" />
+                <MemphisSkeleton count={4} />
             ) : items.length > 0 ? (
                 <div className="flex flex-col gap-1 -mx-2">
-                    {items.map((item) => (
-                        <Link
-                            key={item.id}
-                            href={item.href}
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-base-100 transition-all duration-150 group"
-                        >
-                            {/* Priority icon */}
-                            <div className={`w-9 h-9 rounded-lg ${item.iconBg} flex items-center justify-center shrink-0`}>
-                                <i className={`fa-duotone fa-regular ${item.icon} text-sm ${item.iconColor}`}></i>
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold text-base-content group-hover:text-primary transition-colors truncate">
-                                    {item.title}
+                    {items.map((item) => {
+                        const accent = accentAt(item.accent);
+                        return (
+                            <Link
+                                key={item.id}
+                                href={item.href}
+                                className="flex items-center gap-3 p-3 hover:bg-dark/5 transition-all duration-150 group border-b border-dark/10 last:border-0"
+                            >
+                                {/* Priority icon — Memphis square badge */}
+                                <div className={`w-9 h-9 border-4 border-dark ${accent.bg} flex items-center justify-center shrink-0`}>
+                                    <i className={`fa-duotone fa-regular ${item.icon} text-sm ${accent.textOnBg}`}></i>
                                 </div>
-                                <div className="text-xs text-base-content/50 truncate">
-                                    {item.description}
-                                </div>
-                            </div>
 
-                            {/* Time + CTA */}
-                            <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-[10px] text-base-content/40 hidden sm:block">
-                                    {item.timeLabel}
-                                </span>
-                                <span className="btn btn-ghost btn-xs text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {item.cta}
-                                    <i className="fa-duotone fa-regular fa-chevron-right text-[8px] ml-0.5"></i>
-                                </span>
-                            </div>
-                        </Link>
-                    ))}
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-bold text-dark group-hover:text-coral transition-colors truncate">
+                                        {item.title}
+                                    </div>
+                                    <div className="text-[10px] text-dark/40 truncate">
+                                        {item.description}
+                                    </div>
+                                </div>
+
+                                {/* Time + CTA */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-dark/30 hidden sm:block">
+                                        {item.timeLabel}
+                                    </span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-coral opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {item.cta}
+                                        <i className="fa-duotone fa-regular fa-chevron-right text-[8px] ml-0.5"></i>
+                                    </span>
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </div>
             ) : (
                 <EmptyState
-                    icon="fa-compass"
+                    icon="fa-duotone fa-regular fa-compass"
                     title="No actions yet"
                     description="Start applying to jobs to build your pipeline"
-                    size="sm"
-                    card={false}
+                    color="teal"
                     action={
-                        <Link href="/public/jobs" className="btn btn-primary btn-sm">
-                            <i className="fa-duotone fa-regular fa-search"></i>
-                            Browse Jobs
+                        <Link href="/public/jobs" className="inline-flex">
+                            <Button color="coral" size="sm">
+                                <i className="fa-duotone fa-regular fa-search"></i>
+                                Browse Jobs
+                            </Button>
                         </Link>
                     }
+                    className="border-0"
                 />
             )}
-        </ContentCard>
+        </MemphisCard>
     );
 }

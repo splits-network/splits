@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Badge } from '@splits-network/memphis-ui';
 import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
 import { ACCENT, accentAt } from './accent';
 import { TopPerformer } from '../hooks/use-top-performers';
@@ -59,9 +60,9 @@ export default function TopPerformers({ performers, loading }: TopPerformersProp
                             <p className="text-sm font-bold text-dark line-clamp-1 flex-1">
                                 {performer.recruiter_name}
                             </p>
-                            <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-teal/20 text-teal shrink-0">
+                            <Badge color="teal" variant="soft" size="xs">
                                 {performer.placement_count} {performer.placement_count === 1 ? 'placement' : 'placements'}
-                            </span>
+                            </Badge>
                         </div>
                     );
                 })}

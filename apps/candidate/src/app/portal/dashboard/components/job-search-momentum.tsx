@@ -8,7 +8,14 @@ import {
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { dataset, registerChart } from '@/components/charts/chart-options';
+import { Card } from '@splits-network/memphis-ui';
 import { ChartLoadingState } from '@splits-network/shared-ui';
+import { ACCENT } from './accent';
+import {
+    ACCENT_HEX,
+    ACCENT_HEX_LIGHT,
+    type AccentColor,
+} from '@splits-network/memphis-ui';
 
 ChartJS.register(ArcElement, Tooltip);
 
@@ -24,8 +31,7 @@ interface Segment {
     label: string;
     score: number;
     max: 25;
-    color: string;
-    bgColor: string;
+    accent: AccentColor;
     icon: string;
 }
 
@@ -74,32 +80,28 @@ export default function JobSearchMomentum({
             label: 'Activity',
             score: calculateActivityScore(recentActivityCount),
             max: 25,
-            color: dataset.primaryBorderColor,
-            bgColor: dataset.primaryBackgroundColor,
+            accent: 'coral',
             icon: 'fa-bolt',
         },
         {
             label: 'Advancement',
             score: calculateAdvancementScore(responseRate),
             max: 25,
-            color: dataset.successBorderColor,
-            bgColor: dataset.successBackgroundColor,
+            accent: 'teal',
             icon: 'fa-arrow-trend-up',
         },
         {
             label: 'Profile',
             score: calculateProfileScore(profileCompletion),
             max: 25,
-            color: dataset.infoBorderColor,
-            bgColor: dataset.infoBackgroundColor,
+            accent: 'purple',
             icon: 'fa-user-check',
         },
         {
             label: 'Engagement',
             score: calculateEngagementScore(activeRecruiters),
             max: 25,
-            color: dataset.warningBorderColor,
-            bgColor: dataset.warningBackgroundColor,
+            accent: 'yellow',
             icon: 'fa-handshake',
         },
     ], [recentActivityCount, responseRate, profileCompletion, activeRecruiters]);
@@ -113,9 +115,9 @@ export default function JobSearchMomentum({
         labels: segments.map(s => s.label),
         datasets: [{
             data: segments.map(s => s.score),
-            backgroundColor: segments.map(s => s.bgColor),
-            borderColor: segments.map(s => s.color),
-            borderWidth: 2,
+            backgroundColor: segments.map(s => ACCENT_HEX_LIGHT[s.accent]),
+            borderColor: segments.map(s => ACCENT_HEX[s.accent]),
+            borderWidth: 3,
             hoverOffset: 4,
         }],
     }), [segments]);
@@ -133,7 +135,7 @@ export default function JobSearchMomentum({
                 borderColor: dataset.base300BorderColor,
                 borderWidth: 1,
                 padding: 10,
-                cornerRadius: 8,
+                cornerRadius: 0,
                 callbacks: {
                     label: (context: any) => {
                         const label = context.label || '';
@@ -147,38 +149,38 @@ export default function JobSearchMomentum({
 
     if (loading) {
         return (
-            <div className="card bg-base-200 overflow-hidden h-full">
-                <div className="m-1.5 shadow-lg rounded-xl bg-base-100 p-4">
+            <Card className="border-4 border-dark h-full">
+                <div className="p-4">
                     <ChartLoadingState height={280} />
                 </div>
-            </div>
+            </Card>
         );
     }
 
     const hasAnyData = totalScore > 0;
 
     return (
-        <div className="card bg-base-200 overflow-hidden h-full">
-            <div className="m-1.5 shadow-lg rounded-xl bg-base-100 p-4 flex flex-col h-full">
-                {/* Header */}
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
-                        <i className="fa-duotone fa-regular fa-gauge-high text-secondary text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-semibold text-base-content">Job Search Momentum</h3>
-                        <p className="text-[10px] text-base-content/50">Your search health score</p>
-                    </div>
+        <Card className="border-4 border-dark h-full">
+            {/* Header */}
+            <div className="border-b-4 border-dark px-5 py-3 flex items-center gap-2">
+                <div className={`w-6 h-6 border-4 border-dark bg-teal flex items-center justify-center`}>
+                    <i className="fa-duotone fa-regular fa-gauge-high text-[10px] text-dark"></i>
                 </div>
+                <div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-dark">Job Search Momentum</h3>
+                    <p className="text-[10px] text-dark/40">Your search health score</p>
+                </div>
+            </div>
 
+            <div className="p-5 flex flex-col h-[calc(100%-60px)]">
                 {hasAnyData ? (
                     <>
                         {/* Chart with center score */}
                         <div className="relative h-[160px] flex-shrink-0">
                             <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <div className="text-3xl font-bold text-base-content">{totalScore}</div>
-                                <div className="text-[10px] text-base-content/50 font-medium">/ 100</div>
+                                <div className="text-3xl font-black text-dark">{totalScore}</div>
+                                <div className="text-[10px] text-dark/40 font-bold uppercase tracking-widest">/ 100</div>
                             </div>
                         </div>
 
@@ -186,18 +188,20 @@ export default function JobSearchMomentum({
                         <div className="mt-3 space-y-2 flex-1">
                             {segments.map((seg) => (
                                 <div key={seg.label} className="flex items-center gap-2">
-                                    <i className={`fa-duotone fa-regular ${seg.icon} text-xs w-4 text-center`} style={{ color: seg.color }}></i>
+                                    <div className={`w-5 h-5 border-4 border-dark bg-${seg.accent} flex items-center justify-center shrink-0`}>
+                                        <i className={`fa-duotone fa-regular ${seg.icon} text-[8px]`} style={{ color: ACCENT_HEX[seg.accent] === '#FFE66D' || ACCENT_HEX[seg.accent] === '#4ECDC4' ? '#1A1A2E' : '#FFFFFF' }}></i>
+                                    </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between text-[11px]">
-                                            <span className="text-base-content/70">{seg.label}</span>
-                                            <span className="font-semibold tabular-nums" style={{ color: seg.color }}>{seg.score}</span>
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <span className="text-dark/50 font-bold uppercase tracking-widest">{seg.label}</span>
+                                            <span className="font-black tabular-nums" style={{ color: ACCENT_HEX[seg.accent] }}>{seg.score}</span>
                                         </div>
-                                        <div className="w-full bg-base-200 rounded-full h-1 mt-0.5">
+                                        <div className="w-full bg-dark/10 h-1 mt-0.5">
                                             <div
-                                                className="h-1 rounded-full transition-all duration-500"
+                                                className="h-1 transition-all duration-500"
                                                 style={{
                                                     width: `${(seg.score / seg.max) * 100}%`,
-                                                    backgroundColor: seg.color,
+                                                    backgroundColor: ACCENT_HEX[seg.accent],
                                                 }}
                                             />
                                         </div>
@@ -208,14 +212,14 @@ export default function JobSearchMomentum({
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-                        <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center mb-3">
-                            <i className="fa-duotone fa-regular fa-rocket text-xl text-base-content/30"></i>
+                        <div className="w-12 h-12 border-4 border-dark bg-teal/10 flex items-center justify-center mb-3">
+                            <i className="fa-duotone fa-regular fa-rocket text-xl text-dark/30"></i>
                         </div>
-                        <p className="text-sm font-medium text-base-content/60">Start your momentum</p>
-                        <p className="text-xs text-base-content/40 mt-1">Apply to jobs to build your search score</p>
+                        <p className="text-sm font-bold text-dark/60">Start your momentum</p>
+                        <p className="text-[10px] text-dark/40 mt-1">Apply to jobs to build your search score</p>
                     </div>
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

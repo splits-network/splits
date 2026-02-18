@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { Badge } from '@splits-network/memphis-ui';
 import { useRoleBreakdown } from '../hooks/use-role-breakdown';
 import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
-import { ACCENT, accentAt } from './accent';
+import { ACCENT } from './accent';
 
 interface CompanyRolesTableProps {
     refreshKey?: number;
@@ -85,24 +86,24 @@ export default function CompanyRolesTable({ refreshKey, onPostRole }: CompanyRol
                                     </Link>
                                 </td>
                                 <td className="text-center px-3 py-3">
-                                    <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-dark/5">
+                                    <Badge color="dark" variant="soft" size="xs">
                                         {role.applications_count}
-                                    </span>
+                                    </Badge>
                                 </td>
                                 <td className="text-center px-3 py-3">
-                                    <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-teal/20 text-teal">
+                                    <Badge color="teal" variant="soft" size="xs">
                                         {role.interview_count}
-                                    </span>
+                                    </Badge>
                                 </td>
                                 <td className="text-center px-3 py-3">
-                                    <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-yellow/20 text-dark">
+                                    <Badge color="yellow" variant="soft" size="xs">
                                         {role.offer_count}
-                                    </span>
+                                    </Badge>
                                 </td>
                                 <td className="text-center px-3 py-3">
-                                    <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-purple/20 text-purple">
+                                    <Badge color="purple" variant="soft" size="xs">
                                         {role.hire_count}
-                                    </span>
+                                    </Badge>
                                 </td>
                                 <td className="text-center px-5 py-3">
                                     <span className={`text-sm font-bold tabular-nums ${role.days_open > 60 ? 'text-coral' : 'text-dark/50'}`}>

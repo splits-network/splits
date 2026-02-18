@@ -12,6 +12,7 @@ import { usePlatformFinancials } from '../hooks/use-platform-financials';
 import { useOnlineActivity } from '../hooks/use-online-activity';
 import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
 import { AnalyticsChart } from '@/components/charts/analytics-chart';
+import { Card } from '@splits-network/memphis-ui';
 
 import { ACCENT, accentAt } from './accent';
 import {
@@ -203,7 +204,7 @@ export default function AdminDashboard() {
             {/* ── Trend Charts (3-column) ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Recruiter Growth */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -235,10 +236,10 @@ export default function AdminDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Application Volume */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -270,10 +271,10 @@ export default function AdminDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Revenue Trend */}
-                <div className="border-4 border-dark bg-base-100 md:col-span-2 lg:col-span-1">
+                <Card className="border-4 border-dark md:col-span-2 lg:col-span-1">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -305,11 +306,11 @@ export default function AdminDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* ── User Growth full-width ── */}
-            <div className="border-4 border-dark bg-base-100">
+            <Card className="border-4 border-dark">
                 <div className="border-b-4 border-dark p-4">
                     {statsLoading ? (
                         <div className="h-12 bg-dark/5 animate-pulse" />
@@ -334,7 +335,7 @@ export default function AdminDashboard() {
                         onTrendPeriodChange={setTrendPeriod}
                     />
                 </div>
-            </div>
+            </Card>
 
             {/* ── Activity + Sidebar (7/5 split) ── */}
             <div className="grid grid-cols-12 gap-4">

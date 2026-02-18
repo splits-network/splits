@@ -10,6 +10,7 @@ import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
 import { AnalyticsChart } from '@/components/charts/analytics-chart';
 import { ConnectPromptBanner } from '@/components/stripe/connect-prompt-banner';
 import { ConnectDrawer } from '@/components/stripe/connect-drawer';
+import { Card, Badge } from '@splits-network/memphis-ui';
 
 import { ACCENT, accentAt } from './accent';
 import {
@@ -151,7 +152,7 @@ export default function RecruiterDashboard() {
             {/* ── Trend Charts (3-column) ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Placement trend */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -179,10 +180,10 @@ export default function RecruiterDashboard() {
                             refreshKey={chartRefreshKey}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Submission heatmap */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -204,10 +205,10 @@ export default function RecruiterDashboard() {
                             refreshKey={chartRefreshKey}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Earnings trend */}
-                <div className="border-4 border-dark bg-base-100 md:col-span-2 lg:col-span-1">
+                <Card className="border-4 border-dark md:col-span-2 lg:col-span-1">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -235,7 +236,7 @@ export default function RecruiterDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* ── Activity + Sidebar (7/5 split) ── */}
@@ -295,9 +296,9 @@ export default function RecruiterDashboard() {
                                                 </div>
                                             </div>
                                             {(role.candidate_count ?? 0) > 0 && (
-                                                <span className="px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums bg-teal text-dark shrink-0">
+                                                <Badge color="teal" size="xs">
                                                     {role.candidate_count}
-                                                </span>
+                                                </Badge>
                                             )}
                                         </Link>
                                     );

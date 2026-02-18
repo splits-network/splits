@@ -31,21 +31,6 @@ export interface ConnectionFilters {
     status?: string;
 }
 
-export function getStatusBadgeClass(status: string): string {
-    switch (status) {
-        case "active":
-            return "badge-success";
-        case "declined":
-            return "badge-error";
-        case "terminated":
-            return "badge-neutral";
-        case "pending":
-            return "badge-info";
-        default:
-            return "";
-    }
-}
-
 export function getStatusLabel(status: string): string {
     switch (status) {
         case "active":
@@ -130,4 +115,28 @@ export function getInitials(name: string): string {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.slice(0, 2).toUpperCase();
+}
+
+/**
+ * Check if a connection was created within the last 7 days.
+ */
+export function isRecent(invitation: RecruiterCompanyRelationship): boolean {
+    if (!invitation.created_at) return false;
+    const d = new Date(invitation.created_at);
+    return (Date.now() - d.getTime()) / 86400000 <= 7;
+}
+
+/**
+ * Format relative time from creation date.
+ */
+export function timeAgo(dateString: string): string {
+    const d = new Date(dateString);
+    const diffMs = Date.now() - d.getTime();
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+    return `${Math.floor(diffDays / 365)}y ago`;
 }

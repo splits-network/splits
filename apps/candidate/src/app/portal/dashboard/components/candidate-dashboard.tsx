@@ -6,12 +6,7 @@ import { usePresence } from '@/hooks/use-presence';
 import { useCandidateDashboardData } from '../hooks/use-candidate-dashboard-data';
 import { useCandidateNotifications } from '../hooks/use-candidate-notifications';
 import { useProfileCompletion } from '../hooks/use-profile-completion';
-import {
-    StatCard,
-    StatCardGrid,
-    ContentCard,
-} from '@/components/ui/cards';
-import { SkeletonList } from '@splits-network/shared-ui';
+import { Card, Badge, AlertBanner, Button } from '@splits-network/memphis-ui';
 import { initThemeListener } from '@/components/charts/chart-options';
 import ApplicationTimelineChart from '@/components/charts/application-timeline-chart';
 import ApplicationStatusChart from '@/components/charts/application-status-chart';
@@ -21,6 +16,16 @@ import CandidatePipeline from './candidate-pipeline';
 import CandidateUrgencyBar from './candidate-urgency-bar';
 import JobSearchMomentum from './job-search-momentum';
 import NextStepsFeed from './next-steps-feed';
+
+import { ACCENT, accentAt } from './accent';
+import {
+    MemphisKpi,
+    MemphisKpiStrip,
+    MemphisCard,
+    MemphisEmpty,
+    MemphisSkeleton,
+    MemphisBtn,
+} from './primitives';
 
 interface CandidateDashboardProps {
     trendPeriod: number;
@@ -70,16 +75,13 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
     }, [applications]);
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-6">
             {/* Error Alert */}
             {dataError && (
-                <div className="alert alert-error">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <div>
-                        <h3 className="font-bold">Failed to load dashboard data</h3>
-                        <div className="text-sm">{dataError}</div>
-                    </div>
-                </div>
+                <AlertBanner type="error">
+                    <span className="font-bold">Failed to load dashboard data</span>
+                    <span className="text-sm ml-2">{dataError}</span>
+                </AlertBanner>
             )}
 
             {/* ── Section 1: Urgency Bar (conditional) ── */}
@@ -95,59 +97,51 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
             )}
 
             {/* ── Section 2: KPI Strip (5 cards) ── */}
-            <StatCardGrid className="shadow-lg w-full">
-                {dataLoading ? (
-                    [1, 2, 3, 4, 5].map((i) => (
-                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
-                    ))
-                ) : (
-                    <>
-                        <StatCard
-                            title="Active Applications"
-                            value={stats.activeApplications}
-                            description="Currently in progress"
-                            icon="fa-file-lines"
-                            color="primary"
-                            href="/portal/applications"
-                        />
-                        <StatCard
-                            title="Response Rate"
-                            value={`${stats.responseRate}%`}
-                            description="Applications advancing"
-                            icon="fa-chart-line-up"
-                            color="secondary"
-                            href="/portal/applications"
-                        />
-                        <StatCard
-                            title="Interviews"
-                            value={stats.interviews}
-                            description="In progress"
-                            icon="fa-calendar-check"
-                            color="success"
-                            href="/portal/applications"
-                        />
-                        <StatCard
-                            title="Offers"
-                            value={stats.offers}
-                            description="Received"
-                            icon="fa-trophy"
-                            color="warning"
-                            href="/portal/applications"
-                        />
-                        <StatCard
-                            title="Active Recruiters"
-                            value={stats.active_relationships}
-                            description="Working with you"
-                            icon="fa-users"
-                            color="info"
-                            href="/portal/recruiters"
-                        />
-                    </>
-                )}
-            </StatCardGrid>
+            <MemphisKpiStrip loading={dataLoading} count={5}>
+                <MemphisKpi
+                    label="Active Applications"
+                    value={stats.activeApplications}
+                    description="Currently in progress"
+                    icon="fa-file-lines"
+                    accent={ACCENT[0]}
+                    href="/portal/applications"
+                />
+                <MemphisKpi
+                    label="Response Rate"
+                    value={`${stats.responseRate}%`}
+                    description="Applications advancing"
+                    icon="fa-chart-line-up"
+                    accent={ACCENT[1]}
+                    href="/portal/applications"
+                />
+                <MemphisKpi
+                    label="Interviews"
+                    value={stats.interviews}
+                    description="In progress"
+                    icon="fa-calendar-check"
+                    accent={ACCENT[2]}
+                    href="/portal/applications"
+                />
+                <MemphisKpi
+                    label="Offers"
+                    value={stats.offers}
+                    description="Received"
+                    icon="fa-trophy"
+                    accent={ACCENT[3]}
+                    href="/portal/applications"
+                />
+                <MemphisKpi
+                    label="Active Recruiters"
+                    value={stats.active_relationships}
+                    description="Working with you"
+                    icon="fa-users"
+                    accent={ACCENT[1]}
+                    href="/portal/recruiters"
+                />
+            </MemphisKpiStrip>
 
             {/* ── Section 3: Hero — Pipeline + Momentum (7/5 split) ── */}
-            <div className="grid grid-cols-12 gap-6">
+            <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 lg:col-span-7">
                     <CandidatePipeline applications={applications} loading={dataLoading} />
                 </div>
@@ -162,24 +156,25 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
                 </div>
             </div>
 
-            {/* ── Section 4: Trend Charts (3-column, elevation pattern) ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* ── Section 4: Trend Charts (3-column) ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Application Trends — Line chart */}
-                <div className="card bg-base-200 overflow-hidden">
-                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                <Card className="border-4 border-dark">
+                    <div className="border-b-4 border-dark p-4">
                         {dataLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <div className="h-12 bg-dark/5 animate-pulse" />
                         ) : (
-                            <StatCard
-                                title="Application trends"
-                                icon="fa-chart-line"
-                                color="primary"
-                                description="Total applications submitted"
-                                value={stats.applications}
-                            />
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-dark/40">
+                                    Application Trends
+                                </div>
+                                <div className="text-lg font-black tabular-nums text-dark mt-1">
+                                    {stats.applications} <span className="text-xs text-dark/40">total</span>
+                                </div>
+                            </div>
                         )}
                     </div>
-                    <div className="px-4 pb-4 pt-2">
+                    <div className="p-4">
                         <ApplicationTimelineChart
                             applications={applications}
                             loading={dataLoading}
@@ -188,59 +183,61 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
                             compact
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Application Status — Doughnut chart */}
-                <div className="card bg-base-200 overflow-hidden">
-                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                <Card className="border-4 border-dark">
+                    <div className="border-b-4 border-dark p-4">
                         {dataLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <div className="h-12 bg-dark/5 animate-pulse" />
                         ) : (
-                            <StatCard
-                                title="Application status"
-                                icon="fa-chart-pie"
-                                color="success"
-                                description="Currently in progress"
-                                value={stats.activeApplications}
-                            />
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-dark/40">
+                                    Application Status
+                                </div>
+                                <div className="text-lg font-black tabular-nums text-dark mt-1">
+                                    {stats.activeApplications} <span className="text-xs text-dark/40">active</span>
+                                </div>
+                            </div>
                         )}
                     </div>
-                    <div className="px-4 pb-4 pt-2">
+                    <div className="p-4">
                         <ApplicationStatusChart
                             applications={applications}
                             loading={dataLoading}
                             compact
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Activity — Heatmap */}
-                <div className="card bg-base-200 overflow-hidden md:col-span-2 lg:col-span-1">
-                    <div className="m-1.5 shadow-lg rounded-xl bg-base-100">
+                <Card className="border-4 border-dark md:col-span-2 lg:col-span-1">
+                    <div className="border-b-4 border-dark p-4">
                         {dataLoading ? (
-                            <StatCard title="" value={0} icon="fa-spinner" loading />
+                            <div className="h-12 bg-dark/5 animate-pulse" />
                         ) : (
-                            <StatCard
-                                title="Your activity"
-                                icon="fa-fire"
-                                color="info"
-                                description="Applications in last 30 days"
-                                value={recentActivityCount}
-                            />
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-dark/40">
+                                    Your Activity
+                                </div>
+                                <div className="text-lg font-black tabular-nums text-dark mt-1">
+                                    {recentActivityCount} <span className="text-xs text-dark/40">last 30 days</span>
+                                </div>
+                            </div>
                         )}
                     </div>
-                    <div className="px-4 pb-4 pt-2">
+                    <div className="p-4">
                         <ActivityHeatmap
                             applications={applications}
                             loading={dataLoading}
                             compact
                         />
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* ── Section 5: What's Next + Sidebar (7/5 split) ── */}
-            <div className="grid grid-cols-12 gap-6">
+            <div className="grid grid-cols-12 gap-4">
                 {/* Left 7/12 — What's Next Feed */}
                 <div className="col-span-12 lg:col-span-7">
                     <NextStepsFeed
@@ -250,21 +247,20 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
                 </div>
 
                 {/* Right 5/12 — Sidebar */}
-                <div className="col-span-12 lg:col-span-5 space-y-6">
+                <div className="col-span-12 lg:col-span-5 space-y-4">
                     {/* My Recruiter */}
-                    <ContentCard
+                    <MemphisCard
                         title="My Recruiter"
                         icon="fa-user-tie"
-                        className="bg-base-200"
-                        headerActions={
-                            <Link href="/portal/recruiters" className="btn btn-sm btn-ghost text-xs">
-                                View all
-                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
-                            </Link>
+                        accent={ACCENT[1]}
+                        headerRight={
+                            <MemphisBtn href="/portal/recruiters" accent={ACCENT[1]} variant="ghost" size="sm">
+                                View all <i className="fa-duotone fa-regular fa-arrow-right" />
+                            </MemphisBtn>
                         }
                     >
                         {dataLoading ? (
-                            <SkeletonList count={1} variant="text-block" gap="gap-3" />
+                            <MemphisSkeleton count={1} />
                         ) : activeRecruiters.length > 0 ? (
                             <div className="space-y-3">
                                 {activeRecruiters.map((rel) => {
@@ -280,76 +276,76 @@ export default function CandidateDashboard({ trendPeriod, onTrendPeriodChange }:
 
                                     return (
                                         <div key={rel.id} className="flex items-center gap-3">
-                                            <div className="avatar avatar-placeholder relative">
-                                                <div className="bg-primary text-primary-content rounded-full w-10">
-                                                    <span>
-                                                        {rel.recruiter_name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
+                                            {/* Memphis avatar — sharp square, accent bg */}
+                                            <div className="w-10 h-10 border-4 border-dark bg-teal flex items-center justify-center shrink-0">
+                                                <span className="text-sm font-black text-dark">
+                                                    {rel.recruiter_name.charAt(0).toUpperCase()}
+                                                </span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-semibold truncate">
+                                                <div className="font-bold text-dark truncate">
                                                     {rel.recruiter_name}
                                                 </div>
-                                                <div className="text-xs text-base-content/60">
+                                                <div className="text-[10px] text-dark/40">
                                                     Since {formatDate(rel.relationship_start_date)}
                                                 </div>
                                             </div>
-                                            <span
-                                                className={`badge badge-sm ${expiresSoon ? 'badge-warning' : 'badge-success'}`}
+                                            <Badge
+                                                color={expiresSoon ? 'yellow' : 'teal'}
+                                                size="xs"
                                             >
                                                 {expiresSoon ? 'Expires Soon' : 'Active'}
-                                            </span>
+                                            </Badge>
                                         </div>
                                     );
                                 })}
                                 <div className="flex gap-2 mt-2">
-                                    <Link href="/portal/messages" className="btn btn-xs btn-ghost flex-1">
+                                    <MemphisBtn href="/portal/messages" accent={ACCENT[1]} variant="ghost" size="sm" className="flex-1">
                                         <i className="fa-duotone fa-regular fa-messages"></i>
                                         Message
-                                    </Link>
-                                    <Link href="/portal/recruiters" className="btn btn-xs btn-ghost flex-1">
+                                    </MemphisBtn>
+                                    <MemphisBtn href="/portal/recruiters" accent={ACCENT[3]} variant="ghost" size="sm" className="flex-1">
                                         <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                                         History
-                                    </Link>
-                                    <Link href="/public/marketplace" className="btn btn-xs btn-ghost flex-1">
+                                    </MemphisBtn>
+                                    <MemphisBtn href="/public/marketplace" accent={ACCENT[0]} variant="ghost" size="sm" className="flex-1">
                                         <i className="fa-duotone fa-regular fa-store"></i>
                                         Browse
-                                    </Link>
+                                    </MemphisBtn>
                                 </div>
                             </div>
                         ) : (
                             <div className="text-center py-4">
-                                <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-3">
-                                    <i className="fa-duotone fa-regular fa-user-tie text-xl text-base-content/30"></i>
+                                <div className="w-12 h-12 border-4 border-dark bg-teal/10 flex items-center justify-center mx-auto mb-3">
+                                    <i className="fa-duotone fa-regular fa-user-tie text-xl text-dark/30"></i>
                                 </div>
-                                <p className="text-sm font-medium text-base-content/60">No active recruiter</p>
-                                <p className="text-xs text-base-content/40 mt-1">
+                                <p className="text-sm font-bold text-dark/60">No active recruiter</p>
+                                <p className="text-[10px] text-dark/40 mt-1">
                                     A recruiter can accelerate your job search
                                 </p>
                                 <div className="flex gap-2 mt-3 justify-center">
-                                    <Link href="/portal/recruiters" className="btn btn-xs btn-ghost">
+                                    <MemphisBtn href="/portal/recruiters" accent={ACCENT[1]} variant="ghost" size="sm">
                                         <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                                         History
-                                    </Link>
-                                    <Link href="/public/marketplace" className="btn btn-xs btn-primary">
+                                    </MemphisBtn>
+                                    <MemphisBtn href="/public/marketplace" accent={ACCENT[0]} size="sm">
                                         <i className="fa-duotone fa-regular fa-store"></i>
                                         Browse Marketplace
-                                    </Link>
+                                    </MemphisBtn>
                                 </div>
                             </div>
                         )}
-                    </ContentCard>
+                    </MemphisCard>
 
                     {/* Quick Actions */}
-                    <ContentCard title="Quick actions" icon="fa-bolt" className="bg-base-200">
+                    <MemphisCard title="Quick Actions" icon="fa-bolt" accent={ACCENT[2]}>
                         <QuickActionsGrid
                             profileCompletion={profileCompletion?.percentage || 100}
                             messageCount={unreadMessages}
                             notificationCount={unreadNotifications}
                             hasResume={hasResume}
                         />
-                    </ContentCard>
+                    </MemphisCard>
                 </div>
             </div>
         </div>

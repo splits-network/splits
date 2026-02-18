@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AlertBanner, Button } from '@splits-network/memphis-ui';
 import { RecruiterStats } from '../hooks/use-recruiter-stats';
 
 interface UrgencyBarProps {
@@ -14,11 +15,8 @@ export default function UrgencyBar({ stats }: UrgencyBarProps) {
     if (stale === 0 && pending === 0) return null;
 
     return (
-        <div className="border-4 border-yellow bg-yellow/10 flex items-center justify-between gap-4 p-4">
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 border-4 border-dark bg-yellow flex items-center justify-center shrink-0">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-dark" />
-                </div>
+        <AlertBanner type="warning" color="yellow" soft>
+            <div className="flex items-center justify-between gap-4 w-full">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     {stale > 0 && (
                         <Link
@@ -40,14 +38,13 @@ export default function UrgencyBar({ stats }: UrgencyBarProps) {
                         </Link>
                     )}
                 </div>
+                <Link href="/portal/applications" className="shrink-0">
+                    <Button color="dark" size="xs">
+                        Review now
+                        <i className="fa-duotone fa-regular fa-arrow-right ml-2" />
+                    </Button>
+                </Link>
             </div>
-            <Link
-                href="/portal/applications"
-                className="border-4 border-dark bg-dark text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shrink-0 hover:-translate-y-0.5 transition-transform"
-            >
-                Review now
-                <i className="fa-duotone fa-regular fa-arrow-right ml-2" />
-            </Link>
-        </div>
+        </AlertBanner>
     );
 }

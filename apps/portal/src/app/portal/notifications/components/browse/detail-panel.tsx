@@ -13,7 +13,8 @@ import {
 import ApplicationDetails from "@/app/portal/applications/components/shared/details";
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { accentAt as candidateAccentAt } from "@/app/portal/candidates/components/shared/accent";
-import PlacementDetails from "@/app/portal/placements/components/shared/details";
+import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/detail-loader";
+import { accentAt as placementAccentAt } from "@/app/portal/placements/components/shared/accent";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
 import { accentAt } from "@/app/portal/roles/components/shared/accent";
 
@@ -229,13 +230,62 @@ function FeatureDetails({
         case "candidate":
             return <CandidateDetailLoader candidateId={entityId} accent={candidateAccentAt(0)} onClose={() => {}} />;
         case "placement":
-            return <PlacementDetails itemId={entityId} />;
+            return <PlacementDetailsLoaderWrapper placementId={entityId} />;
         case "proposal":
         case "collaboration":
             return <RoleDetailsLoader roleId={entityId} />;
         default:
             return null;
     }
+}
+
+/**
+ * Loads a placement by ID and renders the detail view.
+ */
+function PlacementDetailsLoaderWrapper({ placementId }: { placementId: string }) {
+    const { getToken } = useAuth();
+    const [placement, setPlacement] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    const fetchPlacement = useCallback(async () => {
+        setLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get(`/placements/${placementId}`, {
+                params: { include: "candidate,job,company" },
+            });
+            setPlacement(res.data);
+        } catch (err) {
+            console.error("Failed to fetch placement:", err);
+        } finally {
+            setLoading(false);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [placementId]);
+
+    useEffect(() => {
+        fetchPlacement();
+    }, [fetchPlacement]);
+
+    if (loading) {
+        return (
+            <div className="p-6">
+                <LoadingState message="Loading placement details..." />
+            </div>
+        );
+    }
+
+    if (!placement) {
+        return (
+            <div className="p-6 text-center text-base-content/40">
+                <p>Placement not found</p>
+            </div>
+        );
+    }
+
+    return <PlacementDetailLoader placement={placement} accent={placementAccentAt(0)} />;
 }
 
 /**

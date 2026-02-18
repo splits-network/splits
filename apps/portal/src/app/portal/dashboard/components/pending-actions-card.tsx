@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { Badge } from '@splits-network/memphis-ui';
+import type { AccentColor } from '@splits-network/memphis-ui';
 import { MemphisCard } from './primitives';
-import { ACCENT } from './accent';
+import { ACCENT, accentAt } from './accent';
 import { PlatformStats } from '../hooks/use-platform-stats';
 
 interface PendingActionsCardProps {
@@ -15,15 +17,16 @@ interface ActionItem {
     count: number;
     icon: string;
     accentIdx: number;
+    color: AccentColor;
     href: string;
 }
 
 export default function PendingActionsCard({ stats, loading }: PendingActionsCardProps) {
     const actions: ActionItem[] = [
-        { label: 'Recruiter approvals', count: stats.pending_recruiter_approvals, icon: 'fa-user-check', accentIdx: 2, href: '/portal/admin/recruiters?status=pending' },
-        { label: 'Fraud reviews', count: stats.active_fraud_signals, icon: 'fa-shield-exclamation', accentIdx: 0, href: '/portal/admin/fraud' },
-        { label: 'Payout processing', count: stats.pending_payouts_count, icon: 'fa-money-bill-transfer', accentIdx: 1, href: '/portal/admin/payouts?status=pending' },
-        { label: 'Escrow releases', count: stats.active_escrow_holds, icon: 'fa-lock', accentIdx: 3, href: '/portal/admin/payouts/escrow' },
+        { label: 'Recruiter approvals', count: stats.pending_recruiter_approvals, icon: 'fa-user-check', accentIdx: 2, color: 'yellow', href: '/portal/admin/recruiters?status=pending' },
+        { label: 'Fraud reviews', count: stats.active_fraud_signals, icon: 'fa-shield-exclamation', accentIdx: 0, color: 'coral', href: '/portal/admin/fraud' },
+        { label: 'Payout processing', count: stats.pending_payouts_count, icon: 'fa-money-bill-transfer', accentIdx: 1, color: 'teal', href: '/portal/admin/payouts?status=pending' },
+        { label: 'Escrow releases', count: stats.active_escrow_holds, icon: 'fa-lock', accentIdx: 3, color: 'purple', href: '/portal/admin/payouts/escrow' },
     ];
 
     return (
@@ -44,9 +47,9 @@ export default function PendingActionsCard({ stats, loading }: PendingActionsCar
                                 {action.label}
                             </span>
                             {action.count > 0 ? (
-                                <span className={`px-2 py-0.5 border-4 border-dark text-[10px] font-black tabular-nums ${accent.bg} ${accent.textOnBg}`}>
+                                <Badge color={action.color} size="xs">
                                     {action.count}
-                                </span>
+                                </Badge>
                             ) : (
                                 <span className="text-[10px] font-bold text-dark/20 uppercase">None</span>
                             )}

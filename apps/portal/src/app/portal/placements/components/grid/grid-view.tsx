@@ -9,10 +9,12 @@ export function GridView({
     placements,
     onSelect,
     selectedId,
+    onRefresh,
 }: {
     placements: Placement[];
     onSelect: (p: Placement) => void;
     selectedId: string | null;
+    onRefresh?: () => void;
 }) {
     const selectedPlacement = placements.find((p) => p.id === selectedId);
     const selectedAc = selectedPlacement

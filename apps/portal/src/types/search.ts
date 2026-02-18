@@ -57,7 +57,7 @@ export const ENTITY_TYPE_CONFIG: Record<SearchableEntityType, EntityTypeConfig> 
   recruiter: {
     label: 'Recruiters',
     icon: 'fa-id-badge',
-    route: '/portal/marketplace/recruiters',
+    route: '/portal/recruiters',
     queryParam: 'recruiterId',
   },
   application: {

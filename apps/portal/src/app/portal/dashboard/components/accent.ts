@@ -1,19 +1,43 @@
-// ─── Memphis Accent Cycle (Tailwind classes, never hex) ─────────────────────
+// ─── Memphis Accent Cycle (uses package utilities) ──────────────────────────
+import {
+    ACCENT_COLORS,
+    getAccentColor,
+    type AccentColor,
+} from '@splits-network/memphis-ui';
 
-export const ACCENT = [
-    { bg: "bg-coral", text: "text-coral", border: "border-coral", bgLight: "bg-coral/10", textOnBg: "text-white" },
-    { bg: "bg-teal", text: "text-teal", border: "border-teal", bgLight: "bg-teal/10", textOnBg: "text-dark" },
-    { bg: "bg-yellow", text: "text-yellow", border: "border-yellow", bgLight: "bg-yellow/10", textOnBg: "text-dark" },
-    { bg: "bg-purple", text: "text-purple", border: "border-purple", bgLight: "bg-purple/10", textOnBg: "text-white" },
-] as const;
-
-export type AccentClasses = (typeof ACCENT)[number];
-
-export function accentAt(idx: number): AccentClasses {
-    return ACCENT[idx % ACCENT.length];
+/**
+ * Per-index accent class bundles — maps AccentColor names to Tailwind classes.
+ * Consumer code references ACCENT[i].bg, .text, .border etc.
+ */
+export interface AccentClasses {
+    readonly bg: string;
+    readonly text: string;
+    readonly border: string;
+    readonly bgLight: string;
+    readonly textOnBg: string;
 }
 
-/** Map pipeline stages to Memphis accent colors */
+const COLOR_MAP: Record<AccentColor, AccentClasses> = {
+    coral:  { bg: "bg-coral",  text: "text-coral",  border: "border-coral",  bgLight: "bg-coral/10",  textOnBg: "text-white" },
+    teal:   { bg: "bg-teal",   text: "text-teal",   border: "border-teal",   bgLight: "bg-teal/10",   textOnBg: "text-dark" },
+    yellow: { bg: "bg-yellow", text: "text-yellow", border: "border-yellow", bgLight: "bg-yellow/10", textOnBg: "text-dark" },
+    purple: { bg: "bg-purple", text: "text-purple", border: "border-purple", bgLight: "bg-purple/10", textOnBg: "text-white" },
+};
+
+/** Ordered accent array — indexes match ACCENT_COLORS from the package. */
+export const ACCENT: readonly AccentClasses[] = ACCENT_COLORS.map(c => COLOR_MAP[c]);
+
+/** Get accent class bundle by cycling index. */
+export function accentAt(idx: number): AccentClasses {
+    return COLOR_MAP[getAccentColor(idx)];
+}
+
+/** Map AccentColor name to class bundle. */
+export function accentFor(color: AccentColor): AccentClasses {
+    return COLOR_MAP[color];
+}
+
+/** Map pipeline stages to Memphis accent colors. */
 export function stageAccent(stage: string): AccentClasses {
     switch (stage.toLowerCase()) {
         case "screen":

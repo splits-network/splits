@@ -104,7 +104,7 @@ const navItems: NavItemData[] = [
         expandable: true,
         children: [
             {
-                href: "/portal/marketplace/recruiters",
+                href: "/portal/recruiters",
                 label: "Find",
                 icon: "fa-magnifying-glass",
                 roles: ["company_admin", "hiring_manager"],
@@ -204,26 +204,11 @@ const navItems: NavItemData[] = [
         shortcut: "U",
     },
     {
-        href: "#company",
+        href: "/portal/company/settings-memphis",
         label: "Company",
         icon: "fa-building",
         roles: ["company_admin", "hiring_manager"],
         section: "settings",
-        expandable: true,
-        children: [
-            {
-                href: "/portal/company/settings",
-                label: "Settings",
-                icon: "fa-buildings",
-                roles: ["company_admin", "hiring_manager"],
-            },
-            {
-                href: "/portal/company/team",
-                label: "Team",
-                icon: "fa-user-group",
-                roles: ["company_admin", "hiring_manager"],
-            },
-        ],
     },
 ];
 

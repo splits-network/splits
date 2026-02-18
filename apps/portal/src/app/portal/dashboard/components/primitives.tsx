@@ -2,7 +2,28 @@
 
 import React from 'react';
 import Link from 'next/link';
+import {
+    Button,
+    Card,
+    EmptyState,
+    PillTabs,
+    type AccentColor,
+} from '@splits-network/memphis-ui';
 import { type AccentClasses, ACCENT, accentAt } from './accent';
+
+/* ── helpers ─────────────────────────────────────────────────────────────── */
+
+/** Map an AccentClasses bundle to its AccentColor name for package components. */
+const ACCENT_NAME_MAP = new Map<AccentClasses, AccentColor>([
+    [ACCENT[0], 'coral'],
+    [ACCENT[1], 'teal'],
+    [ACCENT[2], 'yellow'],
+    [ACCENT[3], 'purple'],
+]);
+
+function toAccentColor(accent: AccentClasses): AccentColor {
+    return ACCENT_NAME_MAP.get(accent) ?? 'coral';
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * MemphisCard — Primary section card with corner accent + thick border
@@ -25,8 +46,10 @@ export function MemphisCard({
     children,
     className = '',
 }: MemphisCardProps) {
+    const color = toAccentColor(accent);
+
     return (
-        <div className={`border-4 border-dark bg-base-100 relative ${className}`}>
+        <Card accent={color} className={`border-4 border-dark relative ${className}`}>
             {/* Corner accent */}
             <div className={`absolute -top-1 -right-1 w-4 h-4 ${accent.bg}`} />
 
@@ -43,7 +66,7 @@ export function MemphisCard({
             <div className="p-5">
                 {children}
             </div>
-        </div>
+        </Card>
     );
 }
 
@@ -174,7 +197,7 @@ export function MemphisKpiStrip({ children, loading, count = 5 }: MemphisKpiStri
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * MemphisEmpty — Empty state with geometric decoration
+ * MemphisEmpty — Empty state using package EmptyState
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 interface MemphisEmptyProps {
@@ -186,18 +209,14 @@ interface MemphisEmptyProps {
 
 export function MemphisEmpty({ icon, title, description, action }: MemphisEmptyProps) {
     return (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="w-14 h-14 border-4 border-dark/20 bg-dark/5 flex items-center justify-center mb-4 rotate-3">
-                <i className={`fa-duotone fa-regular ${icon} text-xl text-dark/30`} />
-            </div>
-            <h4 className="text-sm font-black uppercase tracking-wider text-dark/70 mb-1">
-                {title}
-            </h4>
-            <p className="text-xs text-dark/40 max-w-xs">
-                {description}
-            </p>
-            {action && <div className="mt-4">{action}</div>}
-        </div>
+        <EmptyState
+            icon={`fa-duotone fa-regular ${icon}`}
+            title={title}
+            description={description}
+            color="teal"
+            action={action}
+            className="border-0"
+        />
     );
 }
 
@@ -226,7 +245,7 @@ export function MemphisSkeleton({ count = 4 }: MemphisSkeletonProps) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * MemphisBtn — Memphis-styled button
+ * MemphisBtn — Memphis-styled button using package Button
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 interface MemphisBtnProps {
@@ -248,24 +267,38 @@ export function MemphisBtn({
     size = 'sm',
     className = '',
 }: MemphisBtnProps) {
-    const base = 'font-black uppercase tracking-wider transition-all hover:-translate-y-0.5 cursor-pointer inline-flex items-center gap-2';
-    const sizeClasses = size === 'sm' ? 'text-[10px] px-3 py-1.5' : 'text-xs px-4 py-2';
-    const variantClasses = variant === 'solid'
-        ? `border-4 border-dark ${accent.bg} ${accent.textOnBg}`
-        : variant === 'outline'
-            ? `border-4 ${accent.border} bg-transparent ${accent.text}`
-            : `border-0 ${accent.text} hover:bg-dark/5`;
-
-    const cls = `${base} ${sizeClasses} ${variantClasses} ${className}`;
+    const color = toAccentColor(accent);
 
     if (href) {
-        return <Link href={href} className={cls}>{children}</Link>;
+        return (
+            <Link href={href} className="inline-flex">
+                <Button
+                    color={color}
+                    variant={variant}
+                    size={size === 'sm' ? 'xs' : 'sm'}
+                    className={className}
+                    tabIndex={-1}
+                >
+                    {children}
+                </Button>
+            </Link>
+        );
     }
-    return <button type="button" onClick={onClick} className={cls}>{children}</button>;
+    return (
+        <Button
+            color={color}
+            variant={variant}
+            size={size === 'sm' ? 'xs' : 'sm'}
+            className={className}
+            onClick={onClick}
+        >
+            {children}
+        </Button>
+    );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * MemphisTrendSelector — Period selector in Memphis style
+ * MemphisTrendSelector — Period selector using package PillTabs
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 interface MemphisTrendSelectorProps {
@@ -281,21 +314,14 @@ const PERIODS = [
 ];
 
 export function MemphisTrendSelector({ value, onChange }: MemphisTrendSelectorProps) {
+    const activeIndex = PERIODS.findIndex(p => p.value === value);
+
     return (
-        <div className="flex items-center gap-1 border-4 border-dark">
-            {PERIODS.map((p) => (
-                <button
-                    key={p.value}
-                    onClick={() => onChange(p.value)}
-                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer ${
-                        value === p.value
-                            ? 'bg-dark text-white'
-                            : 'bg-transparent text-dark/60 hover:bg-dark/10'
-                    }`}
-                >
-                    {p.label}
-                </button>
-            ))}
-        </div>
+        <PillTabs
+            items={PERIODS.map(p => p.label)}
+            activeIndex={activeIndex >= 0 ? activeIndex : 1}
+            onChange={(idx) => onChange(PERIODS[idx].value)}
+            accent="coral"
+        />
     );
 }

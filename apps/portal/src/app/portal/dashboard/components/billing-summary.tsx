@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useUserProfile } from '@/contexts';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { Badge, AlertBanner } from '@splits-network/memphis-ui';
 import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
 import { ACCENT } from './accent';
 
@@ -52,12 +53,12 @@ const BILLING_TERMS_LABELS: Record<string, string> = {
     net_90: 'Net 90',
 };
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
-    draft: { bg: 'bg-dark/10', text: 'text-dark/50', label: 'Draft' },
-    open: { bg: 'bg-yellow/20', text: 'text-dark', label: 'Due' },
-    paid: { bg: 'bg-teal/20', text: 'text-teal', label: 'Paid' },
-    void: { bg: 'bg-dark/10', text: 'text-dark/40', label: 'Void' },
-    uncollectible: { bg: 'bg-coral/20', text: 'text-coral', label: 'Failed' },
+const STATUS_BADGE: Record<string, { color: 'teal' | 'yellow' | 'coral' | 'dark' | 'purple'; label: string }> = {
+    draft: { color: 'dark', label: 'Draft' },
+    open: { color: 'yellow', label: 'Due' },
+    paid: { color: 'teal', label: 'Paid' },
+    void: { color: 'dark', label: 'Void' },
+    uncollectible: { color: 'coral', label: 'Failed' },
 };
 
 function formatCurrency(amount: number, currency: string = 'usd'): string {
@@ -177,15 +178,16 @@ export default function BillingSummary() {
             <div className="space-y-4">
                 {/* Incomplete warning */}
                 {status === 'incomplete' && (
-                    <div className="border-4 border-yellow bg-yellow/10 p-3 flex items-center gap-3">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-dark" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-dark flex-1">
-                            Setup incomplete
-                        </span>
-                        <Link href="/portal/company/settings" className="text-[10px] font-black uppercase tracking-wider text-coral hover:underline">
-                            Complete
-                        </Link>
-                    </div>
+                    <AlertBanner type="warning" color="yellow" soft>
+                        <div className="flex items-center justify-between w-full">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-dark">
+                                Setup incomplete
+                            </span>
+                            <Link href="/portal/company/settings" className="text-[10px] font-black uppercase tracking-wider text-coral hover:underline">
+                                Complete
+                            </Link>
+                        </div>
+                    </AlertBanner>
                 )}
 
                 {/* Details */}
@@ -233,7 +235,7 @@ export default function BillingSummary() {
                         </div>
                         <div className="space-y-1">
                             {invoices.slice(0, 4).map((invoice) => {
-                                const cfg = STATUS_CONFIG[invoice.invoice_status] || STATUS_CONFIG.draft;
+                                const cfg = STATUS_BADGE[invoice.invoice_status] || STATUS_BADGE.draft;
                                 return (
                                     <div key={invoice.id} className="flex items-center gap-3 p-2 border-b border-dark/10 last:border-0">
                                         <div className="flex-1 min-w-0">
@@ -241,9 +243,9 @@ export default function BillingSummary() {
                                                 <span className="text-sm font-bold tabular-nums text-dark">
                                                     {formatCurrency(invoice.amount_due, invoice.currency)}
                                                 </span>
-                                                <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border-4 border-dark ${cfg.bg} ${cfg.text}`}>
+                                                <Badge color={cfg.color} size="xs">
                                                     {cfg.label}
-                                                </span>
+                                                </Badge>
                                             </div>
                                             <div className="text-[10px] text-dark/40 mt-0.5">
                                                 {invoice.stripe_invoice_number || `INV-${invoice.id.slice(0, 8)}`}

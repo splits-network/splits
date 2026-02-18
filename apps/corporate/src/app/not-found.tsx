@@ -1,137 +1,215 @@
 import Link from "next/link";
 
 export const metadata = {
-    title: "Page Not Found",
+    title: "Signal Lost | Employment Networks",
 };
 
 export default function NotFound() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
-            {/* Hero section with 404 */}
-            <div className="hero min-h-screen">
-                <div className="hero-content text-center max-w-4xl px-4">
-                    <div>
-                        {/* Decorative background elements */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary rounded-full blur-3xl"></div>
-                            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
+        <div className="min-h-screen relative overflow-hidden bg-dark">
+            {/* ── Color Bar ─────────────────────────────────────────────── */}
+            <div className="flex h-1.5">
+                <div className="flex-1 bg-coral" />
+                <div className="flex-1 bg-teal" />
+                <div className="flex-1 bg-yellow" />
+                <div className="flex-1 bg-purple" />
+            </div>
+
+            {/* ── Memphis Background Shapes ──────────────────────────────── */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                aria-hidden="true"
+            >
+                {/* Circle outlines */}
+                <div className="absolute top-[8%] left-[5%] w-16 h-16 rounded-full border-4 border-coral opacity-15" />
+                <div className="absolute bottom-[25%] left-[22%] w-12 h-12 rounded-full border-4 border-teal opacity-10" />
+                <div className="absolute bottom-[12%] right-[15%] w-14 h-14 rounded-full bg-purple opacity-10" />
+
+                {/* Filled squares */}
+                <div className="absolute top-[22%] right-[8%] w-10 h-10 bg-teal opacity-10 rotate-45" />
+                <div className="absolute top-[60%] left-[8%] w-8 h-8 bg-yellow opacity-10 rotate-12" />
+                <div className="absolute top-[75%] right-[30%] w-6 h-6 border-4 border-coral opacity-10 rotate-45" />
+
+                {/* Plus sign */}
+                <svg
+                    className="absolute top-[42%] right-[12%] opacity-10"
+                    width="30"
+                    height="30"
+                    viewBox="0 0 30 30"
+                >
+                    <line
+                        x1="15"
+                        y1="3"
+                        x2="15"
+                        y2="27"
+                        className="stroke-yellow"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                    />
+                    <line
+                        x1="3"
+                        y1="15"
+                        x2="27"
+                        y2="15"
+                        className="stroke-yellow"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                    />
+                </svg>
+
+                {/* Zigzag */}
+                <svg
+                    className="absolute bottom-[18%] left-[35%] opacity-10"
+                    width="80"
+                    height="20"
+                    viewBox="0 0 80 20"
+                >
+                    <polyline
+                        points="0,16 10,4 20,16 30,4 40,16 50,4 60,16 70,4 80,16"
+                        className="stroke-purple"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeLinecap="round"
+                    />
+                </svg>
+
+                {/* Triangle */}
+                <div
+                    className="absolute top-[35%] left-[15%] opacity-10 border-b-4 border-b-coral"
+                    style={{
+                        width: 0,
+                        height: 0,
+                        borderLeft: "14px solid transparent",
+                        borderRight: "14px solid transparent",
+                        borderBottom: "24px solid",
+                        transform: "rotate(-15deg)",
+                    }}
+                />
+            </div>
+
+            {/* ── Main Content ───────────────────────────────────────────── */}
+            <div className="relative z-10 min-h-[calc(100vh-6px)] flex flex-col items-center justify-center px-4 py-16">
+                {/* Badge */}
+                <span className="inline-block px-4 py-1.5 bg-coral text-white text-xs font-black uppercase tracking-[0.2em] mb-10">
+                    Signal Lost
+                </span>
+
+                {/* ── Giant 4 ◯ 4 ────────────────────────────────────────── */}
+                <div className="flex items-center justify-center gap-3 md:gap-6 lg:gap-8 mb-10">
+                    <span className="text-[7rem] md:text-[12rem] lg:text-[16rem] font-black leading-none text-coral select-none">
+                        4
+                    </span>
+                    <div className="w-24 h-24 md:w-40 md:h-40 lg:w-52 lg:h-52 rounded-full border-4 border-teal flex-shrink-0" />
+                    <span className="text-[7rem] md:text-[12rem] lg:text-[16rem] font-black leading-none text-yellow select-none">
+                        4
+                    </span>
+                </div>
+
+                {/* ── Message ─────────────────────────────────────────────── */}
+                <div className="text-center max-w-2xl mb-12">
+                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white mb-4">
+                        The Signal Dropped. The{" "}
+                        <span className="text-coral relative inline-block">
+                            Network
+                            <span className="absolute -bottom-1 left-0 w-full h-1 bg-coral" />
+                        </span>{" "}
+                        Didn&apos;t.
+                    </h1>
+                    <p className="text-base text-white/60">
+                        You followed a link that leads nowhere. Meanwhile,
+                        split-fee recruiting is reshaping how talent moves
+                        across every industry vertical.
+                    </p>
+                </div>
+
+                {/* ── CTAs ────────────────────────────────────────────────── */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-16">
+                    <Link
+                        href="/"
+                        className="btn btn-coral btn-lg gap-2"
+                    >
+                        <i className="fa-duotone fa-regular fa-house" />
+                        Back to Home
+                    </Link>
+                    <a
+                        href="https://splits.network"
+                        className="btn btn-teal btn-outline btn-lg gap-2"
+                    >
+                        <i className="fa-duotone fa-regular fa-handshake" />
+                        Open Splits Network
+                    </a>
+                </div>
+
+                {/* ── Quick Link Cards ────────────────────────────────────── */}
+                <div className="grid md:grid-cols-3 gap-6 max-w-4xl w-full">
+                    <h2 className="md:col-span-3 text-sm font-black uppercase tracking-wider text-white/50 mb-0">
+                        Find Your <span className="text-coral">Signal</span>
+                    </h2>
+
+                    {/* For Recruiters */}
+                    <div className="border-4 border-coral bg-white p-6 text-center">
+                        <div className="w-12 h-12 border-4 border-coral flex items-center justify-center mx-auto mb-4">
+                            <i className="fa-duotone fa-regular fa-users-between-lines text-xl text-coral" />
                         </div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-dark mb-2">
+                            For Recruiters
+                        </h3>
+                        <p className="text-base text-dark/50 mb-4">
+                            Access the marketplace where every recruiter is a
+                            potential partner
+                        </p>
+                        <a
+                            href="https://splits.network"
+                            className="btn btn-coral btn-sm"
+                        >
+                            Start Splitting
+                        </a>
+                    </div>
 
-                        {/* Main content */}
-                        <div className="relative z-10">
-                            {/* Large 404 number */}
-                            <div className="mb-8">
-                                <h1 className="text-[12rem] md:text-[16rem] font-black leading-none">
-                                    <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                                        404
-                                    </span>
-                                </h1>
-                            </div>
-
-                            {/* Message */}
-                            <div className="mb-12">
-                                <h2 className="text-3xl md:text-5xl font-bold text-base-content mb-6">
-                                    This Page Has Been Recruited Away
-                                </h2>
-                                <p className="text-lg md:text-xl text-base-content/70 max-w-2xl mx-auto mb-4">
-                                    Looks like this page found a better
-                                    opportunity elsewhere. Don't worry — we have
-                                    plenty more to explore.
-                                </p>
-                            </div>
-
-                            {/* CTA Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                                <Link
-                                    href="/"
-                                    className="btn btn-primary btn-lg gap-3"
-                                >
-                                    <i className="fa-duotone fa-regular fa-house text-xl"></i>
-                                    Back to Home
-                                </Link>
-                                <a
-                                    href="https://splits.network"
-                                    className="btn btn-outline btn-lg gap-3"
-                                >
-                                    <i className="fa-duotone fa-regular fa-handshake text-xl"></i>
-                                    Visit Splits Platform
-                                </a>
-                            </div>
-
-                            {/* Quick Links Cards */}
-                            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                                {/* Splits Card */}
-                                <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                                    <div className="card-body items-center text-center">
-                                        <div className="bg-primary/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-regular fa-users-between-lines text-4xl text-primary"></i>
-                                        </div>
-                                        <h3 className="card-title text-lg">
-                                            For Recruiters
-                                        </h3>
-                                        <p className="text-sm text-base-content/70 mb-4">
-                                            Collaborate and split fees on
-                                            placements
-                                        </p>
-                                        <a
-                                            href="https://splits.network"
-                                            className="btn btn-sm btn-primary btn-outline"
-                                        >
-                                            Explore Splits
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {/* Applicant Card */}
-                                <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                                    <div className="card-body items-center text-center">
-                                        <div className="bg-secondary/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-regular fa-briefcase text-4xl text-secondary"></i>
-                                        </div>
-                                        <h3 className="card-title text-lg">
-                                            For Job Seekers
-                                        </h3>
-                                        <p className="text-sm text-base-content/70 mb-4">
-                                            Find your next career opportunity
-                                        </p>
-                                        <a
-                                            href="https://applicant.network"
-                                            className="btn btn-sm btn-secondary btn-outline"
-                                        >
-                                            Browse Jobs
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {/* Contact Card */}
-                                <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                                    <div className="card-body items-center text-center">
-                                        <div className="bg-accent/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-regular fa-envelope text-4xl text-accent"></i>
-                                        </div>
-                                        <h3 className="card-title text-lg">
-                                            Need Help?
-                                        </h3>
-                                        <p className="text-sm text-base-content/70 mb-4">
-                                            Our support team is here for you
-                                        </p>
-                                        <a
-                                            href="mailto:support@employment-networks.com"
-                                            className="btn btn-sm btn-accent btn-outline"
-                                        >
-                                            Contact Us
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Error reference */}
-                            <p className="mt-12 text-sm text-base-content/40 font-mono">
-                                ERROR_CODE: 404_PAGE_NOT_FOUND
-                            </p>
+                    {/* For Job Seekers */}
+                    <div className="border-4 border-teal bg-white p-6 text-center">
+                        <div className="w-12 h-12 border-4 border-teal flex items-center justify-center mx-auto mb-4">
+                            <i className="fa-duotone fa-regular fa-briefcase text-xl text-teal" />
                         </div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-dark mb-2">
+                            For Job Seekers
+                        </h3>
+                        <p className="text-base text-dark/50 mb-4">
+                            Recruiters compete to represent you, not the other
+                            way around
+                        </p>
+                        <a
+                            href="https://applicant.network"
+                            className="btn btn-teal btn-sm"
+                        >
+                            Browse Jobs
+                        </a>
+                    </div>
+
+                    {/* Contact */}
+                    <div className="border-4 border-purple bg-white p-6 text-center">
+                        <div className="w-12 h-12 border-4 border-purple flex items-center justify-center mx-auto mb-4">
+                            <i className="fa-duotone fa-regular fa-envelope text-xl text-purple" />
+                        </div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-dark mb-2">
+                            Reach Out
+                        </h3>
+                        <p className="text-base text-dark/50 mb-4">
+                            Direct line to our team. No bots, no ticket numbers
+                        </p>
+                        <a
+                            href="mailto:support@employment-networks.com"
+                            className="btn btn-purple btn-sm"
+                        >
+                            Contact Us
+                        </a>
                     </div>
                 </div>
+
+                {/* ── Error Reference ─────────────────────────────────────── */}
+                <p className="mt-12 text-xs text-white/30 font-mono uppercase tracking-wider">
+                    Error 404 — Signal Not Found
+                </p>
             </div>
         </div>
     );

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
+    useStandardList,
     PaginationControls,
     LoadingState,
     EmptyState,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import type { Placement, PlacementFilters } from "./types";
 import type { ViewMode } from "./components/shared/accent";
 import { PlacementsAnimator } from "./placements-animator";
 import { HeaderSection } from "./components/shared/header-section";
@@ -15,17 +17,8 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
-import { FilterProvider, useFilter } from "./contexts/filter-context";
 
 export default function PlacementsPage() {
-    return (
-        <FilterProvider>
-            <PlacementsPageContent />
-        </FilterProvider>
-    );
-}
-
-function PlacementsPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -37,6 +30,37 @@ function PlacementsPageContent() {
     const [selectedPlacementId, setSelectedPlacementId] = useState<string | null>(
         () => searchParams.get("placementId"),
     );
+
+    // Sync viewMode + selectedPlacementId to URL (ref pattern avoids infinite loops)
+    const searchParamsRef = useRef(searchParams);
+    searchParamsRef.current = searchParams;
+
+    useEffect(() => {
+        const params = new URLSearchParams(searchParamsRef.current.toString());
+
+        if (selectedPlacementId) {
+            params.set("placementId", selectedPlacementId);
+        } else {
+            params.delete("placementId");
+        }
+        if (viewMode !== "grid") {
+            params.set("view", viewMode);
+        } else {
+            params.delete("view");
+        }
+
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        const currentQuery = searchParamsRef.current.toString();
+        const currentUrl = currentQuery
+            ? `${pathname}?${currentQuery}`
+            : pathname;
+
+        if (newUrl !== currentUrl) {
+            router.replace(newUrl, { scroll: false });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedPlacementId, viewMode, pathname, router]);
 
     const {
         data: placements,
@@ -50,37 +74,29 @@ function PlacementsPageContent() {
         setFilter,
         clearFilters,
         page,
+        limit,
         goToPage,
+        setLimit,
         total,
         totalPages,
         refresh,
-    } = useFilter();
+    } = useStandardList<Placement, PlacementFilters>({
+        endpoint: "/placements",
+        include: "candidate,job,company",
+        defaultFilters: { status: undefined },
+        defaultSortBy: "hired_at",
+        defaultSortOrder: "desc",
+        defaultLimit: 25,
+        syncToUrl: true,
+    });
 
-    const handleSelect = useCallback((placement: any) => {
+    const handleSelect = useCallback((placement: Placement) => {
         setSelectedPlacementId((prev) => (prev === placement.id ? null : placement.id));
     }, []);
 
-    const handleViewModeChange = useCallback(
-        (mode: ViewMode) => {
-            setViewMode(mode);
-            // Update URL
-            const params = new URLSearchParams(searchParams);
-            if (mode !== "grid") {
-                params.set("view", mode);
-            } else {
-                params.delete("view");
-            }
-            if (selectedPlacementId) {
-                params.set("placementId", selectedPlacementId);
-            } else {
-                params.delete("placementId");
-            }
-            const queryString = params.toString();
-            const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-            router.replace(newUrl, { scroll: false });
-        },
-        [pathname, router, searchParams, selectedPlacementId],
-    );
+    const handleViewModeChange = useCallback((mode: ViewMode) => {
+        setViewMode(mode);
+    }, []);
 
     const stats = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -147,6 +163,7 @@ function PlacementsPageContent() {
                                             placements={placements}
                                             onSelect={handleSelect}
                                             selectedId={selectedPlacementId}
+                                            onRefresh={refresh}
                                         />
                                     )}
                                     {viewMode === "grid" && (
@@ -154,6 +171,7 @@ function PlacementsPageContent() {
                                             placements={placements}
                                             onSelect={handleSelect}
                                             selectedId={selectedPlacementId}
+                                            onRefresh={refresh}
                                         />
                                     )}
                                     {viewMode === "split" && (
@@ -161,6 +179,7 @@ function PlacementsPageContent() {
                                             placements={placements}
                                             onSelect={handleSelect}
                                             selectedId={selectedPlacementId}
+                                            onRefresh={refresh}
                                         />
                                     )}
                                 </>
@@ -168,15 +187,15 @@ function PlacementsPageContent() {
                         </div>
 
                         {/* Pagination */}
-                        {totalPages > 1 && (
-                            <PaginationControls
-                                page={page}
-                                totalPages={totalPages}
-                                total={total}
-                                onPageChange={goToPage}
-                                loading={loading}
-                            />
-                        )}
+                        <PaginationControls
+                            page={page}
+                            totalPages={totalPages}
+                            total={total}
+                            limit={limit}
+                            onPageChange={goToPage}
+                            onLimitChange={setLimit}
+                            loading={loading}
+                        />
                     </div>
                 </section>
             </PlacementsAnimator>

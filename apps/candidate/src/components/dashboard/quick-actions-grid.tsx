@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Badge } from "@splits-network/memphis-ui";
 
 interface QuickActionsGridProps {
     profileCompletion?: number;
@@ -26,10 +27,10 @@ export default function QuickActionsGrid({
             {/* Browse Jobs - always prominent */}
             <Link
                 href="/public/jobs"
-                className="btn btn-primary btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case"
+                className="border-4 border-dark bg-coral text-white p-3 flex flex-col items-start gap-1 hover:-translate-y-0.5 transition-transform"
             >
                 <i className="fa-duotone fa-regular fa-search text-lg"></i>
-                <span className="font-semibold">Browse Jobs</span>
+                <span className="text-xs font-black uppercase tracking-widest">Browse Jobs</span>
                 <span className="text-[10px] opacity-80">
                     Find opportunities
                 </span>
@@ -38,16 +39,18 @@ export default function QuickActionsGrid({
             {/* Messages - highlighted if unread */}
             <Link
                 href="/portal/messages"
-                className={`btn ${hasMessages ? "btn-warning" : "btn-outline"} btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
+                className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
+                    hasMessages ? "bg-yellow text-dark" : "bg-white text-dark"
+                }`}
             >
                 {hasMessages && (
-                    <span className="badge badge-error badge-xs absolute -top-1 -right-1">
+                    <Badge color="coral" size="xs" className="absolute -top-2 -right-2">
                         {messageCount}
-                    </span>
+                    </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-messages text-lg"></i>
-                <span className="font-semibold">Messages</span>
-                <span className="text-[10px] opacity-80">
+                <span className="text-xs font-black uppercase tracking-widest">Messages</span>
+                <span className="text-[10px] opacity-60">
                     {hasMessages
                         ? `${messageCount} unread`
                         : "Chat with recruiters"}
@@ -57,16 +60,18 @@ export default function QuickActionsGrid({
             {/* Profile - highlighted if incomplete */}
             <Link
                 href="/portal/profile"
-                className={`btn ${needsProfileCompletion ? "btn-outline btn-warning" : "btn-soft btn-warning"} btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
+                className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
+                    needsProfileCompletion ? "bg-yellow/20 text-dark" : "bg-white text-dark"
+                }`}
             >
                 {needsProfileCompletion && (
-                    <span className="badge badge-warning badge-xs absolute -top-1 -right-1">
+                    <Badge color="yellow" size="xs" className="absolute -top-2 -right-2">
                         {profileCompletion}%
-                    </span>
+                    </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-user text-lg"></i>
-                <span className="font-semibold">Profile</span>
-                <span className="text-[10px] opacity-80">
+                <span className="text-xs font-black uppercase tracking-widest">Profile</span>
+                <span className="text-[10px] opacity-60">
                     {needsProfileCompletion
                         ? "Complete profile"
                         : "Update details"}
@@ -76,16 +81,18 @@ export default function QuickActionsGrid({
             {/* Notifications - highlighted if unread */}
             <Link
                 href="/portal/notifications"
-                className={`btn ${hasNotifications ? "btn-info" : "btn-outline"} btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
+                className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
+                    hasNotifications ? "bg-teal text-dark" : "bg-white text-dark"
+                }`}
             >
                 {hasNotifications && (
-                    <span className="badge badge-error badge-xs absolute -top-1 -right-1">
+                    <Badge color="coral" size="xs" className="absolute -top-2 -right-2">
                         {notificationCount}
-                    </span>
+                    </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-bell text-lg"></i>
-                <span className="font-semibold">Notifications</span>
-                <span className="text-[10px] opacity-80">
+                <span className="text-xs font-black uppercase tracking-widest">Notifications</span>
+                <span className="text-[10px] opacity-60">
                     {hasNotifications
                         ? `${notificationCount} new`
                         : "View updates"}
@@ -95,16 +102,18 @@ export default function QuickActionsGrid({
             {/* Documents - highlighted if no resume */}
             <Link
                 href="/portal/documents"
-                className={`btn ${needsResume ? "btn-outline" : "btn-soft"} btn-accent btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case relative`}
+                className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
+                    needsResume ? "bg-purple/20 text-dark" : "bg-white text-dark"
+                }`}
             >
                 {needsResume && (
-                    <span className="badge badge-accent badge-xs absolute -top-1 -right-1">
+                    <Badge color="purple" size="xs" className="absolute -top-2 -right-2">
                         !
-                    </span>
+                    </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-upload text-lg"></i>
-                <span className="font-semibold">Documents</span>
-                <span className="text-[10px] opacity-80">
+                <span className="text-xs font-black uppercase tracking-widest">Documents</span>
+                <span className="text-[10px] opacity-60">
                     {needsResume ? "Upload resume" : "Manage files"}
                 </span>
             </Link>
@@ -112,11 +121,11 @@ export default function QuickActionsGrid({
             {/* View Applications */}
             <Link
                 href="/portal/applications"
-                className="btn btn-outline btn-sm justify-start h-auto py-3 flex-col items-start gap-1 normal-case"
+                className="border-4 border-dark bg-white text-dark p-3 flex flex-col items-start gap-1 hover:-translate-y-0.5 transition-transform"
             >
                 <i className="fa-duotone fa-regular fa-list text-lg"></i>
-                <span className="font-semibold">Applications</span>
-                <span className="text-[10px] opacity-80">Track progress</span>
+                <span className="text-xs font-black uppercase tracking-widest">Applications</span>
+                <span className="text-[10px] opacity-60">Track progress</span>
             </Link>
         </div>
     );

@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import { Button } from '@splits-network/memphis-ui';
 import { PageTitle } from '@/components/page-title';
-import { TrendPeriodSelector } from '@/components/charts/trend-period-selector';
 import CandidateDashboard from './components/candidate-dashboard';
+import { MemphisTrendSelector } from './components/primitives';
 
 export default function DashboardPage() {
     const { user } = useUser();
@@ -17,22 +18,28 @@ export default function DashboardPage() {
                 title={`Welcome back, ${user?.firstName || 'there'}!`}
                 subtitle="Here's an overview of your job search"
             >
-                <TrendPeriodSelector
-                    trendPeriod={trendPeriod}
-                    onTrendPeriodChange={setTrendPeriod}
+                <MemphisTrendSelector
+                    value={trendPeriod}
+                    onChange={setTrendPeriod}
                 />
-                <div className="hidden lg:block w-px h-6 bg-base-300" />
-                <Link href="/public/jobs" className="btn btn-primary btn-sm gap-2">
-                    <i className="fa-duotone fa-regular fa-search w-3.5"></i>
-                    Browse Jobs
+                <div className="hidden lg:block w-px h-6 bg-dark/20" />
+                <Link href="/public/jobs" className="inline-flex">
+                    <Button color="coral" variant="solid" size="xs">
+                        <i className="fa-duotone fa-regular fa-search w-3.5"></i>
+                        Browse Jobs
+                    </Button>
                 </Link>
-                <Link href="/portal/profile" className="btn btn-ghost btn-sm gap-2">
-                    <i className="fa-duotone fa-regular fa-user w-3.5"></i>
-                    My Profile
+                <Link href="/portal/profile" className="inline-flex">
+                    <Button color="dark" variant="ghost" size="xs">
+                        <i className="fa-duotone fa-regular fa-user w-3.5"></i>
+                        My Profile
+                    </Button>
                 </Link>
-                <Link href="/portal/documents" className="btn btn-ghost btn-sm gap-2">
-                    <i className="fa-duotone fa-regular fa-file-lines w-3.5"></i>
-                    Documents
+                <Link href="/portal/documents" className="inline-flex">
+                    <Button color="dark" variant="ghost" size="xs">
+                        <i className="fa-duotone fa-regular fa-file-lines w-3.5"></i>
+                        Documents
+                    </Button>
                 </Link>
             </PageTitle>
             <CandidateDashboard

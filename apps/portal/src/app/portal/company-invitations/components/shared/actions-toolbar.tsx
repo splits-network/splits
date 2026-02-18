@@ -4,9 +4,10 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { useConnectionFilterOptional } from "../../contexts/filter-context";
-import { RecruiterCompanyRelationship } from "../../types";
+import { ModalPortal } from "@splits-network/shared-ui";
+import type { RecruiterCompanyRelationship } from "../../types";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
+import { ExpandableButton } from "./expandable-button";
 
 export interface ConnectionActionsToolbarProps {
     invitation: RecruiterCompanyRelationship;
@@ -35,8 +36,7 @@ export default function ConnectionActionsToolbar({
 }: ConnectionActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const filterContext = useConnectionFilterOptional();
-    const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
+    const refresh = onRefresh ?? (() => {});
 
     const [accepting, setAccepting] = useState(false);
     const [declining, setDeclining] = useState(false);
@@ -59,9 +59,7 @@ export default function ConnectionActionsToolbar({
             const client = createAuthenticatedClient(token);
             await client.patch(
                 `/recruiter-companies/${invitation.id}/respond`,
-                {
-                    accept: true,
-                },
+                { accept: true },
             );
             toast.success("Connection accepted!");
             refresh();
@@ -91,9 +89,7 @@ export default function ConnectionActionsToolbar({
             const client = createAuthenticatedClient(token);
             await client.patch(
                 `/recruiter-companies/${invitation.id}/respond`,
-                {
-                    accept: false,
-                },
+                { accept: false },
             );
             toast.success("Connection declined.");
             refresh();
@@ -112,26 +108,29 @@ export default function ConnectionActionsToolbar({
         onViewDetails?.(invitation.id);
     }, [invitation.id, onViewDetails]);
 
-    const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
     const terminateModal = showTerminateModal && (
-        <TerminateCompanyModal
-            isOpen={showTerminateModal}
-            onClose={() => setShowTerminateModal(false)}
-            onSuccess={() => {
-                setShowTerminateModal(false);
-                refresh();
-            }}
-            relationshipId={invitation.id}
-            recruiterId={invitation.recruiter_id}
-            companyId={invitation.company_id}
-            targetName={invitation.recruiter?.user?.name || "Unknown Recruiter"}
-            targetEmail={invitation.recruiter?.user?.email}
-            targetRole="recruiter"
-        />
+        <ModalPortal>
+            <TerminateCompanyModal
+                isOpen={showTerminateModal}
+                onClose={() => setShowTerminateModal(false)}
+                onSuccess={() => {
+                    setShowTerminateModal(false);
+                    refresh();
+                }}
+                relationshipId={invitation.id}
+                recruiterId={invitation.recruiter_id}
+                companyId={invitation.company_id}
+                targetName={invitation.recruiter?.user?.name || "Unknown Recruiter"}
+                targetEmail={invitation.recruiter?.user?.email}
+                targetRole="recruiter"
+            />
+        </ModalPortal>
     );
+
+    // ===== ICON-ONLY VARIANT =====
 
     if (variant === "icon-only") {
         return (
@@ -139,61 +138,53 @@ export default function ConnectionActionsToolbar({
                 <div
                     className={`flex items-center ${getLayoutClass()} ${className}`}
                 >
-                    {/* Accept - CTA */}
                     {actions.accept && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-check"
+                            label="Accept"
+                            variant="btn-success"
+                            size={size}
                             onClick={handleAccept}
-                            className={`btn ${getSizeClass()} btn-square btn-success`}
                             disabled={accepting}
-                            title="Accept"
-                        >
-                            {accepting ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
-                            )}
-                        </button>
+                            loading={accepting}
+                            title="Accept Connection"
+                        />
                     )}
-                    {/* Decline */}
                     {actions.decline && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-xmark"
+                            label="Decline"
+                            variant="btn-ghost"
+                            size={size}
                             onClick={handleDecline}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
                             disabled={declining}
-                            title="Decline"
-                        >
-                            {declining ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-xmark" />
-                            )}
-                        </button>
+                            loading={declining}
+                            title="Decline Connection"
+                        />
                     )}
-                    {/* End Relationship */}
                     {actions.terminate && (
-                        <button
+                        <ExpandableButton
+                            icon="fa-duotone fa-regular fa-link-slash"
+                            label="End"
+                            variant="btn-ghost"
+                            size={size}
                             onClick={() => setShowTerminateModal(true)}
-                            className={`btn ${getSizeClass()} btn-square btn-ghost text-error`}
                             title="End Relationship"
-                        >
-                            <i className="fa-duotone fa-regular fa-link-slash" />
-                        </button>
+                        />
                     )}
-                    {/* View Details - far right */}
                     {onViewDetails && (
                         <>
-                            {(actions.accept ||
-                                actions.decline ||
-                                actions.terminate) && (
-                                <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            {(actions.accept || actions.decline || actions.terminate) && (
+                                <div className="w-px h-4 bg-dark/20 mx-0.5" />
                             )}
-                            <button
+                            <ExpandableButton
+                                icon="fa-duotone fa-regular fa-eye"
+                                label="Details"
+                                variant="btn-primary"
+                                size={size}
                                 onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-square btn-primary`}
                                 title="View Details"
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                            </button>
+                            />
                         </>
                     )}
                 </div>
@@ -202,17 +193,17 @@ export default function ConnectionActionsToolbar({
         );
     }
 
-    // Descriptive variant
+    // ===== DESCRIPTIVE VARIANT =====
+
     return (
         <>
             <div
-                className={`flex ${layout === "horizontal" ? "flex-wrap gap-2" : "flex-col gap-2"} ${className}`}
+                className={`flex flex-wrap items-center ${layout === "horizontal" ? "gap-2" : "flex-col gap-2"} ${className}`}
             >
-                {/* Accept - CTA */}
                 {actions.accept && (
                     <button
                         onClick={handleAccept}
-                        className={`btn ${getSizeClass()} btn-success gap-2`}
+                        className={`btn btn-${size} btn-success gap-2`}
                         disabled={accepting}
                     >
                         {accepting ? (
@@ -223,11 +214,10 @@ export default function ConnectionActionsToolbar({
                         Accept
                     </button>
                 )}
-                {/* Decline */}
                 {actions.decline && (
                     <button
                         onClick={handleDecline}
-                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                        className={`btn btn-${size} btn-ghost gap-2 text-coral`}
                         disabled={declining}
                     >
                         {declining ? (
@@ -238,27 +228,23 @@ export default function ConnectionActionsToolbar({
                         Decline
                     </button>
                 )}
-                {/* End Relationship */}
                 {actions.terminate && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                        className={`btn btn-${size} btn-ghost gap-2 text-coral`}
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
                         End Relationship
                     </button>
                 )}
-                {/* View Details - far right */}
                 {onViewDetails && (
                     <>
-                        {(actions.accept ||
-                            actions.decline ||
-                            actions.terminate) && (
-                            <div className="divider divider-horizontal mx-0" />
+                        {(actions.accept || actions.decline || actions.terminate) && (
+                            <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
                         )}
                         <button
                             onClick={handleViewDetails}
-                            className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            className={`btn btn-${size} btn-ghost gap-2`}
                         >
                             <i className="fa-duotone fa-regular fa-eye" />
                             View Details

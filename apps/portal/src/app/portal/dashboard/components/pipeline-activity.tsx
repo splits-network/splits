@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { Badge } from '@splits-network/memphis-ui';
+import type { AccentColor } from '@splits-network/memphis-ui';
 import { usePipelineActivity, PipelineApplication } from '../hooks/use-pipeline-activity';
 import { MemphisCard, MemphisEmpty, MemphisSkeleton, MemphisBtn } from './primitives';
 import { ACCENT, stageAccent } from './accent';
@@ -25,6 +27,16 @@ const STAGE_LABELS: Record<string, string> = {
     interview: 'Interview',
     offer: 'Offer',
     hired: 'Hired',
+};
+
+const STAGE_BADGE_COLOR: Record<string, AccentColor> = {
+    screen: 'teal',
+    draft: 'teal',
+    submitted: 'teal',
+    company_review: 'teal',
+    interview: 'coral',
+    offer: 'yellow',
+    hired: 'purple',
 };
 
 export default function PipelineActivity() {
@@ -80,7 +92,7 @@ export default function PipelineActivity() {
                         {applications.map((app: PipelineApplication) => {
                             const days = getDaysInStage(app.updated_at);
                             const daysStyle = getDaysStyle(days);
-                            const accent = stageAccent(app.stage);
+                            const badgeColor = STAGE_BADGE_COLOR[app.stage] || 'teal';
 
                             return (
                                 <tr key={app.id} className="border-b border-dark/10 hover:bg-dark/5 transition-colors">
@@ -98,9 +110,9 @@ export default function PipelineActivity() {
                                         </span>
                                     </td>
                                     <td className="text-center px-3 py-3">
-                                        <span className={`inline-block px-2 py-0.5 border-4 border-dark text-[10px] font-black uppercase tracking-wider ${accent.bg} ${accent.textOnBg}`}>
+                                        <Badge color={badgeColor} size="xs">
                                             {STAGE_LABELS[app.stage] || app.stage}
-                                        </span>
+                                        </Badge>
                                     </td>
                                     <td className="text-center px-5 py-3">
                                         <span className={`text-sm tabular-nums ${daysStyle.className}`}>

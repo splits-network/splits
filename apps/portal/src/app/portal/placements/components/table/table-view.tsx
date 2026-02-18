@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { Fragment } from "react";
 import { Badge } from "@splits-network/memphis-ui";
 import type { Placement } from "../../types";
 import {
@@ -16,10 +16,12 @@ export function TableView({
     placements,
     onSelect,
     selectedId,
+    onRefresh,
 }: {
     placements: Placement[];
     onSelect: (p: Placement) => void;
     selectedId: string | null;
+    onRefresh?: () => void;
 }) {
     const columnHeaders = [
         "",
@@ -59,27 +61,17 @@ export function TableView({
                             <Fragment key={placement.id}>
                                 <tr
                                     onClick={() => onSelect(placement)}
-                                    className="cursor-pointer transition-colors"
-                                    style={{
-                                        backgroundColor: isSelected
-                                            ? `${accent.bg}15`
+                                    className={`cursor-pointer transition-colors border-l-4 ${
+                                        isSelected
+                                            ? `${accent.bgLight} ${accent.border}`
                                             : idx % 2 === 0
-                                              ? "white"
-                                              : "#F5F0EB",
-                                        borderLeft: isSelected
-                                            ? `4px solid`
-                                            : "4px solid transparent",
-                                        borderLeftColor: isSelected
-                                            ? accent.bg.replace("bg-", "")
-                                            : "transparent",
-                                    }}
+                                              ? "bg-white border-transparent"
+                                              : "bg-cream border-transparent"
+                                    }`}
                                 >
                                     <td className="px-4 py-3 w-8">
                                         <i
-                                            className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-[10px] transition-transform ${accent.text}`}
-                                            style={{
-                                                opacity: isSelected ? 1 : 0.25,
-                                            }}
+                                            className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-[10px] transition-transform ${accent.text} ${isSelected ? "opacity-100" : "opacity-25"}`}
                                         />
                                     </td>
                                     <td className="px-4 py-3">
@@ -124,12 +116,7 @@ export function TableView({
                                     <tr>
                                         <td
                                             colSpan={columnHeaders.length}
-                                            className="p-0"
-                                            style={{
-                                                backgroundColor: "white",
-                                                borderTop: `4px solid ${accent.bg.replace("bg-", "")}`,
-                                                borderBottom: `4px solid ${accent.bg.replace("bg-", "")}`,
-                                            }}
+                                            className={`p-0 bg-white border-y-4 ${accent.border}`}
                                         >
                                             <DetailLoader
                                                 placement={placement}

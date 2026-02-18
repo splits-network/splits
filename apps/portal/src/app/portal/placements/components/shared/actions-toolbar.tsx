@@ -6,7 +6,6 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
-import { useFilter } from "../../contexts/filter-context";
 import type { Placement } from "../../types";
 
 export interface ActionsToolbarProps {
@@ -40,7 +39,6 @@ export default function ActionsToolbar({
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin } = useUserProfile();
-    const { refresh } = useFilter();
 
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
@@ -81,7 +79,6 @@ export default function ActionsToolbar({
             });
 
             toast.success(`Placement status updated to ${newStatus}!`);
-            refresh();
             onRefresh?.();
         } catch (error: any) {
             console.error("Failed to update status:", error);

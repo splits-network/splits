@@ -9,6 +9,7 @@ import { useCompanyActivity } from '../hooks/use-company-activity';
 import { useDashboardRealtime } from '../hooks/use-dashboard-realtime';
 import { AnalyticsChart } from '@/components/charts/analytics-chart';
 import RoleWizardModal from '../../roles/components/modals/role-wizard-modal';
+import { Card, Badge } from '@splits-network/memphis-ui';
 
 import { ACCENT, accentAt } from './accent';
 import {
@@ -155,7 +156,7 @@ export default function CompanyDashboard() {
             {/* ── Trend Charts (3-column) ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Time to Hire */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -181,10 +182,10 @@ export default function CompanyDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Application Volume */}
-                <div className="border-4 border-dark bg-base-100">
+                <Card className="border-4 border-dark">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -208,10 +209,10 @@ export default function CompanyDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
 
                 {/* Placement Trend */}
-                <div className="border-4 border-dark bg-base-100 md:col-span-2 lg:col-span-1">
+                <Card className="border-4 border-dark md:col-span-2 lg:col-span-1">
                     <div className="border-b-4 border-dark p-4">
                         {statsLoading ? (
                             <div className="h-12 bg-dark/5 animate-pulse" />
@@ -243,7 +244,7 @@ export default function CompanyDashboard() {
                             onTrendPeriodChange={setTrendPeriod}
                         />
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* ── Roles Table + Sidebar (7/5 split) ── */}
