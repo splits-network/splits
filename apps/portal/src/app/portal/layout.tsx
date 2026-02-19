@@ -1,19 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { AuthenticatedLayoutClient } from "./layout-client";
 
-export default async function AuthenticatedLayout({
+// Auth is enforced by proxy.ts for all /portal/* routes — no redirect needed here.
+export default function AuthenticatedLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const { userId } = await auth();
-
-    if (!userId) {
-        redirect("/sign-in");
-    }
-
     return (
         <AuthenticatedLayoutClient>
             <Sidebar />

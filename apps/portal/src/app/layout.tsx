@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import {
@@ -15,7 +16,8 @@ import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
-import { UserProfileProvider } from "@/contexts";
+import { UserProfileProvider, type UserProfile } from "@/contexts";
+import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
@@ -67,6 +69,22 @@ export default async function RootLayout({
         throw new Error(
             "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable",
         );
+    }
+
+    // Fetch user profile server-side so UserProfileProvider has data immediately
+    // on first render — eliminates loading flash across all authenticated pages.
+    // auth() requires clerkMiddleware() to have run on this route — public routes
+    // (/public/*) are outside the middleware matcher, so we catch and fall back to null.
+    let initialProfile: UserProfile | null = null;
+    try {
+        const { getToken, userId } = await auth();
+        if (userId) {
+            initialProfile = (await getCurrentUserProfile(getToken).catch(
+                () => null,
+            )) as unknown as UserProfile | null;
+        }
+    } catch {
+        // Public route not covered by clerkMiddleware — profile not available server-side
     }
     const webAppJsonLd = {
         "@context": "https://schema.org",
@@ -143,7 +161,7 @@ export default async function RootLayout({
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <ThemeProvider>
-                        <UserProfileProvider>
+                        <UserProfileProvider initialProfile={initialProfile}>
                             <ToastProvider>
                                 <Header />
                                 <ServiceStatusProvider statusHref="/public/status" />

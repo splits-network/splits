@@ -157,6 +157,28 @@ export class InvitationServiceV2 {
     }
 
     /**
+     * Get a public preview of an invitation — no auth required.
+     * Returns only non-sensitive fields; the invitee's email is intentionally omitted.
+     */
+    async getInvitationPreview(id: string) {
+        this.logger.info({ id }, 'InvitationService.getInvitationPreview');
+        const invitation = await this.repository.findInvitationById(id);
+
+        return {
+            id: invitation.id,
+            organization_name:
+                invitation.organizations?.display_name ||
+                invitation.organizations?.name ||
+                invitation.organizations?.slug ||
+                null,
+            organization_slug: invitation.organizations?.slug || null,
+            role: invitation.role,
+            status: invitation.status,
+            expires_at: invitation.expires_at,
+        };
+    }
+
+    /**
      * Create a new invitation
      */
     async createInvitation(clerkUserId: string, invitationData: any) {

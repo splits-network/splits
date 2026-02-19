@@ -49,9 +49,9 @@
     --color-error-content: #09090b;
 
     /* Radii / sizing (same as light for consistency) */
-    --radius-selector: 0.5rem;
-    --radius-field: 0.5rem;
-    --radius-box: 0.5rem;
+    --radius-selector: 0rem;
+    --radius-field: 0rem;
+    --radius-box: 0rem;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
     --border: 1px;

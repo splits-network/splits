@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import AcceptInvitationClient from "./AcceptInvitationClient";
 
@@ -8,27 +7,19 @@ interface PageProps {
 
 export default async function AcceptInvitationPage({ params }: PageProps) {
     const { id } = await params;
+
+    // Check if the user is already signed in so the client can skip the auth prompt.
+    // We intentionally do NOT redirect unauthenticated users — they should see the
+    // invitation details first and then choose to sign in or create an account.
     const user = await currentUser();
-
-    // If not logged in, redirect to sign up with redirect back to invitation page
-    if (!user) {
-        // Use Clerk's redirect_url mechanism to return here after sign-up
-        const redirectUrl = encodeURIComponent(`/accept-invitation/${id}`);
-        const signUpUrl = `/sign-up?redirect_url=${redirectUrl}`;
-        redirect(signUpUrl);
-    }
-
-    // Get user email for validation (will be done client-side)
-    const userEmail = user.emailAddresses.find(
+    const userEmail = user?.emailAddresses.find(
         (e) => e.id === user.primaryEmailAddressId,
     )?.emailAddress;
 
-    // Pass the invitation ID and user info to the client component
-    // The client will fetch the invitation details and handle all validation
     return (
         <AcceptInvitationClient
             invitationId={id}
-            userId={user.id}
+            userId={user?.id || ""}
             userEmail={userEmail || ""}
         />
     );

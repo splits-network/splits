@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
-import { ServiceStatusProvider, ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
+import {
+    ServiceStatusProvider,
+    ThemeScript,
+    ThemeProvider,
+} from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
 import { JsonLd } from "@splits-network/shared-ui";
+import { UserProfileProvider } from "@/contexts";
+import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
@@ -51,7 +58,7 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
@@ -62,6 +69,13 @@ export default function RootLayout({
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     const appUrl =
         process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network";
+
+    // Fetch user profile server-side so UserProfileProvider has data immediately
+    // on first render — eliminates loading flash across all authenticated pages.
+    const { getToken, userId } = await auth();
+    const initialProfile = userId
+        ? await getCurrentUserProfile(getToken).catch(() => null)
+        : null;
     const webAppJsonLd = {
         "@context": "https://schema.org",
         "@type": "WebApplication",
@@ -152,13 +166,17 @@ export default function RootLayout({
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <ThemeProvider>
-                    <ServiceStatusProvider statusHref="/status" />
-                    <ToastProvider>
-                        <Header />
-                        <main className="flex-1 pt-[68px]">{children}</main>
-                        <Footer />
-                        {/* <CookieConsent /> */}
-                    </ToastProvider>
+                        <UserProfileProvider initialProfile={initialProfile}>
+                            <ServiceStatusProvider statusHref="/status" />
+                            <ToastProvider>
+                                <Header />
+                                <main className="flex-1 pt-[68px]">
+                                    {children}
+                                </main>
+                                <Footer />
+                                {/* <CookieConsent /> */}
+                            </ToastProvider>
+                        </UserProfileProvider>
                     </ThemeProvider>
                     <DevDebugPanel />
                     <CandidateActivityTrackerWrapper />

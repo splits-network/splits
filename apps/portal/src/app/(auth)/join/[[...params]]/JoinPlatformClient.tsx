@@ -165,8 +165,8 @@ export default function JoinPlatformClient({ token, code }: Props) {
     if (loading) {
         return (
             <div className="flex flex-col items-center gap-4 py-8">
-                <span className="loading loading-spinner loading-lg text-coral"></span>
-                <p className="text-base-content/70">
+                <span className="loading loading-spinner loading-lg text-primary" />
+                <p className="text-base-content/60 text-sm">
                     Loading invitation...
                 </p>
             </div>
@@ -224,27 +224,25 @@ export default function JoinPlatformClient({ token, code }: Props) {
         };
 
         return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
+            <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-6 bg-base-200 flex items-center justify-center">
                     <i
-                        className={`fa-duotone fa-regular ${scenario.icon} text-5xl ${scenario.iconColor}`}
-                    ></i>
+                        className={`fa-duotone fa-regular ${scenario.icon} text-3xl ${scenario.iconColor}`}
+                    />
                 </div>
 
-                <h2 className="card-title text-xl justify-center">{scenario.title}</h2>
+                <h1 className="text-2xl font-black tracking-tight mb-2">{scenario.title}</h1>
 
-                <p className="text-base-content/70 text-sm mt-2">
+                <p className="text-base-content/60 text-sm mt-2 mb-8">
                     {scenario.message}
                 </p>
 
-                <div className="mt-6">
-                    <button
-                        onClick={handleClearInvitation}
-                        className="btn btn-coral btn-block"
-                    >
-                        Try Another Code
-                    </button>
-                </div>
+                <button
+                    onClick={handleClearInvitation}
+                    className="btn btn-primary w-full"
+                >
+                    Try Another Code
+                </button>
             </div>
         );
     }
@@ -254,9 +252,9 @@ export default function JoinPlatformClient({ token, code }: Props) {
         const recruiter = invitation.recruiter;
 
         return (
-            <>
+            <div className="py-4">
                 {/* Recruiter Profile Header */}
-                <div className="flex items-center gap-4 pb-4 border-b border-base-200">
+                <div className="flex items-center gap-4 pb-4 border-b border-base-300">
                     <UserAvatar
                         user={{
                             name: recruiter.name,
@@ -280,12 +278,12 @@ export default function JoinPlatformClient({ token, code }: Props) {
                                 )}
                         </div>
                         {recruiter.tagline && (
-                            <p className="text-sm text-base-content/70 line-clamp-2 mt-0.5">
+                            <p className="text-sm text-base-content/60 line-clamp-2 mt-0.5">
                                 {recruiter.tagline}
                             </p>
                         )}
                         {recruiter.location && (
-                            <p className="text-sm text-base-content/50 mt-1 flex items-center gap-1">
+                            <p className="text-sm text-base-content/40 mt-1 flex items-center gap-1">
                                 <i className="fa-duotone fa-regular fa-location-dot" />
                                 {recruiter.location}
                             </p>
@@ -316,18 +314,18 @@ export default function JoinPlatformClient({ token, code }: Props) {
                 )}
 
                 {/* Invitation Header */}
-                <div className="text-center py-4">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-coral/10 rounded-full mb-3">
-                        <i className="fa-duotone fa-regular fa-envelope-open-text text-coral" />
-                        <span className="text-sm font-medium text-coral">
+                <div className="text-center py-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 mb-4">
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-primary" />
+                        <span className="text-sm font-semibold text-primary">
                             You're Invited
                         </span>
                     </div>
 
-                    <h2 className="text-xl font-bold">
+                    <h2 className="text-xl font-black tracking-tight">
                         Partner with {recruiter.name}
                     </h2>
-                    <p className="text-sm text-base-content/60 mt-1">
+                    <p className="text-sm text-base-content/50 mt-2 leading-relaxed">
                         Join Splits Network and access qualified
                         candidates vetted by {recruiter.name} and their
                         proven track record of successful placements.
@@ -336,7 +334,7 @@ export default function JoinPlatformClient({ token, code }: Props) {
 
                 {/* Company Name Hint */}
                 {invitation.company_name_hint && (
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mb-4">
                         <h2 className="text-xl font-bold gap-2 px-4">
                             <i className="fa-duotone fa-regular fa-building" />{" "}
                             {invitation.company_name_hint}
@@ -346,11 +344,11 @@ export default function JoinPlatformClient({ token, code }: Props) {
 
                 {/* Personal Message */}
                 {invitation.personal_message && (
-                    <div className="bg-base-200/50 rounded-xl p-4 mt-3 border-l-4 border-coral">
-                        <p className="text-sm italic text-base-content/80 leading-relaxed">
+                    <div className="bg-base-200 p-4 mt-3 border-l-4 border-primary">
+                        <p className="text-sm italic text-base-content/70 leading-relaxed">
                             &ldquo;{invitation.personal_message}&rdquo;
                         </p>
-                        <p className="text-sm text-base-content/50 mt-2 flex items-center gap-1">
+                        <p className="text-xs text-base-content/40 mt-2 flex items-center gap-1">
                             <i className="fa-duotone fa-regular fa-quote-left" />
                             {recruiter.name}
                         </p>
@@ -362,7 +360,7 @@ export default function JoinPlatformClient({ token, code }: Props) {
                     recruiter.industries.length > 0) ||
                     (recruiter.specialties &&
                         recruiter.specialties.length > 1)) && (
-                    <div className="flex flex-wrap gap-1.5 justify-center pt-3">
+                    <div className="flex flex-wrap gap-1.5 justify-center pt-4">
                         {recruiter.industries?.map((industry) => (
                             <span
                                 key={industry}
@@ -386,16 +384,16 @@ export default function JoinPlatformClient({ token, code }: Props) {
 
                 {/* Error */}
                 {error && (
-                    <div className="alert alert-error text-sm mt-3">
+                    <div className="alert alert-error text-sm mt-4" role="alert">
                         <i className="fa-duotone fa-regular fa-circle-exclamation" />
                         <span>{error}</span>
                     </div>
                 )}
 
                 {/* CTA */}
-                <div className="mt-6 space-y-2">
+                <div className="mt-6 space-y-3">
                     <button
-                        className="btn btn-coral btn-block"
+                        className="btn btn-primary w-full"
                         onClick={handleAccept}
                         disabled={accepting}
                     >
@@ -411,7 +409,7 @@ export default function JoinPlatformClient({ token, code }: Props) {
                     </button>
 
                     <button
-                        className="btn btn-ghost btn-sm btn-block"
+                        className="btn btn-ghost btn-sm w-full"
                         onClick={handleClearInvitation}
                     >
                         Use a different code
@@ -419,7 +417,7 @@ export default function JoinPlatformClient({ token, code }: Props) {
                 </div>
 
                 {/* Expiration */}
-                <p className="text-sm text-base-content/40 text-center mt-4 flex items-center justify-center gap-1">
+                <p className="text-xs text-base-content/30 text-center mt-6 flex items-center justify-center gap-1">
                     <i className="fa-duotone fa-regular fa-clock" />
                     Expires{" "}
                     {new Date(invitation.expires_at).toLocaleDateString(
@@ -431,31 +429,33 @@ export default function JoinPlatformClient({ token, code }: Props) {
                         },
                     )}
                 </p>
-            </>
+            </div>
         );
     }
 
     // Default: Code entry form
     return (
-        <>
-            <div className="text-center mb-4">
-                <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-coral mb-3"></i>
-                <h2 className="card-title text-xl justify-center">
+        <div className="py-4">
+            <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-2xl" />
+                </div>
+                <h1 className="text-2xl font-black tracking-tight">
                     Have an Invitation?
-                </h2>
-                <p className="text-base-content/70 text-sm mt-1">
+                </h1>
+                <p className="text-base-content/50 text-sm mt-2">
                     Enter your code to see who invited you
                 </p>
             </div>
 
             <form onSubmit={handleCodeLookup} className="space-y-4">
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Invitation Code
-                    </legend>
+                    </label>
                     <input
                         type="text"
-                        className="input w-full text-center font-mono text-lg tracking-wider"
+                        className="input input-bordered w-full text-center font-mono text-lg tracking-wider"
                         placeholder="SPLITS-XXXXXX"
                         value={enteredCode}
                         onChange={(e) =>
@@ -467,15 +467,15 @@ export default function JoinPlatformClient({ token, code }: Props) {
                 </fieldset>
 
                 {error && (
-                    <div className="alert alert-warning text-sm">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                    <div className="alert alert-warning text-sm" role="alert">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation" />
                         <span>{error}</span>
                     </div>
                 )}
 
                 <button
                     type="submit"
-                    className="btn btn-coral btn-block"
+                    className="btn btn-primary w-full"
                     disabled={lookingUpCode || !enteredCode.trim()}
                 >
                     <ButtonLoading
@@ -486,14 +486,19 @@ export default function JoinPlatformClient({ token, code }: Props) {
                 </button>
             </form>
 
-            <div className="divider text-sm text-base-content/40">
-                or use the link from your invite
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or use the link from your invite
+                </span>
+                <div className="flex-1 h-px bg-base-300" />
             </div>
 
-            <p className="text-center text-sm text-base-content/50">
+            <p className="text-center text-sm text-base-content/40">
                 Received a link? Just paste it in your browser's address
                 bar.
             </p>
-        </>
+        </div>
     );
 }

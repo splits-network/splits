@@ -43,6 +43,7 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
     registerUserRegistrationRoute(app, services);
     registerProfileImageRoute(app, services); // Add profile image route
     registerDeleteProfileImageRoute(app, services); // Add delete profile image route
+    registerInvitationPreviewRoute(app, services); // Public — must come before generic resource routes
     registerInvitationAcceptRoute(app, services);
     registerClerkWebhookProxy(app, services);
 
@@ -268,6 +269,35 @@ function registerClerkWebhookProxy(app: FastifyInstance, services: ServiceRegist
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: { message: error.message || 'Webhook processing failed' } });
+            }
+        }
+    );
+}
+
+/**
+ * GET /api/v2/invitations/:id/preview — Public, no auth required.
+ * Returns only non-sensitive invitation data so users can see what they're accepting
+ * before being asked to sign in.
+ */
+function registerInvitationPreviewRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const identityService = () => services.get('identity');
+
+    app.get(
+        '/api/v2/invitations/:id/preview',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            try {
+                const data = await identityService().get(
+                    `/api/v2/invitations/${id}/preview`,
+                    undefined,
+                    correlationId
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: 'Failed to load invitation preview' } });
             }
         }
     );

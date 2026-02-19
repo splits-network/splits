@@ -3,25 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    createAuthenticatedClient,
+    createUnauthenticatedClient,
+} from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 
-interface Invitation {
+// Public preview — only non-sensitive fields, no email exposed
+interface InvitationPreview {
     id: string;
-    email: string;
-    organization_id: string;
+    organization_name: string | null;
+    organization_slug: string | null;
     role: string;
-    invited_by: string;
     status: string;
     expires_at: string;
-    created_at: string;
-}
-
-interface Organization {
-    id: string;
-    name: string;
-    slug: string;
-    display_name?: string;
 }
 
 interface Props {
@@ -29,6 +24,12 @@ interface Props {
     userId: string;
     userEmail: string;
 }
+
+const roleLabels: Record<string, string> = {
+    company_admin: "Company Administrator",
+    hiring_manager: "Hiring Manager",
+    recruiter: "Recruiter",
+};
 
 export default function AcceptInvitationClient({
     invitationId,
@@ -38,141 +39,93 @@ export default function AcceptInvitationClient({
     const router = useRouter();
     const { getToken } = useAuth();
     const { refresh: refreshProfile } = useUserProfile();
-    const [invitation, setInvitation] = useState<Invitation | null>(null);
-    const [organization, setOrganization] = useState<Organization | null>(null);
-    const [loading, setLoading] = useState(true);
+
+    const isAuthenticated = !!userId;
+
+    const [preview, setPreview] = useState<InvitationPreview | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(true);
+    const [previewError, setPreviewError] = useState<
+        "not_found" | "failed" | null
+    >(null);
+
     const [accepting, setAccepting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [acceptError, setAcceptError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [acceptedRole, setAcceptedRole] = useState<string | null>(null);
 
-    const roleLabels: Record<string, string> = {
-        company_admin: "Company Administrator",
-        hiring_manager: "Hiring Manager",
-        recruiter: "Recruiter",
-    };
+    // Validate that the signed-in user's email matches the invitation target
+    const [emailMismatch, setEmailMismatch] = useState(false);
 
+    // ── Step 1: Load public preview (no auth required) ───────────────────────
     useEffect(() => {
-        async function fetchInvitationAndOrganization() {
+        async function loadPreview() {
             try {
-                const token = await getToken();
-
-                if (!token) {
-                    setError("Authentication required");
-                    setLoading(false);
-                    return;
-                }
-
-                const client = createAuthenticatedClient(token);
-
-                const invitationResponse = await client.get(
-                    `/invitations/${invitationId}?email=${encodeURIComponent(userEmail)}`,
+                const client = createUnauthenticatedClient();
+                const response = await client.get(
+                    `/invitations/${invitationId}/preview`,
                 );
-
-                const invitationData = invitationResponse.data;
-
-                if (!invitationData) {
-                    setError("Invitation not found");
-                    setLoading(false);
-                    return;
-                }
-
-                setInvitation(invitationData);
-
-                if (invitationData.status !== "pending") {
-                    setLoading(false);
-                    return;
-                }
-
-                const expiresAt = new Date(invitationData.expires_at);
-                if (expiresAt < new Date()) {
-                    setLoading(false);
-                    return;
-                }
-
-                if (
-                    userEmail.toLowerCase() !==
-                    invitationData.email.toLowerCase()
-                ) {
-                    setError(
-                        `Email mismatch. This invitation was sent to ${invitationData.email}, but you're logged in as ${userEmail}.`,
-                    );
-                    setLoading(false);
-                    return;
-                }
-
-                try {
-                    const orgResponse = await client.get(
-                        `/organizations/${invitationData.organization_id}`,
-                    );
-                    setOrganization(orgResponse.data);
-                } catch (orgError) {
-                    // We can still proceed without organization details
-                }
-
-                setLoading(false);
+                setPreview(response.data);
             } catch (err: any) {
-                let errorMessage = "Failed to load invitation details";
-
-                if (err.response) {
-                    const status = err.response.status;
-                    const message = err.response.data?.message || err.message;
-
-                    if (status === 404 || message?.includes("not found")) {
-                        errorMessage = "invitation_not_found";
-                    } else if (status === 403 || message?.includes("access")) {
-                        errorMessage = "no_access";
-                    } else if (status === 401) {
-                        errorMessage = "authentication_required";
-                    } else {
-                        errorMessage = message || errorMessage;
-                    }
-                } else if (err.message) {
-                    errorMessage = err.message;
-                }
-
-                setError(errorMessage);
-                setLoading(false);
+                const status = err.response?.status;
+                setPreviewError(status === 404 ? "not_found" : "failed");
+            } finally {
+                setPreviewLoading(false);
             }
         }
 
-        fetchInvitationAndOrganization();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [invitationId, userEmail]);
+        loadPreview();
+    }, [invitationId]);
 
-    function getRoleBasedRedirect(role: string): string {
-        return "/portal/dashboard";
-    }
+    // ── Step 2: If authenticated, validate the invitation email matches ───────
+    useEffect(() => {
+        if (!isAuthenticated || !preview || !userEmail) return;
+
+        async function validateEmail() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+                const response = await client.get(
+                    `/invitations/${invitationId}?email=${encodeURIComponent(userEmail)}`,
+                );
+                const invitation = response.data;
+
+                if (
+                    userEmail.toLowerCase() !==
+                    invitation.email?.toLowerCase()
+                ) {
+                    setEmailMismatch(true);
+                }
+            } catch {
+                // If validation fails, allow accept — the server enforces email match
+            }
+        }
+
+        validateEmail();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, preview, userEmail, invitationId]);
 
     async function handleAccept() {
-        if (!invitation) return;
-
         setAccepting(true);
-        setError(null);
+        setAcceptError(null);
 
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error("Authentication token not available");
-            }
+            if (!token) throw new Error("Authentication token not available");
 
             const client = createAuthenticatedClient(token);
-
-            await client.post(`/invitations/${invitation.id}/accept`, {
+            await client.post(`/invitations/${invitationId}/accept`, {
                 user_email: userEmail,
             });
 
             await refreshProfile();
-
-            setAcceptedRole(invitation.role);
             setShowSuccess(true);
 
             setTimeout(() => {
-                const redirectPath = getRoleBasedRedirect(invitation.role);
-                router.push(redirectPath);
+                router.push("/portal/dashboard");
             }, 2000);
         } catch (err: any) {
-            setError(
+            setAcceptError(
                 err.message ||
                     "An error occurred while accepting the invitation",
             );
@@ -180,497 +133,353 @@ export default function AcceptInvitationClient({
         }
     }
 
-    function handleDecline() {
-        router.push("/");
-    }
-
-    // Loading
-    if (loading) {
+    // ── Loading ───────────────────────────────────────────────────────────────
+    if (previewLoading) {
         return (
-            <>
+            <div className="py-8">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="skeleton h-16 w-16 rounded-full"></div>
+                    <div className="skeleton h-16 w-16"></div>
                     <div className="skeleton h-8 w-48"></div>
                 </div>
                 <div className="space-y-4 mt-6">
-                    <div className="skeleton h-4 w-full"></div>
-                    <div className="skeleton h-4 w-3/4"></div>
-                    <div className="skeleton h-12 w-full"></div>
-                    <div className="skeleton h-12 w-full"></div>
+                    <div className="skeleton h-16 w-full"></div>
+                    <div className="skeleton h-16 w-full"></div>
+                    <div className="skeleton h-16 w-full"></div>
                 </div>
-            </>
+            </div>
         );
     }
 
-    // Success
+    // ── Not found ─────────────────────────────────────────────────────────────
+    if (previewError === "not_found" || (!preview && !previewLoading)) {
+        return (
+            <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-6 bg-base-200 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-envelope-circle-check text-3xl text-warning" />
+                </div>
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Invitation Not Found
+                </h1>
+                <p className="text-base-content/60 mb-8 leading-relaxed max-w-sm mx-auto">
+                    This invitation link appears to be invalid or may have been
+                    removed. This can happen if the invitation was cancelled or
+                    the link was mistyped.
+                </p>
+                <p className="text-xs text-base-content/30 mt-8">
+                    Invitation ID:{" "}
+                    <code className="text-xs">{invitationId}</code>
+                </p>
+            </div>
+        );
+    }
+
+    // ── General load error ────────────────────────────────────────────────────
+    if (previewError === "failed") {
+        return (
+            <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-6 bg-base-200 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-circle-exclamation text-3xl text-error" />
+                </div>
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Something Went Wrong
+                </h1>
+                <p className="text-base-content/60 mb-8 leading-relaxed max-w-sm mx-auto">
+                    We couldn't load this invitation. Please try again.
+                </p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="btn btn-primary"
+                >
+                    Try Again
+                </button>
+            </div>
+        );
+    }
+
+    // From here preview is guaranteed non-null
+    const { role, status, expires_at } = preview!;
+    const orgName =
+        preview!.organization_name ||
+        preview!.organization_slug ||
+        "an organization";
+    const roleLabel = roleLabels[role] || role;
+    const expiresAt = new Date(expires_at);
+    const isExpired = expiresAt < new Date();
+
+    // ── Success ───────────────────────────────────────────────────────────────
     if (showSuccess) {
         return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
-                    <div className="rounded-full bg-success/10 p-6">
-                        <i className="fa-duotone fa-regular fa-check-circle text-6xl text-success"></i>
-                    </div>
+            <div className="text-center py-8">
+                <div className="w-20 h-20 mx-auto mb-6 bg-success/10 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-circle-check text-success text-4xl" />
                 </div>
-
-                <h2 className="card-title text-2xl justify-center mb-2">
-                    Welcome to{" "}
-                    {organization?.display_name ||
-                        organization?.name ||
-                        "the team"}
-                    !
-                </h2>
-
-                <p className="text-base-content/70 mb-4">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Welcome to {orgName}!
+                </h1>
+                <p className="text-base-content/60 mb-6">
                     You've successfully joined as a{" "}
-                    <strong>
-                        {roleLabels[acceptedRole || ""] || acceptedRole}
-                    </strong>
-                    .
+                    <strong className="text-base-content">{roleLabel}</strong>.
                 </p>
-
-                <div className="flex items-center justify-center gap-2 text-sm text-base-content/60">
-                    <span className="loading loading-spinner loading-sm"></span>
+                <div className="flex items-center justify-center gap-2 text-sm text-base-content/50">
+                    <span className="loading loading-spinner loading-sm" />
                     <span>Redirecting you to your dashboard...</span>
                 </div>
             </div>
         );
     }
 
-    // Error
-    if (error) {
-        const errorScenarios: Record<
-            string,
-            {
-                icon: string;
-                iconColor: string;
-                title: string;
-                message: string;
-                actions: Array<{
-                    label: string;
-                    onClick: () => void;
-                    variant?: string;
-                }>;
-            }
-        > = {
-            invitation_not_found: {
-                icon: "fa-envelope-circle-check",
-                iconColor: "text-warning",
-                title: "Invitation Not Found",
-                message:
-                    "This invitation link appears to be invalid or may have been removed. This can happen if the invitation was cancelled or if the link was mistyped.",
-                actions: [
-                    {
-                        label: "Go to Dashboard",
-                        onClick: () => router.push("/portal/dashboard"),
-                    },
-                    {
-                        label: "Contact Support",
-                        onClick: () => router.push("/support"),
-                        variant: "outline",
-                    },
-                ],
-            },
-            no_access: {
-                icon: "fa-shield-exclamation",
-                iconColor: "text-error",
-                title: "Access Denied",
-                message:
-                    "You don't have permission to view this invitation. This invitation may be for a different email address.",
-                actions: [
-                    {
-                        label: "Go to Dashboard",
-                        onClick: () => router.push("/portal/dashboard"),
-                    },
-                    {
-                        label: "Sign Out & Try Another Account",
-                        onClick: () => router.push("/sign-out"),
-                        variant: "outline",
-                    },
-                ],
-            },
-            authentication_required: {
-                icon: "fa-user-lock",
-                iconColor: "text-warning",
-                title: "Authentication Required",
-                message:
-                    "Your session has expired. Please sign in again to view this invitation.",
-                actions: [
-                    {
-                        label: "Sign In",
-                        onClick: () =>
-                            router.push(
-                                `/sign-in?redirect_url=${encodeURIComponent(`/accept-invitation/${invitationId}`)}`,
-                            ),
-                    },
-                ],
-            },
-        };
-
-        const scenario = errorScenarios[error] || {
-            icon: "fa-circle-exclamation",
-            iconColor: "text-error",
-            title: "Something Went Wrong",
+    // ── Status: expired or non-pending ────────────────────────────────────────
+    const statusScenarios: Record<
+        string,
+        {
+            icon: string;
+            iconColor: string;
+            title: string;
+            message: string;
+            details?: string;
+        }
+    > = {
+        accepted: {
+            icon: "fa-circle-check",
+            iconColor: "text-success",
+            title: "Already Accepted",
             message:
-                error ||
-                "We encountered an unexpected error while loading your invitation.",
-            actions: [
-                {
-                    label: "Try Again",
-                    onClick: () => window.location.reload(),
-                },
-                {
-                    label: "Go to Dashboard",
-                    onClick: () => router.push("/portal/dashboard"),
-                    variant: "outline",
-                },
-                {
-                    label: "Contact Support",
-                    onClick: () => router.push("/support"),
-                    variant: "ghost",
-                },
-            ],
-        };
+                "This invitation has already been accepted. You're all set!",
+            details:
+                "If you need to access this organization, go to your dashboard.",
+        },
+        expired: {
+            icon: "fa-clock-rotate-left",
+            iconColor: "text-warning",
+            title: "Invitation Expired",
+            message: "This invitation expired and is no longer valid.",
+            details:
+                "Contact the organization administrator to request a new invitation link.",
+        },
+        revoked: {
+            icon: "fa-ban",
+            iconColor: "text-error",
+            title: "Invitation Revoked",
+            message: "This invitation was cancelled by the organization.",
+            details:
+                "If you believe this was a mistake, please contact the organization administrator.",
+        },
+    };
 
-        return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
-                    <i
-                        className={`fa-duotone fa-regular ${scenario.icon} text-5xl ${scenario.iconColor}`}
-                    ></i>
-                </div>
-
-                <h2 className="card-title text-2xl justify-center mb-2">
-                    {scenario.title}
-                </h2>
-
-                <p className="text-base-content/70 mb-6 leading-relaxed">
-                    {scenario.message}
-                </p>
-
-                <div className="divider text-sm text-base-content/40">
-                    What would you like to do?
-                </div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                    {scenario.actions.map((action, index) => (
-                        <button
-                            key={index}
-                            onClick={action.onClick}
-                            className={`btn btn-block ${action.variant ? `btn-${action.variant}` : "btn-coral"}`}
-                        >
-                            {action.label}
-                        </button>
-                    ))}
-                </div>
-
-                <p className="text-sm text-base-content/50 mt-6">
-                    Invitation ID:{" "}
-                    <code className="text-sm">{invitationId}</code>
-                </p>
-            </div>
-        );
-    }
-
-    // Not found
-    if (!invitation) {
-        return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
-                    <i className="fa-duotone fa-regular fa-envelope-circle-check text-5xl text-warning"></i>
-                </div>
-
-                <h2 className="card-title text-2xl justify-center mb-2">
-                    Invitation Not Found
-                </h2>
-
-                <p className="text-base-content/70 mb-6 leading-relaxed">
-                    This invitation link appears to be invalid or may
-                    have been removed. This can happen if:
-                </p>
-
-                <ul className="text-left text-sm text-base-content/70 space-y-2 mb-6 list-disc list-inside">
-                    <li>The invitation was cancelled by the organization</li>
-                    <li>The link was mistyped or incomplete</li>
-                    <li>The invitation already expired</li>
-                </ul>
-
-                <div className="divider text-sm text-base-content/40">
-                    What would you like to do?
-                </div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                    <button
-                        onClick={() => router.push("/portal/dashboard")}
-                        className="btn btn-coral btn-block"
-                    >
-                        Go to Dashboard
-                    </button>
-                    <button
-                        onClick={() => router.push("/support")}
-                        className="btn btn-outline btn-block"
-                    >
-                        Contact Support
-                    </button>
-                </div>
-
-                <p className="text-sm text-base-content/50 mt-6">
-                    Invitation ID:{" "}
-                    <code className="text-sm">{invitationId}</code>
-                </p>
-            </div>
-        );
-    }
-
-    // Non-pending status
-    if (invitation.status !== "pending") {
-        const statusScenarios: Record<
-            string,
-            {
-                icon: string;
-                iconColor: string;
-                title: string;
-                message: string;
-                details?: string;
-            }
-        > = {
-            accepted: {
-                icon: "fa-circle-check",
-                iconColor: "text-success",
-                title: "Already Accepted",
-                message:
-                    "This invitation has already been accepted. You're all set!",
-                details:
-                    "If you need to access this organization, go to your dashboard to see all your organizations.",
-            },
-            expired: {
-                icon: "fa-clock-rotate-left",
-                iconColor: "text-warning",
-                title: "Invitation Expired",
-                message: "This invitation expired and is no longer valid.",
-                details:
-                    "Contact the organization administrator to request a new invitation link.",
-            },
-            revoked: {
-                icon: "fa-ban",
-                iconColor: "text-error",
-                title: "Invitation Revoked",
-                message: "This invitation was cancelled by the organization.",
-                details:
-                    "If you believe this was a mistake, please contact the organization administrator.",
-            },
-        };
-
+    if (isExpired || status !== "pending") {
         const scenario =
-            statusScenarios[invitation.status] || statusScenarios.revoked;
-
+            statusScenarios[isExpired ? "expired" : status] ||
+            statusScenarios.revoked;
         return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
+            <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-6 bg-base-200 flex items-center justify-center">
                     <i
-                        className={`fa-duotone fa-regular ${scenario.icon} text-5xl ${scenario.iconColor}`}
-                    ></i>
+                        className={`fa-duotone fa-regular ${scenario.icon} text-3xl ${scenario.iconColor}`}
+                    />
                 </div>
-
-                <h2 className="card-title text-2xl justify-center mb-2">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
                     {scenario.title}
-                </h2>
-
-                <p className="text-base-content/70 mb-3 leading-relaxed">
+                </h1>
+                <p className="text-base-content/60 mb-2 leading-relaxed">
                     {scenario.message}
                 </p>
-
                 {scenario.details && (
-                    <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
+                    <p className="text-sm text-base-content/40 mb-8 leading-relaxed">
                         {scenario.details}
                     </p>
                 )}
-
-                <div className="divider text-sm text-base-content/40">
-                    What would you like to do?
-                </div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                    <button
-                        onClick={() => router.push("/portal/dashboard")}
-                        className="btn btn-coral btn-block"
-                    >
-                        Go to Dashboard
-                    </button>
-                    {(invitation.status === "expired" ||
-                        invitation.status === "revoked") && (
+                {isAuthenticated && (
+                    <div className="flex flex-col gap-3 max-w-xs mx-auto mt-6">
                         <button
-                            onClick={() => router.push("/support")}
-                            className="btn btn-outline btn-block"
+                            onClick={() => router.push("/portal/dashboard")}
+                            className="btn btn-primary w-full"
                         >
-                            Contact Support
+                            Go to Dashboard
                         </button>
-                    )}
-                </div>
-
-                <p className="text-sm text-base-content/50 mt-6">
-                    Organization:{" "}
-                    {organization?.display_name ||
-                        organization?.name ||
-                        "Unknown"}
+                    </div>
+                )}
+                <p className="text-xs text-base-content/30 mt-8">
+                    Organization: {orgName}
                 </p>
             </div>
         );
     }
 
-    // Expired
-    const expiresAt = new Date(invitation.expires_at);
-    if (expiresAt < new Date()) {
+    // ── Invitation card used in both authed and non-authed views ─────────────
+    const invitationDetails = (
+        <div className="space-y-3 mb-6">
+            <div className="bg-base-200 p-4">
+                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                    Organization
+                </span>
+                <p className="text-lg font-bold mt-1">{orgName}</p>
+            </div>
+            <div className="bg-base-200 p-4">
+                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                    Your Role
+                </span>
+                <p className="mt-1">
+                    <span className="badge badge-primary">{roleLabel}</span>
+                </p>
+            </div>
+            <div className="bg-base-200 p-4">
+                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                    Invitation Expires
+                </span>
+                <p className="text-sm font-semibold mt-1">
+                    {expiresAt.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                    })}
+                </p>
+            </div>
+        </div>
+    );
+
+    const redirectUrl = encodeURIComponent(
+        `/accept-invitation/${invitationId}`,
+    );
+
+    // ── Not authenticated: preview + sign-in / create-account CTAs ───────────
+    if (!isAuthenticated) {
         return (
-            <div className="text-center">
-                <div className="flex justify-center mb-4">
-                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-5xl text-warning"></i>
+            <div className="py-4">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 flex items-center justify-center">
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-2xl" />
+                    </div>
+                    <h1 className="text-3xl font-black tracking-tight">
+                        You've Been Invited!
+                    </h1>
+                    <p className="text-base-content/60 mt-2 text-sm">
+                        Join{" "}
+                        <strong className="text-base-content">{orgName}</strong>{" "}
+                        as a{" "}
+                        <strong className="text-base-content">
+                            {roleLabel}
+                        </strong>
+                        .
+                    </p>
                 </div>
 
-                <h2 className="card-title text-2xl justify-center mb-2">
-                    Invitation Expired
-                </h2>
+                {invitationDetails}
 
-                <p className="text-base-content/70 mb-3 leading-relaxed">
-                    This invitation expired on{" "}
-                    <strong>
-                        {expiresAt.toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                        })}
-                    </strong>
-                    .
-                </p>
-
-                <p className="text-sm text-base-content/60 mb-6 leading-relaxed">
-                    Invitations have a limited validity period for
-                    security reasons. Contact the organization
-                    administrator to request a new invitation link.
-                </p>
-
-                <div className="divider text-sm text-base-content/40">
-                    What would you like to do?
+                <div className="flex items-center gap-3 my-6">
+                    <div className="flex-1 h-px bg-base-300" />
+                    <span className="text-xs text-base-content/40 uppercase tracking-widest">
+                        To Accept
+                    </span>
+                    <div className="flex-1 h-px bg-base-300" />
                 </div>
 
-                <div className="flex flex-col gap-2 mt-4">
-                    <button
-                        onClick={() => router.push("/portal/dashboard")}
-                        className="btn btn-coral btn-block"
+                <div className="flex flex-col gap-3">
+                    <a
+                        href={`/sign-in?redirect_url=${redirectUrl}`}
+                        className="btn btn-primary w-full"
                     >
-                        Go to Dashboard
-                    </button>
-                    <button
-                        onClick={() => router.push("/support")}
-                        className="btn btn-outline btn-block"
+                        <i className="fa-duotone fa-regular fa-arrow-right-to-bracket" />
+                        Sign In to Accept
+                    </a>
+                    <a
+                        href={`/sign-up?redirect_url=${redirectUrl}`}
+                        className="btn btn-ghost w-full border border-base-300"
                     >
-                        Contact Support
-                    </button>
+                        <i className="fa-duotone fa-regular fa-user-plus" />
+                        Create Account
+                    </a>
                 </div>
-
-                <p className="text-sm text-base-content/50 mt-6">
-                    Organization:{" "}
-                    {organization?.display_name ||
-                        organization?.name ||
-                        "Unknown"}
-                </p>
             </div>
         );
     }
 
-    // Main accept/decline UI
-    const roleLabel = roleLabels[invitation.role] || invitation.role;
-    const orgName =
-        organization?.display_name ||
-        organization?.name ||
-        organization?.slug ||
-        "the organization";
+    // ── Authenticated: email mismatch ─────────────────────────────────────────
+    if (emailMismatch) {
+        return (
+            <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-6 bg-base-200 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-shield-exclamation text-3xl text-error" />
+                </div>
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Wrong Account
+                </h1>
+                <p className="text-base-content/60 mb-8 leading-relaxed max-w-sm mx-auto">
+                    This invitation was sent to a different email address. Please
+                    sign in with the account that received the invitation.
+                </p>
+                <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                    <a
+                        href={`/sign-in?redirect_url=${redirectUrl}`}
+                        className="btn btn-primary w-full"
+                    >
+                        Sign In with Another Account
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
+    // ── Authenticated: accept / decline ───────────────────────────────────────
     return (
-        <>
-            <div className="text-center mb-6">
-                <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-coral mb-4"></i>
-                <h2 className="card-title text-2xl justify-center">
+        <div className="py-4">
+            <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-2xl" />
+                </div>
+                <h1 className="text-3xl font-black tracking-tight">
                     You've Been Invited!
-                </h2>
+                </h1>
             </div>
 
-            <div className="space-y-4">
-                <div>
-                    <p className="text-sm text-base-content/60 mb-1">
-                        Organization
-                    </p>
-                    <p className="text-lg font-semibold">{orgName}</p>
-                </div>
+            {invitationDetails}
 
-                <div>
-                    <p className="text-sm text-base-content/60 mb-1">
-                        Your Role
-                    </p>
-                    <p className="text-lg">
-                        <span className="badge badge-primary badge-lg">
-                            {roleLabel}
-                        </span>
-                    </p>
-                </div>
-
-                <div>
-                    <p className="text-sm text-base-content/60 mb-1">
-                        Invitation Expires
-                    </p>
-                    <p className="text-base">
-                        {expiresAt.toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                        })}
-                    </p>
-                </div>
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
             </div>
 
-            <div className="divider"></div>
-
-            {error && (
-                <div className="alert alert-error mb-4">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
+            {acceptError && (
+                <div className="alert alert-error mb-4" role="alert">
+                    <i className="fa-duotone fa-regular fa-circle-exclamation" />
+                    <span>{acceptError}</span>
                 </div>
             )}
 
-            <p className="text-sm text-base-content/70 text-center mb-4">
-                By accepting this invitation, you will become a member
-                of this organization with {roleLabel} privileges.
+            <p className="text-sm text-base-content/60 text-center mb-6">
+                By accepting, you will become a member of{" "}
+                <strong className="text-base-content">{orgName}</strong> with{" "}
+                {roleLabel} privileges.
             </p>
 
-            <div className="flex justify-center gap-3">
+            <div className="flex gap-3">
                 <button
                     type="button"
-                    className="btn btn-outline"
-                    onClick={handleDecline}
+                    className="btn btn-ghost flex-1 border border-base-300"
+                    onClick={() => router.push("/")}
                     disabled={accepting}
                 >
                     Decline
                 </button>
                 <button
                     type="button"
-                    className="btn btn-coral"
+                    className="btn btn-primary flex-1"
                     onClick={handleAccept}
                     disabled={accepting}
                 >
                     {accepting ? (
                         <>
-                            <span className="loading loading-spinner loading-sm"></span>
+                            <span className="loading loading-spinner loading-sm" />
                             Accepting...
                         </>
                     ) : (
                         <>
-                            <i className="fa-duotone fa-regular fa-check"></i>
+                            <i className="fa-duotone fa-regular fa-check" />
                             Accept Invitation
                         </>
                     )}
                 </button>
             </div>
-        </>
+        </div>
     );
 }

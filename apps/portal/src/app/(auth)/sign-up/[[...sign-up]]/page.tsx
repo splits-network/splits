@@ -5,10 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
-import {
-    AuthInput,
-    SocialLoginButton,
-} from "@splits-network/memphis-ui";
 import { ensureUserInDatabase } from "@/lib/user-registration";
 import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
 import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
@@ -28,6 +24,7 @@ export default function SignUpPage() {
     const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [pendingVerification, setPendingVerification] = useState(false);
     const [code, setCode] = useState("");
     const [error, setError] = useState("");
@@ -191,65 +188,81 @@ export default function SignUpPage() {
         gsap.fromTo(
             stepRef.current,
             { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
         );
     }, [pendingVerification]);
 
     // Already signed in state
     if (isLoaded && isSignedIn) {
         return (
-            <div className="space-y-4">
-                <h2 className="card-title text-lg justify-center">Already Signed In</h2>
-
-                <div className="alert alert-soft alert-teal" role="alert">
-                    <i className="fa-duotone fa-regular fa-circle-info" />
-                    <span>You&apos;re already signed in to your account.</span>
+            <>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-black tracking-tight mb-2">
+                        Already signed in
+                    </h1>
                 </div>
 
-                <p className="text-center text-base-content/60">
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
+                        <span className="text-sm">You&apos;re already signed in to your account.</span>
+                    </div>
+                </div>
+
+                <p className="text-sm text-base-content/50 text-center mb-6">
                     To create a new account, you&apos;ll need to sign out first.
                 </p>
 
-                <button onClick={() => router.push("/portal/dashboard")} className="btn btn-coral btn-block">
-                    <i className="fa-duotone fa-regular fa-home" />
-                    Go to Dashboard
-                </button>
-                <button onClick={handleSignOut} className="btn btn-outline btn-block" disabled={isLoading}>
-                    {isLoading ? (
-                        <><span className="loading loading-spinner" /> Signing out...</>
-                    ) : (
-                        <><i className="fa-duotone fa-regular fa-right-from-bracket" /> Sign Out & Create New Account</>
-                    )}
-                </button>
-            </div>
+                <div className="space-y-3">
+                    <button onClick={() => router.push("/portal/dashboard")} className="btn btn-primary w-full">
+                        <i className="fa-duotone fa-regular fa-gauge-high" />
+                        Go to Dashboard
+                    </button>
+                    <button onClick={handleSignOut} className="btn btn-ghost w-full border border-base-300" disabled={isLoading}>
+                        {isLoading ? (
+                            <><span className="loading loading-spinner loading-sm" /> Signing out...</>
+                        ) : (
+                            <><i className="fa-duotone fa-regular fa-right-from-bracket" /> Sign Out & Create New Account</>
+                        )}
+                    </button>
+                </div>
+            </>
         );
     }
 
     // Verification step
     if (pendingVerification) {
         return (
-            <div ref={stepRef} className="space-y-4">
-                <h2 className="card-title text-lg">Verify Your Email</h2>
+            <div ref={stepRef}>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-black tracking-tight mb-2">
+                        Verify your email
+                    </h1>
+                </div>
 
-                <div className="alert alert-soft alert-purple" role="alert">
-                    <i className="fa-duotone fa-regular fa-envelope" />
-                    <span>We sent a verification code to {email}</span>
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
+                        <span className="text-sm">We sent a verification code to <strong>{email}</strong></span>
+                    </div>
                 </div>
 
                 {error && (
-                    <div className="alert alert-outline alert-coral" role="alert">
+                    <div className="alert alert-error mb-4" role="alert">
                         <i className="fa-solid fa-circle-xmark" />
                         <span>{error}</span>
                     </div>
                 )}
 
                 <form onSubmit={handleVerification} className="space-y-4">
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Verification Code</legend>
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            Verification Code
+                        </label>
                         <input
                             type="text"
                             placeholder="123456"
-                            className="input w-full text-center text-2xl tracking-widest"
+                            className="input input-bordered w-full text-center text-2xl tracking-widest"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             required
@@ -259,16 +272,16 @@ export default function SignUpPage() {
                         />
                     </fieldset>
 
-                    <button type="submit" className="btn btn-teal btn-block" disabled={isLoading || !isLoaded}>
+                    <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
                         {isLoading ? (
-                            <><span className="loading loading-spinner" /> Verifying...</>
+                            <><span className="loading loading-spinner loading-sm" /> Verifying...</>
                         ) : (
                             "Verify Email"
                         )}
                     </button>
                 </form>
 
-                <button onClick={() => setPendingVerification(false)} className="btn btn-ghost btn-sm btn-block">
+                <button onClick={() => setPendingVerification(false)} className="btn btn-ghost btn-sm w-full mt-4">
                     <i className="fa-solid fa-arrow-left" /> Back to sign up
                 </button>
             </div>
@@ -277,75 +290,150 @@ export default function SignUpPage() {
 
     // Registration form
     return (
-        <div ref={stepRef} className="space-y-4">
-            <div>
-                <h2 className="card-title text-lg">Create Your Account</h2>
-                <p className="text-base-content/50">Join the Splits Network marketplace</p>
+        <div ref={stepRef}>
+            {/* Heading */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Create your account
+                </h1>
+                <p className="text-base-content/50">
+                    Join the split-fee recruiting marketplace.
+                </p>
             </div>
 
             {isFromInvitation && (
-                <div className="alert alert-soft alert-teal" role="alert">
-                    <i className="fa-duotone fa-regular fa-envelope-open-text" />
-                    <span>Complete sign-up to accept your invitation</span>
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-info mt-0.5" />
+                        <span className="text-sm">Complete sign-up to accept your invitation</span>
+                    </div>
                 </div>
             )}
 
             {error && (
-                <div className="alert alert-outline alert-coral" role="alert">
+                <div className="alert alert-error mb-4" role="alert">
                     <i className="fa-solid fa-circle-xmark" />
                     <span>{error}</span>
                 </div>
             )}
 
+            {/* Social login */}
+            <div className="space-y-3 mb-6">
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signUpWithOAuth("oauth_google")}
+                >
+                    <i className="fa-brands fa-google text-lg" />
+                    <span className="text-sm font-semibold">Continue with Google</span>
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signUpWithOAuth("oauth_github")}
+                >
+                    <i className="fa-brands fa-github text-lg" />
+                    <span className="text-sm font-semibold">Continue with GitHub</span>
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signUpWithOAuth("oauth_microsoft")}
+                >
+                    <i className="fa-brands fa-microsoft text-lg" />
+                    <span className="text-sm font-semibold">Continue with Microsoft</span>
+                </button>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
+
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div id="clerk-captcha" />
 
                 <div className="grid grid-cols-2 gap-4">
-                    <AuthInput
-                        label="First Name"
-                        type="text"
-                        value={firstName}
-                        onChange={(v: string) => setFirstName(v)}
-                        placeholder="John"
-                    />
-                    <AuthInput
-                        label="Last Name"
-                        type="text"
-                        value={lastName}
-                        onChange={(v: string) => setLastName(v)}
-                        placeholder="Doe"
-                    />
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            First Name
+                        </label>
+                        <input
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            placeholder="Sarah"
+                            className="input input-bordered w-full"
+                        />
+                    </fieldset>
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            Last Name
+                        </label>
+                        <input
+                            type="text"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            placeholder="Kim"
+                            className="input input-bordered w-full"
+                        />
+                    </fieldset>
                 </div>
 
-                <AuthInput
-                    label="Email"
-                    type="email"
-                    value={email}
-                    onChange={(v: string) => setEmail(v)}
-                    placeholder="you@company.com"
-                />
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Email Address
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="you@company.com"
+                            className="input input-bordered w-full pl-10"
+                            required
+                        />
+                    </div>
+                </fieldset>
 
-                <div>
-                    <AuthInput
-                        label="Password"
-                        type="password"
-                        value={password}
-                        onChange={(v: string) => setPassword(v)}
-                        placeholder="Enter password"
-                        showPasswordToggle
-                    />
-                    <p className="label text-base-content/50 -mt-1">Must be at least 8 characters</p>
-                </div>
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            className="input input-bordered w-full pl-10 pr-10"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
+                        >
+                            <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                        </button>
+                    </div>
+                    <p className="text-xs text-base-content/40 mt-1.5">Must be at least 8 characters</p>
+                </fieldset>
 
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Referral Code
-                        <span className="text-base-content/50 font-normal ml-1">(optional)</span>
-                    </legend>
+                        <span className="text-base-content/30 font-normal normal-case tracking-normal ml-1">(optional)</span>
+                    </label>
                     <input
                         type="text"
                         placeholder="e.g. abc12345"
-                        className={`input w-full tracking-wider ${
+                        className={`input input-bordered w-full tracking-wider ${
                             referralStatus === "valid" ? "input-success" : referralStatus === "invalid" ? "input-error" : ""
                         }`}
                         value={referralCode}
@@ -354,51 +442,44 @@ export default function SignUpPage() {
                         maxLength={8}
                     />
                     {referralStatus === "validating" && (
-                        <p className="label flex items-center gap-1">
+                        <p className="text-xs text-base-content/50 mt-1.5 flex items-center gap-1">
                             <span className="loading loading-spinner loading-xs" />
                             Validating...
                         </p>
                     )}
                     {referralStatus === "valid" && referralRecruiter && (
-                        <p className="label text-success flex items-center gap-1">
+                        <p className="text-xs text-success mt-1.5 flex items-center gap-1">
                             <i className="fa-duotone fa-regular fa-circle-check" />
                             Referred by {referralRecruiter.name}
                         </p>
                     )}
                     {referralStatus === "invalid" && (
-                        <p className="label text-error flex items-center gap-1">
+                        <p className="text-xs text-error mt-1.5 flex items-center gap-1">
                             <i className="fa-duotone fa-regular fa-circle-xmark" />
                             {referralError}
                         </p>
                     )}
                 </fieldset>
 
-                <button type="submit" className="btn btn-coral btn-block" disabled={isLoading || !isLoaded}>
+                <button type="submit" className="btn btn-primary w-full mt-2" disabled={isLoading || !isLoaded}>
                     {isLoading ? (
-                        <><span className="loading loading-spinner" /> Creating account...</>
+                        <><span className="loading loading-spinner loading-sm" /> Creating account...</>
                     ) : (
-                        "Sign Up"
+                        "Create Account"
                     )}
                 </button>
             </form>
 
-            <div className="divider">or</div>
-
-            <div className="grid grid-cols-3 gap-3">
-                <SocialLoginButton label="Google" icon="fa-brands fa-google" color="coral" onClick={() => signUpWithOAuth("oauth_google")} />
-                <SocialLoginButton label="GitHub" icon="fa-brands fa-github" color="purple" onClick={() => signUpWithOAuth("oauth_github")} />
-                <SocialLoginButton label="Microsoft" icon="fa-brands fa-microsoft" color="teal" onClick={() => signUpWithOAuth("oauth_microsoft")} />
-            </div>
-
-            <p className="text-center text-base-content/60">
+            {/* Switch mode */}
+            <div className="text-center mt-8 text-sm text-base-content/50">
                 Already have an account?{" "}
                 <Link
                     href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-in"}
-                    className="btn btn-link btn-sm text-coral"
+                    className="text-primary font-semibold hover:underline"
                 >
                     Sign in
                 </Link>
-            </p>
+            </div>
         </div>
     );
 }

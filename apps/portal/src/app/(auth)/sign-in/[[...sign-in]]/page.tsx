@@ -4,10 +4,6 @@ import { useSignIn, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
-import {
-    AuthInput,
-    SocialLoginButton,
-} from "@splits-network/memphis-ui";
 
 export default function SignInPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
@@ -18,6 +14,7 @@ export default function SignInPage() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -122,125 +119,195 @@ export default function SignInPage() {
     }, [isLoaded, isSignedIn, router, redirectUrl]);
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h2 className="card-title text-lg">Welcome Back</h2>
-                <p className="text-base-content/50">Sign in to your account</p>
+        <>
+            {/* Heading */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Welcome back
+                </h1>
+                <p className="text-base-content/50">
+                    Sign in to your Splits Network account.
+                </p>
             </div>
 
+            {/* Error alerts */}
             {error && (
-                <div className="alert alert-outline alert-coral" role="alert">
+                <div className="alert alert-error mb-4" role="alert">
                     <i className="fa-solid fa-circle-xmark" />
                     <span>{error}</span>
                 </div>
             )}
 
             {errorType === "needs_2fa" && (
-                <div className="alert alert-soft alert-purple" role="alert">
-                    <i className="fa-duotone fa-regular fa-shield-check" />
-                    <div>
-                        <p className="font-bold">Two-factor authentication is enabled</p>
-                        <p>Check your authenticator app or SMS for the verification code.</p>
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-4" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-shield-check text-info mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">Two-factor authentication is enabled</p>
+                            <p className="text-sm text-base-content/60">Check your authenticator app or SMS for the verification code.</p>
+                        </div>
                     </div>
                 </div>
             )}
 
             {errorType === "account_not_found" && (
-                <div className="alert alert-soft alert-teal" role="alert">
-                    <i className="fa-duotone fa-regular fa-info-circle" />
-                    <div>
-                        <p className="font-bold">Don&apos;t have an account yet?</p>
-                        <p>
-                            <Link
-                                href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
-                                className="font-bold text-coral"
-                            >
-                                Create your Splits Network account
-                            </Link>{" "}
-                            to get started.
-                        </p>
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-4" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">Don&apos;t have an account yet?</p>
+                            <p className="text-sm text-base-content/60">
+                                <Link
+                                    href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
+                                    className="text-primary font-semibold hover:underline"
+                                >
+                                    Create your Splits Network account
+                                </Link>{" "}
+                                to get started.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
 
             {errorType === "incorrect_password" && (
-                <div className="alert alert-soft alert-yellow" role="alert">
-                    <i className="fa-duotone fa-regular fa-key" />
-                    <div>
-                        <p className="font-bold">Password incorrect</p>
-                        <p>
-                            Double-check your password or{" "}
-                            <Link href="/forgot-password" className="font-bold text-coral">reset your password</Link>
-                        </p>
+                <div className="bg-warning/10 border-l-4 border-warning p-4 mb-4" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-key text-warning mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">Password incorrect</p>
+                            <p className="text-sm text-base-content/60">
+                                Double-check your password or{" "}
+                                <Link href="/forgot-password" className="text-primary font-semibold hover:underline">reset your password</Link>
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
 
             {errorType === "rate_limited" && (
-                <div className="alert alert-soft alert-yellow" role="alert">
-                    <i className="fa-duotone fa-regular fa-clock" />
-                    <div>
-                        <p className="font-bold">Too many attempts</p>
-                        <p>For security, please wait a few minutes before trying again.</p>
+                <div className="bg-warning/10 border-l-4 border-warning p-4 mb-4" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-clock text-warning mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">Too many attempts</p>
+                            <p className="text-sm text-base-content/60">For security, please wait a few minutes before trying again.</p>
+                        </div>
                     </div>
                 </div>
             )}
 
+            {/* Social login buttons */}
+            <div className="space-y-3 mb-6">
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signInWithOAuth("oauth_google")}
+                >
+                    <i className="fa-brands fa-google text-lg" />
+                    <span className="text-sm font-semibold">Continue with Google</span>
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signInWithOAuth("oauth_github")}
+                >
+                    <i className="fa-brands fa-github text-lg" />
+                    <span className="text-sm font-semibold">Continue with GitHub</span>
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signInWithOAuth("oauth_microsoft")}
+                >
+                    <i className="fa-brands fa-microsoft text-lg" />
+                    <span className="text-sm font-semibold">Continue with Microsoft</span>
+                </button>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
+
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div id="clerk-captcha" />
 
-                <AuthInput
-                    label="Email"
-                    type="email"
-                    value={email}
-                    onChange={(v: string) => { setEmail(v); setError(""); }}
-                    placeholder="you@company.com"
-                    error={errorType === "account_not_found" ? " " : undefined}
-                />
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Email Address
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                            placeholder="you@company.com"
+                            className={`input input-bordered w-full pl-10 ${errorType === "account_not_found" ? "input-error" : ""}`}
+                            required
+                        />
+                    </div>
+                </fieldset>
 
-                <div>
-                    <AuthInput
-                        label="Password"
-                        type="password"
-                        value={password}
-                        onChange={(v: string) => { setPassword(v); setError(""); }}
-                        placeholder="Enter password"
-                        showPasswordToggle
-                        error={errorType === "incorrect_password" ? " " : undefined}
-                    />
-                    <div className="flex justify-end mt-2">
-                        <Link href="/forgot-password" className="btn btn-link btn-sm text-coral">
-                            Forgot Password?
+                <fieldset>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40">
+                            Password
+                        </label>
+                        <Link
+                            href="/forgot-password"
+                            className="text-xs text-primary font-semibold hover:underline"
+                        >
+                            Forgot?
                         </Link>
                     </div>
-                </div>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                            placeholder="Enter your password"
+                            className={`input input-bordered w-full pl-10 pr-10 ${errorType === "incorrect_password" ? "input-error" : ""}`}
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
+                        >
+                            <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                        </button>
+                    </div>
+                </fieldset>
 
-                <button type="submit" className="btn btn-coral btn-block" disabled={isLoading || !isLoaded}>
+                <button
+                    type="submit"
+                    className="btn btn-primary w-full mt-2"
+                    disabled={isLoading || !isLoaded}
+                >
                     {isLoading ? (
-                        <><span className="loading loading-spinner" /> Signing in...</>
+                        <><span className="loading loading-spinner loading-sm" /> Signing in...</>
                     ) : (
                         "Sign In"
                     )}
                 </button>
             </form>
 
-            <div className="divider">or</div>
-
-            <div className="grid grid-cols-3 gap-3">
-                <SocialLoginButton label="Google" icon="fa-brands fa-google" color="coral" onClick={() => signInWithOAuth("oauth_google")} />
-                <SocialLoginButton label="GitHub" icon="fa-brands fa-github" color="purple" onClick={() => signInWithOAuth("oauth_github")} />
-                <SocialLoginButton label="Microsoft" icon="fa-brands fa-microsoft" color="teal" onClick={() => signInWithOAuth("oauth_microsoft")} />
-            </div>
-
-            <p className="text-center text-base-content/60">
+            {/* Switch mode */}
+            <div className="text-center mt-8 text-sm text-base-content/50">
                 Don&apos;t have an account?{" "}
                 <Link
                     href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
-                    className="btn btn-link btn-sm text-coral"
+                    className="text-primary font-semibold hover:underline"
                 >
                     Sign up
                 </Link>
-            </p>
-        </div>
+            </div>
+        </>
     );
 }

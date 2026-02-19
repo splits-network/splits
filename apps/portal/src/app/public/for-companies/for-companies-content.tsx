@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
 import {
     duration,
     easing,
@@ -715,24 +716,26 @@ export function ForCompaniesContent() {
                     </div>
 
                     <div className="mt-16 text-center animate-section">
-                        <div className="bg-gradient-to-r from-base-100 to-base-200 p-8 rounded-2xl shadow-lg">
-                            <h3 className="text-2xl font-bold text-base-content mb-4">
-                                Ready to Experience Better Hiring?
-                            </h3>
-                            <p className="text-lg text-base-content/80 max-w-3xl mx-auto mb-6">
-                                Stop settling for the limitations of traditional
-                                recruiting. Join companies who've discovered
-                                that collaborative recruiting isn't just faster
-                                - it's fundamentally better.
-                            </p>
-                            <Link
-                                href="/sign-up"
-                                className="btn btn-primary btn-lg"
-                            >
-                                <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
-                                Partner With Us Today
-                            </Link>
-                        </div>
+                        <AuthenticatedCTAWrapper>
+                            <div className="bg-gradient-to-r from-base-100 to-base-200 p-8 rounded-2xl shadow-lg">
+                                <h3 className="text-2xl font-bold text-base-content mb-4">
+                                    Ready to Experience Better Hiring?
+                                </h3>
+                                <p className="text-lg text-base-content/80 max-w-3xl mx-auto mb-6">
+                                    Stop settling for the limitations of traditional
+                                    recruiting. Join companies who've discovered
+                                    that collaborative recruiting isn't just faster
+                                    - it's fundamentally better.
+                                </p>
+                                <Link
+                                    href="/sign-up"
+                                    className="btn btn-primary btn-lg"
+                                >
+                                    <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
+                                    Partner With Us Today
+                                </Link>
+                            </div>
+                        </AuthenticatedCTAWrapper>
                     </div>
                 </div>
             </section>
@@ -913,9 +916,10 @@ export function ForCompaniesContent() {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA Section (Hidden for logged-in users) */}
             <section className="py-24 px-4 bg-gradient-to-br from-secondary/10 via-base-100 to-accent/10">
-                <div className="max-w-7xl mx-auto text-center">
+                <AuthenticatedCTAWrapper>
+                    <div className="max-w-7xl mx-auto text-center">
                     <div className="animate-section">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Ready to Transform Your Hiring?
@@ -973,7 +977,8 @@ export function ForCompaniesContent() {
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
+                </AuthenticatedCTAWrapper>
             </section>
         </div>
     );

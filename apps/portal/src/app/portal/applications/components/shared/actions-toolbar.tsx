@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -67,7 +67,6 @@ export default function ActionsToolbar({
     className = "",
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
-    const { user } = useUser();
     const router = useRouter();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
@@ -380,10 +379,10 @@ export default function ActionsToolbar({
                 jobTitle={application.job?.title || "Unknown"}
                 gateName={permissions.stageLabel}
             />
-            {showNoteModal && user?.id && (
+            {showNoteModal && profile?.clerk_user_id && (
                 <AddNoteModal
                     applicationId={application.id}
-                    currentUserId={user.id}
+                    currentUserId={profile.clerk_user_id}
                     creatorType={getCreatorType()}
                     onClose={() => setShowNoteModal(false)}
                     onSave={handleSaveNote}

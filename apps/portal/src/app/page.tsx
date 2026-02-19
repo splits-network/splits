@@ -241,10 +241,7 @@ export default async function HomePage() {
                     <div className="container mx-auto px-6">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                             {stats.map((stat, i) => (
-                                <div
-                                    key={i}
-                                    className="stat-item opacity-0"
-                                >
+                                <div key={i} className="stat-item opacity-0">
                                     <div className="text-3xl md:text-4xl font-black tracking-tight">
                                         {stat.value}
                                     </div>
@@ -502,7 +499,8 @@ export default async function HomePage() {
                                     documented record — who submitted the
                                     candidate, what terms were agreed, where the
                                     pipeline stands, and when payment
-                                    distributes. Nothing verbal. Nothing assumed.
+                                    distributes. Nothing verbal. Nothing
+                                    assumed.
                                 </p>
 
                                 <div className="grid sm:grid-cols-3 gap-6">
@@ -601,9 +599,7 @@ export default async function HomePage() {
                         <p className="text-4xl md:text-5xl lg:text-6xl font-black text-white text-center leading-[0.95] tracking-tight px-6">
                             Your next placement
                             <br />
-                            <span className="text-secondary">
-                                starts here.
-                            </span>
+                            <span className="text-secondary">starts here.</span>
                         </p>
                     </div>
                 </section>

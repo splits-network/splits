@@ -45,6 +45,24 @@ export function registerInvitationRoutes(
         }
     });
 
+    // Public preview endpoint — no auth required.
+    // Returns only non-sensitive fields so users can see the invitation before signing in.
+    app.get('/api/v2/invitations/:id/preview', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const preview = await invitationService.getInvitationPreview(id);
+            reply.send({ data: preview });
+        } catch (error) {
+            logError('GET /api/v2/invitations/:id/preview failed', error);
+            const message = (error as Error).message;
+            if (message?.toLowerCase().includes('not found')) {
+                reply.code(404).send({ error: { message: 'Invitation not found' } });
+            } else {
+                reply.code(500).send({ error: { message: 'Failed to fetch invitation preview' } });
+            }
+        }
+    });
+
     app.get('/api/v2/invitations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

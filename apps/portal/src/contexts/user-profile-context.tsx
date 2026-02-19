@@ -151,13 +151,20 @@ const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 
 interface UserProfileProviderProps {
     children: ReactNode;
+    /** Server-fetched profile to pre-seed state, eliminating the client-side loading flash */
+    initialProfile?: Record<string, any> | null;
 }
 
-export function UserProfileProvider({ children }: UserProfileProviderProps) {
+export function UserProfileProvider({
+    children,
+    initialProfile,
+}: UserProfileProviderProps) {
     const { getToken, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
     const { signOut } = useClerk();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [profile, setProfile] = useState<UserProfile | null>(
+        (initialProfile as UserProfile) ?? null,
+    );
+    const [isLoading, setIsLoading] = useState(!initialProfile);
     const [error, setError] = useState<string | null>(null);
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
@@ -165,43 +172,57 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         [],
     );
 
-    const fetchProfile = useCallback(async () => {
-        if (!isAuthLoaded) return;
+    const fetchProfile = useCallback(
+        async (opts?: { silent?: boolean }) => {
+            if (!isAuthLoaded) return;
 
-        if (!isSignedIn) {
-            setProfile(null);
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            const token = await getToken();
-            if (!token) {
+            if (!isSignedIn) {
                 setProfile(null);
                 setIsLoading(false);
                 return;
             }
 
-            const profileData = await getCurrentUserProfile(getToken);
-            setProfile(profileData as UserProfile | null);
-        } catch (err) {
-            console.error("Failed to fetch user profile:", err);
-            setError(
-                err instanceof Error ? err.message : "Failed to load profile",
-            );
-            setProfile(null);
-        } finally {
-            setIsLoading(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthLoaded, isSignedIn]);
+            try {
+                // If we already have profile data (from server-side initialProfile or a
+                // prior fetch) perform a silent background refresh — no loading spinner.
+                if (!opts?.silent) {
+                    setIsLoading(true);
+                }
+                setError(null);
+
+                const token = await getToken();
+                if (!token) {
+                    setProfile(null);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const profileData = await getCurrentUserProfile(getToken);
+                setProfile(profileData as UserProfile | null);
+            } catch (err) {
+                console.error("Failed to fetch user profile:", err);
+                // Only surface errors when not silently refreshing
+                if (!opts?.silent) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load profile",
+                    );
+                }
+                if (!opts?.silent) setProfile(null);
+            } finally {
+                if (!opts?.silent) setIsLoading(false);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [isAuthLoaded, isSignedIn],
+    );
 
     useEffect(() => {
-        fetchProfile();
-    }, [fetchProfile]);
+        // If we have server-provided initialProfile, do a silent background refresh
+        // so the user never sees a loading state on first render.
+        fetchProfile({ silent: Boolean(initialProfile) });
+    }, [fetchProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchSubscription = useCallback(async () => {
         // Only fetch for recruiters

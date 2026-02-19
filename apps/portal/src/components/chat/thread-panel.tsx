@@ -505,8 +505,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                                         isOwnMessage ? "chat-end" : "chat-start"
                                     }`}
                                 >
-                                    <div className="chat-image avatar avatar-placeholder">
-                                        <div className="bg-base-200 text-base-content rounded-full w-10">
+                                    <div className="chat-image avatar avatar-placeholder rounded-none">
+                                        <div className="bg-base-200 text-base-content rounded-none w-10">
                                             <span className="text-sm text-primary font-semibold">
                                                 {isOwnMessage ? (
                                                     <i className="fa-duotone fa-user text-2xl" />

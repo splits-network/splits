@@ -3,7 +3,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { ActivitySnapshot } from '../components/online-activity-chart';
+
+type UserType = 'recruiter' | 'company_admin' | 'hiring_manager' | 'candidate' | 'anonymous';
+
+export interface ActivitySnapshot {
+    total_online: number;
+    by_app: { portal: number; candidate: number; corporate: number };
+    by_role?: Record<UserType, number>;
+    authenticated: number;
+    anonymous: number;
+    timeline: { minute: string; count: number }[];
+    timeline_by_app?: Record<string, { minute: string; count: number }[]>;
+    timeline_by_role?: Record<string, { minute: string; count: number }[]>;
+    timestamp: string;
+}
 
 export function useOnlineActivity() {
     const { getToken } = useAuth();

@@ -51,7 +51,10 @@ export function BaselFooter({
     containerRef,
 }: BaselFooterProps) {
     return (
-        <div ref={containerRef as React.RefObject<HTMLDivElement>} className={className}>
+        <div
+            ref={containerRef as React.RefObject<HTMLDivElement>}
+            className={className}
+        >
             {/* ── 1. CTA Band ─────────────────────────────────────── */}
             {cta && (
                 <section className="footer-cta-band bg-primary text-primary-content py-16">
@@ -102,14 +105,42 @@ export function BaselFooter({
                 {/* ── Bottom Bar ───────────────────────────────────── */}
                 {bottomBar && (
                     <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-                        <div className="footer-bottom py-6">
-                            {bottomBar}
-                        </div>
+                        <div className="footer-bottom py-6">{bottomBar}</div>
                     </div>
                 )}
 
                 {/* Bottom accent line */}
                 <div className="h-1 bg-primary w-full" />
+                <div className="flex items-center justify-between">
+                    <div className="text-sm text-neutral-content/50">
+                        &copy; {new Date().getFullYear()} Splits Network. All
+                        rights reserved.
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <a
+                            href="/privacy"
+                            className="text-sm text-neutral-content/50 hover:text-neutral-content transition-colors"
+                        >
+                            Privacy Policy
+                        </a>
+                        <a
+                            href="/terms"
+                            className="text-sm text-neutral-content/50 hover:text-neutral-content transition-colors"
+                        >
+                            Terms of Service
+                        </a>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs opacity-30">
+                        <div className="flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-shield-check" />
+                            SOC 2 Type II Compliant
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-lock" />
+                            256-bit Encryption
+                        </div>
+                    </div>
+                </div>
             </footer>
         </div>
     );

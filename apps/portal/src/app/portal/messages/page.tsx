@@ -1,33 +1,32 @@
 "use client";
 
+/**
+ * Messages Page — Basel design (showcase/messages/one).
+ * Route: /portal/messages
+ *
+ * Structure: Editorial header -> split-screen (with inline search/filters) -> footer accent.
+ * DaisyUI semantic tokens only.
+ */
+
 import { ErrorState } from "@/hooks/use-standard-list";
 import { FilterProvider, useFilter } from "./contexts/filter-context";
-import { ListsSixAnimator } from "./lists-six-animator";
-import { HeaderSection } from "./components/shared/header-section";
-import { ControlsBar } from "./components/shared/controls-bar";
-import SplitView from "./components/split/split-view";
+import { BaselAnimator } from "./basel-animator";
+import { HeaderSection } from "@/components/basel/messages/header-section";
+import SplitView from "@/components/basel/messages/split-view";
 
 export default function MessagesPage() {
     return (
         <FilterProvider>
-            <MessagesPageContent />
+            <MessagesContent />
         </FilterProvider>
     );
 }
 
-function MessagesPageContent() {
+function MessagesContent() {
     const {
         data,
         error,
-        searchInput,
-        setSearchInput,
-        clearSearch,
-        filters,
-        setFilter,
-        loading,
         refresh,
-        showStats,
-        setShowStats,
         requestCount,
     } = useFilter();
 
@@ -47,33 +46,53 @@ function MessagesPageContent() {
     }
 
     return (
-        <ListsSixAnimator>
+        <BaselAnimator>
             <HeaderSection stats={stats} />
 
-            <section className="min-h-screen bg-cream">
-                <div className="py-8 px-4 lg:px-8">
-                    <ControlsBar
-                        searchInput={searchInput}
-                        onSearchChange={setSearchInput}
-                        onClearSearch={clearSearch}
-                        filters={filters}
-                        onFilterChange={setFilter}
-                        loading={loading}
-                        onRefresh={refresh}
-                        showStats={showStats}
-                        onToggleStats={setShowStats}
-                        requestCount={requestCount}
-                    />
-
-                    <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6 mt-4">
-                        Showing {data.length} conversations
-                    </p>
-
-                    <div className="listings-content opacity-0 mt-6">
+            <section className="bg-base-100">
+                <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
+                    <div className="listings-content opacity-0">
                         <SplitView />
                     </div>
                 </div>
             </section>
-        </ListsSixAnimator>
+
+            {/* ═══ Footer Accent — Editorial style (from showcase) ═══ */}
+            <section className="bg-neutral text-neutral-content py-8">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-comments text-primary-content" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold">
+                                    Splits Network Messaging
+                                </p>
+                                <p className="text-xs opacity-50">
+                                    Secure, real-time communication across the
+                                    entire recruiting ecosystem
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6 text-xs opacity-50">
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-lock" />
+                                End-to-end encrypted
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-bolt" />
+                                Real-time delivery
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-shield-check" />
+                                GDPR compliant
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </BaselAnimator>
     );
 }

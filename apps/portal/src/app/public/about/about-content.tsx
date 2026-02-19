@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
 import {
     duration,
     easing,
@@ -772,37 +773,39 @@ export function AboutContent() {
                 ref={ctaRef}
                 className="py-20 bg-primary text-primary-content overflow-hidden"
             >
-                <div className="container mx-auto px-4 text-center">
-                    <div className="cta-content opacity-0">
-                        <h2 className="text-4xl font-bold mb-6">
-                            Ready to Join the Movement?
-                        </h2>
-                        <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                            Be part of the platform that's changing how split
-                            placements work.
-                        </p>
+                <AuthenticatedCTAWrapper>
+                    <div className="container mx-auto px-4 text-center">
+                        <div className="cta-content opacity-0">
+                            <h2 className="text-4xl font-bold mb-6">
+                                Ready to Join the Movement?
+                            </h2>
+                            <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+                                Be part of the platform that's changing how
+                                split placements work.
+                            </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/sign-up"
+                                className="cta-btn btn btn-lg btn-neutral opacity-0"
+                                onMouseEnter={handleButtonEnter}
+                                onMouseLeave={handleButtonLeave}
+                            >
+                                <i className="fa-duotone fa-regular fa-user-tie"></i>
+                                Join as a Recruiter
+                            </Link>
+                            <Link
+                                href="/sign-up"
+                                className="cta-btn btn btn-lg btn-secondary opacity-0"
+                                onMouseEnter={handleButtonEnter}
+                                onMouseLeave={handleButtonLeave}
+                            >
+                                <i className="fa-duotone fa-regular fa-building"></i>
+                                Post Roles as a Company
+                            </Link>
+                        </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/sign-up"
-                            className="cta-btn btn btn-lg btn-neutral opacity-0"
-                            onMouseEnter={handleButtonEnter}
-                            onMouseLeave={handleButtonLeave}
-                        >
-                            <i className="fa-duotone fa-regular fa-user-tie"></i>
-                            Join as a Recruiter
-                        </Link>
-                        <Link
-                            href="/sign-up"
-                            className="cta-btn btn btn-lg btn-secondary opacity-0"
-                            onMouseEnter={handleButtonEnter}
-                            onMouseLeave={handleButtonLeave}
-                        >
-                            <i className="fa-duotone fa-regular fa-building"></i>
-                            Post Roles as a Company
-                        </Link>
-                    </div>
-                </div>
+                </AuthenticatedCTAWrapper>
             </section>
         </>
     );

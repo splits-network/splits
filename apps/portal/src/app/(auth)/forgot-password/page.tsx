@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
-import { AuthInput } from "@splits-network/memphis-ui";
 
 export default function ForgotPasswordPage() {
     const { isLoaded, signIn } = useSignIn();
@@ -14,6 +13,7 @@ export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [successfulCreation, setSuccessfulCreation] = useState(false);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -62,47 +62,61 @@ export default function ForgotPasswordPage() {
         gsap.fromTo(
             stepRef.current,
             { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
         );
     }, [successfulCreation, complete]);
 
+    // Success state
     if (complete) {
         return (
             <div ref={stepRef} className="py-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center border-4 border-teal bg-teal">
-                    <i className="fa-duotone fa-regular fa-check text-2xl text-dark" />
+                <div className="w-16 h-16 mx-auto mb-6 bg-success/10 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-circle-check text-success text-3xl" />
                 </div>
-                <h2 className="card-title text-xl justify-center mb-2">Password Reset Successful</h2>
-                <p className="text-base-content/50 mb-4">Your password has been updated. Redirecting to sign in...</p>
-                <span className="loading loading-spinner loading-lg text-coral" />
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Password reset successful
+                </h1>
+                <p className="text-base-content/50 mb-6">
+                    Your password has been updated. Redirecting to sign in...
+                </p>
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }
 
+    // Reset code entry + new password step
     if (successfulCreation) {
         return (
-            <div ref={stepRef} className="space-y-4">
-                <h2 className="card-title text-lg">Reset Your Password</h2>
+            <div ref={stepRef}>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-black tracking-tight mb-2">
+                        Reset your password
+                    </h1>
+                </div>
 
-                <div className="alert alert-soft alert-purple" role="alert">
-                    <i className="fa-duotone fa-regular fa-envelope" />
-                    <span>We sent a reset code to {email}</span>
+                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
+                        <span className="text-sm">We sent a reset code to <strong>{email}</strong></span>
+                    </div>
                 </div>
 
                 {error && (
-                    <div className="alert alert-outline alert-coral" role="alert">
+                    <div className="alert alert-error mb-4" role="alert">
                         <i className="fa-solid fa-circle-xmark" />
                         <span>{error}</span>
                     </div>
                 )}
 
                 <form onSubmit={handleReset} className="space-y-4">
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Reset Code</legend>
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            Reset Code
+                        </label>
                         <input
                             type="text"
                             placeholder="123456"
-                            className="input w-full text-center text-2xl tracking-widest"
+                            className="input input-bordered w-full text-center text-2xl tracking-widest"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             required
@@ -111,69 +125,106 @@ export default function ForgotPasswordPage() {
                         />
                     </fieldset>
 
-                    <AuthInput
-                        label="New Password"
-                        type="password"
-                        value={password}
-                        onChange={(v: string) => setPassword(v)}
-                        placeholder="Enter new password"
-                        showPasswordToggle
-                    />
-                    <p className="label text-base-content/50 -mt-2">Must be at least 8 characters</p>
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            New Password
+                        </label>
+                        <div className="relative">
+                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter new password"
+                                className="input input-bordered w-full pl-10 pr-10"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
+                            >
+                                <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                            </button>
+                        </div>
+                        <p className="text-xs text-base-content/40 mt-1.5">Must be at least 8 characters</p>
+                    </fieldset>
 
-                    <button type="submit" className="btn btn-yellow btn-block" disabled={isLoading || !isLoaded}>
+                    <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
                         {isLoading ? (
-                            <><span className="loading loading-spinner" /> Resetting password...</>
+                            <><span className="loading loading-spinner loading-sm" /> Resetting password...</>
                         ) : (
                             "Reset Password"
                         )}
                     </button>
                 </form>
 
-                <button onClick={() => setSuccessfulCreation(false)} className="btn btn-ghost btn-sm btn-block">
+                <button onClick={() => setSuccessfulCreation(false)} className="btn btn-ghost btn-sm w-full mt-4">
                     <i className="fa-solid fa-arrow-left" /> Back
                 </button>
             </div>
         );
     }
 
+    // Initial email entry step
     return (
-        <div ref={stepRef} className="space-y-4">
-            <div>
-                <h2 className="card-title text-lg">Reset Password</h2>
-                <p className="text-base-content/50">Enter your email and we&apos;ll send you a reset code.</p>
+        <div ref={stepRef}>
+            <div className="mb-8">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Reset your password
+                </h1>
+                <p className="text-base-content/50">
+                    Enter your email and we&apos;ll send a reset code.
+                </p>
             </div>
 
             {error && (
-                <div className="alert alert-outline alert-coral" role="alert">
+                <div className="alert alert-error mb-4" role="alert">
                     <i className="fa-solid fa-circle-xmark" />
                     <span>{error}</span>
                 </div>
             )}
 
             <form onSubmit={handleSendCode} className="space-y-4">
-                <AuthInput
-                    label="Email Address"
-                    type="email"
-                    value={email}
-                    onChange={(v: string) => setEmail(v)}
-                    placeholder="you@company.com"
-                />
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Email Address
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="you@company.com"
+                            className="input input-bordered w-full pl-10"
+                            required
+                        />
+                    </div>
+                </fieldset>
 
-                <button type="submit" className="btn btn-yellow btn-block" disabled={isLoading || !isLoaded}>
+                <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
                     {isLoading ? (
-                        <><span className="loading loading-spinner" /> Sending code...</>
+                        <><span className="loading loading-spinner loading-sm" /> Sending code...</>
                     ) : (
                         "Send Reset Code"
                     )}
                 </button>
             </form>
 
-            <div className="divider">or</div>
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
 
-            <Link href="/sign-in" className="btn btn-ghost btn-sm btn-block">
-                <i className="fa-solid fa-arrow-left" /> Back to Sign In
-            </Link>
+            <div className="text-center text-sm text-base-content/50">
+                Remember your password?{" "}
+                <Link href="/sign-in" className="text-primary font-semibold hover:underline">
+                    Sign in
+                </Link>
+            </div>
         </div>
     );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { AuthenticatedCTAWrapper } from "@/components/authenticated-cta-wrapper";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -497,7 +498,8 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
                         <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
                             Browse thousands of roles from top companies. Get
                             matched with specialized recruiters who advocate for
-                            you — real communication, real support, real results.
+                            you — real communication, real support, real
+                            results.
                         </p>
 
                         <div className="flex flex-wrap gap-4">
@@ -564,9 +566,9 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
                                 broken.
                             </h2>
                             <p className="text-lg text-base-content/70 leading-relaxed mb-10 max-w-lg">
-                                Black-hole applications, ghosting recruiters, and
-                                zero transparency. The traditional job search fails
-                                candidates at every step.
+                                Black-hole applications, ghosting recruiters,
+                                and zero transparency. The traditional job
+                                search fails candidates at every step.
                             </p>
 
                             <div className="space-y-4">
@@ -753,9 +755,9 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
                             </h2>
                             <p className="text-lg text-base-content/70 leading-relaxed mb-8 max-w-lg">
                                 Applicant Network connects you with expert
-                                recruiters who specialize in your field. They open
-                                doors, prep you for interviews, and ensure you
-                                never get ghosted again.
+                                recruiters who specialize in your field. They
+                                open doors, prep you for interviews, and ensure
+                                you never get ghosted again.
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-6">
@@ -912,51 +914,53 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
             </section>
 
             {/* ═══════════════════════════════════════════════════════
-                FINAL CTA
-               ═══════════════════════════════════════════════════════ */}
-            <section className="final-cta py-28 bg-primary text-primary-content">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
-                            Ready to find
-                            <br />
-                            your perfect role?
-                        </h2>
-                        <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                            Join thousands of candidates who found better
-                            opportunities with expert recruiter support. Get
-                            started in minutes.
-                        </p>
+                FINAL CTA (Hidden for logged-in users)
+               ════════════════════════════════════════════════════════════ */}
+            <AuthenticatedCTAWrapper>
+                <section className="final-cta py-28 bg-primary text-primary-content">
+                    <div className="container mx-auto px-6 lg:px-12">
+                        <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
+                                Ready to find
+                                <br />
+                                your perfect role?
+                            </h2>
+                            <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
+                                Join thousands of candidates who found better
+                                opportunities with expert recruiter support. Get
+                                started in minutes.
+                            </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                            <Link
-                                href="/sign-up"
-                                className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
-                            >
-                                <i className="fa-duotone fa-regular fa-user-plus"></i>
-                                Create Free Account
-                            </Link>
-                            <Link
-                                href="/public/jobs"
-                                className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-                            >
-                                <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
-                                Browse Jobs First
-                            </Link>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                                <Link
+                                    href="/sign-up"
+                                    className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
+                                >
+                                    <i className="fa-duotone fa-regular fa-user-plus"></i>
+                                    Create Free Account
+                                </Link>
+                                <Link
+                                    href="/public/jobs"
+                                    className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                                >
+                                    <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
+                                    Browse Jobs First
+                                </Link>
+                            </div>
+
+                            <p className="text-sm opacity-60">
+                                Free forever. No credit card required.{" "}
+                                <a
+                                    href="mailto:hello@applicant.network"
+                                    className="underline hover:opacity-100 transition-opacity"
+                                >
+                                    Questions? Get in touch
+                                </a>
+                            </p>
                         </div>
-
-                        <p className="text-sm opacity-60">
-                            Free forever. No credit card required.{" "}
-                            <a
-                                href="mailto:hello@applicant.network"
-                                className="underline hover:opacity-100 transition-opacity"
-                            >
-                                Questions? Get in touch
-                            </a>
-                        </p>
                     </div>
-                </div>
-            </section>
+                </section>
+            </AuthenticatedCTAWrapper>
         </main>
     );
 }

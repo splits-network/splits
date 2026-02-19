@@ -5,6 +5,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
 import {
     duration,
     easing,
@@ -19,42 +20,48 @@ const blogTopics = [
         iconColor: "text-primary",
         bgColor: "bg-primary/20",
         title: "Split Placement Strategies",
-        description: "Tips and techniques for successful collaborative placements and partner relationships.",
+        description:
+            "Tips and techniques for successful collaborative placements and partner relationships.",
     },
     {
         icon: "fa-chart-line",
         iconColor: "text-secondary",
         bgColor: "bg-secondary/20",
         title: "Industry Insights",
-        description: "Trends in recruiting, hiring data, and the future of the talent acquisition industry.",
+        description:
+            "Trends in recruiting, hiring data, and the future of the talent acquisition industry.",
     },
     {
         icon: "fa-rocket",
         iconColor: "text-accent",
         bgColor: "bg-accent/20",
         title: "Platform Updates",
-        description: "New features, improvements, and how to get the most out of Splits",
+        description:
+            "New features, improvements, and how to get the most out of Splits",
     },
     {
         icon: "fa-user-tie",
         iconColor: "text-success",
         bgColor: "bg-success/20",
         title: "Recruiter Success Stories",
-        description: "Case studies and interviews with recruiters building successful split placement businesses.",
+        description:
+            "Case studies and interviews with recruiters building successful split placement businesses.",
     },
     {
         icon: "fa-lightbulb",
         iconColor: "text-info",
         bgColor: "bg-info/20",
         title: "Best Practices",
-        description: "Guides on candidate sourcing, client relationships, fee negotiations, and more.",
+        description:
+            "Guides on candidate sourcing, client relationships, fee negotiations, and more.",
     },
     {
         icon: "fa-building",
         iconColor: "text-warning",
         bgColor: "bg-warning/20",
         title: "Company Perspectives",
-        description: "How companies can build effective external recruiting networks and partnerships.",
+        description:
+            "How companies can build effective external recruiting networks and partnerships.",
     },
 ];
 
@@ -96,7 +103,7 @@ export function BlogContent() {
         () => {
             if (!heroRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -110,11 +117,11 @@ export function BlogContent() {
                         y: 0,
                         duration: duration.hero,
                         ease: easing.smooth,
-                    }
+                    },
                 );
             }
         },
-        { scope: heroRef }
+        { scope: heroRef },
     );
 
     // Coming Soon animation
@@ -122,12 +129,15 @@ export function BlogContent() {
         () => {
             if (!comingSoonRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
-            const icon = comingSoonRef.current.querySelector(".coming-soon-icon");
-            const content = comingSoonRef.current.querySelector(".coming-soon-content");
+            const icon =
+                comingSoonRef.current.querySelector(".coming-soon-icon");
+            const content = comingSoonRef.current.querySelector(
+                ".coming-soon-content",
+            );
 
             const tl = gsap.timeline({
                 scrollTrigger: {
@@ -145,7 +155,7 @@ export function BlogContent() {
                         rotation: 0,
                         duration: duration.normal,
                         ease: easing.bounce,
-                    }
+                    },
                 );
             }
 
@@ -159,11 +169,11 @@ export function BlogContent() {
                         duration: duration.normal,
                         ease: easing.smooth,
                     },
-                    "-=0.3"
+                    "-=0.3",
                 );
             }
         },
-        { scope: comingSoonRef }
+        { scope: comingSoonRef },
     );
 
     // Topics animation
@@ -171,7 +181,7 @@ export function BlogContent() {
         () => {
             if (!topicsRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -195,7 +205,7 @@ export function BlogContent() {
                         y: 0,
                         duration: duration.normal,
                         ease: easing.smooth,
-                    }
+                    },
                 );
             }
 
@@ -211,7 +221,7 @@ export function BlogContent() {
                         ease: easing.smooth,
                         stagger: stagger.normal,
                     },
-                    "-=0.3"
+                    "-=0.3",
                 );
             }
 
@@ -225,11 +235,11 @@ export function BlogContent() {
                         ease: easing.bounce,
                         stagger: stagger.tight,
                     },
-                    "-=0.6"
+                    "-=0.6",
                 );
             }
         },
-        { scope: topicsRef }
+        { scope: topicsRef },
     );
 
     // Newsletter animation
@@ -237,11 +247,12 @@ export function BlogContent() {
         () => {
             if (!newsletterRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
-            const card = newsletterRef.current.querySelector(".newsletter-card");
+            const card =
+                newsletterRef.current.querySelector(".newsletter-card");
 
             gsap.fromTo(
                 card,
@@ -256,10 +267,10 @@ export function BlogContent() {
                         trigger: newsletterRef.current,
                         start: "top 80%",
                     },
-                }
+                },
             );
         },
-        { scope: newsletterRef }
+        { scope: newsletterRef },
     );
 
     // Resources animation
@@ -267,12 +278,14 @@ export function BlogContent() {
         () => {
             if (!resourcesRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
-            const heading = resourcesRef.current.querySelector(".section-heading");
-            const cards = resourcesRef.current.querySelectorAll(".resource-card");
+            const heading =
+                resourcesRef.current.querySelector(".section-heading");
+            const cards =
+                resourcesRef.current.querySelectorAll(".resource-card");
 
             const tl = gsap.timeline({
                 scrollTrigger: {
@@ -290,7 +303,7 @@ export function BlogContent() {
                         y: 0,
                         duration: duration.normal,
                         ease: easing.smooth,
-                    }
+                    },
                 );
             }
 
@@ -306,11 +319,11 @@ export function BlogContent() {
                         ease: easing.bounce,
                         stagger: stagger.normal,
                     },
-                    "-=0.3"
+                    "-=0.3",
                 );
             }
         },
-        { scope: resourcesRef }
+        { scope: resourcesRef },
     );
 
     // CTA animation
@@ -318,7 +331,7 @@ export function BlogContent() {
         () => {
             if (!ctaRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -336,45 +349,56 @@ export function BlogContent() {
                         trigger: ctaRef.current,
                         start: "top 85%",
                     },
-                }
+                },
             );
         },
-        { scope: ctaRef }
+        { scope: ctaRef },
     );
 
     return (
         <>
             {/* Hero Section */}
-            <section ref={heroRef} className="hero bg-gradient-to-r from-info to-secondary text-info-content py-20 overflow-hidden">
+            <section
+                ref={heroRef}
+                className="hero bg-gradient-to-r from-info to-secondary text-info-content py-20 overflow-hidden"
+            >
                 <div className="hero-content text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
                             Splits Network Blog
                         </h1>
                         <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                            Insights, updates, and best practices for collaborative recruiting
+                            Insights, updates, and best practices for
+                            collaborative recruiting
                         </p>
                     </div>
                 </div>
             </section>
 
             {/* Coming Soon Message */}
-            <section ref={comingSoonRef} className="py-20 bg-base-100 overflow-hidden">
+            <section
+                ref={comingSoonRef}
+                className="py-20 bg-base-100 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="mb-12">
                             <i className="coming-soon-icon fa-duotone fa-regular fa-pen-to-square text-8xl text-primary opacity-20"></i>
                         </div>
                         <div className="coming-soon-content">
-                            <h2 className="text-4xl font-bold mb-6">Blog Coming Soon</h2>
+                            <h2 className="text-4xl font-bold mb-6">
+                                Blog Coming Soon
+                            </h2>
                             <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-                                We're preparing valuable content about split placements, recruiting best practices,
-                                platform updates, and industry insights. Check back soon!
+                                We're preparing valuable content about split
+                                placements, recruiting best practices, platform
+                                updates, and industry insights. Check back soon!
                             </p>
                             <div className="alert alert-info max-w-2xl mx-auto mb-8">
                                 <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <span>
-                                    Want to be notified when we publish? Subscribe to our newsletter below.
+                                    Want to be notified when we publish?
+                                    Subscribe to our newsletter below.
                                 </span>
                             </div>
                         </div>
@@ -383,18 +407,32 @@ export function BlogContent() {
             </section>
 
             {/* What to Expect */}
-            <section ref={topicsRef} className="py-20 bg-base-200 overflow-hidden">
+            <section
+                ref={topicsRef}
+                className="py-20 bg-base-200 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">What We'll Cover</h2>
+                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">
+                            What We'll Cover
+                        </h2>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {blogTopics.map((topic, index) => (
-                                <div key={index} className="topic-card card bg-base-100 shadow">
+                                <div
+                                    key={index}
+                                    className="topic-card card bg-base-100 shadow"
+                                >
                                     <div className="card-body">
-                                        <div className={`card-icon w-12 h-12 rounded-full ${topic.bgColor} flex items-center justify-center mb-4`}>
-                                            <i className={`fa-duotone fa-regular ${topic.icon} ${topic.iconColor} text-xl`}></i>
+                                        <div
+                                            className={`card-icon w-12 h-12 rounded-full ${topic.bgColor} flex items-center justify-center mb-4`}
+                                        >
+                                            <i
+                                                className={`fa-duotone fa-regular ${topic.icon} ${topic.iconColor} text-xl`}
+                                            ></i>
                                         </div>
-                                        <h3 className="card-title text-lg">{topic.title}</h3>
+                                        <h3 className="card-title text-lg">
+                                            {topic.title}
+                                        </h3>
                                         <p className="text-sm text-base-content/70">
                                             {topic.description}
                                         </p>
@@ -407,7 +445,10 @@ export function BlogContent() {
             </section>
 
             {/* Newsletter Signup */}
-            <section ref={newsletterRef} className="py-20 bg-base-100 overflow-hidden">
+            <section
+                ref={newsletterRef}
+                className="py-20 bg-base-100 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto">
                         <div className="newsletter-card card bg-primary text-primary-content shadow">
@@ -417,8 +458,10 @@ export function BlogContent() {
                                     Subscribe to Our Newsletter
                                 </h2>
                                 <p className="text-lg opacity-90 mb-8">
-                                    Be the first to know when we publish new content. Get platform updates,
-                                    recruiting tips, and industry insights delivered to your inbox.
+                                    Be the first to know when we publish new
+                                    content. Get platform updates, recruiting
+                                    tips, and industry insights delivered to
+                                    your inbox.
                                 </p>
                                 <div className="form-control w-full max-w-md mx-auto">
                                     <div className="join">
@@ -433,7 +476,8 @@ export function BlogContent() {
                                     </div>
                                     <label className="label">
                                         <span className="label-text-alt text-primary-content/70">
-                                            We respect your privacy. Unsubscribe at any time.
+                                            We respect your privacy. Unsubscribe
+                                            at any time.
                                         </span>
                                     </label>
                                 </div>
@@ -444,18 +488,26 @@ export function BlogContent() {
             </section>
 
             {/* In the Meantime */}
-            <section ref={resourcesRef} className="py-20 bg-neutral text-neutral-content overflow-hidden">
+            <section
+                ref={resourcesRef}
+                className="py-20 bg-neutral text-neutral-content overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto text-center">
                         <div className="section-heading">
-                            <h2 className="text-4xl font-bold mb-8">In the Meantime</h2>
+                            <h2 className="text-4xl font-bold mb-8">
+                                In the Meantime
+                            </h2>
                             <p className="text-lg opacity-80 mb-12">
-                                Explore other resources while we prepare our blog content
+                                Explore other resources while we prepare our
+                                blog content
                             </p>
                         </div>
                         <div className="grid md:grid-cols-3 gap-6">
                             {resourceLinks.map((resource, index) => {
-                                const CardWrapper = resource.isExternal ? "a" : Link;
+                                const CardWrapper = resource.isExternal
+                                    ? "a"
+                                    : Link;
                                 return (
                                     <CardWrapper
                                         key={index}
@@ -463,8 +515,12 @@ export function BlogContent() {
                                         className="resource-card card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow"
                                     >
                                         <div className="card-body text-center">
-                                            <i className={`fa-duotone fa-regular ${resource.icon} text-4xl ${resource.iconColor} mb-4`}></i>
-                                            <h3 className="card-title justify-center">{resource.title}</h3>
+                                            <i
+                                                className={`fa-duotone fa-regular ${resource.icon} text-4xl ${resource.iconColor} mb-4`}
+                                            ></i>
+                                            <h3 className="card-title justify-center">
+                                                {resource.title}
+                                            </h3>
                                             <p className="text-sm text-base-content/70">
                                                 {resource.description}
                                             </p>
@@ -478,23 +534,37 @@ export function BlogContent() {
             </section>
 
             {/* CTA Section */}
-            <section ref={ctaRef} className="py-20 bg-primary text-primary-content overflow-hidden">
-                <div className="cta-content container mx-auto px-4 text-center">
-                    <h2 className="text-4xl font-bold mb-6">Ready to Get Started?</h2>
-                    <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                        Don't wait for blog posts—start making split placements today.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                            <i className="fa-duotone fa-regular fa-user-plus"></i>
-                            Join as a Recruiter
-                        </Link>
-                        <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-duotone fa-regular fa-building"></i>
-                            Post Roles as a Company
-                        </Link>
+            <section
+                ref={ctaRef}
+                className="py-20 bg-primary text-primary-content overflow-hidden"
+            >
+                <AuthenticatedCTAWrapper>
+                    <div className="cta-content container mx-auto px-4 text-center">
+                        <h2 className="text-4xl font-bold mb-6">
+                            Ready to Get Started?
+                        </h2>
+                        <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+                            Don't wait for blog posts—start making split
+                            placements today.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/sign-up"
+                                className="btn btn-lg btn-neutral"
+                            >
+                                <i className="fa-duotone fa-regular fa-user-plus"></i>
+                                Join as a Recruiter
+                            </Link>
+                            <Link
+                                href="/sign-up"
+                                className="btn btn-lg btn-secondary"
+                            >
+                                <i className="fa-duotone fa-regular fa-building"></i>
+                                Post Roles as a Company
+                            </Link>
+                        </div>
                     </div>
-                </div>
+                </AuthenticatedCTAWrapper>
             </section>
         </>
     );

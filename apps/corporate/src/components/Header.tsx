@@ -54,7 +54,7 @@ export function Header() {
                             key={link.href}
                             href={link.href}
                             onClick={(e) => handleSmoothScroll(e, link.href)}
-                            className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
+                            className="px-3 py-2 text-sm font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
                         >
                             {link.label}
                         </a>
@@ -66,13 +66,13 @@ export function Header() {
                     <ThemeToggle />
                     <a
                         href="https://splits.network"
-                        className="hidden md:inline-flex btn btn-sm btn-ghost text-xs font-semibold uppercase tracking-wider"
+                        className="hidden md:inline-flex btn btn-sm btn-ghost text-sm font-semibold uppercase tracking-wider"
                     >
                         Sign In
                     </a>
                     <a
                         href="https://applicant.network"
-                        className="hidden md:inline-flex btn btn-sm btn-primary text-xs font-semibold uppercase tracking-wider"
+                        className="hidden md:inline-flex btn btn-sm btn-primary text-sm font-semibold uppercase tracking-wider"
                     >
                         Find Jobs
                     </a>
@@ -85,7 +85,9 @@ export function Header() {
                             <a
                                 key={link.href}
                                 href={link.href}
-                                onClick={(e) => handleSmoothScroll(e, link.href)}
+                                onClick={(e) =>
+                                    handleSmoothScroll(e, link.href)
+                                }
                                 className="block px-4 py-2.5 text-sm font-semibold text-base-content/70 hover:text-primary hover:bg-base-200 transition-colors"
                             >
                                 {link.label}
