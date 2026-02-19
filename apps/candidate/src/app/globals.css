@@ -1,6 +1,7 @@
 /* @layer base; */
 
 @import "tailwindcss";
+@source "../../../../packages/basel-ui/src";
 @plugin "daisyui";
 @import "./themes/memphis.css";
 

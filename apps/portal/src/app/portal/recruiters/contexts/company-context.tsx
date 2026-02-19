@@ -27,9 +27,10 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     const { isCompanyUser, isAdmin, profile } = useUserProfile();
 
     const [companies, setCompanies] = useState<Company[]>([]);
-    const [recruiterRelationships, setRecruiterRelationships] = useState<Map<string, CompanyRecruiterRelationship>>(new Map());
+    const [recruiterRelationships, setRecruiterRelationships] = useState<
+        Map<string, CompanyRecruiterRelationship>
+    >(new Map());
 
-    // Load companies for invite modal
     useEffect(() => {
         const loadCompanies = async () => {
             if (!isCompanyUser && !isAdmin) return;
@@ -60,7 +61,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
     const canInvite = (isCompanyUser || isAdmin) && companies.length > 0;
 
-    // Load recruiter-company relationships
     const loadRelationships = useCallback(async () => {
         if (!companies.length) return;
 
@@ -74,9 +74,16 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
             const allRelationships: CompanyRecruiterRelationship[] = [];
             for (const companyId of companyIds) {
                 try {
-                    const response: any = await client.get("/recruiter-companies", {
-                        params: { company_id: companyId, status: "active", limit: 100 },
-                    });
+                    const response: any = await client.get(
+                        "/recruiter-companies",
+                        {
+                            params: {
+                                company_id: companyId,
+                                status: "active",
+                                limit: 100,
+                            },
+                        },
+                    );
                     const rels = response?.data || [];
                     allRelationships.push(...rels);
                 } catch {
@@ -103,23 +110,23 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     }, [companies]);
 
     return (
-        <CompanyContext.Provider
-            value={{
-                companies,
-                canInvite,
-                recruiterRelationships,
-                refreshRelationships: loadRelationships,
-            }}
-        >
+        <CompanyContext value={{
+            companies,
+            canInvite,
+            recruiterRelationships,
+            refreshRelationships: loadRelationships,
+        }}>
             {children}
-        </CompanyContext.Provider>
+        </CompanyContext>
     );
 }
 
 export function useCompanyContext() {
     const context = useContext(CompanyContext);
     if (!context) {
-        throw new Error("useCompanyContext must be used within CompanyProvider");
+        throw new Error(
+            "useCompanyContext must be used within CompanyProvider",
+        );
     }
     return context;
 }

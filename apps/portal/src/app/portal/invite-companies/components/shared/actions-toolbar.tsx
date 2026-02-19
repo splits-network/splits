@@ -4,15 +4,15 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { ExpandableButton } from "@splits-network/basel-ui";
 import type { CompanyInvitation } from "../../types";
 import { getInviteLink } from "./helpers";
-import { ExpandableButton } from "./expandable-button";
 
 export interface InvitationActionsToolbarProps {
     invitation: CompanyInvitation;
     variant: "icon-only" | "descriptive";
     layout?: "horizontal" | "vertical";
-    size?: "xs" | "sm" | "md" | "lg";
+    size?: "xs" | "sm" | "md";
     showActions?: {
         copyCode?: boolean;
         copyLink?: boolean;
@@ -137,7 +137,6 @@ export default function InvitationActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast, onRefresh]);
 
-    const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
@@ -190,7 +189,7 @@ export default function InvitationActionsToolbar({
                 )}
                 {actions.revoke && (
                     <>
-                        <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                        <div className="w-px h-4 bg-base-content/20 mx-0.5" />
                         <ExpandableButton
                             icon="fa-duotone fa-regular fa-ban"
                             label="Revoke"
@@ -210,12 +209,13 @@ export default function InvitationActionsToolbar({
     // Descriptive variant
     return (
         <div
-            className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
+            className={`flex flex-wrap items-center ${layout === "horizontal" ? "gap-2" : "flex-col gap-2"} ${className}`}
         >
             {actions.copyCode && (
                 <button
                     onClick={handleCopyCode}
-                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    className={`btn btn-${size} btn-ghost gap-2`}
+                    style={{ borderRadius: 0 }}
                     title="Copy invite code"
                 >
                     <i className="fa-duotone fa-regular fa-copy" />
@@ -225,7 +225,8 @@ export default function InvitationActionsToolbar({
             {actions.copyLink && (
                 <button
                     onClick={handleCopyLink}
-                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    className={`btn btn-${size} btn-ghost gap-2`}
+                    style={{ borderRadius: 0 }}
                     title="Copy invite link"
                 >
                     <i className="fa-duotone fa-regular fa-link" />
@@ -235,7 +236,8 @@ export default function InvitationActionsToolbar({
             {actions.share && (
                 <button
                     onClick={handleShare}
-                    className={`btn ${getSizeClass()} btn-primary gap-2`}
+                    className={`btn btn-${size} btn-primary gap-2`}
+                    style={{ borderRadius: 0 }}
                     title="Share invitation"
                 >
                     <i className="fa-duotone fa-regular fa-share-nodes" />
@@ -245,7 +247,8 @@ export default function InvitationActionsToolbar({
             {actions.resend && (
                 <button
                     onClick={handleResend}
-                    className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                    className={`btn btn-${size} btn-ghost gap-2`}
+                    style={{ borderRadius: 0 }}
                     disabled={resending}
                     title="Resend email"
                 >
@@ -259,10 +262,11 @@ export default function InvitationActionsToolbar({
             )}
             {actions.revoke && (
                 <>
-                    <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                    <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                     <button
                         onClick={handleRevoke}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2 text-coral`}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
+                        style={{ borderRadius: 0 }}
                         disabled={revoking}
                         title="Revoke invitation"
                     >

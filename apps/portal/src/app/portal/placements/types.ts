@@ -1,3 +1,8 @@
+/**
+ * Basel placements types — self-contained (no cross-reference to original).
+ * Imports the base Placement type from shared-types and extends it
+ * with API-enriched fields.
+ */
 import type { Placement as BasePlacement } from "@splits-network/shared-types";
 
 export interface Collaborator {
@@ -17,7 +22,6 @@ export interface YourSplit {
     split_amount: number;
 }
 
-// Extend BasePlacement with enriched fields returned by the API
 export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at" | "updated_at" | "start_date" | "end_date" | "guarantee_expires_at" | "failed_at"> {
     hired_at: string;
     created_at: string;
@@ -27,7 +31,7 @@ export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at"
     guarantee_expires_at?: string;
     failed_at?: string;
     failure_date?: string;
-    status?: string; // Legacy field, use state instead
+    status?: string;
     candidate?: {
         id: string;
         full_name: string;
@@ -48,67 +52,4 @@ export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at"
 
 export interface PlacementFilters {
     status?: string;
-}
-
-export interface PlacementStatusDisplay {
-    label: string;
-    badge: "coral" | "teal" | "yellow" | "purple" | "dark" | "cream";
-    icon: string;
-}
-
-export function getStatusDisplay(placement: Placement): PlacementStatusDisplay {
-    const state = placement.state || "unknown";
-
-    const statusMap: Record<string, PlacementStatusDisplay> = {
-        hired: {
-            label: "Hired",
-            badge: "teal",
-            icon: "fa-user-check",
-        },
-        active: {
-            label: "Active",
-            badge: "purple",
-            icon: "fa-briefcase",
-        },
-        completed: {
-            label: "Completed",
-            badge: "yellow",
-            icon: "fa-check",
-        },
-        failed: {
-            label: "Failed",
-            badge: "coral",
-            icon: "fa-xmark",
-        },
-    };
-
-    return (
-        statusMap[state] || {
-            label: state.charAt(0).toUpperCase() + state.slice(1),
-            badge: "dark",
-            icon: "fa-circle-question",
-        }
-    );
-}
-
-export function formatPlacementDate(
-    dateString: string | Date | null | undefined,
-): string {
-    if (!dateString) return "N/A";
-    const date =
-        dateString instanceof Date ? dateString : new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
-}
-
-export function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(amount);
 }

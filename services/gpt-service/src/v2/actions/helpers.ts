@@ -5,8 +5,12 @@
  * Phase 13: GPT API Endpoints
  */
 
-import { randomUUID } from 'crypto';
-import { GptErrorResponse, ConfirmationToken, GptJobSearchResult } from './types';
+import { randomUUID } from "crypto";
+import {
+    GptErrorResponse,
+    ConfirmationToken,
+    GptJobSearchResult,
+} from "./types";
 
 // ============================================================================
 // Error Response Builder
@@ -19,7 +23,7 @@ import { GptErrorResponse, ConfirmationToken, GptJobSearchResult } from './types
 export function gptError(
     code: string,
     message: string,
-    extras?: { suggestion?: string; required_scope?: string }
+    extras?: { suggestion?: string; required_scope?: string },
 ): GptErrorResponse {
     return {
         error: {
@@ -53,25 +57,33 @@ export function formatJobForGpt(job: any): GptJobSearchResult {
     }
 
     // Generate summary (first ~200 chars of description)
-    let summary = '';
+    let summary = "";
     if (job.description) {
         const truncated = job.description.substring(0, 200);
-        const lastSpace = truncated.lastIndexOf(' ');
-        summary = lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+        const lastSpace = truncated.lastIndexOf(" ");
+        summary =
+            lastSpace > 0
+                ? truncated.substring(0, lastSpace) + "..."
+                : truncated + "...";
     }
 
     // Format posted date
-    const postedDate = job.created_at ? new Date(job.created_at).toISOString().split('T')[0] : '';
+    const postedDate = job.created_at
+        ? new Date(job.created_at).toISOString().split("T")[0]
+        : "";
 
     return {
         id: job.id,
         title: job.title,
-        company_name: job.company?.name || 'Unknown Company',
-        location: job.location || '',
+        company_name: job.company?.name || "Unknown Company",
+        location: job.location || "",
         commute_types: job.commute_types || [],
         posted_date: postedDate,
         salary_range: salaryRange,
-        job_level: job.job_level || '',
+        job_level: job.job_level || "",
+        employment_type: job.employment_type || null,
+        department: job.department || null,
+        open_to_relocation: job.open_to_relocation ?? null,
         summary,
         view_url: `https://applicant.network/public/jobs/${job.id}`,
     };
@@ -86,18 +98,18 @@ export function formatJobForGpt(job: any): GptJobSearchResult {
  */
 export function formatStageLabel(stage: string): string {
     const labelMap: Record<string, string> = {
-        draft: 'Draft',
-        submitted: 'Submitted',
-        company_review: 'Under Review',
-        interview: 'Interviewing',
-        offer: 'Offer Received',
-        hired: 'Hired',
-        rejected: 'Not Selected',
-        withdrawn: 'Withdrawn',
-        ai_review: 'Under Review',
-        screen: 'Screening',
-        recruiter_proposed: 'Recruiter Proposed',
-        recruiter_request: 'Changes Requested',
+        draft: "Draft",
+        submitted: "Submitted",
+        company_review: "Under Review",
+        interview: "Interviewing",
+        offer: "Offer Received",
+        hired: "Hired",
+        rejected: "Not Selected",
+        withdrawn: "Withdrawn",
+        ai_review: "Under Review",
+        screen: "Screening",
+        recruiter_proposed: "Recruiter Proposed",
+        recruiter_request: "Changes Requested",
     };
 
     return labelMap[stage] || stage;
@@ -117,7 +129,7 @@ export function generateConfirmationToken(
     jobId: string,
     candidateId: string,
     preScreenAnswers?: { question_id: string; answer: string }[],
-    coverLetter?: string
+    coverLetter?: string,
 ): ConfirmationToken {
     const tokenId = `gpt_confirm_${randomUUID()}`;
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
@@ -146,7 +158,9 @@ export function storeConfirmationToken(token: ConfirmationToken): void {
 /**
  * Retrieve a confirmation token, checks expiry, deletes if expired
  */
-export function getConfirmationToken(tokenId: string): ConfirmationToken | undefined {
+export function getConfirmationToken(
+    tokenId: string,
+): ConfirmationToken | undefined {
     const token = confirmationTokens.get(tokenId);
     if (!token) {
         return undefined;

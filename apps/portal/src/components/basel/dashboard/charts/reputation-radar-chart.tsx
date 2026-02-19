@@ -10,7 +10,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 
 export interface ReputationRadarChartProps {
@@ -51,19 +51,19 @@ export function ReputationRadarChart({
     return (
         <ResponsiveContainer width="100%" height={height}>
             <RadarChart data={data} cx="50%" cy="50%" outerRadius="70%">
-                <PolarGrid stroke="oklch(var(--bc) / 0.1)" />
+                <PolarGrid stroke={hexWithAlpha(colors.baseContent, 0.1)} />
                 <PolarAngleAxis
                     dataKey="metric"
                     tick={{
                         fontSize: 10,
                         fontWeight: 500,
-                        fill: "oklch(var(--bc) / 0.6)",
+                        fill: hexWithAlpha(colors.baseContent, 0.6),
                     }}
                 />
                 <PolarRadiusAxis
                     tick={{
                         fontSize: 9,
-                        fill: "oklch(var(--bc) / 0.4)",
+                        fill: hexWithAlpha(colors.baseContent, 0.4),
                     }}
                     axisLine={false}
                     tickCount={4}

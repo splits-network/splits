@@ -274,7 +274,7 @@ function SearchPanel() {
         <div className="header-right-item opacity-0 relative">
             <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="btn btn-ghost btn-sm btn-square"
+                className="btn btn-ghost btn-square"
             >
                 <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/60" />
             </button>
@@ -406,13 +406,22 @@ function MobileMenuContent({ isSignedIn }: { isSignedIn: boolean }) {
             {/* CTAs */}
             <div className="border-t border-base-300 pt-4 space-y-3">
                 {isSignedIn ? (
-                    <Link
-                        href="/portal/dashboard"
-                        className="btn btn-primary btn-sm w-full"
-                    >
-                        <i className="fa-duotone fa-regular fa-gauge" />
-                        Dashboard
-                    </Link>
+                    <>
+                        <Link
+                            href="/portal/dashboard"
+                            className="btn btn-primary btn-sm w-full"
+                        >
+                            <i className="fa-duotone fa-regular fa-gauge" />
+                            Dashboard
+                        </Link>
+                        <Link
+                            href="/sign-out"
+                            className="btn btn-ghost btn-sm w-full border border-base-300"
+                        >
+                            <i className="fa-duotone fa-regular fa-arrow-right-to-bracket" />
+                            Sign Out
+                        </Link>
+                    </>
                 ) : (
                     <>
                         <Link
@@ -539,19 +548,21 @@ export function Header() {
             position="sticky"
             frosted
             logo={
-                <Link
-                    href="/"
-                    className="header-logo flex items-center opacity-0"
-                >
-                    <Image
-                        src="/logo.svg"
-                        alt="Splits Network"
-                        width={140}
-                        height={48}
-                        className="h-10 w-auto"
-                        priority
-                    />
-                </Link>
+                <span className="mr-10 ml-20">
+                    <Link
+                        href="/"
+                        className="header-logo flex-shrink-0 opacity-0"
+                    >
+                        <Image
+                            src="/logo.svg"
+                            alt="Splits Network"
+                            width={140}
+                            height={48}
+                            className="h-10 w-auto py-0.5"
+                            priority
+                        />
+                    </Link>
+                </span>
             }
             nav={<DesktopNavContent />}
             actions={
@@ -569,7 +580,7 @@ export function Header() {
                             {/* Dashboard link */}
                             <Link
                                 href="/portal/dashboard"
-                                className="hidden lg:flex btn btn-ghost btn-sm btn-square"
+                                className="hidden lg:flex btn btn-ghost btn-md btn-square"
                                 title="Dashboard"
                             >
                                 <i className="fa-duotone fa-regular fa-gauge text-base-content/60" />
@@ -589,13 +600,13 @@ export function Header() {
                         <>
                             <Link
                                 href="/sign-in"
-                                className="header-right-item opacity-0 btn btn-ghost btn-sm hidden xl:flex"
+                                className="header-right-item opacity-0 btn btn-ghost hidden xl:flex"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 href="/sign-up"
-                                className="header-right-item opacity-0 btn btn-primary btn-sm"
+                                className="header-right-item opacity-0 btn btn-primary"
                             >
                                 <i className="fa-duotone fa-regular fa-rocket" />
                                 Get Started

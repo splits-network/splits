@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { Badge } from "@splits-network/memphis-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
-import type { AccentClasses } from "./accent";
-import { statusVariant } from "./accent";
+import { statusColor } from "./status-color";
 import {
     recruiterEmail,
     recruiterLocation,
@@ -25,12 +23,10 @@ import RecruiterActionsToolbar from "./actions-toolbar";
 
 export function RecruiterDetail({
     recruiter,
-    accent,
     onClose,
     onRefresh,
 }: {
     recruiter: RecruiterWithUser;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
@@ -39,6 +35,7 @@ export function RecruiterDetail({
     const location = recruiterLocation(recruiter);
     const specialties = recruiter.specialties || [];
     const industries = recruiter.industries || [];
+    const status = recruiter.marketplace_profile?.status || "active";
 
     const bioContent =
         recruiter.marketplace_profile?.description ||
@@ -49,42 +46,57 @@ export function RecruiterDetail({
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1">
                         {recruiter.users?.profile_image_url ? (
                             <img
                                 src={recruiter.users.profile_image_url}
                                 alt={name}
-                                className={`w-16 h-16 object-cover border-4 ${accent.border}`}
+                                className="w-16 h-16 object-cover border-2 border-primary"
                             />
                         ) : (
-                            <div
-                                className={`w-16 h-16 flex items-center justify-center border-4 ${accent.border} ${accent.bg} ${accent.textOnBg} text-xl font-black`}
-                            >
+                            <div className="w-16 h-16 flex items-center justify-center border-2 border-primary bg-primary/10 text-primary text-xl font-black">
                                 {getInitials(name)}
                             </div>
                         )}
-                        <div className="flex-1">
-                            {isNew(recruiter) && (
-                                <Badge color="yellow" className="mb-2" size="sm">
-                                    <i className="fa-duotone fa-regular fa-sparkles mr-1" />
-                                    New
-                                </Badge>
-                            )}
-                            <h2 className="text-2xl font-black uppercase tracking-tight leading-tight mb-1 text-dark">
+                        <div className="flex-1 min-w-0">
+                            {/* Status + NEW */}
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span
+                                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
+                                >
+                                    {formatStatus(status)}
+                                </span>
+                                {isNew(recruiter) && (
+                                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                                        New
+                                    </span>
+                                )}
+                                {experienceDisplay(recruiter) && (
+                                    <span className="text-[10px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                                        {experienceDisplay(recruiter)} exp
+                                    </span>
+                                )}
+                            </div>
+                            <h2 className="text-xl font-black tracking-tight leading-tight mb-0.5">
                                 {name}
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 text-sm">
                                 {recruiter.tagline && (
-                                    <span className={`font-bold ${accent.text}`}>
+                                    <span className="font-semibold text-primary">
                                         {recruiter.tagline}
                                     </span>
                                 )}
                                 {location && (
                                     <>
-                                        {recruiter.tagline && <span className="text-dark/50">|</span>}
-                                        <span className="text-dark/70">
+                                        {recruiter.tagline && (
+                                            <span className="text-base-content/30">
+                                                |
+                                            </span>
+                                        )}
+                                        <span className="text-base-content/60">
                                             <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                                             {location}
                                         </span>
@@ -96,22 +108,10 @@ export function RecruiterDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost flex-shrink-0"
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                         </button>
-                    )}
-                </div>
-
-                {/* Meta pills */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge color={statusVariant(recruiter.marketplace_profile?.status || "active")} variant="outline">
-                        {formatStatus(recruiter.marketplace_profile?.status || "active")}
-                    </Badge>
-                    {experienceDisplay(recruiter) && (
-                        <Badge color="dark" variant="outline">
-                            {experienceDisplay(recruiter)} experience
-                        </Badge>
                     )}
                 </div>
 
@@ -130,46 +130,46 @@ export function RecruiterDetail({
             </div>
 
             {/* Stats Row */}
-            <div className={`grid grid-cols-3 border-b-4 ${accent.border}`}>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {placementsDisplay(recruiter)}
+            <div className="grid grid-cols-3 border-b border-base-200">
+                {[
+                    {
+                        value: placementsDisplay(recruiter),
+                        label: "Placements",
+                    },
+                    {
+                        value: successRateDisplay(recruiter) || "N/A",
+                        label: "Success Rate",
+                    },
+                    {
+                        value: reputationDisplay(recruiter) || "N/A",
+                        label: "Reputation",
+                    },
+                ].map((stat, i) => (
+                    <div
+                        key={i}
+                        className={`p-4 text-center ${i < 2 ? "border-r border-base-200" : ""}`}
+                    >
+                        <div className="text-lg font-black text-primary">
+                            {stat.value}
+                        </div>
+                        <div className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold">
+                            {stat.label}
+                        </div>
                     </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Placements
-                    </div>
-                </div>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {successRateDisplay(recruiter) || "N/A"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Success Rate
-                    </div>
-                </div>
-                <div className="p-4 text-center">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {reputationDisplay(recruiter) || "N/A"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Reputation
-                    </div>
-                </div>
+                ))}
             </div>
 
-            {/* Bio */}
+            {/* Content sections */}
             <div className="p-6">
+                {/* Bio */}
                 {bioContent && (
                     <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-coral">
-                                <i className="fa-duotone fa-regular fa-address-card" />
-                            </span>
+                        <h3 className="uppercase tracking-[0.2em] text-base-content/40 text-xs font-bold mb-3">
                             About
                         </h3>
                         <MarkdownRenderer
                             content={bioContent}
-                            className="prose prose-sm max-w-none text-dark/80"
+                            className="prose prose-sm max-w-none text-base-content/80"
                         />
                     </div>
                 )}
@@ -177,21 +177,17 @@ export function RecruiterDetail({
                 {/* Specialties */}
                 {specialties.length > 0 && (
                     <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-teal">
-                                <i className="fa-duotone fa-regular fa-briefcase" />
-                            </span>
+                        <h3 className="uppercase tracking-[0.2em] text-base-content/40 text-xs font-bold mb-3">
                             Specialties
                         </h3>
                         <div className="flex flex-wrap gap-2">
                             {specialties.map((specialty, i) => (
-                                <Badge
+                                <span
                                     key={`specialty-${i}`}
-                                    color="coral"
-                                    variant="outline"
+                                    className="text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary px-3 py-1"
                                 >
                                     {specialty}
-                                </Badge>
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -200,49 +196,45 @@ export function RecruiterDetail({
                 {/* Industries */}
                 {industries.length > 0 && (
                     <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-purple">
-                                <i className="fa-duotone fa-regular fa-industry" />
-                            </span>
+                        <h3 className="uppercase tracking-[0.2em] text-base-content/40 text-xs font-bold mb-3">
                             Industries
                         </h3>
                         <div className="flex flex-wrap gap-2">
                             {industries.map((industry, i) => (
-                                <Badge
+                                <span
                                     key={`industry-${i}`}
-                                    color="purple"
-                                    variant="outline"
+                                    className="text-xs font-semibold uppercase tracking-wider bg-secondary/10 text-secondary px-3 py-1"
                                 >
                                     {industry}
-                                </Badge>
+                                </span>
                             ))}
                         </div>
                     </div>
                 )}
 
                 {/* Contact Info */}
-                <div className={`p-4 border-4 ${accent.border}`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 text-dark">
+                <div className="border-l-4 border-primary p-4 bg-base-200/50">
+                    <h3 className="uppercase tracking-[0.2em] text-base-content/40 text-xs font-bold mb-3">
                         Contact
                     </h3>
                     <div className="space-y-2">
                         {email && (
                             <a
                                 href={`mailto:${email}`}
-                                className="flex items-center gap-2 text-sm text-dark/70 hover:text-dark transition-colors"
+                                className="flex items-center gap-2 text-sm text-base-content/70 hover:text-primary transition-colors"
                             >
                                 <i className="fa-duotone fa-regular fa-envelope w-5" />
                                 <span className="truncate">{email}</span>
                             </a>
                         )}
                         {recruiter.phone && (
-                            <div className="flex items-center gap-2 text-sm text-dark/70">
+                            <div className="flex items-center gap-2 text-sm text-base-content/70">
                                 <i className="fa-duotone fa-regular fa-phone w-5" />
                                 <span>{recruiter.phone}</span>
                             </div>
                         )}
                         {location && (
-                            <div className="flex items-center gap-2 text-sm text-dark/70">
+                            <div className="flex items-center gap-2 text-sm text-base-content/70">
                                 <i className="fa-duotone fa-regular fa-location-dot w-5" />
                                 <span>{location}</span>
                             </div>
@@ -258,12 +250,10 @@ export function RecruiterDetail({
 
 export function DetailLoader({
     recruiterId,
-    accent,
     onClose,
     onRefresh,
 }: {
     recruiterId: string;
-    accent: AccentClasses;
     onClose: () => void;
     onRefresh?: () => void;
 }) {
@@ -280,9 +270,12 @@ export function DetailLoader({
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: RecruiterWithUser }>(`/recruiters/${recruiterId}`, {
-                    params: { include: "user,reputation" },
-                });
+                const res = await client.get<{ data: RecruiterWithUser }>(
+                    `/recruiters/${recruiterId}`,
+                    {
+                        params: { include: "user,reputation" },
+                    },
+                );
                 if (!cancelled) setRecruiter(res.data);
             } catch (err) {
                 console.error("Failed to fetch recruiter detail:", err);
@@ -300,16 +293,7 @@ export function DetailLoader({
     if (loading) {
         return (
             <div className="h-full flex items-center justify-center p-12">
-                <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-4 h-4 bg-coral animate-pulse" />
-                        <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                        <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Loading details...
-                    </span>
-                </div>
+                <span className="loading loading-spinner loading-md text-primary" />
             </div>
         );
     }
@@ -319,7 +303,6 @@ export function DetailLoader({
     return (
         <RecruiterDetail
             recruiter={recruiter}
-            accent={accent}
             onClose={onClose}
             onRefresh={onRefresh}
         />

@@ -3,34 +3,30 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { Badge } from "@splits-network/memphis-ui";
 import type { Company, CompanyRelationship } from "../../types";
 import { formatDate, formatCompanySize } from "../../types";
-import type { AccentClasses } from "./accent";
-import { relationshipStatusVariant } from "./accent";
-import { companyInitials } from "./helpers";
+import { statusColor } from "./status-color";
+import { companyInitials, formatStatus } from "./helpers";
 import CompanyActionsToolbar from "./actions-toolbar";
 import CompanyContacts from "@/components/company-contacts";
 
-// ─── Detail Panel ───────────────────────────────────────────────────────────
+/* -- Detail Panel -- */
 
 export function CompanyDetail({
     company,
     relationship,
-    accent,
     onClose,
     onRefresh,
 }: {
     company: Company;
     relationship: CompanyRelationship | null;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
@@ -38,53 +34,51 @@ export function CompanyDetail({
                                 <img
                                     src={company.logo_url}
                                     alt={company.name}
-                                    className={`w-14 h-14 object-contain border-2 ${accent.border} bg-cream p-1`}
+                                    className="w-14 h-14 object-contain border-2 border-base-300 bg-base-200 p-1"
                                 />
                             ) : (
-                                <div
-                                    className={`w-14 h-14 flex items-center justify-center border-2 ${accent.border} bg-cream text-lg font-bold text-dark`}
-                                >
+                                <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 text-lg font-bold text-base-content/60">
                                     {companyInitials(company.name)}
                                 </div>
                             )}
                             <div>
-                                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight text-dark">
+                                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">
+                                    {company.industry || "Company"}
+                                </p>
+                                <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight">
                                     {company.name}
                                 </h2>
-                                {company.industry && (
-                                    <span className={`text-sm font-bold ${accent.text}`}>
-                                        {company.industry}
-                                    </span>
-                                )}
                             </div>
                         </div>
 
                         {/* Meta pills */}
                         <div className="flex flex-wrap gap-2 mt-2">
                             {relationship && (
-                                <Badge color={relationshipStatusVariant(relationship.status)} variant="outline">
-                                    {relationship.status.charAt(0).toUpperCase() + relationship.status.slice(1)}
-                                </Badge>
+                                <span
+                                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
+                                >
+                                    {formatStatus(relationship.status)}
+                                </span>
                             )}
                             {company.company_size && (
-                                <Badge color="dark" variant="outline">
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {formatCompanySize(company.company_size)}
-                                </Badge>
+                                </span>
                             )}
                             {company.headquarters_location && (
-                                <Badge color="dark" variant="outline">
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                                     {company.headquarters_location}
-                                </Badge>
+                                </span>
                             )}
                         </div>
                     </div>
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
-                            <i className="fa-duotone fa-regular fa-xmark" />
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
                         </button>
                     )}
                 </div>
@@ -101,153 +95,162 @@ export function CompanyDetail({
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className={`grid grid-cols-3 border-b-4 ${accent.border}`}>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {company.company_size || "N/A"}
+            {/* Content */}
+            <div className="p-6 space-y-8">
+                {/* Stats grid */}
+                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Size
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {company.company_size || "N/A"}
+                        </p>
                     </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Size
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Relationship
+                        </p>
+                        <p className="text-lg font-black tracking-tight capitalize">
+                            {relationship?.relationship_type || "None"}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Manage Jobs
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {relationship?.can_manage_company_jobs ? (
+                                <span className="text-success">Yes</span>
+                            ) : (
+                                "No"
+                            )}
+                        </p>
                     </div>
                 </div>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {relationship ? (
-                            <span className="capitalize">{relationship.relationship_type}</span>
-                        ) : "—"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Relationship
-                    </div>
-                </div>
-                <div className="p-4 text-center">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {relationship?.can_manage_company_jobs ? "Yes" : "No"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Manage Jobs
-                    </div>
-                </div>
-            </div>
 
-            {/* Description */}
-            <div className="p-6">
+                {/* Description */}
                 {company.description && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-coral">
-                                <i className="fa-duotone fa-regular fa-building" />
-                            </span>
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             About
                         </h3>
-                        <p className="text-sm text-dark/80 leading-relaxed">
+                        <p className="text-base-content/70 leading-relaxed">
                             {company.description}
                         </p>
                     </div>
                 )}
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {/* Details grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {company.headquarters_location && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Location
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                                 {company.headquarters_location}
-                            </div>
+                            </p>
                         </div>
                     )}
                     {company.website && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Website
-                            </div>
+                            </p>
                             <a
-                                href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+                                href={
+                                    company.website.startsWith("http")
+                                        ? company.website
+                                        : `https://${company.website}`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`text-sm font-bold ${accent.text} hover:underline`}
+                                className="text-sm font-bold text-primary hover:underline"
                             >
                                 {company.website}
                             </a>
                         </div>
                     )}
                     {company.industry && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Industry
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {company.industry}
-                            </div>
+                            </p>
                         </div>
                     )}
                     {company.company_size && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Company Size
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {formatCompanySize(company.company_size)}
-                            </div>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Relationship details */}
                 {relationship && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-teal">
-                                <i className="fa-duotone fa-regular fa-handshake" />
-                            </span>
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Relationship
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div className="p-3 border-2 border-dark/20">
-                                <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                            <div className="bg-base-100 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Status
-                                </div>
-                                <Badge color={relationshipStatusVariant(relationship.status)}>
-                                    {relationship.status.charAt(0).toUpperCase() + relationship.status.slice(1)}
-                                </Badge>
+                                </p>
+                                <span
+                                    className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(relationship.status)}`}
+                                >
+                                    {formatStatus(relationship.status)}
+                                </span>
                             </div>
-                            <div className="p-3 border-2 border-dark/20">
-                                <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                            <div className="bg-base-100 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Type
-                                </div>
-                                <div className="text-sm font-bold text-dark capitalize">
+                                </p>
+                                <p className="font-bold text-sm capitalize">
                                     {relationship.relationship_type}
-                                </div>
+                                </p>
                             </div>
                             {relationship.relationship_start_date && (
-                                <div className="p-3 border-2 border-dark/20">
-                                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                                <div className="bg-base-100 p-4">
+                                    <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                         Start Date
-                                    </div>
-                                    <div className="text-sm font-bold text-dark">
-                                        {formatDate(relationship.relationship_start_date)}
-                                    </div>
+                                    </p>
+                                    <p className="font-bold text-sm">
+                                        {formatDate(
+                                            relationship.relationship_start_date,
+                                        )}
+                                    </p>
                                 </div>
                             )}
-                            <div className="p-3 border-2 border-dark/20">
-                                <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                            <div className="bg-base-100 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Can Manage Jobs
-                                </div>
-                                <div className={`text-sm font-bold ${relationship.can_manage_company_jobs ? "text-teal" : "text-dark/50"}`}>
-                                    {relationship.can_manage_company_jobs ? "Yes" : "No"}
-                                </div>
+                                </p>
+                                <p
+                                    className={`font-bold text-sm ${relationship.can_manage_company_jobs ? "text-success" : "text-base-content/50"}`}
+                                >
+                                    {relationship.can_manage_company_jobs
+                                        ? "Yes"
+                                        : "No"}
+                                </p>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Contacts */}
-                <div className={`p-4 border-4 ${accent.border}`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 text-dark">
+                <div className="border-t-2 border-base-300 pt-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
                         Team Contacts
                     </h3>
                     <CompanyContacts companyId={company.id} />
@@ -257,22 +260,21 @@ export function CompanyDetail({
     );
 }
 
-// ─── Detail Loading Wrapper ─────────────────────────────────────────────────
+/* -- Detail Loading Wrapper -- */
 
 export function CompanyDetailLoader({
     companyId,
-    accent,
     onClose,
     onRefresh,
 }: {
     companyId: string;
-    accent: AccentClasses;
     onClose: () => void;
     onRefresh?: () => void;
 }) {
     const { getToken } = useAuth();
     const [company, setCompany] = useState<Company | null>(null);
-    const [relationship, setRelationship] = useState<CompanyRelationship | null>(null);
+    const [relationship, setRelationship] =
+        useState<CompanyRelationship | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -285,7 +287,9 @@ export function CompanyDetailLoader({
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
 
-                const companyRes = await client.get<{ data: Company }>(`/companies/${companyId}`);
+                const companyRes = await client.get<{ data: Company }>(
+                    `/companies/${companyId}`,
+                );
                 if (!cancelled) setCompany(companyRes.data);
 
                 // Check for existing relationship
@@ -312,12 +316,8 @@ export function CompanyDetailLoader({
         return (
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-4 h-4 bg-coral animate-pulse" />
-                        <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                        <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
+                    <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading details...
                     </span>
                 </div>
@@ -331,7 +331,6 @@ export function CompanyDetailLoader({
         <CompanyDetail
             company={company}
             relationship={relationship}
-            accent={accent}
             onClose={onClose}
             onRefresh={onRefresh}
         />

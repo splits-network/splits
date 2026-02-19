@@ -9,7 +9,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors, getSeriesColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha, getSeriesColors } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 import { formatCurrency } from "./chart-utils";
 
@@ -54,7 +54,7 @@ export function CommissionDonutChart({
                     innerRadius={55}
                     outerRadius={85}
                     cornerRadius={0}
-                    stroke="oklch(var(--b1))"
+                    stroke={colors.base100}
                     strokeWidth={1}
                 >
                     {data.map((_, index) => (
@@ -81,7 +81,7 @@ export function CommissionDonutChart({
                             <span
                                 style={{
                                     fontSize: 11,
-                                    color: "oklch(var(--bc) / 0.7)",
+                                    color: hexWithAlpha(colors.baseContent, 0.7),
                                 }}
                             >
                                 {value}
@@ -109,7 +109,7 @@ export function CommissionDonutChart({
                     style={{
                         fontSize: 18,
                         fontWeight: 700,
-                        fill: "oklch(var(--bc))",
+                        fill: colors.baseContent,
                     }}
                 >
                     {formatCurrency(total)}
@@ -122,7 +122,7 @@ export function CommissionDonutChart({
                     style={{
                         fontSize: 9,
                         fontWeight: 500,
-                        fill: "oklch(var(--bc) / 0.5)",
+                        fill: hexWithAlpha(colors.baseContent, 0.5),
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
                     }}

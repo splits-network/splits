@@ -42,7 +42,7 @@ export function Header() {
                         alt="Employment Networks"
                         width={160}
                         height={54}
-                        className="h-8 w-auto"
+                        className="h-10 w-auto"
                         priority
                     />
                 </Link>
@@ -54,7 +54,7 @@ export function Header() {
                             key={link.href}
                             href={link.href}
                             onClick={(e) => handleSmoothScroll(e, link.href)}
-                            className="px-3 py-2 text-sm font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
+                            className="px-3 py-2 text-md font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
                         >
                             {link.label}
                         </a>
@@ -66,13 +66,13 @@ export function Header() {
                     <ThemeToggle />
                     <a
                         href="https://splits.network"
-                        className="hidden md:inline-flex btn btn-sm btn-ghost text-sm font-semibold uppercase tracking-wider"
+                        className="hidden md:inline-flex btn btn-ghost text-md font-semibold uppercase tracking-wider"
                     >
                         Sign In
                     </a>
                     <a
                         href="https://applicant.network"
-                        className="hidden md:inline-flex btn btn-sm btn-primary text-sm font-semibold uppercase tracking-wider"
+                        className="hidden md:inline-flex btn btn-primary text-md font-semibold uppercase tracking-wider"
                     >
                         Find Jobs
                     </a>
@@ -97,13 +97,13 @@ export function Header() {
                     <div className="border-t border-base-300 pt-4 flex flex-col gap-2">
                         <a
                             href="https://applicant.network"
-                            className="btn btn-primary btn-sm w-full"
+                            className="btn btn-primary w-full"
                         >
                             Find Jobs
                         </a>
                         <a
                             href="https://splits.network"
-                            className="btn btn-ghost btn-sm w-full"
+                            className="btn btn-ghost w-full"
                         >
                             Sign In
                         </a>

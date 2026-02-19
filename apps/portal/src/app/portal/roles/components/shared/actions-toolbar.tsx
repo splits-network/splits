@@ -178,9 +178,8 @@ export default function RoleActionsToolbar({
         if (variant !== "icon-only" || !actions.statusActions) return null;
         if (job.status === "active") {
             return (
-                <ExpandableButton
+                <Button
                     icon="fa-duotone fa-regular fa-pause"
-                    label="Pause"
                     variant="btn-secondary"
                     size={size}
                     onClick={() => handleStatusChange("paused")}
@@ -192,9 +191,8 @@ export default function RoleActionsToolbar({
         }
         if (job.status === "paused") {
             return (
-                <ExpandableButton
+                <Button
                     icon="fa-duotone fa-regular fa-play"
-                    label="Activate"
                     variant="btn-success"
                     size={size}
                     onClick={() => handleStatusChange("active")}

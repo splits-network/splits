@@ -47,3 +47,24 @@ export function timeAgo(date: string | null | undefined): string {
     if (days < 30) return `${days} days ago`;
     return `${Math.floor(days / 30)}mo ago`;
 }
+
+export function formatCurrency(amount: number): string {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(amount);
+}
+
+export function formatCurrencyShort(amount: number): string {
+    if (amount >= 1000) {
+        return `$${Math.round(amount / 1000)}K`;
+    }
+    return `$${amount}`;
+}
+
+export function formatStatus(state?: string): string {
+    if (!state) return "Unknown";
+    return state.charAt(0).toUpperCase() + state.slice(1).replace(/_/g, " ");
+}

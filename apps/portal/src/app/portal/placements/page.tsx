@@ -5,12 +5,10 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
     useStandardList,
     PaginationControls,
-    LoadingState,
-    EmptyState,
     ErrorState,
 } from "@/hooks/use-standard-list";
 import type { Placement, PlacementFilters } from "./types";
-import type { ViewMode } from "./components/shared/accent";
+import type { ViewMode } from "./components/shared/status-color";
 import { PlacementsAnimator } from "./placements-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -18,10 +16,11 @@ import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 
-export default function PlacementsPage() {
+export default function PlacementsBaselPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
@@ -31,7 +30,7 @@ export default function PlacementsPage() {
         () => searchParams.get("placementId"),
     );
 
-    // Sync viewMode + selectedPlacementId to URL (ref pattern avoids infinite loops)
+    /* ── URL sync ── */
     const searchParamsRef = useRef(searchParams);
     searchParamsRef.current = searchParams;
 
@@ -62,6 +61,7 @@ export default function PlacementsPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedPlacementId, viewMode, pathname, router]);
 
+    /* ── Data ── */
     const {
         data: placements,
         loading,
@@ -91,7 +91,9 @@ export default function PlacementsPage() {
     });
 
     const handleSelect = useCallback((placement: Placement) => {
-        setSelectedPlacementId((prev) => (prev === placement.id ? null : placement.id));
+        setSelectedPlacementId((prev) =>
+            prev === placement.id ? null : placement.id,
+        );
     }, []);
 
     const handleViewModeChange = useCallback((mode: ViewMode) => {
@@ -100,17 +102,28 @@ export default function PlacementsPage() {
 
     const stats = useMemo(() => {
         const currentYear = new Date().getFullYear();
-        const totalEarnings = placements.reduce((sum, p) => sum + (p.recruiter_share || 0), 0);
-        const thisYearPlacements = placements.filter(
-            (p) => p.hired_at && new Date(p.hired_at).getFullYear() === currentYear,
+        const totalEarnings = placements.reduce(
+            (sum, p) => sum + (p.recruiter_share || 0),
+            0,
         );
-        const thisYearEarnings = thisYearPlacements.reduce((sum, p) => sum + (p.recruiter_share || 0), 0);
+        const thisYearPlacements = placements.filter(
+            (p) =>
+                p.hired_at &&
+                new Date(p.hired_at).getFullYear() === currentYear,
+        );
+        const thisYearEarnings = thisYearPlacements.reduce(
+            (sum, p) => sum + (p.recruiter_share || 0),
+            0,
+        );
 
         return {
             total: pagination?.total || placements.length,
             totalEarnings,
             thisYearEarnings,
-            avgCommission: placements.length > 0 ? Math.round(totalEarnings / placements.length) : 0,
+            avgCommission:
+                placements.length > 0
+                    ? Math.round(totalEarnings / placements.length)
+                    : 0,
         };
     }, [placements, pagination]);
 
@@ -119,86 +132,94 @@ export default function PlacementsPage() {
     }
 
     return (
-        <>
-            <PlacementsAnimator>
-                <HeaderSection stats={stats} />
+        <PlacementsAnimator contentRef={contentRef}>
+            <HeaderSection stats={stats} />
 
-                <section className="min-h-screen bg-cream">
-                    <div className="py-8 px-4 lg:px-8">
-                        <ControlsBar
-                            searchInput={searchInput}
-                            onSearchChange={setSearchInput}
-                            filters={filters}
-                            onFilterChange={setFilter}
-                            viewMode={viewMode}
-                            onViewModeChange={handleViewModeChange}
-                        />
+            <ControlsBar
+                searchInput={searchInput}
+                onSearchChange={setSearchInput}
+                filters={filters}
+                onFilterChange={setFilter}
+                viewMode={viewMode}
+                onViewModeChange={handleViewModeChange}
+                placementCount={placements.length}
+                totalCount={pagination?.total ?? placements.length}
+            />
 
-                        {/* Listing Count */}
-                        <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                            Showing {placements.length} of {pagination?.total ?? placements.length} placements
-                        </p>
-
-                        {/* Content Area */}
-                        <div className="listings-content opacity-0">
-                            {loading && placements.length === 0 ? (
-                                <LoadingState message="Loading placements..." />
-                            ) : placements.length === 0 ? (
-                                <EmptyState
-                                    icon="fa-handshake"
-                                    title="No Placements Found"
-                                    description="Try adjusting your search or filters"
-                                    action={{
-                                        label: "Reset Filters",
-                                        onClick: () => {
-                                            clearSearch();
-                                            clearFilters();
-                                        },
-                                    }}
-                                />
-                            ) : (
-                                <>
-                                    {viewMode === "table" && (
-                                        <TableView
-                                            placements={placements}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedPlacementId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "grid" && (
-                                        <GridView
-                                            placements={placements}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedPlacementId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "split" && (
-                                        <SplitView
-                                            placements={placements}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedPlacementId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                </>
-                            )}
+            {/* Content Area */}
+            <section className="content-area opacity-0">
+                <div ref={contentRef}>
+                    {loading && placements.length === 0 ? (
+                        <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                            <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                Loading placements...
+                            </p>
                         </div>
+                    ) : placements.length === 0 ? (
+                        <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                            <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                            <h3 className="text-2xl font-black tracking-tight mb-2">
+                                No placements found
+                            </h3>
+                            <p className="text-base-content/50 mb-6">
+                                Adjust your search or clear filters to see
+                                placements.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    clearSearch();
+                                    clearFilters();
+                                }}
+                                className="btn btn-outline btn-sm"
+                                style={{ borderRadius: 0 }}
+                            >
+                                Reset Filters
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {viewMode === "table" && (
+                                <TableView
+                                    placements={placements}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedPlacementId}
+                                    onRefresh={refresh}
+                                />
+                            )}
+                            {viewMode === "grid" && (
+                                <GridView
+                                    placements={placements}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedPlacementId}
+                                    onRefresh={refresh}
+                                />
+                            )}
+                            {viewMode === "split" && (
+                                <SplitView
+                                    placements={placements}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedPlacementId}
+                                    onRefresh={refresh}
+                                />
+                            )}
+                        </>
+                    )}
+                </div>
+            </section>
 
-                        {/* Pagination */}
-                        <PaginationControls
-                            page={page}
-                            totalPages={totalPages}
-                            total={total}
-                            limit={limit}
-                            onPageChange={goToPage}
-                            onLimitChange={setLimit}
-                            loading={loading}
-                        />
-                    </div>
-                </section>
-            </PlacementsAnimator>
-        </>
+            {/* Pagination */}
+            <div className="container mx-auto px-6 lg:px-12 py-6">
+                <PaginationControls
+                    page={page}
+                    totalPages={totalPages}
+                    total={total}
+                    limit={limit}
+                    onPageChange={goToPage}
+                    onLimitChange={setLimit}
+                    loading={loading}
+                />
+            </div>
+        </PlacementsAnimator>
     );
 }

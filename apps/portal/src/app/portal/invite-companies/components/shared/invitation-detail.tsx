@@ -1,9 +1,7 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { CompanyInvitation } from "../../types";
-import type { AccentClasses } from "./accent";
-import { statusVariant } from "./accent";
+import { statusColor, statusIcon } from "./status-color";
 import {
     formatStatus,
     formatDate,
@@ -15,16 +13,12 @@ import {
 } from "./helpers";
 import InvitationActionsToolbar from "./actions-toolbar";
 
-// ─── Detail Panel ───────────────────────────────────────────────────────────
-
 export function InvitationDetail({
     invitation,
-    accent,
     onClose,
     onRefresh,
 }: {
     invitation: CompanyInvitation;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
@@ -37,24 +31,40 @@ export function InvitationDetail({
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                        <Badge color={statusVariant(invitation.status)} className="mb-3">
-                            {formatStatus(invitation.status)}
-                        </Badge>
-                        <h2 className="text-2xl font-black uppercase tracking-tight leading-tight mb-2 text-dark">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span
+                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                            >
+                                <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
+                                {formatStatus(invitation.status)}
+                            </span>
+                            {invitation.email_sent_at && (
+                                <span className="text-[10px] uppercase tracking-wider bg-success/15 text-success px-2 py-1">
+                                    <i className="fa-duotone fa-regular fa-envelope-circle-check mr-1" />
+                                    Email Sent
+                                </span>
+                            )}
+                            {expiringSoon && (
+                                <span className="text-[10px] uppercase tracking-wider bg-error/15 text-error px-2 py-1">
+                                    <i className="fa-duotone fa-regular fa-clock mr-1" />
+                                    Expires Soon
+                                </span>
+                            )}
+                        </div>
+                        <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
                             {invitation.company_name_hint || "Company Invitation"}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-3 text-sm">
+                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
                             {invitation.invited_email && (
-                                <span className={`font-bold ${accent.text}`}>
+                                <span>
                                     <i className="fa-duotone fa-regular fa-envelope mr-1" />
                                     {invitation.invited_email}
                                 </span>
                             )}
-                            <span className="text-dark/50">|</span>
-                            <span className="text-dark/70">
+                            <span>
                                 <i className="fa-duotone fa-regular fa-calendar mr-1" />
                                 Created {formatDate(invitation.created_at)}
                             </span>
@@ -63,26 +73,10 @@ export function InvitationDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
-                            <i className="fa-duotone fa-regular fa-xmark" />
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
                         </button>
-                    )}
-                </div>
-
-                {/* Meta pills */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                    {invitation.email_sent_at && (
-                        <Badge color="teal" variant="outline">
-                            <i className="fa-duotone fa-regular fa-envelope-circle-check mr-1" />
-                            Email Sent
-                        </Badge>
-                    )}
-                    {expiringSoon && (
-                        <Badge color="coral" variant="outline">
-                            <i className="fa-duotone fa-regular fa-clock mr-1" />
-                            Expires Soon
-                        </Badge>
                     )}
                 </div>
 
@@ -97,112 +91,105 @@ export function InvitationDetail({
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className={`grid grid-cols-3 border-b-4 ${accent.border}`}>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {invitation.invite_code}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Invite Code
-                    </div>
-                </div>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {daysLeft !== null ? (daysLeft > 0 ? `${daysLeft}d` : "Expired") : "—"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Days Left
-                    </div>
-                </div>
-                <div className="p-4 text-center">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {invitation.status === "accepted" ? "Yes" : "No"}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Accepted
-                    </div>
-                </div>
-            </div>
-
             {/* Content */}
-            <div className="p-6">
+            <div className="p-6 space-y-8">
+                {/* Stats grid */}
+                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Invite Code
+                        </p>
+                        <p className="text-lg font-black tracking-tight font-mono">
+                            {invitation.invite_code}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Days Left
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {daysLeft !== null ? (daysLeft > 0 ? `${daysLeft}d` : "Expired") : "\u2014"}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Accepted
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {invitation.status === "accepted" ? "Yes" : "No"}
+                        </p>
+                    </div>
+                </div>
+
                 {/* Personal Message */}
                 {invitation.personal_message && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-purple">
-                                <i className="fa-duotone fa-regular fa-message" />
-                            </span>
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Personal Message
                         </h3>
-                        <p className="text-sm text-dark/80 whitespace-pre-wrap">
+                        <div className="p-4 border-l-4 border-primary bg-primary/5 text-sm text-base-content/80 whitespace-pre-wrap">
                             {invitation.personal_message}
-                        </p>
+                        </div>
                     </div>
                 )}
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                    <div className="p-3 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                {/* Details grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Invite Link
-                        </div>
-                        <div className="text-sm font-bold text-dark truncate">
+                        </p>
+                        <p className="font-bold text-sm truncate">
                             {getInviteLink(invitation)}
-                        </div>
+                        </p>
                     </div>
-                    <div className="p-3 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Expires
-                        </div>
-                        <div className="text-sm font-bold text-dark">
+                        </p>
+                        <p className="font-bold text-sm">
                             {invitation.expires_at
                                 ? formatDate(invitation.expires_at)
-                                : "—"}
-                        </div>
+                                : "\u2014"}
+                        </p>
                     </div>
                     {invitation.accepted_at && (
-                        <div className="p-3 border-2 border-teal/40">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Accepted
-                            </div>
-                            <div className="text-sm font-bold text-teal">
+                            </p>
+                            <p className="font-bold text-sm text-success">
                                 {formatDate(invitation.accepted_at)}
-                            </div>
+                            </p>
                         </div>
                     )}
                     {invitation.email_sent_at && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Email Sent
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {formatDate(invitation.email_sent_at)}
-                            </div>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Recruiter Info */}
-                <div className={`p-4 border-4 ${accent.border}`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 text-dark">
+                <div className="border-t-2 border-base-300 pt-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
                         Invited By
                     </h3>
-                    <div className="flex items-center gap-3">
-                        <div
-                            className={`w-12 h-12 flex items-center justify-center border-2 ${accent.border} bg-cream font-bold text-sm text-dark`}
-                        >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
                             {recruiterInitials(name)}
                         </div>
                         <div>
-                            <div className="font-bold text-sm text-dark">
-                                {name}
-                            </div>
+                            <p className="font-bold">{name}</p>
                             {invitation.recruiter?.user?.email && (
-                                <div className={`text-sm ${accent.text}`}>
+                                <p className="text-sm text-base-content/50">
                                     {invitation.recruiter.user.email}
-                                </div>
+                                </p>
                             )}
                         </div>
                     </div>

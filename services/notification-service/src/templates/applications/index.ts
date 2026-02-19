@@ -44,7 +44,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help? Visit our <a href="https://splits.network/public/help" style="color: #FF6B6B; text-decoration: underline;">Help Center</a> or reply to this email.'
+        'Need help? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> or reply to this email.'
     )}
     `.trim();
 
@@ -95,7 +95,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Get real-time updates in your <a href="https://splits.network/portal/dashboard" style="color: #FF6B6B; text-decoration: underline;">dashboard</a>.'
+        'Get real-time updates in your <a href="https://splits.network/portal/dashboard" style="color: #233876; text-decoration: underline;">dashboard</a>.'
     )}
     `.trim();
 
@@ -252,7 +252,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Looking for other opportunities? Browse available roles in your <a href="https://splits.network/portal/roles" style="color: #FF6B6B; text-decoration: underline;">dashboard</a>.'
+        'Looking for other opportunities? Browse available roles in your <a href="https://splits.network/portal/roles" style="color: #233876; text-decoration: underline;">dashboard</a>.'
     )}
     `.trim();
 
@@ -364,7 +364,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-            'Manage all your applications in your <a href="https://splits.network/portal/applications" style="color: #FF6B6B; text-decoration: underline;">company portal</a>.'
+            'Manage all your applications in your <a href="https://splits.network/portal/applications" style="color: #233876; text-decoration: underline;">company portal</a>.'
         )}
     `.trim();
 
@@ -607,14 +607,14 @@ ${infoCard({
 
 ${data.strengths.length > 0 ? `
 ${heading({ level: 3, text: 'Your Strengths' })}
-<ul style="margin: 8px 0 20px; padding-left: 24px; color: #1A1A2E; line-height: 1.6;">
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #18181b; line-height: 1.6;">
 ${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.concerns.length > 0 ? `
 ${heading({ level: 3, text: 'Areas to Address' })}
-<ul style="margin: 8px 0 20px; padding-left: 24px; color: #1A1A2E; line-height: 1.6;">
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #18181b; line-height: 1.6;">
 ${data.concerns.map(c => `  <li style="margin-bottom: 6px;">${c}</li>`).join('\n')}
 </ul>
 ` : ''}
@@ -636,7 +636,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Questions about your review? Visit our <a href="https://splits.network/public/help" style="color: #FF6B6B; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
+        'Questions about your review? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
     )}
     `.trim();
 
@@ -697,14 +697,14 @@ ${paragraph(data.overallSummary)}
 
 ${data.matchedSkills.length > 0 ? `
 ${heading({ level: 3, text: 'Matched Skills' })}
-<ul style="margin: 8px 0 20px; padding-left: 24px; color: #1A1A2E; line-height: 1.6;">
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #18181b; line-height: 1.6;">
 ${data.matchedSkills.map(s => `  <li style="margin-bottom: 6px;"><strong>${s}</strong></li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.strengths.length > 0 ? `
 ${heading({ level: 3, text: 'Key Strengths' })}
-<ul style="margin: 8px 0 20px; padding-left: 24px; color: #1A1A2E; line-height: 1.6;">
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #18181b; line-height: 1.6;">
 ${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
 </ul>
 ` : ''}
@@ -740,7 +740,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help interpreting the AI review? Check out our <a href="https://splits.network/public/help/ai-reviews" style="color: #FF6B6B; text-decoration: underline;">AI Review Guide</a>.'
+        'Need help interpreting the AI review? Check out our <a href="https://splits.network/public/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
     )}
     `.trim();
 
@@ -808,7 +808,7 @@ ${paragraph(
     )}
 
 ${paragraph(
-        'Questions? Reply to this email or visit our <a href="https://splits.network/public/help" style="color: #FF6B6B; text-decoration: underline;">Help Center</a>.'
+        'Questions? Reply to this email or visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a>.'
     )}
     `.trim();
 
@@ -864,7 +864,7 @@ ${paragraph(
     )}
 
 ${paragraph(
-        'Track all your proposals in your <a href="https://splits.network/portal/dashboard" style="color: #FF6B6B; text-decoration: underline;">dashboard</a>.'
+        'Track all your proposals in your <a href="https://splits.network/portal/dashboard" style="color: #233876; text-decoration: underline;">dashboard</a>.'
     )}
     `.trim();
 
@@ -986,7 +986,7 @@ ${paragraph(
     )}
 
 ${paragraph(
-        'Need tips on crafting better proposals? Visit our <a href="https://splits.network/public/help/proposals" style="color: #FF6B6B; text-decoration: underline;">Proposal Guide</a>.'
+        'Need tips on crafting better proposals? Visit our <a href="https://splits.network/public/help/proposals" style="color: #233876; text-decoration: underline;">Proposal Guide</a>.'
     )}
     `.trim();
 

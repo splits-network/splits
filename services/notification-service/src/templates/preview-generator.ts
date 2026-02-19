@@ -19,6 +19,15 @@ import {
     placementFailedEmail,
     guaranteeExpiringEmail,
 } from './placements';
+import {
+    candidateSourcedEmail,
+    ownershipConflictEmail,
+    ownershipConflictRejectionEmail,
+    candidateAddedToNetworkEmail,
+    candidateInvitationEmail,
+    consentGivenEmail,
+    consentDeclinedEmail,
+} from './candidates';
 
 const OUTPUT_DIR = path.join(__dirname, '../../email-previews');
 
@@ -90,6 +99,57 @@ const guaranteeExpiringData = {
     placementUrl: 'https://splits.network/placements/xyz789',
 };
 
+const candidateSourcedData = {
+    candidateName: 'Sarah Johnson',
+    sourceMethod: 'LinkedIn',
+    protectionPeriod: '12 months',
+    candidatesUrl: 'https://splits.network/portal/candidates',
+};
+
+const ownershipConflictData = {
+    candidateName: 'Sarah Johnson',
+    attemptingRecruiterName: 'Mike Chen',
+    candidateUrl: 'https://splits.network/portal/candidates',
+};
+
+const ownershipConflictRejectionData = {
+    candidateName: 'Sarah Johnson',
+    originalSourcerName: 'Jane Smith',
+    candidatesUrl: 'https://splits.network/portal/candidates',
+};
+
+const candidateAddedToNetworkData = {
+    candidateName: 'Sarah Johnson',
+    recruiterName: 'Jane Smith',
+    portalUrl: 'https://applicant.network/portal/profile',
+};
+
+const candidateInvitationData = {
+    candidateName: 'Sarah Johnson',
+    recruiterName: 'Jane Smith',
+    recruiterEmail: 'jane@splits.network',
+    recruiterBio: 'Senior tech recruiter with 10+ years placing engineers at top-tier companies across the UK and US.',
+    invitationUrl: 'https://applicant.network/portal/invitation/abc123',
+    expiryDate: 'March 15, 2026',
+};
+
+const consentGivenData = {
+    recruiterName: 'Jane Smith',
+    candidateName: 'Sarah Johnson',
+    candidateEmail: 'sarah@example.com',
+    consentDate: 'February 19, 2026',
+    candidatesUrl: 'https://splits.network/portal/candidates',
+};
+
+const consentDeclinedData = {
+    recruiterName: 'Jane Smith',
+    candidateName: 'Sarah Johnson',
+    candidateEmail: 'sarah@example.com',
+    declinedDate: 'February 19, 2026',
+    declinedReason: 'I am not currently looking for new opportunities.',
+    candidatesUrl: 'https://splits.network/portal/candidates',
+};
+
 // Generate all previews
 function generatePreviews() {
     // Create output directory if it doesn't exist
@@ -130,6 +190,34 @@ function generatePreviews() {
             name: 'guarantee-expiring',
             html: guaranteeExpiringEmail(guaranteeExpiringData),
         },
+        {
+            name: 'candidate-sourced',
+            html: candidateSourcedEmail(candidateSourcedData),
+        },
+        {
+            name: 'ownership-conflict',
+            html: ownershipConflictEmail(ownershipConflictData),
+        },
+        {
+            name: 'ownership-conflict-rejection',
+            html: ownershipConflictRejectionEmail(ownershipConflictRejectionData),
+        },
+        {
+            name: 'candidate-added-to-network',
+            html: candidateAddedToNetworkEmail(candidateAddedToNetworkData),
+        },
+        {
+            name: 'candidate-invitation',
+            html: candidateInvitationEmail(candidateInvitationData),
+        },
+        {
+            name: 'consent-given',
+            html: consentGivenEmail(consentGivenData),
+        },
+        {
+            name: 'consent-declined',
+            html: consentDeclinedEmail(consentDeclinedData),
+        },
     ];
 
     previews.forEach(({ name, html }) => {
@@ -149,7 +237,7 @@ function generatePreviews() {
     <style>
         body {
             font-family: -apple-system, 'Segoe UI', sans-serif;
-            background: #F5F0EB;
+            background: #f4f4f5;
             padding: 40px;
             margin: 0;
         }
@@ -159,10 +247,10 @@ function generatePreviews() {
             background: white;
             border-radius: 4px;
             padding: 40px;
-            border: 4px solid #1A1A2E;
+            border: 4px solid #18181b;
         }
         h1 {
-            color: #1A1A2E;
+            color: #18181b;
             margin-bottom: 24px;
         }
         .links {
@@ -172,49 +260,58 @@ function generatePreviews() {
         a {
             display: block;
             padding: 16px 20px;
-            background: #F5F0EB;
-            border: 2px solid #1A1A2E;
+            background: #f4f4f5;
+            border: 2px solid #e4e4e7;
             border-radius: 4px;
             text-decoration: none;
-            color: #1A1A2E;
+            color: #18181b;
             font-weight: 700;
             transition: all 0.2s;
         }
         a:hover {
-            background: #FF6B6B;
+            background: #233876;
             color: white;
         }
         .badge {
             display: inline-block;
             padding: 4px 12px;
             background: #FFE0E0;
-            color: #1A1A2E;
+            color: #18181b;
             border-radius: 4px;
             font-size: 12px;
             font-weight: 700;
             margin-left: 8px;
-            border: 1px solid #1A1A2E;
+            border: 1px solid #18181b;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Email Template Previews</h1>
-        <p style="color: #1A1A2E; margin-bottom: 32px;">
+        <p style="color: #18181b; margin-bottom: 32px;">
             Click any template below to preview how it looks in an email client.
         </p>
         <div class="links">
-            <h3 style="color: #1A1A2E; margin: 24px 0 12px;">Application Emails</h3>
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Application Emails</h3>
             <a href="application-created.html">Application Created <span class="badge">New Candidate</span></a>
             <a href="application-stage-changed.html">Stage Changed <span class="badge">Update</span></a>
             <a href="application-accepted.html">Application Accepted <span class="badge">Success</span></a>
 
-            <h3 style="color: #1A1A2E; margin: 24px 0 12px;">Placement Emails</h3>
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Placement Emails</h3>
             <a href="placement-created.html">Placement Created <span class="badge">Celebration</span></a>
             <a href="placement-activated.html">Placement Activated <span class="badge">Started</span></a>
             <a href="placement-completed.html">Placement Completed <span class="badge">Success</span></a>
             <a href="placement-failed.html">Placement Failed <span class="badge">Issue</span></a>
             <a href="guarantee-expiring.html">Guarantee Expiring <span class="badge">Reminder</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Candidate Emails</h3>
+            <a href="candidate-sourced.html">Candidate Sourced <span class="badge">Recruiter</span></a>
+            <a href="ownership-conflict.html">Ownership Conflict <span class="badge">Warning</span></a>
+            <a href="ownership-conflict-rejection.html">Ownership Conflict Rejection <span class="badge">Info</span></a>
+            <a href="candidate-added-to-network.html">Added to Network <span class="badge">Candidate</span></a>
+            <a href="candidate-invitation.html">Candidate Invitation <span class="badge">Candidate</span></a>
+            <a href="consent-given.html">Consent Given <span class="badge">Success</span></a>
+            <a href="consent-declined.html">Consent Declined <span class="badge">Declined</span></a>
         </div>
     </div>
 </body>

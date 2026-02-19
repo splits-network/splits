@@ -1,9 +1,8 @@
 "use client";
 
 import type { CompanyInvitation } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
-import { InvitationDetail } from "../shared/invitation-detail";
 import { MobileDetailOverlay } from "@/components/standard-lists";
+import { InvitationDetail } from "../shared/invitation-detail";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -18,9 +17,6 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const selectedInv = invitations.find((inv) => inv.id === selectedId);
-    const selectedAc = selectedInv
-        ? accentAt(invitations.indexOf(selectedInv))
-        : ACCENT[0];
 
     return (
         <div className="flex gap-6">
@@ -32,11 +28,10 @@ export function GridView({
                             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
                     }`}
                 >
-                    {invitations.map((inv, idx) => (
+                    {invitations.map((inv) => (
                         <GridCard
                             key={inv.id}
                             invitation={inv}
-                            accent={accentAt(idx)}
                             isSelected={selectedId === inv.id}
                             onSelect={() => onSelectAction(inv)}
                             onRefresh={onRefreshAction}
@@ -49,11 +44,10 @@ export function GridView({
             {selectedInv && (
                 <MobileDetailOverlay
                     isOpen
-                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white ${selectedAc.border}`}
+                    className="md:w-1/2 md:border-2 md:border-base-200 md:flex-shrink-0 md:self-start bg-base-100 shadow-md"
                 >
                     <InvitationDetail
                         invitation={selectedInv}
-                        accent={selectedAc}
                         onClose={() => onSelectAction(selectedInv)}
                         onRefresh={onRefreshAction}
                     />

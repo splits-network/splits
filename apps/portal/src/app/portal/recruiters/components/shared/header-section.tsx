@@ -9,90 +9,75 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
     return (
-        <section className="bg-dark -mx-2 -mt-2">
-            <div className="relative overflow-hidden py-16 bg-dark -mx-2 -mt-4">
-                {/* Memphis shapes */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="memphis-shape absolute top-[8%] left-[4%] w-20 h-20 rounded-full border-4 border-teal opacity-0" />
-                    <div className="memphis-shape absolute top-[50%] right-[6%] w-16 h-16 rounded-full bg-coral opacity-0" />
-                    <div className="memphis-shape absolute bottom-[10%] left-[12%] w-10 h-10 rounded-full bg-purple opacity-0" />
-                    <div className="memphis-shape absolute top-[20%] right-[18%] w-14 h-14 rotate-12 bg-yellow opacity-0" />
-                    <div className="memphis-shape absolute bottom-[25%] right-[30%] w-20 h-8 -rotate-6 border-4 border-teal opacity-0" />
-                    <div className="memphis-shape absolute top-[40%] left-[22%] w-10 h-10 rotate-45 bg-coral opacity-0" />
-                    <div className="memphis-shape absolute bottom-[15%] right-[42%] opacity-0">
-                        <div className="grid grid-cols-3 gap-2">
-                            {Array.from({ length: 9 }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="w-2 h-2 rounded-full bg-purple"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
+        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <div className="container mx-auto px-6 lg:px-12">
+                <div className="max-w-4xl">
+                    {/* Kicker */}
+                    <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <i className="fa-duotone fa-regular fa-users mr-2" />
+                        Recruiter Network
+                    </p>
 
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-5xl mx-auto text-center">
-                        <div className="header-badge inline-block mb-6 opacity-0">
-                            <span className="badge badge-teal badge-lg">
-                                <i className="fa-duotone fa-regular fa-users" />
-                                Recruiter Network
-                            </span>
-                        </div>
+                    {/* Headline */}
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
+                        <span className="hero-headline-word inline-block opacity-0">
+                            Find your next
+                        </span>{" "}
+                        <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            recruiting
+                        </span>{" "}
+                        <span className="hero-headline-word inline-block opacity-0">
+                            partner.
+                        </span>
+                    </h1>
 
-                        <h1 className="header-title text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] mb-6 text-white opacity-0">
-                            Find{" "}
-                            <span className="relative inline-block">
-                                <span className="text-teal">Recruiters</span>
-                                <span className="absolute -bottom-2 left-0 w-full h-2 bg-teal" />
-                            </span>
-                        </h1>
+                    {/* Subtitle */}
+                    <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 opacity-0">
+                        Discover and connect with top recruiters in the
+                        marketplace. Search by specialty, industry, and
+                        track record.
+                    </p>
 
-                        <p className="header-subtitle text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-white/70 opacity-0">
-                            Discover and connect with top recruiters across your
-                            network. Split-fee recruiting, made transparent.
-                        </p>
+                    {/* Stats */}
+                    <div className="flex flex-wrap gap-8">
+                        {[
+                            {
+                                value: stats.total.toString(),
+                                label: "Recruiters",
+                            },
+                            {
+                                value: stats.active.toString(),
+                                label: "Active",
+                            },
+                            {
+                                value: stats.avgPlacements.toString(),
+                                label: "Avg. Placements",
+                            },
+                            {
+                                value: stats.topRated.toString(),
+                                label: "Top Rated",
+                            },
+                        ].map((stat, i) => (
+                            <div key={i} className="hero-stat opacity-0">
+                                <div className="text-2xl font-black tracking-tight text-primary">
+                                    {stat.value}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            {/* Stats */}
-            <div className="retro-metrics grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full">
-                {[
-                    {
-                        label: "Total Recruiters",
-                        value: stats.total,
-                        color: "bg-coral",
-                        fg: "text-coral-content",
-                    },
-                    {
-                        label: "Active",
-                        value: stats.active,
-                        color: "bg-teal",
-                        fg: "text-teal-content",
-                    },
-                    {
-                        label: "Avg. Placements",
-                        value: stats.avgPlacements,
-                        color: "bg-yellow",
-                        fg: "text-yellow-content",
-                    },
-                    {
-                        label: "Top Rated",
-                        value: stats.topRated,
-                        color: "bg-purple",
-                        fg: "text-purple-content",
-                    },
-                ].map((stat, i) => (
-                    <div
-                        key={i}
-                        className={`metric-block metric-block-sm ${stat.color} ${stat.fg}`}
-                    >
-                        <div className="retro-metric-value">{stat.value}</div>
-                        <div className="retro-metric-label">{stat.label}</div>
-                    </div>
-                ))}
-            </div>
+            {/* Diagonal clip-path accent */}
+            <div
+                className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block"
+                style={{
+                    clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
+                }}
+            />
         </section>
     );
 }

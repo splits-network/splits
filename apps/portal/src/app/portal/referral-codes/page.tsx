@@ -1,304 +1,297 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import {
+    useStandardList,
+    PaginationControls,
+    ErrorState,
+} from "@/hooks/use-standard-list";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { PageTitle } from "@/components/page-title";
-import { LoadingState, ButtonLoading } from "@splits-network/shared-ui";
+import { ModalPortal } from "@splits-network/shared-ui";
+import type { RecruiterCode, ReferralCodeFilters } from "./types";
+import { ReferralCodesAnimator } from "./referral-codes-animator";
+import { HeaderSection } from "./components/shared/header-section";
+import { ControlsBar } from "./components/shared/controls-bar";
+import { TableView } from "./components/table/table-view";
+import { CreateCodeModal } from "./components/modals/create-code-modal";
 
-interface RecruiterCode {
+interface StatsCode {
     id: string;
-    code: string;
-    label?: string;
     status: "active" | "inactive";
-    created_at: string;
     usage_count?: number;
 }
 
-export default function ReferralCodesPage() {
-    const { getToken } = useAuth();
+export default function ReferralCodesBaselPage() {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const { getToken, isLoaded: isAuthLoaded } = useAuth();
 
-    const [codes, setCodes] = useState<RecruiterCode[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [creating, setCreating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [newLabel, setNewLabel] = useState("");
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [copiedId, setCopiedId] = useState<string | null>(null);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
-    const fetchCodes = useCallback(async () => {
-        try {
-            setLoading(true);
-            const token = await getToken();
-            if (!token) return;
+    // Stats (fetched independently)
+    const [stats, setStats] = useState({
+        total: 0,
+        active: 0,
+        signups: 0,
+        inactive: 0,
+    });
 
-            const client = createAuthenticatedClient(token);
-            const response: any = await client.get("/recruiter-codes", {
-                params: { limit: 50, sort_by: "created_at", sort_order: "desc" },
-            });
-
-            setCodes(response?.data || []);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message || "Failed to load referral codes");
-        } finally {
-            setLoading(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
+    // Fetch stats
     useEffect(() => {
-        fetchCodes();
-    }, [fetchCodes]);
+        let cancelled = false;
 
-    const handleCreate = async () => {
-        try {
-            setCreating(true);
-            setError(null);
+        const run = async () => {
+            if (cancelled || !isAuthLoaded) return;
+
             const token = await getToken();
-            if (!token) return;
+            if (!token) {
+                if (!cancelled) {
+                    setStats({ total: 0, active: 0, signups: 0, inactive: 0 });
+                }
+                return;
+            }
 
+            try {
+                const client = createAuthenticatedClient(token);
+                // Paginate through all codes to compute stats (max 100 per request)
+                const allCodes: StatsCode[] = [];
+                let statsPage = 1;
+                let hasMore = true;
+
+                while (hasMore) {
+                    const response = await client.get("/recruiter-codes", {
+                        params: { limit: 100, page: statsPage },
+                    });
+                    if (cancelled) return;
+
+                    const batch: StatsCode[] = response.data || [];
+                    allCodes.push(...batch);
+
+                    const totalFromServer = response.pagination?.total ?? batch.length;
+                    hasMore = allCodes.length < totalFromServer && batch.length === 100;
+                    statsPage++;
+                }
+
+                const active = allCodes.filter(
+                    (c) => c.status === "active",
+                ).length;
+                const inactive = allCodes.filter(
+                    (c) => c.status === "inactive",
+                ).length;
+                const signups = allCodes.reduce(
+                    (sum, c) => sum + (c.usage_count ?? 0),
+                    0,
+                );
+
+                if (!cancelled) {
+                    setStats({
+                        total: allCodes.length,
+                        active,
+                        signups,
+                        inactive,
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to fetch referral code stats:", error);
+                if (!cancelled) {
+                    setStats({ total: 0, active: 0, signups: 0, inactive: 0 });
+                }
+            }
+        };
+
+        void run();
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthLoaded]);
+
+    const defaultFilters = useMemo<ReferralCodeFilters>(
+        () => ({ status: undefined }),
+        [],
+    );
+
+    const {
+        data: codes,
+        loading,
+        error,
+        pagination,
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        clearFilters,
+        filters,
+        setFilter,
+        page,
+        limit,
+        goToPage,
+        setLimit,
+        total,
+        totalPages,
+        refresh,
+    } = useStandardList<RecruiterCode, ReferralCodeFilters>({
+        endpoint: "/recruiter-codes",
+        defaultFilters,
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
+        defaultLimit: 50,
+        syncToUrl: true,
+    });
+
+    const handleCreateSuccess = () => {
+        setShowCreateModal(false);
+        refresh();
+        // Refresh stats too
+        void refreshStats();
+    };
+
+    const refreshStats = async () => {
+        const token = await getToken();
+        if (!token) return;
+
+        try {
             const client = createAuthenticatedClient(token);
-            await client.post("/recruiter-codes", {
-                label: newLabel.trim() || undefined,
+            const allCodes: StatsCode[] = [];
+            let statsPage = 1;
+            let hasMore = true;
+
+            while (hasMore) {
+                const response = await client.get("/recruiter-codes", {
+                    params: { limit: 100, page: statsPage },
+                });
+
+                const batch: StatsCode[] = response.data || [];
+                allCodes.push(...batch);
+
+                const totalFromServer = response.pagination?.total ?? batch.length;
+                hasMore = allCodes.length < totalFromServer && batch.length === 100;
+                statsPage++;
+            }
+
+            const active = allCodes.filter(
+                (c) => c.status === "active",
+            ).length;
+            const inactive = allCodes.filter(
+                (c) => c.status === "inactive",
+            ).length;
+            const signups = allCodes.reduce(
+                (sum, c) => sum + (c.usage_count ?? 0),
+                0,
+            );
+
+            setStats({
+                total: allCodes.length,
+                active,
+                signups,
+                inactive,
             });
-
-            setNewLabel("");
-            setShowCreateForm(false);
-            await fetchCodes();
-        } catch (err: any) {
-            setError(err.message || "Failed to create referral code");
-        } finally {
-            setCreating(false);
+        } catch {
+            // Silently fail - stats will be stale but not broken
         }
     };
 
-    const handleToggleStatus = async (code: RecruiterCode) => {
-        try {
-            const token = await getToken();
-            if (!token) return;
-
-            const client = createAuthenticatedClient(token);
-            const newStatus = code.status === "active" ? "inactive" : "active";
-            await client.patch(`/recruiter-codes/${code.id}`, {
-                status: newStatus,
-            });
-            await fetchCodes();
-        } catch (err: any) {
-            setError(err.message || "Failed to update code");
-        }
+    const handleRefresh = () => {
+        refresh();
+        void refreshStats();
     };
 
-    const handleDelete = async (id: string) => {
-        try {
-            setDeletingId(id);
-            const token = await getToken();
-            if (!token) return;
-
-            const client = createAuthenticatedClient(token);
-            await client.delete(`/recruiter-codes/${id}`);
-            await fetchCodes();
-        } catch (err: any) {
-            setError(err.message || "Failed to delete code");
-        } finally {
-            setDeletingId(null);
-        }
-    };
-
-    const copyShareLink = (code: string) => {
-        const url = `https://splits.network?rec_code=${code}`;
-        navigator.clipboard.writeText(url);
-        setCopiedId(code);
-        setTimeout(() => setCopiedId(null), 2000);
-    };
-
-    if (loading) {
-        return <LoadingState message="Loading referral codes..." />;
+    if (error) {
+        return <ErrorState message={error} onRetry={refresh} />;
     }
 
     return (
         <>
-            <PageTitle
-                title="Referral Codes"
-                subtitle="Create and manage your referral codes to track sourcing attribution"
-            >
-                <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setShowCreateForm(true)}
-                >
-                    <i className="fa-duotone fa-regular fa-plus"></i>
-                    New Code
-                </button>
-            </PageTitle>
+            <ReferralCodesAnimator contentRef={contentRef}>
+                <HeaderSection stats={stats} />
 
-            <div className="space-y-4">
-                {error && (
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{error}</span>
-                        <button
-                            className="btn btn-ghost btn-xs"
-                            onClick={() => setError(null)}
-                        >
-                            Dismiss
-                        </button>
-                    </div>
-                )}
+                <ControlsBar
+                    searchInput={searchInput}
+                    onSearchChange={setSearchInput}
+                    filters={filters}
+                    onFilterChange={setFilter}
+                    onCreateCode={() => setShowCreateModal(true)}
+                    codeCount={codes.length}
+                    totalCount={pagination?.total ?? codes.length}
+                />
 
-                {/* Create form */}
-                {showCreateForm && (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h3 className="card-title text-base">Create New Referral Code</h3>
-                            <p className="text-sm text-base-content/60">
-                                A unique code will be generated automatically. You can add an optional label to track campaigns.
-                            </p>
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Label (optional)</legend>
-                                <input
-                                    type="text"
-                                    placeholder="e.g., LinkedIn Q1 2026"
-                                    className="input w-full"
-                                    value={newLabel}
-                                    onChange={(e) => setNewLabel(e.target.value)}
-                                    maxLength={255}
-                                    disabled={creating}
-                                />
-                                <p className="fieldset-label">
-                                    Campaign name or description for your reference
+                {/* Content Area */}
+                <section className="content-area opacity-0">
+                    <div ref={contentRef} className="container mx-auto px-6 lg:px-12 py-8">
+                        {loading && codes.length === 0 ? (
+                            <div className="py-28 text-center">
+                                <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    Loading referral codes...
                                 </p>
-                            </fieldset>
-                            <div className="card-actions justify-end mt-2">
-                                <button
-                                    className="btn btn-ghost btn-sm"
-                                    onClick={() => {
-                                        setShowCreateForm(false);
-                                        setNewLabel("");
-                                    }}
-                                    disabled={creating}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="btn btn-primary btn-sm"
-                                    onClick={handleCreate}
-                                    disabled={creating}
-                                >
-                                    <ButtonLoading
-                                        loading={creating}
-                                        text="Create Code"
-                                        loadingText="Creating..."
-                                    />
-                                </button>
                             </div>
-                        </div>
+                        ) : codes.length === 0 ? (
+                            <div className="py-28 text-center">
+                                <i className="fa-duotone fa-regular fa-link text-5xl text-base-content/15 mb-6 block" />
+                                <h3 className="text-2xl font-black tracking-tight mb-2">
+                                    No referral codes yet
+                                </h3>
+                                <p className="text-base-content/50 mb-6 max-w-md mx-auto">
+                                    Create your first referral code and start sharing it
+                                    with potential candidates and companies. When they sign
+                                    up using your code, you&apos;ll be attributed as the
+                                    sourcer.
+                                </p>
+                                <div className="flex gap-3 justify-center">
+                                    <button
+                                        onClick={() => setShowCreateModal(true)}
+                                        className="btn btn-primary btn-sm"
+                                        style={{ borderRadius: 0 }}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-plus mr-2" />
+                                        Create Your First Code
+                                    </button>
+                                    {(searchInput || filters.status) && (
+                                        <button
+                                            onClick={() => {
+                                                clearSearch();
+                                                clearFilters();
+                                            }}
+                                            className="btn btn-outline btn-sm"
+                                            style={{ borderRadius: 0 }}
+                                        >
+                                            Reset Filters
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <TableView
+                                codes={codes}
+                                onRefresh={handleRefresh}
+                            />
+                        )}
                     </div>
-                )}
+                </section>
 
-                {/* Codes table */}
-                {codes.length === 0 && !showCreateForm ? (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body items-center text-center py-12">
-                            <i className="fa-duotone fa-regular fa-link text-4xl text-base-content/30 mb-4"></i>
-                            <h3 className="font-semibold text-lg">No referral codes yet</h3>
-                            <p className="text-base-content/60 max-w-md">
-                                Create referral codes to share with potential candidates and companies.
-                                When they sign up using your code, you'll be attributed as the sourcer.
-                            </p>
-                            <button
-                                className="btn btn-primary btn-sm mt-4"
-                                onClick={() => setShowCreateForm(true)}
-                            >
-                                <i className="fa-duotone fa-regular fa-plus"></i>
-                                Create Your First Code
-                            </button>
-                        </div>
-                    </div>
-                ) : codes.length > 0 ? (
-                    <div className="card bg-base-100 shadow overflow-x-auto">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Label</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th className="text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {codes.map((code) => (
-                                    <tr key={code.id}>
-                                        <td>
-                                            <code className="bg-base-200 px-2 py-1 rounded text-sm font-mono">
-                                                {code.code}
-                                            </code>
-                                        </td>
-                                        <td>
-                                            <span className="text-sm text-base-content/70">
-                                                {code.label || "—"}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                className={`badge badge-sm ${
-                                                    code.status === "active"
-                                                        ? "badge-success"
-                                                        : "badge-ghost"
-                                                }`}
-                                            >
-                                                {code.status}
-                                            </span>
-                                        </td>
-                                        <td className="text-sm text-base-content/60">
-                                            {new Date(code.created_at).toLocaleDateString()}
-                                        </td>
-                                        <td>
-                                            <div className="flex gap-1 justify-end">
-                                                <button
-                                                    className="btn btn-ghost btn-xs"
-                                                    onClick={() => copyShareLink(code.code)}
-                                                    title="Copy share link"
-                                                >
-                                                    {copiedId === code.code ? (
-                                                        <i className="fa-duotone fa-regular fa-check text-success"></i>
-                                                    ) : (
-                                                        <i className="fa-duotone fa-regular fa-copy"></i>
-                                                    )}
-                                                </button>
-                                                <button
-                                                    className="btn btn-ghost btn-xs"
-                                                    onClick={() => handleToggleStatus(code)}
-                                                    title={code.status === "active" ? "Deactivate" : "Activate"}
-                                                >
-                                                    {code.status === "active" ? (
-                                                        <i className="fa-duotone fa-regular fa-pause"></i>
-                                                    ) : (
-                                                        <i className="fa-duotone fa-regular fa-play"></i>
-                                                    )}
-                                                </button>
-                                                <button
-                                                    className="btn btn-ghost btn-xs text-error"
-                                                    onClick={() => handleDelete(code.id)}
-                                                    disabled={deletingId === code.id}
-                                                    title="Delete"
-                                                >
-                                                    {deletingId === code.id ? (
-                                                        <span className="loading loading-spinner loading-xs"></span>
-                                                    ) : (
-                                                        <i className="fa-duotone fa-regular fa-trash"></i>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : null}
-            </div>
+                {/* Pagination */}
+                <div className="container mx-auto px-6 lg:px-12 py-6">
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        total={total}
+                        limit={limit}
+                        onPageChange={goToPage}
+                        onLimitChange={setLimit}
+                        loading={loading}
+                    />
+                </div>
+            </ReferralCodesAnimator>
+
+            <ModalPortal>
+                {showCreateModal && (
+                    <CreateCodeModal
+                        isOpen={showCreateModal}
+                        onClose={() => setShowCreateModal(false)}
+                        onSuccess={handleCreateSuccess}
+                    />
+                )}
+            </ModalPortal>
         </>
     );
 }

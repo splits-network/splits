@@ -1,143 +1,170 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef, useCallback, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const D = { fast: 0.3, normal: 0.5, slow: 0.8 };
-const E = {
-    smooth: "power2.out",
-    bounce: "back.out(1.7)",
-    elastic: "elastic.out(1, 0.4)",
-    pop: "back.out(2.0)",
-};
-const S = { tight: 0.06 };
-
-interface RecruitersAnimatorProps {
-    children: ReactNode;
+if (typeof window !== "undefined") {
+    gsap.registerPlugin();
 }
 
-export function RecruitersAnimator({ children }: RecruitersAnimatorProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
+/**
+ * Basel GSAP animator for the recruiters page.
+ * Editorial entrance animations: power3.out easing, staggered fade-in.
+ * Follows showcase/lists/one patterns.
+ */
+export function RecruitersAnimator({
+    children,
+    contentRef,
+}: {
+    children: ReactNode;
+    contentRef: React.RefObject<HTMLDivElement | null>;
+}) {
+    const mainRef = useRef<HTMLElement>(null);
+
+    /* ── View mode transition ── */
+
+    const animateViewChange = useCallback(
+        (callback: () => void) => {
+            if (!contentRef.current) {
+                callback();
+                return;
+            }
+            gsap.to(contentRef.current, {
+                opacity: 0,
+                y: 15,
+                duration: 0.2,
+                ease: "power2.in",
+                onComplete: () => {
+                    callback();
+                    gsap.fromTo(
+                        contentRef.current,
+                        { opacity: 0, y: 15 },
+                        {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.35,
+                            ease: "power3.out",
+                        },
+                    );
+                },
+            });
+        },
+        [contentRef],
+    );
+
+    /* ── Hero entrance ── */
 
     useGSAP(
         () => {
-            if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    containerRef.current.querySelectorAll("[class*='opacity-0']"),
-                    { opacity: 1 },
-                );
+            if (!mainRef.current) return;
+            const prefersReducedMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches;
+
+            if (prefersReducedMotion) {
+                const hidden =
+                    mainRef.current.querySelectorAll("[class*='opacity-0']");
+                gsap.set(hidden, { opacity: 1 });
                 return;
             }
 
             const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
+                mainRef.current!.querySelectorAll(sel);
             const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
+                mainRef.current!.querySelector(sel);
 
-            // Memphis shapes
-            gsap.fromTo(
-                $(".memphis-shape"),
-                { opacity: 0, scale: 0, rotation: -180 },
-                {
-                    opacity: 0.4,
-                    scale: 1,
-                    rotation: 0,
-                    duration: D.slow,
-                    ease: E.elastic,
-                    stagger: { each: S.tight, from: "random" },
-                    delay: 0.2,
-                },
-            );
-
-            $(".memphis-shape").forEach((shape, i) => {
-                gsap.to(shape, {
-                    y: `+=${8 + (i % 3) * 4}`,
-                    x: `+=${4 + (i % 2) * 6}`,
-                    rotation: `+=${(i % 2 === 0 ? 1 : -1) * (4 + i * 2)}`,
-                    duration: 3 + i * 0.4,
-                    ease: "sine.inOut",
-                    repeat: -1,
-                    yoyo: true,
-                });
+            /* Hero timeline */
+            const heroTl = gsap.timeline({
+                defaults: { ease: "power3.out" },
             });
 
-            // Header
-            const headerTl = gsap.timeline({ defaults: { ease: E.smooth } });
-
-            const headerBadge = $1(".header-badge");
-            if (headerBadge) {
-                headerTl.fromTo(
-                    headerBadge,
-                    { opacity: 0, y: -20, scale: 0.8 },
-                    { opacity: 1, y: 0, scale: 1, duration: D.normal, ease: E.bounce },
+            const kicker = $1(".hero-kicker");
+            if (kicker) {
+                heroTl.fromTo(
+                    kicker,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.6 },
                 );
             }
 
-            const headerTitle = $1(".header-title");
-            if (headerTitle) {
-                headerTl.fromTo(
-                    headerTitle,
-                    { opacity: 0, y: 50, skewY: 2 },
-                    { opacity: 1, y: 0, skewY: 0, duration: D.slow },
+            const words = $(".hero-headline-word");
+            if (words.length) {
+                heroTl.fromTo(
+                    words,
+                    { opacity: 0, y: 80, rotateX: 40 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        duration: 1,
+                        stagger: 0.12,
+                    },
                     "-=0.3",
                 );
             }
 
-            const headerSubtitle = $1(".header-subtitle");
-            if (headerSubtitle) {
-                headerTl.fromTo(
-                    headerSubtitle,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
-                    "-=0.4",
+            const subtitle = $1(".hero-subtitle");
+            if (subtitle) {
+                heroTl.fromTo(
+                    subtitle,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.7 },
+                    "-=0.5",
                 );
             }
 
-            // Controls bar
+            const stats = $(".hero-stat");
+            if (stats.length) {
+                heroTl.fromTo(
+                    stats,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+                    "-=0.3",
+                );
+            }
+
+            /* Controls bar */
             const controlsBar = $1(".controls-bar");
             if (controlsBar) {
-                headerTl.fromTo(
+                gsap.fromTo(
                     controlsBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal, ease: E.bounce },
-                    "-=0.2",
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: "power3.out",
+                        delay: 0.8,
+                    },
                 );
             }
 
-            // Stats
-            gsap.fromTo(
-                $(".stat-pill"),
-                { opacity: 0, scale: 0.8 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: D.fast,
-                    ease: E.pop,
-                    stagger: S.tight,
-                    delay: 0.8,
-                },
-            );
-
-            // Content area
-            const listingsContent = $1(".listings-content");
-            if (listingsContent) {
+            /* Content area */
+            const contentArea = $1(".content-area");
+            if (contentArea) {
                 gsap.fromTo(
-                    listingsContent,
+                    contentArea,
                     { opacity: 0, y: 30 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        delay: 1.0,
+                        duration: 0.7,
+                        ease: "power3.out",
+                        delay: 1,
                     },
                 );
             }
         },
-        { scope: containerRef },
+        { scope: mainRef },
     );
 
-    return <div ref={containerRef}>{children}</div>;
+    return (
+        <main
+            ref={mainRef}
+            className="overflow-hidden min-h-screen bg-base-100"
+        >
+            {children}
+        </main>
+    );
 }

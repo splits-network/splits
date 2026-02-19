@@ -1,16 +1,13 @@
 "use client";
 
 import { Fragment } from "react";
-import { Badge } from "@splits-network/memphis-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { statusColor, statusBorder } from "../shared/status-color";
 import {
     recruiterLocation,
     formatStatus,
     placementsDisplay,
-    successRateDisplay,
     reputationDisplay,
     experienceDisplay,
     joinedAgo,
@@ -21,7 +18,6 @@ import RecruiterActionsToolbar from "../shared/actions-toolbar";
 
 export function TableRow({
     recruiter,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -29,16 +25,15 @@ export function TableRow({
     onRefresh,
 }: {
     recruiter: RecruiterWithUser;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
+    const status = recruiter.marketplace_profile?.status || "active";
 
     return (
         <Fragment>
@@ -46,13 +41,13 @@ export function TableRow({
                 onClick={onSelect}
                 className={`cursor-pointer transition-colors border-l-4 ${
                     isSelected
-                        ? `${ac.bgLight} ${ac.border}`
-                        : `border-transparent ${idx % 2 === 0 ? "bg-white" : "bg-cream"}`
+                        ? `bg-primary/5 ${statusBorder(status)}`
+                        : `border-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`
                 }`}
             >
                 <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? ac.text : "text-dark/40"}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/40"}`}
                     />
                 </td>
                 <td className="px-4 py-3">
@@ -61,60 +56,69 @@ export function TableRow({
                             <img
                                 src={recruiter.users.profile_image_url}
                                 alt={name}
-                                className={`w-8 h-8 object-cover border-2 ${ac.border}`}
+                                className="w-8 h-8 object-cover border border-base-300"
                             />
                         ) : (
-                            <div
-                                className={`w-8 h-8 flex items-center justify-center border-2 ${ac.border} bg-cream text-xs font-bold text-dark`}
-                            >
+                            <div className="w-8 h-8 flex items-center justify-center border border-base-300 bg-base-200 text-xs font-bold text-base-content/60">
                                 {getInitials(name)}
                             </div>
                         )}
                         <div className="flex items-center gap-2">
                             {isNew(recruiter) && (
-                                <i className="fa-duotone fa-regular fa-sparkles text-sm text-yellow" />
+                                <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
                             )}
-                            <span className="font-bold text-sm text-dark">
+                            <span className="font-bold text-sm">
                                 {name}
                             </span>
                         </div>
                     </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-dark/70">
+                <td className="px-4 py-3 text-sm text-base-content/70">
                     {location || "\u2014"}
                 </td>
                 <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                        {(recruiter.specialties || []).slice(0, 2).map((s, i) => (
-                            <Badge key={i} color={ac.name} variant="outline" size="sm">
-                                {s}
-                            </Badge>
-                        ))}
+                        {(recruiter.specialties || [])
+                            .slice(0, 2)
+                            .map((s, i) => (
+                                <span
+                                    key={i}
+                                    className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5"
+                                >
+                                    {s}
+                                </span>
+                            ))}
                         {(recruiter.specialties || []).length > 2 && (
-                            <span className="text-sm text-dark/40">
-                                +{(recruiter.specialties || []).length - 2}
+                            <span className="text-sm text-base-content/40">
+                                +
+                                {(recruiter.specialties || []).length - 2}
                             </span>
                         )}
                     </div>
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-dark">
+                <td className="px-4 py-3 text-sm font-bold">
                     {placementsDisplay(recruiter)}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-purple">
+                <td className="px-4 py-3 text-sm font-bold text-accent">
                     {reputationDisplay(recruiter) || "\u2014"}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-dark">
+                <td className="px-4 py-3 text-sm font-bold">
                     {experienceDisplay(recruiter) || "\u2014"}
                 </td>
                 <td className="px-4 py-3">
-                    <Badge color={statusVariant(recruiter.marketplace_profile?.status || "active")}>
-                        {formatStatus(recruiter.marketplace_profile?.status || "active")}
-                    </Badge>
+                    <span
+                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
+                    >
+                        {formatStatus(status)}
+                    </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-dark/60">
+                <td className="px-4 py-3 text-sm text-base-content/60">
                     {joinedAgo(recruiter)}
                 </td>
-                <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
+                <td
+                    className="px-4 py-3 relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
                         <RecruiterActionsToolbar
                             recruiter={recruiter}
@@ -133,11 +137,10 @@ export function TableRow({
                 <tr>
                     <td
                         colSpan={colSpan}
-                        className={`p-0 bg-white border-t-4 border-b-4 ${ac.border}`}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                     >
                         <DetailLoader
                             recruiterId={recruiter.id}
-                            accent={ac}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

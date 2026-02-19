@@ -1,7 +1,6 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { accentAt } from "../shared/accent";
 import { companyId } from "../shared/helpers";
 import { TableRow } from "./table-row";
 
@@ -20,19 +19,36 @@ export function TableView({
 }) {
     const isMarketplace = activeTab === "marketplace";
 
-    const marketplaceColumns = ["", "Company", "Industry", "Location", "Size", "Added", ""];
-    const myCompaniesColumns = ["", "Company", "Industry", "Location", "Status", "Type", "Added", ""];
+    const marketplaceColumns = [
+        "",
+        "Company",
+        "Industry",
+        "Location",
+        "Size",
+        "Added",
+        "",
+    ];
+    const myCompaniesColumns = [
+        "",
+        "Company",
+        "Industry",
+        "Location",
+        "Status",
+        "Type",
+        "Added",
+        "",
+    ];
     const columns = isMarketplace ? marketplaceColumns : myCompaniesColumns;
 
     return (
-        <div className="overflow-x-auto border-4 border-dark">
+        <div className="overflow-x-auto border-2 border-base-300">
             <table className="w-full" style={{ minWidth: 900 }}>
                 <thead>
-                    <tr className="bg-dark">
+                    <tr className="bg-base-200 border-b-2 border-base-300">
                         {columns.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-sm font-black uppercase tracking-wider ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-20" : ""} ${accentAt(i).text}`}
+                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-24" : ""}`}
                             >
                                 {h}
                             </th>
@@ -44,14 +60,19 @@ export function TableView({
                         const cId = companyId(item, isMarketplace);
                         return (
                             <TableRow
-                                key={isMarketplace ? (item as Company).id : (item as CompanyRelationship).id}
+                                key={
+                                    isMarketplace
+                                        ? (item as Company).id
+                                        : (item as CompanyRelationship).id
+                                }
                                 item={item}
                                 activeTab={activeTab}
-                                accent={accentAt(idx)}
                                 idx={idx}
                                 isSelected={selectedId === cId}
                                 colSpan={columns.length}
-                                selectedCompanyId={selectedId === cId ? cId : null}
+                                selectedCompanyId={
+                                    selectedId === cId ? cId : null
+                                }
                                 onSelect={() => onSelect(item)}
                                 onRefresh={onRefresh}
                             />

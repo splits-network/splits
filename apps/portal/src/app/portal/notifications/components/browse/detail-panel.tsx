@@ -12,8 +12,7 @@ import {
 } from "@/lib/notifications";
 import ApplicationDetails from "@/app/portal/applications/components/shared/details";
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
-import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/detail-loader";
-import { accentAt as placementAccentAt } from "@/app/portal/placements/components/shared/accent";
+import { DetailPanel as PlacementDetailPanel } from "@/app/portal/placements/components/shared/detail-panel";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
 import { accentAt } from "@/app/portal/roles/components/shared/accent";
 
@@ -284,7 +283,7 @@ function PlacementDetailsLoaderWrapper({ placementId }: { placementId: string })
         );
     }
 
-    return <PlacementDetailLoader placement={placement} accent={placementAccentAt(0)} />;
+    return <PlacementDetailPanel placement={placement} />;
 }
 
 /**

@@ -5,12 +5,10 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
     useStandardList,
     PaginationControls,
-    LoadingState,
-    EmptyState,
     ErrorState,
 } from "@/hooks/use-standard-list";
 import type { Company, CompanyRelationship, CompanyFilters, CompanyTab } from "./types";
-import type { ViewMode } from "./components/shared/accent";
+import type { ViewMode } from "./components/shared/status-color";
 import { companyId as getCompanyId } from "./components/shared/helpers";
 import { CompaniesAnimator } from "./companies-animator";
 import { HeaderSection } from "./components/shared/header-section";
@@ -19,24 +17,25 @@ import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 
-export default function CompaniesMemphisPage() {
+export default function CompaniesBaselPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(() =>
-        searchParams.get("companyId"),
+    const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
+        () => searchParams.get("companyId"),
     );
     const [activeTab, setActiveTab] = useState<CompanyTab>(() => {
         const t = searchParams.get("tab");
         return t === "my-companies" ? "my-companies" : "marketplace";
     });
 
-    // Sync viewMode, selectedCompanyId, and tab to URL
+    /* -- URL sync -- */
     const searchParamsRef = useRef(searchParams);
     searchParamsRef.current = searchParams;
 
@@ -74,7 +73,7 @@ export default function CompaniesMemphisPage() {
 
     const isMarketplace = activeTab === "marketplace";
 
-    // Two useStandardList hooks — one for each tab
+    /* -- Data -- */
     const marketplace = useStandardList<Company, CompanyFilters>({
         endpoint: "/companies",
         defaultFilters: { browse_all: "true" },
@@ -119,13 +118,20 @@ export default function CompaniesMemphisPage() {
 
     const stats = useMemo(
         () => ({
-            total: marketplace.pagination?.total || marketplace.data.length,
-            myCompanies: myCompanies.pagination?.total || myCompanies.data.length,
+            total:
+                marketplace.pagination?.total || marketplace.data.length,
+            myCompanies:
+                myCompanies.pagination?.total || myCompanies.data.length,
             pending: myCompanies.data.filter(
                 (r: any) => r.status === "pending",
             ).length,
         }),
-        [marketplace.pagination, marketplace.data, myCompanies.pagination, myCompanies.data],
+        [
+            marketplace.pagination,
+            marketplace.data,
+            myCompanies.pagination,
+            myCompanies.data,
+        ],
     );
 
     if (active.error) {
@@ -133,100 +139,109 @@ export default function CompaniesMemphisPage() {
     }
 
     return (
-        <CompaniesAnimator>
+        <CompaniesAnimator contentRef={contentRef}>
             <HeaderSection stats={stats} />
 
-            <section className="min-h-screen bg-cream">
-                <div className="py-8 px-4 lg:px-8">
-                    <ControlsBar
-                        searchInput={active.searchInput}
-                        onSearchChange={active.setSearchInput}
-                        activeTab={activeTab}
-                        onTabChange={handleTabChange}
-                        filters={active.filters}
-                        onFilterChange={active.setFilter}
-                        viewMode={viewMode}
-                        onViewModeChange={handleViewModeChange}
-                        isMyCompanies={!isMarketplace}
-                    />
+            <ControlsBar
+                searchInput={active.searchInput}
+                onSearchChange={active.setSearchInput}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                filters={active.filters}
+                onFilterChange={active.setFilter}
+                viewMode={viewMode}
+                onViewModeChange={handleViewModeChange}
+                isMyCompanies={!isMarketplace}
+                companyCount={active.data.length}
+                totalCount={active.pagination?.total ?? active.data.length}
+            />
 
-                    {/* Listing Count */}
-                    <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                        Showing {active.data.length} of{" "}
-                        {active.pagination?.total ?? active.data.length}{" "}
-                        {isMarketplace ? "companies" : "relationships"}
-                    </p>
-
-                    {/* Content Area */}
-                    <div className="listings-content opacity-0">
-                        {active.loading && active.data.length === 0 ? (
-                            <LoadingState message="Loading companies..." />
-                        ) : active.data.length === 0 ? (
-                            <EmptyState
-                                icon="fa-building"
-                                title={isMarketplace ? "No Companies Found" : "No Relationships"}
-                                description={
-                                    isMarketplace
-                                        ? "Try adjusting your search or filters"
-                                        : "Browse the marketplace to connect with companies"
-                                }
-                                action={{
-                                    label: isMarketplace ? "Reset Filters" : "Browse Marketplace",
-                                    onClick: () => {
-                                        if (isMarketplace) {
-                                            active.clearSearch();
-                                            active.clearFilters();
-                                        } else {
-                                            handleTabChange("marketplace");
-                                        }
-                                    },
+            {/* Content Area */}
+            <section className="content-area opacity-0">
+                <div ref={contentRef}>
+                    {active.loading && active.data.length === 0 ? (
+                        <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                            <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                Loading companies...
+                            </p>
+                        </div>
+                    ) : active.data.length === 0 ? (
+                        <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                            <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                            <h3 className="text-2xl font-black tracking-tight mb-2">
+                                {isMarketplace
+                                    ? "No companies found"
+                                    : "No relationships"}
+                            </h3>
+                            <p className="text-base-content/50 mb-6">
+                                {isMarketplace
+                                    ? "Adjust your search or clear filters to see available companies."
+                                    : "Browse the marketplace to connect with companies."}
+                            </p>
+                            <button
+                                onClick={() => {
+                                    if (isMarketplace) {
+                                        active.clearSearch();
+                                        active.clearFilters();
+                                    } else {
+                                        handleTabChange("marketplace");
+                                    }
                                 }}
-                            />
-                        ) : (
-                            <>
-                                {viewMode === "table" && (
-                                    <TableView
-                                        items={active.data}
-                                        activeTab={activeTab}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedCompanyId}
-                                        onRefresh={handleRefresh}
-                                    />
-                                )}
-                                {viewMode === "grid" && (
-                                    <GridView
-                                        items={active.data}
-                                        activeTab={activeTab}
-                                        onSelectAction={handleSelect}
-                                        selectedId={selectedCompanyId}
-                                        onRefreshAction={handleRefresh}
-                                    />
-                                )}
-                                {viewMode === "split" && (
-                                    <SplitView
-                                        items={active.data}
-                                        activeTab={activeTab}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedCompanyId}
-                                        onRefresh={handleRefresh}
-                                    />
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    {/* Pagination */}
-                    <PaginationControls
-                        page={active.page}
-                        totalPages={active.totalPages}
-                        total={active.total}
-                        limit={active.limit}
-                        onPageChange={active.goToPage}
-                        onLimitChange={active.setLimit}
-                        loading={active.loading}
-                    />
+                                className="btn btn-outline btn-sm"
+                                style={{ borderRadius: 0 }}
+                            >
+                                {isMarketplace
+                                    ? "Reset Filters"
+                                    : "Browse Marketplace"}
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {viewMode === "table" && (
+                                <TableView
+                                    items={active.data}
+                                    activeTab={activeTab}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedCompanyId}
+                                    onRefresh={handleRefresh}
+                                />
+                            )}
+                            {viewMode === "grid" && (
+                                <GridView
+                                    items={active.data}
+                                    activeTab={activeTab}
+                                    onSelectAction={handleSelect}
+                                    selectedId={selectedCompanyId}
+                                    onRefreshAction={handleRefresh}
+                                />
+                            )}
+                            {viewMode === "split" && (
+                                <SplitView
+                                    items={active.data}
+                                    activeTab={activeTab}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedCompanyId}
+                                    onRefresh={handleRefresh}
+                                />
+                            )}
+                        </>
+                    )}
                 </div>
             </section>
+
+            {/* Pagination */}
+            <div className="container mx-auto px-6 lg:px-12 py-6">
+                <PaginationControls
+                    page={active.page}
+                    totalPages={active.totalPages}
+                    total={active.total}
+                    limit={active.limit}
+                    onPageChange={active.goToPage}
+                    onLimitChange={active.setLimit}
+                    loading={active.loading}
+                />
+            </div>
         </CompaniesAnimator>
     );
 }

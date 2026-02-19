@@ -688,21 +688,21 @@ export class ApplicationsEmailService {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
-    <div style="background: #FF6B6B; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
+<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f5;">
+    <div style="background: #233876; padding: 30px; text-align: center; border: 4px solid #18181b; border-bottom: none; border-radius: 4px 4px 0 0;">
         <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800;">New Job Opportunity</h1>
     </div>
 
-    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
+    <div style="background: #ffffff; padding: 30px; border: 4px solid #18181b; border-top: none; border-radius: 0 0 4px 4px;">
         <p style="font-size: 16px; margin-bottom: 20px;">Hi ${data.candidateName},</p>
 
         <p style="font-size: 16px; margin-bottom: 20px;">
             ${data.recruiterName} has proposed an exciting opportunity for you:
         </p>
 
-        <div style="background: #F5F0EB; padding: 20px; border-radius: 4px; border-left: 4px solid #FF6B6B; margin: 20px 0;">
-            <h2 style="color: #1A1A2E; margin-top: 0; font-size: 22px; font-weight: 700;">${data.jobTitle}</h2>
-            <p style="font-size: 16px; color: #1A1A2E; margin: 5px 0;">
+        <div style="background: #f4f4f5; padding: 20px; border-radius: 4px; border-left: 4px solid #233876; margin: 20px 0;">
+            <h2 style="color: #18181b; margin-top: 0; font-size: 22px; font-weight: 700;">${data.jobTitle}</h2>
+            <p style="font-size: 16px; color: #18181b; margin: 5px 0;">
                 <strong>Company:</strong> ${data.companyName}
             </p>
         </div>
@@ -714,7 +714,7 @@ export class ApplicationsEmailService {
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="${applicationUrl}"
-               style="background: #FF6B6B;
+               style="background: #233876;
                       color: white;
                       padding: 15px 40px;
                       text-decoration: none;
@@ -722,23 +722,23 @@ export class ApplicationsEmailService {
                       font-weight: 700;
                       font-size: 16px;
                       display: inline-block;
-                      border: 2px solid #1A1A2E;">
+                      border: 2px solid #18181b;">
                 View Job Details
             </a>
         </div>
 
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #1A1A2E;">
-            <p style="font-size: 14px; color: #1A1A2E; margin: 5px 0;">
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #18181b;">
+            <p style="font-size: 14px; color: #18181b; margin: 5px 0;">
                 <strong>Next Steps:</strong>
             </p>
-            <ul style="font-size: 14px; color: #1A1A2E;">
+            <ul style="font-size: 14px; color: #18181b;">
                 <li>Review the job description and requirements</li>
                 <li>If interested, proceed with your application</li>
                 <li>Your recruiter will guide you through the process</li>
             </ul>
         </div>
 
-        <p style="font-size: 14px; color: #1A1A2E; margin-top: 30px; text-align: center;">
+        <p style="font-size: 14px; color: #18181b; margin-top: 30px; text-align: center;">
             Questions? Reply to this email or contact your recruiter directly.
         </p>
     </div>

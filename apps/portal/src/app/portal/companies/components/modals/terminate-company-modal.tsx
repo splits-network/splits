@@ -42,7 +42,9 @@ export default function TerminateModal({
     const [error, setError] = useState<string | null>(null);
     const [affectedJobs, setAffectedJobs] = useState<AffectedJob[]>([]);
     const [loadingJobs, setLoadingJobs] = useState(true);
-    const [decisions, setDecisions] = useState<Record<string, "keep" | "pause" | "close">>({});
+    const [decisions, setDecisions] = useState<
+        Record<string, "keep" | "pause" | "close">
+    >({});
 
     useEffect(() => {
         if (!isOpen) return;
@@ -70,7 +72,10 @@ export default function TerminateModal({
                 const jobs = response.data || [];
                 setAffectedJobs(jobs);
 
-                const defaultDecisions: Record<string, "keep" | "pause" | "close"> = {};
+                const defaultDecisions: Record<
+                    string,
+                    "keep" | "pause" | "close"
+                > = {};
                 jobs.forEach((job) => {
                     defaultDecisions[job.id] = "keep";
                 });
@@ -91,7 +96,9 @@ export default function TerminateModal({
         setError(null);
 
         if (!reason.trim()) {
-            setError("Please provide a reason for ending this relationship.");
+            setError(
+                "Please provide a reason for ending this relationship.",
+            );
             return;
         }
 
@@ -103,14 +110,19 @@ export default function TerminateModal({
 
             const client = createAuthenticatedClient(token);
 
-            await client.patch(`/recruiter-companies/${relationshipId}/terminate`, {
-                reason: reason.trim(),
-            });
+            await client.patch(
+                `/recruiter-companies/${relationshipId}/terminate`,
+                {
+                    reason: reason.trim(),
+                },
+            );
 
-            const decisionsList = Object.entries(decisions).map(([job_id, action]) => ({
-                job_id,
-                action,
-            }));
+            const decisionsList = Object.entries(decisions).map(
+                ([job_id, action]) => ({
+                    job_id,
+                    action,
+                }),
+            );
 
             if (decisionsList.length > 0) {
                 await client.post("/jobs/termination-decisions", {
@@ -123,7 +135,11 @@ export default function TerminateModal({
             onSuccess();
         } catch (err) {
             console.error("Failed to terminate relationship:", err);
-            setError(err instanceof Error ? err.message : "Failed to end relationship");
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Failed to end relationship",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -147,88 +163,126 @@ export default function TerminateModal({
     return (
         <ModalPortal>
             <dialog className="modal modal-open" open>
-                <div className="modal-box max-w-2xl border-4 border-dark bg-white">
-                    <h3 className="font-black text-xl uppercase tracking-tight mb-4 text-dark">
-                        <i className="fa-duotone fa-regular fa-link-slash text-coral mr-2" />
+                <div
+                    className="modal-box max-w-2xl border-2 border-base-300 bg-base-100 shadow-md"
+                    style={{ borderRadius: 0 }}
+                >
+                    <h3 className="text-xl font-black tracking-tight mb-4">
+                        <i className="fa-duotone fa-regular fa-link-slash text-error mr-2" />
                         End Relationship
                     </h3>
 
                     <div className="mb-4">
-                        <p className="text-sm text-dark/70 mb-2">
+                        <p className="text-sm text-base-content/70 mb-2">
                             You are ending your relationship with:
                         </p>
-                        <div className="p-3 border-4 border-dark/20 bg-cream">
-                            <p className="font-bold text-dark">{targetName}</p>
+                        <div className="p-3 border-2 border-base-300 bg-base-200">
+                            <p className="font-bold">{targetName}</p>
                             {targetEmail && (
-                                <p className="text-sm text-dark/70">{targetEmail}</p>
+                                <p className="text-sm text-base-content/60">
+                                    {targetEmail}
+                                </p>
                             )}
                         </div>
                     </div>
 
-                    <div className="p-3 mb-4 border-4 border-yellow bg-yellow/10">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-yellow mr-2" />
-                        <span className="font-bold text-sm text-dark">This will end your working relationship</span>
-                        <p className="text-sm text-dark/70 mt-1">{notificationTarget}</p>
+                    <div className="p-3 mb-4 border-l-4 border-warning bg-warning/10">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning mr-2" />
+                        <span className="font-bold text-sm">
+                            This will end your working relationship
+                        </span>
+                        <p className="text-sm text-base-content/70 mt-1">
+                            {notificationTarget}
+                        </p>
                     </div>
 
                     {/* Affected Jobs */}
                     {loadingJobs ? (
                         <div className="flex items-center gap-2 py-4">
                             <span className="loading loading-spinner loading-sm" />
-                            <span className="text-sm font-bold text-dark/50">Checking for affected jobs...</span>
+                            <span className="text-sm font-bold text-base-content/50">
+                                Checking for affected jobs...
+                            </span>
                         </div>
-                    ) : affectedJobs.length > 0 && (
-                        <div className="mb-4">
-                            <h4 className="font-black text-sm uppercase tracking-wider mb-2 text-dark">
-                                Affected Jobs ({affectedJobs.length})
-                            </h4>
-                            <p className="text-xs text-dark/50 mb-3">
-                                Choose what to do with each job managed by this recruiter.
-                            </p>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {affectedJobs.map((job) => (
-                                    <div key={job.id} className="p-3 border-2 border-dark/20 bg-cream flex items-center justify-between gap-3">
-                                        <div className="min-w-0 flex-1">
-                                            <p className="font-bold text-sm text-dark truncate">{job.title}</p>
-                                            <p className="text-xs text-dark/50">
-                                                {job.status} &middot; {job.application_count} active application{job.application_count !== 1 ? "s" : ""}
-                                            </p>
-                                        </div>
-                                        <select
-                                            className="select select-sm select-ghost font-bold uppercase"
-                                            value={decisions[job.id] || "keep"}
-                                            onChange={(e) =>
-                                                setDecisions((prev) => ({
-                                                    ...prev,
-                                                    [job.id]: e.target.value as "keep" | "pause" | "close",
-                                                }))
-                                            }
-                                            disabled={submitting}
+                    ) : (
+                        affectedJobs.length > 0 && (
+                            <div className="mb-4">
+                                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                    Affected Jobs ({affectedJobs.length})
+                                </h4>
+                                <p className="text-xs text-base-content/50 mb-3">
+                                    Choose what to do with each job managed by
+                                    this recruiter.
+                                </p>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {affectedJobs.map((job) => (
+                                        <div
+                                            key={job.id}
+                                            className="p-3 border-2 border-base-300 bg-base-200 flex items-center justify-between gap-3"
                                         >
-                                            <option value="keep">Keep active</option>
-                                            <option value="pause">Pause job</option>
-                                            <option value="close">Close job</option>
-                                        </select>
-                                    </div>
-                                ))}
+                                            <div className="min-w-0 flex-1">
+                                                <p className="font-bold text-sm truncate">
+                                                    {job.title}
+                                                </p>
+                                                <p className="text-xs text-base-content/50">
+                                                    {job.status} &middot;{" "}
+                                                    {job.application_count}{" "}
+                                                    active application
+                                                    {job.application_count !== 1
+                                                        ? "s"
+                                                        : ""}
+                                                </p>
+                                            </div>
+                                            <select
+                                                className="select select-sm select-bordered bg-base-100 text-xs uppercase tracking-wider font-bold"
+                                                style={{ borderRadius: 0 }}
+                                                value={
+                                                    decisions[job.id] || "keep"
+                                                }
+                                                onChange={(e) =>
+                                                    setDecisions((prev) => ({
+                                                        ...prev,
+                                                        [job.id]: e.target
+                                                            .value as
+                                                            | "keep"
+                                                            | "pause"
+                                                            | "close",
+                                                    }))
+                                                }
+                                                disabled={submitting}
+                                            >
+                                                <option value="keep">
+                                                    Keep active
+                                                </option>
+                                                <option value="pause">
+                                                    Pause job
+                                                </option>
+                                                <option value="close">
+                                                    Close job
+                                                </option>
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )
                     )}
 
                     {error && (
-                        <div className="p-3 mb-4 border-4 border-coral bg-coral/10">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-coral mr-2" />
-                            <span className="text-sm font-bold text-dark">{error}</span>
+                        <div className="p-3 mb-4 border-l-4 border-error bg-error/10">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-error mr-2" />
+                            <span className="text-sm font-bold">{error}</span>
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-2 block">
+                            <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                 Reason *
                             </label>
                             <textarea
-                                className="textarea w-full border-2 border-dark/20 focus:border-coral bg-cream"
+                                className="textarea w-full border-2 border-base-300 focus:border-primary bg-base-200"
+                                style={{ borderRadius: 0 }}
                                 rows={3}
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
@@ -241,6 +295,7 @@ export default function TerminateModal({
                             <button
                                 type="button"
                                 className="btn btn-ghost"
+                                style={{ borderRadius: 0 }}
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
@@ -249,6 +304,7 @@ export default function TerminateModal({
                             <button
                                 type="submit"
                                 className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
                                 disabled={submitting || !reason.trim()}
                             >
                                 {submitting ? (
@@ -266,7 +322,11 @@ export default function TerminateModal({
                         </div>
                     </form>
                 </div>
-                <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+                <form
+                    method="dialog"
+                    className="modal-backdrop"
+                    onClick={handleClose}
+                >
                     <button type="button">close</button>
                 </form>
             </dialog>

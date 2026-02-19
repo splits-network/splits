@@ -15,45 +15,25 @@ export function BaselTooltip({ active, payload, label, formatter }: BaselTooltip
     if (!active || !payload?.length) return null;
 
     return (
-        <div
-            style={{
-                backgroundColor: "oklch(var(--b1))",
-                border: "1px solid oklch(var(--bc) / 0.15)",
-                padding: "10px 14px",
-                borderRadius: 0,
-                minWidth: 120,
-            }}
-        >
+        <div className="bg-base-100 border border-base-content/15 px-3.5 py-2.5" style={{ minWidth: 120 }}>
             {label && (
-                <p
-                    style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: "oklch(var(--bc) / 0.5)",
-                        marginBottom: 6,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                    }}
-                >
+                <p className="text-[10px] font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider">
                     {label}
                 </p>
             )}
             {payload.map((entry, i) => (
                 <div
                     key={i}
+                    className="flex items-center gap-2 pl-2"
                     style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        marginBottom: i < payload.length - 1 ? 4 : 0,
                         borderLeft: `3px solid ${entry.color}`,
-                        paddingLeft: 8,
+                        marginBottom: i < payload.length - 1 ? 4 : 0,
                     }}
                 >
-                    <span style={{ fontSize: 11, color: "oklch(var(--bc) / 0.7)" }}>
+                    <span className="text-[11px] text-base-content/70">
                         {entry.name}:
                     </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "oklch(var(--bc))" }}>
+                    <span className="text-xs font-bold text-base-content">
                         {formatter
                             ? formatter(entry.value, entry.name)
                             : typeof entry.value === "number"

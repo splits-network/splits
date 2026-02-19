@@ -1,4 +1,3 @@
-import { formatRelativeTime } from "@/lib/utils";
 import type { CompanyInvitation } from "../../types";
 
 export function formatStatus(status?: string): string {
@@ -8,7 +7,15 @@ export function formatStatus(status?: string): string {
 
 export function createdAgo(invitation: CompanyInvitation): string {
     if (!invitation.created_at) return "";
-    return formatRelativeTime(invitation.created_at);
+    const d = new Date(invitation.created_at);
+    const diffMs = Date.now() - d.getTime();
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+    return `${Math.floor(diffDays / 365)}y ago`;
 }
 
 export function getDaysUntilExpiry(expiresAt: string): number {

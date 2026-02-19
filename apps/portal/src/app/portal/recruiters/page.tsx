@@ -11,7 +11,7 @@ import {
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
 import type { RecruiterWithUser, MarketplaceFilters } from "./types";
-import type { ViewMode } from "./components/shared/accent";
+import type { ViewMode } from "./components/shared/status-color";
 import { RecruitersAnimator } from "./recruiters-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -20,7 +20,7 @@ import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 import { CompanyProvider, useCompanyContext } from "./contexts/company-context";
 
-export default function RecruitersMemphisPage() {
+export default function RecruitersBaselPage() {
     return (
         <CompanyProvider>
             <RecruitersContent />
@@ -32,22 +32,24 @@ function RecruitersContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedRecruiterId, setSelectedRecruiterId] = useState<string | null>(() =>
-        searchParams.get("recruiterId"),
-    );
-    const [showInviteFromHeader, setShowInviteFromHeader] = useState(false);
+    const [selectedRecruiterId, setSelectedRecruiterId] = useState<
+        string | null
+    >(() => searchParams.get("recruiterId"));
 
-    // Sync viewMode + selectedRecruiterId to URL (ref pattern avoids infinite loops)
+    /* ── URL sync ── */
     const searchParamsRef = useRef(searchParams);
     searchParamsRef.current = searchParams;
 
     useEffect(() => {
-        const params = new URLSearchParams(searchParamsRef.current.toString());
+        const params = new URLSearchParams(
+            searchParamsRef.current.toString(),
+        );
 
         if (selectedRecruiterId) {
             params.set("recruiterId", selectedRecruiterId);
@@ -73,9 +75,10 @@ function RecruitersContent() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedRecruiterId, viewMode, pathname, router]);
 
-    const { isAdmin, isCompanyUser } = useUserProfile();
+    /* ── Permissions ── */
     const { canInvite } = useCompanyContext();
 
+    /* ── Data ── */
     const {
         data: recruiters,
         loading,
@@ -105,7 +108,9 @@ function RecruitersContent() {
     });
 
     const handleSelect = useCallback((recruiter: RecruiterWithUser) => {
-        setSelectedRecruiterId((prev) => (prev === recruiter.id ? null : recruiter.id));
+        setSelectedRecruiterId((prev) =>
+            prev === recruiter.id ? null : recruiter.id,
+        );
     }, []);
 
     const handleViewModeChange = useCallback((mode: ViewMode) => {
@@ -115,12 +120,17 @@ function RecruitersContent() {
     const stats = useMemo(
         () => ({
             total: pagination?.total || recruiters.length,
-            active: recruiters.filter((r) => r.marketplace_profile?.status === "active" || !r.marketplace_profile?.status).length,
+            active: recruiters.filter(
+                (r) =>
+                    r.marketplace_profile?.status === "active" ||
+                    !r.marketplace_profile?.status,
+            ).length,
             avgPlacements:
                 recruiters.length > 0
                     ? Math.round(
                           recruiters.reduce(
-                              (sum, r) => sum + (r.total_placements || 0),
+                              (sum, r) =>
+                                  sum + (r.total_placements || 0),
                               0,
                           ) / recruiters.length,
                       )
@@ -140,30 +150,28 @@ function RecruitersContent() {
     }
 
     return (
-        <RecruitersAnimator>
+        <RecruitersAnimator contentRef={contentRef}>
             <HeaderSection stats={stats} />
 
-            <section className="min-h-screen bg-cream">
-                <div className="py-8 px-4 lg:px-8">
-                    <ControlsBar
-                        searchInput={searchInput}
-                        onSearchChange={setSearchInput}
-                        filters={filters}
-                        onFilterChange={setFilter}
-                        viewMode={viewMode}
-                        onViewModeChange={handleViewModeChange}
-                        canInvite={canInvite}
-                        onInvite={() => setShowInviteFromHeader(true)}
-                    />
+            <ControlsBar
+                searchInput={searchInput}
+                onSearchChange={setSearchInput}
+                filters={filters}
+                onFilterChange={setFilter}
+                viewMode={viewMode}
+                onViewModeChange={handleViewModeChange}
+                canInvite={canInvite}
+                onInvite={() => {
+                    /* handled by controls bar invite button flow */
+                }}
+                recruiterCount={recruiters.length}
+                totalCount={pagination?.total ?? recruiters.length}
+            />
 
-                    {/* Listing Count */}
-                    <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                        Showing {recruiters.length} of{" "}
-                        {pagination?.total ?? recruiters.length} recruiters
-                    </p>
-
+            <section className="min-h-screen bg-base-100">
+                <div className="container mx-auto px-6 lg:px-12 py-8">
                     {/* Content Area */}
-                    <div className="listings-content opacity-0">
+                    <div ref={contentRef} className="content-area opacity-0">
                         {loading && recruiters.length === 0 ? (
                             <LoadingState message="Loading recruiters..." />
                         ) : recruiters.length === 0 ? (

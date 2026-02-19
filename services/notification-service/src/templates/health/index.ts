@@ -46,7 +46,7 @@ ${paragraph('This alert was triggered after the sliding window threshold was met
 
 ${divider()}
 
-${paragraph(`<a href="${data.statusPageUrl}" style="color: #FF6B6B; font-weight: 600;">View Status Page →</a>`)}
+${paragraph(`<a href="${data.statusPageUrl}" style="color: #233876; font-weight: 600;">View Status Page →</a>`)}
     `.trim();
 
     return baseEmailTemplate({
@@ -81,7 +81,7 @@ ${paragraph('The sliding window now shows the service passing consistently. No f
 
 ${divider()}
 
-${paragraph(`<a href="${data.statusPageUrl}" style="color: #FF6B6B; font-weight: 600;">View Status Page →</a>`)}
+${paragraph(`<a href="${data.statusPageUrl}" style="color: #233876; font-weight: 600;">View Status Page →</a>`)}
     `.trim();
 
     return baseEmailTemplate({

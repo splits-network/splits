@@ -9,12 +9,12 @@ import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
+import { Button, ExpandableButton } from "@splits-network/basel-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName } from "../../types";
 import { useCompanyContext } from "../../contexts/company-context";
 import InviteRecruiterModal from "../modals/invite-recruiter-modal";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
-import { ExpandableButton } from "./expandable-button";
 
 export interface RecruiterActionsToolbarProps {
     recruiter: RecruiterWithUser;
@@ -52,7 +52,8 @@ export default function RecruiterActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    const { companies, recruiterRelationships, refreshRelationships } = useCompanyContext();
+    const { companies, recruiterRelationships, refreshRelationships } =
+        useCompanyContext();
 
     const companyRelationship = recruiterRelationships.get(recruiter.id);
     const hasActiveRelationship = companyRelationship?.status === "active";
@@ -109,7 +110,8 @@ export default function RecruiterActionsToolbar({
         viewDetails: showActions.viewDetails === true,
         message: showActions.message !== false,
         inviteToCompany: showActions.inviteToCompany !== false && canInvite,
-        endRelationship: (isCompanyUser || isAdmin) && hasActiveRelationship,
+        endRelationship:
+            (isCompanyUser || isAdmin) && hasActiveRelationship,
     };
 
     const getLayoutClass = () =>
@@ -149,12 +151,14 @@ export default function RecruiterActionsToolbar({
     if (variant === "icon-only") {
         return (
             <>
-                <div className={`flex items-center ${getLayoutClass()} ${className}`}>
+                <div
+                    className={`flex items-center ${getLayoutClass()} ${className}`}
+                >
                     {actions.inviteToCompany && (
                         <ExpandableButton
                             icon="fa-duotone fa-regular fa-paper-plane"
                             label="Invite"
-                            variant="btn-primary"
+                            variant="btn-primary btn-square"
                             size={size}
                             onClick={handleInviteToCompany}
                             title="Invite to Company"
@@ -165,23 +169,25 @@ export default function RecruiterActionsToolbar({
                         <ExpandableButton
                             icon="fa-duotone fa-regular fa-link-slash"
                             label="End"
-                            variant="btn-ghost"
+                            variant="btn-ghost btn-square"
                             size={size}
                             onClick={() => setShowTerminateModal(true)}
                             title="End Relationship"
                         />
                     )}
 
-                    {actions.message && (actions.inviteToCompany || actions.endRelationship) && (
-                        <div className="w-px h-4 bg-dark/20 mx-0.5" />
-                    )}
+                    {actions.message &&
+                        (actions.inviteToCompany ||
+                            actions.endRelationship) && (
+                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
+                        )}
 
                     {actions.message && (
                         <span title={chatDisabledReason || undefined}>
                             <ExpandableButton
                                 icon="fa-duotone fa-regular fa-messages"
                                 label="Message"
-                                variant="btn-ghost"
+                                variant="btn-ghost btn-square"
                                 size={size}
                                 onClick={handleStartChat}
                                 disabled={!canChat || startingChat}
@@ -193,11 +199,11 @@ export default function RecruiterActionsToolbar({
 
                     {actions.viewDetails && onViewDetails && (
                         <>
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
                             <ExpandableButton
                                 icon="fa-duotone fa-regular fa-eye"
                                 label="Details"
-                                variant="btn-primary"
+                                variant="btn-primary btn-square"
                                 size={size}
                                 onClick={handleViewDetails}
                                 title="View Details"
@@ -222,6 +228,7 @@ export default function RecruiterActionsToolbar({
                     <button
                         onClick={handleInviteToCompany}
                         className={`btn btn-${size} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Invite to Company"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -232,7 +239,8 @@ export default function RecruiterActionsToolbar({
                 {actions.endRelationship && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-ghost gap-2 text-coral`}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
+                        style={{ borderRadius: 0 }}
                         title="End Relationship"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
@@ -240,15 +248,18 @@ export default function RecruiterActionsToolbar({
                     </button>
                 )}
 
-                {actions.message && (actions.inviteToCompany || actions.endRelationship) && (
-                    <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
-                )}
+                {actions.message &&
+                    (actions.inviteToCompany ||
+                        actions.endRelationship) && (
+                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
+                    )}
 
                 {actions.message && (
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
                             className={`btn btn-${size} btn-ghost gap-2 relative`}
+                            style={{ borderRadius: 0 }}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
@@ -264,10 +275,11 @@ export default function RecruiterActionsToolbar({
 
                 {actions.viewDetails && onViewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                         <button
                             onClick={handleViewDetails}
                             className={`btn btn-${size} btn-ghost gap-2`}
+                            style={{ borderRadius: 0 }}
                             title="View Details"
                         >
                             <i className="fa-duotone fa-regular fa-eye" />

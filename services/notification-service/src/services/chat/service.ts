@@ -23,12 +23,12 @@ export class ChatEmailService {
         const preview = data.preview ? data.preview : 'New message';
         return `
             <html>
-                <body style="font-family: Arial, sans-serif; color: #1A1A2E;">
-                    <h2 style="color:#1A1A2E;">You have a new message</h2>
+                <body style="font-family: Arial, sans-serif; color: #18181b;">
+                    <h2 style="color:#18181b;">You have a new message</h2>
                     <p><strong>${data.senderName}</strong> sent you a message:</p>
-                    <p style="white-space:pre-line; background:#F5F0EB; padding:12px; border-radius:4px;">${preview}</p>
+                    <p style="white-space:pre-line; background:#f4f4f5; padding:12px; border-radius:4px;">${preview}</p>
                     <p>
-                        <a href="${data.conversationUrl}" style="color:#FF6B6B; text-decoration:underline;">
+                        <a href="${data.conversationUrl}" style="color:#233876; text-decoration:underline;">
                             View conversation
                         </a>
                     </p>

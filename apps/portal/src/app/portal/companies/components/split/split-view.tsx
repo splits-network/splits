@@ -1,7 +1,6 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import { companyId } from "../shared/helpers";
 import { MobileDetailOverlay } from "@/components/standard-lists";
@@ -21,51 +20,56 @@ export function SplitView({
     onRefresh?: () => void;
 }) {
     const isMarketplace = activeTab === "marketplace";
-    const selectedItem = items.find((item) => companyId(item, isMarketplace) === selectedId);
-    const selectedAc = selectedItem ? accentAt(items.indexOf(selectedItem)) : ACCENT[0];
+    const selectedItem = items.find(
+        (item) => companyId(item, isMarketplace) === selectedId,
+    );
 
     return (
-        <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
-            {/* Left list */}
-            <div className={`w-full md:w-2/5 border-r-4 border-dark overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}>
-                {items.map((item, idx) => (
+        <div
+            className="flex border-2 border-base-300"
+            style={{ minHeight: 600 }}
+        >
+            {/* Left list -- hidden on mobile when a company is selected */}
+            <div
+                className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
+                    selectedId ? "hidden md:block" : "block"
+                }`}
+            >
+                {items.map((item) => (
                     <SplitItem
-                        key={isMarketplace ? (item as Company).id : (item as CompanyRelationship).id}
+                        key={
+                            isMarketplace
+                                ? (item as Company).id
+                                : (item as CompanyRelationship).id
+                        }
                         item={item}
                         activeTab={activeTab}
-                        accent={accentAt(idx)}
-                        isSelected={selectedId === companyId(item, isMarketplace)}
+                        isSelected={
+                            selectedId === companyId(item, isMarketplace)
+                        }
                         onSelect={() => onSelect(item)}
                     />
                 ))}
             </div>
 
-            {/* Right detail */}
+            {/* Right detail -- MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
                 isOpen={!!(selectedItem && selectedId)}
-                className="md:w-3/5 w-full bg-white overflow-y-auto"
+                className="md:w-3/5 w-full bg-base-100"
             >
                 {selectedItem && selectedId ? (
                     <CompanyDetailLoader
                         companyId={selectedId}
-                        accent={selectedAc}
                         onClose={() => onSelect(selectedItem)}
                         onRefresh={onRefresh}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center p-12">
                         <div className="text-center">
-                            <div className="flex justify-center gap-3 mb-6">
-                                <div className="w-8 h-8 rotate-12 bg-coral" />
-                                <div className="w-8 h-8 rounded-full bg-teal" />
-                                <div className="w-8 h-8 rotate-45 bg-yellow" />
-                            </div>
-                            <h3 className="font-black text-xl uppercase tracking-tight mb-2 text-dark">
-                                Select a Company
+                            <i className="fa-duotone fa-regular fa-hand-pointer text-5xl text-base-content/30 mb-4" />
+                            <h3 className="font-bold text-base text-base-content/30 tracking-tight">
+                                Select a company to view details
                             </h3>
-                            <p className="text-sm text-dark/50">
-                                Click a company on the left to view details
-                            </p>
                         </div>
                     </div>
                 )}

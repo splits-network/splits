@@ -1,77 +1,102 @@
 "use client";
 
-import { Badge, Card } from "@splits-network/memphis-ui";
 import type { Placement } from "../../types";
+import { statusColor } from "../shared/status-color";
 import {
-    getStatusDisplay,
+    isNew,
+    candidateName,
+    jobTitle,
+    companyName,
     formatCurrency,
-    formatPlacementDate,
-} from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
-import { isNew, candidateName, jobTitle, companyName } from "../shared/helpers";
+    formatDate,
+    formatStatus,
+} from "../shared/helpers";
 
 export function GridCard({
     placement,
-    accent,
     isSelected,
-    onSelectAction,
+    onSelect,
 }: {
     placement: Placement;
-    accent: AccentClasses;
-    isSelected?: boolean;
-    onSelectAction: () => void;
+    isSelected: boolean;
+    onSelect: () => void;
 }) {
-    const ac = accent;
-    const status = getStatusDisplay(placement);
+    const state = placement.state || "unknown";
 
     return (
-        <Card
-            onClick={onSelectAction}
-            className={`cursor-pointer border-4 transition-transform hover:-translate-y-1 relative ${isSelected ? ac.border : "border-dark/30"}`}
+        <div
+            onClick={onSelect}
+            className={[
+                "group cursor-pointer bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
+                isSelected ? "border-primary border-l-4" : "border-base-200",
+            ].join(" ")}
         >
-            {/* Corner accent */}
-            <div className={`absolute top-0 right-0 w-8 h-8 ${ac.bg}`} />
+            {/* Top row: status pill + NEW badge */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <span
+                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(state)}`}
+                >
+                    {formatStatus(state)}
+                </span>
 
-            <div className="card-body">
                 {isNew(placement) && (
-                    <Badge color="yellow" className="mb-2">
+                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
-                    </Badge>
+                    </span>
                 )}
-                <h3 className="font-black text-base uppercase tracking-tight leading-tight mb-1 text-dark">
-                    {candidateName(placement)}
-                </h3>
-                <div className={`text-sm font-bold mb-2 ${ac.text}`}>
-                    {companyName(placement)}
-                </div>
-
-                <div className="flex items-center gap-1 text-xs mb-3 text-dark/60 font-bold">
-                    <i className="fa-duotone fa-regular fa-briefcase" />
-                    {jobTitle(placement)}
-                </div>
-
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-black text-dark">
-                        {formatCurrency(placement.salary || 0)}
-                    </span>
-                    <Badge color={getStatusDisplay(placement).badge}>
-                        {getStatusDisplay(placement).label}
-                    </Badge>
-                </div>
-
-                <div
-                    className={`pt-3 border-t-4 ${ac.border} flex items-center justify-between`}
-                >
-                    <span className="text-xs font-bold text-dark/60 uppercase tracking-wider">
-                        {formatPlacementDate(placement.hired_at)}
-                    </span>
-                    <span className={`text-xs font-black ${ac.text}`}>
-                        {formatCurrency(placement.recruiter_share || 0)}
-                    </span>
-                </div>
             </div>
-        </Card>
+
+            {/* Candidate name */}
+            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1">
+                {candidateName(placement)}
+            </h3>
+
+            {/* Company */}
+            <div className="text-sm font-semibold text-base-content/60 mb-2">
+                {companyName(placement)}
+            </div>
+
+            {/* Job title */}
+            <div className="flex items-center gap-1 text-sm text-base-content/50 mb-4">
+                <i className="fa-duotone fa-regular fa-briefcase" />
+                {jobTitle(placement)}
+            </div>
+
+            {/* Salary */}
+            <div className="text-base font-black tracking-tight text-primary mb-3">
+                {formatCurrency(placement.salary || 0)}
+            </div>
+
+            {/* Fee + share row */}
+            <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-bold text-accent">
+                    <i className="fa-duotone fa-regular fa-percent mr-1" />
+                    {placement.fee_percentage || 0}% fee
+                </span>
+                <span className="text-sm font-bold text-base-content/60">
+                    <i className="fa-duotone fa-regular fa-coins mr-1" />
+                    {formatCurrency(placement.recruiter_share || 0)} share
+                </span>
+            </div>
+
+            {/* Guarantee tag */}
+            {placement.guarantee_days !== undefined &&
+                placement.guarantee_days !== null && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                            {placement.guarantee_days}d guarantee
+                        </span>
+                    </div>
+                )}
+
+            {/* Footer: hired date */}
+            <div className="flex items-center justify-between pt-4 border-t border-base-200">
+                <span className="text-xs text-base-content/40">
+                    <i className="fa-duotone fa-regular fa-calendar mr-1" />
+                    {formatDate(placement.hired_at)}
+                </span>
+            </div>
+        </div>
     );
 }

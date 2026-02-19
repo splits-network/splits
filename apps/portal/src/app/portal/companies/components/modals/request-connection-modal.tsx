@@ -69,31 +69,39 @@ export default function RequestConnectionModal({
                     if (e.target === e.currentTarget) handleClose();
                 }}
             >
-                <div className="modal-box border-4 border-dark bg-white">
-                    <h3 className="font-black text-xl uppercase tracking-tight mb-4 text-dark">
-                        <i className="fa-duotone fa-regular fa-link mr-2 text-coral" />
+                <div
+                    className="modal-box border-2 border-base-300 bg-base-100 shadow-md"
+                    style={{ borderRadius: 0 }}
+                >
+                    <h3 className="text-xl font-black tracking-tight mb-4">
+                        <i className="fa-duotone fa-regular fa-link mr-2 text-primary" />
                         Request Connection
                     </h3>
 
-                    <p className="text-sm text-dark/60 mb-4">
+                    <p className="text-sm text-base-content/60 mb-4">
                         Send a connection request to{" "}
-                        <span className="font-bold text-dark">{company.name}</span>
+                        <span className="font-bold text-base-content">
+                            {company.name}
+                        </span>
                     </p>
 
                     {error && (
-                        <div className="p-3 mb-4 border-4 border-coral bg-coral/10">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-coral mr-2" />
-                            <span className="text-sm font-bold text-dark">{error}</span>
+                        <div className="p-3 mb-4 border-l-4 border-error bg-error/10">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-error mr-2" />
+                            <span className="text-sm font-bold">
+                                {error}
+                            </span>
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-2 block">
+                            <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                 Message (optional)
                             </label>
                             <textarea
-                                className="textarea w-full border-2 border-dark/20 focus:border-coral bg-cream"
+                                className="textarea w-full border-2 border-base-300 focus:border-primary bg-base-200"
+                                style={{ borderRadius: 0 }}
                                 placeholder="Introduce yourself and explain why you'd like to connect..."
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
@@ -101,7 +109,7 @@ export default function RequestConnectionModal({
                                 rows={4}
                                 disabled={submitting}
                             />
-                            <div className="text-xs font-bold text-dark/40 text-right mt-1">
+                            <div className="text-xs font-bold text-base-content/30 text-right mt-1">
                                 {message.length}/500
                             </div>
                         </div>
@@ -110,6 +118,7 @@ export default function RequestConnectionModal({
                             <button
                                 type="button"
                                 className="btn btn-ghost"
+                                style={{ borderRadius: 0 }}
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
@@ -118,6 +127,7 @@ export default function RequestConnectionModal({
                             <button
                                 type="submit"
                                 className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             >
                                 <ButtonLoading
@@ -129,7 +139,11 @@ export default function RequestConnectionModal({
                         </div>
                     </form>
                 </div>
-                <form method="dialog" className="modal-backdrop" onClick={handleClose}>
+                <form
+                    method="dialog"
+                    className="modal-backdrop"
+                    onClick={handleClose}
+                >
                     <button type="button">close</button>
                 </form>
             </dialog>

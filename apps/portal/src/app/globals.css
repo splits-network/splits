@@ -87,16 +87,11 @@
 
 /* Memphis markdown editor overrides */
 .w-md-editor {
-    --md-editor-background-color: var(--color-cream) !important;
-    --md-editor-box-shadow-color: var(--color-dark) !important;
-    box-shadow: 0 0 0 var(--border-interactive) var(--color-dark) !important;
     border-radius: 0 !important;
 }
 
 .w-md-editor-toolbar {
     border-radius: 0 !important;
-    border-bottom-width: var(--border-detail) !important;
-    border-bottom-color: var(--color-dark) !important;
 }
 
 .w-md-editor-content {

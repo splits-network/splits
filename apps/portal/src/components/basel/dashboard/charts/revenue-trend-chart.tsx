@@ -12,7 +12,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 import { formatCurrency } from "./chart-utils";
 
@@ -39,7 +39,7 @@ export function RevenueTrendChart({
 
     const axisTick = {
         fontSize: 10,
-        fill: "oklch(var(--bc) / 0.6)",
+        fill: hexWithAlpha(colors.baseContent, 0.6),
         fontWeight: 500 as const,
     };
 
@@ -51,12 +51,12 @@ export function RevenueTrendChart({
             >
                 <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="oklch(var(--bc) / 0.08)"
+                    stroke={hexWithAlpha(colors.baseContent, 0.08)}
                 />
                 <XAxis
                     dataKey="month"
                     tick={axisTick}
-                    axisLine={{ stroke: "oklch(var(--bc) / 0.15)" }}
+                    axisLine={{ stroke: hexWithAlpha(colors.baseContent, 0.15) }}
                     tickLine={false}
                 />
                 <YAxis

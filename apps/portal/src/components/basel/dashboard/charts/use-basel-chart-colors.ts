@@ -9,6 +9,7 @@ export interface BaselChartColors {
     neutral: string;
     base100: string;
     base200: string;
+    base300: string;
     baseContent: string;
     success: string;
     error: string;
@@ -16,36 +17,68 @@ export interface BaselChartColors {
     info: string;
 }
 
-function getBaselChartColors(): BaselChartColors {
-    if (typeof document === "undefined") {
-        return {
-            primary: "#570df8",
-            secondary: "#f000b8",
-            accent: "#37cdbe",
-            neutral: "#3d4451",
-            base100: "#ffffff",
-            base200: "#f2f2f2",
-            baseContent: "#1f2937",
-            success: "#36d399",
-            error: "#f87272",
-            warning: "#fbbd23",
-            info: "#3abff8",
-        };
+/** DaisyUI v5 CSS custom properties */
+const COLOR_MAP: Record<keyof BaselChartColors, string> = {
+    primary: "var(--color-primary)",
+    secondary: "var(--color-secondary)",
+    accent: "var(--color-accent)",
+    neutral: "var(--color-neutral)",
+    base100: "var(--color-base-100)",
+    base200: "var(--color-base-200)",
+    base300: "var(--color-base-300)",
+    baseContent: "var(--color-base-content)",
+    success: "var(--color-success)",
+    error: "var(--color-error)",
+    warning: "var(--color-warning)",
+    info: "var(--color-info)",
+};
+
+/**
+ * Resolves a CSS color expression to hex via a temporary DOM element.
+ * Needed because SVG fill/stroke attributes require concrete color values.
+ */
+function resolveCssColorToHex(cssValue: string): string {
+    const el = document.createElement("div");
+    el.style.color = cssValue;
+    document.body.appendChild(el);
+    const resolved = getComputedStyle(el).color;
+    document.body.removeChild(el);
+    return rgbToHex(resolved);
+}
+
+function rgbToHex(rgb: string): string {
+    const match = rgb.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (!match) return "transparent";
+    const r = parseInt(match[1], 10);
+    const g = parseInt(match[2], 10);
+    const b = parseInt(match[3], 10);
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+}
+
+function resolveAllColors(): BaselChartColors {
+    const result = {} as BaselChartColors;
+    for (const [key, cssExpr] of Object.entries(COLOR_MAP)) {
+        result[key as keyof BaselChartColors] = resolveCssColorToHex(cssExpr);
     }
-    const s = getComputedStyle(document.documentElement);
-    return {
-        primary: `oklch(${s.getPropertyValue("--p").trim()})`,
-        secondary: `oklch(${s.getPropertyValue("--s").trim()})`,
-        accent: `oklch(${s.getPropertyValue("--a").trim()})`,
-        neutral: `oklch(${s.getPropertyValue("--n").trim()})`,
-        base100: `oklch(${s.getPropertyValue("--b1").trim()})`,
-        base200: `oklch(${s.getPropertyValue("--b2").trim()})`,
-        baseContent: `oklch(${s.getPropertyValue("--bc").trim()})`,
-        success: `oklch(${s.getPropertyValue("--su").trim()})`,
-        error: `oklch(${s.getPropertyValue("--er").trim()})`,
-        warning: `oklch(${s.getPropertyValue("--wa").trim()})`,
-        info: `oklch(${s.getPropertyValue("--in").trim()})`,
-    };
+    return result;
+}
+
+// Transparent placeholders for SSR — charts are client-only anyway
+const TRANSPARENT = Object.keys(COLOR_MAP).reduce((acc, k) => {
+    acc[k as keyof BaselChartColors] = "transparent";
+    return acc;
+}, {} as BaselChartColors);
+
+/**
+ * Appends an alpha channel to a 6-digit hex color -> 8-digit hex.
+ * e.g. hexWithAlpha("#233876", 0.4) -> "#23387666"
+ */
+export function hexWithAlpha(hex: string, alpha: number): string {
+    if (!hex || hex === "transparent") return "transparent";
+    const a = Math.round(alpha * 255)
+        .toString(16)
+        .padStart(2, "0");
+    return `${hex.slice(0, 7)}${a}`;
 }
 
 /** Series color order for multi-series charts. */
@@ -53,14 +86,18 @@ export function getSeriesColors(colors: BaselChartColors): string[] {
     return [colors.primary, colors.secondary, colors.accent, colors.info, colors.success];
 }
 
+/**
+ * Returns DaisyUI theme colors as hex strings for use in Recharts SVG charts.
+ * Colors are resolved from CSS custom properties at runtime and update on theme change.
+ */
 export function useBaselChartColors(): BaselChartColors {
-    const [colors, setColors] = useState<BaselChartColors>(getBaselChartColors);
+    const [colors, setColors] = useState(TRANSPARENT);
 
     useEffect(() => {
-        setColors(getBaselChartColors());
+        setColors(resolveAllColors());
 
         const observer = new MutationObserver(() => {
-            setColors(getBaselChartColors());
+            setColors(resolveAllColors());
         });
         observer.observe(document.documentElement, {
             attributes: true,

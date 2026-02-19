@@ -11,7 +11,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 
 export interface TimeToHireChartProps {
@@ -39,7 +39,7 @@ export function TimeToHireChart({
 
     const axisTick = {
         fontSize: 10,
-        fill: "oklch(var(--bc) / 0.6)",
+        fill: hexWithAlpha(colors.baseContent, 0.6),
         fontWeight: 500 as const,
     };
 
@@ -52,13 +52,13 @@ export function TimeToHireChart({
             >
                 <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="oklch(var(--bc) / 0.08)"
+                    stroke={hexWithAlpha(colors.baseContent, 0.08)}
                     horizontal={false}
                 />
                 <XAxis
                     type="number"
                     tick={axisTick}
-                    axisLine={{ stroke: "oklch(var(--bc) / 0.15)" }}
+                    axisLine={{ stroke: hexWithAlpha(colors.baseContent, 0.15) }}
                     tickLine={false}
                     label={{
                         value: "Days",
@@ -66,7 +66,7 @@ export function TimeToHireChart({
                         offset: -4,
                         style: {
                             fontSize: 10,
-                            fill: "oklch(var(--bc) / 0.5)",
+                            fill: hexWithAlpha(colors.baseContent, 0.5),
                         },
                     }}
                 />
@@ -86,7 +86,7 @@ export function TimeToHireChart({
                             }
                         />
                     }
-                    cursor={{ fill: "oklch(var(--bc) / 0.04)" }}
+                    cursor={{ fill: hexWithAlpha(colors.baseContent, 0.04) }}
                 />
                 <Legend
                     iconType="square"
@@ -103,7 +103,7 @@ export function TimeToHireChart({
                 <Bar
                     dataKey="benchmark"
                     name="Benchmark"
-                    fill="oklch(var(--bc) / 0.2)"
+                    fill={hexWithAlpha(colors.baseContent, 0.2)}
                     radius={[0, 0, 0, 0]}
                     barSize={10}
                 />

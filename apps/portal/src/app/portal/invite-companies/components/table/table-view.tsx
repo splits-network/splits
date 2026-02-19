@@ -1,8 +1,18 @@
 "use client";
 
 import type { CompanyInvitation } from "../../types";
-import { accentAt } from "../shared/accent";
 import { TableRow } from "./table-row";
+
+const COLUMNS = [
+    "",           // chevron
+    "Company",
+    "Email",
+    "Code",
+    "Status",
+    "Created",
+    "Expires",
+    "",           // actions
+] as const;
 
 export function TableView({
     invitations,
@@ -15,17 +25,15 @@ export function TableView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const columns = ["", "Company", "Email", "Code", "Status", "Created", "Expires", ""];
-
     return (
-        <div className="overflow-x-auto border-4 border-dark">
+        <div className="overflow-x-auto border-2 border-base-300">
             <table className="w-full" style={{ minWidth: 800 }}>
                 <thead>
-                    <tr className="bg-dark">
-                        {columns.map((h, i) => (
+                    <tr className="bg-base-200 border-b-2 border-base-300">
+                        {COLUMNS.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-sm font-black uppercase tracking-wider ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-20" : ""} ${accentAt(i).text}`}
+                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""} ${i === COLUMNS.length - 1 ? "w-24" : ""}`}
                             >
                                 {h}
                             </th>
@@ -37,10 +45,9 @@ export function TableView({
                         <TableRow
                             key={inv.id}
                             invitation={inv}
-                            accent={accentAt(idx)}
                             idx={idx}
                             isSelected={selectedId === inv.id}
-                            colSpan={columns.length}
+                            colSpan={COLUMNS.length}
                             onSelect={() => onSelect(inv)}
                             onRefresh={onRefresh}
                         />

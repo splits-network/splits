@@ -26,7 +26,10 @@ export function joinedAgo(recruiter: RecruiterWithUser): string {
 
 export function isNew(recruiter: RecruiterWithUser): boolean {
     if (!recruiter.created_at) return false;
-    const d = typeof recruiter.created_at === "string" ? new Date(recruiter.created_at) : recruiter.created_at;
+    const d =
+        typeof recruiter.created_at === "string"
+            ? new Date(recruiter.created_at)
+            : recruiter.created_at;
     return (Date.now() - d.getTime()) / 86400000 <= 14;
 }
 
@@ -34,17 +37,31 @@ export function placementsDisplay(recruiter: RecruiterWithUser): string {
     return String(recruiter.total_placements ?? 0);
 }
 
-export function successRateDisplay(recruiter: RecruiterWithUser): string | null {
-    if (recruiter.success_rate === undefined || recruiter.success_rate === null) return null;
+export function successRateDisplay(
+    recruiter: RecruiterWithUser,
+): string | null {
+    if (
+        recruiter.success_rate === undefined ||
+        recruiter.success_rate === null
+    )
+        return null;
     return `${Math.round(recruiter.success_rate)}%`;
 }
 
-export function reputationDisplay(recruiter: RecruiterWithUser): string | null {
-    if (recruiter.reputation_score === undefined || recruiter.reputation_score === null) return null;
+export function reputationDisplay(
+    recruiter: RecruiterWithUser,
+): string | null {
+    if (
+        recruiter.reputation_score === undefined ||
+        recruiter.reputation_score === null
+    )
+        return null;
     return String(Math.round(recruiter.reputation_score));
 }
 
-export function experienceDisplay(recruiter: RecruiterWithUser): string | null {
+export function experienceDisplay(
+    recruiter: RecruiterWithUser,
+): string | null {
     if (!recruiter.years_experience) return null;
     return `${recruiter.years_experience}+ yrs`;
 }

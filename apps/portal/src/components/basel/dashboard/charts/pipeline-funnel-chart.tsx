@@ -12,7 +12,7 @@ import {
     Cell,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors, getSeriesColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha, getSeriesColors } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 
 export interface PipelineFunnelChartProps {
@@ -49,7 +49,7 @@ export function PipelineFunnelChart({
 
     const axisTick = {
         fontSize: 10,
-        fill: "oklch(var(--bc) / 0.6)",
+        fill: hexWithAlpha(colors.baseContent, 0.6),
         fontWeight: 500 as const,
     };
 
@@ -62,13 +62,13 @@ export function PipelineFunnelChart({
             >
                 <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="oklch(var(--bc) / 0.08)"
+                    stroke={hexWithAlpha(colors.baseContent, 0.08)}
                     horizontal={false}
                 />
                 <XAxis
                     type="number"
                     tick={axisTick}
-                    axisLine={{ stroke: "oklch(var(--bc) / 0.15)" }}
+                    axisLine={{ stroke: hexWithAlpha(colors.baseContent, 0.15) }}
                     tickLine={false}
                 />
                 <YAxis
@@ -81,7 +81,7 @@ export function PipelineFunnelChart({
                 />
                 <Tooltip
                     content={<BaselTooltip />}
-                    cursor={{ fill: "oklch(var(--bc) / 0.04)" }}
+                    cursor={{ fill: hexWithAlpha(colors.baseContent, 0.04) }}
                 />
                 <Bar dataKey="count" name="Candidates" radius={[0, 0, 0, 0]}>
                     {data.map((_, index) => (
@@ -96,7 +96,7 @@ export function PipelineFunnelChart({
                         style={{
                             fontSize: 11,
                             fontWeight: 700,
-                            fill: "oklch(var(--bc) / 0.8)",
+                            fill: hexWithAlpha(colors.baseContent, 0.8),
                         }}
                         formatter={(value) => typeof value === "number" ? value.toLocaleString() : String(value ?? "")}
                     />

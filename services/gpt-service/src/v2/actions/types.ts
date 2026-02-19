@@ -26,6 +26,9 @@ export interface GptJobSearchResult {
     posted_date: string; // YYYY-MM-DD
     salary_range: string | null; // "$80k-$120k" or null
     job_level: string;
+    employment_type: string | null; // e.g. "full_time", "contract"
+    department: string | null; // e.g. "Engineering", "Marketing"
+    open_to_relocation: boolean | null;
     summary: string; // 1-2 sentences, ~200 chars
     view_url: string; // Deep link to job detail page on applicant.network
 }
@@ -48,7 +51,7 @@ export interface GptJobDetail extends GptJobSearchResult {
     responsibilities: string[];
     requirements: {
         text: string;
-        type: 'mandatory' | 'preferred';
+        type: "mandatory" | "preferred";
     }[];
     pre_screen_questions: {
         id: string;
@@ -147,18 +150,18 @@ export interface GptErrorResponse {
 
 // Error code constants
 export const ERROR_CODES = {
-    NOT_FOUND: 'NOT_FOUND',
-    INVALID_REQUEST: 'INVALID_REQUEST',
-    DUPLICATE_APPLICATION: 'DUPLICATE_APPLICATION',
-    CONFIRMATION_REQUIRED: 'CONFIRMATION_REQUIRED',
-    MISSING_PRE_SCREEN_ANSWERS: 'MISSING_PRE_SCREEN_ANSWERS',
-    RESUME_NOT_FOUND: 'RESUME_NOT_FOUND',
-    CONFIRMATION_EXPIRED: 'CONFIRMATION_EXPIRED',
-    TOKEN_EXPIRED: 'TOKEN_EXPIRED',
-    TOKEN_REVOKED: 'TOKEN_REVOKED',
-    TOKEN_INVALID: 'TOKEN_INVALID',
-    INSUFFICIENT_SCOPE: 'INSUFFICIENT_SCOPE',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
+    NOT_FOUND: "NOT_FOUND",
+    INVALID_REQUEST: "INVALID_REQUEST",
+    DUPLICATE_APPLICATION: "DUPLICATE_APPLICATION",
+    CONFIRMATION_REQUIRED: "CONFIRMATION_REQUIRED",
+    MISSING_PRE_SCREEN_ANSWERS: "MISSING_PRE_SCREEN_ANSWERS",
+    RESUME_NOT_FOUND: "RESUME_NOT_FOUND",
+    CONFIRMATION_EXPIRED: "CONFIRMATION_EXPIRED",
+    TOKEN_EXPIRED: "TOKEN_EXPIRED",
+    TOKEN_REVOKED: "TOKEN_REVOKED",
+    TOKEN_INVALID: "TOKEN_INVALID",
+    INSUFFICIENT_SCOPE: "INSUFFICIENT_SCOPE",
+    INTERNAL_ERROR: "INTERNAL_ERROR",
 } as const;
 
 // ============================================================================

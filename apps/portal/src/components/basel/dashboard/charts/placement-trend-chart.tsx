@@ -10,7 +10,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 
 export interface PlacementTrendChartProps {
@@ -36,7 +36,7 @@ export function PlacementTrendChart({
 
     const axisTick = {
         fontSize: 10,
-        fill: "oklch(var(--bc) / 0.6)",
+        fill: hexWithAlpha(colors.baseContent, 0.6),
         fontWeight: 500 as const,
     };
 
@@ -48,13 +48,13 @@ export function PlacementTrendChart({
             >
                 <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="oklch(var(--bc) / 0.08)"
+                    stroke={hexWithAlpha(colors.baseContent, 0.08)}
                     vertical={false}
                 />
                 <XAxis
                     dataKey="month"
                     tick={axisTick}
-                    axisLine={{ stroke: "oklch(var(--bc) / 0.15)" }}
+                    axisLine={{ stroke: hexWithAlpha(colors.baseContent, 0.15) }}
                     tickLine={false}
                 />
                 <YAxis
@@ -65,7 +65,7 @@ export function PlacementTrendChart({
                 />
                 <Tooltip
                     content={<BaselTooltip />}
-                    cursor={{ fill: "oklch(var(--bc) / 0.04)" }}
+                    cursor={{ fill: hexWithAlpha(colors.baseContent, 0.04) }}
                 />
                 <Bar
                     dataKey="count"

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
+import { Button, ExpandableButton } from "@splits-network/basel-ui";
 import type { Company, CompanyRelationship } from "../../types";
-import { ExpandableButton } from "./expandable-button";
 import RequestConnectionModal from "../modals/request-connection-modal";
 import TerminateModal from "../modals/terminate-company-modal";
 
@@ -33,7 +33,6 @@ export default function CompanyActionsToolbar({
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
@@ -71,7 +70,7 @@ export default function CompanyActionsToolbar({
         </ModalPortal>
     );
 
-    // Icon-only variant (matching roles ExpandableButton pattern)
+    // Icon-only variant (matching roles Basel ExpandableButton pattern)
     if (variant === "icon-only") {
         return (
             <>
@@ -80,10 +79,9 @@ export default function CompanyActionsToolbar({
                 >
                     {/* Connect */}
                     {!hasConnection && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-link"
-                            label="Connect"
-                            variant="btn-primary"
+                            variant="btn-primary btn-square"
                             size={size}
                             onClick={() => setShowRequestModal(true)}
                             title="Request Connection"
@@ -92,10 +90,9 @@ export default function CompanyActionsToolbar({
 
                     {/* End Relationship */}
                     {relationship?.status === "active" && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-link-slash"
-                            label="End"
-                            variant="btn-ghost"
+                            variant="btn-ghost btn-square"
                             size={size}
                             onClick={() => setShowTerminateModal(true)}
                             title="End Relationship"
@@ -104,13 +101,12 @@ export default function CompanyActionsToolbar({
 
                     {/* Pending indicator */}
                     {relationship?.status === "pending" && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-clock"
-                            label="Pending"
-                            variant="btn-ghost"
+                            variant="btn-ghost btn-square"
                             size={size}
                             disabled
-                            onClick={() => {}} // No-op handler for disabled pending state
+                            onClick={() => {}}
                             title="Connection Pending"
                         />
                     )}
@@ -118,11 +114,10 @@ export default function CompanyActionsToolbar({
                     {/* View Details */}
                     {onViewDetails && (
                         <>
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
-                            <ExpandableButton
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <Button
                                 icon="fa-duotone fa-regular fa-eye"
-                                label="Details"
-                                variant="btn-primary"
+                                variant="btn-primary btn-square"
                                 size={size}
                                 onClick={onViewDetails}
                                 title="View Details"
@@ -136,6 +131,8 @@ export default function CompanyActionsToolbar({
     }
 
     // Descriptive variant
+    const getSizeClass = () => `btn-${size}`;
+
     return (
         <>
             <div
@@ -146,6 +143,7 @@ export default function CompanyActionsToolbar({
                     <button
                         onClick={() => setShowRequestModal(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
                     >
                         <i className="fa-duotone fa-regular fa-link" />
                         <span className="hidden md:inline">Connect</span>
@@ -157,6 +155,7 @@ export default function CompanyActionsToolbar({
                     <button
                         onClick={() => setShowTerminateModal(true)}
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
                         <span className="hidden md:inline">End</span>
@@ -167,6 +166,7 @@ export default function CompanyActionsToolbar({
                 {relationship?.status === "pending" && (
                     <button
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
                         disabled
                     >
                         <i className="fa-duotone fa-regular fa-clock" />
@@ -177,10 +177,11 @@ export default function CompanyActionsToolbar({
                 {/* View Details */}
                 {onViewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                         <button
                             onClick={onViewDetails}
                             className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            style={{ borderRadius: 0 }}
                         >
                             <i className="fa-duotone fa-regular fa-eye" />
                             <span className="hidden md:inline">

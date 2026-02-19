@@ -84,7 +84,7 @@ export default function InviteRecruiterModal({
 
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box max-w-md border-4 border-dark bg-cream">
+            <div className="modal-box max-w-md bg-base-100 border-2 border-base-300 shadow-md" style={{ borderRadius: 0 }}>
                 <form method="dialog">
                     <button
                         type="button"
@@ -96,19 +96,21 @@ export default function InviteRecruiterModal({
                     </button>
                 </form>
 
-                <h3 className="font-black text-xl uppercase tracking-tight mb-6 text-dark">
-                    <i className="fa-duotone fa-regular fa-paper-plane mr-2 text-teal" />
+                <h3 className="font-black text-xl uppercase tracking-tight mb-6">
+                    <i className="fa-duotone fa-regular fa-paper-plane mr-2 text-primary" />
                     Invite Recruiter
                 </h3>
 
                 <form onSubmit={handleSubmit}>
                     {/* Recruiter Info */}
-                    <div className="p-4 border-4 border-dark/20 bg-white mb-4">
+                    <div className="p-4 border-l-4 border-primary bg-primary/5 mb-4">
                         <div className="flex items-center gap-3">
-                            <i className="fa-duotone fa-regular fa-user text-teal" />
+                            <i className="fa-duotone fa-regular fa-user text-primary" />
                             <div>
-                                <div className="font-bold text-dark">{displayName}</div>
-                                <div className="text-sm text-dark/60">
+                                <div className="font-bold">
+                                    {displayName}
+                                </div>
+                                <div className="text-sm text-base-content/60">
                                     {displayEmail}
                                 </div>
                             </div>
@@ -117,13 +119,16 @@ export default function InviteRecruiterModal({
 
                     {/* Company Selection */}
                     <fieldset className="fieldset mb-4">
-                        <legend className="fieldset-legend font-black uppercase text-sm tracking-wider">Company</legend>
+                        <legend className="fieldset-legend font-bold uppercase text-xs tracking-wider">
+                            Company
+                        </legend>
                         {companies.length === 1 ? (
                             <input
                                 type="text"
                                 className="input w-full"
                                 value={companies[0].name}
                                 disabled
+                                style={{ borderRadius: 0 }}
                             />
                         ) : (
                             <select
@@ -133,10 +138,14 @@ export default function InviteRecruiterModal({
                                     setSelectedCompanyId(e.target.value)
                                 }
                                 required
+                                style={{ borderRadius: 0 }}
                             >
                                 <option value="">Select a company...</option>
                                 {companies.map((company) => (
-                                    <option key={company.id} value={company.id}>
+                                    <option
+                                        key={company.id}
+                                        value={company.id}
+                                    >
                                         {company.name}
                                     </option>
                                 ))}
@@ -155,11 +164,11 @@ export default function InviteRecruiterModal({
                                     setCanManageJobs(e.target.checked)
                                 }
                             />
-                            <span className="label-text font-bold text-dark">
+                            <span className="label-text font-bold">
                                 Allow recruiter to manage company jobs
                             </span>
                         </label>
-                        <p className="text-sm text-dark/50 ml-9">
+                        <p className="text-sm text-base-content/50 ml-9">
                             If enabled, the recruiter can create and edit job
                             postings for your company.
                         </p>
@@ -167,7 +176,7 @@ export default function InviteRecruiterModal({
 
                     {/* Optional Message */}
                     <fieldset className="fieldset mb-6">
-                        <legend className="fieldset-legend font-black uppercase text-sm tracking-wider">
+                        <legend className="fieldset-legend font-bold uppercase text-xs tracking-wider">
                             Message (optional)
                         </legend>
                         <textarea
@@ -177,9 +186,10 @@ export default function InviteRecruiterModal({
                             onChange={(e) => setMessage(e.target.value)}
                             rows={3}
                             maxLength={500}
+                            style={{ borderRadius: 0 }}
                         />
                         <label className="label">
-                            <span className="text-sm text-dark/40">
+                            <span className="text-sm text-base-content/40">
                                 {message.length}/500 characters
                             </span>
                         </label>
@@ -192,6 +202,7 @@ export default function InviteRecruiterModal({
                             className="btn btn-ghost font-bold"
                             onClick={onClose}
                             disabled={isSubmitting}
+                            style={{ borderRadius: 0 }}
                         >
                             Cancel
                         </button>
@@ -199,6 +210,7 @@ export default function InviteRecruiterModal({
                             type="submit"
                             className="btn btn-primary font-bold"
                             disabled={isSubmitting || !selectedCompanyId}
+                            style={{ borderRadius: 0 }}
                         >
                             <ButtonLoading
                                 loading={isSubmitting}

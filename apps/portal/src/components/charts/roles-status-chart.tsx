@@ -12,6 +12,7 @@ import { Doughnut } from "react-chartjs-2";
 import { registerChart } from "./chart-options";
 import type { Job } from "../../app/portal/roles/types";
 import { ChartLoadingState } from "@splits-network/shared-ui";
+import { useBaselChartColors, hexWithAlpha } from "../basel/dashboard/charts/use-basel-chart-colors";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -22,6 +23,7 @@ interface RolesStatusChartProps {
 }
 
 export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
+    const colors = useBaselChartColors();
     const chartRef = useRef<any>(null);
 
     // Register chart when it's created
@@ -64,23 +66,23 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
                         statusCounts.closed,
                     ],
                     backgroundColor: [
-                        "oklch(var(--su))", // success - green for active
-                        "oklch(var(--wa))", // warning - yellow for paused
-                        "oklch(var(--in))", // info - blue for filled
-                        "oklch(var(--n))", // neutral - gray for closed
+                        colors.success,
+                        colors.warning,
+                        colors.info,
+                        colors.neutral,
                     ],
                     borderColor: [
-                        "oklch(var(--su) / 0.8)",
-                        "oklch(var(--wa) / 0.8)",
-                        "oklch(var(--in) / 0.8)",
-                        "oklch(var(--n) / 0.8)",
+                        hexWithAlpha(colors.success, 0.8),
+                        hexWithAlpha(colors.warning, 0.8),
+                        hexWithAlpha(colors.info, 0.8),
+                        hexWithAlpha(colors.neutral, 0.8),
                     ],
                     borderWidth: 2,
                     hoverOffset: 8,
                 },
             ],
         }),
-        [statusCounts],
+        [statusCounts, colors],
     );
 
     // Chart options
@@ -101,14 +103,14 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
                             size: 12,
                             family: "inherit",
                         },
-                        color: "oklch(var(--bc))",
+                        color: colors.baseContent,
                     },
                 },
                 tooltip: {
-                    backgroundColor: "oklch(var(--b2))",
-                    titleColor: "oklch(var(--bc))",
-                    bodyColor: "oklch(var(--bc))",
-                    borderColor: "oklch(var(--b3))",
+                    backgroundColor: colors.base200,
+                    titleColor: colors.baseContent,
+                    bodyColor: colors.baseContent,
+                    borderColor: colors.base300,
                     borderWidth: 1,
                     padding: 12,
                     cornerRadius: 8,
@@ -133,7 +135,7 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
                 animateScale: true,
             },
         }),
-        [jobs.length],
+        [jobs.length, colors],
     );
 
     // Loading state

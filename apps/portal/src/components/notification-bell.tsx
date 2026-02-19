@@ -17,27 +17,43 @@ import { useNotificationTabIndicator } from "@/hooks/use-notification-tab-indica
 
 function getCategoryColor(category?: string): string {
     switch (category) {
-        case "application": return "text-primary";
-        case "placement": return "text-secondary";
-        case "proposal": return "text-warning";
-        case "candidate": return "text-accent";
-        case "collaboration": return "text-secondary";
-        case "invitation": return "text-primary";
-        case "system": return "text-info";
-        default: return "text-primary";
+        case "application":
+            return "text-primary";
+        case "placement":
+            return "text-secondary";
+        case "proposal":
+            return "text-warning";
+        case "candidate":
+            return "text-accent";
+        case "collaboration":
+            return "text-secondary";
+        case "invitation":
+            return "text-primary";
+        case "system":
+            return "text-info";
+        default:
+            return "text-primary";
     }
 }
 
 function getCategoryLabel(category?: string): string | undefined {
     switch (category) {
-        case "application": return "Application";
-        case "placement": return "Placement";
-        case "proposal": return "Proposal";
-        case "candidate": return "Candidate";
-        case "collaboration": return "Team";
-        case "invitation": return "Invitation";
-        case "system": return "System";
-        default: return undefined;
+        case "application":
+            return "Application";
+        case "placement":
+            return "Placement";
+        case "proposal":
+            return "Proposal";
+        case "candidate":
+            return "Candidate";
+        case "collaboration":
+            return "Team";
+        case "invitation":
+            return "Invitation";
+        case "system":
+            return "System";
+        default:
+            return undefined;
     }
 }
 
@@ -63,29 +79,33 @@ function NotificationItemBasel({
             className={`relative border-l-4 ${notification.read ? "border-base-300 bg-base-100" : "border-primary bg-base-200"} p-3 hover:bg-base-200/80 transition-colors cursor-pointer`}
             onClick={onClick}
         >
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-3">
                 <div
                     className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{ borderRadius: 0 }}
                 >
-                    <i className={`fa-duotone fa-regular ${icon} text-xs ${colorClass}`} />
+                    <i
+                        className={`fa-duotone fa-regular ${icon} text-sm ${colorClass}`}
+                    />
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                         {categoryLabel && (
-                            <span className={`text-[9px] font-semibold uppercase tracking-wider ${colorClass}`}>
+                            <span
+                                className={`text-sm font-semibold uppercase tracking-wider ${colorClass}`}
+                            >
                                 {categoryLabel}
                             </span>
                         )}
-                        <span className="text-[10px] text-base-content/30">
+                        <span className="text-sm text-base-content/30">
                             {formatNotificationTime(notification.created_at)}
                         </span>
                     </div>
-                    <p className="text-xs font-semibold text-base-content truncate">
+                    <p className="text-sm font-semibold text-base-content truncate">
                         {notification.subject}
                     </p>
                     {notification.action_label && (
-                        <p className="text-[11px] text-base-content/50 truncate mt-0.5">
+                        <p className="text-sm text-base-content/50 truncate mt-0.5">
                             {notification.action_label}
                         </p>
                     )}
@@ -93,20 +113,32 @@ function NotificationItemBasel({
                 {/* Actions */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                     <button
-                        onClick={(e) => { e.stopPropagation(); onToggleRead(); }}
-                        className="btn btn-ghost btn-xs btn-square"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleRead();
+                        }}
+                        className="btn btn-ghost btn-sm btn-square"
                         style={{ borderRadius: 0 }}
-                        title={notification.read ? "Mark as unread" : "Mark as read"}
+                        title={
+                            notification.read
+                                ? "Mark as unread"
+                                : "Mark as read"
+                        }
                     >
-                        <i className={`fa-duotone fa-regular ${notification.read ? "fa-envelope" : "fa-envelope-open"} text-[10px] text-base-content/40`} />
+                        <i
+                            className={`fa-duotone fa-regular ${notification.read ? "fa-envelope" : "fa-envelope-open"} text-base-content/40`}
+                        />
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className="btn btn-ghost btn-xs btn-square"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete();
+                        }}
+                        className="btn btn-ghost btn-sm btn-square"
                         style={{ borderRadius: 0 }}
                         title="Dismiss"
                     >
-                        <i className="fa-duotone fa-regular fa-xmark text-[10px] text-base-content/40" />
+                        <i className="fa-duotone fa-regular fa-xmark text-base-content/40" />
                     </button>
                 </div>
             </div>
@@ -133,14 +165,18 @@ export default function NotificationBell() {
     // Click outside to close
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
                 setIsOpen(false);
             }
         };
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
         }
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen]);
 
     // Fetch unread count every 15 seconds
@@ -153,7 +189,10 @@ export default function NotificationBell() {
             const res = await client.get("/notifications/unread-count");
             const count = res?.data?.count ?? 0;
 
-            if (previousUnreadCount.current !== null && count > previousUnreadCount.current) {
+            if (
+                previousUnreadCount.current !== null &&
+                count > previousUnreadCount.current
+            ) {
                 const newCount = count - previousUnreadCount.current;
                 toast.info(
                     newCount === 1
@@ -174,10 +213,15 @@ export default function NotificationBell() {
         setLoading(true);
         try {
             const token = await getToken();
-            if (!token) { setLoading(false); return; }
+            if (!token) {
+                setLoading(false);
+                return;
+            }
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get("/notifications", { params: { limit: 10 } });
+            const res = await client.get("/notifications", {
+                params: { limit: 10 },
+            });
             const data = res?.data ?? [];
             setNotifications(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -207,11 +251,18 @@ export default function NotificationBell() {
                 const token = await getToken();
                 if (!token) return;
                 const client = createAuthenticatedClient(token);
-                await client.patch(`/notifications/${notification.id}`, { read: true });
+                await client.patch(`/notifications/${notification.id}`, {
+                    read: true,
+                });
                 setUnreadCount((prev) => Math.max(0, prev - 1));
-                previousUnreadCount.current = Math.max(0, (previousUnreadCount.current ?? 1) - 1);
+                previousUnreadCount.current = Math.max(
+                    0,
+                    (previousUnreadCount.current ?? 1) - 1,
+                );
                 setNotifications((prev) =>
-                    prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
+                    prev.map((n) =>
+                        n.id === notification.id ? { ...n, read: true } : n,
+                    ),
                 );
             } catch (error) {
                 console.error("Failed to mark as read:", error);
@@ -243,11 +294,17 @@ export default function NotificationBell() {
             if (!token) return;
             const client = createAuthenticatedClient(token);
             const newRead = !notification.read;
-            await client.patch(`/notifications/${notification.id}`, { read: newRead });
+            await client.patch(`/notifications/${notification.id}`, {
+                read: newRead,
+            });
             setNotifications((prev) =>
-                prev.map((n) => (n.id === notification.id ? { ...n, read: newRead } : n)),
+                prev.map((n) =>
+                    n.id === notification.id ? { ...n, read: newRead } : n,
+                ),
             );
-            setUnreadCount((prev) => newRead ? Math.max(0, prev - 1) : prev + 1);
+            setUnreadCount((prev) =>
+                newRead ? Math.max(0, prev - 1) : prev + 1,
+            );
             previousUnreadCount.current = newRead
                 ? Math.max(0, (previousUnreadCount.current ?? 1) - 1)
                 : (previousUnreadCount.current ?? 0) + 1;
@@ -262,7 +319,9 @@ export default function NotificationBell() {
             if (!token) return;
             const client = createAuthenticatedClient(token);
             await client.delete(`/notifications/${notificationId}`);
-            setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+            setNotifications((prev) =>
+                prev.filter((n) => n.id !== notificationId),
+            );
             loadUnreadCount();
         } catch (err) {
             console.warn("Failed to dismiss notification:", err);
@@ -274,7 +333,7 @@ export default function NotificationBell() {
             {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="btn btn-ghost btn-sm btn-square relative"
+                className="btn btn-ghost btn-square relative"
                 style={{ borderRadius: 0 }}
                 aria-label="Notifications"
                 title="Notifications"
@@ -293,19 +352,19 @@ export default function NotificationBell() {
             {/* Dropdown Panel */}
             {isOpen && (
                 <div
-                    className="absolute right-0 mt-2 w-96 bg-base-100 border border-base-300 shadow-lg z-[100]"
+                    className="fixed inset-x-2 top-[var(--header-h,3.5rem)] sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96 bg-base-100 border border-base-300 shadow-lg z-[100]"
                     style={{ borderRadius: 0 }}
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-5 bg-primary" />
-                            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-base-content">
+                            <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content">
                                 Notifications
                             </span>
                             {unreadCount > 0 && (
                                 <span
-                                    className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary"
+                                    className="text-xs font-bold px-2 py-0.5 bg-primary/10 text-primary"
                                     style={{ borderRadius: 0 }}
                                 >
                                     {unreadCount}
@@ -325,7 +384,7 @@ export default function NotificationBell() {
                             <Link
                                 href="/portal/notifications"
                                 onClick={() => setIsOpen(false)}
-                                className="text-[10px] font-semibold uppercase tracking-wider text-base-content/40 hover:text-base-content transition-colors"
+                                className="text-sm font-semibold uppercase tracking-wider text-base-content/40 hover:text-base-content transition-colors"
                             >
                                 View all
                             </Link>
@@ -337,7 +396,7 @@ export default function NotificationBell() {
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-10 gap-2">
                                 <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xl text-primary" />
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-base-content/30">
+                                <span className="text-md font-semibold uppercase tracking-wider text-base-content/30">
                                     Loading...
                                 </span>
                             </div>
@@ -350,10 +409,10 @@ export default function NotificationBell() {
                                     <i className="fa-duotone fa-regular fa-inbox text-2xl text-base-content/20" />
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-xs font-semibold uppercase tracking-wider text-base-content/40">
+                                    <div className="text-sm font-semibold uppercase tracking-wider text-base-content/40">
                                         All Clear
                                     </div>
-                                    <div className="text-[10px] text-base-content/20 mt-1">
+                                    <div className="text-xs text-base-content/20 mt-1">
                                         No notifications yet
                                     </div>
                                 </div>
@@ -364,9 +423,17 @@ export default function NotificationBell() {
                                     <NotificationItemBasel
                                         key={notification.id}
                                         notification={notification}
-                                        onClick={() => handleNotificationClick(notification)}
-                                        onToggleRead={() => handleToggleRead(notification)}
-                                        onDelete={() => handleDismiss(notification.id)}
+                                        onClick={() =>
+                                            handleNotificationClick(
+                                                notification,
+                                            )
+                                        }
+                                        onToggleRead={() =>
+                                            handleToggleRead(notification)
+                                        }
+                                        onDelete={() =>
+                                            handleDismiss(notification.id)
+                                        }
                                     />
                                 ))}
                             </div>
@@ -379,9 +446,9 @@ export default function NotificationBell() {
                             <Link
                                 href="/portal/notifications"
                                 onClick={() => setIsOpen(false)}
-                                className="flex items-center justify-center gap-2 py-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-base-content/40 hover:text-primary transition-colors"
+                                className="flex items-center justify-center gap-2 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 hover:text-primary transition-colors"
                             >
-                                <i className="fa-duotone fa-regular fa-arrow-right text-[8px]" />
+                                <i className="fa-duotone fa-regular fa-arrow-right text-sm" />
                                 View all notifications
                             </Link>
                         </div>

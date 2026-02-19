@@ -6,6 +6,9 @@ import {
     candidateAddedToNetworkEmail,
     ownershipConflictEmail,
     ownershipConflictRejectionEmail,
+    candidateInvitationEmail,
+    consentGivenEmail,
+    consentDeclinedEmail,
 } from '../../templates/candidates';
 
 export class CandidatesEmailService {
@@ -364,81 +367,14 @@ export class CandidatesEmailService {
             year: 'numeric',
         });
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invitation to Join Applicant Network</title>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
-    <div style="background: #FF6B6B; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800;">Welcome to Applicant Network</h1>
-    </div>
-
-    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
-        <p style="font-size: 18px; margin-top: 0;">Hi ${data.candidate_name},</p>
-        
-        <p style="font-size: 16px;">
-            <strong>${data.recruiter_name}</strong> wants to represent you and has invited you to join the <strong>Applicant Network</strong>.
-        </p>
-
-        <div style="background: #F5F0EB; padding: 20px; border-radius: 4px; margin: 20px 0; border: 2px solid #1A1A2E;">
-            <h3 style="margin-top: 0; color: #1A1A2E;">About Your Recruiter</h3>
-            <p style="margin: 10px 0;"><strong>${data.recruiter_name}</strong></p>
-            <p style="margin: 10px 0; color: #1A1A2E;">${data.recruiter_bio}</p>
-            <p style="margin: 10px 0; color: #1A1A2E;">Contact: ${data.recruiter_email}</p>
-        </div>
-
-        <h3 style="color: #1A1A2E;">What is the Applicant Network?</h3>
-        <p>The Applicant Network is a platform where you can:</p>
-        <ul style="padding-left: 20px;">
-            <li>Track job opportunities your recruiter finds for you</li>
-            <li>Manage your applications in one place</li>
-            <li>Communicate directly with your recruiter</li>
-            <li>Stay informed about your job search progress</li>
-        </ul>
-
-        <h3 style="color: #1A1A2E;">What is "Right to Represent"?</h3>
-        <p>
-            By accepting this invitation, you're giving ${data.recruiter_name} permission to submit your profile 
-            to job opportunities on your behalf. This is a standard agreement in the recruiting industry that:
-        </p>
-        <ul style="padding-left: 20px;">
-            <li>Formalizes your working relationship with the recruiter</li>
-            <li>Prevents duplicate submissions to the same job</li>
-            <li>Ensures your recruiter gets credit for placements they facilitate</li>
-            <li>Protects your interests throughout the hiring process</li>
-        </ul>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="${invitationUrl}" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 18px; font-weight: 700; border: 2px solid #1A1A2E;">
-                Review & Accept Invitation
-            </a>
-        </div>
-
-        <p style="color: #1A1A2E; font-size: 14px; border-top: 2px solid #1A1A2E; padding-top: 20px;">
-            <strong>Important:</strong> This invitation expires on ${expiryDate}. If you don't respond by then, 
-            ${data.recruiter_name} will need to send a new invitation.
-        </p>
-
-        <p style="color: #1A1A2E; font-size: 14px;">
-            If you didn't expect this invitation or have questions, please contact ${data.recruiter_name} directly at 
-            <a href="mailto:${data.recruiter_email}" style="color: #1A1A2E;">${data.recruiter_email}</a>.
-        </p>
-    </div>
-
-    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
-        <p>
-            <a href="https://splits.network/public/privacy" style="color: #1A1A2E; text-decoration: none;">Privacy Policy</a> | 
-            <a href="https://splits.network/public/terms" style="color: #1A1A2E; text-decoration: none;">Terms of Service</a>
-        </p>
-    </div>
-</body>
-</html>
-        `.trim();
+        const html = candidateInvitationEmail({
+            candidateName: data.candidate_name,
+            recruiterName: data.recruiter_name,
+            recruiterEmail: data.recruiter_email,
+            recruiterBio: data.recruiter_bio,
+            invitationUrl,
+            expiryDate,
+        });
 
         await this.sendEmail(candidateEmail, subject, html, {
             eventType: 'candidate.invited',
@@ -466,62 +402,15 @@ export class CandidatesEmailService {
             minute: '2-digit',
         });
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candidate Accepted Your Invitation</title>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
-    <div style="background: #4ECDC4; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
-        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #1A1A2E;">
-            <i class="fa-duotone fa-regular fa-check-circle" style="font-size: 48px; color: #4ECDC4;"></i>
-        </div>
-        <h1 style="color: #1A1A2E; margin: 0; font-size: 28px; font-weight: 800;">Great News!</h1>
-    </div>
+        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
-    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
-        <p style="font-size: 18px; margin-top: 0;">Hi ${data.recruiter_name},</p>
-        
-        <p style="font-size: 16px; line-height: 1.8;">
-            <strong>${data.candidate_name}</strong> has accepted your invitation and granted you 
-            the right to represent them! You can now submit their profile to job opportunities.
-        </p>
-
-        <div style="background: #D5F5F0; border-left: 4px solid #4ECDC4; padding: 20px; margin: 20px 0; border-radius: 4px;">
-            <h3 style="margin-top: 0; color: #1A1A2E;">Candidate Details</h3>
-            <p style="margin: 8px 0;"><strong>Name:</strong> ${data.candidate_name}</p>
-            <p style="margin: 8px 0;"><strong>Email:</strong> ${data.candidate_email}</p>
-            <p style="margin: 8px 0;"><strong>Accepted On:</strong> ${consentDate}</p>
-        </div>
-
-        <h3 style="color: #1A1A2E;">What's Next?</h3>
-        <ul style="padding-left: 20px; line-height: 1.8;">
-            <li>Review their profile and update any missing information</li>
-            <li>Identify suitable job opportunities that match their skills</li>
-            <li>Submit their profile to open positions</li>
-            <li>Keep them updated on application progress</li>
-        </ul>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 16px; font-weight: 700; border: 2px solid #1A1A2E;">
-                View Candidate Profile
-            </a>
-        </div>
-
-        <p style="color: #1A1A2E; font-size: 14px; border-top: 2px solid #1A1A2E; padding-top: 20px;">
-            Remember to maintain regular communication with ${data.candidate_name} throughout their job search journey.
-        </p>
-    </div>
-
-    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
-    </div>
-</body>
-</html>
-        `.trim();
+        const html = consentGivenEmail({
+            recruiterName: data.recruiter_name,
+            candidateName: data.candidate_name,
+            candidateEmail: data.candidate_email,
+            consentDate,
+            candidatesUrl,
+        });
 
         await this.sendDualNotification(recruiterEmail, subject, html, {
             eventType: 'candidate.consent_given',
@@ -555,69 +444,16 @@ export class CandidatesEmailService {
             minute: '2-digit',
         });
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candidate Declined Your Invitation</title>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1A1A2E; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5F0EB;">
-    <div style="background: #1A1A2E; padding: 30px; text-align: center; border: 4px solid #1A1A2E; border-bottom: none; border-radius: 4px 4px 0 0;">
-        <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #1A1A2E;">
-            <i class="fa-duotone fa-regular fa-info-circle" style="font-size: 48px; color: #A78BFA;"></i>
-        </div>
-        <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800;">Invitation Response</h1>
-    </div>
+        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
-    <div style="background: #ffffff; padding: 30px; border: 4px solid #1A1A2E; border-top: none; border-radius: 0 0 4px 4px;">
-        <p style="font-size: 18px; margin-top: 0;">Hi ${data.recruiter_name},</p>
-        
-        <p style="font-size: 16px; line-height: 1.8;">
-            <strong>${data.candidate_name}</strong> has declined your invitation to work together on Applicant 
-        </p>
-
-        <div style="background: #F5F0EB; border-left: 4px solid #A78BFA; padding: 20px; margin: 20px 0; border-radius: 4px;">
-            <h3 style="margin-top: 0; color: #1A1A2E;">Details</h3>
-            <p style="margin: 8px 0;"><strong>Candidate:</strong> ${data.candidate_name}</p>
-            <p style="margin: 8px 0;"><strong>Email:</strong> ${data.candidate_email}</p>
-            <p style="margin: 8px 0;"><strong>Declined On:</strong> ${declinedDate}</p>
-            ${data.declined_reason ? `
-            <div style="margin-top: 16px;">
-                <p style="margin: 8px 0;"><strong>Their Message:</strong></p>
-                <p style="background: white; padding: 12px; border-radius: 4px; margin: 8px 0; font-style: italic;">"${data.declined_reason}"</p>
-            </div>
-            ` : ''}
-        </div>
-
-        <h3 style="color: #1A1A2E;">What Can You Do?</h3>
-        <ul style="padding-left: 20px; line-height: 1.8;">
-            <li>If they provided feedback, consider how you might adjust your approach</li>
-            <li>You can reach out directly to discuss any concerns or misunderstandings</li>
-            <li>Focus on building relationships with other candidates in your network</li>
-            <li>Review your invitation message and outreach strategy</li>
-        </ul>
-
-        <div style="background: #EDE9FE; border-radius: 4px; padding: 16px; margin: 20px 0; border: 2px solid #A78BFA;">
-            <p style="margin: 0; color: #1A1A2E;">
-                <strong>💡 Tip:</strong> Not every candidate is a perfect fit right now. Keep building your network and focus on candidates who are excited to work with you!
-            </p>
-        </div>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: #FF6B6B; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-size: 16px; font-weight: 700; border: 2px solid #1A1A2E;">
-                View Your Candidates
-            </a>
-        </div>
-    </div>
-
-    <div style="text-align: center; padding: 20px; color: #1A1A2E; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
-    </div>
-</body>
-</html>
-        `.trim();
+        const html = consentDeclinedEmail({
+            recruiterName: data.recruiter_name,
+            candidateName: data.candidate_name,
+            candidateEmail: data.candidate_email,
+            declinedDate,
+            declinedReason: data.declined_reason,
+            candidatesUrl,
+        });
 
         await this.sendDualNotification(recruiterEmail, subject, html, {
             eventType: 'candidate.consent_declined',

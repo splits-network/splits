@@ -35,9 +35,13 @@ export const config = {
         '/sign-up(.*)',
         '/sso-callback(.*)',
 
+        // All public pages — layout.tsx calls auth() on every route so Clerk
+        // middleware must run here even though auth is not required
+        '/public/(.*)',
+
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
-        '/public/jobs/(.*)',       // Job pages (auth optional for personalization)
+
         // Protected API routes only
         '/api/v2/(.*)',     // V2 API routes
         '/api/notifications/(.*)', // Notification APIs

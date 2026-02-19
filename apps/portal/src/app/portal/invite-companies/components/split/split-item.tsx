@@ -1,9 +1,7 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { CompanyInvitation } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { statusColor } from "../shared/status-color";
 import {
     formatStatus,
     createdAgo,
@@ -13,16 +11,13 @@ import {
 
 export function SplitItem({
     invitation,
-    accent,
     isSelected,
     onSelect,
 }: {
     invitation: CompanyInvitation;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
 }) {
-    const ac = accent;
     const daysLeft = invitation.expires_at
         ? getDaysUntilExpiry(invitation.expires_at)
         : null;
@@ -30,46 +25,55 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 transition-colors border-b-2 border-dark/10 border-l-4 ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
-                    ? `${ac.bgLight} ${ac.border}`
-                    : "bg-white border-transparent"
+                    ? "bg-primary/5 border-l-primary"
+                    : "bg-base-100 border-transparent"
             }`}
         >
+            {/* Row 1: name + posted time */}
             <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
                     {isExpiringSoon(invitation) && (
-                        <i className="fa-duotone fa-regular fa-clock text-sm flex-shrink-0 text-coral" />
+                        <i className="fa-duotone fa-regular fa-clock text-warning text-xs flex-shrink-0" />
                     )}
-                    <h4 className="font-black text-sm uppercase tracking-tight truncate text-dark">
+                    <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {invitation.company_name_hint || "Company Invitation"}
                     </h4>
                 </div>
-                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-dark/40">
+                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {createdAgo(invitation)}
                 </span>
             </div>
+
+            {/* Row 2: email */}
             {invitation.invited_email && (
-                <div className={`text-sm font-bold mb-1 ${ac.text}`}>
+                <div className="text-sm font-semibold text-base-content/60 mb-1 truncate">
                     {invitation.invited_email}
                 </div>
             )}
-            <div className="flex items-center justify-between">
-                <span className="text-sm font-mono font-bold tracking-wider text-dark/70">
+
+            {/* Row 3: code + status */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-sm font-mono font-bold tracking-wider text-base-content/70">
                     {invitation.invite_code}
                 </span>
-                <Badge color={statusVariant(invitation.status)}>
+                <span
+                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(invitation.status)}`}
+                >
                     {formatStatus(invitation.status)}
-                </Badge>
+                </span>
             </div>
-            <div className="flex items-center gap-3 mt-1">
+
+            {/* Row 4: days left + tags */}
+            <div className="flex items-center gap-3">
                 {daysLeft !== null && (
-                    <span className={`text-sm font-bold ${daysLeft <= 3 ? "text-coral" : "text-dark/40"}`}>
+                    <span className={`text-sm font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/40"}`}>
                         {daysLeft > 0 ? `${daysLeft}d left` : "Expired"}
                     </span>
                 )}
                 {invitation.email_sent_at && (
-                    <span className="text-sm text-teal">
+                    <span className="text-sm text-success">
                         <i className="fa-duotone fa-regular fa-envelope-circle-check mr-1" />
                         Sent
                     </span>

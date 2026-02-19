@@ -1,13 +1,10 @@
 "use client";
 
 import { Fragment } from "react";
-import { Badge } from "@splits-network/memphis-ui";
 import type { CompanyInvitation } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { statusColor, statusBorder, statusIcon } from "../shared/status-color";
 import {
     formatStatus,
-    formatDate,
     createdAgo,
     isExpiringSoon,
     getDaysUntilExpiry,
@@ -17,7 +14,6 @@ import InvitationActionsToolbar from "../shared/actions-toolbar";
 
 export function TableRow({
     invitation,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -25,17 +21,16 @@ export function TableRow({
     onRefresh,
 }: {
     invitation: CompanyInvitation;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
     const daysLeft = invitation.expires_at
         ? getDaysUntilExpiry(invitation.expires_at)
         : null;
+    const borderClass = statusBorder(invitation.status);
 
     return (
         <Fragment>
@@ -43,46 +38,49 @@ export function TableRow({
                 onClick={onSelect}
                 className={`cursor-pointer transition-colors border-l-4 ${
                     isSelected
-                        ? `${ac.bgLight} ${ac.border}`
-                        : `border-transparent ${idx % 2 === 0 ? "bg-white" : "bg-cream"}`
+                        ? `bg-base-200/50 ${borderClass}`
+                        : `border-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`
                 }`}
             >
                 <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? ac.text : "text-dark/40"}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
                     />
                 </td>
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                         {isExpiringSoon(invitation) && (
-                            <i className="fa-duotone fa-regular fa-clock text-sm text-coral" />
+                            <i className="fa-duotone fa-regular fa-clock text-sm text-warning" />
                         )}
-                        <span className="font-bold text-sm text-dark">
-                            {invitation.company_name_hint || "—"}
+                        <span className="font-bold text-sm">
+                            {invitation.company_name_hint || "\u2014"}
                         </span>
                     </div>
                 </td>
-                <td className={`px-4 py-3 text-sm font-semibold ${ac.text}`}>
-                    {invitation.invited_email || "—"}
+                <td className="px-4 py-3 text-sm text-base-content/60">
+                    {invitation.invited_email || "\u2014"}
                 </td>
-                <td className="px-4 py-3 text-sm font-mono font-bold tracking-wider text-dark">
+                <td className="px-4 py-3 text-sm font-mono font-bold tracking-wider text-base-content">
                     {invitation.invite_code}
                 </td>
                 <td className="px-4 py-3">
-                    <Badge color={statusVariant(invitation.status)}>
+                    <span
+                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                    >
+                        <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
                         {formatStatus(invitation.status)}
-                    </Badge>
+                    </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-dark/60">
+                <td className="px-4 py-3 text-sm text-base-content/50">
                     {createdAgo(invitation)}
                 </td>
                 <td className="px-4 py-3 text-sm">
                     {daysLeft !== null ? (
-                        <span className={`font-bold ${daysLeft <= 3 ? "text-coral" : "text-dark/60"}`}>
+                        <span className={`font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/50"}`}>
                             {daysLeft > 0 ? `${daysLeft}d` : "Expired"}
                         </span>
                     ) : (
-                        <span className="text-dark/40">—</span>
+                        <span className="text-base-content/30">{"\u2014"}</span>
                     )}
                 </td>
                 <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
@@ -107,11 +105,10 @@ export function TableRow({
                 <tr>
                     <td
                         colSpan={colSpan}
-                        className={`p-0 bg-white border-t-4 border-b-4 ${ac.border}`}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-base-300"
                     >
                         <InvitationDetail
                             invitation={invitation}
-                            accent={ac}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

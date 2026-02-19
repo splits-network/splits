@@ -8,7 +8,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors } from "./use-basel-chart-colors";
+import { useBaselChartColors, hexWithAlpha } from "./use-basel-chart-colors";
 import { BaselTooltip } from "./basel-tooltip";
 
 export interface OnlineActivityChartProps {
@@ -41,7 +41,7 @@ export function OnlineActivityChart({
                 <YAxis
                     tick={{
                         fontSize: 9,
-                        fill: "oklch(var(--bc) / 0.5)",
+                        fill: hexWithAlpha(colors.baseContent, 0.5),
                         fontWeight: 500,
                     }}
                     axisLine={false}

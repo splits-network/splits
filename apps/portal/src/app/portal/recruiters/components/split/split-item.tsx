@@ -1,10 +1,8 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { statusColor } from "../shared/status-color";
 import {
     recruiterLocation,
     formatStatus,
@@ -16,80 +14,85 @@ import {
 
 export function SplitItem({
     recruiter,
-    accent,
     isSelected,
     onSelect,
 }: {
     recruiter: RecruiterWithUser;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
 }) {
-    const ac = accent;
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
+    const status = recruiter.marketplace_profile?.status || "active";
 
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 transition-colors border-b-2 border-dark/10 border-l-4 ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
-                    ? `${ac.bgLight} ${ac.border}`
-                    : "bg-white border-transparent"
+                    ? "bg-primary/5 border-l-primary"
+                    : "bg-base-100 border-transparent"
             }`}
         >
+            {/* Row 1: avatar + name + posted time */}
             <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="flex items-center gap-3 min-w-0">
                     {recruiter.users?.profile_image_url ? (
                         <img
                             src={recruiter.users.profile_image_url}
                             alt={name}
-                            className={`w-8 h-8 object-cover border-2 ${ac.border} flex-shrink-0`}
+                            className="w-8 h-8 object-cover border border-base-300 flex-shrink-0"
                         />
                     ) : (
-                        <div
-                            className={`w-8 h-8 flex items-center justify-center border-2 ${ac.border} bg-cream text-xs font-bold text-dark flex-shrink-0`}
-                        >
+                        <div className="w-8 h-8 flex items-center justify-center border border-base-300 bg-base-200 text-xs font-bold text-base-content/60 flex-shrink-0">
                             {getInitials(name)}
                         </div>
                     )}
                     <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             {isNew(recruiter) && (
-                                <i className="fa-duotone fa-regular fa-sparkles text-sm flex-shrink-0 text-yellow" />
+                                <i className="fa-duotone fa-regular fa-star text-primary text-xs flex-shrink-0" />
                             )}
-                            <h4 className="font-black text-sm uppercase tracking-tight truncate text-dark">
+                            <h4 className="font-bold text-sm tracking-tight truncate">
                                 {name}
                             </h4>
                         </div>
                         {recruiter.tagline && (
-                            <div className={`text-sm font-bold truncate ${ac.text}`}>
+                            <div className="text-sm font-semibold truncate text-primary/70">
                                 {recruiter.tagline}
                             </div>
                         )}
                     </div>
                 </div>
-                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-dark/40">
+                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {joinedAgo(recruiter)}
                 </span>
             </div>
-            <div className="flex items-center justify-between mt-1">
-                {location && (
-                    <span className="text-sm text-dark/50">
-                        <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                        {location}
-                    </span>
-                )}
-                <Badge color={statusVariant(recruiter.marketplace_profile?.status || "active")}>
-                    {formatStatus(recruiter.marketplace_profile?.status || "active")}
-                </Badge>
+
+            {/* Row 2: location + status */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="text-sm text-base-content/50 truncate">
+                    {location ? (
+                        <>
+                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                            {location}
+                        </>
+                    ) : null}
+                </div>
+                <span
+                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(status)}`}
+                >
+                    {formatStatus(status)}
+                </span>
             </div>
-            <div className="flex items-center gap-3 mt-1">
-                <span className="text-sm font-bold text-dark/70">
+
+            {/* Row 3: placements + success rate */}
+            <div className="flex items-center gap-3">
+                <span className="text-sm font-bold text-base-content/70">
                     {placementsDisplay(recruiter)} placements
                 </span>
                 {successRateDisplay(recruiter) && (
-                    <span className="text-sm font-bold text-purple">
+                    <span className="text-sm font-bold text-accent">
                         {successRateDisplay(recruiter)} success
                     </span>
                 )}

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
+import Image from "next/image";
 
 // ─── Nav Data ───────────────────────────────────────────────────────────────
 
@@ -137,10 +138,12 @@ export default function Header() {
         <BaselHeader
             logo={
                 <Link href="/" className="flex-shrink-0">
-                    <img
+                    <Image
                         src="/logo.png"
                         alt="Applicant Network"
-                        className="h-8 w-auto"
+                        width={140}
+                        height={48}
+                        className="h-10 w-auto"
                     />
                 </Link>
             }
@@ -148,7 +151,7 @@ export default function Header() {
                 <>
                     <Link
                         href="/public/how-it-works"
-                        className="px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                        className="px-3 py-2 font-semibold text-base-content/70 hover:text-base-content transition-colors"
                     >
                         How It Works
                     </Link>

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import { companyId } from "../shared/helpers";
 import { MobileDetailOverlay } from "@/components/standard-lists";
@@ -21,14 +20,16 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const isMarketplace = activeTab === "marketplace";
-    const selectedItem = items.find((item) => companyId(item, isMarketplace) === selectedId);
-    const selectedAc = selectedItem
-        ? accentAt(items.indexOf(selectedItem))
-        : ACCENT[0];
+    const selectedItem = items.find(
+        (item) => companyId(item, isMarketplace) === selectedId,
+    );
 
     return (
         <div className="flex gap-6">
-            <div className={`flex flex-col w-full ${selectedItem ? "hidden md:flex" : "flex"}`}>
+            {/* Card grid -- hidden on mobile when a detail is open */}
+            <div
+                className={`flex flex-col w-full ${selectedItem ? "hidden md:flex" : "flex"}`}
+            >
                 <div
                     className={`grid gap-4 w-full ${
                         selectedItem
@@ -36,29 +37,34 @@ export function GridView({
                             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
                     }`}
                 >
-                    {items.map((item, idx) => (
-                        <GridCard
-                            key={isMarketplace ? (item as Company).id : (item as CompanyRelationship).id}
-                            item={item}
-                            activeTab={activeTab}
-                            accent={accentAt(idx)}
-                            isSelected={selectedId === companyId(item, isMarketplace)}
-                            onSelect={() => onSelectAction(item)}
-                            onRefresh={onRefreshAction}
-                        />
-                    ))}
+                    {items.map((item) => {
+                        const cId = companyId(item, isMarketplace);
+                        return (
+                            <GridCard
+                                key={
+                                    isMarketplace
+                                        ? (item as Company).id
+                                        : (item as CompanyRelationship).id
+                                }
+                                item={item}
+                                activeTab={activeTab}
+                                isSelected={selectedId === cId}
+                                onSelect={() => onSelectAction(item)}
+                                onRefresh={onRefreshAction}
+                            />
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Detail Sidebar */}
+            {/* Detail sidebar */}
             {selectedItem && selectedId && (
                 <MobileDetailOverlay
                     isOpen
-                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white ${selectedAc.border}`}
+                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
                 >
                     <CompanyDetailLoader
                         companyId={selectedId}
-                        accent={selectedAc}
                         onClose={() => onSelectAction(selectedItem)}
                         onRefresh={onRefreshAction}
                     />

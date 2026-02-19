@@ -15,7 +15,7 @@ export interface ThemeToggleProps {
  * Uses FontAwesome sun/moon icons to match the project icon system.
  * Designed to sit in the header actions slot.
  */
-export function ThemeToggle({ className, size = "sm" }: ThemeToggleProps) {
+export function ThemeToggle({ className, size = "md" }: ThemeToggleProps) {
     const { isDark, toggleTheme } = useTheme();
 
     return (

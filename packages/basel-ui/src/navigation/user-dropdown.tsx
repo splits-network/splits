@@ -128,7 +128,9 @@ export function UserDropdown({
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-2 py-1 hover:bg-base-200 transition-colors cursor-pointer"
             >
-                <div className={`w-8 h-8 ${avatarClassName} flex items-center justify-center font-bold text-xs overflow-hidden`}>
+                <div
+                    className={`w-8 h-8 ${avatarClassName} flex items-center justify-center font-bold text-sm overflow-hidden`}
+                >
                     {userImageUrl ? (
                         <img
                             src={userImageUrl}
@@ -140,11 +142,11 @@ export function UserDropdown({
                     )}
                 </div>
                 <div className="hidden md:block text-left">
-                    <div className="text-xs font-bold leading-tight">
+                    <div className="text-sm font-bold leading-tight">
                         {userName}
                     </div>
                     {role && (
-                        <div className="text-[10px] text-base-content/50">
+                        <div className="text-sm text-base-content/50">
                             {role.label}
                         </div>
                     )}
@@ -160,7 +162,9 @@ export function UserDropdown({
                     {/* User header */}
                     <div className="px-4 py-3 border-b border-base-300">
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 ${avatarClassName} flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden`}>
+                            <div
+                                className={`w-10 h-10 ${avatarClassName} flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden`}
+                            >
                                 {userImageUrl ? (
                                     <img
                                         src={userImageUrl}
@@ -176,12 +180,14 @@ export function UserDropdown({
                                     {userName}
                                 </div>
                                 {userEmail && (
-                                    <div className="text-[11px] text-base-content/50 truncate mt-0.5">
+                                    <div className="text-sm text-base-content/50 truncate mt-0.5">
                                         {userEmail}
                                     </div>
                                 )}
                                 {role && (
-                                    <span className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${badgeClassName}`}>
+                                    <span
+                                        className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${badgeClassName}`}
+                                    >
                                         {role.icon && (
                                             <i
                                                 className={`fa-duotone fa-regular ${role.icon} text-[9px]`}
@@ -205,7 +211,7 @@ export function UserDropdown({
                             >
                                 <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
                                     <i
-                                        className={`${item.icon} text-primary text-xs`}
+                                        className={`${item.icon} text-primary text-sm`}
                                     />
                                 </div>
                                 <div>
@@ -213,7 +219,7 @@ export function UserDropdown({
                                         {item.label}
                                     </div>
                                     {item.description && (
-                                        <div className="text-[11px] text-base-content/50">
+                                        <div className="text-sm text-base-content/50">
                                             {item.description}
                                         </div>
                                     )}
@@ -228,7 +234,7 @@ export function UserDropdown({
                             onClick={handleSignOut}
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error/70 hover:bg-error/10 hover:text-error transition-colors cursor-pointer"
                         >
-                            <i className="fa-duotone fa-regular fa-arrow-right-from-bracket text-xs w-4 text-center" />
+                            <i className="fa-duotone fa-regular fa-arrow-right-from-bracket text-sm w-4 text-center" />
                             Sign Out
                         </button>
                     </div>

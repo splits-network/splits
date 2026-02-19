@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { ButtonLoading, ModalPortal } from "@splits-network/shared-ui";
+import { ButtonLoading } from "@splits-network/shared-ui";
 import type { CompanyInvitation } from "../../types";
 
 interface CreateInvitationModalProps {
@@ -112,27 +112,29 @@ export default function CreateInvitationModal({
 
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box max-w-lg border-4 border-dark p-0">
-                {/* Memphis header bar */}
-                <div className="bg-dark p-6 relative">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-teal" />
+            <div className="modal-box max-w-lg border-2 border-base-300 p-0" style={{ borderRadius: 0 }}>
+                {/* Basel header */}
+                <div className="bg-neutral text-neutral-content px-6 py-5 relative">
                     <button
                         type="button"
-                        className="btn btn-sm btn-square btn-ghost text-white absolute right-2 top-2 z-10"
+                        className="btn btn-sm btn-square btn-ghost text-neutral-content absolute right-3 top-3 z-10"
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
-                    <h3 className="font-black text-xl uppercase tracking-tight text-white">
+                    <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary mb-1">
+                        {createdInvitation ? "Success" : "New Invitation"}
+                    </p>
+                    <h3 className="text-xl font-black tracking-tight">
                         {createdInvitation ? (
                             <>
-                                <i className="fa-duotone fa-regular fa-circle-check text-teal mr-2" />
-                                Invitation Created!
+                                <i className="fa-duotone fa-regular fa-circle-check text-success mr-2" />
+                                Invitation Created
                             </>
                         ) : (
                             <>
-                                <i className="fa-duotone fa-regular fa-building-user text-teal mr-2" />
+                                <i className="fa-duotone fa-regular fa-building-user text-primary mr-2" />
                                 Invite a Company
                             </>
                         )}
@@ -142,7 +144,7 @@ export default function CreateInvitationModal({
                 <div className="p-6">
                     {!createdInvitation ? (
                         <>
-                            <p className="text-sm text-dark/70 mb-6">
+                            <p className="text-sm text-base-content/60 mb-6">
                                 Create an invitation to bring a new company to
                                 Splits Network. You can send via email, share a
                                 link, or give them a code.
@@ -150,12 +152,13 @@ export default function CreateInvitationModal({
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend font-black uppercase tracking-wider text-dark">
+                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Company Name
                                     </legend>
                                     <input
                                         type="text"
-                                        className="input w-full"
+                                        className="input w-full bg-base-200 border-base-300"
+                                        style={{ borderRadius: 0 }}
                                         placeholder="e.g., Acme Corp"
                                         value={companyNameHint}
                                         onChange={(e) =>
@@ -163,35 +166,37 @@ export default function CreateInvitationModal({
                                         }
                                         maxLength={255}
                                     />
-                                    <p className="fieldset-label text-dark/50">
+                                    <p className="fieldset-label text-base-content/40">
                                         Pre-fills during their signup (optional)
                                     </p>
                                 </fieldset>
 
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend font-black uppercase tracking-wider text-dark">
+                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Email Address
                                     </legend>
                                     <input
                                         type="email"
-                                        className="input w-full"
+                                        className="input w-full bg-base-200 border-base-300"
+                                        style={{ borderRadius: 0 }}
                                         placeholder="e.g., hr@acmecorp.com"
                                         value={invitedEmail}
                                         onChange={(e) =>
                                             setInvitedEmail(e.target.value)
                                         }
                                     />
-                                    <p className="fieldset-label text-dark/50">
-                                        We'll send them an invitation email (optional)
+                                    <p className="fieldset-label text-base-content/40">
+                                        We&apos;ll send them an invitation email (optional)
                                     </p>
                                 </fieldset>
 
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend font-black uppercase tracking-wider text-dark">
+                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Personal Message
                                     </legend>
                                     <textarea
-                                        className="textarea w-full h-24"
+                                        className="textarea w-full h-24 bg-base-200 border-base-300"
+                                        style={{ borderRadius: 0 }}
                                         placeholder="Add a personal note to your invitation..."
                                         value={personalMessage}
                                         onChange={(e) =>
@@ -199,7 +204,7 @@ export default function CreateInvitationModal({
                                         }
                                         maxLength={1000}
                                     />
-                                    <p className="fieldset-label text-dark/50">
+                                    <p className="fieldset-label text-base-content/40">
                                         {personalMessage.length}/1000 characters (optional)
                                     </p>
                                 </fieldset>
@@ -208,22 +213,23 @@ export default function CreateInvitationModal({
                                     <label className="flex items-center gap-3 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            className="checkbox checkbox-sm"
+                                            className="checkbox checkbox-sm checkbox-primary"
                                             checked={sendEmail}
                                             onChange={(e) =>
                                                 setSendEmail(e.target.checked)
                                             }
                                         />
-                                        <span className="text-sm font-bold text-dark">
+                                        <span className="text-sm font-bold text-base-content">
                                             Send invitation email now
                                         </span>
                                     </label>
                                 )}
 
-                                <div className="flex justify-end gap-2 pt-4 border-t-2 border-dark/10">
+                                <div className="flex justify-end gap-2 pt-4 border-t border-base-200">
                                     <button
                                         type="button"
                                         className="btn btn-ghost"
+                                        style={{ borderRadius: 0 }}
                                         onClick={handleClose}
                                         disabled={isSubmitting}
                                     >
@@ -232,6 +238,7 @@ export default function CreateInvitationModal({
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
+                                        style={{ borderRadius: 0 }}
                                         disabled={isSubmitting}
                                     >
                                         <ButtonLoading
@@ -245,22 +252,23 @@ export default function CreateInvitationModal({
                         </>
                     ) : (
                         <>
-                            <p className="text-sm text-dark/70 mb-6">
+                            <p className="text-sm text-base-content/60 mb-6">
                                 Share this invitation with the company. They can
                                 join using the link or code below.
                             </p>
 
                             {/* Invite Code */}
-                            <div className="bg-cream border-4 border-dark p-4 mb-4">
-                                <label className="text-xs font-black uppercase tracking-wider text-dark/50 mb-2 block">
+                            <div className="bg-base-200 border-2 border-base-300 p-4 mb-4">
+                                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                     Invite Code
                                 </label>
                                 <div className="flex items-center gap-2">
-                                    <code className="text-2xl font-mono font-black tracking-wider flex-1 text-dark">
+                                    <code className="text-2xl font-mono font-black tracking-wider flex-1 text-base-content">
                                         {createdInvitation.invite_code}
                                     </code>
                                     <button
                                         className="btn btn-ghost btn-sm"
+                                        style={{ borderRadius: 0 }}
                                         onClick={handleCopyCode}
                                         title="Copy code"
                                     >
@@ -270,19 +278,21 @@ export default function CreateInvitationModal({
                             </div>
 
                             {/* Invite Link */}
-                            <div className="bg-cream border-4 border-dark p-4 mb-6">
-                                <label className="text-xs font-black uppercase tracking-wider text-dark/50 mb-2 block">
+                            <div className="bg-base-200 border-2 border-base-300 p-4 mb-6">
+                                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                     Invite Link
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="text"
-                                        className="input input-sm flex-1 font-mono text-xs"
+                                        className="input input-sm flex-1 font-mono text-xs bg-base-100 border-base-300"
+                                        style={{ borderRadius: 0 }}
                                         value={createdInvitation.invite_url || ""}
                                         readOnly
                                     />
                                     <button
                                         className="btn btn-ghost btn-sm"
+                                        style={{ borderRadius: 0 }}
                                         onClick={handleCopyLink}
                                         title="Copy link"
                                     >
@@ -294,14 +304,16 @@ export default function CreateInvitationModal({
                             {/* Share Actions */}
                             <div className="flex gap-2 flex-wrap mb-6">
                                 <button
-                                    className="btn btn-outline border-2 border-dark btn-sm flex-1"
+                                    className="btn btn-outline border-base-300 btn-sm flex-1"
+                                    style={{ borderRadius: 0 }}
                                     onClick={handleCopyLink}
                                 >
                                     <i className="fa-duotone fa-regular fa-link mr-2" />
                                     Copy Link
                                 </button>
                                 <button
-                                    className="btn btn-outline border-2 border-dark btn-sm flex-1"
+                                    className="btn btn-outline border-base-300 btn-sm flex-1"
+                                    style={{ borderRadius: 0 }}
                                     onClick={handleCopyCode}
                                 >
                                     <i className="fa-duotone fa-regular fa-copy mr-2" />
@@ -309,6 +321,7 @@ export default function CreateInvitationModal({
                                 </button>
                                 <button
                                     className="btn btn-primary btn-sm flex-1"
+                                    style={{ borderRadius: 0 }}
                                     onClick={handleShare}
                                 >
                                     <i className="fa-duotone fa-regular fa-share mr-2" />
@@ -317,18 +330,19 @@ export default function CreateInvitationModal({
                             </div>
 
                             {createdInvitation.email_sent_at && (
-                                <div className="bg-teal-light border-4 border-teal p-3 mb-4 flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-envelope-circle-check text-teal" />
-                                    <span className="text-sm font-bold text-dark">
+                                <div className="bg-success/10 border-2 border-success/30 p-3 mb-4 flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-envelope-circle-check text-success" />
+                                    <span className="text-sm font-bold text-base-content">
                                         Email sent to{" "}
                                         {createdInvitation.invited_email}
                                     </span>
                                 </div>
                             )}
 
-                            <div className="flex justify-end pt-4 border-t-2 border-dark/10">
+                            <div className="flex justify-end pt-4 border-t border-base-200">
                                 <button
                                     className="btn btn-primary"
+                                    style={{ borderRadius: 0 }}
                                     onClick={handleDone}
                                 >
                                     Done

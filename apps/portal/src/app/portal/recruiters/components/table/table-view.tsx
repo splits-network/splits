@@ -1,7 +1,6 @@
 "use client";
 
 import type { RecruiterWithUser } from "../../types";
-import { accentAt } from "../shared/accent";
 import { TableRow } from "./table-row";
 
 export function TableView({
@@ -15,17 +14,28 @@ export function TableView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const columns = ["", "Name", "Location", "Specialties", "Placements", "Reputation", "Experience", "Status", "Joined", ""];
+    const columns = [
+        "",
+        "Name",
+        "Location",
+        "Specialties",
+        "Placements",
+        "Reputation",
+        "Experience",
+        "Status",
+        "Joined",
+        "",
+    ];
 
     return (
-        <div className="overflow-x-auto border-4 border-dark">
+        <div className="overflow-x-auto border-2 border-base-300 shadow-sm">
             <table className="w-full" style={{ minWidth: 1000 }}>
                 <thead>
-                    <tr className="bg-dark">
+                    <tr className="bg-neutral text-neutral-content">
                         {columns.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-sm font-black uppercase tracking-wider ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-20" : ""} ${accentAt(i).text}`}
+                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-20" : ""}`}
                             >
                                 {h}
                             </th>
@@ -37,7 +47,6 @@ export function TableView({
                         <TableRow
                             key={recruiter.id}
                             recruiter={recruiter}
-                            accent={accentAt(idx)}
                             idx={idx}
                             isSelected={selectedId === recruiter.id}
                             colSpan={columns.length}
