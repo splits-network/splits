@@ -1,17 +1,59 @@
 "use client";
 
 /**
- * Basel browse list item — clean DaisyUI.
- * Already clean in original; self-contained in Basel tree.
+ * Basel browse list item — matches showcase/messages/one conversation item design.
+ * Square avatar with role color, online dot, role badge line, unread pill.
  */
 
-import { Presence } from "@/components/presense";
 import {
     type ConversationRow,
     type ConversationContext,
     getOtherParticipant,
     formatMessageDate,
+    getRequestStateDisplay,
 } from "@/app/portal/messages/types";
+
+/* ─── Role metadata — DaisyUI semantic tokens ──────────────────────────── */
+
+type UserRole = "recruiter" | "company" | "candidate" | "admin";
+
+const roleMeta: Record<
+    UserRole,
+    { label: string; bgClass: string; textClass: string; icon: string }
+> = {
+    recruiter: {
+        label: "Recruiter",
+        bgClass: "bg-primary text-primary-content",
+        textClass: "text-primary",
+        icon: "fa-duotone fa-regular fa-user-tie",
+    },
+    company: {
+        label: "Company",
+        bgClass: "bg-secondary text-secondary-content",
+        textClass: "text-secondary",
+        icon: "fa-duotone fa-regular fa-building",
+    },
+    candidate: {
+        label: "Candidate",
+        bgClass: "bg-accent text-accent-content",
+        textClass: "text-accent",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    admin: {
+        label: "Admin",
+        bgClass: "bg-neutral text-neutral-content",
+        textClass: "text-neutral",
+        icon: "fa-duotone fa-regular fa-shield-halved",
+    },
+};
+
+function getRoleMeta(role: string | null | undefined) {
+    if (!role) return null;
+    const key = role.toLowerCase() as UserRole;
+    return roleMeta[key] ?? null;
+}
+
+/* ─── Component ────────────────────────────────────────────────────────── */
 
 interface BrowseListItemProps {
     row: ConversationRow;
@@ -21,6 +63,7 @@ interface BrowseListItemProps {
     onSelect: (id: string) => void;
     context?: ConversationContext | null;
     otherUserRole?: string | null;
+    initials: string;
 }
 
 export default function BrowseListItem({
@@ -31,6 +74,7 @@ export default function BrowseListItem({
     onSelect,
     context,
     otherUserRole,
+    initials,
 }: BrowseListItemProps) {
     const convo = row.conversation;
     const participant = row.participant;
@@ -39,6 +83,9 @@ export default function BrowseListItem({
 
     const other = getOtherParticipant(convo, currentUserId);
     const name = other?.name || other?.email || "Unknown user";
+    const meta = getRoleMeta(otherUserRole);
+    const isOnline = presenceStatus === "online";
+    const status = getRequestStateDisplay(row);
 
     const contextLabel =
         context?.jobTitle && context?.companyName
@@ -49,76 +96,88 @@ export default function BrowseListItem({
         <button
             type="button"
             onClick={() => onSelect(convo.id)}
-            className={`
-                group w-full relative p-3 sm:p-4 border-b border-base-300 cursor-pointer transition-all duration-200
-                hover:bg-base-100
-                ${
-                    isSelected
-                        ? "bg-base-100 border-l-4 border-l-primary shadow-sm z-10"
-                        : "border-l-4 border-l-transparent"
-                }
-            `}
+            className={`w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
+                isSelected
+                    ? "bg-base-100 border-l-4 border-l-primary"
+                    : "border-l-4 border-l-transparent"
+            }`}
         >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex gap-3">
+                {/* Square avatar with role color */}
+                <div className="relative flex-shrink-0">
+                    <div
+                        className={`w-11 h-11 flex items-center justify-center font-bold text-sm ${
+                            meta?.bgClass ?? "bg-base-300 text-base-content"
+                        }`}
+                    >
+                        {initials}
+                    </div>
+                    {isOnline && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success border-2 border-base-200 rounded-full" />
+                    )}
+                </div>
+
+                {/* Content */}
                 <div className="flex-1 min-w-0">
-                    {/* Name + role + status badges */}
-                    <div className="flex items-center gap-2 justify-between mb-1">
-                        <div className="flex items-center gap-2 min-w-0 text-left">
-                            <span className="font-semibold truncate">
+                    <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <span
+                                className={`font-bold text-sm truncate ${
+                                    participant.unread_count > 0
+                                        ? "text-base-content"
+                                        : "text-base-content/80"
+                                }`}
+                            >
                                 {name}
                             </span>
-                            {otherUserRole && (
-                                <span className="badge badge-outline badge-xs">
-                                    {otherUserRole}
-                                </span>
-                            )}
-                            {participant.request_state === "pending" && (
-                                <span className="badge badge-warning badge-sm">
-                                    Request
-                                </span>
-                            )}
-                            {participant.archived_at && (
-                                <span className="badge badge-ghost badge-sm">
-                                    Archived
-                                </span>
-                            )}
-                            {participant.muted_at && (
-                                <span className="badge badge-ghost badge-sm">
-                                    <i className="fa-duotone fa-regular fa-volume-slash text-xs" />
-                                </span>
-                            )}
                         </div>
-                        <Presence status={presenceStatus} variant="badge" />
+                        <span className="text-[11px] text-base-content/40 flex-shrink-0 ml-2">
+                            {formatMessageDate(convo.last_message_at)}
+                        </span>
                     </div>
 
-                    {/* Context line */}
-                    {contextLabel && (
-                        <div className="text-xs text-start text-base-content/50 truncate mb-1">
-                            <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                            {contextLabel}
+                    {/* Role badge line */}
+                    {meta && (
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <i className={`${meta.icon} text-[10px] ${meta.textClass}`} />
+                            <span className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}>
+                                {meta.label}
+                            </span>
                         </div>
                     )}
 
-                    {/* Candidate representation context */}
-                    {context?.candidateName && (
-                        <div className="text-xs text-start text-base-content/50 truncate mb-1">
-                            <i className="fa-duotone fa-regular fa-user-shield mr-1" />
-                            Re: {context.candidateName}
-                        </div>
-                    )}
-
-                    {/* Timestamp */}
-                    <div className="text-xs text-start text-base-content/60">
-                        {formatMessageDate(convo.last_message_at)}
+                    {/* Context preview */}
+                    <div className="flex items-center justify-between">
+                        <p className={`text-xs truncate max-w-[85%] ${
+                            participant.unread_count > 0
+                                ? "text-base-content/70 font-medium"
+                                : "text-base-content/50"
+                        }`}>
+                            {contextLabel && (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                                    {contextLabel}
+                                </>
+                            )}
+                            {!contextLabel && context?.candidateName && (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                                    Re: {context.candidateName}
+                                </>
+                            )}
+                            {!contextLabel && !context?.candidateName && (
+                                <span className="text-base-content/40">
+                                    {status.label !== "Active" ? status.label : "No context"}
+                                </span>
+                            )}
+                        </p>
+                        {participant.unread_count > 0 && (
+                            <span className="flex-shrink-0 w-5 h-5 bg-accent text-accent-content text-[10px] font-bold flex items-center justify-center rounded-full">
+                                {participant.unread_count > 99 ? "99+" : participant.unread_count}
+                            </span>
+                        )}
                     </div>
                 </div>
-                {participant.unread_count > 0 && (
-                    <span className="badge badge-primary">
-                        {participant.unread_count > 99
-                            ? "99+"
-                            : participant.unread_count}
-                    </span>
-                )}
             </div>
         </button>
     );

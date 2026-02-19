@@ -81,72 +81,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                 );
             }
 
-            /* Controls bar */
-            const controls = $1(".controls-bar");
-            if (controls) {
-                gsap.fromTo(
-                    controls,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.editorial,
-                        delay: 0.5,
-                    },
-                );
-            }
-
-            /* Inbox panel — slide from left */
-            const inbox = $1(".inbox-panel");
-            if (inbox) {
-                gsap.fromTo(
-                    inbox,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.editorial,
-                        delay: 0.3,
-                    },
-                );
-            }
-
-            /* Thread panel — slide from right */
-            const thread = $1(".thread-panel");
-            if (thread) {
-                gsap.fromTo(
-                    thread,
-                    { opacity: 0, x: 40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.editorial,
-                        delay: 0.4,
-                    },
-                );
-            }
-
-            /* Conversation items stagger */
-            const items = $(".conv-item");
-            if (items.length) {
-                gsap.fromTo(
-                    items,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.fast,
-                        stagger: S.tight,
-                        ease: E.editorial,
-                        delay: 0.5,
-                    },
-                );
-            }
-
-            /* Listings content — generic fade in */
+            /* Listings content — fade in (covers inbox + thread panels + conv items) */
             const listings = $1(".listings-content");
             if (listings) {
                 gsap.fromTo(

@@ -14,7 +14,8 @@ export default function BrowseDetailPanel({ id, item, onClose }: BrowseDetailPan
     return (
         <div className="flex-1 flex flex-col bg-base-100 w-full overflow-hidden">
             <DetailHeader item={item} onClose={onClose} />
-            <div className="flex-1 overflow-y-auto min-h-0">
+            {/* Square avatars for Basel — override shared thread-panel's rounded-full */}
+            <div className="flex-1 overflow-y-auto min-h-0 [&_.chat-image_div.rounded-full]:rounded-none">
                 <ThreadPanel conversationId={id} />
             </div>
         </div>

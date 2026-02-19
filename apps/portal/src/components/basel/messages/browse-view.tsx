@@ -2,16 +2,13 @@
 
 /**
  * Basel browse view — clean DaisyUI two-panel layout.
- * Already clean in original; self-contained in Basel tree.
+ * No @splits-network/shared-ui imports.
  */
 
 import { useCallback, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { BrowseLayout } from "@splits-network/shared-ui";
-import { LoadingState } from "@splits-network/shared-ui";
-import { EmptyState } from "@/hooks/use-standard-list";
 import { useFilter } from "@/app/portal/messages/contexts/filter-context";
-import { getOtherUserId, getOtherParticipant } from "@/app/portal/messages/types";
+import { getOtherUserId, getOtherParticipant, getInitials } from "@/app/portal/messages/types";
 import BrowseListItem from "./browse-list-item";
 import BrowseDetailPanel from "./browse-detail-panel";
 
@@ -55,7 +52,7 @@ export default function BrowseView() {
     }, [pathname, router, searchParams]);
 
     return (
-        <BrowseLayout>
+        <div className="flex h-full min-h-[500px]">
             {/* Left Panel - Conversation List */}
             <div
                 className={`flex flex-col border-r border-base-300 bg-base-200 w-full md:w-96 lg:w-[420px] ${
@@ -64,15 +61,14 @@ export default function BrowseView() {
             >
                 <div className="flex-1 overflow-y-auto min-h-0">
                     {loading && data.length === 0 ? (
-                        <div className="p-8">
-                            <LoadingState message="Loading conversations..." />
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <span className="loading loading-spinner loading-md text-primary" />
+                            <p className="text-sm text-base-content/50 mt-3">Loading conversations...</p>
                         </div>
                     ) : data.length === 0 ? (
-                        <div className="p-4">
-                            <EmptyState
-                                title="No conversations found"
-                                description="Try adjusting your search or filters"
-                            />
+                        <div className="flex flex-col items-center justify-center h-full opacity-40">
+                            <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3" />
+                            <p className="text-sm">No conversations found</p>
                         </div>
                     ) : (
                         data.map((row) => {
@@ -91,9 +87,8 @@ export default function BrowseView() {
                                 convo,
                                 currentUserId,
                             );
-                            const otherUserRole = other?.user_role
-                                ? other.user_role.charAt(0).toUpperCase() + other.user_role.slice(1)
-                                : null;
+                            const otherUserRole = other?.user_role || null;
+                            const initials = getInitials(other?.name || other?.email);
 
                             return (
                                 <BrowseListItem
@@ -108,6 +103,7 @@ export default function BrowseView() {
                                     onSelect={handleSelect}
                                     context={contextMap[convo.id]}
                                     otherUserRole={otherUserRole}
+                                    initials={initials}
                                 />
                             );
                         })
@@ -138,6 +134,6 @@ export default function BrowseView() {
                     </div>
                 )}
             </div>
-        </BrowseLayout>
+        </div>
     );
 }

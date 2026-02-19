@@ -9,8 +9,17 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { ModalPortal } from "@splits-network/shared-ui";
 import ConfirmDialog from "@/components/confirm-dialog";
+
+/* Inline portal — avoids shared-ui CJS/ESM issue */
+import { useEffect, useState as usePortalState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+function ModalPortal({ children }: { children: ReactNode }) {
+    const [mounted, setMounted] = usePortalState(false);
+    useEffect(() => { setMounted(true); }, []);
+    if (!mounted) return null;
+    return createPortal(children, document.body);
+}
 import { useFilter } from "@/app/portal/messages/contexts/filter-context";
 import type { ConversationRow } from "@/app/portal/messages/types";
 import { getOtherUserId } from "@/app/portal/messages/types";
