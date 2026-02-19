@@ -5,9 +5,9 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Button } from "@splits-network/basel-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
+import { ExpandableButton } from "./expandable-button";
 
 export interface ConnectionActionsToolbarProps {
     invitation: RecruiterCompanyRelationship;
@@ -20,6 +20,7 @@ export interface ConnectionActionsToolbarProps {
         terminate?: boolean;
     };
     onRefresh?: () => void;
+    onViewDetails?: (id: string) => void;
     className?: string;
 }
 
@@ -30,6 +31,7 @@ export default function ConnectionActionsToolbar({
     size = "sm",
     showActions = {},
     onRefresh,
+    onViewDetails,
     className = "",
 }: ConnectionActionsToolbarProps) {
     const { getToken } = useAuth();
@@ -102,6 +104,10 @@ export default function ConnectionActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
+    const handleViewDetails = useCallback(() => {
+        onViewDetails?.(invitation.id);
+    }, [invitation.id, onViewDetails]);
+
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
@@ -133,9 +139,10 @@ export default function ConnectionActionsToolbar({
                     className={`flex items-center ${getLayoutClass()} ${className}`}
                 >
                     {actions.accept && (
-                        <Button
+                        <ExpandableButton
                             icon="fa-duotone fa-regular fa-check"
-                            variant="btn-success btn-square"
+                            label="Accept"
+                            variant="btn-success"
                             size={size}
                             onClick={handleAccept}
                             disabled={accepting}
@@ -144,9 +151,10 @@ export default function ConnectionActionsToolbar({
                         />
                     )}
                     {actions.decline && (
-                        <Button
+                        <ExpandableButton
                             icon="fa-duotone fa-regular fa-xmark"
-                            variant="btn-ghost btn-square"
+                            label="Decline"
+                            variant="btn-ghost"
                             size={size}
                             onClick={handleDecline}
                             disabled={declining}
@@ -155,13 +163,29 @@ export default function ConnectionActionsToolbar({
                         />
                     )}
                     {actions.terminate && (
-                        <Button
+                        <ExpandableButton
                             icon="fa-duotone fa-regular fa-link-slash"
-                            variant="btn-ghost btn-square"
+                            label="End"
+                            variant="btn-ghost"
                             size={size}
                             onClick={() => setShowTerminateModal(true)}
                             title="End Relationship"
                         />
+                    )}
+                    {onViewDetails && (
+                        <>
+                            {(actions.accept || actions.decline || actions.terminate) && (
+                                <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            )}
+                            <ExpandableButton
+                                icon="fa-duotone fa-regular fa-eye"
+                                label="Details"
+                                variant="btn-primary"
+                                size={size}
+                                onClick={handleViewDetails}
+                                title="View Details"
+                            />
+                        </>
                     )}
                 </div>
                 {terminateModal}
@@ -180,7 +204,6 @@ export default function ConnectionActionsToolbar({
                     <button
                         onClick={handleAccept}
                         className={`btn btn-${size} btn-success gap-2`}
-                        style={{ borderRadius: 0 }}
                         disabled={accepting}
                     >
                         {accepting ? (
@@ -194,8 +217,7 @@ export default function ConnectionActionsToolbar({
                 {actions.decline && (
                     <button
                         onClick={handleDecline}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-ghost gap-2 text-coral`}
                         disabled={declining}
                     >
                         {declining ? (
@@ -209,12 +231,25 @@ export default function ConnectionActionsToolbar({
                 {actions.terminate && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-ghost gap-2 text-coral`}
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
                         End Relationship
                     </button>
+                )}
+                {onViewDetails && (
+                    <>
+                        {(actions.accept || actions.decline || actions.terminate) && (
+                            <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        )}
+                        <button
+                            onClick={handleViewDetails}
+                            className={`btn btn-${size} btn-ghost gap-2`}
+                        >
+                            <i className="fa-duotone fa-regular fa-eye" />
+                            View Details
+                        </button>
+                    </>
                 )}
             </div>
             {terminateModal}

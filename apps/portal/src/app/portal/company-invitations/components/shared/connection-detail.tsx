@@ -1,7 +1,6 @@
 "use client";
 
 import { useUserProfile } from "@/contexts";
-import { Badge } from "@splits-network/memphis-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
 import {
     getStatusLabel,
@@ -10,20 +9,16 @@ import {
     getCounterpartySubtext,
     getInitials,
 } from "../../types";
-import type { AccentClasses } from "./accent";
-import { statusVariant } from "./accent";
+import { statusColor } from "./status-color";
+import { formatStatus } from "./helpers";
 import ConnectionActionsToolbar from "./actions-toolbar";
-
-// ─── Detail Panel ───────────────────────────────────────────────────────────
 
 export function ConnectionDetail({
     invitation,
-    accent,
     onClose,
     onRefresh,
 }: {
     invitation: RecruiterCompanyRelationship;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
@@ -35,19 +30,26 @@ export function ConnectionDetail({
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                        <Badge color={statusVariant(invitation.status)} className="mb-3">
-                            <i className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : "fa-times-circle"} mr-1`} />
-                            {getStatusLabel(invitation.status)}
-                        </Badge>
-                        <h2 className="text-2xl font-black uppercase tracking-tight leading-tight mb-2 text-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span
+                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                            >
+                                <i className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"} mr-1`} />
+                                {getStatusLabel(invitation.status)}
+                            </span>
+                        </div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
+                            {invitation.relationship_type}
+                        </p>
+                        <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
                             {counterpartyName}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-3 text-sm">
+                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
                             {counterpartySubtext && (
-                                <span className="text-dark/70">
+                                <span>
                                     <i className="fa-duotone fa-regular fa-envelope mr-1" />
                                     {counterpartySubtext}
                                 </span>
@@ -57,9 +59,9 @@ export function ConnectionDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
-                            <i className="fa-duotone fa-regular fa-xmark" />
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
                         </button>
                     )}
                 </div>
@@ -75,120 +77,113 @@ export function ConnectionDetail({
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className={`grid grid-cols-3 border-b-4 ${accent.border}`}>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {getStatusLabel(invitation.status)}
+            {/* Content */}
+            <div className="p-6 space-y-8">
+                {/* Stats grid */}
+                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Status
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {getStatusLabel(invitation.status)}
+                        </p>
                     </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Status
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Type
+                        </p>
+                        <p className="text-lg font-black tracking-tight capitalize">
+                            {invitation.relationship_type}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Received
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {formatDate(invitation.created_at)}
+                        </p>
                     </div>
                 </div>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black capitalize ${accent.text}`}>
-                        {invitation.relationship_type}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Type
-                    </div>
-                </div>
-                <div className="p-4 text-center">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {formatDate(invitation.created_at)}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Received
-                    </div>
-                </div>
-            </div>
 
-            {/* Details */}
-            <div className="p-6">
                 {/* Counterparty Info */}
-                <div className={`p-4 border-4 ${accent.border} mb-6`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 text-dark">
+                <div className="border-t-2 border-base-300 pt-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
                         {isCompanyUser ? "Recruiter" : "Company"}
                     </h3>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         {counterpartyLogo ? (
                             <img
                                 src={counterpartyLogo}
                                 alt={counterpartyName}
-                                className={`w-12 h-12 object-cover border-2 ${accent.border}`}
+                                className="w-12 h-12 object-cover"
                             />
                         ) : (
-                            <div
-                                className={`w-12 h-12 flex items-center justify-center border-2 ${accent.border} bg-cream font-bold text-sm text-dark`}
-                            >
+                            <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
                                 {getInitials(counterpartyName)}
                             </div>
                         )}
                         <div>
-                            <div className="font-bold text-sm text-dark">
-                                {counterpartyName}
-                            </div>
+                            <p className="font-bold">{counterpartyName}</p>
                             {isCompanyUser && invitation.recruiter?.user?.email && (
-                                <div className="text-sm text-dark/50">
+                                <p className="text-sm text-base-content/50">
                                     {invitation.recruiter.user.email}
-                                </div>
+                                </p>
                             )}
                             {!isCompanyUser && invitation.company?.industry && (
-                                <div className={`text-sm ${accent.text}`}>
+                                <p className="text-sm text-base-content/50">
                                     {invitation.company.industry}
-                                </div>
+                                </p>
                             )}
                             {!isCompanyUser && invitation.company?.headquarters_location && (
-                                <div className="text-sm text-dark/50">
+                                <p className="text-sm text-base-content/50">
                                     {invitation.company.headquarters_location}
-                                </div>
+                                </p>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {/* Details grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {invitation.relationship_start_date && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Connected Since
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {formatDate(invitation.relationship_start_date)}
-                            </div>
+                            </p>
                         </div>
                     )}
                     {invitation.relationship_end_date && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Ended
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {formatDate(invitation.relationship_end_date)}
-                            </div>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Permissions */}
-                <div className="mb-6">
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                        <span className="badge badge-xs badge-teal">
-                            <i className="fa-duotone fa-regular fa-key" />
-                        </span>
+                <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                         Permissions
                     </h3>
                     <div className="flex items-center gap-3 text-sm">
                         <i
-                            className={`fa-duotone fa-regular ${invitation.can_manage_company_jobs ? "fa-check-circle text-teal" : "fa-times-circle text-dark/30"}`}
+                            className={`fa-duotone fa-regular ${invitation.can_manage_company_jobs ? "fa-check-circle text-success" : "fa-times-circle text-base-content/30"}`}
                         />
-                        <span className="text-dark/75">Can manage company jobs</span>
+                        <span className="text-base-content/75">Can manage company jobs</span>
                     </div>
                     {invitation.can_manage_company_jobs && (
-                        <div className="p-3 border-2 border-teal/40 mt-3">
-                            <div className="text-sm text-dark/70">
-                                <i className="fa-duotone fa-regular fa-info-circle mr-1 text-teal" />
+                        <div className="p-3 border-2 border-success/20 mt-3">
+                            <div className="text-sm text-base-content/70">
+                                <i className="fa-duotone fa-regular fa-info-circle mr-1 text-success" />
                                 {isCompanyUser
                                     ? "This recruiter can create and edit job postings for your company."
                                     : "You can create and edit job postings for this company."}
@@ -199,14 +194,11 @@ export function ConnectionDetail({
 
                 {/* Termination Reason */}
                 {invitation.status === "terminated" && invitation.termination_reason && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-coral">
-                                <i className="fa-duotone fa-regular fa-times-circle" />
-                            </span>
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Termination Reason
                         </h3>
-                        <div className="p-3 border-2 border-coral/40 text-sm text-dark/70">
+                        <div className="p-3 border-2 border-error/20 text-sm text-base-content/70">
                             {invitation.termination_reason}
                         </div>
                     </div>
