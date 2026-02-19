@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { Badge } from "@splits-network/memphis-ui";
 import { LoadingState } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
-import { formatJobType, formatAvailability, formatVerificationStatus } from "../../types";
-import type { AccentClasses } from "./accent";
-import { ACCENT, accentAt, statusVariant } from "./accent";
+import {
+    formatJobType,
+    formatAvailability,
+    formatVerificationStatus,
+} from "../../types";
+import { statusColor } from "./status-color";
 import {
     salaryDisplay,
     isNew,
@@ -20,7 +22,7 @@ import {
 } from "./helpers";
 import CandidateActionsToolbar from "./actions-toolbar";
 
-// ─── Tab Types ──────────────────────────────────────────────────────────────
+/* ─── Tab Types ─────────────────────────────────────────────────────────── */
 
 type TabType = "overview" | "resume" | "applications" | "documents";
 
@@ -31,16 +33,17 @@ const TABS: { key: TabType; label: string; icon: string }[] = [
     { key: "documents", label: "Documents", icon: "fa-file-lines" },
 ];
 
-// ─── Detail Loading Wrapper ─────────────────────────────────────────────────
+/* ─── Detail Loading Wrapper ────────────────────────────────────────────── */
 
-interface DetailLoaderProps {
+export function DetailLoader({
+    candidateId,
+    onClose,
+    onRefresh,
+}: {
     candidateId: string;
-    accent: AccentClasses;
     onClose: () => void;
     onRefresh?: () => void;
-}
-
-export function DetailLoader({ candidateId, accent, onClose, onRefresh }: DetailLoaderProps) {
+}) {
     const { getToken } = useAuth();
     const [candidate, setCandidate] = useState<Candidate | null>(null);
     const [loading, setLoading] = useState(true);
@@ -54,7 +57,9 @@ export function DetailLoader({ candidateId, accent, onClose, onRefresh }: Detail
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Candidate }>(`/candidates/${candidateId}`);
+                const res = await client.get<{ data: Candidate }>(
+                    `/candidates/${candidateId}`,
+                );
                 if (!cancelled) setCandidate(res.data);
             } catch (err) {
                 console.error("Failed to fetch candidate detail:", err);
@@ -73,13 +78,9 @@ export function DetailLoader({ candidateId, accent, onClose, onRefresh }: Detail
         return (
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-4 h-4 bg-coral animate-pulse" />
-                        <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                        <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Loading details...
+                    <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                        Loading profile...
                     </span>
                 </div>
             </div>
@@ -91,30 +92,30 @@ export function DetailLoader({ candidateId, accent, onClose, onRefresh }: Detail
     return (
         <CandidateDetail
             candidate={candidate}
-            accent={accent}
             onClose={onClose}
             onRefresh={onRefresh}
         />
     );
 }
 
-// ─── Detail Panel ───────────────────────────────────────────────────────────
+/* ─── Detail Panel ──────────────────────────────────────────────────────── */
 
 export function CandidateDetail({
     candidate,
-    accent,
     onClose,
     onRefresh,
+    accent: _accent,
 }: {
     candidate: Candidate;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
+    /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
+    accent?: unknown;
 }) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
 
-    // Lazy-loaded applications
+    /* Lazy-loaded applications */
     const [applications, setApplications] = useState<any[]>([]);
     const [appsLoading, setAppsLoading] = useState(false);
 
@@ -154,36 +155,43 @@ export function CandidateDetail({
     return (
         <div className="flex flex-col h-full min-h-0">
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
                         {/* Initials square */}
-                        <div
-                            className={`w-14 h-14 flex items-center justify-center ${accent.bg} ${accent.textOnBg} font-black text-lg flex-shrink-0`}
-                        >
+                        <div className="w-14 h-14 flex items-center justify-center bg-primary text-primary-content font-black text-lg flex-shrink-0">
                             {initials}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 {isNew(candidate) && (
-                                    <Badge color="yellow">
-                                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
                                         New
-                                    </Badge>
+                                    </span>
                                 )}
-                                <Badge color={statusVariant(candidate.verification_status)}>
-                                    {formatVerificationStatus(candidate.verification_status)}
-                                </Badge>
+                                <span
+                                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
+                                >
+                                    {formatVerificationStatus(
+                                        candidate.verification_status,
+                                    )}
+                                </span>
                             </div>
-                            <h2 className="text-2xl font-black uppercase tracking-tight leading-tight mb-1 text-dark">
+                            <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-1">
                                 {name}
                             </h2>
                             <div className="flex flex-wrap items-center gap-2 text-sm">
-                                <span className={`font-bold ${accent.text}`}>{title}</span>
+                                <span className="font-semibold text-primary">
+                                    {title || "Title not set"}
+                                </span>
                                 {company && (
                                     <>
-                                        <span className="text-dark/50">|</span>
-                                        <span className="text-dark/70">{company}</span>
+                                        <span className="text-base-content/40">
+                                            |
+                                        </span>
+                                        <span className="text-base-content/70">
+                                            {company}
+                                        </span>
                                     </>
                                 )}
                             </div>
@@ -192,19 +200,19 @@ export function CandidateDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
-                            <i className="fa-duotone fa-regular fa-xmark" />
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
                         </button>
                     )}
                 </div>
 
                 {/* Contact row */}
-                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-dark/60">
+                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-base-content/60">
                     {candidate.email && (
                         <a
                             href={`mailto:${candidate.email}`}
-                            className="flex items-center gap-1.5 hover:text-coral transition-colors"
+                            className="flex items-center gap-1.5 hover:text-primary transition-colors"
                         >
                             <i className="fa-duotone fa-regular fa-envelope" />
                             {candidate.email}
@@ -231,7 +239,7 @@ export function CandidateDetail({
                             href={candidate.linkedin_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-bold text-dark/50 hover:text-coral transition-colors flex items-center gap-1.5"
+                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
                         >
                             <i className="fa-brands fa-linkedin" />
                             LinkedIn
@@ -242,7 +250,7 @@ export function CandidateDetail({
                             href={candidate.github_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-bold text-dark/50 hover:text-coral transition-colors flex items-center gap-1.5"
+                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
                         >
                             <i className="fa-brands fa-github" />
                             GitHub
@@ -253,7 +261,7 @@ export function CandidateDetail({
                             href={candidate.portfolio_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-bold text-dark/50 hover:text-coral transition-colors flex items-center gap-1.5"
+                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
                         >
                             <i className="fa-duotone fa-regular fa-globe" />
                             Portfolio
@@ -268,30 +276,33 @@ export function CandidateDetail({
                         variant="descriptive"
                         size="sm"
                         onRefresh={onRefresh}
-                        showActions={{
-                            viewDetails: false,
-                        }}
+                        showActions={{ viewDetails: false }}
                     />
                 </div>
             </div>
 
-            {/* Memphis Tabs */}
-            <div className="flex border-b-4 border-dark/10">
+            {/* Tab Bar */}
+            <div className="flex border-b-2 border-base-300">
                 {TABS.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors border-b-4 -mb-[4px] ${
+                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-[0.15em] transition-colors border-b-2 -mb-[2px] ${
                             activeTab === tab.key
-                                ? `${accent.border} ${accent.text}`
-                                : "border-transparent text-dark/40 hover:text-dark/70"
+                                ? "border-b-2 border-primary text-primary"
+                                : "border-transparent text-base-content/40 hover:text-base-content/70"
                         }`}
                     >
-                        <i className={`fa-duotone fa-regular ${tab.icon} mr-1.5`} />
+                        <i
+                            className={`fa-duotone fa-regular ${tab.icon} mr-1.5`}
+                        />
                         {tab.label}
-                        {tab.key === "applications" && applications.length > 0 && (
-                            <span className="ml-1.5 text-xs">{applications.length}</span>
-                        )}
+                        {tab.key === "applications" &&
+                            applications.length > 0 && (
+                                <span className="ml-1.5 text-xs">
+                                    {applications.length}
+                                </span>
+                            )}
                     </button>
                 ))}
             </div>
@@ -301,7 +312,6 @@ export function CandidateDetail({
                 {activeTab === "overview" && (
                     <OverviewTab
                         candidate={candidate}
-                        accent={accent}
                         bioText={bioText}
                         skills={skills}
                         salary={salary}
@@ -309,7 +319,10 @@ export function CandidateDetail({
                 )}
                 {activeTab === "resume" && <ResumeTab />}
                 {activeTab === "applications" && (
-                    <ApplicationsTab applications={applications} loading={appsLoading} />
+                    <ApplicationsTab
+                        applications={applications}
+                        loading={appsLoading}
+                    />
                 )}
                 {activeTab === "documents" && <DocumentsTab />}
             </div>
@@ -317,180 +330,192 @@ export function CandidateDetail({
     );
 }
 
-// ─── Overview Tab ───────────────────────────────────────────────────────────
+/* ─── Overview Tab ──────────────────────────────────────────────────────── */
 
 function OverviewTab({
     candidate,
-    accent,
     bioText,
     skills,
     salary,
 }: {
     candidate: Candidate;
-    accent: AccentClasses;
     bioText?: string;
     skills: string[];
     salary: string | null;
 }) {
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-8">
             {/* About / Bio */}
             {bioText ? (
-                <div className={`border-l-4 ${accent.border} pl-4`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-2 text-dark">
+                <div className="border-l-4 border-primary pl-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
                         About
                     </h3>
-                    <p className="text-sm text-dark/70 leading-relaxed whitespace-pre-line">
+                    <p className="text-sm text-base-content/70 leading-relaxed whitespace-pre-line">
                         {bioText}
                     </p>
                 </div>
             ) : (
-                <div className="border-l-4 border-dark/20 pl-4">
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-2 text-dark">
+                <div className="border-l-4 border-base-300 pl-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
                         About
                     </h3>
-                    <p className="text-sm text-dark/40 italic">No biography provided.</p>
+                    <p className="text-sm text-base-content/40 italic">
+                        No biography added. Edit the profile to include one.
+                    </p>
                 </div>
             )}
 
-            {/* Career Preferences Card */}
-            <div className="border-4 border-dark">
-                <div className={`px-4 py-2 border-b-4 ${accent.border} ${accent.bg}`}>
-                    <h3 className={`font-black text-sm uppercase tracking-wider ${accent.textOnBg}`}>
-                        Career Preferences
-                    </h3>
-                </div>
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
+            {/* Career Preferences */}
+            <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                    Career Preferences
+                </h3>
+                <div className="grid grid-cols-2 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Desired Salary
-                        </div>
-                        <div className="text-sm font-bold text-dark">
-                            {salary || <span className="text-dark/30 italic">Not specified</span>}
-                        </div>
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {salary || "N/A"}
+                        </p>
                     </div>
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Job Type
-                        </div>
-                        <div className="text-sm font-bold text-dark capitalize">
+                        </p>
+                        <p className="text-lg font-black tracking-tight capitalize">
                             {formatJobType(candidate.desired_job_type)}
-                        </div>
+                        </p>
                     </div>
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Availability
-                        </div>
-                        <div className="text-sm font-bold text-dark capitalize">
+                        </p>
+                        <p className="text-lg font-black tracking-tight capitalize">
                             {formatAvailability(candidate.availability)}
-                        </div>
+                        </p>
                     </div>
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Work Mode
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
                             {candidate.open_to_remote && (
-                                <Badge color="teal">Remote</Badge>
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-success/15 text-success">
+                                    Remote
+                                </span>
                             )}
                             {candidate.open_to_relocation && (
-                                <Badge color="purple">Relocation</Badge>
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-info/15 text-info">
+                                    Relocation
+                                </span>
                             )}
-                            {!candidate.open_to_remote && !candidate.open_to_relocation && (
-                                <span className="text-sm text-dark/30 italic">Not specified</span>
-                            )}
+                            {!candidate.open_to_remote &&
+                                !candidate.open_to_relocation && (
+                                    <span className="text-sm text-base-content/40 italic">
+                                        No preference set
+                                    </span>
+                                )}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Skills */}
+            {/* Skills & Expertise */}
             <div>
-                <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                    <span className={`w-3 h-3 ${accent.bg}`} />
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                     Skills & Expertise
                 </h3>
                 {skills.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
-                        {skills.map((skill, i) => {
-                            const skillAccent = accentAt(i);
-                            return (
-                                <Badge key={i} color={skillAccent.bg.replace("bg-", "") as any}>
-                                    {skill}
-                                </Badge>
-                            );
-                        })}
+                        {skills.map((skill, i) => (
+                            <span
+                                key={i}
+                                className="bg-primary/10 text-primary px-3 py-1 text-sm font-semibold"
+                            >
+                                {skill}
+                            </span>
+                        ))}
                     </div>
                 ) : (
-                    <p className="text-sm text-dark/40 italic">No skills listed.</p>
+                    <p className="text-sm text-base-content/40 italic">
+                        No skills added. Edit the profile to include them.
+                    </p>
                 )}
             </div>
 
             {/* Profile Status Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="p-3 border-2 border-dark/20">
-                    <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
-                        Verification
+            <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                    Profile Status
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Verification
+                        </p>
+                        <p className="font-bold text-sm">
+                            {formatVerificationStatus(
+                                candidate.verification_status,
+                            )}
+                        </p>
                     </div>
-                    <div className="text-sm font-bold text-dark">
-                        {formatVerificationStatus(candidate.verification_status)}
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Marketplace
+                        </p>
+                        <p className="font-bold text-sm capitalize">
+                            {candidate.marketplace_visibility || "Not configured"}
+                        </p>
                     </div>
+                    {candidate.onboarding_status && (
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                Onboarding
+                            </p>
+                            <p className="font-bold text-sm capitalize">
+                                {candidate.onboarding_status.replace(/_/g, " ")}
+                            </p>
+                        </div>
+                    )}
+                    {candidate.created_at && (
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                Profile Created
+                            </p>
+                            <p className="font-bold text-sm">
+                                {new Date(
+                                    candidate.created_at,
+                                ).toLocaleDateString()}
+                            </p>
+                        </div>
+                    )}
                 </div>
-                <div className="p-3 border-2 border-dark/20">
-                    <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
-                        Marketplace
-                    </div>
-                    <div className="text-sm font-bold text-dark capitalize">
-                        {candidate.marketplace_visibility || "Not set"}
-                    </div>
-                </div>
-                {candidate.onboarding_status && (
-                    <div className="p-3 border-2 border-dark/20">
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
-                            Onboarding
-                        </div>
-                        <div className="text-sm font-bold text-dark capitalize">
-                            {candidate.onboarding_status.replace(/_/g, " ")}
-                        </div>
-                    </div>
-                )}
-                {candidate.created_at && (
-                    <div className="p-3 border-2 border-dark/20">
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/50 mb-1">
-                            Profile Created
-                        </div>
-                        <div className="text-sm font-bold text-dark">
-                            {new Date(candidate.created_at).toLocaleDateString()}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );
 }
 
-// ─── Resume Tab ─────────────────────────────────────────────────────────────
+/* ─── Resume Tab ────────────────────────────────────────────────────────── */
 
 function ResumeTab() {
     return (
         <div className="h-full flex items-center justify-center p-12">
             <div className="text-center">
-                <div className="flex justify-center gap-3 mb-4">
-                    <div className="w-6 h-6 bg-teal" />
-                    <div className="w-6 h-6 rotate-12 bg-coral" />
-                </div>
-                <h3 className="font-black text-lg uppercase tracking-tight mb-2 text-dark">
-                    Resume
+                <i className="fa-duotone fa-regular fa-file-user text-3xl text-base-content/20 mb-4 block" />
+                <h3 className="text-lg font-black tracking-tight mb-2">
+                    No Resume on File
                 </h3>
-                <p className="text-sm text-dark/40">
-                    Resume details coming soon.
+                <p className="text-sm text-base-content/40">
+                    Resume parsing is not yet available. Upload documents in the Documents tab.
                 </p>
             </div>
         </div>
     );
 }
 
-// ─── Applications Tab ───────────────────────────────────────────────────────
+/* ─── Applications Tab ──────────────────────────────────────────────────── */
 
 function ApplicationsTab({
     applications,
@@ -511,15 +536,12 @@ function ApplicationsTab({
         return (
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-6 h-6 bg-purple" />
-                        <div className="w-6 h-6 rotate-45 bg-yellow" />
-                    </div>
-                    <h3 className="font-black text-lg uppercase tracking-tight mb-2 text-dark">
-                        No Applications
+                    <i className="fa-duotone fa-regular fa-briefcase text-3xl text-base-content/20 mb-4 block" />
+                    <h3 className="text-lg font-black tracking-tight mb-2">
+                        No Active Applications
                     </h3>
-                    <p className="text-sm text-dark/40">
-                        This candidate has no active applications.
+                    <p className="text-sm text-base-content/40">
+                        This candidate has not been submitted to any roles. Use Send Opportunity to get started.
                     </p>
                 </div>
             </div>
@@ -527,46 +549,40 @@ function ApplicationsTab({
     }
 
     return (
-        <div className="p-6 space-y-3">
-            {applications.map((app, idx) => {
-                const ac = accentAt(idx);
-                return (
-                    <div key={app.id} className={`border-4 ${ac.border} p-4`}>
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <h4 className="font-black text-sm uppercase tracking-tight text-dark">
-                                    {app.job?.title || "Unknown Job"}
-                                </h4>
-                                <p className={`text-sm font-bold mt-0.5 ${ac.text}`}>
-                                    {app.job?.company?.name || "Unknown Company"}
-                                </p>
-                            </div>
-                            <Badge color={ac.bg.replace("bg-", "") as any}>
-                                {app.status_id || "Applied"}
-                            </Badge>
+        <div className="p-6 space-y-[2px] bg-base-300">
+            {applications.map((app) => (
+                <div key={app.id} className="bg-base-100 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h4 className="font-bold text-sm tracking-tight">
+                                {app.job?.title || "Untitled Role"}
+                            </h4>
+                            <p className="text-sm text-base-content/60 mt-0.5">
+                                {app.job?.company?.name || "Company not listed"}
+                            </p>
                         </div>
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/60">
+                            {app.status_id || "Applied"}
+                        </span>
                     </div>
-                );
-            })}
+                </div>
+            ))}
         </div>
     );
 }
 
-// ─── Documents Tab ──────────────────────────────────────────────────────────
+/* ─── Documents Tab ─────────────────────────────────────────────────────── */
 
 function DocumentsTab() {
     return (
         <div className="h-full flex items-center justify-center p-12">
             <div className="text-center">
-                <div className="flex justify-center gap-3 mb-4">
-                    <div className="w-6 h-6 bg-yellow" />
-                    <div className="w-6 h-6 rotate-12 bg-purple" />
-                </div>
-                <h3 className="font-black text-lg uppercase tracking-tight mb-2 text-dark">
-                    Documents
+                <i className="fa-duotone fa-regular fa-file-lines text-3xl text-base-content/20 mb-4 block" />
+                <h3 className="text-lg font-black tracking-tight mb-2">
+                    No Documents
                 </h3>
-                <p className="text-sm text-dark/40">
-                    Document management coming soon.
+                <p className="text-sm text-base-content/40">
+                    No files have been uploaded for this candidate. Document management is coming soon.
                 </p>
             </div>
         </div>

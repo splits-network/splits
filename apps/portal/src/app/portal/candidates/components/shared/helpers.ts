@@ -25,7 +25,7 @@ export function addedAgo(candidate: Candidate): string {
 }
 
 export function candidateName(candidate: Candidate): string {
-    return candidate.full_name || "Unknown";
+    return candidate.full_name || "Name not provided";
 }
 
 export function candidateInitials(name: string): string {

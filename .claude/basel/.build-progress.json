@@ -1,0 +1,60 @@
+{
+  "migration": "portal-candidates-basel-v2",
+  "phase": "complete",
+  "startedAt": "2026-02-18T00:00:00Z",
+  "completedAt": "2026-02-19T00:25:00Z",
+  "showcase_reference": "apps/corporate/src/app/showcase/lists/one/page.tsx",
+  "live_reference": "apps/portal/src/app/portal/roles/",
+  "target": "apps/portal/src/app/portal/candidates/",
+  "legacy": "apps/portal/src/app/portal/candidates-legacy/",
+  "tasks": [
+    {
+      "id": "wave-0",
+      "name": "Data-layer foundation (types, helpers, status-color)",
+      "status": "complete",
+      "agent": "orchestrator"
+    },
+    {
+      "id": "wave-1",
+      "name": "Page structure (page, animator, header, controls, expandable-button)",
+      "status": "complete",
+      "agent": "orchestrator"
+    },
+    {
+      "id": "wave-2",
+      "name": "Views (table, grid, split — 6 files) + detail panel + actions toolbar",
+      "status": "complete",
+      "agent": "basel-designer"
+    },
+    {
+      "id": "wave-3",
+      "name": "Modals + wizard (5 files)",
+      "status": "complete",
+      "agent": "basel-designer"
+    },
+    {
+      "id": "wave-4",
+      "name": "Editorial copy",
+      "status": "complete",
+      "agent": "basel-copy"
+    },
+    {
+      "id": "wave-5",
+      "name": "Build verification",
+      "status": "complete",
+      "agent": "orchestrator",
+      "notes": "TypeScript noEmit passed, 0 errors. Fixed GridView prop mismatch + notifications detail-panel accent import."
+    }
+  ],
+  "files_created": 21,
+  "files_fixed": 2,
+  "audit": {
+    "memphis_colors": 0,
+    "memphis_imports": 0,
+    "decorative_rounding": 0,
+    "heavy_shadows": 0,
+    "gradients": 0,
+    "raw_tailwind_palette": 0,
+    "hardcoded_hex": 0
+  }
+}

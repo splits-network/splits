@@ -1,79 +1,86 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { Candidate } from "../../types";
-import { formatVerificationStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { formatVerificationStatus, formatJobType } from "../../types";
+import { statusColor } from "../shared/status-color";
 import {
+    candidateName,
+    candidateTitle,
     salaryDisplay,
     isNew,
     addedAgo,
-    candidateName,
-    candidateTitle,
-    candidateCompany,
 } from "../shared/helpers";
 
 export function SplitItem({
     candidate,
-    accent,
     isSelected,
     onSelect,
 }: {
     candidate: Candidate;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
 }) {
-    const ac = accent;
-    const company = candidateCompany(candidate);
+    const title = candidateTitle(candidate);
 
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 transition-colors border-b-2 border-dark/10 border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
-                    ? `${ac.bgLight} ${ac.border}`
-                    : "bg-white border-transparent"
+                    ? "bg-primary/5 border-l-primary"
+                    : "bg-base-100 border-transparent"
             }`}
         >
-            <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2 min-w-0">
+            {/* Row 1: name + added time */}
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(candidate) && (
-                        <i className="fa-duotone fa-regular fa-sparkles text-sm flex-shrink-0 text-yellow" />
+                        <i className="fa-duotone fa-regular fa-star text-primary text-[10px] flex-shrink-0" />
                     )}
-                    <h4 className="font-black text-sm uppercase tracking-tight truncate text-dark">
+                    <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
+                    <span
+                        className={`inline-flex items-center px-1.5 py-px text-[10px] font-semibold flex-shrink-0 ${statusColor(
+                            candidate.verification_status,
+                        )}`}
+                    >
+                        {formatVerificationStatus(candidate.verification_status)}
+                    </span>
                 </div>
-                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-dark/40">
+                <span className="text-[10px] font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {addedAgo(candidate)}
                 </span>
             </div>
-            <div className={`text-sm font-bold mb-1 ${ac.text}`}>
-                {candidateTitle(candidate)}
-                {company && (
-                    <span className="text-dark/50 font-normal"> at {company}</span>
-                )}
-            </div>
-            <div className="flex items-center justify-between">
+
+            {/* Row 2: title + location */}
+            <div className="flex items-center justify-between gap-2 mt-0.5">
+                <span className="text-xs text-base-content/60 truncate">
+                    {title || "No title"}
+                </span>
                 {candidate.location && (
-                    <span className="text-sm text-dark/50">
-                        <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                    <span className="text-[10px] text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
+                        <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
                         {candidate.location}
                     </span>
                 )}
-                <Badge color={statusVariant(candidate.verification_status)}>
-                    {formatVerificationStatus(candidate.verification_status)}
-                </Badge>
             </div>
-            {salaryDisplay(candidate) && (
-                <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm font-bold text-dark/70">
-                        {salaryDisplay(candidate)}
+
+            {/* Row 3: salary, job type, remote */}
+            <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-xs font-bold text-base-content/60">
+                    {salaryDisplay(candidate) || "Not specified"}
+                </span>
+                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                    {formatJobType(candidate.desired_job_type)}
+                </span>
+                {candidate.open_to_remote && (
+                    <span className="text-[10px] text-base-content/40">
+                        <i className="fa-duotone fa-regular fa-wifi mr-0.5" />
+                        Remote
                     </span>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

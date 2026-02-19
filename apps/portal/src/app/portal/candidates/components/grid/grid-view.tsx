@@ -1,9 +1,8 @@
 "use client";
 
 import type { Candidate } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
-import { DetailLoader } from "../shared/candidate-detail";
 import { MobileDetailOverlay } from "@/components/standard-lists";
+import { DetailLoader } from "../shared/candidate-detail";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -17,26 +16,25 @@ export function GridView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedCandidate = candidates.find((c) => c.id === selectedId);
-    const selectedAc = selectedCandidate
-        ? accentAt(candidates.indexOf(selectedCandidate))
-        : ACCENT[0];
+    const selectedCandidate = candidates.find((c) => c.id === selectedId) ?? null;
 
     return (
         <div className="flex gap-6">
-            <div className={`flex flex-col w-full ${selectedCandidate ? "hidden md:flex" : "flex"}`}>
+            {/* Card grid -- hidden on mobile when a detail is open */}
+            <div
+                className={`flex flex-col w-full ${selectedCandidate ? "hidden md:flex" : "flex"}`}
+            >
                 <div
                     className={`grid gap-4 w-full ${
                         selectedCandidate
-                            ? "grid-cols-1 lg:grid-cols-2"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                            ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
+                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
                     }`}
                 >
-                    {candidates.map((candidate, idx) => (
+                    {candidates.map((candidate) => (
                         <GridCard
                             key={candidate.id}
                             candidate={candidate}
-                            accent={accentAt(idx)}
                             isSelected={selectedId === candidate.id}
                             onSelect={() => onSelect(candidate)}
                             onRefresh={onRefresh}
@@ -45,15 +43,14 @@ export function GridView({
                 </div>
             </div>
 
-            {/* Detail Sidebar */}
+            {/* Detail sidebar -- 50% width on desktop, full-screen overlay on mobile */}
             {selectedCandidate && (
                 <MobileDetailOverlay
                     isOpen
-                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white overflow-y-auto ${selectedAc.border}`}
+                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
                 >
                     <DetailLoader
                         candidateId={selectedCandidate.id}
-                        accent={selectedAc}
                         onClose={() => onSelect(selectedCandidate)}
                         onRefresh={onRefresh}
                     />

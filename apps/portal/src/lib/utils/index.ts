@@ -61,6 +61,8 @@ export {
     getHealthScoreColor,
     getHealthScore,
     getServiceStatusColor,
+    getRoleStyle,
+    type RoleStyle,
 } from './color-styles';
 
 // Role badge utilities

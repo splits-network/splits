@@ -17,7 +17,7 @@ export default async function AuthenticatedLayout({
     return (
         <AuthenticatedLayoutClient>
             <Sidebar />
-            <div className="lg:ml-[280px] min-h-screen">
+            <div className="lg:ml-64 min-h-screen">
                 <main className="p-2">{children}</main>
             </div>
         </AuthenticatedLayoutClient>

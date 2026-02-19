@@ -10,9 +10,9 @@ import { ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "../modals/role-wizard-modal";
 import SubmitCandidateModal from "../modals/submit-candidate-modal";
 import type { Job } from "../../types";
-import { ExpandableButton } from "./expandable-button";
+import { Button, ExpandableButton } from "@splits-network/basel-ui";
 
-// ===== TYPES =====
+/* ─── Types ──────────────────────────────────────────────────────────────── */
 
 export interface RoleActionsToolbarProps {
     job: Job;
@@ -33,7 +33,7 @@ export interface RoleActionsToolbarProps {
     className?: string;
 }
 
-// ===== COMPONENT =====
+/* ─── Component ──────────────────────────────────────────────────────────── */
 
 export default function RoleActionsToolbar({
     job,
@@ -52,16 +52,13 @@ export default function RoleActionsToolbar({
         useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
-    // Modal states
     const [showEditModal, setShowEditModal] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
-
-    // Loading states
     const [isSharing, setIsSharing] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
 
-    // ===== PERMISSION LOGIC =====
+    /* ── Permissions ── */
 
     const canManageRole = useMemo(() => {
         if (isAdmin) return true;
@@ -71,34 +68,35 @@ export default function RoleActionsToolbar({
             isRecruiter &&
             job.company_id &&
             manageableCompanyIds.includes(job.company_id)
-        ) {
+        )
             return true;
-        }
         return false;
     }, [isAdmin, profile, isRecruiter, job.company_id, manageableCompanyIds]);
 
-    const canSubmitCandidate = useMemo(() => {
-        return isRecruiter || isAdmin;
-    }, [isRecruiter, isAdmin]);
+    const canSubmitCandidate = useMemo(
+        () => isRecruiter || isAdmin,
+        [isRecruiter, isAdmin],
+    );
 
-    // ===== STATUS CHANGE HANDLER =====
+    /* ── Status Change ── */
 
     const handleStatusChange = async (
         newStatus: "active" | "paused" | "filled" | "closed",
     ) => {
-        const confirmMessage = `Are you sure you want to change the status to ${newStatus}?`;
-        if (!confirm(confirmMessage)) return;
+        if (
+            !confirm(
+                `Are you sure you want to change the status to ${newStatus}?`,
+            )
+        )
+            return;
 
         setUpdatingStatus(true);
         setStatusAction(newStatus);
-
         try {
             const token = await getToken();
             if (!token) throw new Error("No auth token");
-
             const client = createAuthenticatedClient(token);
             await client.patch(`/jobs/${job.id}`, { status: newStatus });
-
             toast.success(`Role status updated to ${newStatus}!`);
             refresh();
         } catch (error: any) {
@@ -110,13 +108,11 @@ export default function RoleActionsToolbar({
         }
     };
 
-    // ===== SHARE HANDLER =====
+    /* ── Share ── */
 
     const handleShare = async () => {
         if (!job) return;
-
         setIsSharing(true);
-
         const candidateAppUrl =
             process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
             "https://staging.applicant.network";
@@ -126,7 +122,6 @@ export default function RoleActionsToolbar({
             text: `Check out this job opportunity: ${job.title || "Job Opportunity"}${job.company?.name ? ` at ${job.company.name}` : ""}`,
             url: shareUrl,
         };
-
         try {
             if (
                 navigator.share &&
@@ -152,22 +147,16 @@ export default function RoleActionsToolbar({
         }
     };
 
-    // ===== ACTION HANDLERS =====
+    /* ── Handlers ── */
 
-    const handleViewDetails = () => {
-        if (onViewDetails) onViewDetails(job.id);
-    };
-
-    const handleViewPipeline = () => {
-        if (onViewPipeline) onViewPipeline(job.id);
-    };
-
+    const handleViewDetails = () => onViewDetails?.(job.id);
+    const handleViewPipeline = () => onViewPipeline?.(job.id);
     const handleEditSuccess = () => {
         setShowEditModal(false);
         refresh();
     };
 
-    // ===== ACTION VISIBILITY =====
+    /* ── Visibility ── */
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
@@ -179,16 +168,14 @@ export default function RoleActionsToolbar({
         share: showActions.share !== false,
     };
 
-    // ===== RENDER HELPERS =====
-
     const getSizeClass = () => `btn-${size}`;
-
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
+    /* ── Quick Status Button (icon-only) ── */
+
     const renderQuickStatusButton = () => {
         if (variant !== "icon-only" || !actions.statusActions) return null;
-
         if (job.status === "active") {
             return (
                 <ExpandableButton
@@ -203,7 +190,6 @@ export default function RoleActionsToolbar({
                 />
             );
         }
-
         if (job.status === "paused") {
             return (
                 <ExpandableButton
@@ -218,15 +204,13 @@ export default function RoleActionsToolbar({
                 />
             );
         }
-
         return null;
     };
 
-    // ===== STATUS DROPDOWN =====
+    /* ── Status Dropdown ── */
 
     const statusDropdownRef = useRef<HTMLDetailsElement>(null);
 
-    // Close dropdown on outside click
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             if (
@@ -248,8 +232,7 @@ export default function RoleActionsToolbar({
             icon: string;
             btnClass: string;
         }[] = [];
-
-        if (job.status !== "active") {
+        if (job.status !== "active")
             items.push({
                 key: "activate",
                 status: "active",
@@ -257,8 +240,7 @@ export default function RoleActionsToolbar({
                 icon: "fa-duotone fa-regular fa-play",
                 btnClass: "text-success",
             });
-        }
-        if (job.status === "active") {
+        if (job.status === "active")
             items.push({
                 key: "pause",
                 status: "paused",
@@ -266,8 +248,7 @@ export default function RoleActionsToolbar({
                 icon: "fa-duotone fa-regular fa-pause",
                 btnClass: "text-warning",
             });
-        }
-        if (job.status !== "filled") {
+        if (job.status !== "filled")
             items.push({
                 key: "filled",
                 status: "filled",
@@ -275,8 +256,7 @@ export default function RoleActionsToolbar({
                 icon: "fa-duotone fa-regular fa-check",
                 btnClass: "text-info",
             });
-        }
-        if (job.status !== "closed") {
+        if (job.status !== "closed")
             items.push({
                 key: "closed",
                 status: "closed",
@@ -284,17 +264,16 @@ export default function RoleActionsToolbar({
                 icon: "fa-duotone fa-regular fa-xmark",
                 btnClass: "text-error",
             });
-        }
         return items;
     }, [job.status]);
 
     const renderStatusDropdown = () => {
         if (!actions.statusActions || statusItems.length === 0) return null;
-
         return (
             <details ref={statusDropdownRef} className="dropdown dropdown-end">
                 <summary
                     className={`btn ${getSizeClass()} btn-ghost gap-2 list-none`}
+                    style={{ borderRadius: 0 }}
                     title="Change Status"
                 >
                     {updatingStatus ? (
@@ -304,7 +283,10 @@ export default function RoleActionsToolbar({
                     )}
                     <span className="hidden md:inline">Status</span>
                 </summary>
-                <ul className="dropdown-content menu bg-white border-4 border-dark p-2 w-48 z-50 mt-1">
+                <ul
+                    className="dropdown-content menu bg-base-100 border-2 border-base-300 shadow-md p-2 w-48 z-50 mt-1"
+                    style={{ borderRadius: 0 }}
+                >
                     {statusItems.map((item) => (
                         <li key={item.key}>
                             <button
@@ -332,7 +314,7 @@ export default function RoleActionsToolbar({
         );
     };
 
-    // ===== MODALS (shared between both variants) =====
+    /* ── Modals ── */
 
     const modals = (
         <ModalPortal>
@@ -359,7 +341,7 @@ export default function RoleActionsToolbar({
         </ModalPortal>
     );
 
-    // ===== ICON-ONLY VARIANT =====
+    /* ── Icon-Only Variant ── */
 
     if (variant === "icon-only") {
         return (
@@ -368,78 +350,66 @@ export default function RoleActionsToolbar({
                     className={`flex items-center ${getLayoutClass()} ${className}`}
                 >
                     {actions.submitCandidate && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-user-plus"
-                            label="Submit"
-                            variant="btn-primary"
+                            variant="btn-primary btn-square"
                             size={size}
                             onClick={() => setShowSubmitModal(true)}
                             title="Submit Candidate"
-                        />
+                        ></Button>
                     )}
-
                     {actions.edit && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-pen-to-square"
-                            label="Edit"
-                            variant="btn-ghost"
+                            variant="btn-ghost btn-square"
                             size={size}
                             onClick={() => setShowEditModal(true)}
                             title="Edit Role"
-                        />
+                        ></Button>
                     )}
-
                     {actions.share && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-share-nodes"
-                            label="Share"
-                            variant="btn-ghost"
+                            variant="btn-ghost btn-square"
                             size={size}
                             onClick={handleShare}
                             disabled={isSharing}
                             loading={isSharing}
                             title="Share Job"
-                        />
+                        ></Button>
                     )}
-
                     {renderQuickStatusButton()}
-
                     {actions.viewPipeline &&
                         (actions.submitCandidate ||
                             actions.edit ||
                             actions.share ||
                             actions.statusActions) && (
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
                         )}
-
                     {actions.viewPipeline && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-users-line"
-                            label="Pipeline"
-                            variant="btn-ghost"
+                            variant="btn-accent btn-soft btn-square"
                             size={size}
                             onClick={handleViewPipeline}
                             title="View Pipeline"
-                        />
+                        ></Button>
                     )}
-
                     {actions.viewDetails && (
                         <>
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
                             {onViewDetails ? (
-                                <ExpandableButton
+                                <Button
                                     icon="fa-duotone fa-regular fa-eye"
-                                    label="Details"
-                                    variant="btn-primary"
+                                    variant="btn-primary btn-square"
                                     size={size}
                                     onClick={handleViewDetails}
                                     title="View Details"
-                                />
+                                ></Button>
                             ) : (
-                                <ExpandableButton
+                                <Button
                                     icon="fa-duotone fa-regular fa-eye"
-                                    label="Details"
-                                    variant="btn-primary"
+                                    variant="btn-primary btn-square"
                                     size={size}
                                     href={`/portal/roles/${job.id}`}
                                     title="View Details"
@@ -448,13 +418,12 @@ export default function RoleActionsToolbar({
                         </>
                     )}
                 </div>
-
                 {modals}
             </>
         );
     }
 
-    // ===== DESCRIPTIVE VARIANT =====
+    /* ── Descriptive Variant ── */
 
     return (
         <>
@@ -465,6 +434,7 @@ export default function RoleActionsToolbar({
                     <button
                         onClick={() => setShowSubmitModal(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Submit Candidate"
                     >
                         <i className="fa-duotone fa-regular fa-user-plus" />
@@ -473,22 +443,22 @@ export default function RoleActionsToolbar({
                         </span>
                     </button>
                 )}
-
                 {actions.edit && (
                     <button
                         onClick={() => setShowEditModal(true)}
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Edit Role"
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
                         <span className="hidden md:inline">Edit</span>
                     </button>
                 )}
-
                 {actions.share && (
                     <button
                         onClick={handleShare}
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Share Job"
                         disabled={isSharing}
                     >
@@ -500,35 +470,33 @@ export default function RoleActionsToolbar({
                         <span className="hidden md:inline">Share</span>
                     </button>
                 )}
-
                 {renderStatusDropdown()}
-
                 {actions.viewPipeline &&
                     (actions.submitCandidate ||
                         actions.edit ||
                         actions.share ||
                         actions.statusActions) && (
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                     )}
-
                 {actions.viewPipeline && (
                     <button
                         onClick={handleViewPipeline}
                         className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="View Pipeline"
                     >
                         <i className="fa-duotone fa-regular fa-users-line" />
                         <span className="hidden md:inline">Pipeline</span>
                     </button>
                 )}
-
                 {actions.viewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                         {onViewDetails ? (
                             <button
                                 onClick={handleViewDetails}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
@@ -540,6 +508,7 @@ export default function RoleActionsToolbar({
                             <Link
                                 href={`/portal/roles/${job.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
@@ -551,7 +520,6 @@ export default function RoleActionsToolbar({
                     </>
                 )}
             </div>
-
             {modals}
         </>
     );

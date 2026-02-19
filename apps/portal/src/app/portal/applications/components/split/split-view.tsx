@@ -1,7 +1,6 @@
 "use client";
 
 import type { Application } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
 import { DetailLoader } from "../shared/application-detail";
 import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
@@ -18,43 +17,43 @@ export function SplitView({
     onRefresh?: () => void;
 }) {
     const selectedApplication = applications.find((a) => a.id === selectedId);
-    const selectedAc = selectedApplication ? accentAt(applications.indexOf(selectedApplication)) : ACCENT[0];
 
     return (
-        <div className="flex gap-0 border-4 border-dark" style={{ minHeight: 600 }}>
-            <div className={`w-full md:w-2/5 border-r-4 border-dark overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}>
-                {applications.map((application, idx) => (
+        <div className="flex border-2 border-base-300" style={{ minHeight: 600 }}>
+            {/* Left list — hidden on mobile when an application is selected */}
+            <div
+                className={`w-full lg:w-[40%] xl:w-[35%] border-r-2 border-base-300 overflow-y-auto ${
+                    selectedId ? "hidden lg:block" : "block"
+                }`}
+            >
+                {applications.map((application) => (
                     <SplitItem
                         key={application.id}
                         application={application}
-                        accent={accentAt(idx)}
                         isSelected={selectedId === application.id}
                         onSelect={() => onSelect(application)}
                     />
                 ))}
             </div>
 
+            {/* Right detail — MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
                 isOpen={!!selectedApplication}
-                className="md:w-3/5 w-full bg-white overflow-y-auto"
+                className="lg:flex-1 w-full bg-base-100 overflow-y-auto"
             >
                 {selectedApplication ? (
                     <DetailLoader
                         applicationId={selectedApplication.id}
-                        accent={selectedAc}
                         onClose={() => onSelect(selectedApplication)}
                         onRefresh={onRefresh}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center p-12">
                         <div className="text-center">
-                            <div className="flex justify-center gap-3 mb-6">
-                                <div className="w-8 h-8 rotate-12 bg-coral" />
-                                <div className="w-8 h-8 rounded-full bg-teal" />
-                                <div className="w-8 h-8 rotate-45 bg-yellow" />
-                            </div>
-                            <h3 className="font-black text-xl uppercase tracking-tight mb-2 text-dark">Select an Application</h3>
-                            <p className="text-sm text-dark/50">Click an application on the left to view details</p>
+                            <i className="fa-duotone fa-regular fa-hand-pointer text-4xl text-base-content/15 mb-4 block" />
+                            <p className="text-sm font-bold uppercase tracking-wider text-base-content/30">
+                                Select an application
+                            </p>
                         </div>
                     </div>
                 )}

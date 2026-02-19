@@ -1,9 +1,8 @@
 "use client";
 
 import type { Job } from "../../types";
-import { ACCENT, accentAt } from "../shared/accent";
-import { DetailLoader } from "../shared/job-detail";
 import { MobileDetailOverlay } from "@/components/standard-lists";
+import { DetailLoader } from "../shared/job-detail";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -17,14 +16,14 @@ export function GridView({
     selectedId: string | null;
     onRefreshAction?: () => void;
 }) {
-    const selectedJob = jobs.find((j) => j.id === selectedId);
-    const selectedAc = selectedJob
-        ? accentAt(jobs.indexOf(selectedJob))
-        : ACCENT[0];
+    const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
 
     return (
         <div className="flex gap-6">
-            <div className={`flex flex-col w-full ${selectedJob ? "hidden md:flex" : "flex"}`}>
+            {/* Card grid — hidden on mobile when a detail is open */}
+            <div
+                className={`flex flex-col w-full ${selectedJob ? "hidden md:flex" : "flex"}`}
+            >
                 <div
                     className={`grid gap-4 w-full ${
                         selectedJob
@@ -32,11 +31,10 @@ export function GridView({
                             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
                     }`}
                 >
-                    {jobs.map((job, idx) => (
+                    {jobs.map((job) => (
                         <GridCard
                             key={job.id}
                             job={job}
-                            accent={accentAt(idx)}
                             isSelected={selectedId === job.id}
                             onSelect={() => onSelectAction(job)}
                             onRefresh={onRefreshAction}
@@ -45,15 +43,14 @@ export function GridView({
                 </div>
             </div>
 
-            {/* Detail Sidebar */}
+            {/* Detail sidebar — 50 % width on desktop, full-screen overlay on mobile */}
             {selectedJob && (
                 <MobileDetailOverlay
                     isOpen
-                    className={`md:w-1/2 md:border-4 md:flex-shrink-0 md:self-start bg-white ${selectedAc.border}`}
+                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
                 >
                     <DetailLoader
                         jobId={selectedJob.id}
-                        accent={selectedAc}
                         onClose={() => onSelectAction(selectedJob)}
                         onRefresh={onRefreshAction}
                     />

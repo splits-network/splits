@@ -12,7 +12,6 @@ import {
 } from "@/lib/notifications";
 import ApplicationDetails from "@/app/portal/applications/components/shared/details";
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
-import { accentAt as candidateAccentAt } from "@/app/portal/candidates/components/shared/accent";
 import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/detail-loader";
 import { accentAt as placementAccentAt } from "@/app/portal/placements/components/shared/accent";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
@@ -228,7 +227,7 @@ function FeatureDetails({
         case "application":
             return <ApplicationDetails itemId={entityId} />;
         case "candidate":
-            return <CandidateDetailLoader candidateId={entityId} accent={candidateAccentAt(0)} onClose={() => {}} />;
+            return <CandidateDetailLoader candidateId={entityId} onClose={() => {}} />;
         case "placement":
             return <PlacementDetailsLoaderWrapper placementId={entityId} />;
         case "proposal":

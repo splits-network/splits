@@ -12,9 +12,9 @@ import {
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate, CandidateFilters, CandidateScope } from "./types";
-import type { ViewMode } from "./components/shared/accent";
+import type { ViewMode } from "./components/shared/status-color";
 import { isNew } from "./components/shared/helpers";
-import { ListsSixAnimator } from "./lists-six-animator";
+import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
@@ -22,12 +22,13 @@ import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 import AddCandidateModal from "./components/modals/add-candidate-modal";
 
-const SCOPE_KEY = "candidatesMemphisScope";
+const SCOPE_KEY = "candidatesBaselScope";
 
-export default function CandidatesMemphisPage() {
+export default function CandidatesPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
@@ -59,13 +60,12 @@ export default function CandidatesMemphisPage() {
         }
     }, []);
 
-    // Sync viewMode + selectedCandidateId to URL (ref pattern avoids infinite loops)
+    /* ── URL sync ── */
     const searchParamsRef = useRef(searchParams);
     searchParamsRef.current = searchParams;
 
     useEffect(() => {
         const params = new URLSearchParams(searchParamsRef.current.toString());
-
         if (selectedCandidateId) {
             params.set("candidateId", selectedCandidateId);
         } else {
@@ -76,12 +76,10 @@ export default function CandidatesMemphisPage() {
         } else {
             params.delete("view");
         }
-
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
         const currentQuery = searchParamsRef.current.toString();
         const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
-
         if (newUrl !== currentUrl) {
             router.replace(newUrl, { scroll: false });
         }
@@ -133,9 +131,12 @@ export default function CandidatesMemphisPage() {
         setViewMode(mode);
     }, []);
 
-    const handleScopeChange = useCallback((newScope: CandidateScope) => {
-        setScope(newScope);
-    }, [setScope]);
+    const handleScopeChange = useCallback(
+        (newScope: CandidateScope) => {
+            setScope(newScope);
+        },
+        [setScope],
+    );
 
     const stats = useMemo(
         () => ({
@@ -153,88 +154,97 @@ export default function CandidatesMemphisPage() {
 
     return (
         <>
-            <ListsSixAnimator>
+            <CandidatesAnimator contentRef={contentRef}>
                 <HeaderSection stats={stats} />
 
-                <section className="min-h-screen bg-cream">
-                    <div className="py-8 px-4 lg:px-8">
-                        <ControlsBar
-                            searchInput={searchInput}
-                            onSearchChange={setSearchInput}
-                            filters={filters}
-                            onFilterChange={setFilter}
-                            scope={scope}
-                            onScopeChange={handleScopeChange}
-                            viewMode={viewMode}
-                            onViewModeChange={handleViewModeChange}
-                            onAddCandidate={() => setShowAddModal(true)}
-                        />
+                <ControlsBar
+                    searchInput={searchInput}
+                    onSearchChange={setSearchInput}
+                    filters={filters}
+                    onFilterChange={setFilter}
+                    scope={scope}
+                    onScopeChange={handleScopeChange}
+                    viewMode={viewMode}
+                    onViewModeChange={handleViewModeChange}
+                    onAddCandidate={() => setShowAddModal(true)}
+                    candidateCount={candidates.length}
+                    totalCount={pagination?.total ?? candidates.length}
+                />
 
-                        {/* Listing Count */}
-                        <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                            Showing {candidates.length} of {pagination?.total ?? candidates.length} candidates
-                        </p>
-
-                        {/* Content Area */}
-                        <div className="listings-content opacity-0">
-                            {loading && candidates.length === 0 ? (
-                                <LoadingState message="Loading candidates..." />
-                            ) : candidates.length === 0 ? (
-                                <EmptyState
-                                    icon="fa-users"
-                                    title="No Candidates Found"
-                                    description="Try adjusting your search or filters"
-                                    action={{
-                                        label: "Reset Filters",
-                                        onClick: () => {
-                                            clearSearch();
-                                            clearFilters();
-                                        },
+                {/* Content Area */}
+                <section className="content-area opacity-0">
+                    <div ref={contentRef}>
+                        {loading && candidates.length === 0 ? (
+                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    Loading candidates...
+                                </p>
+                            </div>
+                        ) : candidates.length === 0 ? (
+                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                                <h3 className="text-2xl font-black tracking-tight mb-2">
+                                    No candidates found
+                                </h3>
+                                <p className="text-base-content/50 mb-6">
+                                    No candidates match your current filters. Clear them to see your full pipeline.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        clearSearch();
+                                        clearFilters();
                                     }}
-                                />
-                            ) : (
-                                <>
-                                    {viewMode === "table" && (
-                                        <TableView
-                                            candidates={candidates}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedCandidateId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "grid" && (
-                                        <GridView
-                                            candidates={candidates}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedCandidateId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "split" && (
-                                        <SplitView
-                                            candidates={candidates}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedCandidateId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        {/* Pagination */}
-                        <PaginationControls
-                            page={page}
-                            totalPages={totalPages}
-                            total={total}
-                            limit={limit}
-                            onPageChange={goToPage}
-                            onLimitChange={setLimit}
-                            loading={loading}
-                        />
+                                    className="btn btn-outline btn-sm"
+                                    style={{ borderRadius: 0 }}
+                                >
+                                    Clear Filters
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                {viewMode === "table" && (
+                                    <TableView
+                                        candidates={candidates}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedCandidateId}
+                                        onRefresh={refresh}
+                                    />
+                                )}
+                                {viewMode === "grid" && (
+                                    <GridView
+                                        candidates={candidates}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedCandidateId}
+                                        onRefresh={refresh}
+                                    />
+                                )}
+                                {viewMode === "split" && (
+                                    <SplitView
+                                        candidates={candidates}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedCandidateId}
+                                        onRefresh={refresh}
+                                    />
+                                )}
+                            </>
+                        )}
                     </div>
                 </section>
-            </ListsSixAnimator>
+
+                {/* Pagination */}
+                <div className="container mx-auto px-6 lg:px-12 py-6">
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        total={total}
+                        limit={limit}
+                        onPageChange={goToPage}
+                        onLimitChange={setLimit}
+                        loading={loading}
+                    />
+                </div>
+            </CandidatesAnimator>
 
             <ModalPortal>
                 {showAddModal && (

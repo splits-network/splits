@@ -423,18 +423,20 @@ Body text MUST use `text-base` (16px) as the default. The `text-sm` and `text-xs
 <p className="text-sm">Welcome to your dashboard. Here you can manage your roles...</p>
 ```
 
-**`text-xs` — afterthought content ONLY:**
+**`text-xs` — icons and non-human text ONLY:**
 ```tsx
-// ✅ ACCEPTABLE — timestamps, footnotes, version info
-<span className="text-xs text-dark opacity-50">Updated 2 hours ago</span>
-<span className="text-xs text-dark opacity-50">v2.4.1</span>
+// ✅ ACCEPTABLE — icon sizing, non-human text
+<i className="fa-solid fa-chevron-right text-xs" />
 
-// ❌ WRONG — text-xs on meaningful content
+// ❌ WRONG — text-xs on ANY human-readable content
+<span className="text-xs text-dark opacity-50">Updated 2 hours ago</span>  // Use text-sm
+<span className="text-xs text-dark opacity-50">v2.4.1</span>               // Use text-sm
 <p className="text-xs text-dark opacity-60">Enter your company details below</p>
 <label className="text-xs font-semibold">Job Title</label>
 ```
 
-Badge text (`text-xs`) is acceptable because the badge component's design inherently uses small text within a bordered container.
+Timestamps, footnotes, copyright, version numbers → use `text-sm` instead.
+Badge text → sized by the badge component (don't manually set `text-xs`).
 
 ## Memphis UI Package Architecture
 
@@ -848,4 +850,4 @@ The orchestrator will spawn `memphis-copy` to produce the text in the Designer S
 15. **ALWAYS** use Memphis plugin classes first (btn, badge, input, card) — they have correct border tiers baked in
 16. **ALWAYS** run quality checks (section above) before marking complete
 17. **NEVER** write user-facing copy — delegate to `memphis-copy` agent
-18. **ALWAYS** use `text-base` as the default body text size — never `text-sm` or `text-xs` for main content. `text-xs` is restricted to afterthought content only (timestamps, footnotes, copyright)
+18. **ALWAYS** use `text-base` as the default body text size — never `text-sm` or `text-xs` for main content. `text-xs` is for icons and non-human text ONLY — never on timestamps, footnotes, copyright, badges, or any human-readable text. Use `text-sm` minimum for those.

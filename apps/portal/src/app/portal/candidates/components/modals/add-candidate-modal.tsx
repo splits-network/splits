@@ -3,7 +3,6 @@
 import { useState, FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { Button } from "@splits-network/memphis-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface AddCandidateModalProps {
@@ -57,16 +56,16 @@ export default function AddCandidateModal({
                 errorMessage.includes("already exists")
             ) {
                 setError(
-                    "A candidate with this email address already exists. Please use a different email or search for the existing candidate.",
+                    "A candidate with this email already exists. Search for them in your candidate list or use a different email.",
                 );
             } else if (errorMessage.includes("Not authenticated")) {
                 setError(
-                    "Your session has expired. Please refresh the page and try again.",
+                    "Session expired. Refresh the page and try again.",
                 );
             } else {
                 setError(
                     errorMessage ||
-                        "Failed to create candidate. Please try again.",
+                        "Could not create candidate. Check your input and try again.",
                 );
             }
         } finally {
@@ -84,43 +83,46 @@ export default function AddCandidateModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" onClick={handleClose}>
+        <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box bg-white border-4 border-dark rounded-none max-w-md w-full p-0"
+                className="modal-box max-w-md w-full p-0"
+                style={{ borderRadius: 0 }}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="bg-coral px-6 py-4 border-b-4 border-dark flex items-center justify-between">
-                    <h2 className="text-xl font-black uppercase tracking-tight text-coral-content">
-                        Add New Candidate
+                <div className="bg-primary px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-xl font-black uppercase tracking-tight text-primary-content">
+                        Add Candidate
                     </h2>
                     <button
                         type="button"
-                        className="w-8 h-8 flex items-center justify-center bg-dark text-white font-black text-lg leading-none hover:bg-dark/80 transition-colors"
+                        className="btn btn-sm btn-square btn-ghost text-primary-content"
                         onClick={handleClose}
                         disabled={submitting}
                         aria-label="Close"
                     >
-                        <i className="fa-duotone fa-regular fa-times" />
+                        <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 </div>
 
                 <div className="p-6">
-                    <p className="text-dark/70 font-bold text-sm uppercase tracking-wider mb-6">
-                        Send a candidate an invitation to join your network
+                    <p className="text-sm font-bold uppercase tracking-wider text-base-content/60 mb-6">
+                        Invite a candidate to join your pipeline
                     </p>
 
                     {/* Error Alert */}
                     {error && (
-                        <div className="bg-coral/10 border-4 border-coral p-4 mb-4">
+                        <div className="bg-error/10 border-l-4 border-error p-4 mb-4">
                             <div className="flex gap-3 items-start">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation text-coral text-lg mt-0.5" />
+                                <i className="fa-duotone fa-regular fa-circle-exclamation text-error text-lg mt-0.5" />
                                 <div className="flex-1">
-                                    <span className="font-bold text-dark text-sm">{error}</span>
+                                    <span className="font-bold text-base-content text-sm">
+                                        {error}
+                                    </span>
                                     {error.includes("already exists") && (
-                                        <p className="text-sm mt-1 text-dark/60 font-medium">
-                                            You can search for existing candidates
-                                            from the candidates list.
+                                        <p className="text-sm mt-1 text-base-content/60 font-medium">
+                                            Use the search bar on the candidates
+                                            page to find them.
                                         </p>
                                     )}
                                 </div>
@@ -131,12 +133,12 @@ export default function AddCandidateModal({
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Full Name Field */}
                         <div>
-                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
-                                Full Name <span className="text-coral">*</span>
+                            <label className="block text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2">
+                                Full Name <span className="text-error">*</span>
                             </label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark placeholder:text-dark/30 placeholder:font-medium focus:outline-none focus:border-coral transition-colors"
+                                className="input input-bordered w-full"
                                 style={{ borderRadius: 0 }}
                                 value={formData.full_name}
                                 onChange={(e) =>
@@ -154,12 +156,12 @@ export default function AddCandidateModal({
 
                         {/* Email Field */}
                         <div>
-                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
-                                Email <span className="text-coral">*</span>
+                            <label className="block text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2">
+                                Email <span className="text-error">*</span>
                             </label>
                             <input
                                 type="email"
-                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark placeholder:text-dark/30 placeholder:font-medium focus:outline-none focus:border-teal transition-colors"
+                                className="input input-bordered w-full"
                                 style={{ borderRadius: 0 }}
                                 value={formData.email}
                                 onChange={(e) =>
@@ -172,28 +174,27 @@ export default function AddCandidateModal({
                                 required
                                 disabled={submitting}
                             />
-                            <p className="text-xs font-bold text-dark/50 mt-2 uppercase tracking-wider">
-                                They'll receive an invitation to join and accept
-                                your representation
+                            <p className="text-xs font-bold text-base-content/50 mt-2 uppercase tracking-wider">
+                                An invitation to accept your representation will
+                                be sent to this address
                             </p>
                         </div>
 
                         {/* Actions */}
                         <div className="flex gap-3 justify-end pt-2">
-                            <Button
+                            <button
                                 type="button"
-                                color="dark"
-                                variant="outline"
-                                size="md"
+                                className="btn btn-outline"
+                                style={{ borderRadius: 0 }}
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
                                 Cancel
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 type="submit"
-                                color="coral"
-                                size="md"
+                                className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
                                 disabled={
                                     submitting ||
                                     !formData.full_name.trim() ||
@@ -203,32 +204,36 @@ export default function AddCandidateModal({
                                 <ButtonLoading
                                     loading={submitting}
                                     text="Send Invitation"
-                                    loadingText="Creating..."
+                                    loadingText="Sending..."
                                 />
-                            </Button>
+                            </button>
                         </div>
                     </form>
 
                     {/* Info Box */}
-                    <div className="bg-teal/10 border-4 border-teal p-4 mt-6">
+                    <div className="bg-info/10 border-l-4 border-info p-4 mt-6">
                         <div className="flex gap-3 items-start">
-                            <i className="fa-duotone fa-regular fa-handshake text-teal text-lg mt-0.5" />
+                            <i className="fa-duotone fa-regular fa-handshake text-info text-lg mt-0.5" />
                             <div className="text-sm">
-                                <p className="font-black text-dark uppercase tracking-wider text-xs mb-1">
-                                    What happens next:
+                                <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
+                                    What happens next
                                 </p>
-                                <p className="text-dark/70 font-medium leading-relaxed">
-                                    The candidate will receive an invitation email
-                                    to join Splits Network and accept your "right to
-                                    represent" agreement. Once accepted, they can
-                                    complete their profile and you can submit them to
-                                    relevant job roles.
+                                <p className="text-base-content/70 font-medium leading-relaxed">
+                                    The candidate receives an email inviting them
+                                    to join Splits Network and accept your right-to-represent
+                                    agreement. Once they accept, you can complete their
+                                    profile and submit them to open roles.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <form method="dialog" className="modal-backdrop">
+                <button type="button" onClick={handleClose}>
+                    close
+                </button>
+            </form>
         </dialog>
     );
 }

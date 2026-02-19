@@ -1,25 +1,21 @@
 "use client";
 
 import { Fragment } from "react";
-import { Badge } from "@splits-network/memphis-ui";
 import type { Application } from "../../types";
-import { getDisplayStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { DetailLoader } from "../shared/application-detail";
-import ActionsToolbar from "../shared/actions-toolbar";
 import {
     candidateName,
-    candidateInitials,
     roleTitle,
     companyName,
     aiScore,
     addedAgo,
     isNew,
 } from "../shared/helpers";
+import { getStageDisplay, getAIScoreBadge } from "../shared/status-color";
+import { DetailLoader } from "../shared/application-detail";
+import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
 export function TableRow({
     application,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -27,82 +23,116 @@ export function TableRow({
     onRefresh,
 }: {
     application: Application;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
-    const status = getDisplayStatus(application);
+    const name = candidateName(application);
+    const stage = getStageDisplay(application.stage);
     const score = aiScore(application);
-    const candidate = candidateName(application);
+
+    const rowBase = isSelected
+        ? "bg-primary/5 border-l-4 border-l-primary"
+        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
+            {/* Main row */}
             <tr
                 onClick={onSelect}
-                className={`cursor-pointer transition-colors border-l-4 ${
-                    isSelected ? `${ac.bgLight} ${ac.border}` : `border-transparent ${idx % 2 === 0 ? "bg-white" : "bg-cream"}`
-                }`}
+                className={`cursor-pointer border-b border-base-200 hover:bg-base-200/50 transition-colors ${rowBase}`}
             >
-                <td className="px-4 py-3 w-8">
-                    <i className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? ac.text : "text-dark/40"}`} />
+                {/* Chevron */}
+                <td className="pl-4 pr-1 py-2 w-6">
+                    <i
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-xs transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
+                    />
                 </td>
 
-                <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full ${ac.bg} flex items-center justify-center`}>
-                            <span className={`text-xs font-black ${ac.textOnBg}`}>{candidateInitials(candidate)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 min-w-0">
-                            {isNew(application) && <i className="fa-duotone fa-regular fa-sparkles text-sm text-yellow flex-shrink-0" />}
-                            <span className="font-black text-sm text-dark uppercase truncate">{candidate}</span>
-                        </div>
+                {/* Candidate */}
+                <td className="px-4 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-bold text-sm tracking-tight text-base-content truncate">
+                            {name}
+                        </span>
+                        {isNew(application) && (
+                            <span className="text-[9px] uppercase tracking-wider bg-info/15 text-info px-1.5 py-0.5 font-bold flex-shrink-0">
+                                New
+                            </span>
+                        )}
                     </div>
                 </td>
 
-                <td className="px-4 py-3">
-                    <div className="min-w-0">
-                        <span className="text-sm font-bold text-dark block truncate">{roleTitle(application)}</span>
-                        <span className={`text-xs font-semibold ${ac.text} block truncate`}>{companyName(application)}</span>
-                    </div>
+                {/* Role */}
+                <td className="px-4 py-2">
+                    <p className="text-sm font-semibold truncate">
+                        {roleTitle(application)}
+                        {companyName(application) && (
+                            <span className="text-base-content/40 font-normal ml-2">
+                                {companyName(application)}
+                            </span>
+                        )}
+                    </p>
                 </td>
 
-                <td className="px-4 py-3">
-                    <Badge
-                        color={status.badgeClass.includes("success") ? "teal" : "purple"}
-                        className="max-w-[160px] truncate"
-                        title={status.label}
+                {/* Stage */}
+                <td className="px-4 py-2">
+                    <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${stage.badge}`}
                     >
-                        {status.label}
-                    </Badge>
+                        <i className={`fa-duotone fa-regular ${stage.icon} text-[9px]`} />
+                        {stage.label}
+                    </span>
                 </td>
 
-                <td className="px-4 py-3 text-sm font-bold text-dark">{score != null ? `${score}%` : "-"}</td>
+                {/* AI Score */}
+                <td className="px-4 py-2">
+                    {score !== null ? (
+                        <span
+                            className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${getAIScoreBadge(score)}`}
+                        >
+                            {score}%
+                        </span>
+                    ) : (
+                        <span className="text-xs text-base-content/30">
+                            &mdash;
+                        </span>
+                    )}
+                </td>
 
-                <td className="px-4 py-3 text-sm text-dark/60">{addedAgo(application)}</td>
+                {/* Added */}
+                <td className="px-4 py-2 text-xs text-base-content/50">
+                    {addedAgo(application)}
+                </td>
 
-                <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
-                        <ActionsToolbar
-                            application={application}
-                            variant="icon-only"
-                            size="xs"
-                            onRefresh={onRefresh}
-                            showActions={{ viewDetails: false }}
-                        />
-                    </div>
+                {/* Actions */}
+                <td
+                    className="px-4 py-2 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <ActionsToolbar
+                        application={application}
+                        variant="icon-only"
+                        size="xs"
+                        onRefresh={onRefresh}
+                        showActions={{
+                            viewDetails: false,
+                        }}
+                    />
                 </td>
             </tr>
 
+            {/* Expanded detail row */}
             {isSelected && (
                 <tr>
-                    <td colSpan={colSpan} className={`border-t-4 border-b-4 ${ac.border}`}>
+                    <td
+                        colSpan={colSpan}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
+                    >
                         <DetailLoader
                             applicationId={application.id}
-                            accent={ac}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

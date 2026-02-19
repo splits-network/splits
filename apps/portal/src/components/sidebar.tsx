@@ -13,9 +13,13 @@ import {
 } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { ColorBar } from "@splits-network/memphis-ui";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
+import {
+    BaselSidebar,
+    type BaselSidebarNavItem,
+    type BaselSidebarSection,
+} from "@splits-network/basel-ui";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -32,55 +36,20 @@ interface NavItemData {
     shortcut?: string;
 }
 
-type MemphisAccent = "coral" | "teal" | "yellow" | "purple";
-
-// ─── Accent Color Tailwind Class Maps (zero inline styles) ──────────────────
-
-const ACCENT_CYCLE: MemphisAccent[] = ["coral", "teal", "yellow", "purple"];
-
-const ACCENT_BG: Record<MemphisAccent, string> = {
-    coral: "bg-coral",
-    teal: "bg-teal",
-    yellow: "bg-yellow",
-    purple: "bg-purple",
-};
-
-const ACCENT_TEXT: Record<MemphisAccent, string> = {
-    coral: "text-coral",
-    teal: "text-teal",
-    yellow: "text-yellow",
-    purple: "text-purple",
-};
-
-const ACCENT_BORDER: Record<MemphisAccent, string> = {
-    coral: "border-coral",
-    teal: "border-teal",
-    yellow: "border-yellow",
-    purple: "border-purple",
-};
-
-// Text on accent-colored backgrounds (contrast-safe)
-const ACCENT_ON_BG: Record<MemphisAccent, string> = {
-    coral: "text-white",
-    teal: "text-dark",
-    yellow: "text-dark",
-    purple: "text-white",
-};
-
 // ─── Navigation Items ───────────────────────────────────────────────────────
 
 const navItems: NavItemData[] = [
     {
         href: "/portal/admin",
         label: "Admin",
-        icon: "fa-gauge-high",
+        icon: "fa-duotone fa-regular fa-gauge-high",
         roles: ["platform_admin"],
         section: "main",
     },
     {
         href: "/portal/dashboard",
         label: "Dashboard",
-        icon: "fa-house",
+        icon: "fa-duotone fa-regular fa-house",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "main",
         mobileDock: true,
@@ -89,7 +58,7 @@ const navItems: NavItemData[] = [
     {
         href: "/portal/roles",
         label: "Roles",
-        icon: "fa-briefcase",
+        icon: "fa-duotone fa-regular fa-briefcase",
         roles: ["all"],
         section: "management",
         mobileDock: true,
@@ -98,7 +67,7 @@ const navItems: NavItemData[] = [
     {
         href: "#recruiters",
         label: "Recruiters",
-        icon: "fa-users-viewfinder",
+        icon: "fa-duotone fa-regular fa-users-viewfinder",
         roles: ["company_admin", "hiring_manager"],
         section: "management",
         expandable: true,
@@ -106,13 +75,13 @@ const navItems: NavItemData[] = [
             {
                 href: "/portal/recruiters",
                 label: "Find",
-                icon: "fa-magnifying-glass",
+                icon: "fa-duotone fa-regular fa-magnifying-glass",
                 roles: ["company_admin", "hiring_manager"],
             },
             {
                 href: "/portal/company-invitations",
                 label: "Invitations",
-                icon: "fa-envelope",
+                icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["company_admin", "hiring_manager"],
             },
         ],
@@ -120,8 +89,13 @@ const navItems: NavItemData[] = [
     {
         href: "#candidates",
         label: "Candidates",
-        icon: "fa-users",
-        roles: ["recruiter", "hiring_manager", "company_admin", "platform_admin"],
+        icon: "fa-duotone fa-regular fa-users",
+        roles: [
+            "recruiter",
+            "hiring_manager",
+            "company_admin",
+            "platform_admin",
+        ],
         section: "management",
         mobileDock: true,
         expandable: true,
@@ -129,20 +103,25 @@ const navItems: NavItemData[] = [
             {
                 href: "/portal/candidates",
                 label: "Manage",
-                icon: "fa-list",
-                roles: ["recruiter", "hiring_manager", "company_admin", "platform_admin"],
+                icon: "fa-duotone fa-regular fa-list",
+                roles: [
+                    "recruiter",
+                    "hiring_manager",
+                    "company_admin",
+                    "platform_admin",
+                ],
                 shortcut: "C",
             },
             {
                 href: "/portal/invitations",
                 label: "Invitations",
-                icon: "fa-envelope",
+                icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["recruiter"],
             },
             {
                 href: "/portal/referral-codes",
                 label: "Referral Codes",
-                icon: "fa-link",
+                icon: "fa-duotone fa-regular fa-link",
                 roles: ["recruiter"],
             },
         ],
@@ -150,7 +129,7 @@ const navItems: NavItemData[] = [
     {
         href: "#companies",
         label: "Companies",
-        icon: "fa-building",
+        icon: "fa-duotone fa-regular fa-building",
         roles: ["recruiter"],
         section: "management",
         expandable: true,
@@ -158,13 +137,13 @@ const navItems: NavItemData[] = [
             {
                 href: "/portal/companies",
                 label: "Browse",
-                icon: "fa-buildings",
+                icon: "fa-duotone fa-regular fa-buildings",
                 roles: ["recruiter"],
             },
             {
                 href: "/portal/invite-companies",
                 label: "Invitations",
-                icon: "fa-building-user",
+                icon: "fa-duotone fa-regular fa-building-user",
                 roles: ["recruiter"],
             },
         ],
@@ -172,7 +151,7 @@ const navItems: NavItemData[] = [
     {
         href: "/portal/applications",
         label: "Applications",
-        icon: "fa-file-lines",
+        icon: "fa-duotone fa-regular fa-file-lines",
         roles: ["company_admin", "hiring_manager", "recruiter"],
         section: "management",
         mobileDock: true,
@@ -181,7 +160,7 @@ const navItems: NavItemData[] = [
     {
         href: "/portal/messages",
         label: "Messages",
-        icon: "fa-messages",
+        icon: "fa-duotone fa-regular fa-messages",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
         mobileDock: true,
@@ -190,15 +169,20 @@ const navItems: NavItemData[] = [
     {
         href: "/portal/placements",
         label: "Placements",
-        icon: "fa-trophy",
-        roles: ["recruiter", "company_admin", "hiring_manager", "platform_admin"],
+        icon: "fa-duotone fa-regular fa-trophy",
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
         section: "management",
         shortcut: "P",
     },
     {
         href: "/portal/profile",
         label: "Profile",
-        icon: "fa-user",
+        icon: "fa-duotone fa-regular fa-user",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "settings",
         shortcut: "U",
@@ -206,201 +190,13 @@ const navItems: NavItemData[] = [
     {
         href: "/portal/company/settings",
         label: "Company",
-        icon: "fa-building",
+        icon: "fa-duotone fa-regular fa-building",
         roles: ["company_admin", "hiring_manager"],
         section: "settings",
     },
 ];
 
-// ─── Sub-Components ─────────────────────────────────────────────────────────
-
-function MemphisNavItem({
-    item,
-    isActive,
-    badge,
-    badges,
-    accent,
-    level = 0,
-}: {
-    item: NavItemData;
-    isActive: boolean;
-    badge?: number;
-    badges?: Record<string, number>;
-    accent: MemphisAccent;
-    level?: number;
-}) {
-    const pathname = usePathname();
-    const [isExpanded, setIsExpanded] = useState(false);
-    const hasChildren = item.children && item.children.length > 0;
-
-    const hasActiveChild = item.children?.some(
-        (child) =>
-            pathname === child.href || pathname.startsWith(child.href + "/"),
-    );
-
-    useEffect(() => {
-        if (hasActiveChild) setIsExpanded(true);
-    }, [hasActiveChild]);
-
-    const handleClick = (e: React.MouseEvent) => {
-        if (hasChildren && item.expandable) {
-            e.preventDefault();
-            setIsExpanded(!isExpanded);
-        }
-    };
-
-    // ── Child item (level > 0) ──
-    if (level > 0) {
-        return (
-            <Link
-                href={item.href}
-                className={`
-                    group flex items-center gap-3 pl-16 pr-4 py-2.5
-                    border-l-4 transition-colors
-                    ${isActive
-                        ? `${ACCENT_BORDER[accent]} text-white`
-                        : "border-transparent text-cream/40 hover:text-cream/70 hover:bg-cream/5"
-                    }
-                `}
-            >
-                <span
-                    className={`w-2 h-2 flex-shrink-0 ${
-                        isActive ? ACCENT_BG[accent] : "bg-cream/20"
-                    }`}
-                />
-                <span className="text-xs font-bold uppercase tracking-wider flex-1">
-                    {item.label}
-                </span>
-                {badges?.[item.href] !== undefined && badges[item.href] > 0 && (
-                    <span className="w-5 h-5 flex items-center justify-center bg-coral text-[9px] font-black text-white">
-                        {badges[item.href] > 99 ? "99+" : badges[item.href]}
-                    </span>
-                )}
-            </Link>
-        );
-    }
-
-    // ── Top-level item ──
-    const itemContent = (
-        <>
-            {/* Icon box */}
-            <div
-                className={`w-9 h-9 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isActive || hasActiveChild
-                        ? `${ACCENT_BG[accent]} ${ACCENT_ON_BG[accent]}`
-                        : "bg-cream/5 text-cream/40 group-hover:bg-cream/10 group-hover:text-cream/60"
-                }`}
-            >
-                <i className={`fa-duotone fa-regular ${item.icon} text-sm`} />
-            </div>
-
-            {/* Label */}
-            <span
-                className={`text-sm uppercase tracking-wider flex-1 ${
-                    isActive || hasActiveChild
-                        ? "text-white font-black"
-                        : "text-cream/50 font-bold"
-                }`}
-            >
-                {item.label}
-            </span>
-
-            {/* Keyboard shortcut hint */}
-            {item.shortcut && (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-cream/20 hidden xl:inline">
-                    Alt+{item.shortcut}
-                </span>
-            )}
-
-            {/* Badge */}
-            {badge !== undefined && badge > 0 && (
-                <span className="w-6 h-6 flex items-center justify-center bg-coral text-[10px] font-black text-white">
-                    {badge > 99 ? "99+" : badge}
-                </span>
-            )}
-
-            {/* Expand chevron */}
-            {hasChildren && item.expandable && (
-                <span
-                    className={`w-4 h-4 flex items-center justify-center transition-transform duration-200 ${
-                        isExpanded ? "rotate-90" : ""
-                    }`}
-                >
-                    <i className="fa-solid fa-chevron-right text-[10px] text-cream/30" />
-                </span>
-            )}
-        </>
-    );
-
-    return (
-        <>
-            {hasChildren && item.expandable ? (
-                <button
-                    type="button"
-                    onClick={handleClick}
-                    className={`
-                        group w-full flex items-center gap-3 px-4 py-3
-                        border-l-4 transition-colors text-left
-                        ${hasActiveChild
-                            ? `${ACCENT_BORDER[accent]} bg-cream/5`
-                            : "border-transparent hover:bg-cream/5"
-                        }
-                    `}
-                >
-                    {itemContent}
-                </button>
-            ) : (
-                <Link
-                    href={item.href}
-                    className={`
-                        group flex items-center gap-3 px-4 py-3
-                        border-l-4 transition-colors
-                        ${isActive
-                            ? `${ACCENT_BORDER[accent]} bg-cream/5`
-                            : "border-transparent hover:bg-cream/5"
-                        }
-                    `}
-                >
-                    {itemContent}
-                </Link>
-            )}
-
-            {/* Expanded children */}
-            {hasChildren && isExpanded && (
-                <div className="mt-1 mb-2">
-                    {item.children!.map((child) => (
-                        <MemphisNavItem
-                            key={child.href}
-                            item={child}
-                            isActive={
-                                pathname === child.href ||
-                                (child.href !== "/portal/dashboard" &&
-                                    pathname.startsWith(child.href))
-                            }
-                            badge={badges?.[child.href]}
-                            badges={badges}
-                            accent={accent}
-                            level={level + 1}
-                        />
-                    ))}
-                </div>
-            )}
-        </>
-    );
-}
-
-function MemphisSectionHeader({ title }: { title: string }) {
-    return (
-        <div className="px-4 pt-6 pb-2 flex items-center gap-3">
-            <span className="text-[10px] font-black text-cream/30 uppercase tracking-[0.2em]">
-                {title}
-            </span>
-            <div className="flex-1 h-px bg-cream/10" />
-        </div>
-    );
-}
-
-// ─── Main Sidebar Component ─────────────────────────────────────────────────
+// ─── Main Component ─────────────────────────────────────────────────────────
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -410,7 +206,7 @@ export function Sidebar() {
 
     const [badges, setBadges] = useState<Record<string, number>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const activityStatus = useActivityStatus({
         enabled: Boolean(currentUserId),
     });
@@ -547,27 +343,33 @@ export function Sidebar() {
 
     // ── Role-based filtering ────────────────────────────────────────────
 
-    const filterByRole = (item: NavItemData) => {
-        if (item.roles.includes("all")) return true;
-        if (isAdmin) return true;
-        if (isRecruiter && item.roles.includes("recruiter")) return true;
-        if (
-            isCompanyUser &&
-            (item.roles.includes("company_admin") ||
-                item.roles.includes("hiring_manager"))
-        )
-            return true;
-        return false;
-    };
+    const filterByRole = useCallback(
+        (item: NavItemData) => {
+            if (item.roles.includes("all")) return true;
+            if (isAdmin) return true;
+            if (isRecruiter && item.roles.includes("recruiter")) return true;
+            if (
+                isCompanyUser &&
+                (item.roles.includes("company_admin") ||
+                    item.roles.includes("hiring_manager"))
+            )
+                return true;
+            return false;
+        },
+        [isAdmin, isRecruiter, isCompanyUser],
+    );
 
-    const filterNavItems = (items: NavItemData[]): NavItemData[] => {
-        return items.filter(filterByRole).map((item) => ({
-            ...item,
-            children: item.children
-                ? filterNavItems(item.children)
-                : undefined,
-        }));
-    };
+    const filterNavItems = useCallback(
+        (items: NavItemData[]): NavItemData[] => {
+            return items.filter(filterByRole).map((item) => ({
+                ...item,
+                children: item.children
+                    ? filterNavItems(item.children)
+                    : undefined,
+            }));
+        },
+        [filterByRole],
+    );
 
     const groupedItems = useMemo(() => {
         const filtered = filterNavItems(navItems);
@@ -576,25 +378,39 @@ export function Sidebar() {
             management: filtered.filter((i) => i.section === "management"),
             settings: filtered.filter((i) => i.section === "settings"),
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAdmin, isRecruiter, isCompanyUser]);
+    }, [filterNavItems]);
 
-    // ── Accent color assignment (cycles across all top-level items) ─────
+    // ── Auto-expand items with active children ──────────────────────────
 
-    const itemAccents = useMemo(() => {
-        const accents = new Map<string, MemphisAccent>();
-        let idx = 0;
-        const allItems = [
+    useEffect(() => {
+        const newExpanded = new Set(expandedItems);
+        let changed = false;
+
+        const checkActive = (items: NavItemData[]) => {
+            for (const item of items) {
+                if (item.expandable && item.children) {
+                    const hasActiveChild = item.children.some(
+                        (child) =>
+                            pathname === child.href ||
+                            pathname.startsWith(child.href + "/"),
+                    );
+                    if (hasActiveChild && !newExpanded.has(item.href)) {
+                        newExpanded.add(item.href);
+                        changed = true;
+                    }
+                }
+            }
+        };
+
+        checkActive([
             ...groupedItems.main,
             ...groupedItems.management,
             ...groupedItems.settings,
-        ];
-        for (const item of allItems) {
-            accents.set(item.href, ACCENT_CYCLE[idx % ACCENT_CYCLE.length]);
-            idx++;
-        }
-        return accents;
-    }, [groupedItems]);
+        ]);
+
+        if (changed) setExpandedItems(newExpanded);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname, groupedItems]);
 
     // ── Keyboard shortcuts ──────────────────────────────────────────────
 
@@ -634,132 +450,104 @@ export function Sidebar() {
 
     useKeyboardShortcuts(shortcutItems, handleHelpToggle);
 
-    // ── Close mobile sidebar on route change ────────────────────────────
+    // ── Map NavItemData → BaselSidebarNavItem ───────────────────────────
 
-    useEffect(() => {
-        setMobileOpen(false);
-    }, [pathname]);
+    const mapItem = useCallback(
+        (item: NavItemData): BaselSidebarNavItem => {
+            const isActive =
+                pathname === item.href ||
+                (item.href !== "/portal/dashboard" &&
+                    !item.href.startsWith("#") &&
+                    pathname.startsWith(item.href));
 
-    // ── Render helpers ──────────────────────────────────────────────────
-
-    const renderItems = (items: NavItemData[]) =>
-        items.map((item) => {
-            const accent = itemAccents.get(item.href) || "coral";
-            const itemBadge =
+            const childBadge =
                 item.expandable && item.children
                     ? item.children.reduce(
                           (sum, child) => sum + (badges[child.href] || 0),
                           0,
                       )
-                    : badges[item.href];
+                    : undefined;
 
-            return (
-                <MemphisNavItem
-                    key={item.href}
-                    item={item}
-                    isActive={
-                        pathname === item.href ||
-                        (item.href !== "/portal/dashboard" &&
-                            !item.href.startsWith("#") &&
-                            pathname.startsWith(item.href))
-                    }
-                    badge={itemBadge}
-                    badges={badges}
-                    accent={accent}
-                />
-            );
-        });
+            return {
+                id: item.href,
+                href: item.href,
+                label: item.label,
+                icon: item.icon,
+                active: isActive,
+                badge: childBadge ?? badges[item.href],
+                shortcutHint: item.shortcut ? `Alt+${item.shortcut}` : undefined,
+                children: item.children?.map(mapItem),
+                expanded: expandedItems.has(item.href),
+                onToggle: item.expandable
+                    ? () => {
+                          setExpandedItems((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(item.href)) {
+                                  next.delete(item.href);
+                              } else {
+                                  next.add(item.href);
+                              }
+                              return next;
+                          });
+                      }
+                    : undefined,
+            };
+        },
+        [pathname, badges, expandedItems],
+    );
+
+    const sections: BaselSidebarSection[] = useMemo(() => {
+        const result: BaselSidebarSection[] = [];
+
+        if (groupedItems.main.length > 0) {
+            result.push({ items: groupedItems.main.map(mapItem) });
+        }
+        if (groupedItems.management.length > 0) {
+            result.push({
+                title: "Management",
+                items: groupedItems.management.map(mapItem),
+            });
+        }
+        if (groupedItems.settings.length > 0) {
+            result.push({
+                title: "Settings",
+                items: groupedItems.settings.map(mapItem),
+            });
+        }
+
+        return result;
+    }, [groupedItems, mapItem]);
+
+    // ── Footer slot ─────────────────────────────────────────────────────
+
+    const footerSlot = (
+        <button
+            onClick={handleHelpToggle}
+            className="flex items-center gap-2 text-neutral-content/30 hover:text-neutral-content/50 transition-colors"
+        >
+            <i className="fa-duotone fa-regular fa-keyboard text-xs" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
+                Keyboard Shortcuts
+            </span>
+        </button>
+    );
 
     // ── Render ──────────────────────────────────────────────────────────
 
     return (
         <>
-            {/* ── Mobile hamburger button ── */}
-            <button
-                onClick={() => setMobileOpen(true)}
-                className="fixed left-4 z-40 lg:hidden w-12 h-12 flex items-center justify-center border-interactive border-coral bg-dark text-coral transition-transform hover:scale-105"
-                style={{ top: "calc(var(--header-h, 4rem) + 1rem)" }}
-                aria-label="Open navigation"
-            >
-                <i className="fa-duotone fa-regular fa-bars text-lg" />
-            </button>
+            <BaselSidebar
+                sections={sections}
+                footer={footerSlot}
+                renderLink={({ href, className, children }) => (
+                    <Link href={href} className={className}>
+                        {children}
+                    </Link>
+                )}
+            />
 
-            {/* ── Mobile overlay ── */}
-            {mobileOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-dark/70 lg:hidden"
-                    onClick={() => setMobileOpen(false)}
-                />
-            )}
-
-            {/* ── Sidebar ── */}
-            <aside
-                className={`
-                    fixed left-0 z-50 sidebar-positioned
-                    lg:z-40
-                    w-[280px] flex flex-col border-r-4 border-coral bg-dark
-                    transition-transform duration-300 ease-out
-                    lg:translate-x-0
-                    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-                `}
-            >
-                {/* Mobile close button */}
-                <div className="lg:hidden flex items-center justify-end px-5 py-3 border-b-4 border-cream/10">
-                    <button
-                        onClick={() => setMobileOpen(false)}
-                        className="w-8 h-8 flex items-center justify-center border-interactive border-coral text-coral transition-transform hover:scale-110"
-                        aria-label="Close navigation"
-                    >
-                        <i className="fa-solid fa-xmark text-sm" />
-                    </button>
-                </div>
-
-                {/* Memphis color strip */}
-                <ColorBar height="h-1" />
-
-                {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto py-2">
-                    {/* Main section */}
-                    {groupedItems.main.length > 0 && (
-                        <div>{renderItems(groupedItems.main)}</div>
-                    )}
-
-                    {/* Management section */}
-                    {groupedItems.management.length > 0 && (
-                        <div>
-                            <MemphisSectionHeader title="Management" />
-                            {renderItems(groupedItems.management)}
-                        </div>
-                    )}
-
-                    {/* Settings section */}
-                    {groupedItems.settings.length > 0 && (
-                        <div>
-                            <MemphisSectionHeader title="Settings" />
-                            {renderItems(groupedItems.settings)}
-                        </div>
-                    )}
-                </nav>
-
-                {/* Memphis color strip (reversed) */}
-                <ColorBar height="h-1" className="flex-row-reverse" />
-
-                {/* Keyboard shortcuts hint */}
-                <div className="px-5 py-4 border-t-4 border-cream/10">
-                    <button
-                        onClick={handleHelpToggle}
-                        className="flex items-center gap-2 text-cream/30 hover:text-cream/50 transition-colors"
-                    >
-                        <i className="fa-duotone fa-regular fa-keyboard text-xs" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
-                            Keyboard Shortcuts
-                        </span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* ── Mobile bottom dock ── */}
-            <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-dark border-t-4 border-coral">
+            {/* Mobile bottom dock */}
+            <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-neutral border-t border-neutral-content/10">
                 <div className="flex items-center justify-around px-1 py-2">
                     {(() => {
                         const dockItems = navItems
@@ -778,8 +566,6 @@ export function Sidebar() {
                                             pathname.startsWith(c.href + "/"),
                                     ) ??
                                         false);
-                                const accent =
-                                    itemAccents.get(item.href) || "coral";
 
                                 return (
                                     <button
@@ -792,19 +578,19 @@ export function Sidebar() {
                                         <div
                                             className={`w-8 h-8 flex items-center justify-center ${
                                                 isItemActive
-                                                    ? `${ACCENT_BG[accent]} ${ACCENT_ON_BG[accent]}`
-                                                    : "text-cream/40"
+                                                    ? "bg-primary text-primary-content"
+                                                    : "text-neutral-content/40"
                                             }`}
                                         >
                                             <i
-                                                className={`fa-duotone fa-regular ${item.icon} text-sm`}
+                                                className={`${item.icon} text-sm`}
                                             />
                                         </div>
                                         <span
                                             className={`text-[8px] font-black uppercase tracking-wider ${
                                                 isItemActive
-                                                    ? "text-white"
-                                                    : "text-cream/40"
+                                                    ? "text-neutral-content"
+                                                    : "text-neutral-content/40"
                                             }`}
                                         >
                                             {item.label}
@@ -837,14 +623,14 @@ export function Sidebar() {
                                     className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer list-none"
                                     title="More options"
                                 >
-                                    <div className="w-8 h-8 flex items-center justify-center text-cream/40">
+                                    <div className="w-8 h-8 flex items-center justify-center text-neutral-content/40">
                                         <i className="fa-duotone fa-regular fa-ellipsis text-lg" />
                                     </div>
-                                    <span className="text-[8px] font-black uppercase tracking-wider text-cream/40">
+                                    <span className="text-[8px] font-black uppercase tracking-wider text-neutral-content/40">
                                         More
                                     </span>
                                 </summary>
-                                <ul className="dropdown-content z-50 mb-2 p-2 w-52 bg-dark border-4 border-coral">
+                                <ul className="dropdown-content z-50 mb-2 p-2 w-52 bg-neutral border border-neutral-content/10 shadow-lg">
                                     {moreItems.map((item) => (
                                         <li key={item.href}>
                                             <button
@@ -860,20 +646,20 @@ export function Sidebar() {
                                                 }}
                                                 className={`
                                                     w-full flex items-center gap-3 px-4 py-2.5 text-left
-                                                    transition-colors hover:bg-cream/5
+                                                    transition-colors hover:bg-neutral-content/5
                                                     ${
                                                         pathname ===
                                                             item.href ||
                                                         pathname.startsWith(
                                                             item.href,
                                                         )
-                                                            ? "text-coral"
-                                                            : "text-cream/60"
+                                                            ? "text-primary"
+                                                            : "text-neutral-content/60"
                                                     }
                                                 `}
                                             >
                                                 <i
-                                                    className={`fa-duotone fa-regular ${item.icon} text-sm`}
+                                                    className={`${item.icon} text-sm`}
                                                 />
                                                 <span className="text-xs font-bold uppercase tracking-wider">
                                                     {item.label}

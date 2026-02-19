@@ -1,8 +1,11 @@
 /* @layer base; */
 
 @import "tailwindcss";
-/* @import '@splits-network/memphis-ui/dist/index.css'; */
+@plugin "daisyui";
+
 @plugin "@splits-network/memphis-ui/plugin";
+@import "./themes/light.css";
+@import "./themes/dark.css";
 
 /* Cookie Consent Banner Animation */
 @keyframes slide-up {

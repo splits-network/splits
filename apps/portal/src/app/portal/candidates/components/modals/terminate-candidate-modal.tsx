@@ -4,7 +4,6 @@ import { useState, useEffect, FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
-import { Button, Modal } from "@splits-network/memphis-ui";
 
 interface AffectedApplication {
     id: string;
@@ -41,10 +40,13 @@ export default function TerminateCandidateModal({
     const [reason, setReason] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [relationship, setRelationship] = useState<RelationshipInfo | null>(null);
+    const [relationship, setRelationship] =
+        useState<RelationshipInfo | null>(null);
     const [affectedApps, setAffectedApps] = useState<AffectedApplication[]>([]);
     const [loading, setLoading] = useState(true);
-    const [decisions, setDecisions] = useState<Record<string, "keep" | "withdraw">>({});
+    const [decisions, setDecisions] = useState<
+        Record<string, "keep" | "withdraw">
+    >({});
 
     useEffect(() => {
         if (!isOpen) return;
@@ -60,12 +62,20 @@ export default function TerminateCandidateModal({
                 // Step 1: Find the active relationship for this candidate
                 const relResponse = await client.get<{ data: any[] }>(
                     "/recruiter-candidates",
-                    { params: { candidate_id: candidateId, status: "active", limit: 1 } },
+                    {
+                        params: {
+                            candidate_id: candidateId,
+                            status: "active",
+                            limit: 1,
+                        },
+                    },
                 );
 
                 const rel = relResponse.data?.[0];
                 if (!rel) {
-                    setError("No active relationship found with this candidate.");
+                    setError(
+                        "No active representation found for this candidate.",
+                    );
                     setLoading(false);
                     return;
                 }
@@ -77,27 +87,27 @@ export default function TerminateCandidateModal({
                 });
 
                 // Step 2: Fetch affected applications
-                const appsResponse = await client.get<{ data: AffectedApplication[] }>(
-                    "/applications/affected-by-termination",
-                    {
-                        params: {
-                            recruiter_id: rel.recruiter_id,
-                            candidate_id: rel.candidate_id,
-                        },
+                const appsResponse = await client.get<{
+                    data: AffectedApplication[];
+                }>("/applications/affected-by-termination", {
+                    params: {
+                        recruiter_id: rel.recruiter_id,
+                        candidate_id: rel.candidate_id,
                     },
-                );
+                });
 
                 const apps = appsResponse.data || [];
                 setAffectedApps(apps);
 
-                const defaultDecisions: Record<string, "keep" | "withdraw"> = {};
+                const defaultDecisions: Record<string, "keep" | "withdraw"> =
+                    {};
                 apps.forEach((app) => {
                     defaultDecisions[app.id] = "keep";
                 });
                 setDecisions(defaultDecisions);
             } catch (err) {
                 console.error("Failed to load termination data:", err);
-                setError("Failed to load relationship data.");
+                setError("Could not load relationship details. Try again.");
             } finally {
                 setLoading(false);
             }
@@ -112,12 +122,14 @@ export default function TerminateCandidateModal({
         setError(null);
 
         if (!reason.trim()) {
-            setError("Please provide a reason for ending this relationship.");
+            setError(
+                "A reason is required to end this representation.",
+            );
             return;
         }
 
         if (!relationship) {
-            setError("Relationship data not loaded.");
+            setError("Relationship data unavailable. Close and try again.");
             return;
         }
 
@@ -130,15 +142,20 @@ export default function TerminateCandidateModal({
             const client = createAuthenticatedClient(token);
 
             // Step 1: Terminate the relationship
-            await client.patch(`/recruiter-candidates/${relationship.id}/terminate`, {
-                reason: reason.trim(),
-            });
+            await client.patch(
+                `/recruiter-candidates/${relationship.id}/terminate`,
+                {
+                    reason: reason.trim(),
+                },
+            );
 
             // Step 2: Process application decisions if any
-            const decisionsList = Object.entries(decisions).map(([application_id, action]) => ({
-                application_id,
-                action,
-            }));
+            const decisionsList = Object.entries(decisions).map(
+                ([application_id, action]) => ({
+                    application_id,
+                    action,
+                }),
+            );
 
             if (decisionsList.length > 0) {
                 await client.post("/applications/termination-decisions", {
@@ -150,7 +167,11 @@ export default function TerminateCandidateModal({
             onSuccess();
         } catch (err) {
             console.error("Failed to terminate relationship:", err);
-            setError(err instanceof Error ? err.message : "Failed to end relationship");
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Could not end representation. Try again.",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -167,162 +188,208 @@ export default function TerminateCandidateModal({
     if (!isOpen) return null;
 
     return (
-        <Modal
-            open={isOpen}
-            onClose={handleClose}
-            title="End Representation"
-            maxWidth="max-w-2xl"
-            closeOnBackdrop={!submitting}
-        >
-            {/* Candidate Info Card */}
-            <div className="border-4 border-dark p-4 mb-5">
-                <label className="text-xs font-black uppercase tracking-wider text-dark/60 mb-2 block">
-                    Ending relationship with
-                </label>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-coral border-4 border-dark flex items-center justify-center">
-                        <span className="text-sm font-black text-white">
-                            {candidateName?.[0] || "?"}
-                        </span>
-                    </div>
-                    <div>
-                        <div className="font-black text-dark">{candidateName}</div>
-                        {candidateEmail && (
-                            <div className="text-sm text-dark/60 font-bold">
-                                {candidateEmail}
-                            </div>
-                        )}
-                    </div>
+        <dialog className="modal modal-open modal-bottom sm:modal-middle">
+            <div
+                className="modal-box max-w-2xl w-full p-0"
+                style={{ borderRadius: 0 }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="bg-error px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-xl font-black uppercase tracking-tight text-error-content">
+                        End Representation
+                    </h2>
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-square btn-ghost text-error-content"
+                        onClick={handleClose}
+                        disabled={submitting}
+                        aria-label="Close"
+                    >
+                        <i className="fa-duotone fa-regular fa-xmark" />
+                    </button>
                 </div>
-            </div>
 
-            {/* Warning Banner */}
-            <div className="border-4 border-dark bg-coral/10 p-4 mb-5">
-                <div className="flex items-start gap-3">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-coral text-lg mt-0.5" />
-                    <div>
-                        <p className="font-black text-dark uppercase tracking-wider text-sm mb-1">
-                            This will end your working relationship
-                        </p>
-                        <p className="text-sm text-dark/70 font-medium">
-                            The candidate will be notified. You will no longer be able to submit them for opportunities.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Loading State */}
-            {loading ? (
-                <div className="flex items-center justify-center py-8">
-                    <div className="text-center">
-                        <div className="flex justify-center gap-3 mb-4">
-                            <div className="w-4 h-4 bg-coral animate-pulse" />
-                            <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                            <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                        </div>
-                        <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                            Loading relationship data...
-                        </span>
-                    </div>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Affected Applications */}
-                    {affectedApps.length > 0 && (
-                        <div>
-                            <label className="text-xs font-black uppercase tracking-wider text-dark/60 mb-2 block">
-                                Active Applications ({affectedApps.length})
-                            </label>
-                            <p className="text-xs text-dark/50 font-bold mb-3">
-                                Choose what to do with each application you submitted for this candidate.
-                            </p>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {affectedApps.map((app) => (
-                                    <div
-                                        key={app.id}
-                                        className="border-4 border-dark p-3 flex items-center justify-between gap-3"
-                                    >
-                                        <div className="min-w-0 flex-1">
-                                            <p className="font-black text-sm uppercase tracking-tight text-dark truncate">
-                                                {app.job_title}
-                                            </p>
-                                            <p className="text-xs text-dark/60 font-bold">
-                                                {app.company_name} &middot; {app.stage}
-                                            </p>
-                                        </div>
-                                        <select
-                                            className="border-4 border-dark p-2 text-sm font-bold text-dark bg-white focus:outline-none focus:border-coral"
-                                            value={decisions[app.id] || "keep"}
-                                            onChange={(e) =>
-                                                setDecisions((prev) => ({
-                                                    ...prev,
-                                                    [app.id]: e.target.value as "keep" | "withdraw",
-                                                }))
-                                            }
-                                            disabled={submitting}
-                                            style={{ borderRadius: 0, appearance: "auto" }}
-                                        >
-                                            <option value="keep">Keep in pipeline</option>
-                                            <option value="withdraw">Withdraw</option>
-                                        </select>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Error */}
-                    {error && (
-                        <div className="border-4 border-dark bg-coral/10 p-4 flex items-center gap-3">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-coral text-lg" />
-                            <span className="font-bold text-dark">{error}</span>
-                        </div>
-                    )}
-
-                    {/* Reason Textarea */}
-                    <div>
-                        <label className="text-xs font-black uppercase tracking-wider text-dark/60 mb-2 block">
-                            Reason *
+                <div className="p-6">
+                    {/* Candidate Info Card */}
+                    <div className="border-2 border-base-300 p-4 mb-5">
+                        <label className="text-xs font-black uppercase tracking-wider text-base-content/60 mb-2 block">
+                            Candidate
                         </label>
-                        <textarea
-                            className="w-full border-4 border-dark p-3 font-medium text-dark bg-white focus:outline-none focus:border-coral resize-none"
-                            rows={3}
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="Please explain why you want to end this relationship..."
-                            disabled={submitting}
-                            style={{ borderRadius: 0 }}
-                        />
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <span className="text-sm font-black text-primary-content">
+                                    {candidateName?.[0] || "?"}
+                                </span>
+                            </div>
+                            <div>
+                                <div className="font-black text-base-content">
+                                    {candidateName}
+                                </div>
+                                {candidateEmail && (
+                                    <div className="text-sm text-base-content/60 font-bold">
+                                        {candidateEmail}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-end gap-3 pt-2 border-t-4 border-dark">
-                        <Button
-                            type="button"
-                            color="dark"
-                            variant="outline"
-                            size="md"
-                            onClick={handleClose}
-                            disabled={submitting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            color="coral"
-                            size="md"
-                            disabled={submitting || !reason.trim() || !relationship}
-                        >
-                            <ButtonLoading
-                                loading={submitting}
-                                text="End Representation"
-                                loadingText="Ending..."
-                                icon="fa-duotone fa-regular fa-link-slash"
-                            />
-                        </Button>
+                    {/* Warning Banner */}
+                    <div className="bg-error/10 border-l-4 border-error p-4 mb-5">
+                        <div className="flex items-start gap-3">
+                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-error text-lg mt-0.5" />
+                            <div>
+                                <p className="font-black text-base-content uppercase tracking-wider text-sm mb-1">
+                                    This action is permanent
+                                </p>
+                                <p className="text-sm text-base-content/70 font-medium">
+                                    The candidate will be notified and you will
+                                    lose the ability to submit them to roles.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            )}
-        </Modal>
+
+                    {/* Loading State */}
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-8">
+                            <span className="loading loading-spinner loading-lg text-primary mb-4" />
+                            <span className="text-sm font-bold uppercase tracking-wider text-base-content/50">
+                                Loading affected applications...
+                            </span>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            {/* Affected Applications */}
+                            {affectedApps.length > 0 && (
+                                <div>
+                                    <label className="text-xs font-black uppercase tracking-wider text-base-content/60 mb-2 block">
+                                        Active Applications (
+                                        {affectedApps.length})
+                                    </label>
+                                    <p className="text-xs text-base-content/50 font-bold mb-3">
+                                        Decide the fate of each open application
+                                        before ending this relationship.
+                                    </p>
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                        {affectedApps.map((app) => (
+                                            <div
+                                                key={app.id}
+                                                className="border-2 border-base-300 p-3 flex items-center justify-between gap-3"
+                                                style={{ borderRadius: 0 }}
+                                            >
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-black text-sm uppercase tracking-tight text-base-content truncate">
+                                                        {app.job_title}
+                                                    </p>
+                                                    <p className="text-xs text-base-content/60 font-bold">
+                                                        {app.company_name}{" "}
+                                                        &middot; {app.stage}
+                                                    </p>
+                                                </div>
+                                                <select
+                                                    className="select select-bordered select-sm"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={
+                                                        decisions[app.id] ||
+                                                        "keep"
+                                                    }
+                                                    onChange={(e) =>
+                                                        setDecisions(
+                                                            (prev) => ({
+                                                                ...prev,
+                                                                [app.id]: e
+                                                                    .target
+                                                                    .value as
+                                                                    | "keep"
+                                                                    | "withdraw",
+                                                            }),
+                                                        )
+                                                    }
+                                                    disabled={submitting}
+                                                >
+                                                    <option value="keep">
+                                                        Keep in pipeline
+                                                    </option>
+                                                    <option value="withdraw">
+                                                        Withdraw
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Error */}
+                            {error && (
+                                <div className="bg-error/10 border-l-4 border-error p-4 flex items-center gap-3">
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation text-error text-lg" />
+                                    <span className="font-bold text-base-content text-sm">
+                                        {error}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Reason Textarea */}
+                            <div>
+                                <label className="text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2 block">
+                                    Reason <span className="text-error">*</span>
+                                </label>
+                                <textarea
+                                    className="textarea textarea-bordered w-full"
+                                    rows={3}
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    placeholder="Explain why you are ending this representation..."
+                                    disabled={submitting}
+                                    style={{ borderRadius: 0 }}
+                                />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end gap-3 pt-2 border-t-2 border-base-300">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline"
+                                    style={{ borderRadius: 0 }}
+                                    onClick={handleClose}
+                                    disabled={submitting}
+                                >
+                                    Keep Representing
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-error"
+                                    style={{ borderRadius: 0 }}
+                                    disabled={
+                                        submitting ||
+                                        !reason.trim() ||
+                                        !relationship
+                                    }
+                                >
+                                    <ButtonLoading
+                                        loading={submitting}
+                                        text="End Representation"
+                                        loadingText="Ending..."
+                                        icon="fa-duotone fa-regular fa-link-slash"
+                                    />
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                </div>
+            </div>
+            <form method="dialog" className="modal-backdrop">
+                <button
+                    type="button"
+                    onClick={handleClose}
+                    disabled={submitting}
+                >
+                    close
+                </button>
+            </form>
+        </dialog>
     );
 }

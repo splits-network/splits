@@ -1,53 +1,78 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { Application } from "../../types";
-import { getDisplayStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { candidateName, roleTitle, companyName, addedAgo, aiScore, isNew } from "../shared/helpers";
+import {
+    candidateName,
+    roleTitle,
+    companyName,
+    addedAgo,
+    aiScore,
+    isNew,
+} from "../shared/helpers";
+import { getStageDisplay, getAIScoreBadge } from "../shared/status-color";
 
 export function SplitItem({
     application,
-    accent,
     isSelected,
     onSelect,
 }: {
     application: Application;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
 }) {
-    const ac = accent;
-    const status = getDisplayStatus(application);
+    const stage = getStageDisplay(application.stage);
     const score = aiScore(application);
 
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 transition-colors border-b-4 border-dark/10 border-l-4 ${
-                isSelected ? `${ac.bgLight} ${ac.border}` : "bg-white border-transparent"
+            className={`cursor-pointer p-4 border-b border-base-200 transition-colors border-l-4 ${
+                isSelected
+                    ? "bg-primary/5 border-l-primary"
+                    : "border-transparent hover:bg-base-200/50"
             }`}
         >
+            {/* Row 1: candidate name + time ago */}
             <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2 min-w-0">
-                    {isNew(application) && <i className="fa-duotone fa-regular fa-sparkles text-sm flex-shrink-0 text-yellow" />}
-                    <h4 className="font-black text-sm uppercase tracking-tight truncate text-dark">{candidateName(application)}</h4>
+                <div className="flex items-center gap-1.5 min-w-0">
+                    {isNew(application) && (
+                        <i className="fa-duotone fa-regular fa-sparkles text-primary text-xs flex-shrink-0" />
+                    )}
+                    <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
+                        {candidateName(application)}
+                    </h4>
                 </div>
-                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-dark/40">{addedAgo(application)}</span>
+                <span className="text-xs font-semibold flex-shrink-0 whitespace-nowrap text-base-content/40">
+                    {addedAgo(application)}
+                </span>
             </div>
-            <div className={`text-sm font-bold mb-1 ${ac.text}`}>
-                {roleTitle(application)}
-                <span className="text-dark/50 font-normal"> at {companyName(application)}</span>
+
+            {/* Row 2: role title at company */}
+            <div className="text-sm truncate mb-1">
+                <span className="font-semibold text-primary">
+                    {roleTitle(application)}
+                </span>
+                <span className="text-base-content/50">
+                    {" "}at {companyName(application)}
+                </span>
             </div>
-            <div className="flex items-center justify-between gap-2">
-                <Badge
-                    color={status.badgeClass.includes("success") ? "teal" : "purple"}
-                    className="max-w-[140px] truncate"
-                    title={status.label}
+
+            {/* Row 3: stage badge + AI score */}
+            <div className="flex items-center gap-2">
+                <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold ${stage.badge}`}
                 >
-                    {status.label}
-                </Badge>
-                {score != null && <span className="text-sm font-bold text-dark/60 shrink-0">AI {score}%</span>}
+                    <i className={`fa-duotone fa-regular ${stage.icon} text-[10px]`} />
+                    {stage.label}
+                </span>
+                {score != null && (
+                    <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold ${getAIScoreBadge(score)}`}
+                    >
+                        <i className="fa-duotone fa-regular fa-robot text-[10px]" />
+                        {score}%
+                    </span>
+                )}
             </div>
         </div>
     );

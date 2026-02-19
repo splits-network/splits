@@ -1,10 +1,8 @@
 "use client";
 
 import { Fragment } from "react";
-import { Badge } from "@splits-network/memphis-ui";
 import type { Job } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { statusColor } from "../shared/status-color";
 import {
     salaryDisplay,
     formatStatus,
@@ -17,7 +15,6 @@ import RoleActionsToolbar from "../shared/actions-toolbar";
 
 export function TableRow({
     job,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -25,64 +22,89 @@ export function TableRow({
     onRefresh,
 }: {
     job: Job;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
+    const rowBase = isSelected
+        ? "bg-primary/5 border-l-4 border-l-primary"
+        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
+            {/* Main row */}
             <tr
                 onClick={onSelect}
-                className={`cursor-pointer transition-colors border-l-4 ${
-                    isSelected
-                        ? `${ac.bgLight} ${ac.border}`
-                        : `border-transparent ${idx % 2 === 0 ? "bg-white" : "bg-cream"}`
-                }`}
+                className={`cursor-pointer transition-colors ${rowBase}`}
             >
+                {/* Chevron */}
                 <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? ac.text : "text-dark/40"}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
                     />
                 </td>
+
+                {/* Title */}
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                         {isNew(job) && (
-                            <i className="fa-duotone fa-regular fa-sparkles text-sm text-yellow" />
+                            <i
+                                className="fa-duotone fa-regular fa-sparkles text-sm text-warning"
+                                title="New in the last 7 days"
+                            />
                         )}
-                        <span className="font-bold text-sm text-dark">
+                        <span className="font-bold text-sm text-base-content">
                             {job.title}
                         </span>
                     </div>
                 </td>
-                <td className={`px-4 py-3 text-sm font-semibold ${ac.text}`}>
+
+                {/* Company */}
+                <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
                     {companyName(job)}
                 </td>
-                <td className="px-4 py-3 text-sm text-dark/70">
+
+                {/* Location */}
+                <td className="px-4 py-3 text-sm text-base-content/60">
                     {job.location || "—"}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-dark">
+
+                {/* Salary */}
+                <td className="px-4 py-3 text-sm font-bold text-base-content">
                     {salaryDisplay(job) || "—"}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-purple">
+
+                {/* Fee % */}
+                <td className="px-4 py-3 text-sm font-bold text-primary">
                     {job.fee_percentage}%
                 </td>
+
+                {/* Status */}
                 <td className="px-4 py-3">
-                    <Badge color={statusVariant(job.status)}>
+                    <span
+                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
+                    >
                         {formatStatus(job.status)}
-                    </Badge>
+                    </span>
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-dark">
+
+                {/* Apps */}
+                <td className="px-4 py-3 text-sm font-bold text-base-content">
                     {job.application_count ?? 0}
                 </td>
-                <td className="px-4 py-3 text-sm text-dark/60">
+
+                {/* Posted */}
+                <td className="px-4 py-3 text-sm text-base-content/50">
                     {postedAgo(job)}
                 </td>
-                <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
+
+                {/* Actions */}
+                <td
+                    className="px-4 py-3 relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
                         <RoleActionsToolbar
                             job={job}
@@ -98,15 +120,16 @@ export function TableRow({
                     </div>
                 </td>
             </tr>
+
+            {/* Expanded detail row */}
             {isSelected && (
                 <tr>
                     <td
                         colSpan={colSpan}
-                        className={`p-0 bg-white border-t-4 border-b-4 ${ac.border}`}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                     >
                         <DetailLoader
                             jobId={job.id}
-                            accent={ac}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

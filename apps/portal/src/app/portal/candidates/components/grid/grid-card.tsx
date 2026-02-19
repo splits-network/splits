@@ -1,14 +1,17 @@
 "use client";
 
-import { Badge, Card } from "@splits-network/memphis-ui";
 import type { Candidate } from "../../types";
-import { formatVerificationStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import {
+    formatVerificationStatus,
+    formatJobType,
+    formatAvailability,
+} from "../../types";
+import { statusColor } from "../shared/status-color";
 import {
     candidateName,
     candidateInitials,
     candidateTitle,
+    candidateCompany,
     salaryDisplay,
     isNew,
     skillsList,
@@ -17,108 +20,133 @@ import CandidateActionsToolbar from "../shared/actions-toolbar";
 
 export function GridCard({
     candidate,
-    accent,
     isSelected,
     onSelect,
     onRefresh,
 }: {
     candidate: Candidate;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
     const name = candidateName(candidate);
+    const title = candidateTitle(candidate);
+    const company = candidateCompany(candidate);
+    const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
 
     return (
-        <Card
+        <div
             onClick={onSelect}
-            className={`cursor-pointer border-4 transition-transform hover:-translate-y-1 relative ${isSelected ? ac.border : "border-dark/30"}`}
+            className={[
+                "group cursor-pointer bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
+                isSelected ? "border-primary border-l-4" : "border-base-200",
+            ].join(" ")}
         >
-            {/* Corner accent */}
-            <div
-                className={`absolute top-0 right-0 w-8 h-8 ${ac.bg}`}
-            />
+            {/* Top row: verification status pill + NEW badge */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <span
+                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
+                >
+                    {formatVerificationStatus(candidate.verification_status)}
+                </span>
 
-            <div className="card-body">
                 {isNew(candidate) && (
-                    <Badge
-                        color="yellow"
-                        className="mb-2"
-                    >
+                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
-                    </Badge>
-                )}
-                <h3 className="font-black text-base uppercase tracking-tight leading-tight mb-1 text-dark">
-                    {name}
-                </h3>
-                <div
-                    className={`text-sm font-bold mb-2 ${ac.text}`}
-                >
-                    {candidateTitle(candidate)}
-                </div>
-
-                {candidate.location && (
-                    <div className="flex items-center gap-1 text-sm mb-3 text-dark/60">
-                        <i className="fa-duotone fa-regular fa-location-dot" />
-                        {candidate.location}
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-black text-dark">
-                        {salaryDisplay(candidate) || "Open to offers"}
                     </span>
-                    <Badge
-                        color={statusVariant(candidate.verification_status)}
-                    >
-                        {formatVerificationStatus(candidate.verification_status)}
-                    </Badge>
-                </div>
+                )}
 
-                {/* Skills */}
-                <div className="flex flex-wrap gap-1">
-                    {skills.slice(0, 3).map((skill) => (
-                        <Badge
-                            key={skill}
-                            color="purple"
-                            variant="outline"
-                        >
-                            {skill}
-                        </Badge>
-                    ))}
-                    {skills.length > 3 && (
-                        <Badge color="yellow" variant="outline">
-                            +{skills.length - 3}
-                        </Badge>
+                {candidate.open_to_remote && (
+                    <span className="text-[10px] uppercase tracking-wider bg-info/15 text-info px-2 py-1">
+                        Remote
+                    </span>
+                )}
+            </div>
+
+            {/* Name */}
+            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1">
+                {name}
+            </h3>
+            {candidate.email && (
+                <div className="text-sm text-base-content/40 truncate pb-1">
+                    {candidate.email}
+                </div>
+            )}
+
+            {/* Title */}
+            {title ? (
+                <div className="text-sm font-semibold text-base-content/60 mb-2">
+                    {title}
+                    {company && (
+                        <span className="text-base-content/40">
+                            {" "}
+                            at {company}
+                        </span>
                     )}
                 </div>
+            ) : (
+                <div className="text-sm font-semibold text-base-content/60 mb-2">
+                    {"No title specified"}
+                </div>
+            )}
+
+            {/* Location */}
+            <div className="flex items-center gap-1 text-sm text-base-content/50 mb-4">
+                <i className="fa-duotone fa-regular fa-location-dot" />
+                {candidate.location || "Location not specified"}
             </div>
-            <div
-                className={`card-actions justify-between gap-3 pt-3 border-t-2 ${ac.border}/30`}
-            >
-                {/* Candidate footer */}
-                <div className="flex flex-row items-center gap-2 mt-2 min-w-0">
-                    <div
-                        className={`w-10 h-10 shrink-0 flex items-center justify-center border-2 ${ac.border} bg-cream text-sm font-bold text-dark`}
-                    >
-                        {candidateInitials(name)}
-                    </div>
-                    <div className="min-w-0">
-                        <div className="text-sm font-bold text-dark truncate">
-                            {name}
-                        </div>
-                        <div className="text-sm text-dark/50 truncate">
-                            {candidate.has_active_relationship
-                                ? "Representing"
-                                : "Available"}
-                        </div>
+
+            {/* Salary */}
+            <div className="text-base font-black tracking-tight text-primary mb-3">
+                {salary || "Salary Not specified"}
+            </div>
+
+            {/* Job type + Availability row */}
+            <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-bold text-accent">
+                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                    {formatJobType(candidate.desired_job_type)}
+                </span>
+                <span className="text-sm font-bold text-base-content/60">
+                    <i className="fa-duotone fa-regular fa-clock mr-1" />
+                    {formatAvailability(candidate.availability)}
+                </span>
+            </div>
+
+            {/* Skills tags */}
+            {skills.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-4">
+                    {skills.slice(0, 4).map((skill) => (
+                        <span
+                            key={skill}
+                            className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
+                        >
+                            {skill}
+                        </span>
+                    ))}
+                    {skills.length > 4 && (
+                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                            +{skills.length - 4}
+                        </span>
+                    )}
+                </div>
+            )}
+            <div className="flex items-center gap-2 min-w-0">
+                <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60 rounded-full">
+                    {candidateInitials(name)}
+                </div>
+                <div className="min-w-0">
+                    <div className="text-sm font-semibold text-base-content truncate">
+                        {name}
                     </div>
                 </div>
-                <div className="mt-2 shrink-0">
+            </div>
+
+            {/* Footer: candidate avatar / initials left, actions right */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-base-200">
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <CandidateActionsToolbar
                         candidate={candidate}
                         variant="icon-only"
@@ -130,6 +158,6 @@ export function GridCard({
                     />
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

@@ -1,123 +1,128 @@
 "use client";
 
-import { Badge, Card } from "@splits-network/memphis-ui";
 import type { Application } from "../../types";
-import { getDisplayStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
 import {
     candidateName,
+    candidateInitials,
     roleTitle,
     companyName,
     aiScore,
     isNew,
+    addedAgo,
 } from "../shared/helpers";
-import ActionsToolbar from "../shared/actions-toolbar";
+import { getStageDisplay, getAIScoreBadge } from "../shared/status-color";
+import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
 export function GridCard({
     application,
-    accent,
     isSelected,
     onSelect,
     onRefresh,
 }: {
     application: Application;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
-    const status = getDisplayStatus(application);
-    const score = aiScore(application);
-    const candidate = candidateName(application);
+    const name = candidateName(application);
+    const initials = candidateInitials(name);
+    const role = roleTitle(application);
     const company = companyName(application);
+    const score = aiScore(application);
+    const stage = getStageDisplay(application.stage);
+    const scoreBadge = getAIScoreBadge(score);
     const companyInitials = company
         .split(" ")
         .filter(Boolean)
         .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase() ?? "")
-        .join("") || "?";
+        .map((w) => w[0]?.toUpperCase() ?? "")
+        .join("");
 
     return (
-        <Card
+        <div
             onClick={onSelect}
-            className={`cursor-pointer border-4 transition-transform hover:-translate-y-1 relative ${isSelected ? ac.border : "border-dark/30"}`}
+            className={[
+                "group cursor-pointer bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
+                isSelected ? "border-primary border-l-4" : "border-base-200",
+            ].join(" ")}
         >
-            <div className={`absolute top-0 right-0 w-8 h-8 ${ac.bg}`} />
+            {/* Top row: stage badge + NEW indicator */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <span
+                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${stage.badge}`}
+                >
+                    <i className={`fa-duotone fa-regular ${stage.icon} mr-1`} />
+                    {stage.label}
+                </span>
 
-            <div className="card-body">
                 {isNew(application) && (
-                    <Badge color="yellow" className="mb-2">
+                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
-                    </Badge>
+                    </span>
                 )}
 
-                <h3 className="font-black text-base uppercase tracking-tight leading-tight mb-1 text-dark truncate">
-                    {candidate}
-                </h3>
-                <div className={`text-sm font-bold mb-2 ${ac.text} truncate`}>
-                    {roleTitle(application)}
-                </div>
+                {/* Timestamp pushed right */}
+                <span className="text-[10px] uppercase tracking-wider text-base-content/40 ml-auto">
+                    {addedAgo(application)}
+                </span>
+            </div>
 
-                <div className="text-sm text-dark/60 mb-3 truncate">
-                    {companyName(application)}
-                </div>
+            {/* Candidate name */}
+            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1">
+                {name}
+            </h3>
 
-                <div className="flex items-center justify-between mb-3 gap-2">
-                    <Badge
-                        color={
-                            status.badgeClass.includes("success")
-                                ? "teal"
-                                : "purple"
-                        }
-                        className="max-w-[140px] truncate"
-                        title={status.label}
-                    >
-                        {status.label}
-                    </Badge>
-                    {score != null && (
-                        <Badge color="yellow" className="shrink-0">
-                            <i className="fa-duotone fa-regular fa-robot mr-1" />
-                            {score}%
-                        </Badge>
-                    )}
+            {/* Role title */}
+            <div className="text-sm font-semibold text-base-content/60 mb-2">
+                {role}
+            </div>
+
+            {/* Company meta row */}
+            <div className="flex items-center gap-1.5 text-sm text-base-content/50 mb-4">
+                <i className="fa-duotone fa-regular fa-building" />
+                {company}
+            </div>
+            <div className="flex items-center gap-2 min-w-0">
+                <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
+                    {companyInitials}
+                </div>
+                <div className="min-w-0">
+                    <div className="text-sm font-semibold text-base-content truncate">
+                        {company}
+                    </div>
                 </div>
             </div>
 
-            <div
-                className={`card-actions flex-col items-stretch gap-3 pt-3 border-t-4 ${ac.border}/30`}
-            >
-                <div className="flex flex-row items-center gap-2 min-w-0">
-                    <div
-                        className={`w-10 h-10 shrink-0 flex items-center justify-center border-4 ${ac.border} bg-cream text-sm font-bold text-dark`}
+            {/* AI score badge */}
+            {score !== null && (
+                <div className="flex items-center gap-2 mb-4">
+                    <span
+                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${scoreBadge}`}
                     >
-                        {companyInitials}
-                    </div>
-                    <div className="min-w-0">
-                        <div className="text-sm font-bold text-dark truncate">
-                            {company}
-                        </div>
-                        <div className="text-sm text-dark/50 truncate">
-                            {roleTitle(application)}
-                        </div>
-                    </div>
+                        <i className="fa-duotone fa-regular fa-robot mr-1" />
+                        AI {score}%
+                    </span>
                 </div>
-                <div
-                    className="w-full flex justify-end overflow-hidden"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex gap-1 flex-wrap justify-end max-w-full">
-                        <ActionsToolbar
-                            application={application}
-                            variant="icon-only"
-                            size="xs"
-                            onRefresh={onRefresh}
-                            showActions={{ viewDetails: false }}
-                        />
-                    </div>
+            )}
+
+            {/* Footer: company initials avatar + actions toolbar */}
+            <div className="flex items-center justify-between gap-3 pt-4 border-t border-base-200">
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <ActionsToolbar
+                        application={application}
+                        variant="icon-only"
+                        size="sm"
+                        onRefresh={onRefresh}
+                        showActions={{
+                            viewDetails: false,
+                            advanceStage: true,
+                            reject: true,
+                            requestPrescreen: true,
+                        }}
+                    />
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

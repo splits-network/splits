@@ -54,14 +54,16 @@ The platform uses system fonts (no custom fonts loaded):
 - NOT the default — only for genuinely secondary information
 - If the text is meaningful content (descriptions, instructions, form labels), use `text-base` instead
 
-### Afterthought Text (RESTRICTED)
-- **Class**: `text-xs text-base-content/60`
-- **ONLY for**: timestamps, footnotes, copyright notices, "last updated" lines, version numbers
-- **NEVER for**: form labels, descriptions, body paragraphs, instructions, button labels, helper text users need to read
-- Badge text (`text-xs font-semibold`) is acceptable because it is inherent to the badge component's design
+### text-xs (HEAVILY RESTRICTED — Icons & Non-Human Text Only)
+- **Class**: `text-xs`
+- **ONLY for**: icon sizing (`<i className="fa-solid fa-icon text-xs">`), text not intended for human reading (hidden labels, ARIA-only, machine-readable data)
+- **NEVER for**: timestamps, footnotes, copyright, badges, kickers, form labels, descriptions, body paragraphs, instructions, button labels, helper text, or ANY text a human is expected to read
+- Timestamps, footnotes, copyright → use `text-sm text-base-content/60` instead
+- Kicker/label text → use `text-sm uppercase tracking-[0.2em]` instead
+- Badge text → use `text-sm font-semibold` or let the badge component handle sizing
 
 ### Badge Text
-- **Class**: `text-xs font-semibold`
+- **Class**: `text-sm font-semibold` (or sized by DaisyUI `badge` component)
 - Inside DaisyUI `badge` components
 
 ### Stat / Metric Numbers
@@ -137,7 +139,7 @@ Reference: `services/notification-service/src/templates/components.ts`
 - Using `text-lg` for body text (too large for standard body — should be `text-base`)
 - Using `text-sm` for body text on marketing pages (should be `text-base`)
 - Using `text-sm` as the default body text size anywhere (too small for sustained reading — should be `text-base`)
-- Using `text-xs` for meaningful content (descriptions, form labels, help text, instructions) — `text-xs` is ONLY for afterthought content (timestamps, footnotes, copyright)
+- Using `text-xs` on ANY human-readable text — `text-xs` is ONLY for icons and non-human text. Timestamps, footnotes, copyright, kickers, badges should all use `text-sm` minimum
 - Mixing px and Tailwind size classes
 
 ## Audit Mode
@@ -147,5 +149,5 @@ When auditing typography on a page:
 2. Verify heading hierarchy (h1 → h2 → h3, no skips)
 3. Check for hardcoded color values in text
 4. Verify font weight hierarchy (not everything bold)
-5. Confirm body text uses `text-base` as the default across all apps (flag `text-sm` body text as undersized, flag `text-xs` on meaningful content as a violation)
+5. Confirm body text uses `text-base` as the default across all apps (flag `text-sm` body text as undersized, flag `text-xs` on any human-readable text as a violation — text-xs is icons and non-human text ONLY)
 6. Check that muted/helper text uses opacity modifiers, not hardcoded grays

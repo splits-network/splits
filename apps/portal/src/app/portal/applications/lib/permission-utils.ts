@@ -97,7 +97,7 @@ function getPermissionsByStage(
                 canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canRequestChanges: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Approve & Move to Company Review',
+                approveButtonText: 'Approve for Company Review',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is being screened.',
             };
@@ -108,7 +108,7 @@ function getPermissionsByStage(
                 canApprove: isCompanyUser || isPlatformAdmin,
                 canReject: isCompanyUser || isPlatformAdmin,
                 canRequestPrescreen: !candidateRecruiterId && (isCompanyUser || isPlatformAdmin),
-                approveButtonText: 'Accept & Move to Company Review',
+                approveButtonText: 'Accept for Company Review',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is awaiting company acceptance.',
             };
@@ -130,7 +130,7 @@ function getPermissionsByStage(
                 canApprove: isRecruiter || isPlatformAdmin,
                 canReject: isRecruiter || isPlatformAdmin,
                 canRequestChanges: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Approve & Submit to Company',
+                approveButtonText: 'Approve for Company',
                 rejectButtonText: 'Decline to Represent',
                 waitingMessage: 'Waiting for recruiter to review this application.',
             };
@@ -140,8 +140,8 @@ function getPermissionsByStage(
                 ...base,
                 canApprove: isRecruiter || isPlatformAdmin,
                 canReject: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Approve Proposal for Company Review',
-                rejectButtonText: 'Decline to Represent',
+                approveButtonText: 'Approve for Company Review',
+                rejectButtonText: 'Decline',
                 waitingMessage: 'Waiting for recruiter proposal to be reviewed.',
             };
 

@@ -288,11 +288,12 @@ All content must comply with Memphis design principles:
 8. **Text size minimums** — content readability is non-negotiable:
    - Body copy, descriptions, instructions = `text-base` (16px) minimum. Never `text-sm` or `text-xs`.
    - Secondary metadata (bylines, "posted by", counts) = `text-sm` (14px) is acceptable
-   - `text-xs` (12px) is ONLY for afterthought content: timestamps, footnotes, copyright, version numbers
+   - `text-xs` (12px) is for icons and non-human text ONLY — never on ANY human-readable content
+   - This means timestamps, footnotes, copyright, version numbers → `text-sm`, NOT `text-xs`
    - Form labels = `text-base` — users must be able to read what they are filling in
    - Button labels and CTAs = sized by the button component (never manually set to `text-xs`)
-   - If a designer hands you a layout with `text-xs` on meaningful content, flag it as a violation
-   - **Rationale:** `text-xs` is 12px — extremely difficult for most users to read. `text-sm` at 14px is marginal for body text. `text-base` at 16px is the web standard for readable body content.
+   - If a designer hands you a layout with `text-xs` on ANY text a human should read, flag it as a violation
+   - **Rationale:** `text-xs` is 12px — too small for any human-readable text, including metadata. `text-sm` at 14px is the absolute minimum. `text-base` at 16px is the web standard.
 
 ## Content Checklist
 

@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { Badge } from "@splits-network/memphis-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
-import type { AccentClasses } from "./accent";
-import { statusVariant } from "./accent";
+import { statusColor } from "./status-color";
 import {
     salaryDisplay,
     formatEmploymentType,
@@ -19,18 +17,19 @@ import {
 } from "./helpers";
 import RoleActionsToolbar from "./actions-toolbar";
 
-// ─── Detail Panel ───────────────────────────────────────────────────────────
+/* ─── Detail Panel ───────────────────────────────────────────────────────── */
 
 export function JobDetail({
     job,
-    accent,
     onClose,
     onRefresh,
+    accent: _accent,
 }: {
     job: Job;
-    accent: AccentClasses;
     onClose?: () => void;
     onRefresh?: () => void;
+    /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
+    accent?: unknown;
 }) {
     const name = companyName(job);
     const salary = salaryDisplay(job);
@@ -47,25 +46,44 @@ export function JobDetail({
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-4 ${accent.border}`}>
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                        {isNew(job) && (
-                            <Badge color="yellow" className="mb-3">
-                                <i className="fa-duotone fa-regular fa-sparkles mr-1" />
-                                New
-                            </Badge>
-                        )}
-                        <h2 className="text-2xl font-black uppercase tracking-tight leading-tight mb-2 text-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span
+                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                            >
+                                {formatStatus(job.status)}
+                            </span>
+                            {isNew(job) && (
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
+                                    New
+                                </span>
+                            )}
+                            {job.employment_type && (
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                    {formatEmploymentType(job.employment_type)}
+                                </span>
+                            )}
+                            {level && (
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                    {level}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
+                            {job.department || name}
+                        </p>
+                        <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
                             {job.title}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-3 text-sm">
-                            <span className={`font-bold ${accent.text}`}>
+                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
+                            <span>
+                                <i className="fa-duotone fa-regular fa-building mr-1" />
                                 {name}
                             </span>
-                            <span className="text-dark/50">|</span>
                             {job.location && (
-                                <span className="text-dark/70">
+                                <span>
                                     <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                                     {job.location}
                                 </span>
@@ -75,27 +93,10 @@ export function JobDetail({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                            className="btn btn-sm btn-square btn-ghost"
                         >
-                            <i className="fa-duotone fa-regular fa-xmark" />
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
                         </button>
-                    )}
-                </div>
-
-                {/* Meta pills */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge color={statusVariant(job.status)} variant="outline">
-                        {formatStatus(job.status)}
-                    </Badge>
-                    {job.employment_type && (
-                        <Badge color="dark" variant="outline">
-                            {formatEmploymentType(job.employment_type)}
-                        </Badge>
-                    )}
-                    {level && (
-                        <Badge color="dark" variant="outline">
-                            {level}
-                        </Badge>
                     )}
                 </div>
 
@@ -106,129 +107,128 @@ export function JobDetail({
                         variant="descriptive"
                         size="sm"
                         onRefresh={onRefresh}
-                        showActions={{
-                            viewDetails: false,
-                        }}
+                        showActions={{ viewDetails: false }}
                     />
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className={`grid grid-cols-3 border-b-4 ${accent.border}`}>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {salary || "N/A"}
+            {/* Content */}
+            <div className="p-6 space-y-8">
+                {/* Stats grid */}
+                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Compensation
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {salary || "N/A"}
+                        </p>
                     </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Salary
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Fee
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {job.fee_percentage}%
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Candidates
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {job.application_count ?? 0}
+                        </p>
                     </div>
                 </div>
-                <div className="p-4 text-center border-r-2 border-dark/10">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {job.fee_percentage}%
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Split Fee
-                    </div>
-                </div>
-                <div className="p-4 text-center">
-                    <div className={`text-lg font-black ${accent.text}`}>
-                        {job.application_count ?? 0}
-                    </div>
-                    <div className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Applicants
-                    </div>
-                </div>
-            </div>
 
-            {/* Description */}
-            <div className="p-6">
+                {/* Recruiter Brief */}
                 {job.recruiter_description && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-purple">
-                                <i className="fa-duotone fa-regular fa-user-tie" />
-                            </span>
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Recruiter Brief
                         </h3>
                         <MarkdownRenderer
                             content={job.recruiter_description}
-                            className="prose prose-sm max-w-none text-dark/80"
+                            className="prose prose-sm max-w-none text-base-content/70"
                         />
                     </div>
                 )}
 
+                {/* Description */}
                 {(job.description || job.candidate_description) && (
-                    <MarkdownRenderer
-                        content={
-                            (job.description || job.candidate_description)!
-                        }
-                        className="prose prose-sm max-w-none mb-6 text-dark/80"
-                    />
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Role Overview
+                        </h3>
+                        <MarkdownRenderer
+                            content={
+                                (job.description || job.candidate_description)!
+                            }
+                            className="prose prose-sm max-w-none text-base-content/70 leading-relaxed"
+                        />
+                    </div>
                 )}
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {/* Details grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {commute && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Commute
-                            </div>
-                            <div className="text-sm font-bold text-dark">
-                                {commute}
-                            </div>
+                            </p>
+                            <p className="font-bold text-sm">{commute}</p>
                         </div>
                     )}
                     {job.department && (
-                        <div className="p-3 border-2 border-dark/20">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Department
-                            </div>
-                            <div className="text-sm font-bold text-dark">
+                            </p>
+                            <p className="font-bold text-sm">
                                 {job.department}
-                            </div>
+                            </p>
                         </div>
                     )}
                     {job.guarantee_days !== undefined &&
                         job.guarantee_days !== null && (
-                            <div className="p-3 border-2 border-dark/20">
-                                <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                            <div className="bg-base-100 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Guarantee
-                                </div>
-                                <div className="text-sm font-bold text-dark">
+                                </p>
+                                <p className="font-bold text-sm">
                                     {job.guarantee_days} days
-                                </div>
+                                </p>
                             </div>
                         )}
                     {job.open_to_relocation && (
-                        <div className="p-3 border-2 border-teal/40">
-                            <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                        <div className="bg-base-100 p-4">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Relocation
-                            </div>
-                            <div className="text-sm font-bold text-teal">
+                            </p>
+                            <p className="font-bold text-sm text-secondary">
                                 Open to relocation
-                            </div>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Mandatory Requirements */}
                 {mandatoryReqs.length > 0 && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-coral">
-                                <i className="fa-duotone fa-regular fa-list-check" />
-                            </span>
-                            Requirements
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Must Have
                         </h3>
                         <ul className="space-y-2">
                             {mandatoryReqs.map((req) => (
                                 <li
                                     key={req.id}
-                                    className="flex items-start gap-2 text-sm text-dark/75"
+                                    className="flex items-start gap-3 text-base-content/70"
                                 >
-                                    <i className="fa-duotone fa-regular fa-chevron-right mt-1 flex-shrink-0 text-sm text-coral" />
-                                    {req.description}
+                                    <i className="fa-duotone fa-regular fa-check text-primary text-xs mt-1.5 flex-shrink-0" />
+                                    <span className="leading-relaxed">
+                                        {req.description}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -237,21 +237,20 @@ export function JobDetail({
 
                 {/* Preferred Requirements */}
                 {preferredReqs.length > 0 && (
-                    <div className="mb-6">
-                        <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-dark">
-                            <span className="badge badge-xs badge-teal">
-                                <i className="fa-duotone fa-regular fa-clipboard-list" />
-                            </span>
-                            Nice to Have
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Preferred
                         </h3>
                         <ul className="space-y-2">
                             {preferredReqs.map((req) => (
                                 <li
                                     key={req.id}
-                                    className="flex items-start gap-2 text-sm text-dark/75"
+                                    className="flex items-start gap-3 text-base-content/70"
                                 >
-                                    <i className="fa-duotone fa-regular fa-chevron-right mt-1 flex-shrink-0 text-sm text-teal" />
-                                    {req.description}
+                                    <i className="fa-duotone fa-regular fa-arrow-right text-secondary text-xs mt-1.5 flex-shrink-0" />
+                                    <span className="leading-relaxed">
+                                        {req.description}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -259,37 +258,33 @@ export function JobDetail({
                 )}
 
                 {/* Company Info */}
-                <div className={`p-4 border-4 ${accent.border}`}>
-                    <h3 className="font-black text-sm uppercase tracking-wider mb-3 text-dark">
-                        Company
+                <div className="border-t-2 border-base-300 pt-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                        Hiring Company
                     </h3>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         {job.company?.logo_url ? (
                             <img
                                 src={job.company.logo_url}
                                 alt={name}
-                                className={`w-12 h-12 object-cover ${accent.bg} border-2 ${accent.border}`}
+                                className="w-12 h-12 object-cover"
                             />
                         ) : (
-                            <div
-                                className={`w-12 h-12 flex items-center justify-center border-2 ${accent.border} bg-cream font-bold text-sm text-dark`}
-                            >
+                            <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
                                 {companyInitials(name)}
                             </div>
                         )}
                         <div>
-                            <div className="font-bold text-sm text-dark">
-                                {name}
-                            </div>
+                            <p className="font-bold">{name}</p>
                             {job.company?.industry && (
-                                <div className={`text-sm ${accent.text}`}>
+                                <p className="text-sm text-base-content/50">
                                     {job.company.industry}
-                                </div>
+                                </p>
                             )}
                             {job.company?.headquarters_location && (
-                                <div className="text-sm text-dark/50">
+                                <p className="text-sm text-base-content/50">
                                     {job.company.headquarters_location}
-                                </div>
+                                </p>
                             )}
                         </div>
                     </div>
@@ -299,16 +294,14 @@ export function JobDetail({
     );
 }
 
-// ─── Detail Loading Wrapper ─────────────────────────────────────────────────
+/* ─── Detail Loading Wrapper ─────────────────────────────────────────────── */
 
 export function DetailLoader({
     jobId,
-    accent,
     onClose,
     onRefresh,
 }: {
     jobId: string;
-    accent: AccentClasses;
     onClose: () => void;
     onRefresh?: () => void;
 }) {
@@ -346,13 +339,9 @@ export function DetailLoader({
         return (
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-4 h-4 bg-coral animate-pulse" />
-                        <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                        <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Loading details...
+                    <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                        Loading role...
                     </span>
                 </div>
             </div>
@@ -361,12 +350,5 @@ export function DetailLoader({
 
     if (!job) return null;
 
-    return (
-        <JobDetail
-            job={job}
-            accent={accent}
-            onClose={onClose}
-            onRefresh={onRefresh}
-        />
-    );
+    return <JobDetail job={job} onClose={onClose} onRefresh={onRefresh} />;
 }

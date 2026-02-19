@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import {
-    ServiceStatusBanner,
-    ActivityTracker,
-} from "@splits-network/shared-ui";
+import { ActivityTracker } from "@splits-network/shared-ui";
+import { ServiceStatusProvider, ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -92,8 +90,9 @@ export default function RootLayout({
         url: "https://employment-networks.com",
     };
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <head>
+                <ThemeScript />
                 <JsonLd data={organizationJsonLd} id="corporate-org-jsonld" />
                 <JsonLd
                     data={softwareAppJsonLd}
@@ -110,10 +109,12 @@ export default function RootLayout({
                 ></Script>
             </head>
             <body className="antialiased flex flex-col min-h-screen">
-                <ServiceStatusBanner statusHref="/status" />
+                <ThemeProvider>
+                <ServiceStatusProvider statusHref="/status" />
                 <Header />
                 <main className="flex-grow">{children}</main>
                 <Footer />
+                </ThemeProvider>
                 <ActivityTracker app="corporate" />
 
                 {clarityId ? (

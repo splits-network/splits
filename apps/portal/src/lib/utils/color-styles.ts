@@ -95,3 +95,28 @@ export function getServiceStatusColor(status: 'healthy' | 'unhealthy' | 'checkin
     };
     return colors[status];
 }
+
+/* ─── Role → DaisyUI semantic color mapping (Basel) ──────────────────────── */
+
+export interface RoleStyle {
+    bg: string;
+    text: string;
+    badgeBg: string;
+}
+
+const ROLE_STYLES: Record<string, RoleStyle> = {
+    Administrator: { bg: 'bg-error', text: 'text-error-content', badgeBg: 'bg-error/10 text-error' },
+    Recruiter: { bg: 'bg-primary', text: 'text-primary-content', badgeBg: 'bg-primary/10 text-primary' },
+    'Recruiter & Company': { bg: 'bg-primary', text: 'text-primary-content', badgeBg: 'bg-primary/10 text-primary' },
+    'Company User': { bg: 'bg-secondary', text: 'text-secondary-content', badgeBg: 'bg-secondary/10 text-secondary' },
+    Candidate: { bg: 'bg-accent', text: 'text-accent-content', badgeBg: 'bg-accent/10 text-accent' },
+    User: { bg: 'bg-neutral', text: 'text-neutral-content', badgeBg: 'bg-neutral/10 text-neutral' },
+};
+
+/**
+ * Get DaisyUI semantic color styles for a user role.
+ * Used by Basel components for role-colored avatars and badges.
+ */
+export function getRoleStyle(roleDisplay: string): RoleStyle {
+    return ROLE_STYLES[roleDisplay] || ROLE_STYLES.User;
+}

@@ -1,27 +1,21 @@
 "use client";
 
 import { Fragment } from "react";
-import { Badge } from "@splits-network/memphis-ui";
 import type { Candidate } from "../../types";
-import { formatVerificationStatus } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
+import { formatVerificationStatus, formatJobType } from "../../types";
+import { statusColor } from "../shared/status-color";
 import {
+    candidateName,
+    candidateTitle,
     salaryDisplay,
     isNew,
     addedAgo,
-    candidateName,
-    candidateInitials,
-    candidateTitle,
-    candidateCompany,
-    skillsList,
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/candidate-detail";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 
 export function TableRow({
     candidate,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -29,122 +23,84 @@ export function TableRow({
     onRefresh,
 }: {
     candidate: Candidate;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
-    const name = candidateName(candidate);
-    const initials = candidateInitials(name);
-    const title = candidateTitle(candidate);
-    const company = candidateCompany(candidate);
-    const skills = skillsList(candidate);
+    const rowBase = isSelected
+        ? "bg-primary/5 border-l-4 border-l-primary"
+        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
+            {/* Main row */}
             <tr
                 onClick={onSelect}
-                className={`cursor-pointer transition-colors border-l-4 ${
-                    isSelected
-                        ? `${ac.bgLight} ${ac.border}`
-                        : `border-transparent ${idx % 2 === 0 ? "bg-white" : "bg-cream"}`
-                }`}
+                className={`cursor-pointer transition-colors ${rowBase}`}
             >
-                {/* Accent indicator / chevron */}
+                {/* Chevron */}
                 <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? ac.text : "text-dark/40"}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
                     />
                 </td>
 
-                {/* Name + avatar initials */}
+                {/* Name */}
                 <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                        <div
-                            className={`flex-shrink-0 w-8 h-8 rounded-full ${ac.bg} flex items-center justify-center`}
-                        >
-                            <span className={`text-xs font-black ${ac.textOnBg}`}>
-                                {initials}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2 min-w-0">
-                            {isNew(candidate) && (
-                                <i className="fa-duotone fa-regular fa-sparkles text-sm text-yellow flex-shrink-0" />
-                            )}
-                            <span className="font-black text-sm text-dark uppercase truncate">
-                                {name}
-                            </span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        {isNew(candidate) && (
+                            <i
+                                className="fa-duotone fa-regular fa-sparkles text-sm text-warning"
+                                title="New in the last 7 days"
+                            />
+                        )}
+                        <span className="font-bold text-sm text-base-content">
+                            {candidateName(candidate)}
+                        </span>
                     </div>
                 </td>
 
-                {/* Title + company */}
-                <td className="px-4 py-3">
-                    <div className="min-w-0">
-                        <span className="text-sm font-bold text-dark block truncate">
-                            {title}
-                        </span>
-                        {company && (
-                            <span className={`text-xs font-semibold ${ac.text} block truncate`}>
-                                {company}
-                            </span>
-                        )}
-                    </div>
+                {/* Title */}
+                <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
+                    {candidateTitle(candidate) || "\u2014"}
                 </td>
 
                 {/* Location */}
-                <td className="px-4 py-3 text-sm text-dark/70">
-                    {candidate.location ? (
-                        <div className="flex items-center gap-1.5">
-                            <i className="fa-duotone fa-regular fa-location-dot text-xs text-dark/40" />
-                            <span className="truncate">{candidate.location}</span>
-                        </div>
-                    ) : (
-                        "—"
-                    )}
+                <td className="px-4 py-3 text-sm text-base-content/60">
+                    {candidate.location || "\u2014"}
                 </td>
 
-                {/* Salary range */}
-                <td className="px-4 py-3 text-sm font-bold text-dark">
-                    {salaryDisplay(candidate) || "—"}
-                </td>
-
-                {/* Verification status */}
+                {/* Verification Status */}
                 <td className="px-4 py-3">
-                    <Badge color={statusVariant(candidate.verification_status)}>
+                    <span
+                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(candidate.verification_status)}`}
+                    >
                         {formatVerificationStatus(candidate.verification_status)}
-                    </Badge>
+                    </span>
                 </td>
 
-                {/* Skills */}
-                <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 flex-wrap">
-                        {skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} color="purple">
-                                {skill}
-                            </Badge>
-                        ))}
-                        {skills.length > 3 && (
-                            <span className="text-xs font-bold text-dark/50">
-                                +{skills.length - 3}
-                            </span>
-                        )}
-                        {skills.length === 0 && (
-                            <span className="text-xs text-dark/40">—</span>
-                        )}
-                    </div>
+                {/* Job Type */}
+                <td className="px-4 py-3 text-sm text-base-content/60">
+                    {formatJobType(candidate.desired_job_type)}
                 </td>
 
-                {/* Added ago */}
-                <td className="px-4 py-3 text-sm text-dark/60">
+                {/* Salary */}
+                <td className="px-4 py-3 text-sm font-bold text-base-content">
+                    {salaryDisplay(candidate) || "\u2014"}
+                </td>
+
+                {/* Added */}
+                <td className="px-4 py-3 text-sm text-base-content/50">
                     {addedAgo(candidate)}
                 </td>
 
                 {/* Actions */}
-                <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
+                <td
+                    className="px-4 py-3 relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
                         <CandidateActionsToolbar
                             candidate={candidate}
@@ -159,16 +115,15 @@ export function TableRow({
                 </td>
             </tr>
 
-            {/* Expandable detail row */}
+            {/* Expanded detail row */}
             {isSelected && (
                 <tr>
                     <td
                         colSpan={colSpan}
-                        className={`border-t-4 border-b-4 ${ac.border}`}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                     >
                         <DetailLoader
                             candidateId={candidate.id}
-                            accent={ac}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

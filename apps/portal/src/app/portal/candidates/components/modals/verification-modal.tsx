@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
-import { Button } from "@splits-network/memphis-ui";
+import { statusDot } from "../shared/status-color";
 
 interface VerificationModalProps {
     candidate: any;
@@ -12,13 +12,6 @@ interface VerificationModalProps {
     onClose: () => void;
     onUpdate: (updatedCandidate: any) => void;
 }
-
-const STATUS_COLORS: Record<string, { bg: string; border: string; text: string; dot: string }> = {
-    verified: { bg: "bg-teal/10", border: "border-teal", text: "text-teal", dot: "bg-teal" },
-    pending: { bg: "bg-yellow/10", border: "border-yellow", text: "text-yellow", dot: "bg-yellow" },
-    unverified: { bg: "bg-purple/10", border: "border-purple", text: "text-purple", dot: "bg-purple" },
-    rejected: { bg: "bg-coral/10", border: "border-coral", text: "text-coral", dot: "bg-coral" },
-};
 
 export default function VerificationModal({
     candidate,
@@ -67,7 +60,7 @@ export default function VerificationModal({
         } catch (err: any) {
             console.error("Failed to update verification:", err);
             setError(
-                err.message || "Failed to update verification status",
+                err.message || "Could not update verification. Try again.",
             );
         } finally {
             setSubmitting(false);
@@ -83,48 +76,47 @@ export default function VerificationModal({
 
     if (!isOpen) return null;
 
-    const colors = STATUS_COLORS[status] || STATUS_COLORS.unverified;
-
     return (
-        <dialog className="modal modal-open" onClick={handleClose}>
+        <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box bg-white border-4 border-dark rounded-none max-w-lg w-full p-0"
+                className="modal-box max-w-lg w-full p-0"
+                style={{ borderRadius: 0 }}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="bg-teal px-6 py-4 border-b-4 border-dark flex items-center justify-between">
-                    <h2 className="text-xl font-black uppercase tracking-tight text-teal-content">
-                        Update Verification
+                <div className="bg-accent px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-xl font-black uppercase tracking-tight text-accent-content">
+                        Verify Candidate
                     </h2>
                     <button
                         type="button"
-                        className="w-8 h-8 flex items-center justify-center bg-dark text-white font-black text-lg leading-none hover:bg-dark/80 transition-colors"
+                        className="btn btn-sm btn-square btn-ghost text-accent-content"
                         onClick={handleClose}
                         disabled={submitting}
                         aria-label="Close"
                     >
-                        <i className="fa-duotone fa-regular fa-times" />
+                        <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 </div>
 
                 <div className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Candidate Info */}
-                        <div className="border-4 border-dark p-4">
-                            <label className="block text-xs font-black uppercase tracking-wider text-dark/60 mb-2">
+                        <div className="border-2 border-base-300 p-4">
+                            <label className="block text-xs font-black uppercase tracking-wider text-base-content/60 mb-2">
                                 Candidate
                             </label>
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-purple border-4 border-dark flex items-center justify-center flex-shrink-0">
-                                    <span className="text-sm font-black text-white">
+                                <div className="w-10 h-10 bg-primary flex items-center justify-center flex-shrink-0">
+                                    <span className="text-sm font-black text-primary-content">
                                         {candidate.full_name?.[0] || "?"}
                                     </span>
                                 </div>
                                 <div>
-                                    <div className="font-black text-dark">
+                                    <div className="font-black text-base-content">
                                         {candidate.full_name}
                                     </div>
-                                    <div className="text-sm text-dark/60 font-bold">
+                                    <div className="text-sm text-base-content/60 font-bold">
                                         {candidate.email}
                                     </div>
                                 </div>
@@ -133,15 +125,16 @@ export default function VerificationModal({
 
                         {/* Status Select */}
                         <div>
-                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
-                                Verification Status <span className="text-coral">*</span>
+                            <label className="block text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2">
+                                Verification Status{" "}
+                                <span className="text-error">*</span>
                             </label>
                             <select
-                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark focus:outline-none focus:border-teal transition-colors"
+                                className="select select-bordered w-full"
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 required
-                                style={{ borderRadius: 0, appearance: "auto" }}
+                                style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             >
                                 <option value="unverified">Unverified</option>
@@ -150,8 +143,11 @@ export default function VerificationModal({
                                 <option value="rejected">Rejected</option>
                             </select>
                             <div className="mt-2 flex items-center gap-2">
-                                <div className={`w-3 h-3 border-2 border-dark ${colors.dot}`} />
-                                <span className={`text-xs font-bold uppercase tracking-wider ${colors.text}`}>
+                                <div
+                                    className={`w-3 h-3 ${statusDot(status)}`}
+                                    style={{ borderRadius: 0 }}
+                                />
+                                <span className="text-xs font-bold uppercase tracking-wider text-base-content/70">
                                     {status}
                                 </span>
                             </div>
@@ -159,54 +155,78 @@ export default function VerificationModal({
 
                         {/* Notes Textarea */}
                         <div>
-                            <label className="block text-xs font-black uppercase tracking-wider text-dark mb-2">
+                            <label className="block text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2">
                                 Verification Notes
                             </label>
                             <textarea
-                                className="w-full px-4 py-3 bg-white border-4 border-dark font-bold text-dark placeholder:text-dark/30 placeholder:font-medium focus:outline-none focus:border-teal transition-colors resize-none"
+                                className="textarea textarea-bordered w-full"
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Optional notes about the verification decision..."
+                                placeholder="Record any context about this verification decision..."
                                 rows={4}
                                 style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             />
-                            <p className="text-xs font-bold text-dark/50 mt-1 uppercase tracking-wider">
-                                Add any relevant notes about the verification process or decision
+                            <p className="text-xs font-bold text-base-content/50 mt-1 uppercase tracking-wider">
+                                Internal only. Not visible to the candidate.
                             </p>
                         </div>
 
                         {/* Status Info Box */}
-                        <div className="bg-sky/10 border-4 border-sky p-4">
+                        <div className="bg-info/10 border-l-4 border-info p-4">
                             <div className="flex gap-3 items-start">
-                                <i className="fa-duotone fa-regular fa-info-circle text-sky text-lg mt-0.5" />
+                                <i className="fa-duotone fa-regular fa-info-circle text-info text-lg mt-0.5" />
                                 <div className="text-sm">
-                                    <p className="font-black text-dark uppercase tracking-wider text-xs mb-2">
-                                        Status Meanings
+                                    <p className="font-black text-base-content uppercase tracking-wider text-xs mb-2">
+                                        Status Reference
                                     </p>
                                     <ul className="space-y-1.5">
                                         <li className="flex items-start gap-2">
-                                            <span className="w-2 h-2 mt-1.5 bg-purple border-2 border-dark flex-shrink-0" />
-                                            <span className="text-dark/80">
-                                                <strong className="text-dark">Unverified:</strong> Default state, no verification performed
+                                            <span
+                                                className="w-2 h-2 mt-1.5 bg-info flex-shrink-0"
+                                                style={{ borderRadius: 0 }}
+                                            />
+                                            <span className="text-base-content/80">
+                                                <strong className="text-base-content">
+                                                    Unverified:
+                                                </strong>{" "}
+                                                No review has been performed yet
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <span className="w-2 h-2 mt-1.5 bg-yellow border-2 border-dark flex-shrink-0" />
-                                            <span className="text-dark/80">
-                                                <strong className="text-dark">Pending:</strong> Verification in progress
+                                            <span
+                                                className="w-2 h-2 mt-1.5 bg-warning flex-shrink-0"
+                                                style={{ borderRadius: 0 }}
+                                            />
+                                            <span className="text-base-content/80">
+                                                <strong className="text-base-content">
+                                                    Pending:
+                                                </strong>{" "}
+                                                Review is in progress
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <span className="w-2 h-2 mt-1.5 bg-teal border-2 border-dark flex-shrink-0" />
-                                            <span className="text-dark/80">
-                                                <strong className="text-dark">Verified:</strong> Candidate information confirmed and accurate
+                                            <span
+                                                className="w-2 h-2 mt-1.5 bg-success flex-shrink-0"
+                                                style={{ borderRadius: 0 }}
+                                            />
+                                            <span className="text-base-content/80">
+                                                <strong className="text-base-content">
+                                                    Verified:
+                                                </strong>{" "}
+                                                Identity and credentials confirmed
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <span className="w-2 h-2 mt-1.5 bg-coral border-2 border-dark flex-shrink-0" />
-                                            <span className="text-dark/80">
-                                                <strong className="text-dark">Rejected:</strong> Verification failed
+                                            <span
+                                                className="w-2 h-2 mt-1.5 bg-error flex-shrink-0"
+                                                style={{ borderRadius: 0 }}
+                                            />
+                                            <span className="text-base-content/80">
+                                                <strong className="text-base-content">
+                                                    Rejected:
+                                                </strong>{" "}
+                                                Verification did not pass review
                                             </span>
                                         </li>
                                     </ul>
@@ -216,42 +236,48 @@ export default function VerificationModal({
 
                         {/* Error */}
                         {error && (
-                            <div className="bg-coral/10 border-4 border-coral p-4">
+                            <div className="bg-error/10 border-l-4 border-error p-4">
                                 <div className="flex gap-3 items-start">
-                                    <i className="fa-duotone fa-regular fa-circle-exclamation text-coral text-lg mt-0.5" />
-                                    <span className="font-bold text-dark text-sm">{error}</span>
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation text-error text-lg mt-0.5" />
+                                    <span className="font-bold text-base-content text-sm">
+                                        {error}
+                                    </span>
                                 </div>
                             </div>
                         )}
 
                         {/* Actions */}
                         <div className="flex gap-3 justify-end pt-2">
-                            <Button
+                            <button
                                 type="button"
-                                color="dark"
-                                variant="outline"
-                                size="md"
+                                className="btn btn-outline"
+                                style={{ borderRadius: 0 }}
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
                                 Cancel
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 type="submit"
-                                color="teal"
-                                size="md"
+                                className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             >
                                 <ButtonLoading
                                     loading={submitting}
-                                    text="Update Status"
-                                    loadingText="Updating..."
+                                    text="Save Verification"
+                                    loadingText="Saving..."
                                 />
-                            </Button>
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
+            <form method="dialog" className="modal-backdrop">
+                <button type="button" onClick={handleClose}>
+                    close
+                </button>
+            </form>
         </dialog>
     );
 }

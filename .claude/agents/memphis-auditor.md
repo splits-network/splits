@@ -338,29 +338,27 @@ Memphis typography:
 
 #### 7b. Text Size Violations (WARNING — Readability)
 
-**`text-xs` on meaningful content is a WARNING.** The `text-xs` class (12px) is extremely difficult for users to read and should ONLY be used for afterthought content: timestamps, footnotes, copyright notices, "last updated" lines, version numbers.
+**`text-xs` on ANY human-readable text is a WARNING.** The `text-xs` class (12px) is for icons and non-human text ONLY. It must NEVER be used on any text intended for humans to read — including timestamps, footnotes, copyright, badges, version numbers, or kicker labels. Use `text-sm` minimum for all human-readable text.
 
 Search patterns for `text-xs` misuse:
 ```bash
-# Find all text-xs usage, then manually verify each is afterthought content
+# Find ALL text-xs usage — every instance on human-readable text is a violation
 grep -rn "text-xs" --include="*.tsx" <target>
 ```
 
-Flag as WARNING if `text-xs` appears on:
+Flag as WARNING if `text-xs` appears on ANY human-readable text, including:
 - `<p>` body paragraphs or descriptions
 - `<label>` or form field labels
-- `<span>` containing instructions, help text, or content the user needs to read
+- `<span>` containing ANY text humans should read (timestamps, kickers, metadata, etc.)
 - `<button>` labels or CTA text
 - `<h1>` through `<h6>` headings
-- `<li>` list items containing substantive content
-- `<td>` or `<th>` table cells with primary data
+- `<li>` list items
+- `<td>` or `<th>` table cells
+- Badge text, copyright, footnotes, version numbers
 
-`text-xs` is ACCEPTABLE on:
-- Timestamps and dates (e.g., `<span className="text-xs ...">2 hours ago</span>`)
-- Copyright notices (e.g., `<span className="text-xs">© 2026 Splits Network</span>`)
-- Badge text (inherent to the `badge` component)
-- Version numbers, footnote markers
-- Content explicitly marked as afterthought/supplementary
+`text-xs` is ONLY ACCEPTABLE on:
+- Icon elements (e.g., `<i className="fa-solid fa-icon text-xs">`)
+- Text not intended for human reading (hidden labels, ARIA-only, machine-readable data)
 
 **`text-sm` as default body text is a WARNING.** The `text-sm` class (14px) is acceptable for secondary/supporting content but should NOT be the default body text size. Body text should use `text-base` (16px).
 
@@ -368,16 +366,18 @@ Flag as WARNING if `text-sm` is the predominant body text size on a page or comp
 
 Example violations:
 ```tsx
-<p className="text-xs text-base-content/60">Enter your company name</p>  ⚠️ WARNING (form label, not afterthought)
-<p className="text-xs">No candidates match your search criteria</p>       ⚠️ WARNING (meaningful content)
-<td className="text-xs">Senior React Developer</td>                       ⚠️ WARNING (primary table data)
+<p className="text-xs text-base-content/60">Enter your company name</p>    ⚠️ WARNING (form label)
+<p className="text-xs">No candidates match your search criteria</p>         ⚠️ WARNING (meaningful content)
+<td className="text-xs">Senior React Developer</td>                         ⚠️ WARNING (table data)
+<span className="text-xs text-base-content/50">Updated 2 hours ago</span>  ⚠️ WARNING (use text-sm)
+<span className="badge text-xs font-semibold">Active</span>                ⚠️ WARNING (use text-sm or let badge component handle sizing)
+<p className="text-xs text-base-content/60">v2.4.1</p>                     ⚠️ WARNING (use text-sm)
 ```
 
 Example acceptable uses:
 ```tsx
-<span className="text-xs text-base-content/50">Updated 2 hours ago</span>  ✅ OK (timestamp)
-<span className="badge text-xs font-semibold">Active</span>                ✅ OK (badge component)
-<p className="text-xs text-base-content/60">v2.4.1</p>                     ✅ OK (version number)
+<i className="fa-solid fa-chevron-right text-xs" />                         ✅ OK (icon sizing)
+<span className="sr-only text-xs">Machine-readable label</span>            ✅ OK (non-human text)
 ```
 
 ### 8. Missing Memphis-UI Component Usage (Warning)
@@ -517,7 +517,7 @@ const violations: Violation[] = [];
 - `hardcoded_hex`, `inline_style`, `color_constant`, `border_width` → **critical**
 - `chartjs_usage` → **critical** (must migrate to Recharts)
 - `chart_styling` → **warning** (non-Memphis chart styling)
-- `text_size` (text-xs on meaningful content, text-sm as default body) → **warning**
+- `text_size` (text-xs on ANY human-readable text, text-sm as default body) → **warning**
 - Non-Memphis Tailwind colors (bg-blue-500 etc.) → **warning**
 - Missing geometric decorations → **info**
 
@@ -681,8 +681,8 @@ grep -rn "from 'chart.js'\|from 'react-chartjs-2'\|ChartJS.register\|registerCha
 ### Warning Patterns
 ```bash
 # Text size violations (readability)
-# Find text-xs on meaningful content (manually verify each is afterthought content)
-grep -rn "text-xs" --include="*.tsx" apps/portal/src/ | grep -v "badge\|timestamp\|copyright\|version"
+# Find ALL text-xs usage — every instance on human-readable text is a violation (only icons are exempt)
+grep -rn "text-xs" --include="*.tsx" apps/portal/src/ | grep -v "fa-\|fa_"
 # Find text-sm used as default body text (flag if predominant on a page)
 grep -rn "text-sm" --include="*.tsx" apps/portal/src/ | grep -v "btn-sm\|badge-sm"
 
@@ -779,7 +779,7 @@ The auditor can automatically fix violations or spawn designers to fix them.
 | Raw Tailwind button styling | → `btn` + `btn-{color}` + `btn-{size}` |
 | Raw Tailwind badge styling | → `badge` |
 | Raw Tailwind input styling | → `input` |
-| `text-xs` on descriptions/labels/body | → `text-base` (primary content) or `text-sm` (secondary metadata) |
+| `text-xs` on ANY human-readable text | → `text-base` (primary content) or `text-sm` (secondary/metadata/timestamps/footnotes) |
 | `text-sm` as default body text | → `text-base` |
 
 ### Hex → Tailwind Class Mapping

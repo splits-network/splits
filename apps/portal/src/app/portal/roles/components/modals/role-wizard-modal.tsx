@@ -6,18 +6,6 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownEditor } from "@splits-network/shared-ui";
-import {
-    Modal,
-    Input,
-    Select,
-    Button,
-    Badge,
-    StepProgress,
-    Checkbox,
-    Toggle,
-    AlertBanner,
-} from "@splits-network/memphis-ui";
-import type { Step } from "@splits-network/memphis-ui";
 import type {
     FormData,
     Company,
@@ -26,32 +14,12 @@ import type {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const WIZARD_STEPS: Step[] = [
-    {
-        label: "Basic Info",
-        icon: "fa-duotone fa-regular fa-briefcase",
-        accent: "coral",
-    },
-    {
-        label: "Compensation",
-        icon: "fa-duotone fa-regular fa-money-bill-wave",
-        accent: "teal",
-    },
-    {
-        label: "Descriptions",
-        icon: "fa-duotone fa-regular fa-file-lines",
-        accent: "yellow",
-    },
-    {
-        label: "Requirements",
-        icon: "fa-duotone fa-regular fa-list-check",
-        accent: "purple",
-    },
-    {
-        label: "Pre-Screen",
-        icon: "fa-duotone fa-regular fa-clipboard-question",
-        accent: "coral",
-    },
+const WIZARD_STEPS = [
+    { label: "Basic Info", icon: "fa-duotone fa-regular fa-briefcase" },
+    { label: "Compensation", icon: "fa-duotone fa-regular fa-money-bill-wave" },
+    { label: "Descriptions", icon: "fa-duotone fa-regular fa-file-lines" },
+    { label: "Requirements", icon: "fa-duotone fa-regular fa-list-check" },
+    { label: "Pre-Screen", icon: "fa-duotone fa-regular fa-clipboard-question" },
 ];
 
 const COMMUTE_OPTIONS = [
@@ -162,54 +130,60 @@ function PreScreenQuestionCard({
     };
 
     return (
-        <div className="border-4 border-dark p-4 space-y-3">
+        <div className="border-2 border-base-300 p-4 space-y-3">
             <div className="flex gap-2">
-                <Input
-                    value={question.question}
-                    onChange={(e) =>
-                        onUpdate(index, "question", e.target.value)
-                    }
-                    placeholder="Enter question..."
-                    className="flex-1"
-                />
+                <fieldset className="fieldset flex-1">
+                    <input
+                        className="input input-bordered w-full"
+                        style={{ borderRadius: 0 }}
+                        value={question.question}
+                        onChange={(e) =>
+                            onUpdate(index, "question", e.target.value)
+                        }
+                        placeholder="Enter question..."
+                    />
+                </fieldset>
                 <button
                     type="button"
                     onClick={() => onRemove(index)}
-                    className="btn btn-dark btn-sm"
+                    className="btn btn-ghost btn-sm text-error"
                 >
                     <i className="fa-duotone fa-regular fa-trash" />
                 </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                <Select
-                    value={question.question_type}
-                    onChange={(e) =>
-                        onUpdate(index, "question_type", e.target.value)
-                    }
-                    options={[
-                        { value: "text", label: "Text" },
-                        { value: "yes_no", label: "Yes/No" },
-                        { value: "select", label: "Select One" },
-                        { value: "multi_select", label: "Multi-Select" },
-                    ]}
-                />
-                <div className="flex items-center">
-                    <Checkbox
-                        checked={question.is_required}
-                        onChange={(checked) =>
-                            onUpdate(index, "is_required", checked)
+                <fieldset className="fieldset">
+                    <select
+                        className="select select-bordered w-full"
+                        style={{ borderRadius: 0 }}
+                        value={question.question_type}
+                        onChange={(e) =>
+                            onUpdate(index, "question_type", e.target.value)
                         }
-                        color="coral"
                     >
-                        Required
-                    </Checkbox>
+                        <option value="text">Text</option>
+                        <option value="yes_no">Yes/No</option>
+                        <option value="select">Select One</option>
+                        <option value="multi_select">Multi-Select</option>
+                    </select>
+                </fieldset>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        className="checkbox checkbox-primary checkbox-sm"
+                        checked={question.is_required}
+                        onChange={(e) =>
+                            onUpdate(index, "is_required", e.target.checked)
+                        }
+                    />
+                    <span className="text-sm font-semibold">Required</span>
                 </div>
             </div>
 
             {requiresOptions && (
-                <div className="space-y-2 pl-4 border-l-4 border-coral">
-                    <span className="text-xs font-black uppercase tracking-wider text-dark">
+                <div className="space-y-2 pl-4 border-l-4 border-primary">
+                    <span className="text-xs font-bold uppercase tracking-wider text-base-content/70">
                         <i className="fa-duotone fa-regular fa-list mr-1" />
                         Answer Options
                     </span>
@@ -221,10 +195,10 @@ function PreScreenQuestionCard({
                                     key={optIdx}
                                     className="flex gap-2 items-center"
                                 >
-                                    <span className="text-dark/60 text-sm font-bold w-5">
+                                    <span className="text-base-content/60 text-sm font-bold w-5">
                                         {optIdx + 1}.
                                     </span>
-                                    <span className="flex-1 bg-cream px-3 py-2 text-sm font-semibold text-dark border-2 border-dark/10">
+                                    <span className="flex-1 bg-base-200 px-3 py-2 text-sm font-semibold text-base-content border-2 border-base-300">
                                         {option}
                                     </span>
                                     <button
@@ -232,7 +206,7 @@ function PreScreenQuestionCard({
                                         onClick={() =>
                                             onRemoveOption(index, optIdx)
                                         }
-                                        className="text-coral font-black text-xs hover:opacity-70"
+                                        className="text-error font-black text-xs hover:opacity-70"
                                     >
                                         &times;
                                     </button>
@@ -242,31 +216,39 @@ function PreScreenQuestionCard({
                     )}
 
                     <div className="flex gap-2">
-                        <Input
-                            value={newOption}
-                            onChange={(e) => setNewOption(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    handleAddOption();
-                                }
-                            }}
-                            placeholder="Type an option and press Enter..."
-                        />
-                        <Button
-                            color="teal"
-                            size="sm"
+                        <fieldset className="fieldset flex-1">
+                            <input
+                                className="input input-bordered w-full"
+                                style={{ borderRadius: 0 }}
+                                value={newOption}
+                                onChange={(e) => setNewOption(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleAddOption();
+                                    }
+                                }}
+                                placeholder="Type an option and press Enter..."
+                            />
+                        </fieldset>
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            style={{ borderRadius: 0 }}
                             onClick={handleAddOption}
                             disabled={!newOption.trim()}
                         >
                             <i className="fa-duotone fa-regular fa-plus" />
-                        </Button>
+                        </button>
                     </div>
 
                     {(!question.options || question.options.length < 2) && (
-                        <AlertBanner type="warning">
-                            Add at least 2 options for this question type
-                        </AlertBanner>
+                        <div role="alert" className="alert alert-info">
+                            <i className="fa-duotone fa-regular fa-circle-info" />
+                            <span className="text-sm">
+                                Add at least 2 options for this question type
+                            </span>
+                        </div>
                     )}
                 </div>
             )}
@@ -813,633 +795,827 @@ export default function RoleWizardModal({
         isAdmin || (isRecruiterWithCompanyAccess && companies.length > 1);
 
     return (
-        <Modal
-            open={isOpen}
-            onClose={handleClose}
-            maxWidth="max-w-3xl"
-            padding={false}
-            closeOnBackdrop={false}
-        >
-            <div className="p-6">
-                {/* ── Header ── */}
-                <div className="flex items-center justify-between mb-6 pb-4 border-b-4 border-dark">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 flex items-center justify-center bg-coral">
-                            <i className="fa-duotone fa-regular fa-briefcase text-lg text-white" />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-black uppercase tracking-wider text-dark">
-                                {mode === "edit"
-                                    ? "Edit Role"
-                                    : "Create New Role"}
-                            </h3>
-                            <p className="text-xs font-semibold text-dark/50 uppercase tracking-wider">
-                                Step {currentStep + 1} of {totalSteps}
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleClose}
-                        disabled={submitting}
-                        className="btn btn-sm btn-square btn-ghost"
-                        aria-label="Close"
-                    >
-                        <i className="fa-solid fa-xmark" />
-                    </button>
-                </div>
-
-                {/* ── Step Progress ── */}
-                <div className="mb-6">
-                    <StepProgress
-                        steps={WIZARD_STEPS}
-                        currentStep={currentStep}
-                    />
-                </div>
-
-                {/* ── Error ── */}
-                {error && (
-                    <div className="mb-4">
-                        <AlertBanner
-                            type="error"
-                            onDismiss={() => setError(null)}
-                        >
-                            {error}
-                        </AlertBanner>
-                    </div>
-                )}
-
-                {/* ── Step Badge ── */}
-                <div className="flex items-center gap-2 mb-5">
-                    <Badge color={WIZARD_STEPS[currentStep].accent} size="md">
-                        Step {currentStep + 1}
-                    </Badge>
-                    <span className="text-md font-bold uppercase tracking-wide text-dark">
-                        {WIZARD_STEPS[currentStep].label}
-                    </span>
-                </div>
-
-                {/* ── Content ── */}
-                <div className="min-h-[300px]">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-16">
-                            <div className="w-16 h-16 flex items-center justify-center border-4 border-coral bg-coral animate-pulse mb-4">
-                                <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-2xl text-white" />
+        <dialog className={`modal ${isOpen ? "modal-open" : ""}`}>
+            <div className="modal-box max-w-3xl p-0" style={{ borderRadius: 0 }}>
+                <div className="p-6">
+                    {/* ── Header ── */}
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-base-300">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 flex items-center justify-center bg-primary">
+                                <i className="fa-duotone fa-regular fa-briefcase text-lg text-primary-content" />
                             </div>
-                            <span className="text-sm font-black uppercase tracking-wider text-dark">
-                                Loading...
-                            </span>
+                            <div>
+                                <h3 className="text-xl font-black uppercase tracking-wider">
+                                    {mode === "edit"
+                                        ? "Edit Role"
+                                        : "Create New Role"}
+                                </h3>
+                                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">
+                                    Step {currentStep + 1} of {totalSteps}
+                                </p>
+                            </div>
                         </div>
-                    ) : (
-                        <>
-                            {/* Step 1: Basic Info */}
-                            {currentStep === 0 && (
-                                <div className="space-y-4">
-                                    <Input
-                                        label="Job Title *"
-                                        value={formData.title}
-                                        onChange={(e) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                title: e.target.value,
-                                            }))
-                                        }
-                                        placeholder="e.g., Senior Software Engineer"
-                                    />
+                        <button
+                            onClick={handleClose}
+                            disabled={submitting}
+                            className="btn btn-sm btn-square btn-ghost"
+                            aria-label="Close"
+                        >
+                            <i className="fa-solid fa-xmark" />
+                        </button>
+                    </div>
 
-                                    {showCompanySelect ? (
-                                        <Select
-                                            label="Company *"
-                                            value={formData.company_id}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    company_id: e.target.value,
-                                                }))
-                                            }
-                                            options={companyOptions}
-                                            placeholder="Select a company..."
-                                        />
-                                    ) : (
-                                        <Input
-                                            label="Company *"
-                                            value={
-                                                companies[0]?.name ||
-                                                "Loading..."
-                                            }
-                                            disabled
-                                            readOnly
-                                        />
-                                    )}
+                    {/* ── Step Progress ── */}
+                    <ul className="steps steps-horizontal w-full text-xs mb-6">
+                        {WIZARD_STEPS.map((step, i) => (
+                            <li
+                                key={i}
+                                className={`step ${i <= currentStep ? "step-primary" : ""}`}
+                            >
+                                <span className="hidden sm:inline text-[10px] uppercase tracking-[0.15em] font-bold">
+                                    {step.label}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input
-                                            label="Location"
-                                            value={formData.location}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    location: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="e.g., New York, NY or Remote"
-                                        />
-                                        <Input
-                                            label="Department"
-                                            value={formData.department}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    department: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="e.g., Engineering"
-                                        />
-                                    </div>
-
-                                    <Select
-                                        label="Status *"
-                                        value={formData.status}
-                                        onChange={(e) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                status: e.target.value as any,
-                                            }))
-                                        }
-                                        options={STATUS_OPTIONS}
-                                    />
-                                </div>
-                            )}
-
-                            {/* Step 2: Compensation */}
-                            {currentStep === 1 && (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input
-                                            label="Min Salary (USD)"
-                                            type="number"
-                                            value={formData.salary_min}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    salary_min: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="100000"
-                                        />
-                                        <Input
-                                            label="Max Salary (USD)"
-                                            type="number"
-                                            value={formData.salary_max}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    salary_max: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="150000"
-                                        />
-                                    </div>
-
-                                    <div className="flex items-center justify-between border-4 border-dark/10 p-4">
-                                        <span className="font-bold text-sm uppercase tracking-wider text-dark">
-                                            Show salary range to candidates
-                                        </span>
-                                        <Toggle
-                                            enabled={formData.show_salary_range}
-                                            onChange={(val) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    show_salary_range: val,
-                                                }))
-                                            }
-                                            accent="teal"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input
-                                            label="Fee Percentage *"
-                                            type="number"
-                                            value={formData.fee_percentage.toString()}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    fee_percentage:
-                                                        parseFloat(
-                                                            e.target.value,
-                                                        ) || 0,
-                                                }))
-                                            }
-                                            placeholder="20"
-                                        />
-                                        <Select
-                                            label="Guarantee Period *"
-                                            value={(
-                                                formData.guarantee_days ?? 0
-                                            ).toString()}
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    guarantee_days: parseInt(
-                                                        e.target.value,
-                                                        10,
-                                                    ),
-                                                }))
-                                            }
-                                            options={GUARANTEE_OPTIONS}
-                                        />
-                                    </div>
-
-                                    <Select
-                                        label="Employment Type *"
-                                        value={formData.employment_type}
-                                        onChange={(e) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                employment_type: e.target
-                                                    .value as FormData["employment_type"],
-                                            }))
-                                        }
-                                        options={EMPLOYMENT_TYPE_OPTIONS}
-                                    />
-
-                                    <div>
-                                        <span className="block font-bold text-sm uppercase tracking-wider text-dark mb-3">
-                                            Commute Type
-                                        </span>
-                                        <div className="flex flex-wrap gap-2">
-                                            {COMMUTE_OPTIONS.map((opt) => {
-                                                const selected =
-                                                    formData.commute_types.includes(
-                                                        opt.value,
-                                                    );
-                                                return (
-                                                    <button
-                                                        key={opt.value}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            toggleCommute(
-                                                                opt.value,
-                                                            )
-                                                        }
-                                                        className={`btn btn-sm ${
-                                                            selected
-                                                                ? "btn-teal"
-                                                                : "btn-outline"
-                                                        }`}
-                                                    >
-                                                        {selected && (
-                                                            <i className="fa-solid fa-check mr-1 text-[10px]" />
-                                                        )}
-                                                        {opt.label}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    <Select
-                                        label="Job Level"
-                                        value={formData.job_level}
-                                        onChange={(e) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                job_level: e.target.value,
-                                            }))
-                                        }
-                                        options={JOB_LEVEL_OPTIONS}
-                                    />
-
-                                    <div className="flex items-center justify-between border-4 border-dark/10 p-4">
-                                        <span className="font-bold text-sm uppercase tracking-wider text-dark">
-                                            Open to relocation
-                                        </span>
-                                        <Toggle
-                                            enabled={
-                                                formData.open_to_relocation
-                                            }
-                                            onChange={(val) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    open_to_relocation: val,
-                                                }))
-                                            }
-                                            accent="coral"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 3: Descriptions */}
-                            {currentStep === 2 && (
-                                <div className="space-y-5">
-                                    <AlertBanner type="info">
-                                        Two descriptions for different
-                                        audiences. Recruiter-facing notes stay
-                                        internal. Candidate-facing description
-                                        is public.
-                                    </AlertBanner>
-
-                                    <fieldset>
-                                        <label className="block font-bold text-sm uppercase tracking-wider text-dark mb-2">
-                                            Recruiter-Facing Description
-                                        </label>
-                                        <MarkdownEditor
-                                            value={
-                                                formData.recruiter_description
-                                            }
-                                            onChange={(value) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    recruiter_description:
-                                                        value,
-                                                }))
-                                            }
-                                            placeholder="Internal notes for recruiters: pain points, urgency, ideal candidate profile..."
-                                            helperText="Internal notes only recruiters will see"
-                                            height={160}
-                                        />
-                                    </fieldset>
-
-                                    <fieldset>
-                                        <label className="block font-bold text-sm uppercase tracking-wider text-dark mb-2">
-                                            Candidate-Facing Description
-                                        </label>
-                                        <MarkdownEditor
-                                            value={
-                                                formData.candidate_description
-                                            }
-                                            onChange={(value) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    candidate_description:
-                                                        value,
-                                                }))
-                                            }
-                                            placeholder="Public job description: responsibilities, team info, company culture..."
-                                            helperText="Public description candidates will see"
-                                            height={160}
-                                        />
-                                    </fieldset>
-                                </div>
-                            )}
-
-                            {/* Step 4: Requirements */}
-                            {currentStep === 3 && (
-                                <div className="space-y-6">
-                                    <AlertBanner type="info">
-                                        Mandatory requirements are must-haves.
-                                        Preferred requirements make candidates
-                                        more competitive.
-                                    </AlertBanner>
-
-                                    {/* Mandatory */}
-                                    <div>
-                                        <div className="flex justify-between items-center mb-3">
-                                            <div>
-                                                <h4 className="font-black text-sm uppercase tracking-wider text-dark">
-                                                    Mandatory Requirements
-                                                </h4>
-                                                <span className="text-xs text-dark/50 font-semibold">
-                                                    Must-have qualifications
-                                                </span>
-                                            </div>
-                                            <Button
-                                                color="coral"
-                                                size="sm"
-                                                onClick={addMandatory}
-                                            >
-                                                <i className="fa-duotone fa-regular fa-plus mr-1" />
-                                                Add
-                                            </Button>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {formData.mandatory_requirements
-                                                .length === 0 ? (
-                                                <p className="text-dark/40 text-sm font-semibold py-6 text-center border-4 border-dashed border-dark/10">
-                                                    No mandatory requirements
-                                                    added yet
-                                                </p>
-                                            ) : (
-                                                formData.mandatory_requirements.map(
-                                                    (req, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex gap-2"
-                                                        >
-                                                            <Input
-                                                                value={req}
-                                                                onChange={(e) =>
-                                                                    updateMandatory(
-                                                                        idx,
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder="e.g., 5+ years of React experience"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-dark btn-sm"
-                                                                onClick={() =>
-                                                                    removeMandatory(
-                                                                        idx,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <i className="fa-duotone fa-regular fa-trash" />
-                                                            </button>
-                                                        </div>
-                                                    ),
-                                                )
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Preferred */}
-                                    <div>
-                                        <div className="flex justify-between items-center mb-3">
-                                            <div>
-                                                <h4 className="font-black text-sm uppercase tracking-wider text-dark">
-                                                    Preferred Requirements
-                                                </h4>
-                                                <span className="text-xs text-dark/50 font-semibold">
-                                                    Nice-to-have qualifications
-                                                </span>
-                                            </div>
-                                            <Button
-                                                color="teal"
-                                                size="sm"
-                                                onClick={addPreferred}
-                                            >
-                                                <i className="fa-duotone fa-regular fa-plus mr-1" />
-                                                Add
-                                            </Button>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {formData.preferred_requirements
-                                                .length === 0 ? (
-                                                <p className="text-dark/40 text-sm font-semibold py-6 text-center border-4 border-dashed border-dark/10">
-                                                    No preferred requirements
-                                                    added yet
-                                                </p>
-                                            ) : (
-                                                formData.preferred_requirements.map(
-                                                    (req, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex gap-2"
-                                                        >
-                                                            <Input
-                                                                value={req}
-                                                                onChange={(e) =>
-                                                                    updatePreferred(
-                                                                        idx,
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder="e.g., Experience with GraphQL"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-dark btn-sm"
-                                                                onClick={() =>
-                                                                    removePreferred(
-                                                                        idx,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <i className="fa-duotone fa-regular fa-trash" />
-                                                            </button>
-                                                        </div>
-                                                    ),
-                                                )
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 5: Pre-Screen Questions */}
-                            {currentStep === 4 && (
-                                <div className="space-y-4">
-                                    <AlertBanner type="info">
-                                        Screen candidates upfront with custom
-                                        questions. Types: Text, Yes/No, Select,
-                                        Multi-Select.
-                                    </AlertBanner>
-
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <h4 className="font-black text-sm uppercase tracking-wider text-dark">
-                                                Questions for Candidates
-                                            </h4>
-                                            <span className="text-xs text-dark/50 font-semibold">
-                                                e.g., eligibility, clearance,
-                                                relocation
-                                            </span>
-                                        </div>
-                                        <Button
-                                            color="coral"
-                                            size="sm"
-                                            onClick={addQuestion}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-plus mr-1" />
-                                            Add Question
-                                        </Button>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        {formData.pre_screen_questions
-                                            .length === 0 ? (
-                                            <p className="text-dark/40 text-sm font-semibold py-10 text-center border-4 border-dashed border-dark/10">
-                                                No pre-screen questions added
-                                                yet
-                                            </p>
-                                        ) : (
-                                            formData.pre_screen_questions.map(
-                                                (question, idx) => (
-                                                    <PreScreenQuestionCard
-                                                        key={idx}
-                                                        question={question}
-                                                        index={idx}
-                                                        onUpdate={
-                                                            updateQuestion
-                                                        }
-                                                        onRemove={
-                                                            removeQuestion
-                                                        }
-                                                        onAddOption={addOption}
-                                                        onRemoveOption={
-                                                            removeOption
-                                                        }
-                                                    />
-                                                ),
-                                            )
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </>
+                    {/* ── Error ── */}
+                    {error && (
+                        <div className="mb-4">
+                            <div role="alert" className="alert alert-error">
+                                <i className="fa-duotone fa-regular fa-circle-xmark" />
+                                <span className="text-sm flex-1">{error}</span>
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost btn-xs"
+                                    onClick={() => setError(null)}
+                                >
+                                    <i className="fa-solid fa-xmark" />
+                                </button>
+                            </div>
+                        </div>
                     )}
-                </div>
 
-                {/* ── Footer Navigation ── */}
-                <div className="mt-6 pt-4 border-t-4 border-dark flex items-center justify-between">
-                    <Button
-                        color="dark"
-                        onClick={currentStep === 0 ? handleClose : handleBack}
-                        disabled={submitting}
-                    >
-                        {currentStep === 0 ? (
-                            "Cancel"
+                    {/* ── Step Label ── */}
+                    <div className="flex items-center gap-2 mb-5">
+                        <span className="badge badge-primary badge-md">
+                            Step {currentStep + 1}
+                        </span>
+                        <span className="text-md font-bold uppercase tracking-wide">
+                            {WIZARD_STEPS[currentStep].label}
+                        </span>
+                    </div>
+
+                    {/* ── Content ── */}
+                    <div className="min-h-[300px]">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-16">
+                                <span className="loading loading-spinner loading-lg text-primary mb-4" />
+                                <span className="text-sm font-bold uppercase tracking-wider text-base-content/60">
+                                    Loading...
+                                </span>
+                            </div>
                         ) : (
                             <>
-                                <i className="fa-solid fa-arrow-left mr-1" />
-                                Back
+                                {/* Step 1: Basic Info */}
+                                {currentStep === 0 && (
+                                    <div className="space-y-4">
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                Job Title *
+                                            </legend>
+                                            <input
+                                                className="input input-bordered w-full"
+                                                style={{ borderRadius: 0 }}
+                                                value={formData.title}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        title: e.target.value,
+                                                    }))
+                                                }
+                                                placeholder="e.g., Senior Software Engineer"
+                                            />
+                                        </fieldset>
+
+                                        {showCompanySelect ? (
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Company *
+                                                </legend>
+                                                <select
+                                                    className="select select-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={formData.company_id}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            company_id:
+                                                                e.target.value,
+                                                        }))
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        Select a company...
+                                                    </option>
+                                                    {companyOptions.map(
+                                                        (opt) => (
+                                                            <option
+                                                                key={opt.value}
+                                                                value={
+                                                                    opt.value
+                                                                }
+                                                            >
+                                                                {opt.label}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                            </fieldset>
+                                        ) : (
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Company *
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={
+                                                        companies[0]?.name ||
+                                                        "Loading..."
+                                                    }
+                                                    disabled
+                                                    readOnly
+                                                />
+                                            </fieldset>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Location
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={formData.location}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            location:
+                                                                e.target.value,
+                                                        }))
+                                                    }
+                                                    placeholder="e.g., New York, NY or Remote"
+                                                />
+                                            </fieldset>
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Department
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={formData.department}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            department:
+                                                                e.target.value,
+                                                        }))
+                                                    }
+                                                    placeholder="e.g., Engineering"
+                                                />
+                                            </fieldset>
+                                        </div>
+
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                Status *
+                                            </legend>
+                                            <select
+                                                className="select select-bordered w-full"
+                                                style={{ borderRadius: 0 }}
+                                                value={formData.status}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        status: e.target
+                                                            .value as any,
+                                                    }))
+                                                }
+                                            >
+                                                {STATUS_OPTIONS.map((opt) => (
+                                                    <option
+                                                        key={opt.value}
+                                                        value={opt.value}
+                                                    >
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                )}
+
+                                {/* Step 2: Compensation */}
+                                {currentStep === 1 && (
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Min Salary (USD)
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    type="number"
+                                                    value={formData.salary_min}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            salary_min:
+                                                                e.target.value,
+                                                        }))
+                                                    }
+                                                    placeholder="100000"
+                                                />
+                                            </fieldset>
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Max Salary (USD)
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    type="number"
+                                                    value={formData.salary_max}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            salary_max:
+                                                                e.target.value,
+                                                        }))
+                                                    }
+                                                    placeholder="150000"
+                                                />
+                                            </fieldset>
+                                        </div>
+
+                                        <div className="flex items-center justify-between border-2 border-base-300 p-4">
+                                            <span className="font-bold text-sm uppercase tracking-wider">
+                                                Show salary range to candidates
+                                            </span>
+                                            <input
+                                                type="checkbox"
+                                                className="toggle toggle-primary"
+                                                checked={
+                                                    formData.show_salary_range
+                                                }
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        show_salary_range:
+                                                            e.target.checked,
+                                                    }))
+                                                }
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Fee Percentage *
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    type="number"
+                                                    value={formData.fee_percentage.toString()}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            fee_percentage:
+                                                                parseFloat(
+                                                                    e.target
+                                                                        .value,
+                                                                ) || 0,
+                                                        }))
+                                                    }
+                                                    placeholder="20"
+                                                />
+                                            </fieldset>
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                    Guarantee Period *
+                                                </legend>
+                                                <select
+                                                    className="select select-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={(
+                                                        formData.guarantee_days ??
+                                                        0
+                                                    ).toString()}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            guarantee_days:
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value,
+                                                                    10,
+                                                                ),
+                                                        }))
+                                                    }
+                                                >
+                                                    {GUARANTEE_OPTIONS.map(
+                                                        (opt) => (
+                                                            <option
+                                                                key={opt.value}
+                                                                value={
+                                                                    opt.value
+                                                                }
+                                                            >
+                                                                {opt.label}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                            </fieldset>
+                                        </div>
+
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                Employment Type *
+                                            </legend>
+                                            <select
+                                                className="select select-bordered w-full"
+                                                style={{ borderRadius: 0 }}
+                                                value={formData.employment_type}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        employment_type: e
+                                                            .target
+                                                            .value as FormData["employment_type"],
+                                                    }))
+                                                }
+                                            >
+                                                {EMPLOYMENT_TYPE_OPTIONS.map(
+                                                    (opt) => (
+                                                        <option
+                                                            key={opt.value}
+                                                            value={opt.value}
+                                                        >
+                                                            {opt.label}
+                                                        </option>
+                                                    ),
+                                                )}
+                                            </select>
+                                        </fieldset>
+
+                                        <div>
+                                            <span className="block font-bold text-sm uppercase tracking-wider mb-3">
+                                                Commute Type
+                                            </span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {COMMUTE_OPTIONS.map((opt) => {
+                                                    const selected =
+                                                        formData.commute_types.includes(
+                                                            opt.value,
+                                                        );
+                                                    return (
+                                                        <button
+                                                            key={opt.value}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                toggleCommute(
+                                                                    opt.value,
+                                                                )
+                                                            }
+                                                            style={{
+                                                                borderRadius: 0,
+                                                            }}
+                                                            className={`btn btn-sm ${
+                                                                selected
+                                                                    ? "btn-primary"
+                                                                    : "btn-outline"
+                                                            }`}
+                                                        >
+                                                            {selected && (
+                                                                <i className="fa-solid fa-check mr-1 text-[10px]" />
+                                                            )}
+                                                            {opt.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                Job Level
+                                            </legend>
+                                            <select
+                                                className="select select-bordered w-full"
+                                                style={{ borderRadius: 0 }}
+                                                value={formData.job_level}
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        job_level:
+                                                            e.target.value,
+                                                    }))
+                                                }
+                                            >
+                                                {JOB_LEVEL_OPTIONS.map(
+                                                    (opt) => (
+                                                        <option
+                                                            key={opt.value}
+                                                            value={opt.value}
+                                                        >
+                                                            {opt.label}
+                                                        </option>
+                                                    ),
+                                                )}
+                                            </select>
+                                        </fieldset>
+
+                                        <div className="flex items-center justify-between border-2 border-base-300 p-4">
+                                            <span className="font-bold text-sm uppercase tracking-wider">
+                                                Open to relocation
+                                            </span>
+                                            <input
+                                                type="checkbox"
+                                                className="toggle toggle-primary"
+                                                checked={
+                                                    formData.open_to_relocation
+                                                }
+                                                onChange={(e) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        open_to_relocation:
+                                                            e.target.checked,
+                                                    }))
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Step 3: Descriptions */}
+                                {currentStep === 2 && (
+                                    <div className="space-y-5">
+                                        <div role="alert" className="alert alert-info">
+                                            <i className="fa-duotone fa-regular fa-circle-info" />
+                                            <span className="text-sm">
+                                                Two descriptions for different
+                                                audiences. Recruiter-facing
+                                                notes stay internal.
+                                                Candidate-facing description is
+                                                public.
+                                            </span>
+                                        </div>
+
+                                        <fieldset>
+                                            <label className="block font-bold text-sm uppercase tracking-wider mb-2">
+                                                Recruiter-Facing Description
+                                            </label>
+                                            <MarkdownEditor
+                                                value={
+                                                    formData.recruiter_description
+                                                }
+                                                onChange={(value) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        recruiter_description:
+                                                            value,
+                                                    }))
+                                                }
+                                                placeholder="Internal notes for recruiters: pain points, urgency, ideal candidate profile..."
+                                                helperText="Internal notes only recruiters will see"
+                                                height={160}
+                                            />
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <label className="block font-bold text-sm uppercase tracking-wider mb-2">
+                                                Candidate-Facing Description
+                                            </label>
+                                            <MarkdownEditor
+                                                value={
+                                                    formData.candidate_description
+                                                }
+                                                onChange={(value) =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        candidate_description:
+                                                            value,
+                                                    }))
+                                                }
+                                                placeholder="Public job description: responsibilities, team info, company culture..."
+                                                helperText="Public description candidates will see"
+                                                height={160}
+                                            />
+                                        </fieldset>
+                                    </div>
+                                )}
+
+                                {/* Step 4: Requirements */}
+                                {currentStep === 3 && (
+                                    <div className="space-y-6">
+                                        <div role="alert" className="alert alert-info">
+                                            <i className="fa-duotone fa-regular fa-circle-info" />
+                                            <span className="text-sm">
+                                                Mandatory requirements are
+                                                must-haves. Preferred
+                                                requirements make candidates
+                                                more competitive.
+                                            </span>
+                                        </div>
+
+                                        {/* Mandatory */}
+                                        <div>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div>
+                                                    <h4 className="font-black text-sm uppercase tracking-wider">
+                                                        Mandatory Requirements
+                                                    </h4>
+                                                    <span className="text-xs text-base-content/50 font-semibold">
+                                                        Must-have qualifications
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary btn-sm"
+                                                    style={{ borderRadius: 0 }}
+                                                    onClick={addMandatory}
+                                                >
+                                                    <i className="fa-duotone fa-regular fa-plus mr-1" />
+                                                    Add
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {formData.mandatory_requirements
+                                                    .length === 0 ? (
+                                                    <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
+                                                        No mandatory requirements
+                                                        added yet
+                                                    </p>
+                                                ) : (
+                                                    formData.mandatory_requirements.map(
+                                                        (req, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className="flex gap-2"
+                                                            >
+                                                                <input
+                                                                    className="input input-bordered flex-1"
+                                                                    style={{
+                                                                        borderRadius: 0,
+                                                                    }}
+                                                                    value={req}
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        updateMandatory(
+                                                                            idx,
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                        )
+                                                                    }
+                                                                    placeholder="e.g., 5+ years of React experience"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-ghost btn-sm text-error"
+                                                                    onClick={() =>
+                                                                        removeMandatory(
+                                                                            idx,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <i className="fa-duotone fa-regular fa-trash" />
+                                                                </button>
+                                                            </div>
+                                                        ),
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Preferred */}
+                                        <div>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div>
+                                                    <h4 className="font-black text-sm uppercase tracking-wider">
+                                                        Preferred Requirements
+                                                    </h4>
+                                                    <span className="text-xs text-base-content/50 font-semibold">
+                                                        Nice-to-have
+                                                        qualifications
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary btn-sm"
+                                                    style={{ borderRadius: 0 }}
+                                                    onClick={addPreferred}
+                                                >
+                                                    <i className="fa-duotone fa-regular fa-plus mr-1" />
+                                                    Add
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {formData.preferred_requirements
+                                                    .length === 0 ? (
+                                                    <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
+                                                        No preferred requirements
+                                                        added yet
+                                                    </p>
+                                                ) : (
+                                                    formData.preferred_requirements.map(
+                                                        (req, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className="flex gap-2"
+                                                            >
+                                                                <input
+                                                                    className="input input-bordered flex-1"
+                                                                    style={{
+                                                                        borderRadius: 0,
+                                                                    }}
+                                                                    value={req}
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        updatePreferred(
+                                                                            idx,
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                        )
+                                                                    }
+                                                                    placeholder="e.g., Experience with GraphQL"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-ghost btn-sm text-error"
+                                                                    onClick={() =>
+                                                                        removePreferred(
+                                                                            idx,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <i className="fa-duotone fa-regular fa-trash" />
+                                                                </button>
+                                                            </div>
+                                                        ),
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Step 5: Pre-Screen Questions */}
+                                {currentStep === 4 && (
+                                    <div className="space-y-4">
+                                        <div role="alert" className="alert alert-info">
+                                            <i className="fa-duotone fa-regular fa-circle-info" />
+                                            <span className="text-sm">
+                                                Screen candidates upfront with
+                                                custom questions. Types: Text,
+                                                Yes/No, Select, Multi-Select.
+                                            </span>
+                                        </div>
+
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h4 className="font-black text-sm uppercase tracking-wider">
+                                                    Questions for Candidates
+                                                </h4>
+                                                <span className="text-xs text-base-content/50 font-semibold">
+                                                    e.g., eligibility,
+                                                    clearance, relocation
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary btn-sm"
+                                                style={{ borderRadius: 0 }}
+                                                onClick={addQuestion}
+                                            >
+                                                <i className="fa-duotone fa-regular fa-plus mr-1" />
+                                                Add Question
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {formData.pre_screen_questions
+                                                .length === 0 ? (
+                                                <p className="text-base-content/40 text-sm font-semibold py-10 text-center border-2 border-dashed border-base-300">
+                                                    No pre-screen questions added
+                                                    yet
+                                                </p>
+                                            ) : (
+                                                formData.pre_screen_questions.map(
+                                                    (question, idx) => (
+                                                        <PreScreenQuestionCard
+                                                            key={idx}
+                                                            question={question}
+                                                            index={idx}
+                                                            onUpdate={
+                                                                updateQuestion
+                                                            }
+                                                            onRemove={
+                                                                removeQuestion
+                                                            }
+                                                            onAddOption={
+                                                                addOption
+                                                            }
+                                                            onRemoveOption={
+                                                                removeOption
+                                                            }
+                                                        />
+                                                    ),
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         )}
-                    </Button>
+                    </div>
 
-                    <span className="text-xs font-bold text-dark/40 uppercase tracking-wider">
-                        Step {currentStep + 1} of {totalSteps}
-                    </span>
-
-                    {currentStep < totalSteps - 1 ? (
-                        <Button
-                            color={WIZARD_STEPS[currentStep].accent}
-                            onClick={handleNext}
-                            disabled={loading || submitting}
-                        >
-                            Next
-                            <i className="fa-solid fa-arrow-right ml-1" />
-                        </Button>
-                    ) : (
-                        <Button
-                            color="teal"
-                            onClick={handleSubmit}
+                    {/* ── Footer Navigation ── */}
+                    <div className="mt-6 pt-4 border-t-2 border-base-300 flex items-center justify-between">
+                        <button
+                            type="button"
+                            className="btn btn-neutral"
+                            style={{ borderRadius: 0 }}
+                            onClick={
+                                currentStep === 0 ? handleClose : handleBack
+                            }
                             disabled={submitting}
                         >
-                            {submitting ? (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-spinner-third fa-spin mr-1" />
-                                    {mode === "edit"
-                                        ? "Updating..."
-                                        : "Creating..."}
-                                </>
+                            {currentStep === 0 ? (
+                                "Cancel"
                             ) : (
                                 <>
-                                    <i className="fa-duotone fa-regular fa-check mr-1" />
-                                    {mode === "edit"
-                                        ? "Update Role"
-                                        : "Create Role"}
+                                    <i className="fa-solid fa-arrow-left mr-1" />
+                                    Back
                                 </>
                             )}
-                        </Button>
-                    )}
+                        </button>
+
+                        <span className="text-xs font-bold text-base-content/40 uppercase tracking-wider">
+                            Step {currentStep + 1} of {totalSteps}
+                        </span>
+
+                        {currentStep < totalSteps - 1 ? (
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
+                                onClick={handleNext}
+                                disabled={loading || submitting}
+                            >
+                                Next
+                                <i className="fa-solid fa-arrow-right ml-1" />
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                            >
+                                {submitting ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm" />
+                                        {mode === "edit"
+                                            ? "Updating..."
+                                            : "Creating..."}
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fa-duotone fa-regular fa-check mr-1" />
+                                        {mode === "edit"
+                                            ? "Update Role"
+                                            : "Create Role"}
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-        </Modal>
+            <form method="dialog" className="modal-backdrop">
+                <button onClick={handleClose}>close</button>
+            </form>
+        </dialog>
     );
 }

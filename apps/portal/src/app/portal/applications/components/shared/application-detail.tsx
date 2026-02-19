@@ -4,20 +4,18 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Application } from "../../types";
-import type { AccentClasses } from "./accent";
 import Details from "./details";
-import ActionsToolbar from "./actions-toolbar";
+// Reuse the original ActionsToolbar -- it contains all the business logic + modals
+import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
 interface DetailLoaderProps {
     applicationId: string;
-    accent: AccentClasses;
     onClose: () => void;
     onRefresh?: () => void;
 }
 
 export function DetailLoader({
     applicationId,
-    accent,
     onClose,
     onRefresh,
 }: DetailLoaderProps) {
@@ -58,13 +56,9 @@ export function DetailLoader({
         return (
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
-                    <div className="flex justify-center gap-3 mb-4">
-                        <div className="w-4 h-4 bg-coral animate-pulse" />
-                        <div className="w-4 h-4 rounded-full bg-teal animate-pulse" />
-                        <div className="w-4 h-4 rotate-45 bg-yellow animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-wider text-dark/50">
-                        Loading details...
+                    <span className="loading loading-spinner loading-md text-primary mb-4 block mx-auto"></span>
+                    <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
+                        Loading application...
                     </span>
                 </div>
             </div>
@@ -74,26 +68,28 @@ export function DetailLoader({
     if (!application) return null;
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <div className={`p-4 border-b-4 ${accent.border}`}>
+        <div className="flex flex-col h-full bg-base-100">
+            {/* Action bar */}
+            <div className="p-4 border-b-2 border-base-300">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <ActionsToolbar
-                            application={application}
+                            application={application as any}
                             variant="priority"
-                            size="xs"
+                            size="sm"
                             showActions={{ viewDetails: false }}
                             onRefresh={onRefresh}
                         />
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-square btn-coral flex-shrink-0"
+                        className="btn btn-sm btn-square btn-ghost flex-shrink-0"
                     >
-                        <i className="fa-duotone fa-regular fa-xmark" />
+                        <i className="fa-duotone fa-regular fa-xmark text-lg" />
                     </button>
                 </div>
             </div>
+            {/* Detail content */}
             <div className="min-h-0 flex-1 overflow-y-auto">
                 <Details itemId={application.id} onRefresh={onRefresh} />
             </div>

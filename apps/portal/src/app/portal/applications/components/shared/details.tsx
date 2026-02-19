@@ -14,22 +14,58 @@ import type {
     ApplicationNote,
     ApplicationNoteCreatorType,
 } from "@splits-network/shared-types";
-import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
-import ApplicationTimeline from "./application-timeline";
-import DocumentViewerModal from "../modals/document-viewer-modal";
+import { getStageDisplay } from "./status-color";
+import ApplicationTimeline from "@/app/portal/applications/components/shared/application-timeline";
+import DocumentViewerModal from "@/app/portal/applications/components/modals/document-viewer-modal";
 import CompanyContacts from "@/components/company-contacts";
-import { categorizeDocuments } from "@/app/portal/applications/lib/permission-utils";
+import { categorizeDocuments } from "../../lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
-import AIReviewPanel from "./ai-review-panel";
+import AIReviewPanel from "@/app/portal/applications/components/shared/ai-review-panel";
 import { CandidateDetail } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
-import { accentAt } from "./accent";
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type TabKey =
+    | "overview"
+    | "candidate"
+    | "job"
+    | "documents"
+    | "ai_review"
+    | "notes"
+    | "timeline";
+
+const TABS: { key: TabKey; label: string; icon: string }[] = [
+    { key: "overview", label: "Overview", icon: "fa-clipboard" },
+    { key: "candidate", label: "Candidate", icon: "fa-user" },
+    { key: "job", label: "Role", icon: "fa-briefcase" },
+    { key: "documents", label: "Documents", icon: "fa-file" },
+    { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
+    { key: "notes", label: "Notes", icon: "fa-comments" },
+    { key: "timeline", label: "Timeline", icon: "fa-timeline" },
+];
+
+// ─── Basel accent object for child components ───────────────────────────────
+
+// Basel accent bridge — CandidateDetail/JobDetail expect Memphis AccentClasses
+// but we use DaisyUI semantic tokens. Runtime works since they're all CSS classes.
+const BASEL_ACCENT = {
+    bg: "bg-primary",
+    text: "text-primary",
+    border: "border-primary",
+    bgLight: "bg-primary/5",
+    textOnBg: "text-primary-content",
+} as any;
+
+// ─── Props ──────────────────────────────────────────────────────────────────
 
 interface DetailsProps {
     itemId: string;
     onRefresh?: () => void;
 }
+
+// ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function Details({ itemId, onRefresh }: DetailsProps) {
     const { getToken } = useAuth();
@@ -37,15 +73,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<
-        | "overview"
-        | "candidate"
-        | "job"
-        | "documents"
-        | "notes"
-        | "ai_review"
-        | "timeline"
-    >("overview");
+    const [activeTab, setActiveTab] = useState<TabKey>("overview");
 
     // Tab scroll arrow buttons
     const tabScrollRef = useRef<HTMLDivElement>(null);
@@ -56,7 +84,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         const el = tabScrollRef.current;
         if (!el) return;
         setCanScrollLeft(el.scrollLeft > 0);
-        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+        setCanScrollRight(
+            el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+        );
     }, []);
 
     useEffect(() => {
@@ -70,7 +100,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             el.removeEventListener("scroll", updateScrollButtons);
             observer.disconnect();
         };
-        // Re-run when application loads so ref is attached
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [updateScrollButtons, !!application]);
 
@@ -118,7 +147,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     if (loading && !application) {
         return (
             <div className="p-6">
-                <LoadingState message="Loading application details..." />
+                <LoadingState message="Loading application..." />
             </div>
         );
     }
@@ -126,12 +155,12 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     if (!application) {
         return (
             <div className="p-6 text-center text-base-content/40">
-                <p>Application not found</p>
+                <p>This application could not be loaded.</p>
             </div>
         );
     }
 
-    const stageBadge = getApplicationStageBadge(application.stage);
+    const stageDisplay = getStageDisplay(application.stage);
     const candidate = application.candidate;
     const job = application.job;
     const documents = application.documents || [];
@@ -140,23 +169,28 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
     return (
         <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
-            {/* Header */}
+            {/* ─── Header ─────────────────────────────────────────────── */}
             <div className="flex items-start justify-between shrink-0">
                 <div>
-                    <h3 className="text-2xl font-bold">
-                        {candidate?.full_name || "Unknown Candidate"}
+                    <h3 className="text-2xl font-black tracking-tight">
+                        {candidate?.full_name || "Unnamed Candidate"}
                     </h3>
                     <p className="text-base-content/60 mt-1">
-                        {job?.title || "Unknown Job"}
+                        {job?.title || "Untitled Role"}
                         {job?.company?.name && ` at ${job.company.name}`}
                     </p>
                 </div>
-                <span className={`badge ${stageBadge.className} badge-lg`}>
-                    {stageBadge.label}
+                <span
+                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 ${stageDisplay.badge}`}
+                >
+                    <i
+                        className={`fa-duotone fa-regular ${stageDisplay.icon} mr-1`}
+                    />
+                    {stageDisplay.label}
                 </span>
             </div>
 
-            {/* Tabs */}
+            {/* ─── Tabs ───────────────────────────────────────────────── */}
             <div className="relative shrink-0">
                 {canScrollLeft && (
                     <button
@@ -171,75 +205,32 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     ref={tabScrollRef}
                     className="overflow-x-auto"
                     style={{ scrollbarWidth: "none" }}
-                    data-tab-scroll
+                    data-tab-scroll-basel
                 >
-                    <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
-                    <div role="tablist" className="tabs tabs-lift min-w-max">
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("overview")}
-                        >
-                            <i className="fa-duotone fa-clipboard mr-2" />
-                            Overview
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "candidate" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("candidate")}
-                        >
-                            <i className="fa-duotone fa-user mr-2" />
-                            Candidate
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "job" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("job")}
-                        >
-                            <i className="fa-duotone fa-briefcase mr-2" />
-                            Job Details
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "documents" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("documents")}
-                        >
-                            <i className="fa-duotone fa-file mr-2" />
-                            Documents
-                            {documents.length > 0 && (
-                                <span className="badge badge-xs badge-primary ml-1">
-                                    {documents.length}
-                                </span>
-                            )}
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "ai_review" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("ai_review")}
-                        >
-                            <i className="fa-duotone fa-brain mr-2" />
-                            AI Review
-                            <AIReviewPanel
-                                applicationId={application.id}
-                                variant="badge"
-                            />
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "notes" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("notes")}
-                        >
-                            <i className="fa-duotone fa-comments mr-2" />
-                            Notes
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "timeline" ? "tab-active" : ""}`}
-                            onClick={() => setActiveTab("timeline")}
-                        >
-                            <i className="fa-duotone fa-timeline mr-2" />
-                            Timeline
-                        </a>
+                    <style>{`[data-tab-scroll-basel]::-webkit-scrollbar { display: none; }`}</style>
+                    <div
+                        role="tablist"
+                        className="tabs tabs-bordered min-w-max"
+                    >
+                        {TABS.map((tab) => (
+                            <a
+                                key={tab.key}
+                                role="tab"
+                                className={`tab ${activeTab === tab.key ? "tab-active" : ""}`}
+                                onClick={() => setActiveTab(tab.key)}
+                            >
+                                <i
+                                    className={`fa-duotone fa-regular ${tab.icon} mr-2`}
+                                />
+                                {tab.label}
+                                {tab.key === "documents" &&
+                                    documents.length > 0 && (
+                                        <span className="ml-1 text-[10px] uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">
+                                            {documents.length}
+                                        </span>
+                                    )}
+                            </a>
+                        ))}
                     </div>
                 </div>
                 {canScrollRight && (
@@ -253,8 +244,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 )}
             </div>
 
-            {/* Tab Content */}
-            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
+            {/* ─── Tab Content ────────────────────────────────────────── */}
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
                 {activeTab === "overview" && (
                     <OverviewTab application={application} />
                 )}
@@ -287,18 +278,23 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     );
 }
 
-// ===== TAB COMPONENTS =====
+// ═════════════════════════════════════════════════════════════════════════════
+// TAB COMPONENTS (Basel editorial styling)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ─── Overview Tab ───────────────────────────────────────────────────────────
 
 function OverviewTab({ application }: { application: Application }) {
     const job = application.job;
     const candidate = application.candidate;
 
     // Handle recruiter data - check multiple possible structures
-    const recruiter = application.recruiter || (application as any).assigned_recruiter;
+    const recruiter =
+        application.recruiter || (application as any).assigned_recruiter;
     const recruiterName =
         recruiter?.name ||
         recruiter?.user?.name ||
-        recruiter?.full_name ||
+        (recruiter as any)?.full_name ||
         ((recruiter as any)?.first_name && (recruiter as any)?.last_name
             ? `${(recruiter as any).first_name} ${(recruiter as any).last_name}`
             : null);
@@ -313,7 +309,10 @@ function OverviewTab({ application }: { application: Application }) {
         : "?";
 
     // Truncate text to ~5 lines (approx 400 chars)
-    const truncateText = (text: string | null | undefined, maxLength = 400) => {
+    const truncateText = (
+        text: string | null | undefined,
+        maxLength = 400,
+    ) => {
         if (!text) return null;
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength).trim() + "...";
@@ -321,52 +320,48 @@ function OverviewTab({ application }: { application: Application }) {
 
     const jobDescription = job?.recruiter_description || job?.description;
     const candidateBio =
-        (candidate?.marketplace_profile as any)?.rich_bio ||
-        candidate?.bio;
+        (candidate?.marketplace_profile as any)?.rich_bio || candidate?.bio;
 
     return (
         <div className="space-y-6">
             {/* Job Key Facts */}
             {job && (
-                <div className="bg-white border-4 border-teal p-6">
-                    <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
-                        <span className="w-6 h-6 flex items-center justify-center bg-teal">
-                            <i className="fa-duotone fa-regular fa-briefcase text-xs text-white" />
-                        </span>
-                        Job Key Facts
+                <div className="bg-base-100 border-l-4 border-primary p-6">
+                    <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                        Role Summary
                     </h3>
                     <div className="space-y-3">
                         <div>
-                            <div className="text-lg font-black uppercase tracking-tight text-dark">
+                            <div className="text-lg font-black tracking-tight">
                                 {job.title}
                             </div>
-                            <div className="text-sm text-dark/70">
-                                {job.company?.name || "Company not specified"}
+                            <div className="text-sm text-base-content/60">
+                                {job.company?.name || "Company pending"}
                             </div>
                         </div>
-                        <div className="flex flex-wrap gap-4 text-sm text-dark/60">
+                        <div className="flex flex-wrap gap-4 text-sm text-base-content/60">
                             {job.location && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-location-dot text-teal" />
+                                    <i className="fa-duotone fa-regular fa-location-dot text-primary" />
                                     {job.location}
                                 </div>
                             )}
                             {job.employment_type && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-briefcase text-purple" />
+                                    <i className="fa-duotone fa-regular fa-briefcase text-secondary" />
                                     {job.employment_type.replace("_", " ")}
                                 </div>
                             )}
                             {(job.salary_min || job.salary_max) && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-money-bill-wave text-yellow" />
-                                    ${job.salary_min?.toLocaleString() || "..."} - $
-                                    {job.salary_max?.toLocaleString() || "..."}
+                                    <i className="fa-duotone fa-regular fa-money-bill-wave text-accent" />
+                                    ${job.salary_min?.toLocaleString() || "..."}{" "}
+                                    - ${job.salary_max?.toLocaleString() || "..."}
                                 </div>
                             )}
                         </div>
                         {jobDescription && (
-                            <div className="text-sm text-dark/70 leading-relaxed pt-3 border-t-2 border-dark/10">
+                            <div className="text-sm text-base-content/60 leading-relaxed pt-3 border-t border-base-300">
                                 {truncateText(jobDescription)}
                             </div>
                         )}
@@ -376,48 +371,45 @@ function OverviewTab({ application }: { application: Application }) {
 
             {/* Candidate Key Facts */}
             {candidate && (
-                <div className="bg-white border-4 border-coral p-6">
-                    <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
-                        <span className="w-6 h-6 flex items-center justify-center bg-coral">
-                            <i className="fa-duotone fa-regular fa-user text-xs text-white" />
-                        </span>
-                        Candidate Key Facts
+                <div className="bg-base-100 border-l-4 border-secondary p-6">
+                    <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                        Candidate Summary
                     </h3>
                     <div className="space-y-3">
                         <div>
-                            <div className="text-lg font-black uppercase tracking-tight text-dark">
+                            <div className="text-lg font-black tracking-tight">
                                 {candidate.full_name}
                             </div>
                             {candidate.current_title && (
-                                <div className="text-sm text-dark/70">
+                                <div className="text-sm text-base-content/60">
                                     {candidate.current_title}
                                     {candidate.current_company &&
                                         ` at ${candidate.current_company}`}
                                 </div>
                             )}
                         </div>
-                        <div className="flex flex-wrap gap-4 text-sm text-dark/60">
+                        <div className="flex flex-wrap gap-4 text-sm text-base-content/60">
                             {candidate.email && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-envelope text-coral" />
+                                    <i className="fa-duotone fa-regular fa-envelope text-secondary" />
                                     {candidate.email}
                                 </div>
                             )}
                             {candidate.phone && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-phone text-teal" />
+                                    <i className="fa-duotone fa-regular fa-phone text-primary" />
                                     {candidate.phone}
                                 </div>
                             )}
                             {candidate.location && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-location-dot text-purple" />
+                                    <i className="fa-duotone fa-regular fa-location-dot text-accent" />
                                     {candidate.location}
                                 </div>
                             )}
                         </div>
                         {candidateBio && (
-                            <div className="text-sm text-dark/70 leading-relaxed pt-3 border-t-2 border-dark/10">
+                            <div className="text-sm text-base-content/60 leading-relaxed pt-3 border-t border-base-300">
                                 {truncateText(candidateBio)}
                             </div>
                         )}
@@ -425,43 +417,46 @@ function OverviewTab({ application }: { application: Application }) {
                 </div>
             )}
 
-            {/* Submitted By */}
-            <div className="bg-white border-4 border-purple p-6">
-                <h3 className="text-xs font-black uppercase tracking-wider mb-4 flex items-center gap-2 text-dark">
-                    <span className="w-6 h-6 flex items-center justify-center bg-purple">
-                        <i className="fa-duotone fa-regular fa-user-tie text-xs text-white" />
-                    </span>
-                    Submitted By
+            {/* Submitting Recruiter */}
+            <div className="bg-base-100 border-l-4 border-accent p-6">
+                <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                    Submitting Recruiter
                 </h3>
                 <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-purple text-white font-black text-lg border-4 border-dark flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary text-primary-content font-black text-lg flex-shrink-0">
                         {recruiterInitials}
                     </div>
                     <div className="flex-1">
-                        <div className="text-lg font-black uppercase tracking-tight text-dark">
+                        <div className="text-lg font-black tracking-tight">
                             {recruiterName || "Unassigned"}
                         </div>
                         {recruiterEmail && (
                             <a
                                 href={`mailto:${recruiterEmail}`}
-                                className="text-sm text-coral hover:text-coral/80 font-bold"
+                                className="text-sm text-primary hover:text-primary/80 font-bold"
                             >
                                 {recruiterEmail}
                             </a>
                         )}
-                        <div className="text-sm text-dark/60 mt-1">
+                        <div className="text-sm text-base-content/50 mt-1">
                             <i className="fa-duotone fa-regular fa-calendar mr-1" />
-                            Submitted {formatApplicationDate(application.created_at)}
+                            Submitted{" "}
+                            {formatApplicationDate(application.created_at)}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* AI Analysis */}
-            <AIReviewPanel applicationId={application.id} variant="compact" />
+            {/* AI Analysis (compact reuse) */}
+            <AIReviewPanel
+                applicationId={application.id}
+                variant="compact"
+            />
         </div>
     );
 }
+
+// ─── Candidate Tab ──────────────────────────────────────────────────────────
 
 function CandidateTab({ application }: { application: Application }) {
     const candidate = application.candidate;
@@ -469,23 +464,22 @@ function CandidateTab({ application }: { application: Application }) {
     if (!candidate) {
         return (
             <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-user text-4xl mb-2" />
-                <p>Candidate information not available</p>
+                <i className="fa-duotone fa-user text-4xl mb-2 block" />
+                <p>No candidate data on file for this application.</p>
             </div>
         );
     }
 
-    // Use accent from application index (cycling through colors)
-    const accent = accentAt(0);
-
     return (
         <CandidateDetail
             candidate={candidate as any}
-            accent={accent}
+            accent={BASEL_ACCENT}
             onRefresh={undefined}
         />
     );
 }
+
+// ─── Job Tab ────────────────────────────────────────────────────────────────
 
 function JobTab({ application }: { application: Application }) {
     const job = application.job;
@@ -493,270 +487,22 @@ function JobTab({ application }: { application: Application }) {
     if (!job) {
         return (
             <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-briefcase text-4xl mb-2" />
-                <p>Job information not available</p>
+                <i className="fa-duotone fa-briefcase text-4xl mb-2 block" />
+                <p>No role data on file for this application.</p>
             </div>
         );
     }
 
-    // Use accent from application index (cycling through colors)
-    const accent = accentAt(1);
-
     return (
         <JobDetail
             job={job as any}
-            accent={accent}
+            accent={BASEL_ACCENT}
             onRefresh={undefined}
         />
     );
 }
 
-function JobTabOLD_BACKUP({ application }: { application: Application }) {
-    const job = application.job;
-
-    if (!job) {
-        return (
-            <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-briefcase text-4xl mb-2" />
-                <p>Job information not available</p>
-            </div>
-        );
-    }
-
-    const accent = accentAt(1);
-
-    return (
-        <div className="space-y-6 BACKUP_OLD_CODE">
-            {/* Header with Job Title and Company */}
-            <div className="bg-white border-4 border-dark p-6">
-                <h2 className="text-3xl font-black uppercase tracking-tight text-dark flex items-center gap-3 mb-2">
-                    <i className="fa-duotone fa-regular fa-briefcase text-coral" />
-                    {job.title}
-                </h2>
-                <div className="text-lg font-bold text-dark/60">
-                    {job.company?.name || "Company not specified"}
-                </div>
-            </div>
-
-            {/* Job Details Grid */}
-            <div className="retro-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                <div className="metric-block metric-block-sm bg-coral text-white">
-                    <div className="retro-metric-label mb-2">
-                        <i className="fa-duotone fa-regular fa-location-dot mr-2" />
-                        Location
-                    </div>
-                    <div className="retro-metric-value text-base font-bold">
-                        {job.location || (
-                            <span className="italic opacity-60">
-                                Not provided
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div className="metric-block metric-block-sm bg-teal text-white">
-                    <div className="retro-metric-label mb-2">
-                        <i className="fa-duotone fa-regular fa-briefcase mr-2" />
-                        Employment Type
-                    </div>
-                    <div className="retro-metric-value text-base font-bold capitalize">
-                        {job.employment_type ? (
-                            job.employment_type.replace("_", " ")
-                        ) : (
-                            <span className="italic opacity-60">
-                                Not provided
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div className="metric-block metric-block-sm bg-yellow text-dark">
-                    <div className="retro-metric-label mb-2">
-                        <i className="fa-duotone fa-regular fa-money-bill-wave mr-2" />
-                        Salary Range
-                    </div>
-                    <div className="retro-metric-value text-base font-bold">
-                        {job.salary_min || job.salary_max ? (
-                            <>
-                                ${job.salary_min?.toLocaleString() || "..."} -{" "}
-                                ${job.salary_max?.toLocaleString() || "..."}
-                            </>
-                        ) : (
-                            <span className="italic opacity-60">
-                                Not provided
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div className="metric-block metric-block-sm bg-purple text-white">
-                    <div className="retro-metric-label mb-2">
-                        <i className="fa-duotone fa-regular fa-sitemap mr-2" />
-                        Department
-                    </div>
-                    <div className="retro-metric-value text-base font-bold">
-                        {job.department || (
-                            <span className="italic opacity-60">
-                                Not provided
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Company Information */}
-            <div className="bg-white border-4 border-dark p-6">
-                <h3 className="text-xs font-black uppercase tracking-wider text-dark/60 mb-4">
-                    Company Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/60 mb-2">
-                            <i className="fa-duotone fa-regular fa-globe mr-1" />
-                            Website
-                        </div>
-                        {job.company?.website ? (
-                            <Link
-                                href={job.company.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-coral hover:text-coral/80 font-bold flex items-center gap-2 group"
-                            >
-                                {job.company.website}
-                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                            </Link>
-                        ) : (
-                            <span className="text-dark/40 italic">
-                                Not provided
-                            </span>
-                        )}
-                    </div>
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-dark/60 mb-2">
-                            <i className="fa-duotone fa-regular fa-industry mr-1" />
-                            Industry
-                        </div>
-                        <div className="text-dark font-bold">
-                            {job.company?.industry || (
-                                <span className="text-dark/40 italic">
-                                    Not provided
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Company Contacts */}
-            {(job.company?.id || job.company_id) && (
-                <div className="bg-white border-4 border-dark p-4">
-                    <h4 className="font-semibold mb-2">
-                        <i className="fa-duotone fa-users mr-2" />
-                        Company Contacts
-                    </h4>
-                    <CompanyContacts
-                        companyId={
-                            (job.company?.id || job.company_id) as string
-                        }
-                    />
-                </div>
-            )}
-
-            {(job.recruiter_description || job.description) && (
-                <div className="bg-white border-4 border-dark p-4">
-                    <h4 className="font-semibold mb-2">Description</h4>
-                    <p className="text-sm text-base-content/80 whitespace-pre-wrap">
-                        {job.recruiter_description || job.description}
-                    </p>
-                </div>
-            )}
-
-            {(job as any).requirements && (job as any).requirements.length > 0 && (
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white border-4 border-dark p-4">
-                        <h4 className="font-semibold text-coral mb-2">
-                            Required
-                        </h4>
-                        <ul className="space-y-2">
-                            {(job as any).requirements
-                                .filter(
-                                    (r: any) =>
-                                        r.requirement_type === "mandatory",
-                                )
-                                .sort(
-                                    (a: any, b: any) =>
-                                        (a.sort_order || 0) -
-                                        (b.sort_order || 0),
-                                )
-                                .map((req: any) => (
-                                    <li
-                                        key={req.id}
-                                        className="flex items-start gap-2 text-sm"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-circle-check text-coral mt-1 shrink-0" />
-                                        <span>{req.description}</span>
-                                    </li>
-                                ))}
-                        </ul>
-                    </div>
-                    <div className="bg-white border-4 border-dark p-4">
-                        <h4 className="font-semibold text-teal mb-2">
-                            Preferred
-                        </h4>
-                        <ul className="space-y-2">
-                            {(job as any).requirements
-                                .filter(
-                                    (r: any) =>
-                                        r.requirement_type === "preferred",
-                                )
-                                .sort(
-                                    (a: any, b: any) =>
-                                        (a.sort_order || 0) -
-                                        (b.sort_order || 0),
-                                )
-                                .map((req: any) => (
-                                    <li
-                                        key={req.id}
-                                        className="flex items-start gap-2 text-sm"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-circle-plus text-teal mt-1 shrink-0" />
-                                        <span>{req.description}</span>
-                                    </li>
-                                ))}
-                        </ul>
-                    </div>
-                </div>
-            )}
-
-            {application.pre_screen_answers &&
-                application.pre_screen_answers.length > 0 && (
-                    <div className="bg-white border-4 border-dark p-4">
-                        <h4 className="font-semibold mb-4">
-                            <i className="fa-duotone fa-regular fa-clipboard-question mr-2" />
-                            Pre-Screen Questions
-                        </h4>
-                        <div className="space-y-4">
-                            {application.pre_screen_answers.map(
-                                (answer: any, index: number) => (
-                                    <div
-                                        key={index}
-                                        className="border-l-4 border-coral pl-4"
-                                    >
-                                        <p className="font-semibold mb-1">
-                                            {answer.question?.question ||
-                                                `Question ${index + 1}`}
-                                        </p>
-                                        <p className="text-sm text-base-content/70">
-                                            {typeof answer.answer === "string"
-                                                ? answer.answer
-                                                : JSON.stringify(answer.answer)}
-                                        </p>
-                                    </div>
-                                ),
-                            )}
-                        </div>
-                    </div>
-                )}
-        </div>
-    );
-}
+// ─── Documents Tab ──────────────────────────────────────────────────────────
 
 function DocumentsTab({ application }: { application: Application }) {
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
@@ -769,36 +515,49 @@ function DocumentsTab({ application }: { application: Application }) {
     if (documents.length === 0) {
         return (
             <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-file text-4xl mb-2" />
-                <p>No documents uploaded</p>
+                <i className="fa-duotone fa-file text-4xl mb-2 block" />
+                <p>No documents attached to this application.</p>
             </div>
         );
     }
 
+    const getDocIcon = (docType: string | null) => {
+        switch (docType) {
+            case "resume":
+                return "fa-file-user";
+            case "cover_letter":
+                return "fa-file-lines";
+            case "portfolio":
+                return "fa-folder-open";
+            case "reference":
+                return "fa-file-certificate";
+            default:
+                return "fa-file";
+        }
+    };
+
     const renderDocumentList = (docs: any[], title: string) => (
-        <div className="bg-white border-4 border-dark p-4">
-            <h4 className="font-semibold mb-4">{title}</h4>
-            <div className="space-y-2">
+        <div className="border-l-4 border-primary">
+            <div className="px-6 py-3 border-b border-base-300">
+                <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    {title}
+                </h4>
+            </div>
+            <div className="divide-y divide-base-200">
                 {docs.map((doc: any) => (
                     <div
                         key={doc.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-base-300 hover:bg-base-300/80 transition-colors"
+                        className="flex items-center justify-between px-6 py-3 bg-base-200/50 hover:bg-base-200 transition-colors"
                     >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                             <i
-                                className={`fa-duotone fa-regular ${
-                                    doc.document_type === "resume"
-                                        ? "fa-file-text"
-                                        : doc.document_type === "cover_letter"
-                                          ? "fa-file-lines"
-                                          : "fa-file"
-                                } text-coral`}
+                                className={`fa-duotone fa-regular ${getDocIcon(doc.document_type)} text-primary`}
                             />
                             <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">
+                                <div className="font-bold text-sm truncate">
                                     {doc.file_name}
                                 </div>
-                                <div className="text-sm text-base-content/60">
+                                <div className="text-xs text-base-content/50">
                                     {doc.document_type
                                         ?.replace("_", " ")
                                         .toUpperCase()}
@@ -809,7 +568,7 @@ function DocumentsTab({ application }: { application: Application }) {
                         </div>
                         <div className="flex items-center gap-2">
                             {doc.metadata?.is_primary && (
-                                <span className="badge badge-primary badge-sm">
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 bg-primary/15 text-primary">
                                     Primary
                                 </span>
                             )}
@@ -818,7 +577,7 @@ function DocumentsTab({ application }: { application: Application }) {
                                     setSelectedDocument(doc);
                                     setShowDocumentModal(true);
                                 }}
-                                className="btn btn-ghost btn-sm"
+                                className="btn btn-ghost btn-sm btn-square"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
                             </button>
@@ -831,14 +590,14 @@ function DocumentsTab({ application }: { application: Application }) {
 
     return (
         <>
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {candidateDocuments.length > 0 &&
                     renderDocumentList(
                         candidateDocuments,
-                        "Candidate Documents",
+                        "From Candidate",
                     )}
                 {companyDocuments.length > 0 &&
-                    renderDocumentList(companyDocuments, "Company Documents")}
+                    renderDocumentList(companyDocuments, "From Company")}
             </div>
 
             <DocumentViewerModal
@@ -853,6 +612,29 @@ function DocumentsTab({ application }: { application: Application }) {
     );
 }
 
+// ─── AI Review Tab ──────────────────────────────────────────────────────────
+
+function AIReviewTab({
+    application,
+    token,
+}: {
+    application: Application;
+    token: string | null;
+}) {
+    if (!token) {
+        return (
+            <div className="text-center p-8 text-base-content/50">
+                <i className="fa-duotone fa-brain text-4xl mb-2 block" />
+                <p>AI analysis has not been run for this application.</p>
+            </div>
+        );
+    }
+
+    return <AIReviewPanel applicationId={application.id} />;
+}
+
+// ─── Notes Tab ──────────────────────────────────────────────────────────────
+
 function NotesTab({
     application,
     getToken,
@@ -866,12 +648,10 @@ function NotesTab({
 }) {
     const { profile } = useUserProfile();
 
-    // Determine user's creator type based on their role
     const getCreatorType = (): ApplicationNoteCreatorType => {
         if (profile?.is_platform_admin) return "platform_admin";
         if (isRecruiter) return "candidate_recruiter";
         if (isCompanyUser) {
-            // Could be hiring_manager or company_admin based on roles
             if (profile?.roles.includes("hiring_manager"))
                 return "hiring_manager";
             return "company_admin";
@@ -879,8 +659,6 @@ function NotesTab({
         return "candidate";
     };
 
-    // API functions for notes - wrapped in useCallback to prevent infinite re-fetching
-    // getToken is stable from Clerk, so these callbacks are stable too
     const fetchNotes = useCallback(
         async (applicationId: string): Promise<ApplicationNote[]> => {
             const token = await getToken();
@@ -891,7 +669,8 @@ function NotesTab({
             );
             return response.data || [];
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const createNote = useCallback(
@@ -905,7 +684,8 @@ function NotesTab({
             );
             return response.data;
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const deleteNote = useCallback(
@@ -915,14 +695,15 @@ function NotesTab({
             const client = createAuthenticatedClient(token);
             await client.delete(`/application-notes/${noteId}`);
         },
-        [getToken],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     if (!profile) {
         return (
             <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-comments text-4xl mb-2" />
-                <p>Loading user profile...</p>
+                <i className="fa-duotone fa-comments text-4xl mb-2 block" />
+                <p>Loading profile...</p>
             </div>
         );
     }
@@ -939,34 +720,13 @@ function NotesTab({
             isOnCompanySide={isCompanyUser}
             allowAddNote={true}
             allowDeleteNote={true}
-            emptyStateMessage="No notes yet. Add one to start the conversation about this application."
+            emptyStateMessage="No notes yet. Add a note to begin the discussion."
             maxHeight="500px"
         />
     );
 }
 
-function AIReviewTab({
-    application,
-    token,
-}: {
-    application: Application;
-    token: string | null;
-}) {
-    if (!token) {
-        return (
-            <div className="text-center p-8 text-base-content/50">
-                <i className="fa-duotone fa-brain text-4xl mb-2" />
-                <p>AI analysis not available</p>
-            </div>
-        );
-    }
-
-    return (
-        <>
-            <AIReviewPanel applicationId={application.id} />
-        </>
-    );
-}
+// ─── Timeline Tab ───────────────────────────────────────────────────────────
 
 function TimelineTab({
     auditLogs,

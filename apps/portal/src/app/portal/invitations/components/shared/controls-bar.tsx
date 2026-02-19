@@ -5,7 +5,7 @@ import { SearchInput } from "@splits-network/memphis-ui";
 import type { ViewMode } from "./accent";
 import type { InvitationFilters } from "../../types";
 import { ViewModeToggle } from "./view-mode-toggle";
-import AddCandidateModal from "../../../candidates/components/modals/add-candidate-modal";
+import AddCandidateModal from "../../../candidates-legacy/components/modals/add-candidate-modal";
 
 interface ControlsBarProps {
     searchInput: string;

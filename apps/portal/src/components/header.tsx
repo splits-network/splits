@@ -2,48 +2,31 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import {
-    ACCENT_HEX,
-    HeaderLogo,
-    NavItem,
-    NavDropdownItem,
-    HeaderSearchToggle,
-    HeaderCta,
-    MobileMenuToggle,
-    MobileAccordionNav,
-    HeaderDecorations,
-} from "@splits-network/memphis-ui";
-import type { AccentColor, MobileNavItemData } from "@splits-network/memphis-ui";
+import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 
-// ─── Animation constants ────────────────────────────────────────────────────
-const D = { fast: 0.25, normal: 0.4, slow: 0.6 };
-const E = {
-    smooth: "power2.out",
-    bounce: "back.out(1.7)",
-    elastic: "elastic.out(1, 0.5)",
-    pop: "back.out(2.0)",
-    snappy: "power3.out",
-};
-const S = { tight: 0.04 };
+if (typeof window !== "undefined") {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
-// ─── Nav Data (uses AccentColor names, not hex) ─────────────────────────────
+/* ─── Navigation Data ────────────────────────────────────────────────────── */
+
 interface NavSubItem {
     icon: string;
     label: string;
     desc: string;
-    color: AccentColor;
     href?: string;
 }
 
 interface NavItemDef {
     label: string;
     icon: string;
-    color: AccentColor;
     hasDropdown: boolean;
     href?: string;
     subItems?: NavSubItem[];
@@ -53,90 +36,58 @@ const NAV_ITEMS: NavItemDef[] = [
     {
         label: "Platform",
         icon: "fa-duotone fa-regular fa-grid-2",
-        color: "coral",
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", color: "coral", href: "/public/platform/ats" },
-            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", color: "teal", href: "/public/platform/split-fees" },
-            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", color: "yellow", href: "/public/platform/analytics" },
-            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", color: "purple", href: "/public/platform/messaging" },
-            { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", color: "coral", href: "/public/platform/ai-matching" },
-            { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", color: "teal", href: "/public/platform/billing" },
+            { icon: "fa-duotone fa-regular fa-briefcase", label: "ATS", desc: "Track every candidate", href: "/public/platform/ats" },
+            { icon: "fa-duotone fa-regular fa-handshake", label: "Split Fees", desc: "Fair, transparent splits", href: "/public/platform/split-fees" },
+            { icon: "fa-duotone fa-regular fa-chart-mixed", label: "Analytics", desc: "Real-time insights", href: "/public/platform/analytics" },
+            { icon: "fa-duotone fa-regular fa-messages", label: "Messaging", desc: "Built-in communication", href: "/public/platform/messaging" },
+            { icon: "fa-duotone fa-regular fa-robot", label: "AI Matching", desc: "Smart candidate pairing", href: "/public/platform/ai-matching" },
+            { icon: "fa-duotone fa-regular fa-file-invoice-dollar", label: "Billing", desc: "Automated payouts", href: "/public/platform/billing" },
         ],
     },
     {
         label: "Network",
         icon: "fa-duotone fa-regular fa-circle-nodes",
-        color: "teal",
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-user-tie", label: "For Recruiters", desc: "Grow your business", color: "teal", href: "/public/for-recruiters" },
-            { icon: "fa-duotone fa-regular fa-building", label: "For Companies", desc: "Find top talent", color: "coral", href: "/public/for-companies" },
-            { icon: "fa-duotone fa-regular fa-address-book", label: "Directory", desc: "Browse the network", color: "purple" },
+            { icon: "fa-duotone fa-regular fa-user-tie", label: "For Recruiters", desc: "Grow your business", href: "/public/for-recruiters" },
+            { icon: "fa-duotone fa-regular fa-building", label: "For Companies", desc: "Find top talent", href: "/public/for-companies" },
+            { icon: "fa-duotone fa-regular fa-address-book", label: "Directory", desc: "Browse the network" },
         ],
     },
     {
         label: "Pricing",
         icon: "fa-duotone fa-regular fa-tag",
-        color: "yellow",
         hasDropdown: false,
         href: "/public/pricing",
     },
     {
         label: "Resources",
         icon: "fa-duotone fa-regular fa-books",
-        color: "purple",
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-gears", label: "How It Works", desc: "See the platform in action", color: "purple", href: "/public/how-it-works" },
-            { icon: "fa-duotone fa-regular fa-life-ring", label: "Help Center", desc: "Get support", color: "teal" },
-            { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", desc: "Latest industry insights", color: "coral" },
+            { icon: "fa-duotone fa-regular fa-gears", label: "How It Works", desc: "See the platform in action", href: "/public/how-it-works" },
+            { icon: "fa-duotone fa-regular fa-life-ring", label: "Help Center", desc: "Get support" },
+            { icon: "fa-duotone fa-regular fa-newspaper", label: "Blog", desc: "Latest industry insights" },
         ],
     },
     {
         label: "Company",
         icon: "fa-duotone fa-regular fa-building-columns",
-        color: "coral",
         hasDropdown: true,
         subItems: [
-            { icon: "fa-duotone fa-regular fa-users", label: "About", desc: "Our story & mission", color: "coral" },
-            { icon: "fa-duotone fa-regular fa-envelope", label: "Contact", desc: "Get in touch", color: "teal" },
+            { icon: "fa-duotone fa-regular fa-users", label: "About", desc: "Our story & mission" },
+            { icon: "fa-duotone fa-regular fa-envelope", label: "Contact", desc: "Get in touch" },
         ],
     },
 ];
 
-// Build mobile nav items — mobile components still use hex strings
-const MOBILE_NAV_ITEMS: MobileNavItemData[] = NAV_ITEMS.map((item) => ({
-    label: item.label,
-    icon: item.icon,
-    color: ACCENT_HEX[item.color],
-    hasDropdown: item.hasDropdown,
-    href: item.href,
-    subItems: item.subItems?.map((sub) => ({
-        icon: sub.icon,
-        label: sub.label,
-        color: ACCENT_HEX[sub.color],
-        href: sub.href,
-    })),
-}));
+/* ─── Desktop Nav Content ────────────────────────────────────────────────── */
 
-// ─── Utility Bar Items ──────────────────────────────────────────────────────
-const UTILITY_ITEMS = [
-    { text: "Recruiters: Join Free", colorClass: "text-coral", icon: "fa-duotone fa-regular fa-arrow-right" },
-    { text: "Split-Fee Marketplace", colorClass: "text-teal", icon: "fa-duotone fa-regular fa-handshake" },
-];
-
-// ─── Desktop Header ─────────────────────────────────────────────────────────
-function DesktopNav() {
-    const { isSignedIn, isLoaded } = useAuth();
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [mounted, setMounted] = useState(false);
+function DesktopNavContent() {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-    const navRef = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const navRef = useRef<HTMLDivElement>(null);
 
     // Close dropdowns when clicking outside the nav
     useEffect(() => {
@@ -153,226 +104,235 @@ function DesktopNav() {
         setActiveDropdown(activeDropdown === label ? null : label);
     };
 
-    const showSignedIn = mounted && isLoaded && isSignedIn;
-
     return (
-        <header className="desktop-header relative hidden lg:block bg-dark border-b-[5px] border-coral">
-            <HeaderDecorations variant="desktop" />
-
-            <div className="relative z-10">
-                {/* Top utility bar */}
-                <div className="header-utility-bar xl:px-10">
-                    <div className="flex items-center gap-2 py-1.5">
-                        {UTILITY_ITEMS.map((item, i) => (
-                            <span
-                                key={i}
-                                className={`top-bar-item flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-1 ${item.colorClass}`}
-                            >
-                                <i className={`${item.icon} text-[8px]`} />
-                                {item.text}
-                            </span>
-                        ))}
-                    </div>
-                    <div className="flex items-center gap-3 py-1.5">
-                        <a href="#" className="text-[9px] font-bold uppercase tracking-[0.2em] transition-colors hover:opacity-80 text-white/40">
-                            Help Center
-                        </a>
-                        <span className="text-[9px] text-white/15">|</span>
-                        <a href="#" className="text-[9px] font-bold uppercase tracking-[0.2em] transition-colors hover:opacity-80 text-white/40">
-                            Contact
-                        </a>
-                    </div>
-                </div>
-
-                {/* Main nav bar */}
-                <div className="navbar px-6 xl:px-10 py-3.5">
-                    {/* Logo */}
-                    <div className="navbar-start">
-                        <Link href="/" className="nav-logo">
-                            <HeaderLogo brand="splits" size="md" />
+        <div ref={navRef} className="flex items-center gap-1">
+            {NAV_ITEMS.map((item) => (
+                <div key={item.label} className="relative">
+                    {item.href && !item.hasDropdown ? (
+                        <Link
+                            href={item.href}
+                            className="nav-link-item opacity-0 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                        >
+                            {item.label}
                         </Link>
-                    </div>
+                    ) : (
+                        <button
+                            onClick={() => item.hasDropdown && toggleDropdown(item.label)}
+                            className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                        >
+                            {item.label}
+                            {item.hasDropdown && (
+                                <i
+                                    className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                                        activeDropdown === item.label ? "rotate-180" : ""
+                                    }`}
+                                />
+                            )}
+                        </button>
+                    )}
 
-                    {/* Nav items — click-to-open dropdowns */}
-                    <nav ref={navRef} className="navbar-center gap-1">
-                        {NAV_ITEMS.map((item) => (
-                            <div
-                                key={item.label}
-                                className="relative"
-                            >
-                                {item.href && !item.hasDropdown ? (
-                                    <Link href={item.href}>
-                                        <NavItem
-                                            label={item.label}
-                                            icon={item.icon}
-                                            color={item.color}
-                                            hasDropdown={false}
-                                        />
-                                    </Link>
-                                ) : (
-                                    <NavItem
-                                        label={item.label}
-                                        icon={item.icon}
-                                        color={item.color}
-                                        hasDropdown={item.hasDropdown}
-                                        isActive={activeDropdown === item.label}
-                                        onClick={() => item.hasDropdown && toggleDropdown(item.label)}
-                                    />
-                                )}
-
-                                {item.hasDropdown && item.subItems && activeDropdown === item.label && (
-                                    <div
-                                        className={`absolute top-full left-0 mt-1 z-50 p-2 nav-dropdown nav-dropdown-${item.color}`}
-                                        style={{ width: item.subItems.length > 3 ? "520px" : "340px" }}
-                                    >
-                                        {item.label && (
-                                            <div className="nav-dropdown-title">{item.label} Tools</div>
-                                        )}
-                                        <div className={item.subItems.length > 3 ? "grid grid-cols-2 gap-0.5" : ""}>
-                                            {item.subItems.map((sub, i) => (
-                                                <NavDropdownItem
-                                                    key={i}
-                                                    icon={sub.icon}
-                                                    label={sub.label}
-                                                    desc={sub.desc}
-                                                    color={sub.color}
-                                                    href={sub.href}
-                                                    onClick={() => setActiveDropdown(null)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                    {/* Dropdown */}
+                    {item.hasDropdown && item.subItems && activeDropdown === item.label && (
+                        <div
+                            className="absolute top-full left-0 mt-1 bg-base-100 border border-base-300 shadow-lg py-2 z-50"
+                            style={{
+                                width: item.subItems.length > 3 ? "520px" : "300px",
+                            }}
+                        >
+                            <div className="px-4 py-2 border-b border-base-300 mb-1">
+                                <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                                    {item.label}
+                                </span>
                             </div>
-                        ))}
-                    </nav>
-
-                    {/* Right actions */}
-                    <div className="navbar-end gap-3">
-                        {/* Search */}
-                        <HeaderSearchToggle isOpen={searchOpen} onToggle={() => setSearchOpen(!searchOpen)} />
-
-                        {showSignedIn ? (
-                            <>
-                                {/* Dashboard link */}
-                                <Link
-                                    href="/portal/dashboard"
-                                    className="nav-action"
-                                    title="Dashboard"
-                                >
-                                    <i className="fa-duotone fa-regular fa-gauge text-sm" />
-                                </Link>
-                                <NotificationBell />
-                                <div className="nav-user flex items-center gap-2 pl-3 ml-1 border-l-[3px] border-dark-gray">
-                                    <UserDropdown />
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <HeaderCta
-                                    label="Sign In"
-                                    icon="fa-duotone fa-regular fa-arrow-right-to-bracket"
-                                    color="purple"
-                                    variant="secondary"
-                                    href="/sign-in"
-                                    className="nav-cta-secondary hidden xl:flex"
-                                />
-                                <HeaderCta
-                                    label="Get Started"
-                                    icon="fa-duotone fa-regular fa-rocket"
-                                    color="coral"
-                                    variant="primary"
-                                    href="/sign-up"
-                                    className="nav-cta-primary"
-                                />
-                            </>
-                        )}
-                    </div>
+                            <div className={item.subItems.length > 3 ? "grid grid-cols-2 gap-0.5" : ""}>
+                                {item.subItems.map((sub, i) => (
+                                    <Link
+                                        key={i}
+                                        href={sub.href || "#"}
+                                        onClick={() => setActiveDropdown(null)}
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+                                    >
+                                        <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
+                                            <i className={`${sub.icon} text-primary text-xs`} />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold">{sub.label}</div>
+                                            <div className="text-[11px] text-base-content/50">{sub.desc}</div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div>
-        </header>
+            ))}
+        </div>
     );
 }
 
-// ─── Mobile Header ──────────────────────────────────────────────────────────
-function MobileNav() {
+/* ─── Search Panel ───────────────────────────────────────────────────────── */
+
+function SearchPanel() {
+    const [searchOpen, setSearchOpen] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (searchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [searchOpen]);
+
+    return (
+        <div className="header-right-item opacity-0 relative">
+            <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="btn btn-ghost btn-sm btn-square"
+            >
+                <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/60" />
+            </button>
+
+            {searchOpen && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-base-100 border border-base-300 shadow-lg p-3 z-50">
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Search jobs, candidates, companies..."
+                            className="input input-sm w-full pl-9 bg-base-200 border-base-300 focus:border-primary focus:outline-none"
+                        />
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-base-300">
+                        <p className="text-[10px] uppercase tracking-widest text-base-content/30 mb-2">
+                            Quick Actions
+                        </p>
+                        {[
+                            { label: "Browse open jobs", icon: "fa-duotone fa-regular fa-briefcase" },
+                            { label: "View my candidates", icon: "fa-duotone fa-regular fa-users" },
+                            { label: "Check placements", icon: "fa-duotone fa-regular fa-trophy" },
+                        ].map((action) => (
+                            <a
+                                key={action.label}
+                                href="#"
+                                className="flex items-center gap-2 px-2 py-1.5 text-xs text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
+                            >
+                                <i className={`${action.icon} text-primary`} />
+                                {action.label}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ─── Mobile Menu Content ────────────────────────────────────────────────── */
+
+function MobileMenuContent({ isSignedIn }: { isSignedIn: boolean }) {
+    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+
+    return (
+        <>
+            {/* Search */}
+            <div className="relative mb-4">
+                <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    className="input input-sm w-full pl-9 bg-base-200 border-base-300"
+                />
+            </div>
+
+            {/* Accordion navigation */}
+            <nav className="space-y-1 mb-4">
+                {NAV_ITEMS.map((item) => (
+                    <div key={item.label}>
+                        {item.subItems ? (
+                            <div>
+                                <button
+                                    onClick={() =>
+                                        setActiveAccordion(
+                                            activeAccordion === item.label ? null : item.label,
+                                        )
+                                    }
+                                    className="flex items-center justify-between w-full px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <i className={`${item.icon} text-primary text-xs`} />
+                                        {item.label}
+                                    </span>
+                                    <i
+                                        className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                                            activeAccordion === item.label ? "rotate-180" : ""
+                                        }`}
+                                    />
+                                </button>
+                                {activeAccordion === item.label && (
+                                    <div className="pl-6 space-y-1 mb-2">
+                                        {item.subItems.map((sub) => (
+                                            <Link
+                                                key={sub.label}
+                                                href={sub.href || "#"}
+                                                className="flex items-center gap-2 px-3 py-2 text-sm text-base-content/60 hover:text-base-content"
+                                            >
+                                                <i className={`${sub.icon} text-xs text-primary`} />
+                                                {sub.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <Link
+                                href={item.href || "#"}
+                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
+                            >
+                                <i className={`${item.icon} text-primary text-xs`} />
+                                {item.label}
+                            </Link>
+                        )}
+                    </div>
+                ))}
+            </nav>
+
+            {/* CTAs */}
+            <div className="border-t border-base-300 pt-4 space-y-3">
+                {isSignedIn ? (
+                    <Link href="/portal/dashboard" className="btn btn-primary btn-sm w-full">
+                        <i className="fa-duotone fa-regular fa-gauge" />
+                        Dashboard
+                    </Link>
+                ) : (
+                    <>
+                        <Link href="/sign-up" className="btn btn-primary btn-sm w-full">
+                            <i className="fa-duotone fa-regular fa-rocket" />
+                            Get Started Free
+                        </Link>
+                        <Link
+                            href="/sign-in"
+                            className="btn btn-ghost btn-sm w-full border border-base-300"
+                        >
+                            <i className="fa-duotone fa-regular fa-arrow-right-to-bracket" />
+                            Sign In
+                        </Link>
+                    </>
+                )}
+            </div>
+        </>
+    );
+}
+
+/* ─── Main Header Component ──────────────────────────────────────────────── */
+
+export function Header() {
     const { isSignedIn, isLoaded } = useAuth();
-    const [menuOpen, setMenuOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
-
-    const showSignedIn = mounted && isLoaded && isSignedIn;
-
-    return (
-        <header className="mobile-header relative lg:hidden bg-dark border-b-[5px] border-teal">
-            <HeaderDecorations variant="mobile" />
-
-            <div className="relative z-10">
-                <div className="navbar px-4 py-3">
-                    {/* Logo */}
-                    <div className="navbar-start">
-                        <Link href="/">
-                            <HeaderLogo brand="splits" size="sm" />
-                        </Link>
-                    </div>
-
-                    {/* Right side */}
-                    <div className="navbar-end gap-2">
-                        {showSignedIn && <NotificationBell />}
-                        <MobileMenuToggle isOpen={menuOpen} onToggle={() => setMenuOpen(!menuOpen)} />
-                    </div>
-                </div>
-
-                {/* Expandable menu */}
-                {menuOpen && (
-                    <div className="px-4 pb-4 border-t-[3px] border-dark-gray">
-                        <MobileAccordionNav items={MOBILE_NAV_ITEMS} />
-
-                        {/* CTAs */}
-                        <div className="space-y-2 pt-3 border-t-[3px] border-dark-gray">
-                            {showSignedIn ? (
-                                <HeaderCta
-                                    label="Dashboard"
-                                    icon="fa-duotone fa-regular fa-gauge"
-                                    color="coral"
-                                    variant="primary"
-                                    href="/portal/dashboard"
-                                    className="w-full py-3"
-                                />
-                            ) : (
-                                <>
-                                    <HeaderCta
-                                        label="Get Started Free"
-                                        icon="fa-duotone fa-regular fa-rocket"
-                                        color="coral"
-                                        variant="primary"
-                                        href="/sign-up"
-                                        className="w-full py-3"
-                                    />
-                                    <HeaderCta
-                                        label="Sign In"
-                                        icon="fa-duotone fa-regular fa-arrow-right-to-bracket"
-                                        color="purple"
-                                        variant="secondary"
-                                        href="/sign-in"
-                                        className="w-full py-3"
-                                    />
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </header>
-    );
-}
-
-// ─── Main Header Component ──────────────────────────────────────────────────
-export function Header() {
-    const containerRef = useRef<HTMLDivElement>(null);
 
     // Publish header height as CSS variable for sidebar positioning
     useEffect(() => {
@@ -394,40 +354,114 @@ export function Header() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                containerRef.current.querySelectorAll("[class*='opacity-0']").forEach((el) => {
+                    gsap.set(el, { opacity: 1 });
+                });
+                return;
+            }
 
             const $ = (sel: string) => containerRef.current!.querySelectorAll(sel);
             const $1 = (sel: string) => containerRef.current!.querySelector(sel);
 
-            // Desktop header entrance
-            const desktop = $1(".desktop-header");
-            if (desktop) {
-                const tl = gsap.timeline({ defaults: { ease: E.smooth } });
-                tl.fromTo(desktop, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: D.slow, ease: E.bounce });
-                tl.fromTo($(".top-bar-item"), { y: -10, opacity: 0 }, { y: 0, opacity: 1, duration: D.fast, stagger: S.tight }, "-=0.3");
-                tl.fromTo($1(".nav-logo"), { x: -30, opacity: 0, scale: 0.8 }, { x: 0, opacity: 1, scale: 1, duration: D.normal, ease: E.pop }, "-=0.3");
-                tl.fromTo($(".nav-action"), { scale: 0, rotation: -15 }, { scale: 1, rotation: 0, duration: D.fast, stagger: S.tight, ease: E.elastic }, "-=0.2");
-                const ctaSecondary = $1(".nav-cta-secondary");
-                if (ctaSecondary) tl.fromTo(ctaSecondary, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: D.fast, ease: E.snappy }, "-=0.2");
-                const ctaPrimary = $1(".nav-cta-primary");
-                if (ctaPrimary) tl.fromTo(ctaPrimary, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: D.normal, ease: E.bounce }, "-=0.2");
-                const navUser = $1(".nav-user");
-                if (navUser) tl.fromTo(navUser, { x: 15, opacity: 0 }, { x: 0, opacity: 1, duration: D.fast }, "-=0.2");
+            // Logo
+            const logo = $1(".header-logo");
+            if (logo) {
+                gsap.fromTo(
+                    logo,
+                    { opacity: 0, x: -20 },
+                    { opacity: 1, x: 0, duration: 0.5, ease: "power2.out", delay: 0.2 },
+                );
             }
 
-            // Mobile header entrance
-            const mobile = $1(".mobile-header");
-            if (mobile) {
-                gsap.fromTo(mobile, { y: -40, opacity: 0 }, { y: 0, opacity: 1, duration: D.slow, ease: E.bounce, delay: 0.2 });
-            }
+            // Nav links stagger
+            gsap.fromTo(
+                $(".nav-link-item"),
+                { opacity: 0, y: -10 },
+                { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: "power2.out", delay: 0.3 },
+            );
+
+            // Right side items
+            gsap.fromTo(
+                $(".header-right-item"),
+                { opacity: 0, x: 20 },
+                { opacity: 1, x: 0, duration: 0.4, stagger: 0.08, ease: "power2.out", delay: 0.4 },
+            );
         },
         { scope: containerRef },
     );
 
+    const showSignedIn = mounted && isLoaded && isSignedIn;
+
     return (
-        <div ref={containerRef} className="sticky top-0 z-50">
-            <DesktopNav />
-            <MobileNav />
-        </div>
+        <BaselHeader
+            containerRef={containerRef}
+            position="sticky"
+            frosted
+            logo={
+                <Link href="/" className="header-logo flex items-center opacity-0">
+                    <Image
+                        src="/logo.png"
+                        alt="Splits Network"
+                        width={140}
+                        height={48}
+                        className="h-9 w-auto"
+                        priority
+                    />
+                </Link>
+            }
+            nav={<DesktopNavContent />}
+            actions={
+                <>
+                    {/* Search */}
+                    <div className="hidden lg:block">
+                        <SearchPanel />
+                    </div>
+
+                    {/* Theme toggle */}
+                    <ThemeToggle className="header-right-item opacity-0" />
+
+                    {showSignedIn ? (
+                        <>
+                            {/* Dashboard link */}
+                            <Link
+                                href="/portal/dashboard"
+                                className="hidden lg:flex btn btn-ghost btn-sm btn-square"
+                                title="Dashboard"
+                            >
+                                <i className="fa-duotone fa-regular fa-gauge text-base-content/60" />
+                            </Link>
+
+                            {/* Notifications */}
+                            <div>
+                                <NotificationBell />
+                            </div>
+
+                            {/* User */}
+                            <div className="pl-3 ml-1 border-l border-base-300">
+                                <UserDropdown />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/sign-in"
+                                className="header-right-item opacity-0 btn btn-ghost btn-sm hidden xl:flex"
+                            >
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/sign-up"
+                                className="header-right-item opacity-0 btn btn-primary btn-sm"
+                            >
+                                <i className="fa-duotone fa-regular fa-rocket" />
+                                Get Started
+                            </Link>
+                        </>
+                    )}
+                </>
+            }
+            mobileMenu={<MobileMenuContent isSignedIn={!!showSignedIn} />}
+        />
     );
 }

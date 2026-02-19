@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
-import { ServiceStatusBanner } from "@splits-network/shared-ui";
+import { ServiceStatusProvider, ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
@@ -120,6 +120,7 @@ export default function RootLayout({
         <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
             <html lang="en" suppressHydrationWarning>
                 <head>
+                    <ThemeScript />
                     <JsonLd data={webAppJsonLd} id="applicant-webapp-jsonld" />
                     <JsonLd
                         data={websiteJsonLd}
@@ -150,13 +151,15 @@ export default function RootLayout({
                     ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <ServiceStatusBanner statusHref="/status" />
+                    <ThemeProvider>
+                    <ServiceStatusProvider statusHref="/status" />
                     <ToastProvider>
                         <Header />
-                        <main className="flex-1">{children}</main>
+                        <main className="flex-1 pt-[68px]">{children}</main>
                         <Footer />
                         {/* <CookieConsent /> */}
                     </ToastProvider>
+                    </ThemeProvider>
                     <DevDebugPanel />
                     <CandidateActivityTrackerWrapper />
 

@@ -9,6 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import { Button, ExpandableButton } from "@splits-network/basel-ui";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
@@ -432,121 +433,54 @@ export default function ActionsToolbar({
                     className={`flex items-center ${layoutClass} ${className}`}
                 >
                     {actions.addNote && (
-                        <div className="group inline-block">
-                            <button
-                                onClick={() => setShowNoteModal(true)}
-                                className={`btn ${sizeClass} btn-square btn-ghost group-hover:hidden`}
-                                title="Add Note"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-note-sticky" />
-                            </button>
-                            <button
-                                onClick={() => setShowNoteModal(true)}
-                                className={`btn ${sizeClass} btn-ghost hidden group-hover:inline-flex gap-1.5`}
-                                title="Add Note"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-note-sticky" />
-                                <span className="text-xs whitespace-nowrap">Add Note</span>
-                            </button>
-                        </div>
+                        <Button
+                            icon="fa-duotone fa-regular fa-note-sticky"
+                            variant="btn-ghost btn-square"
+                            size={size}
+                            disabled={actionLoading}
+                            onClick={() => setShowNoteModal(true)}
+                        />
                     )}
                     {actions.requestPrescreen && (
-                        <div className="group inline-block">
-                            <button
-                                onClick={() => setShowPreScreenModal(true)}
-                                className={`btn ${sizeClass} btn-square btn-yellow group-hover:hidden`}
-                                title="Request Pre-Screen"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-user-check" />
-                            </button>
-                            <button
-                                onClick={() => setShowPreScreenModal(true)}
-                                className={`btn ${sizeClass} btn-yellow hidden group-hover:inline-flex gap-1.5`}
-                                title="Request Pre-Screen"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-user-check" />
-                                <span className="text-xs whitespace-nowrap">Pre-Screen</span>
-                            </button>
-                        </div>
+                        <Button
+                            icon="fa-duotone fa-regular fa-user-check"
+                            variant="btn-warning btn-square"
+                            size={size}
+                            disabled={actionLoading}
+                            onClick={() => setShowPreScreenModal(true)}
+                        />
                     )}
                     {actions.requestChanges && (
-                        <div className="group inline-block">
-                            <button
-                                onClick={() => setShowRequestChangesModal(true)}
-                                className={`btn ${sizeClass} btn-square btn-purple group-hover:hidden`}
-                                title="Request Changes"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-question" />
-                            </button>
-                            <button
-                                onClick={() => setShowRequestChangesModal(true)}
-                                className={`btn ${sizeClass} btn-purple hidden group-hover:inline-flex gap-1.5`}
-                                title="Request Changes"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-question" />
-                                <span className="text-xs whitespace-nowrap">Changes</span>
-                            </button>
-                        </div>
+                        <Button
+                            icon="fa-duotone fa-regular fa-question"
+                            variant="btn-accent btn-square"
+                            size={size}
+                            disabled={actionLoading}
+                            onClick={() => setShowRequestChangesModal(true)}
+                        />
                     )}
                     {actions.advanceStage && (
-                        <div className="group inline-block">
-                            <button
-                                onClick={() => handleApprove(false)}
-                                className={`btn ${sizeClass} btn-square btn-teal group-hover:hidden`}
-                                title={permissions.approveButtonText}
-                                disabled={actionLoading}
-                            >
-                                {actionLoading ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-check" />
-                                )}
-                            </button>
-                            <button
-                                onClick={() => handleApprove(false)}
-                                className={`btn ${sizeClass} btn-teal hidden group-hover:inline-flex gap-1.5`}
-                                title={permissions.approveButtonText}
-                                disabled={actionLoading}
-                            >
-                                {actionLoading ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-check" />
-                                        <span className="text-xs whitespace-nowrap">
-                                            {size === "xs" ? "Accept" : "Approve"}
-                                        </span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                        <Button
+                            icon="fa-duotone fa-regular fa-check"
+                            title={permissions.approveButtonText}
+                            variant="btn-success"
+                            size={size}
+                            disabled={actionLoading}
+                            loading={actionLoading}
+                            onClick={() => handleApprove(false)}
+                        >
+                            Approve
+                        </Button>
                     )}
                     {actions.reject && (
-                        <div className="group inline-block">
-                            <button
-                                onClick={() => setShowDenyModal(true)}
-                                className={`btn ${sizeClass} btn-square btn-coral group-hover:hidden`}
-                                title={permissions.rejectButtonText}
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-xmark" />
-                            </button>
-                            <button
-                                onClick={() => setShowDenyModal(true)}
-                                className={`btn ${sizeClass} btn-coral hidden group-hover:inline-flex gap-1.5`}
-                                title={permissions.rejectButtonText}
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-xmark" />
-                                <span className="text-xs whitespace-nowrap">Reject</span>
-                            </button>
-                        </div>
+                        <Button
+                            icon="fa-duotone fa-regular fa-xmark"
+                            title={permissions.rejectButtonText}
+                            variant="btn-error"
+                            size={size}
+                            disabled={actionLoading}
+                            onClick={() => setShowDenyModal(true)}
+                        ></Button>
                     )}
 
                     {/* Divider — only if there are action buttons before message */}
@@ -555,68 +489,37 @@ export default function ActionsToolbar({
                         actions.requestChanges ||
                         actions.advanceStage ||
                         actions.reject) && (
-                        <div className="w-px h-4 bg-dark/10 mx-0.5" />
+                        <div className="w-px h-4 bg-base-300 mx-0.5" />
                     )}
 
                     {actions.message && (
-                        <div className="group inline-block" title={chatDisabledReason || undefined}>
-                            <button
-                                onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-square btn-ghost group-hover:hidden relative`}
-                                title="Message Candidate"
+                        <div
+                            className="relative inline-block"
+                            title={chatDisabledReason || undefined}
+                        >
+                            <Presence
+                                status={presenceStatus}
+                                className="absolute -top-1 -right-1 z-10"
+                            />
+                            <Button
+                                icon="fa-duotone fa-regular fa-messages"
+                                variant="btn-nuetral btn-square btn-outline"
+                                size={size}
                                 disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-1 -right-1 z-10"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages" />
-                                )}
-                            </button>
-                            <button
+                                loading={startingChat}
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-ghost hidden group-hover:inline-flex gap-1.5 relative`}
-                                title="Message Candidate"
-                                disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-0.5 -right-0.5 z-10"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-messages" />
-                                        <span className="text-xs whitespace-nowrap">Message</span>
-                                    </>
-                                )}
-                            </button>
+                            />
                         </div>
                     )}
                     {actions.viewDetails && onViewDetails && (
                         <>
-                            <div className="w-px h-4 bg-dark/10 mx-0.5" />
-                            <div className="group inline-block">
-                                <button
-                                    onClick={() => onViewDetails(application.id)}
-                                    className={`btn ${sizeClass} btn-square btn-purple group-hover:hidden`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                </button>
-                                <button
-                                    onClick={() => onViewDetails(application.id)}
-                                    className={`btn ${sizeClass} btn-purple hidden group-hover:inline-flex gap-1.5`}
-                                    title="View Details"
-                                >
-                                    <i className="fa-duotone fa-regular fa-eye" />
-                                    <span className="text-xs whitespace-nowrap">Details</span>
-                                </button>
-                            </div>
+                            <div className="w-px h-4 bg-base-300 mx-0.5" />
+                            <Button
+                                icon="fa-duotone fa-regular fa-eye"
+                                variant="btn-primary"
+                                size={size}
+                                onClick={() => onViewDetails(application.id)}
+                            />
                         </>
                     )}
                 </div>
@@ -650,7 +553,9 @@ export default function ActionsToolbar({
                                 <i className="fa-duotone fa-regular fa-check" />
                             )}
                             <span className="truncate text-xs">
-                                {size === "xs" ? "Accept" : permissions.approveButtonText}
+                                {size === "xs"
+                                    ? "Accept"
+                                    : permissions.approveButtonText}
                             </span>
                         </button>
                     )}
@@ -662,7 +567,9 @@ export default function ActionsToolbar({
                         >
                             <i className="fa-duotone fa-regular fa-xmark" />
                             <span className="truncate text-xs">
-                                {size === "xs" ? "Reject" : permissions.rejectButtonText}
+                                {size === "xs"
+                                    ? "Reject"
+                                    : permissions.rejectButtonText}
                             </span>
                         </button>
                     )}
@@ -670,7 +577,7 @@ export default function ActionsToolbar({
                         <span title={chatDisabledReason || undefined}>
                             <button
                                 onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-ghost gap-1.5 relative`}
+                                className={`btn ${sizeClass} btn-neutral btn-outline gap-1.5 relative`}
                                 disabled={!canChat || startingChat}
                             >
                                 <Presence
@@ -682,7 +589,9 @@ export default function ActionsToolbar({
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-messages" />
                                 )}
-                                <span className="truncate text-xs">Message</span>
+                                <span className="truncate text-xs">
+                                    Message
+                                </span>
                             </button>
                         </span>
                     )}
@@ -691,7 +600,9 @@ export default function ActionsToolbar({
                     {hasOverflowItems && (
                         <div className="relative">
                             <button
-                                onClick={() => setShowOverflowMenu(!showOverflowMenu)}
+                                onClick={() =>
+                                    setShowOverflowMenu(!showOverflowMenu)
+                                }
                                 className={`btn ${sizeClass} btn-ghost gap-1`}
                             >
                                 <i className="fa-duotone fa-regular fa-ellipsis" />
@@ -702,62 +613,87 @@ export default function ActionsToolbar({
                                     {/* Backdrop */}
                                     <div
                                         className="fixed inset-0 z-10"
-                                        onClick={() => setShowOverflowMenu(false)}
+                                        onClick={() =>
+                                            setShowOverflowMenu(false)
+                                        }
                                     />
                                     {/* Dropdown Menu */}
-                                    <div className="absolute right-0 top-full mt-1 z-20 bg-white border-4 border-dark shadow-lg min-w-[200px]">
+                                    <div className="absolute right-0 top-full mt-1 z-20 bg-base-100 border-2 border-base-300 shadow-md min-w-[200px]">
                                         <div className="flex flex-col">
                                             {actions.addNote && (
                                                 <button
                                                     onClick={() => {
                                                         setShowNoteModal(true);
-                                                        setShowOverflowMenu(false);
+                                                        setShowOverflowMenu(
+                                                            false,
+                                                        );
                                                     }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b-2 border-dark/10"
+                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
                                                     disabled={actionLoading}
                                                 >
                                                     <i className="fa-duotone fa-regular fa-note-sticky" />
-                                                    <span className="text-xs">Add Note</span>
+                                                    <span className="text-xs">
+                                                        Add Note
+                                                    </span>
                                                 </button>
                                             )}
                                             {actions.requestPrescreen && (
                                                 <button
                                                     onClick={() => {
-                                                        setShowPreScreenModal(true);
-                                                        setShowOverflowMenu(false);
+                                                        setShowPreScreenModal(
+                                                            true,
+                                                        );
+                                                        setShowOverflowMenu(
+                                                            false,
+                                                        );
                                                     }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b-2 border-dark/10"
+                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
                                                     disabled={actionLoading}
                                                 >
                                                     <i className="fa-duotone fa-regular fa-user-check" />
-                                                    <span className="text-xs">Request Pre-Screen</span>
+                                                    <span className="text-xs">
+                                                        Request Pre-Screen
+                                                    </span>
                                                 </button>
                                             )}
                                             {actions.requestChanges && (
                                                 <button
                                                     onClick={() => {
-                                                        setShowRequestChangesModal(true);
-                                                        setShowOverflowMenu(false);
+                                                        setShowRequestChangesModal(
+                                                            true,
+                                                        );
+                                                        setShowOverflowMenu(
+                                                            false,
+                                                        );
                                                     }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b-2 border-dark/10"
+                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
                                                     disabled={actionLoading}
                                                 >
                                                     <i className="fa-duotone fa-regular fa-comment-edit" />
-                                                    <span className="text-xs">Request Changes</span>
+                                                    <span className="text-xs">
+                                                        Request Changes
+                                                    </span>
                                                 </button>
                                             )}
-                                            {actions.viewDetails && onViewDetails && (
-                                                <button
-                                                    onClick={() => {
-                                                        onViewDetails(application.id);
-                                                        setShowOverflowMenu(false);
-                                                    }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none"
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-eye" />
-                                                    <span className="text-xs">View Details</span>
-                                                </button>
-                                            )}
+                                            {actions.viewDetails &&
+                                                onViewDetails && (
+                                                    <button
+                                                        onClick={() => {
+                                                            onViewDetails(
+                                                                application.id,
+                                                            );
+                                                            setShowOverflowMenu(
+                                                                false,
+                                                            );
+                                                        }}
+                                                        className="btn btn-ghost justify-start gap-2 rounded-none"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-eye" />
+                                                        <span className="text-xs">
+                                                            View Details
+                                                        </span>
+                                                    </button>
+                                                )}
                                         </div>
                                     </div>
                                 </>
@@ -890,5 +826,3 @@ export default function ActionsToolbar({
         </>
     );
 }
-
-

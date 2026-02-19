@@ -12,13 +12,13 @@ import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
-import { ExpandableButton } from "./expandable-button";
+import { Button } from "@splits-network/basel-ui";
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import EditCandidateModal from "../modals/edit-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
 
-// ===== TYPES =====
+/* ─── Types ─────────────────────────────────────────────────────────────── */
 
 export interface CandidateActionsToolbarProps {
     candidate: Candidate;
@@ -46,7 +46,7 @@ export interface CandidateActionsToolbarProps {
     className?: string;
 }
 
-// ===== COMPONENT =====
+/* ─── Component ─────────────────────────────────────────────────────────── */
 
 export default function CandidateActionsToolbar({
     candidate,
@@ -67,16 +67,16 @@ export default function CandidateActionsToolbar({
     const { isAdmin, isRecruiter } = useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
-    // Modal states
+    /* ── Modal states ── */
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
 
-    // Loading states
+    /* ── Loading states ── */
     const [startingChat, setStartingChat] = useState(false);
 
-    // Chat presence
+    /* ── Chat presence ── */
     const canChat = Boolean(candidate.user_id);
     const chatDisabledReason = canChat
         ? null
@@ -86,7 +86,7 @@ export default function CandidateActionsToolbar({
         ? presence[candidate.user_id]?.status
         : undefined;
 
-    // ===== PERMISSION LOGIC =====
+    /* ── Permissions ── */
 
     const canManageCandidate = useMemo(() => {
         if (isAdmin) return true;
@@ -95,15 +95,17 @@ export default function CandidateActionsToolbar({
         return false;
     }, [isAdmin, isRecruiter, candidate]);
 
-    const canVerifyCandidate = useMemo(() => {
-        return isAdmin || isRecruiter;
-    }, [isAdmin, isRecruiter]);
+    const canVerifyCandidate = useMemo(
+        () => isAdmin || isRecruiter,
+        [isAdmin, isRecruiter],
+    );
 
-    const canSendJobOpportunity = useMemo(() => {
-        return isRecruiter || isAdmin;
-    }, [isRecruiter, isAdmin]);
+    const canSendJobOpportunity = useMemo(
+        () => isRecruiter || isAdmin,
+        [isRecruiter, isAdmin],
+    );
 
-    // ===== ACTION HANDLERS =====
+    /* ── Action Handlers ── */
 
     const handleStartChat = async () => {
         if (!candidate.user_id) return;
@@ -159,7 +161,7 @@ export default function CandidateActionsToolbar({
         if (onViewDetails) onViewDetails(candidate.id);
     };
 
-    // ===== ACTION VISIBILITY =====
+    /* ── Action Visibility ── */
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
@@ -174,14 +176,11 @@ export default function CandidateActionsToolbar({
             candidate.has_active_relationship,
     };
 
-    // ===== RENDER HELPERS =====
-
     const getSizeClass = () => `btn-${size}`;
-
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
-    // ===== MODALS (shared between both variants) =====
+    /* ── Modals ── */
 
     const modals = (
         <ModalPortal>
@@ -221,7 +220,7 @@ export default function CandidateActionsToolbar({
                     candidate={candidate}
                     isOpen={showVerifyModal}
                     onClose={() => setShowVerifyModal(false)}
-                    onUpdate={(updatedCandidate) => {
+                    onUpdate={() => {
                         setShowVerifyModal(false);
                         refresh();
                     }}
@@ -230,7 +229,7 @@ export default function CandidateActionsToolbar({
         </ModalPortal>
     );
 
-    // ===== ICON-ONLY VARIANT =====
+    /* ── Icon-Only Variant ── */
 
     if (variant === "icon-only") {
         return (
@@ -238,53 +237,51 @@ export default function CandidateActionsToolbar({
                 <div
                     className={`flex items-center ${getLayoutClass()} ${className}`}
                 >
-                    {/* Send Job Opportunity - Primary CTA */}
+                    {/* Send Job Opportunity — Primary CTA */}
                     {actions.sendJobOpportunity && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-paper-plane"
-                            label="Send Job"
-                            variant="btn-primary"
+                            variant="btn-primary btn-square"
                             size={size}
                             onClick={() => setShowSubmitWizard(true)}
                             title="Send Job Opportunity"
-                        />
+                        ></Button>
                     )}
 
                     {/* Edit */}
                     {actions.edit && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-pen-to-square"
-                            label="Edit"
                             variant="btn-ghost"
                             size={size}
                             onClick={() => setShowEditModal(true)}
                             title="Edit Candidate"
-                        />
+                        ></Button>
                     )}
 
                     {/* Verify */}
                     {actions.verify &&
                         candidate.verification_status !== "verified" && (
-                            <ExpandableButton
+                            <Button
                                 icon="fa-duotone fa-regular fa-badge-check"
-                                label="Verify"
                                 variant="btn-success"
                                 size={size}
                                 onClick={() => setShowVerifyModal(true)}
                                 title="Verify Candidate"
-                            />
+                            >
+                                Verify
+                            </Button>
                         )}
 
                     {/* End Representation */}
                     {actions.endRepresentation && (
-                        <ExpandableButton
+                        <Button
                             icon="fa-duotone fa-regular fa-link-slash"
-                            label="End Rep"
-                            variant="btn-error"
+                            variant="btn-error btn-square"
                             size={size}
                             onClick={() => setShowTerminateModal(true)}
                             title="End Representation"
-                        />
+                        ></Button>
                     )}
 
                     {/* Divider before Message */}
@@ -293,47 +290,44 @@ export default function CandidateActionsToolbar({
                             actions.edit ||
                             actions.verify ||
                             actions.endRepresentation) && (
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
                         )}
 
                     {/* Message */}
                     {actions.message && (
                         <span title={chatDisabledReason || undefined}>
-                            <ExpandableButton
+                            <Button
                                 icon="fa-duotone fa-regular fa-messages"
-                                label="Message"
-                                variant="btn-ghost"
+                                variant="btn-neutral btn-square btn-outline"
                                 size={size}
                                 onClick={handleStartChat}
                                 disabled={!canChat || startingChat}
                                 loading={startingChat}
                                 title="Message Candidate"
-                            />
+                            ></Button>
                         </span>
                     )}
 
                     {/* Divider before View Details */}
                     {actions.viewDetails && (
                         <>
-                            <div className="w-px h-4 bg-dark/20 mx-0.5" />
+                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
                             {onViewDetails ? (
-                                <ExpandableButton
+                                <Button
                                     icon="fa-duotone fa-regular fa-eye"
-                                    label="Details"
-                                    variant="btn-primary"
+                                    variant="btn-primary btn-square"
                                     size={size}
                                     onClick={handleViewDetails}
                                     title="View Details"
-                                />
+                                ></Button>
                             ) : (
-                                <ExpandableButton
+                                <Button
                                     icon="fa-duotone fa-regular fa-eye"
-                                    label="Details"
-                                    variant="btn-primary"
+                                    variant="btn-primary btn-square"
                                     size={size}
-                                    href={`/portal/candidates/${candidate.id}`}
+                                    href={`/portal/candidates?candidateId=${candidate.id}`}
                                     title="View Details"
-                                />
+                                ></Button>
                             )}
                         </>
                     )}
@@ -344,18 +338,19 @@ export default function CandidateActionsToolbar({
         );
     }
 
-    // ===== DESCRIPTIVE VARIANT =====
+    /* ── Descriptive Variant ── */
 
     return (
         <>
             <div
                 className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
             >
-                {/* Send Job Opportunity - Primary CTA */}
+                {/* Send Job Opportunity — Primary CTA */}
                 {actions.sendJobOpportunity && (
                     <button
                         onClick={() => setShowSubmitWizard(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Send Job Opportunity"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -368,6 +363,7 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowEditModal(true)}
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="Edit Candidate"
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
@@ -381,6 +377,7 @@ export default function CandidateActionsToolbar({
                         <button
                             onClick={() => setShowVerifyModal(true)}
                             className={`btn ${getSizeClass()} btn-success gap-2`}
+                            style={{ borderRadius: 0 }}
                             title="Verify Candidate"
                         >
                             <i className="fa-duotone fa-regular fa-badge-check" />
@@ -393,6 +390,7 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowTerminateModal(true)}
                         className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
+                        style={{ borderRadius: 0 }}
                         title="End Representation"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
@@ -408,7 +406,7 @@ export default function CandidateActionsToolbar({
                         actions.edit ||
                         actions.verify ||
                         actions.endRepresentation) && (
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                     )}
 
                 {/* Message */}
@@ -417,6 +415,7 @@ export default function CandidateActionsToolbar({
                         <button
                             onClick={handleStartChat}
                             className={`btn ${getSizeClass()} btn-outline gap-2`}
+                            style={{ borderRadius: 0 }}
                             title="Message Candidate"
                             disabled={!canChat || startingChat}
                         >
@@ -431,14 +430,15 @@ export default function CandidateActionsToolbar({
                     </span>
                 )}
 
-                {/* View Details - far right */}
+                {/* View Details — far right */}
                 {actions.viewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-dark/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                         {onViewDetails ? (
                             <button
                                 onClick={handleViewDetails}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
@@ -450,6 +450,7 @@ export default function CandidateActionsToolbar({
                             <Link
                                 href={`/portal/candidates/${candidate.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />

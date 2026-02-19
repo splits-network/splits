@@ -5,7 +5,6 @@ import type {
     Company,
     AIReview,
 } from "@splits-network/shared-types";
-import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
 
 // Extend BaseApplication to include enriched fields from API
 export interface Application extends BaseApplication {
@@ -32,42 +31,7 @@ export interface ApplicationFilters {
     scope?: "all" | "mine";
 }
 
-export interface ApplicationStatusDisplay {
-    label: string;
-    badgeClass: string;
-    icon: string;
-}
-
-export function getDisplayStatus(
-    application: Application,
-): ApplicationStatusDisplay {
-    const badge = getApplicationStageBadge(application.stage);
-
-    const iconMap: Record<string, string> = {
-        draft: "fa-pen",
-        ai_review: "fa-robot",
-        ai_reviewed: "fa-robot",
-        recruiter_request: "fa-user-tie",
-        recruiter_proposed: "fa-user-tie",
-        recruiter_review: "fa-user-check",
-        screen: "fa-filter",
-        submitted: "fa-paper-plane",
-        company_review: "fa-building",
-        company_feedback: "fa-comment",
-        interview: "fa-calendar",
-        offer: "fa-handshake",
-        hired: "fa-circle-check",
-        rejected: "fa-circle-xmark",
-        withdrawn: "fa-arrow-left",
-        expired: "fa-clock",
-    };
-
-    return {
-        label: badge.label,
-        badgeClass: badge.className,
-        icon: iconMap[application.stage || ""] || "fa-circle-question",
-    };
-}
+export type ViewMode = "table" | "grid" | "split";
 
 export function formatApplicationDate(
     dateString: string | Date | null | undefined,

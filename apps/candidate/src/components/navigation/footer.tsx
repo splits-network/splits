@@ -1,204 +1,307 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { HeaderLogo } from "@splits-network/memphis-ui";
+import { BaselFooter } from "@splits-network/basel-ui";
 
-// ─── Footer Links Data ──────────────────────────────────────────────────────
+// ─── Footer Data ────────────────────────────────────────────────────────────
 
-const PLATFORM_LINKS = [
-    { label: "Browse Jobs", href: "/public/jobs", icon: "fa-duotone fa-regular fa-briefcase" },
-    { label: "How It Works", href: "/public/how-it-works", icon: "fa-duotone fa-regular fa-circle-info" },
-    { label: "Find a Recruiter", href: "/public/marketplace", icon: "fa-duotone fa-regular fa-users" },
-    { label: "Help Center", href: "/public/help", icon: "fa-duotone fa-regular fa-life-ring" },
-];
-
-const RESOURCES_LINKS = [
-    { label: "Career Guides", href: "/public/resources/career-guides", icon: "fa-duotone fa-regular fa-book" },
-    { label: "Resume Tips", href: "/public/resources/resume-tips", icon: "fa-duotone fa-regular fa-file-alt" },
-    { label: "Interview Prep", href: "/public/resources/interview-prep", icon: "fa-duotone fa-regular fa-user-tie" },
-    { label: "Salary Insights", href: "/public/resources/salary-insights", icon: "fa-duotone fa-regular fa-chart-line" },
-];
-
-const COMPANY_LINKS = [
-    { label: "About Us", href: "/public/about", icon: "fa-duotone fa-regular fa-building" },
-    { label: "Contact", href: "/public/contact", icon: "fa-duotone fa-regular fa-envelope" },
-    { label: "For Recruiters", href: "/public/for-recruiters", icon: "fa-duotone fa-regular fa-handshake" },
-    { label: "Splits Network", href: "https://splits.network", icon: "fa-duotone fa-regular fa-network-wired" },
-];
-
-const LEGAL_LINKS = [
-    { label: "Privacy Policy", href: "/public/privacy-policy", icon: "fa-duotone fa-regular fa-shield-check" },
-    { label: "Terms of Service", href: "/public/terms-of-service", icon: "fa-duotone fa-regular fa-file-contract" },
-    { label: "Cookie Policy", href: "/public/cookie-policy", icon: "fa-duotone fa-regular fa-cookie-bite" },
-    { label: "System Status", href: "/public/status", icon: "fa-duotone fa-regular fa-heartbeat" },
+const FOOTER_SECTIONS = [
+    {
+        title: "Platform",
+        links: [
+            { label: "Browse Jobs", href: "/public/jobs" },
+            { label: "How It Works", href: "/public/how-it-works" },
+            { label: "Find a Recruiter", href: "/public/marketplace" },
+            { label: "Help Center", href: "/public/help" },
+            { label: "System Status", href: "/public/status" },
+        ],
+    },
+    {
+        title: "Resources",
+        links: [
+            { label: "Career Guides", href: "/public/resources/career-guides" },
+            { label: "Resume Tips", href: "/public/resources/resume-tips" },
+            {
+                label: "Interview Prep",
+                href: "/public/resources/interview-prep",
+            },
+            {
+                label: "Salary Insights",
+                href: "/public/resources/salary-insights",
+            },
+            {
+                label: "Industry Trends",
+                href: "/public/resources/industry-trends",
+            },
+        ],
+    },
+    {
+        title: "Company",
+        links: [
+            { label: "About Us", href: "/public/about" },
+            { label: "Contact", href: "/public/contact" },
+            { label: "For Recruiters", href: "/public/for-recruiters" },
+            {
+                label: "Splits Network",
+                href: "https://splits.network",
+                external: true,
+            },
+        ],
+    },
+    {
+        title: "Legal",
+        links: [
+            { label: "Privacy Policy", href: "/public/privacy-policy" },
+            { label: "Terms of Service", href: "/public/terms-of-service" },
+            { label: "Cookie Policy", href: "/public/cookie-policy" },
+        ],
+    },
 ];
 
 const SOCIAL_LINKS = [
-    { label: "Twitter", href: "https://twitter.com", icon: "fa-brands fa-twitter" },
-    { label: "LinkedIn", href: "https://linkedin.com", icon: "fa-brands fa-linkedin" },
-    { label: "Facebook", href: "https://facebook.com", icon: "fa-brands fa-facebook" },
-    { label: "Instagram", href: "https://instagram.com", icon: "fa-brands fa-instagram" },
+    {
+        icon: "fa-brands fa-linkedin-in",
+        href: "https://linkedin.com",
+        label: "LinkedIn",
+    },
+    {
+        icon: "fa-brands fa-x-twitter",
+        href: "https://twitter.com",
+        label: "X / Twitter",
+    },
+    {
+        icon: "fa-brands fa-facebook",
+        href: "https://facebook.com",
+        label: "Facebook",
+    },
+    {
+        icon: "fa-brands fa-instagram",
+        href: "https://instagram.com",
+        label: "Instagram",
+    },
 ];
 
-// ─── Memphis Footer Component ───────────────────────────────────────────────
+const LEGAL_LINKS = [
+    { label: "Privacy Policy", href: "/public/privacy-policy" },
+    { label: "Terms of Service", href: "/public/terms-of-service" },
+    { label: "Cookie Policy", href: "/public/cookie-policy" },
+];
+
+const TRUST_STATS = [
+    { value: "2,847", label: "Recruiters" },
+    { value: "518", label: "Companies" },
+    { value: "12,340", label: "Candidates" },
+    { value: "$42M+", label: "In Placements" },
+];
+
+// ─── Footer Component ───────────────────────────────────────────────────────
 
 export default function Footer() {
-    const currentYear = new Date().getFullYear();
+    const [email, setEmail] = useState("");
+    const [subscribed, setSubscribed] = useState(false);
+
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (email.trim()) {
+            setSubscribed(true);
+            setEmail("");
+        }
+    };
 
     return (
-        <footer className="relative bg-dark overflow-hidden">
-            {/* Memphis decorations */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
-                <div className="absolute top-8 right-[15%] w-12 h-12 rounded-full border-4 border-coral" />
-                <div className="absolute top-24 right-[8%] w-8 h-8 rotate-45 bg-teal" />
-                <div className="absolute bottom-12 left-[20%] w-6 h-6 bg-yellow" />
-                <div className="absolute top-16 left-[30%] w-10 h-10 rounded-full border-4 border-purple" />
-                <svg className="absolute bottom-20 right-[40%] text-teal" width="60" height="20" viewBox="0 0 60 20">
-                    <polyline
-                        points="0,15 8,5 16,15 24,5 32,15 40,5 48,15 56,5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                    />
-                </svg>
-            </div>
-
-            {/* Main footer content */}
-            <div className="relative z-10 border-t-4 border-coral">
-                <div className="container mx-auto px-4 py-12">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-                        {/* Brand Column */}
-                        <div>
-                            <div className="mb-4">
-                                <HeaderLogo brand="employment" size="md" variant="light" />
-                            </div>
-                            <p className="text-xs font-medium text-white/60 leading-relaxed max-w-xs">
-                                Connecting talented candidates with amazing opportunities through expert recruiters.
-                            </p>
-                        </div>
-
-                        {/* Platform Column */}
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-coral mb-4 flex items-center gap-2">
-                                <div className="w-2 h-2 bg-coral" />
-                                Platform
-                            </h3>
-                            <nav className="space-y-2">
-                                {PLATFORM_LINKS.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className="group flex items-center gap-2 text-xs font-bold text-white/70 hover:text-coral transition-colors"
-                                    >
-                                        <i className={`${link.icon} text-[9px] text-coral group-hover:scale-110 transition-transform`}></i>
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-                        </div>
-
-                        {/* Resources Column */}
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-teal mb-4 flex items-center gap-2">
-                                <div className="w-2 h-2 bg-teal" />
-                                Resources
-                            </h3>
-                            <nav className="space-y-2">
-                                {RESOURCES_LINKS.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className="group flex items-center gap-2 text-xs font-bold text-white/70 hover:text-teal transition-colors"
-                                    >
-                                        <i className={`${link.icon} text-[9px] text-teal group-hover:scale-110 transition-transform`}></i>
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-                        </div>
-
-                        {/* Company Column */}
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-yellow mb-4 flex items-center gap-2">
-                                <div className="w-2 h-2 bg-yellow" />
-                                Company
-                            </h3>
-                            <nav className="space-y-2">
-                                {COMPANY_LINKS.map((link) => (
-                                    link.href.startsWith("http") ? (
-                                        <a
-                                            key={link.href}
-                                            href={link.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="group flex items-center gap-2 text-xs font-bold text-white/70 hover:text-yellow transition-colors"
-                                        >
-                                            <i className={`${link.icon} text-[9px] text-yellow group-hover:scale-110 transition-transform`}></i>
-                                            {link.label}
-                                        </a>
-                                    ) : (
-                                        <Link
-                                            key={link.href}
-                                            href={link.href}
-                                            className="group flex items-center gap-2 text-xs font-bold text-white/70 hover:text-yellow transition-colors"
-                                        >
-                                            <i className={`${link.icon} text-[9px] text-yellow group-hover:scale-110 transition-transform`}></i>
-                                            {link.label}
-                                        </Link>
-                                    )
-                                ))}
-                            </nav>
-                        </div>
-
-                        {/* Legal Column */}
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-purple mb-4 flex items-center gap-2">
-                                <div className="w-2 h-2 bg-purple" />
-                                Legal
-                            </h3>
-                            <nav className="space-y-2">
-                                {LEGAL_LINKS.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className="group flex items-center gap-2 text-xs font-bold text-white/70 hover:text-purple transition-colors"
-                                    >
-                                        <i className={`${link.icon} text-[9px] text-purple group-hover:scale-110 transition-transform`}></i>
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-                        </div>
+        <BaselFooter
+            cta={
+                <div className="grid lg:grid-cols-5 gap-8 items-center">
+                    <div className="lg:col-span-3">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
+                            Ready to find your
+                            <br />
+                            dream job?
+                        </h2>
+                    </div>
+                    <div className="lg:col-span-2 flex flex-col sm:flex-row gap-3 lg:justify-end">
+                        <Link
+                            href="/sign-up"
+                            className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
+                        >
+                            <i className="fa-duotone fa-regular fa-rocket" />
+                            Get Started Free
+                        </Link>
+                        <Link
+                            href="/public/jobs"
+                            className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                        >
+                            <i className="fa-duotone fa-regular fa-briefcase" />
+                            Browse Jobs
+                        </Link>
                     </div>
                 </div>
-
-                {/* Bottom bar */}
-                <div className="border-t-4 border-dark-lighter">
-                    <div className="container mx-auto px-4 py-6">
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            {/* Copyright */}
-                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/40">
-                                © {currentYear} Employment Networks, Inc.
+            }
+            newsletter={
+                <>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                            <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black">
+                                Stay in the loop
+                            </h3>
+                            <p className="text-xs opacity-50">
+                                Weekly career tips, new job alerts, and platform
+                                updates.
                             </p>
-
-                            {/* Social Links */}
-                            <div className="flex items-center gap-3">
-                                {SOCIAL_LINKS.map((link) => (
-                                    <a
-                                        key={link.href}
-                                        href={link.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={link.label}
-                                        className="w-10 h-10 flex items-center justify-center border-4 border-white/20 hover:border-coral hover:bg-coral/10 hover:-translate-y-0.5 transition-all"
-                                    >
-                                        <i className={`${link.icon} text-sm text-white/60 hover:text-coral transition-colors`}></i>
-                                    </a>
-                                ))}
-                            </div>
                         </div>
                     </div>
+
+                    {subscribed ? (
+                        <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/20">
+                            <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
+                            <div>
+                                <p className="text-sm font-bold text-success">
+                                    You are subscribed!
+                                </p>
+                                <p className="text-xs opacity-50">
+                                    Check your inbox for a confirmation email.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <form
+                            onSubmit={handleSubscribe}
+                            className="flex gap-2"
+                        >
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@company.com"
+                                required
+                                className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                            />
+                            <button
+                                type="submit"
+                                className="btn btn-primary btn-sm"
+                            >
+                                <i className="fa-duotone fa-regular fa-paper-plane" />
+                                Subscribe
+                            </button>
+                        </form>
+                    )}
+
+                    <p className="text-[10px] opacity-30 mt-3">
+                        No spam. Unsubscribe anytime. We respect your privacy.
+                    </p>
+                </>
+            }
+            brand={
+                <>
+                    <div className="mb-4">
+                        <img
+                            src="/logo.png"
+                            alt="Applicant Network"
+                            className="h-8 w-auto brightness-0 invert"
+                        />
+                    </div>
+                    <p className="text-sm opacity-50 leading-relaxed mb-4">
+                        Connecting talented candidates with amazing opportunities
+                        through expert recruiters in a single transparent
+                        marketplace.
+                    </p>
+                    <div className="flex gap-2">
+                        {SOCIAL_LINKS.map((social) => (
+                            <a
+                                key={social.label}
+                                href={social.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={social.label}
+                                className="w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all"
+                            >
+                                <i className={`${social.icon} text-sm`} />
+                            </a>
+                        ))}
+                    </div>
+                </>
+            }
+            columns={
+                <>
+                    {FOOTER_SECTIONS.map((section) => (
+                        <div key={section.title}>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
+                                {section.title}
+                            </h4>
+                            <ul className="space-y-2.5">
+                                {section.links.map((link) => (
+                                    <li key={link.label}>
+                                        {"external" in link && link.external ? (
+                                            <a
+                                                href={link.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                            >
+                                                {link.label}
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                href={link.href}
+                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </>
+            }
+            stats={
+                <>
+                    {TRUST_STATS.map((stat) => (
+                        <div key={stat.label} className="text-center">
+                            <div className="text-2xl font-black text-primary">
+                                {stat.value}
+                            </div>
+                            <div className="text-[10px] uppercase tracking-widest opacity-40 mt-1">
+                                {stat.label}
+                            </div>
+                        </div>
+                    ))}
+                </>
+            }
+            bottomBar={
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-1 text-[11px] opacity-30">
+                        <i className="fa-duotone fa-regular fa-copyright" />
+                        <span>
+                            {new Date().getFullYear()} Employment Networks, Inc.
+                            All rights reserved.
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {LEGAL_LINKS.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] opacity-30">
+                        <i className="fa-duotone fa-regular fa-shield-check" />
+                        <span>SOC 2 Type II Compliant</span>
+                        <span className="mx-1">|</span>
+                        <i className="fa-duotone fa-regular fa-lock" />
+                        <span>256-bit Encryption</span>
+                    </div>
                 </div>
-            </div>
-        </footer>
+            }
+        />
     );
 }

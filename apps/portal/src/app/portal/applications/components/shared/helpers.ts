@@ -1,7 +1,7 @@
 import type { Application } from "../../types";
 
 export function candidateName(application: Application): string {
-    return application.candidate?.full_name || "Unknown Candidate";
+    return application.candidate?.full_name || "Unnamed Candidate";
 }
 
 export function candidateInitials(name: string): string {
@@ -14,11 +14,11 @@ export function candidateInitials(name: string): string {
 }
 
 export function roleTitle(application: Application): string {
-    return application.job?.title || "Unknown Role";
+    return application.job?.title || "Untitled Role";
 }
 
 export function companyName(application: Application): string {
-    return application.job?.company?.name || "Unknown Company";
+    return application.job?.company?.name || "Company Pending";
 }
 
 export function aiScore(application: Application): number | null {

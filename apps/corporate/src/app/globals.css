@@ -1,5 +1,7 @@
-/* @layer base; */
-
 @import "tailwindcss";
+@plugin "daisyui";
+@import "./themes/memphis.css";
 
 @plugin "@splits-network/memphis-ui/plugin";
+@import "./themes/light.css";
+@import "./themes/dark.css";

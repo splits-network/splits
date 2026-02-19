@@ -22,7 +22,6 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 import {
     getCurrentUserProfile,
     getCachedSubscription,
-    clearCachedCurrentUserProfile,
 } from "@/lib/current-user-profile";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
@@ -162,7 +161,9 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
     const [error, setError] = useState<string | null>(null);
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
-    const [manageableCompanyIds, setManageableCompanyIds] = useState<string[]>([]);
+    const [manageableCompanyIds, setManageableCompanyIds] = useState<string[]>(
+        [],
+    );
 
     const fetchProfile = useCallback(async () => {
         if (!isAuthLoaded) return;
@@ -195,7 +196,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         } finally {
             setIsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAuthLoaded, isSignedIn]);
 
     useEffect(() => {
@@ -220,7 +221,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         } finally {
             setIsSubscriptionLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile?.recruiter_id]);
 
     // Load subscription when profile loads
@@ -249,7 +250,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
             console.error("Failed to fetch manageable companies:", err);
             setManageableCompanyIds([]);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile?.recruiter_id]);
 
     // Load manageable companies when profile loads (recruiters only)
@@ -298,7 +299,6 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
 
     const logout = useCallback(async () => {
         // Clear all caches
-        clearCachedCurrentUserProfile();
         // REMOVED: clearUserCache() - user-cache.ts has been deleted
         // The chat API now includes participant names inline, eliminating the need for client-side user caching
 

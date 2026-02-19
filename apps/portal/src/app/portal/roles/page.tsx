@@ -12,9 +12,9 @@ import {
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
-import type { ViewMode } from "./components/shared/accent";
+import type { ViewMode } from "./components/shared/status-color";
 import { isNew } from "./components/shared/helpers";
-import { ListsSixAnimator } from "./lists-six-animator";
+import { RolesAnimator } from "./roles-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
@@ -26,6 +26,7 @@ export default function RolesPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
@@ -36,13 +37,12 @@ export default function RolesPage() {
     );
     const [showAddModal, setShowAddModal] = useState(false);
 
-    // Sync viewMode + selectedJobId to URL (ref pattern avoids infinite loops)
+    /* ── URL sync ── */
     const searchParamsRef = useRef(searchParams);
     searchParamsRef.current = searchParams;
 
     useEffect(() => {
         const params = new URLSearchParams(searchParamsRef.current.toString());
-
         if (selectedJobId) {
             params.set("roleId", selectedJobId);
         } else {
@@ -53,27 +53,27 @@ export default function RolesPage() {
         } else {
             params.delete("view");
         }
-
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
         const currentQuery = searchParamsRef.current.toString();
         const currentUrl = currentQuery
             ? `${pathname}?${currentQuery}`
             : pathname;
-
         if (newUrl !== currentUrl) {
             router.replace(newUrl, { scroll: false });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedJobId, viewMode, pathname, router]);
+
+    /* ── User profile ── */
     const { isAdmin, isRecruiter, isCompanyUser, manageableCompanyIds } =
         useUserProfile();
-
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
         (isRecruiter && manageableCompanyIds.length > 0);
 
+    /* ── Data ── */
     const {
         data: jobs,
         loading,
@@ -129,88 +129,96 @@ export default function RolesPage() {
 
     return (
         <>
-            <ListsSixAnimator>
+            <RolesAnimator contentRef={contentRef}>
                 <HeaderSection stats={stats} />
 
-                <section className="min-h-screen bg-cream">
-                    <div className="py-8 px-4 lg:px-8">
-                        <ControlsBar
-                            searchInput={searchInput}
-                            onSearchChange={setSearchInput}
-                            filters={filters}
-                            onFilterChange={setFilter}
-                            viewMode={viewMode}
-                            onViewModeChange={handleViewModeChange}
-                            canCreateRole={canCreateRole}
-                            onAddRole={() => setShowAddModal(true)}
-                        />
+                <ControlsBar
+                    searchInput={searchInput}
+                    onSearchChange={setSearchInput}
+                    filters={filters}
+                    onFilterChange={setFilter}
+                    viewMode={viewMode}
+                    onViewModeChange={handleViewModeChange}
+                    canCreateRole={canCreateRole}
+                    onAddRole={() => setShowAddModal(true)}
+                    jobCount={jobs.length}
+                    totalCount={pagination?.total ?? jobs.length}
+                />
 
-                        {/* Listing Count */}
-                        <p className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-6">
-                            Showing {jobs.length} of{" "}
-                            {pagination?.total ?? jobs.length} listings
-                        </p>
-
-                        {/* Content Area */}
-                        <div className="listings-content opacity-0">
-                            {loading && jobs.length === 0 ? (
-                                <LoadingState message="Loading roles..." />
-                            ) : jobs.length === 0 ? (
-                                <EmptyState
-                                    icon="fa-briefcase"
-                                    title="No Roles Found"
-                                    description="Try adjusting your search or filters"
-                                    action={{
-                                        label: "Reset Filters",
-                                        onClick: () => {
-                                            clearSearch();
-                                            clearFilters();
-                                        },
+                {/* Content Area */}
+                <section className="content-area opacity-0">
+                    <div ref={contentRef}>
+                        {loading && jobs.length === 0 ? (
+                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    Loading your pipeline...
+                                </p>
+                            </div>
+                        ) : jobs.length === 0 ? (
+                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                                <h3 className="text-2xl font-black tracking-tight mb-2">
+                                    No matching roles
+                                </h3>
+                                <p className="text-base-content/50 mb-6">
+                                    Adjust your search or clear filters to see available positions.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        clearSearch();
+                                        clearFilters();
                                     }}
-                                />
-                            ) : (
-                                <>
-                                    {viewMode === "table" && (
-                                        <TableView
-                                            jobs={jobs}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedJobId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "grid" && (
-                                        <GridView
-                                            jobs={jobs}
-                                            onSelectAction={handleSelect}
-                                            selectedId={selectedJobId}
-                                            onRefreshAction={refresh}
-                                        />
-                                    )}
-                                    {viewMode === "split" && (
-                                        <SplitView
-                                            jobs={jobs}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedJobId}
-                                            onRefresh={refresh}
-                                        />
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        {/* Pagination */}
-                        <PaginationControls
-                            page={page}
-                            totalPages={totalPages}
-                            total={total}
-                            limit={limit}
-                            onPageChange={goToPage}
-                            onLimitChange={setLimit}
-                            loading={loading}
-                        />
+                                    className="btn btn-outline btn-sm"
+                                    style={{ borderRadius: 0 }}
+                                >
+                                    Reset Filters
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                {viewMode === "table" && (
+                                    <TableView
+                                        jobs={jobs}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedJobId}
+                                        onRefresh={refresh}
+                                    />
+                                )}
+                                {viewMode === "grid" && (
+                                    <GridView
+                                        jobs={jobs}
+                                        onSelectAction={handleSelect}
+                                        selectedId={selectedJobId}
+                                        onRefreshAction={refresh}
+                                    />
+                                )}
+                                {viewMode === "split" && (
+                                    <SplitView
+                                        jobs={jobs}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedJobId}
+                                        onRefresh={refresh}
+                                    />
+                                )}
+                            </>
+                        )}
                     </div>
                 </section>
-            </ListsSixAnimator>
+
+                {/* Pagination */}
+                <div className="container mx-auto px-6 lg:px-12 py-6">
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        total={total}
+                        limit={limit}
+                        onPageChange={goToPage}
+                        onLimitChange={setLimit}
+                        loading={loading}
+                    />
+                </div>
+            </RolesAnimator>
 
             <ModalPortal>
                 {showAddModal && (

@@ -3,7 +3,12 @@ import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
-import { ServiceStatusBanner } from "@/components/service-status-banner";
+import {
+    ServiceStatusProvider,
+    ServiceStatusDebugger,
+    ThemeScript,
+    ThemeProvider,
+} from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -106,6 +111,7 @@ export default async function RootLayout({
         <ClerkProvider publishableKey={publishableKey}>
             <html lang="en" suppressHydrationWarning>
                 <head>
+                    <ThemeScript />
                     <meta
                         name="helpninja-verification"
                         content="b49754f5-9bd5-4f3d-895d-1ef14b050375"
@@ -136,17 +142,20 @@ export default async function RootLayout({
                     ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <UserProfileProvider>
-                        <ToastProvider>
-                            <Header />
-                            <ServiceStatusBanner statusHref="/public/status" />
-                            <main className="grow">{children}</main>
-                            <Footer />
-                            <CookieConsent />
-                        </ToastProvider>
-                        <DevDebugPanel />
-                        <PortalActivityTrackerWrapper />
-                    </UserProfileProvider>
+                    <ThemeProvider>
+                        <UserProfileProvider>
+                            <ToastProvider>
+                                <Header />
+                                <ServiceStatusProvider statusHref="/public/status" />
+                                <ServiceStatusDebugger />
+                                <main className="grow">{children}</main>
+                                <Footer />
+                                <CookieConsent />
+                            </ToastProvider>
+                            <DevDebugPanel />
+                            <PortalActivityTrackerWrapper />
+                        </UserProfileProvider>
+                    </ThemeProvider>
 
                     {/* HelpNinja widget loaded after page becomes interactive */}
                     {/** Commented out temporarily */}

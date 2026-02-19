@@ -1,7 +1,6 @@
 "use client";
 
 import type { Application } from "../../types";
-import { accentAt } from "../shared/accent";
 import { TableRow } from "./table-row";
 
 export function TableView({
@@ -15,19 +14,19 @@ export function TableView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const columns = ["", "Candidate", "Role", "Stage", "AI Score", "Added", ""];
+    const columns = ["", "Candidate", "Role", "Stage", "AI", "Submitted", ""];
 
     return (
-        <div className="overflow-x-auto border-4 border-dark">
-            <table className="w-full" style={{ minWidth: 900 }}>
+        <div className="overflow-x-auto">
+            <table className="table w-full" style={{ minWidth: 900 }}>
                 <thead>
-                    <tr className="bg-dark">
+                    <tr className="bg-base-200 border-b-2 border-base-300">
                         {columns.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-sm font-black uppercase tracking-wider ${
-                                    i === 0 ? "w-8" : ""
-                                } ${i === columns.length - 1 ? "w-20" : ""} ${accentAt(i).text}`}
+                                className={`text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-2 px-4 ${
+                                    i === 0 ? "w-6 pl-4 pr-1" : ""
+                                } ${i === columns.length - 1 ? "w-20 text-right" : ""}`}
                             >
                                 {h}
                             </th>
@@ -39,7 +38,6 @@ export function TableView({
                         <TableRow
                             key={application.id}
                             application={application}
-                            accent={accentAt(idx)}
                             idx={idx}
                             isSelected={selectedId === application.id}
                             colSpan={columns.length}

@@ -64,11 +64,11 @@ export function formatVerificationStatus(status?: string | null): string {
 }
 
 export function formatJobType(type?: string | null): string {
-    if (!type) return "Not specified";
+    if (!type) return "Job type not specified";
     return JOB_TYPE_LABELS[type] || type.replace(/_/g, " ");
 }
 
 export function formatAvailability(availability?: string | null): string {
-    if (!availability) return "Not specified";
+    if (!availability) return "Availability Not specified";
     return AVAILABILITY_LABELS[availability] || availability.replace(/_/g, " ");
 }
