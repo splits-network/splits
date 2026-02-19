@@ -21,15 +21,27 @@ export function LandingAnimator({
     useGSAP(
         () => {
             if (!containerRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) {
-                gsap.set(
+
+            // Remove opacity-0 CSS class so GSAP has full ownership of opacity.
+            // This runs in useLayoutEffect (before paint) so there is no visible flash.
+            // Without this, a React re-render can recreate a DOM element that still
+            // carries the Tailwind class while the GSAP inline style is gone — leaving
+            // the element permanently invisible.
+            const clearOpacity = (
+                els: NodeListOf<Element> | Element[] | null,
+            ) => {
+                if (!els) return;
+                const arr = Array.isArray(els) ? els : Array.from(els);
+                arr.forEach((el) => el.classList.remove("opacity-0"));
+            };
+
+            if (
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ) {
+                clearOpacity(
                     containerRef.current.querySelectorAll(
                         "[class*='opacity-0']",
                     ),
-                    { opacity: 1 },
                 );
                 return;
             }
@@ -46,6 +58,7 @@ export function LandingAnimator({
 
             const heroKicker = $1(".hero-kicker");
             if (heroKicker) {
+                heroKicker.classList.remove("opacity-0");
                 heroTl.fromTo(
                     heroKicker,
                     { opacity: 0, y: 20 },
@@ -53,8 +66,10 @@ export function LandingAnimator({
                 );
             }
 
+            const heroWords = $(".hero-headline-word");
+            clearOpacity(heroWords);
             heroTl.fromTo(
-                $(".hero-headline-word"),
+                heroWords,
                 { opacity: 0, y: 80, rotateX: 40 },
                 {
                     opacity: 1,
@@ -68,6 +83,7 @@ export function LandingAnimator({
 
             const heroBody = $1(".hero-body");
             if (heroBody) {
+                heroBody.classList.remove("opacity-0");
                 heroTl.fromTo(
                     heroBody,
                     { opacity: 0, y: 30 },
@@ -76,8 +92,10 @@ export function LandingAnimator({
                 );
             }
 
+            const heroCtas = $(".hero-cta");
+            clearOpacity(heroCtas);
             heroTl.fromTo(
-                $(".hero-cta"),
+                heroCtas,
                 { opacity: 0, y: 20 },
                 { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
                 "-=0.3",
@@ -86,6 +104,7 @@ export function LandingAnimator({
             // Hero image parallax
             const heroImgWrap = $1(".hero-img-wrap");
             if (heroImgWrap) {
+                heroImgWrap.classList.remove("opacity-0");
                 gsap.fromTo(
                     heroImgWrap,
                     { opacity: 0, scale: 1.08 },
@@ -117,8 +136,10 @@ export function LandingAnimator({
             // ── Stats bar ───────────────────────────────────────
             const statsBar = $1(".stats-bar");
             if (statsBar) {
+                const statItems = $(".stat-item");
+                clearOpacity(statItems);
                 gsap.fromTo(
-                    $(".stat-item"),
+                    statItems,
                     { opacity: 0, y: 30 },
                     {
                         opacity: 1,
@@ -139,6 +160,7 @@ export function LandingAnimator({
             if (problemSection) {
                 const problemText = $1(".problem-text");
                 if (problemText) {
+                    problemText.classList.remove("opacity-0");
                     gsap.fromTo(
                         problemText,
                         { opacity: 0, x: -60 },
@@ -157,6 +179,7 @@ export function LandingAnimator({
 
                 const problemImg = $1(".problem-img");
                 if (problemImg) {
+                    problemImg.classList.remove("opacity-0");
                     gsap.fromTo(
                         problemImg,
                         { opacity: 0, x: 60 },
@@ -173,8 +196,10 @@ export function LandingAnimator({
                     );
                 }
 
+                const painItems = $(".problem-pain");
+                clearOpacity(painItems);
                 gsap.fromTo(
-                    $(".problem-pain"),
+                    painItems,
                     { opacity: 0, x: -20 },
                     {
                         opacity: 1,
@@ -195,6 +220,7 @@ export function LandingAnimator({
             if (hiwSection) {
                 const hiwHeading = $1(".hiw-heading");
                 if (hiwHeading) {
+                    hiwHeading.classList.remove("opacity-0");
                     gsap.fromTo(
                         hiwHeading,
                         { opacity: 0, y: 40 },
@@ -212,6 +238,7 @@ export function LandingAnimator({
                 }
 
                 $(".hiw-step").forEach((step, i) => {
+                    step.classList.remove("opacity-0");
                     gsap.fromTo(
                         step,
                         { opacity: 0, y: 50, scale: 0.96 },
@@ -236,6 +263,7 @@ export function LandingAnimator({
             if (platformsSection) {
                 const platformsHeading = $1(".platforms-heading");
                 if (platformsHeading) {
+                    platformsHeading.classList.remove("opacity-0");
                     gsap.fromTo(
                         platformsHeading,
                         { opacity: 0, y: 40 },
@@ -254,8 +282,10 @@ export function LandingAnimator({
 
                 const platformsGrid = $1(".platforms-grid");
                 if (platformsGrid) {
+                    const platformCards = $(".platform-card");
+                    clearOpacity(platformCards);
                     gsap.fromTo(
-                        $(".platform-card"),
+                        platformCards,
                         { opacity: 0, y: 50 },
                         {
                             opacity: 1,
@@ -277,6 +307,7 @@ export function LandingAnimator({
             if (editorialSection) {
                 const editorialImg = $1(".editorial-img");
                 if (editorialImg) {
+                    editorialImg.classList.remove("opacity-0");
                     gsap.fromTo(
                         editorialImg,
                         { opacity: 0, scale: 1.05 },
@@ -311,6 +342,7 @@ export function LandingAnimator({
 
                 const editorialText = $1(".editorial-text");
                 if (editorialText) {
+                    editorialText.classList.remove("opacity-0");
                     gsap.fromTo(
                         editorialText,
                         { opacity: 0, x: 60 },
@@ -333,6 +365,7 @@ export function LandingAnimator({
             if (testimonialsSection) {
                 const testimonialsHeading = $1(".testimonials-heading");
                 if (testimonialsHeading) {
+                    testimonialsHeading.classList.remove("opacity-0");
                     gsap.fromTo(
                         testimonialsHeading,
                         { opacity: 0, y: 40 },
@@ -351,8 +384,10 @@ export function LandingAnimator({
 
                 const testimonialsGrid = $1(".testimonials-grid");
                 if (testimonialsGrid) {
+                    const testimonialCards = $(".testimonial-card");
+                    clearOpacity(testimonialCards);
                     gsap.fromTo(
-                        $(".testimonial-card"),
+                        testimonialCards,
                         { opacity: 0, y: 40 },
                         {
                             opacity: 1,
@@ -374,6 +409,7 @@ export function LandingAnimator({
             if (faqSection) {
                 const faqHeading = $1(".faq-heading");
                 if (faqHeading) {
+                    faqHeading.classList.remove("opacity-0");
                     gsap.fromTo(
                         faqHeading,
                         { opacity: 0, y: 40 },
@@ -392,6 +428,7 @@ export function LandingAnimator({
 
                 const faqItems = $(".faq-item");
                 if (faqItems.length) {
+                    clearOpacity(faqItems);
                     gsap.fromTo(
                         faqItems,
                         { opacity: 0, y: 16 },
@@ -415,6 +452,7 @@ export function LandingAnimator({
             if (finalCta) {
                 const finalCtaContent = $1(".final-cta-content");
                 if (finalCtaContent) {
+                    finalCtaContent.classList.remove("opacity-0");
                     gsap.fromTo(
                         finalCtaContent,
                         { opacity: 0, y: 50 },

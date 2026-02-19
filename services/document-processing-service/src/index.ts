@@ -163,16 +163,23 @@ async function main() {
     }
 }
 
-// Handle uncaught exceptions
-process.on("uncaughtException", (error) => {
-    logger.error(`Uncaught exception: ${error.message}`);
-    if (error.stack) logger.debug(error.stack);
+// Handle uncaught exceptions / unhandled rejections — logs the full error with
+// stack trace and exits with code 1 so Kubernetes restarts the pod.
+const handleFatalError = async (error: Error, origin: string): Promise<void> => {
+    logger.error({ err: error, origin }, `Fatal process error [${origin}] — service is shutting down`);
     process.exit(1);
+};
+
+process.on("uncaughtException", (error: Error, origin: string) => {
+    void handleFatalError(error, origin);
 });
 
-process.on("unhandledRejection", (reason, promise) => {
-    logger.error(`Unhandled rejection: ${reason}`);
-    process.exit(1);
+process.on("unhandledRejection", (reason: unknown) => {
+    const error =
+        reason instanceof Error
+            ? reason
+            : new Error(typeof reason === "string" ? reason : JSON.stringify(reason));
+    void handleFatalError(error, "unhandledRejection");
 });
 
 main().catch((error) => {

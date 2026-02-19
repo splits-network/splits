@@ -266,6 +266,53 @@ export class HealthCheckers {
             }
         };
     }
+
+    /**
+     * Create a health checker for external third-party providers (Clerk, Stripe, Resend, etc.)
+     *
+     * Unlike `custom`, failures here cap the overall health at 'degraded' (never 'unhealthy'),
+     * so that 3rd-party outages do NOT cause pod restarts. The overall health endpoint still
+     * returns HTTP 200 when degraded, keeping Kubernetes liveness/readiness probes passing.
+     *
+     * An AbortSignal is passed to the checkFn so the caller can abort an in-flight fetch.
+     * The default timeout (600ms) is intentionally shorter than the typical K8s liveness
+     * probe timeout (1s) to ensure the health endpoint always responds in time.
+     *
+     * @param name       - Identifier shown in the health response
+     * @param checkFn    - Async check function; receives an AbortSignal to cancel HTTP calls
+     * @param details    - Static metadata included in the health response (e.g. { provider: 'clerk' })
+     * @param timeoutMs  - Hard abort timeout in ms (default: 600)
+     */
+    static externalProvider(
+        name: string,
+        checkFn: (signal: AbortSignal) => Promise<boolean>,
+        details?: Record<string, any>,
+        timeoutMs = 600
+    ): HealthChecker {
+        return async (): Promise<HealthCheckResult> => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const isHealthy = await checkFn(controller.signal);
+                clearTimeout(timer);
+                return {
+                    status: isHealthy ? 'healthy' : 'degraded',
+                    name,
+                    details
+                };
+            } catch (error) {
+                clearTimeout(timer);
+                const message = error instanceof Error ? error.message : 'External provider check failed';
+                const isAbort = error instanceof Error && error.name === 'AbortError';
+                return {
+                    status: 'degraded',
+                    name,
+                    details,
+                    error: isAbort ? `Timed out after ${timeoutMs}ms` : message
+                };
+            }
+        };
+    }
 }
 
 /**

@@ -4,124 +4,102 @@ import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const D = { fast: 0.3, normal: 0.5, slow: 0.8 };
-const E = {
-    smooth: "power2.out",
-    bounce: "back.out(1.7)",
-    elastic: "elastic.out(1, 0.4)",
-    pop: "back.out(2.0)",
-};
-const S = { tight: 0.06 };
-
-interface TeamDetailAnimatorProps {
-    children: ReactNode;
+if (typeof window !== "undefined") {
+    gsap.registerPlugin();
 }
 
-export function TeamDetailAnimator({ children }: TeamDetailAnimatorProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
+export function TeamDetailAnimator({ children }: { children: ReactNode }) {
+    const mainRef = useRef<HTMLElement>(null);
 
     useGSAP(
         () => {
-            if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            if (!mainRef.current) return;
+            const prefersReducedMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches;
+            if (prefersReducedMotion) {
                 gsap.set(
-                    containerRef.current.querySelectorAll("[class*='opacity-0']"),
+                    mainRef.current.querySelectorAll("[class*='opacity-0']"),
                     { opacity: 1 },
                 );
                 return;
             }
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
 
-            const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-            // Memphis shapes
-            gsap.fromTo(
-                $(".memphis-shape"),
-                { opacity: 0, scale: 0, rotation: -180 },
-                {
-                    opacity: 0.4,
-                    scale: 1,
-                    rotation: 0,
-                    duration: D.slow,
-                    ease: E.elastic,
-                    stagger: { each: S.tight, from: "random" },
-                    delay: 0.2,
-                },
-            );
-
-            $(".memphis-shape").forEach((shape, i) => {
-                gsap.to(shape, {
-                    y: `+=${8 + (i % 3) * 4}`,
-                    x: `+=${4 + (i % 2) * 6}`,
-                    rotation: `+=${(i % 2 === 0 ? 1 : -1) * (4 + i * 2)}`,
-                    duration: 3 + i * 0.4,
-                    ease: "sine.inOut",
-                    repeat: -1,
-                    yoyo: true,
-                });
-            });
-
-            // Header
-            const headerTl = gsap.timeline({ defaults: { ease: E.smooth } });
-
-            const headerBadge = $1(".header-badge");
-            if (headerBadge) {
-                headerTl.fromTo(
-                    headerBadge,
-                    { opacity: 0, y: -20, scale: 0.8 },
-                    { opacity: 1, y: 0, scale: 1, duration: D.normal, ease: E.bounce },
+            // Header elements
+            const badge = $1(".detail-badge");
+            if (badge)
+                tl.fromTo(
+                    badge,
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.4 },
                 );
-            }
-            const headerTitle = $1(".header-title");
-            if (headerTitle) {
-                headerTl.fromTo(
-                    headerTitle,
-                    { opacity: 0, y: 50, skewY: 2 },
-                    { opacity: 1, y: 0, skewY: 0, duration: D.slow },
-                    "-=0.3",
-                );
-            }
-            const headerSubtitle = $1(".header-subtitle");
-            if (headerSubtitle) {
-                headerTl.fromTo(
-                    headerSubtitle,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
-                    "-=0.4",
-                );
-            }
 
-            // Detail tabs
-            const detailTabs = $1(".detail-tabs");
-            if (detailTabs) {
-                headerTl.fromTo(
-                    detailTabs,
-                    { opacity: 0, x: -20 },
-                    { opacity: 1, x: 0, duration: D.normal },
+            const title = $1(".detail-title");
+            if (title)
+                tl.fromTo(
+                    title,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.6 },
                     "-=0.2",
                 );
-            }
 
-            // Detail content
-            const detailContent = $1(".detail-content");
-            if (detailContent) {
+            const subtitle = $1(".detail-subtitle");
+            if (subtitle)
+                tl.fromTo(
+                    subtitle,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                    "-=0.3",
+                );
+
+            const stats = $(".detail-stat");
+            if (stats.length)
+                tl.fromTo(
+                    stats,
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
+                    "-=0.2",
+                );
+
+            // Tabs and content
+            const tabs = $1(".detail-tabs");
+            if (tabs)
                 gsap.fromTo(
-                    detailContent,
-                    { opacity: 0, y: 30 },
+                    tabs,
+                    { opacity: 0, y: 15 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        delay: 1.0,
+                        duration: 0.5,
+                        ease: "power3.out",
+                        delay: 0.6,
                     },
                 );
-            }
+
+            const content = $1(".detail-content");
+            if (content)
+                gsap.fromTo(
+                    content,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: "power3.out",
+                        delay: 0.8,
+                    },
+                );
         },
-        { scope: containerRef },
+        { scope: mainRef },
     );
 
-    return <div ref={containerRef}>{children}</div>;
+    return (
+        <main ref={mainRef} className="min-h-screen bg-base-100">
+            {children}
+        </main>
+    );
 }

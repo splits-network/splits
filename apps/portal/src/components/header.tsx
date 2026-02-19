@@ -479,12 +479,22 @@ export function Header() {
     useGSAP(
         () => {
             if (!containerRef.current) return;
+
+            // Remove opacity-0 CSS class so GSAP has full ownership of opacity.
+            // This runs in useLayoutEffect (before paint) so there is no visible flash.
+            // Without this, a React re-render can recreate a DOM element that still
+            // carries the Tailwind class while the GSAP inline style is gone — leaving
+            // the element permanently invisible.
+            const clearOpacity = (els: NodeListOf<Element> | null) => {
+                els?.forEach((el) => el.classList.remove("opacity-0"));
+            };
+
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => {
-                        gsap.set(el, { opacity: 1 });
-                    });
+                clearOpacity(
+                    containerRef.current.querySelectorAll(
+                        "[class*='opacity-0']",
+                    ),
+                );
                 return;
             }
 
@@ -496,6 +506,7 @@ export function Header() {
             // Logo
             const logo = $1(".header-logo");
             if (logo) {
+                logo.classList.remove("opacity-0");
                 gsap.fromTo(
                     logo,
                     { opacity: 0, x: -20 },
@@ -510,8 +521,10 @@ export function Header() {
             }
 
             // Nav links stagger
+            const navLinks = $(".nav-link-item");
+            clearOpacity(navLinks);
             gsap.fromTo(
-                $(".nav-link-item"),
+                navLinks,
                 { opacity: 0, y: -10 },
                 {
                     opacity: 1,
@@ -524,8 +537,10 @@ export function Header() {
             );
 
             // Right side items
+            const rightItems = $(".header-right-item");
+            clearOpacity(rightItems);
             gsap.fromTo(
-                $(".header-right-item"),
+                rightItems,
                 { opacity: 0, x: 20 },
                 {
                     opacity: 1,

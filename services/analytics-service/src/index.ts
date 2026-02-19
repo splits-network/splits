@@ -197,5 +197,24 @@ async function shutdown() {
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
+// Catch uncaught exceptions / unhandled rejections — logs the full error and
+// exits with code 1 so Kubernetes restarts the pod and the crash is visible.
+const handleFatalError = async (error: Error, origin: string): Promise<void> => {
+    logger.error({ err: error, origin }, `Fatal process error [${origin}] — service is shutting down`);
+    process.exit(1);
+};
+
+process.on("uncaughtException", (error: Error, origin: string) => {
+    void handleFatalError(error, origin);
+});
+
+process.on("unhandledRejection", (reason: unknown) => {
+    const error =
+        reason instanceof Error
+            ? reason
+            : new Error(typeof reason === "string" ? reason : JSON.stringify(reason));
+    void handleFatalError(error, "unhandledRejection");
+});
+
 // Start the server
 startServer();

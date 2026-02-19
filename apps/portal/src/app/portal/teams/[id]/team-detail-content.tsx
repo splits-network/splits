@@ -4,30 +4,16 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { SettingsNav } from "@splits-network/memphis-ui";
 import { LoadingState } from "@splits-network/shared-ui";
 import type { Team, TeamMember } from "../types";
-import { formatCurrency, formatDate } from "../types";
+import { formatCurrency } from "../types";
+import { statusColor } from "../components/shared/status-color";
+import { formatStatus, teamInitials, memberCountDisplay } from "../components/shared/helpers";
 import { TeamDetailAnimator } from "./team-detail-animator";
 import { MembersSection } from "../components/detail/members-section";
 import { SettingsSection } from "../components/detail/settings-section";
 
 type DetailTab = "members" | "settings";
-
-const NAV_ITEMS = [
-    {
-        key: "members" as const,
-        label: "Members",
-        icon: "fa-duotone fa-regular fa-users",
-        accent: "coral" as const,
-    },
-    {
-        key: "settings" as const,
-        label: "Settings",
-        icon: "fa-duotone fa-regular fa-cog",
-        accent: "teal" as const,
-    },
-];
 
 const VALID_TABS = new Set<string>(["members", "settings"]);
 
@@ -85,12 +71,10 @@ export default function TeamDetailContent({ teamId }: TeamDetailContentProps) {
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            const [teamRes, membersRes] = await Promise.all([
-                client.get(`/teams/${teamId}`),
-                client.get(`/teams/${teamId}/members`),
-            ]);
-
+            const teamRes = await client.get(`/teams/${teamId}`);
             setTeam(teamRes.data);
+
+            const membersRes = await client.get(`/teams/${teamId}/members`);
             setMembers(membersRes.data || []);
         } catch (err: any) {
             setError(err.message);
@@ -111,14 +95,15 @@ export default function TeamDetailContent({ teamId }: TeamDetailContentProps) {
     if (error || !team) {
         return (
             <div className="p-8">
-                <div className="border-4 border-coral bg-coral-light p-6">
-                    <p className="text-sm font-bold text-dark">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral mr-2" />
+                <div className="border-2 border-error/30 bg-error/5 p-6">
+                    <p className="text-sm font-bold">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mr-2" />
                         {error || "Team not found"}
                     </p>
                     <a
                         href="/portal/teams"
                         className="btn btn-sm btn-ghost mt-4"
+                        style={{ borderRadius: 0 }}
                     >
                         <i className="fa-duotone fa-regular fa-arrow-left mr-2" />
                         Back to Teams
@@ -131,95 +116,122 @@ export default function TeamDetailContent({ teamId }: TeamDetailContentProps) {
     return (
         <TeamDetailAnimator>
             {/* Header */}
-            <section className="bg-dark -mx-2 -mt-2">
-                <div className="relative overflow-hidden py-16 bg-dark -mx-2 -mt-4">
-                    {/* Memphis shapes */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                        <div className="memphis-shape absolute top-[10%] left-[5%] w-16 h-16 rounded-full border-4 border-teal opacity-0" />
-                        <div className="memphis-shape absolute top-[45%] right-[8%] w-12 h-12 rounded-full bg-coral opacity-0" />
-                        <div className="memphis-shape absolute bottom-[12%] left-[15%] w-8 h-8 rotate-45 bg-yellow opacity-0" />
-                        <div className="memphis-shape absolute top-[25%] right-[20%] w-10 h-10 rotate-12 bg-purple opacity-0" />
-                    </div>
+            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="max-w-4xl">
+                        {/* Back link */}
+                        <a
+                            href="/portal/teams"
+                            className="detail-badge inline-flex items-center gap-2 text-sm font-semibold text-neutral-content/50 hover:text-neutral-content mb-6 opacity-0"
+                        >
+                            <i className="fa-duotone fa-regular fa-arrow-left" />
+                            Back to Teams
+                        </a>
 
-                    <div className="container mx-auto px-4 relative z-10">
-                        <div className="max-w-5xl mx-auto">
-                            {/* Back button */}
-                            <a
-                                href="/portal/teams"
-                                className="header-badge inline-flex items-center gap-2 text-sm font-bold text-white/60 hover:text-white mb-6 opacity-0"
+                        {/* Status badge */}
+                        <div className="mb-4">
+                            <span
+                                className={`detail-badge text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 opacity-0 ${statusColor(team.status)}`}
                             >
-                                <i className="fa-duotone fa-regular fa-arrow-left" />
-                                Back to Teams
-                            </a>
+                                {formatStatus(team.status)}
+                            </span>
+                        </div>
 
-                            <h1 className="header-title text-4xl md:text-6xl font-black uppercase tracking-tight leading-[0.95] mb-4 text-white opacity-0">
-                                {team.name}
-                            </h1>
+                        {/* Title */}
+                        <h1 className="detail-title text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-[0.92] mb-4 opacity-0">
+                            {team.name}
+                        </h1>
 
-                            <div className="header-subtitle flex flex-wrap items-center gap-4 text-white/70 opacity-0">
-                                <span className={`badge ${team.status === "active" ? "badge-teal" : "badge-coral"} badge-lg`}>
-                                    {team.status === "active" ? "Active" : "Suspended"}
-                                </span>
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-calendar mr-1" />
-                                    Created {formatDate(team.created_at)}
-                                </span>
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-users mr-1" />
-                                    {team.active_member_count} members
-                                </span>
+                        {/* Subtitle */}
+                        <p className="detail-subtitle text-base-content/60 text-lg mb-8 opacity-0">
+                            {memberCountDisplay(team)}
+                        </p>
+
+                        {/* Stats row */}
+                        <div className="flex flex-wrap gap-8">
+                            <div className="detail-stat opacity-0">
+                                <div className="text-2xl font-black tracking-tight text-primary">
+                                    {team.active_member_count}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
+                                    Members
+                                </div>
+                            </div>
+                            <div className="detail-stat opacity-0">
+                                <div className="text-2xl font-black tracking-tight text-primary">
+                                    {team.total_placements}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
+                                    Placements
+                                </div>
+                            </div>
+                            <div className="detail-stat opacity-0">
+                                <div className="text-2xl font-black tracking-tight text-primary">
+                                    {formatCurrency(team.total_revenue)}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
+                                    Revenue
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Stats */}
-                <div className="retro-metrics grid grid-cols-1 sm:grid-cols-3 w-full">
-                    <div className="metric-block metric-block-sm bg-coral text-coral-content">
-                        <div className="retro-metric-value">{team.active_member_count}</div>
-                        <div className="retro-metric-label">Members</div>
-                    </div>
-                    <div className="metric-block metric-block-sm bg-teal text-teal-content">
-                        <div className="retro-metric-value">{team.total_placements}</div>
-                        <div className="retro-metric-label">Placements</div>
-                    </div>
-                    <div className="metric-block metric-block-sm bg-yellow text-yellow-content">
-                        <div className="retro-metric-value">{formatCurrency(team.total_revenue)}</div>
-                        <div className="retro-metric-label">Revenue</div>
-                    </div>
-                </div>
+                {/* Diagonal clip-path accent */}
+                <div
+                    className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block"
+                    style={{
+                        clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
+                />
             </section>
 
-            {/* Content */}
-            <section className="min-h-screen bg-cream">
-                <div className="py-8 px-4 lg:px-8">
-                    <div className="max-w-6xl mx-auto grid lg:grid-cols-4 gap-8">
-                        {/* Sidebar Nav */}
-                        <div className="detail-tabs lg:col-span-1 opacity-0">
-                            <SettingsNav
-                                items={NAV_ITEMS}
-                                active={activeTab}
-                                onChange={(key) => setActiveTab(key as DetailTab)}
-                            />
-                        </div>
-
-                        {/* Tab Content */}
-                        <div className="detail-content lg:col-span-3 opacity-0">
-                            {activeTab === "members" && (
-                                <MembersSection
-                                    teamId={teamId}
-                                    members={members}
-                                    onRefresh={loadTeamData}
-                                />
-                            )}
-
-                            {activeTab === "settings" && (
-                                <SettingsSection team={team} />
-                            )}
-                        </div>
-                    </div>
+            {/* Tab bar */}
+            <div className="detail-tabs opacity-0 container mx-auto px-6 lg:px-12 pt-8">
+                <div className="flex bg-base-200 p-1 w-fit">
+                    <button
+                        type="button"
+                        className={`px-5 py-2 text-sm font-semibold transition-colors ${
+                            activeTab === "members"
+                                ? "bg-primary text-primary-content"
+                                : "text-base-content/50 hover:text-base-content/70"
+                        }`}
+                        style={{ borderRadius: 0 }}
+                        onClick={() => setActiveTab("members")}
+                    >
+                        Members
+                    </button>
+                    <button
+                        type="button"
+                        className={`px-5 py-2 text-sm font-semibold transition-colors ${
+                            activeTab === "settings"
+                                ? "bg-primary text-primary-content"
+                                : "text-base-content/50 hover:text-base-content/70"
+                        }`}
+                        style={{ borderRadius: 0 }}
+                        onClick={() => setActiveTab("settings")}
+                    >
+                        Settings
+                    </button>
                 </div>
-            </section>
+            </div>
+
+            {/* Content area */}
+            <div className="detail-content opacity-0 container mx-auto px-6 lg:px-12 py-8">
+                {activeTab === "members" && (
+                    <MembersSection
+                        team={team}
+                        members={members}
+                        onRefresh={loadTeamData}
+                    />
+                )}
+                {activeTab === "settings" && (
+                    <SettingsSection
+                        team={team}
+                        onRefresh={loadTeamData}
+                    />
+                )}
+            </div>
         </TeamDetailAnimator>
     );
 }

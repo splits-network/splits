@@ -5,36 +5,34 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import {
-    Modal,
-    Input,
-    Select,
-    Button,
-    AlertBanner,
-} from "@splits-network/memphis-ui";
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselFormField,
+} from "@splits-network/basel-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
-const ROLES = [
-    { value: "member", label: "Member" },
-    { value: "admin", label: "Admin" },
-    { value: "collaborator", label: "Collaborator" },
-];
-
 interface InviteMemberModalProps {
+    isOpen?: boolean;
     teamId: string;
     onClose: () => void;
     onSuccess: () => void;
 }
 
 export function InviteMemberModal({
+    isOpen = true,
     teamId,
     onClose,
     onSuccess,
 }: InviteMemberModalProps) {
+    console.log("[InviteMemberModal] mounted — teamId:", teamId);
     const { getToken } = useAuth();
     const toast = useToast();
+
     const [email, setEmail] = useState("");
     const [role, setRole] = useState("member");
-    const [inviting, setInviting] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -42,12 +40,21 @@ export function InviteMemberModal({
         if (!email.trim()) return;
 
         try {
-            setInviting(true);
+            setLoading(true);
             setError(null);
+
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
+            console.log(
+                "[InviteMemberModal] teamId:",
+                teamId,
+                "email:",
+                email,
+                "role:",
+                role,
+            );
             await client.post(`/teams/${teamId}/invitations`, { email, role });
 
             toast.success(`Invitation sent to ${email}`);
@@ -55,66 +62,88 @@ export function InviteMemberModal({
         } catch (err: any) {
             setError(err.message || "Failed to send invitation");
         } finally {
-            setInviting(false);
+            setLoading(false);
         }
     };
 
     return (
-        <Modal
-            open
+        <BaselModal
+            isOpen={isOpen}
             onClose={onClose}
-            title="Invite Team Member"
-            closeOnBackdrop={!inviting}
+            closeOnBackdropClick={!loading}
         >
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <Input
-                    label="Email Address"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="recruiter@example.com"
-                    required
-                    autoFocus
-                    disabled={inviting}
-                />
+            <BaselModalHeader
+                title="Invite Team Member"
+                icon="fa-user-plus"
+                iconColor="secondary"
+                onClose={onClose}
+                closeDisabled={loading}
+            />
 
-                <Select
-                    label="Role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    options={ROLES}
-                    disabled={inviting}
-                />
-                <p className="text-xs text-dark/50 -mt-4">
-                    Admins can manage members and settings
-                </p>
+            <form onSubmit={handleSubmit}>
+                <BaselModalBody>
+                    <div className="space-y-4">
+                        {error && (
+                            <div className="bg-error/10 text-error text-sm p-3 mb-4">
+                                {error}
+                            </div>
+                        )}
 
-                {error && <AlertBanner type="error">{error}</AlertBanner>}
+                        <BaselFormField label="Email Address" required>
+                            <input
+                                type="email"
+                                className="input input-bordered w-full bg-base-200 border-base-300"
+                                style={{ borderRadius: 0 }}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="recruiter@example.com"
+                                autoFocus
+                                disabled={loading}
+                            />
+                        </BaselFormField>
 
-                <div className="flex gap-3 justify-end">
-                    <Button
+                        <BaselFormField label="Role" required>
+                            <select
+                                className="select select-bordered w-full bg-base-200 border-base-300"
+                                style={{ borderRadius: 0 }}
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                disabled={loading}
+                            >
+                                <option value="admin">Admin</option>
+                                <option value="member">Member</option>
+                                <option value="collaborator">
+                                    Collaborator
+                                </option>
+                            </select>
+                        </BaselFormField>
+                    </div>
+                </BaselModalBody>
+
+                <BaselModalFooter>
+                    <button
                         type="button"
-                        color="dark"
-                        variant="ghost"
+                        className="btn btn-ghost"
+                        style={{ borderRadius: 0 }}
                         onClick={onClose}
-                        disabled={inviting}
+                        disabled={loading}
                     >
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         type="submit"
-                        color="teal"
-                        disabled={inviting || !email.trim()}
+                        className="btn btn-primary"
+                        style={{ borderRadius: 0 }}
+                        disabled={loading || !email.trim()}
                     >
                         <ButtonLoading
-                            loading={inviting}
+                            loading={loading}
                             text="Send Invitation"
                             loadingText="Sending..."
-                            icon="fa-duotone fa-regular fa-paper-plane"
                         />
-                    </Button>
-                </div>
+                    </button>
+                </BaselModalFooter>
             </form>
-        </Modal>
+        </BaselModal>
     );
 }

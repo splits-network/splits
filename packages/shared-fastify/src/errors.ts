@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ApiError } from '@splits-network/shared-types';
+import { Logger } from '@splits-network/shared-logging';
 
 export class HttpError extends Error {
     constructor(
@@ -79,4 +80,60 @@ export function errorHandler(
         },
     };
     return reply.status(500).send(response);
+}
+
+export interface ProcessErrorHandlerOptions {
+    /** Logger instance to use for error output */
+    logger: Logger;
+    /**
+     * Optional async callback called with the fatal error before the process exits.
+     * Use this to flush Sentry or other external error reporters.
+     * Will be awaited with a 2.5-second hard timeout to prevent the process hanging.
+     */
+    onFatalError?: (error: Error) => Promise<void>;
+}
+
+/**
+ * Register process-level handlers for uncaught exceptions and unhandled promise
+ * rejections. Call this once, as early as possible inside `main()`, before any
+ * async work starts.
+ *
+ * Both handlers:
+ *  1. Log the full error with stack trace at `error` level.
+ *  2. Await `onFatalError` (e.g. Sentry flush) with a 2.5 s hard timeout.
+ *  3. Exit with code 1 so Kubernetes restarts the pod and the crash is visible
+ *     in `kubectl describe pod` / `kubectl logs --previous`.
+ *
+ * Without this, uncaught errors crash Node silently, Sentry never receives the
+ * event, and you lose all context for what went wrong.
+ */
+export function setupProcessErrorHandlers(options: ProcessErrorHandlerOptions): void {
+    const { logger, onFatalError } = options;
+
+    const handleFatal = async (error: Error, origin: string): Promise<void> => {
+        try {
+            logger.error({ err: error, origin }, `Fatal process error [${origin}] — service is shutting down`);
+            if (onFatalError) {
+                // Hard 2.5 s timeout — cannot wait forever before exiting
+                await Promise.race([
+                    onFatalError(error),
+                    new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+                ]);
+            }
+        } finally {
+            process.exit(1);
+        }
+    };
+
+    process.on('uncaughtException', (error: Error, origin: string) => {
+        void handleFatal(error, origin);
+    });
+
+    process.on('unhandledRejection', (reason: unknown) => {
+        const error =
+            reason instanceof Error
+                ? reason
+                : new Error(typeof reason === 'string' ? reason : JSON.stringify(reason));
+        void handleFatal(error, 'unhandledRejection');
+    });
 }

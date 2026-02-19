@@ -408,6 +408,20 @@ async function publishEphemeral(
     await redisData.publish(channel, JSON.stringify(payload));
 }
 
+// Catch uncaught exceptions / unhandled rejections — logs the full error and
+// exits with code 1 so Kubernetes restarts the pod and the crash is visible.
+process.on("uncaughtException", (error: Error, origin: string) => {
+    console.error(JSON.stringify({ err: { message: error.message, stack: error.stack }, origin, msg: `Fatal process error [${origin}] — shutting down` }));
+    process.exit(1);
+});
+
+process.on("unhandledRejection", (reason: unknown) => {
+    const message = reason instanceof Error ? reason.message : String(reason);
+    const stack = reason instanceof Error ? reason.stack : undefined;
+    console.error(JSON.stringify({ err: { message, stack }, origin: "unhandledRejection", msg: "Fatal process error [unhandledRejection] — shutting down" }));
+    process.exit(1);
+});
+
 if (process.env.VITEST !== "true" && process.env.NODE_ENV !== "test") {
     main();
 }

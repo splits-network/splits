@@ -1,94 +1,105 @@
 "use client";
 
-import { Button, DetailSection } from "@splits-network/memphis-ui";
 import type { Team } from "../../types";
-import { formatDate } from "../../types";
+import { formatCurrency, formatDate } from "../../types";
+import { statusColor } from "../shared/status-color";
 import { formatStatus, memberCountDisplay } from "../shared/helpers";
 
 interface SettingsSectionProps {
     team: Team;
+    onRefresh: () => void;
 }
 
-export function SettingsSection({ team }: SettingsSectionProps) {
+export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
     return (
         <div className="space-y-8">
-            {/* Split Distribution */}
-            <DetailSection
-                title="Split Distribution"
-                icon="fa-duotone fa-regular fa-percent"
-                accent="teal"
-            >
-                <p className="text-sm text-dark/60 mb-4">
-                    Configure how placement fees are distributed among team members.
-                    Define split percentages, tiered structures, or custom models.
-                </p>
-                <Button color="teal">
-                    <i className="fa-duotone fa-regular fa-cog mr-2" />
-                    Configure Splits
-                </Button>
-            </DetailSection>
-
-            {/* Team Information */}
-            <DetailSection
-                title="Team Information"
-                icon="fa-duotone fa-regular fa-circle-info"
-                accent="purple"
-            >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+            {/* Section 1: Team Information */}
+            <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                    Team Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Team ID
-                        </div>
-                        <div className="text-sm font-bold text-dark font-mono truncate">
+                        </p>
+                        <p className="font-bold text-sm font-mono truncate">
                             {team.id}
-                        </div>
+                        </p>
                     </div>
-                    <div className="p-4 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
-                        </div>
-                        <div className="text-sm font-bold text-dark">
+                        </p>
+                        <span
+                            className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(team.status)}`}
+                        >
                             {formatStatus(team.status)}
-                        </div>
+                        </span>
                     </div>
-                    <div className="p-4 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Created
-                        </div>
-                        <div className="text-sm font-bold text-dark">
+                        </p>
+                        <p className="font-bold text-sm">
                             {formatDate(team.created_at)}
-                        </div>
+                        </p>
                     </div>
-                    <div className="p-4 border-2 border-dark/20">
-                        <div className="text-sm font-bold uppercase tracking-wider text-dark/50 mb-1">
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Members
-                        </div>
-                        <div className="text-sm font-bold text-dark">
+                        </p>
+                        <p className="font-bold text-sm">
                             {memberCountDisplay(team)}
-                        </div>
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Total Placements
+                        </p>
+                        <p className="font-bold text-sm">
+                            {team.total_placements}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Total Revenue
+                        </p>
+                        <p className="font-bold text-sm">
+                            {formatCurrency(team.total_revenue)}
+                        </p>
                     </div>
                 </div>
-            </DetailSection>
+            </div>
 
-            {/* Danger Zone */}
-            <DetailSection
-                title="Danger Zone"
-                icon="fa-duotone fa-regular fa-triangle-exclamation"
-                accent="coral"
-            >
-                <p className="text-sm text-dark/60 mb-4">
-                    Suspending a team will disable all member access and pause active placements.
-                    This action can be reversed.
+            {/* Section 2: Split Distribution */}
+            <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                    Split Distribution
+                </h3>
+                <div className="bg-info/10 text-info text-sm p-4">
+                    Split configuration coming soon
+                </div>
+            </div>
+
+            {/* Section 3: Danger Zone */}
+            <div className="border-2 border-error/20 p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
+                    Danger Zone
+                </h3>
+                <p className="text-sm text-base-content/60 mb-4">
+                    Suspending a team will disable all member access and pause
+                    active placements. This action can be reversed.
                 </p>
-                <Button
-                    color="coral"
-                    variant="outline"
+                <button
+                    className="btn btn-sm btn-error btn-outline"
+                    style={{ borderRadius: 0 }}
                     disabled
                 >
                     <i className="fa-duotone fa-regular fa-ban mr-2" />
-                    Suspend Team
-                </Button>
-            </DetailSection>
+                    {team.status === "active" ? "Suspend Team" : "Activate Team"}
+                </button>
+            </div>
         </div>
     );
 }

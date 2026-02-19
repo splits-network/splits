@@ -1,18 +1,19 @@
 "use client";
 
-import { Fragment, useState } from "react";
-import { Badge } from "@splits-network/memphis-ui";
+import { Fragment } from "react";
 import type { Team } from "../../types";
-import { formatCurrency, formatDate } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
-import { formatStatus, memberCountDisplay, createdAgo } from "../shared/helpers";
-import { TeamActionsToolbar } from "../shared/actions-toolbar";
+import { formatCurrency } from "../../types";
+import { statusColor } from "../shared/status-color";
+import {
+    formatStatus,
+    createdAgo,
+    memberCountDisplay,
+} from "../shared/helpers";
 import { TeamDetailLoader } from "../shared/team-detail";
+import { TeamActionsToolbar } from "../shared/actions-toolbar";
 
 export function TableRow({
     team,
-    accent,
     idx,
     isSelected,
     colSpan,
@@ -20,94 +21,79 @@ export function TableRow({
     onRefresh,
 }: {
     team: Team;
-    accent: AccentClasses;
     idx: number;
     isSelected: boolean;
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const ac = accent;
-    const [expanded, setExpanded] = useState(false);
-
-    const handleClick = () => {
-        setExpanded((prev) => !prev);
-        onSelect();
-    };
-
-    const rowBg = isSelected
-        ? `${ac.bgLight} ${ac.border}`
-        : idx % 2 === 0
-          ? "bg-white"
-          : "bg-cream";
+    const rowBase = isSelected
+        ? "bg-primary/5 border-l-4 border-l-primary"
+        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
+            {/* Main row */}
             <tr
-                onClick={handleClick}
-                className={`cursor-pointer transition-colors hover:bg-cream/80 ${rowBg} ${isSelected ? "border-l-4" : "border-l-4 border-transparent"}`}
+                onClick={onSelect}
+                className={`cursor-pointer transition-colors ${rowBase}`}
             >
                 {/* Chevron */}
-                <td className="w-8 px-4">
+                <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular fa-chevron-right text-sm transition-transform ${
-                            expanded ? "rotate-90" : ""
-                        } ${ac.text}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
                     />
                 </td>
 
                 {/* Team Name */}
                 <td className="px-4 py-3">
-                    <span className="font-black text-sm uppercase tracking-tight text-dark">
+                    <span className="font-bold text-sm text-base-content">
                         {team.name}
                     </span>
                 </td>
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <Badge color={statusVariant(team.status)} size="sm">
+                    <span
+                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(team.status)}`}
+                    >
                         {formatStatus(team.status)}
-                    </Badge>
+                    </span>
                 </td>
 
                 {/* Members */}
-                <td className="px-4 py-3">
-                    <span className="text-sm text-dark/70">
-                        {memberCountDisplay(team)}
-                    </span>
+                <td className="px-4 py-3 text-sm text-base-content/70">
+                    {memberCountDisplay(team)}
                 </td>
 
                 {/* Placements */}
-                <td className="px-4 py-3">
-                    <span className="text-sm font-bold text-dark">
-                        {team.total_placements}
-                    </span>
+                <td className="px-4 py-3 text-sm font-bold text-base-content">
+                    {team.total_placements}
                 </td>
 
                 {/* Revenue */}
-                <td className="px-4 py-3">
-                    <span className="text-sm font-bold text-dark">
-                        {formatCurrency(team.total_revenue)}
-                    </span>
+                <td className="px-4 py-3 text-sm font-bold text-primary">
+                    {formatCurrency(team.total_revenue)}
                 </td>
 
                 {/* Created */}
-                <td className="px-4 py-3">
-                    <span className="text-sm text-dark/50">
-                        {createdAgo(team)}
-                    </span>
+                <td className="px-4 py-3 text-sm text-base-content/50">
+                    {createdAgo(team)}
                 </td>
 
                 {/* Actions */}
-                <td className="px-4 py-3">
-                    <div onClick={(e) => e.stopPropagation()}>
+                <td
+                    className="px-4 py-3 relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
                         <TeamActionsToolbar
                             team={team}
                             variant="icon-only"
                             size="xs"
                             onRefresh={onRefresh}
                             showActions={{
-                                viewDetails: true,
+                                viewDetails: false,
                                 inviteMember: false,
                             }}
                         />
@@ -115,18 +101,18 @@ export function TableRow({
                 </td>
             </tr>
 
-            {/* Expandable Detail Row */}
-            {expanded && isSelected && (
+            {/* Expanded detail row */}
+            {isSelected && (
                 <tr>
-                    <td colSpan={colSpan} className="p-0">
-                        <div className={`border-t-4 ${ac.border}`}>
-                            <TeamDetailLoader
-                                team={team}
-                                accent={ac}
-                                onClose={handleClick}
-                                onRefresh={onRefresh}
-                            />
-                        </div>
+                    <td
+                        colSpan={colSpan}
+                        className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
+                    >
+                        <TeamDetailLoader
+                            teamId={team.id}
+                            onClose={onSelect}
+                            onRefresh={onRefresh}
+                        />
                     </td>
                 </tr>
             )}

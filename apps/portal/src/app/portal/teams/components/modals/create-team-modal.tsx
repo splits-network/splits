@@ -4,19 +4,31 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { Modal, Input, Button, AlertBanner } from "@splits-network/memphis-ui";
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselFormField,
+} from "@splits-network/basel-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface CreateTeamModalProps {
+    isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
 }
 
-export function CreateTeamModal({ onClose, onSuccess }: CreateTeamModalProps) {
+export default function CreateTeamModal({
+    isOpen,
+    onClose,
+    onSuccess,
+}: CreateTeamModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+
     const [name, setName] = useState("");
-    const [creating, setCreating] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -24,8 +36,9 @@ export function CreateTeamModal({ onClose, onSuccess }: CreateTeamModalProps) {
         if (!name.trim()) return;
 
         try {
-            setCreating(true);
+            setLoading(true);
             setError(null);
+
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
 
@@ -37,58 +50,72 @@ export function CreateTeamModal({ onClose, onSuccess }: CreateTeamModalProps) {
         } catch (err: any) {
             setError(err.message || "Failed to create team");
         } finally {
-            setCreating(false);
+            setLoading(false);
         }
     };
 
     return (
-        <Modal
-            open
+        <BaselModal
+            isOpen={isOpen}
             onClose={onClose}
-            title="Create New Team"
-            closeOnBackdrop={!creating}
+            closeOnBackdropClick={!loading}
         >
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <Input
-                    label="Team Name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., Tech Recruiters Inc."
-                    required
-                    autoFocus
-                    disabled={creating}
-                />
-                <p className="text-xs text-dark/50 -mt-4">
-                    Choose a name for your recruiting team or agency
-                </p>
+            <BaselModalHeader
+                title="Create Team"
+                icon="fa-users"
+                iconColor="primary"
+                onClose={onClose}
+                closeDisabled={loading}
+            />
 
-                {error && <AlertBanner type="error">{error}</AlertBanner>}
+            <form onSubmit={handleSubmit}>
+                <BaselModalBody>
+                    <div className="space-y-4">
+                        {error && (
+                            <div className="bg-error/10 text-error text-sm p-3 mb-4">
+                                {error}
+                            </div>
+                        )}
 
-                <div className="flex gap-3 justify-end">
-                    <Button
+                        <BaselFormField label="Team Name" required>
+                            <input
+                                type="text"
+                                className="input input-bordered w-full bg-base-200 border-base-300"
+                                style={{ borderRadius: 0 }}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g., Tech Recruiters Inc."
+                                autoFocus
+                                disabled={loading}
+                            />
+                        </BaselFormField>
+                    </div>
+                </BaselModalBody>
+
+                <BaselModalFooter>
+                    <button
                         type="button"
-                        color="dark"
-                        variant="ghost"
+                        className="btn btn-ghost"
+                        style={{ borderRadius: 0 }}
                         onClick={onClose}
-                        disabled={creating}
+                        disabled={loading}
                     >
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         type="submit"
-                        color="teal"
-                        disabled={creating || !name.trim()}
+                        className="btn btn-primary"
+                        style={{ borderRadius: 0 }}
+                        disabled={loading || !name.trim()}
                     >
                         <ButtonLoading
-                            loading={creating}
+                            loading={loading}
                             text="Create Team"
                             loadingText="Creating..."
-                            icon="fa-duotone fa-regular fa-check"
                         />
-                    </Button>
-                </div>
+                    </button>
+                </BaselModalFooter>
             </form>
-        </Modal>
+        </BaselModal>
     );
 }

@@ -2,9 +2,10 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import RoleWizardModal from "@/app/portal/roles/components/modals/role-wizard-modal";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
-import dynamic from "next/dynamic";
 import { useCompanyStats } from "@/app/portal/dashboard/hooks/use-company-stats";
 import { useHiringPipeline } from "@/app/portal/dashboard/hooks/use-hiring-pipeline";
 import { useCompanyHealth } from "@/app/portal/dashboard/hooks/use-company-health";
@@ -119,6 +120,7 @@ export default function CompanyView() {
     const { userId } = useAuth();
     const { profile } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
+    const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 
     /* Data hooks */
     const {
@@ -179,13 +181,13 @@ export default function CompanyView() {
                                 value={trendPeriod}
                                 onChange={setTrendPeriod}
                             />
-                            <Link
-                                href="/portal/roles/new"
+                            <button
+                                onClick={() => setIsRoleModalOpen(true)}
                                 className="btn btn-primary btn-sm"
                             >
                                 <i className="fa-duotone fa-regular fa-plus" />{" "}
                                 Post Role
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -513,6 +515,11 @@ export default function CompanyView() {
                     </div>
                 </section>
             </BaselAnimator>
+            <RoleWizardModal
+                isOpen={isRoleModalOpen}
+                onClose={() => setIsRoleModalOpen(false)}
+                onSuccess={refreshStats}
+            />
         </div>
     );
 }

@@ -8,7 +8,8 @@ import {
     buildServer,
     errorHandler,
     registerHealthCheck,
-    HealthCheckers
+    HealthCheckers,
+    setupProcessErrorHandlers
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
@@ -21,6 +22,16 @@ import { ResumeExtractionService } from "./v2/resume-extraction/service";
 import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
 import * as Sentry from "@sentry/node";
 
+// Initialize Sentry at module level so startup errors are captured before main() runs
+if (process.env.SENTRY_DSN) {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        environment: process.env.NODE_ENV ?? "development",
+        release: process.env.SENTRY_RELEASE,
+        tracesSampleRate: 0.1,
+    });
+}
+
 async function main() {
     const baseConfig = loadBaseConfig("ai-service");
     const dbConfig = loadDatabaseConfig();
@@ -30,6 +41,19 @@ async function main() {
         serviceName: baseConfig.serviceName,
         level: baseConfig.nodeEnv === "development" ? "debug" : "info",
         prettyPrint: baseConfig.nodeEnv === "development",
+    });
+
+    // Register process-level error handlers as early as possible.
+    // For uncaughtException / unhandledRejection: logs the full error, flushes
+    // Sentry so the event is not lost, then exits with code 1.
+    setupProcessErrorHandlers({
+        logger,
+        ...(process.env.SENTRY_DSN && {
+            onFatalError: async (error) => {
+                Sentry.captureException(error);
+                await Sentry.flush(2000);
+            },
+        }),
     });
 
     const app = await buildServer({
@@ -43,23 +67,16 @@ async function main() {
 
     app.setErrorHandler(errorHandler);
 
-    // Initialize Sentry if DSN is provided
-    const sentryDsn = process.env.SENTRY_DSN;
-    if (sentryDsn) {
-        Sentry.init({
-            dsn: sentryDsn,
-            environment: baseConfig.nodeEnv,
-            release: process.env.SENTRY_RELEASE,
-            tracesSampleRate: 0.1,
-        });
-
-        app.addHook("onError", async (request, reply, error) => {
+    // Capture per-request errors with route context.
+    // Sentry.captureException is a no-op when Sentry was not initialized.
+    app.addHook("onError", async (request, reply, error) => {
+        if (process.env.SENTRY_DSN) {
             Sentry.captureException(error, {
                 tags: { service: baseConfig.serviceName },
                 extra: { path: request.url, method: request.method },
             });
-        });
-    }
+        }
+    });
 
     // Register Swagger
     await app.register(swagger as any, {

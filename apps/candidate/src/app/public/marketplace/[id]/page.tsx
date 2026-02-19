@@ -1,31 +1,29 @@
-import type { Metadata } from 'next';
-import type { MarketplaceProfile } from '@splits-network/shared-types';
-import { apiClient } from '@/lib/api-client';
-import { cache } from 'react';
-import RecruiterDetailClient from './recruiter-detail-client';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { apiClient } from "@/lib/api-client";
 import { buildCanonical } from "@/lib/seo";
-import { JsonLd } from "@splits-network/shared-ui";
+import RecruiterDetail from "./recruiter-detail";
 
-interface MarketplaceRecruiter {
+interface RecruiterDetailPageProps {
+    params: Promise<{ id: string }>;
+}
+
+interface Recruiter {
     id: string;
     user_id: string;
-    user_name?: string;
-    user_email?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
     tagline?: string;
+    specialization?: string;
     industries?: string[];
     specialties?: string[];
     location?: string;
     years_experience?: number;
-    marketplace_profile?: MarketplaceProfile;
-    show_contact_info?: boolean;
     bio?: string;
-    phone?: string;
-    contact_available?: boolean;
     total_placements?: number;
     success_rate?: number;
     reputation_score?: number;
-    status?: string;
-    marketplace_visibility?: string;
     created_at: string;
     users?: {
         id: string;
@@ -34,90 +32,66 @@ interface MarketplaceRecruiter {
     };
 }
 
-interface PageProps {
-    params: Promise<{ id: string }>;
-}
-
-const fetchRecruiter = cache(async (id: string): Promise<MarketplaceRecruiter | null> => {
-    try {
-        const response = await apiClient.get<{ data: MarketplaceRecruiter }>(`/recruiters/${id}`, {
-            params: { include: 'user,marketplace_profile,reputation' },
-        });
-        return response.data ?? null;
-    } catch (error) {
-        console.error('Failed to fetch recruiter:', error);
-        return null;
-    }
-});
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+    params,
+}: RecruiterDetailPageProps): Promise<Metadata> {
     const { id } = await params;
-    const recruiter = await fetchRecruiter(id);
-    const canonicalPath = `/public/marketplace/${id}`;
+    let recruiter: Recruiter | null = null;
 
-    if (!recruiter) {
+    try {
+        const response = await apiClient.get<{ data: Recruiter }>(
+            `/recruiters/${id}`,
+            {
+                params: { include: "user" },
+            },
+        );
+        recruiter = response.data;
+    } catch {
         return {
-            title: 'Recruiter Profile',
-            description: 'Explore recruiter profiles and marketplace availability.',
-            ...buildCanonical(canonicalPath),
+            title: "Recruiter Not Found",
         };
     }
 
-    const recruiterName = recruiter.users?.name ?? 'Recruiter Profile';
+    const name = recruiter?.users?.name || recruiter?.name || "Recruiter";
+    const tagline = recruiter?.tagline || "Expert Recruiter";
+
     return {
-        title: recruiterName,
-        description: recruiter.tagline || 'Explore recruiter specialties, experience, and marketplace availability.',
-        ...buildCanonical(canonicalPath),
+        title: `${name} - ${tagline}`,
+        description:
+            recruiter?.bio?.substring(0, 160) ||
+            `View ${name}'s recruiter profile`,
+        openGraph: {
+            title: `${name} - ${tagline}`,
+            description:
+                recruiter?.bio?.substring(0, 160) ||
+                `View ${name}'s recruiter profile`,
+            url: `https://applicant.network/public/marketplace/${id}`,
+        },
+        ...buildCanonical(`/public/marketplace/${id}`),
     };
 }
 
-export const revalidate = 60;
-
-export default async function RecruiterDetailPage({ params }: PageProps) {
+export default async function RecruiterDetailPage({
+    params,
+}: RecruiterDetailPageProps) {
     const { id } = await params;
-    const recruiter = await fetchRecruiter(id);
-    const recruiterName = recruiter?.users?.name || recruiter?.user_name || "Recruiter Profile";
-    const personJsonLd = recruiter
-        ? {
-              "@context": "https://schema.org",
-              "@type": "Person",
-              name: recruiterName,
-              jobTitle: recruiter.tagline,
-              url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/public/marketplace/${id}`,
-              address: recruiter.location
-                  ? {
-                        "@type": "PostalAddress",
-                        addressLocality: recruiter.location,
-                    }
-                  : undefined,
-              knowsAbout: recruiter.specialties,
-              worksFor: recruiter.industries?.length
-                  ? {
-                        "@type": "Organization",
-                        name: recruiter.industries.join(", "),
-                    }
-                  : undefined,
-              description:
-                  recruiter.marketplace_profile?.bio_rich ||
-                  recruiter.bio ||
-                  recruiter.tagline,
-          }
-        : null;
+    let recruiter: Recruiter | null = null;
 
-    return (
-        <>
-            {personJsonLd && (
-                <JsonLd data={personJsonLd} id="marketplace-person-jsonld" />
-            )}
-            <RecruiterDetailClient
-                recruiterId={id}
-                initialRecruiter={recruiter}
-                initialError={
-                    recruiter
-                        ? undefined
-                        : "Failed to load recruiter profile. Please try again."
-                }
-            />
-        </>
-    );
+    try {
+        const response = await apiClient.get<{ data: Recruiter }>(
+            `/recruiters/${id}`,
+            {
+                params: { include: "user" },
+            },
+        );
+        recruiter = response.data;
+    } catch {
+        notFound();
+    }
+
+    if (!recruiter) {
+        notFound();
+    }
+
+    return <RecruiterDetail recruiter={recruiter} />;
 }

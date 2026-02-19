@@ -1,60 +1,65 @@
 "use client";
 
-import { Badge } from "@splits-network/memphis-ui";
 import type { Team } from "../../types";
 import { formatCurrency } from "../../types";
-import type { AccentClasses } from "../shared/accent";
-import { statusVariant } from "../shared/accent";
-import { formatStatus, createdAgo } from "../shared/helpers";
+import { statusColor } from "../shared/status-color";
+import {
+    formatStatus,
+    createdAgo,
+    memberCountDisplay,
+} from "../shared/helpers";
 
 export function SplitItem({
     team,
-    accent,
     isSelected,
     onSelect,
 }: {
     team: Team;
-    accent: AccentClasses;
     isSelected: boolean;
     onSelect: () => void;
 }) {
-    const ac = accent;
-
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 border-b-2 border-dark/10 border-l-4 transition-colors ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
-                    ? `${ac.bgLight} ${ac.border}`
-                    : "border-transparent hover:bg-cream/50"
+                    ? "bg-primary/5 border-l-primary"
+                    : "bg-base-100 border-transparent"
             }`}
         >
-            <div className="flex items-start justify-between gap-2 mb-2">
-                <h4 className="font-black text-sm uppercase tracking-tight text-dark truncate">
+            {/* Row 1: team name + created ago */}
+            <div className="flex items-start justify-between gap-2 mb-1">
+                <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                     {team.name}
                 </h4>
-                <span className="text-xs text-dark/40 whitespace-nowrap">
+                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {createdAgo(team)}
                 </span>
             </div>
 
-            <div className="flex items-center gap-2 mb-2">
-                <Badge color={statusVariant(team.status)} size="sm">
-                    {formatStatus(team.status)}
-                </Badge>
+            {/* Row 2: member count */}
+            <div className="text-sm font-semibold text-base-content/60 mb-1">
+                {memberCountDisplay(team)}
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-dark/60">
-                <span>
-                    <i className="fa-duotone fa-regular fa-users mr-1" />
-                    {team.active_member_count} members
+            {/* Row 3: status pill + revenue */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+                <span
+                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(team.status)}`}
+                >
+                    {formatStatus(team.status)}
                 </span>
-                <span>
-                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                    {team.total_placements}
-                </span>
-                <span className="font-bold">
+                <span className="text-sm font-bold text-primary">
                     {formatCurrency(team.total_revenue)}
+                </span>
+            </div>
+
+            {/* Row 4: placements */}
+            <div className="flex items-center gap-3">
+                <span className="text-sm text-base-content/50">
+                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                    {team.total_placements} placement
+                    {team.total_placements !== 1 ? "s" : ""}
                 </span>
             </div>
         </div>

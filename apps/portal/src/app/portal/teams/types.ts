@@ -27,8 +27,12 @@ export interface TeamMember {
     recruiter: {
         id: string;
         user_id: string;
-        name: string;
-        email: string;
+        status: string;
+        user: {
+            id: string;
+            name: string;
+            email: string;
+        };
     };
 }
 

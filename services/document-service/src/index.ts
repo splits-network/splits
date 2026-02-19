@@ -90,7 +90,10 @@ async function start() {
                 ...(eventPublisher && {
                     rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
                 }),
-                storage: HealthCheckers.custom('storage', async () => {
+                storage: HealthCheckers.externalProvider('storage', async (signal) => {
+                    // Uses externalProvider so a Supabase Storage outage caps status at
+                    // 'degraded' rather than 'unhealthy' — a pod restart can't fix a
+                    // storage-side outage, it would just cause a crash-loop.
                     return await storage.healthCheck();
                 }, { provider: 'supabase-storage' }),
             },

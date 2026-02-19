@@ -49,6 +49,7 @@ export const config = {
 
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
+        '/onboarding(.*)',  // Full-page onboarding wizard
         '/accept-invitation(.*)', // Invitation acceptance
         //'/join(.*)', // Join platform (handled conditionally in page)
 

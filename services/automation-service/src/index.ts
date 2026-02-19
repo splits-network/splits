@@ -4,7 +4,7 @@ import {
     loadRabbitMQConfig,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
@@ -26,6 +26,11 @@ async function main() {
         level: baseConfig.nodeEnv === "development" ? "debug" : "info",
         prettyPrint: baseConfig.nodeEnv === "development",
     });
+
+    // Register process-level error handlers as early as possible.
+    // For uncaughtException / unhandledRejection: logs the full error and exits
+    // with code 1 so Kubernetes restarts the pod and the crash is visible.
+    setupProcessErrorHandlers({ logger });
 
     const app = await buildServer({
         logger,

@@ -18,6 +18,9 @@ import { registerProposalRoutes } from './proposals/routes';
 import { recruiterCompanyRoutes } from './recruiter-companies/routes';
 import { companyInvitationRoutes } from './company-invitations/routes';
 import { recruiterCodeRoutes } from './recruiter-codes/routes';
+import { TeamRepository } from './teams/repository';
+import { TeamServiceV2 } from './teams/service';
+import { registerTeamRoutes } from './teams/routes';
 import { createClient } from '@supabase/supabase-js';
 
 interface V2Config {
@@ -38,6 +41,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     );
     const reputationRepository = new ReputationRepository(config.supabaseUrl, config.supabaseKey);
     const proposalRepository = new ProposalRepository(config.supabaseUrl, config.supabaseKey);
+    const teamRepository = new TeamRepository(config.supabaseUrl, config.supabaseKey);
 
     const recruiterService = new RecruiterServiceV2(recruiterRepository, config.eventPublisher);
     const assignmentService = new AssignmentServiceV2(assignmentRepository, config.eventPublisher);
@@ -48,12 +52,14 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     );
     const reputationService = new ReputationServiceV2(reputationRepository, config.eventPublisher);
     const proposalService = new ProposalServiceV2(proposalRepository, config.eventPublisher);
+    const teamService = new TeamServiceV2(teamRepository, config.eventPublisher);
 
     registerRecruiterRoutes(app, { recruiterService });
     registerAssignmentRoutes(app, { assignmentService });
     registerRecruiterCandidateRoutes(app, { recruiterCandidateService });
     registerReputationRoutes(app, { reputationService });
     registerProposalRoutes(app, { proposalService });
+    registerTeamRoutes(app, { teamService });
     
     // Register recruiter-companies routes
     await recruiterCompanyRoutes(app, supabase, config.eventPublisher);

@@ -1,11 +1,21 @@
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisherV2 } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
+
+// Initialize Sentry at module level so startup errors are captured before main() runs
+if (process.env.SENTRY_DSN) {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        environment: process.env.NODE_ENV ?? 'development',
+        release: process.env.SENTRY_RELEASE,
+        tracesSampleRate: 0.1,
+    });
+}
 
 async function main() {
     const baseConfig = loadBaseConfig('identity-service');
@@ -25,6 +35,19 @@ async function main() {
         prettyPrint: baseConfig.nodeEnv === 'development',
     });
 
+    // Register process-level error handlers as early as possible.
+    // For uncaughtException / unhandledRejection: logs the full error, flushes
+    // Sentry so the event is not lost, then exits with code 1.
+    setupProcessErrorHandlers({
+        logger,
+        ...(process.env.SENTRY_DSN && {
+            onFatalError: async (error) => {
+                Sentry.captureException(error);
+                await Sentry.flush(2000);
+            },
+        }),
+    });
+
     const app = await buildServer({
         logger,
         cors: {
@@ -38,23 +61,16 @@ async function main() {
     // Set error handler
     app.setErrorHandler(errorHandler);
 
-    // Initialize Sentry if DSN is provided
-    const sentryDsn = process.env.SENTRY_DSN;
-    if (sentryDsn) {
-        Sentry.init({
-            dsn: sentryDsn,
-            environment: baseConfig.nodeEnv,
-            release: process.env.SENTRY_RELEASE,
-            tracesSampleRate: 0.1,
-        });
-
-        app.addHook('onError', async (request, reply, error) => {
+    // Capture per-request errors with route context.
+    // Sentry.captureException is a no-op when Sentry was not initialized.
+    app.addHook('onError', async (request, reply, error) => {
+        if (process.env.SENTRY_DSN) {
             Sentry.captureException(error, {
                 tags: { service: baseConfig.serviceName },
                 extra: { path: request.url, method: request.method },
             });
-        });
-    }
+        }
+    });
 
     // Register Swagger
     await app.register(swagger as any, {
@@ -123,10 +139,13 @@ async function main() {
             ...(eventPublisher && {
                 rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
             }),
-            clerk: HealthCheckers.custom('clerk', async () => {
-                // Test Clerk API connectivity if secret key is available
+            clerk: HealthCheckers.externalProvider('clerk', async (signal) => {
+                // Test Clerk API connectivity if secret key is available.
+                // Uses externalProvider so a Clerk outage caps status at 'degraded' and
+                // never causes a pod restart — the service still auth's via JWT fine.
                 if (process.env.CLERK_SECRET_KEY) {
                     const response = await fetch('https://api.clerk.dev/v1/users', {
+                        signal,
                         headers: {
                             'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
                             'Content-Type': 'application/json'
@@ -134,7 +153,7 @@ async function main() {
                     });
                     return response.ok;
                 }
-                return true; // If no key, consider healthy (sync disabled)
+                return true; // If no key configured, sync is disabled — not a fault
             }, { provider: 'clerk' }),
         },
     });

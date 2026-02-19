@@ -6,7 +6,10 @@ import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ensureUserInDatabase } from "@/lib/user-registration";
-import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
+import {
+    createAuthenticatedClient,
+    createUnauthenticatedClient,
+} from "@/lib/api-client";
 import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 
 export default function SignUpPage() {
@@ -31,8 +34,14 @@ export default function SignUpPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     const [referralCode, setReferralCode] = useState(recCode || "");
-    const [referralStatus, setReferralStatus] = useState<"idle" | "validating" | "valid" | "invalid">("idle");
-    const [referralRecruiter, setReferralRecruiter] = useState<{ id: string; name: string; profile_image_url?: string | null } | null>(null);
+    const [referralStatus, setReferralStatus] = useState<
+        "idle" | "validating" | "valid" | "invalid"
+    >("idle");
+    const [referralRecruiter, setReferralRecruiter] = useState<{
+        id: string;
+        name: string;
+        profile_image_url?: string | null;
+    } | null>(null);
     const [referralError, setReferralError] = useState("");
 
     const stepRef = useRef<HTMLDivElement>(null);
@@ -61,7 +70,10 @@ export default function SignUpPage() {
                 } else {
                     setReferralStatus("invalid");
                     setReferralRecruiter(null);
-                    setReferralError(response?.data?.error_message || "Invalid referral code");
+                    setReferralError(
+                        response?.data?.error_message ||
+                            "Invalid referral code",
+                    );
                 }
             } catch {
                 setReferralStatus("invalid");
@@ -94,7 +106,9 @@ export default function SignUpPage() {
                 lastName,
             });
 
-            await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+            await signUp.prepareEmailAddressVerification({
+                strategy: "email_code",
+            });
             setPendingVerification(true);
         } catch (err: any) {
             setError(err.errors?.[0]?.message || "Failed to create account");
@@ -111,7 +125,9 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
-            const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
+            const completeSignUp = await signUp.attemptEmailAddressVerification(
+                { code },
+            );
 
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
@@ -124,15 +140,21 @@ export default function SignUpPage() {
                             const codeToUse = referralCode || recCode;
                             if (codeToUse) {
                                 try {
-                                    const unauthClient = createUnauthenticatedClient();
-                                    const lookupResponse: any = await unauthClient.get(
-                                        `/recruiter-codes/lookup?code=${encodeURIComponent(codeToUse)}`,
-                                    );
+                                    const unauthClient =
+                                        createUnauthenticatedClient();
+                                    const lookupResponse: any =
+                                        await unauthClient.get(
+                                            `/recruiter-codes/lookup?code=${encodeURIComponent(codeToUse)}`,
+                                        );
                                     if (lookupResponse?.data?.is_valid) {
-                                        referredByRecruiterId = lookupResponse.data.recruiter_id;
+                                        referredByRecruiterId =
+                                            lookupResponse.data.recruiter_id;
                                     }
                                 } catch (lookupError) {
-                                    console.warn("[SignUp] Failed to resolve rec_code:", lookupError);
+                                    console.warn(
+                                        "[SignUp] Failed to resolve rec_code:",
+                                        lookupError,
+                                    );
                                 }
                             }
 
@@ -144,26 +166,45 @@ export default function SignUpPage() {
                             });
 
                             if (!result.success) {
-                                console.warn("[SignUp] User creation warning:", result.error);
+                                console.warn(
+                                    "[SignUp] User creation warning:",
+                                    result.error,
+                                );
                             }
 
-                            if (codeToUse && result.success && !result.wasExisting) {
+                            if (
+                                codeToUse &&
+                                result.success &&
+                                !result.wasExisting
+                            ) {
                                 try {
-                                    const authClient = createAuthenticatedClient(token);
-                                    await authClient.post("/recruiter-codes/log", { code: codeToUse });
+                                    const authClient =
+                                        createAuthenticatedClient(token);
+                                    await authClient.post(
+                                        "/recruiter-codes/log",
+                                        { code: codeToUse },
+                                    );
                                 } catch (logError) {
-                                    console.warn("[SignUp] Failed to log rec_code usage:", logError);
+                                    console.warn(
+                                        "[SignUp] Failed to log rec_code usage:",
+                                        logError,
+                                    );
                                 }
                             }
                         }
                     } catch (userCreationError) {
-                        console.error("Failed to create user in database (webhook will handle):", userCreationError);
+                        console.error(
+                            "Failed to create user in database (webhook will handle):",
+                            userCreationError,
+                        );
                     }
 
-                    router.replace(redirectUrl || "/portal/dashboard");
+                    router.replace(redirectUrl || "/onboarding");
                 }, 500);
             } else {
-                setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
+                setError(
+                    `Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`,
+                );
             }
         } catch (err: any) {
             console.error("Verification error:", err);
@@ -173,18 +214,24 @@ export default function SignUpPage() {
         }
     };
 
-    const signUpWithOAuth = (provider: "oauth_google" | "oauth_github" | "oauth_microsoft") => {
+    const signUpWithOAuth = (
+        provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
+    ) => {
         if (!isLoaded) return;
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
-            redirectUrlComplete: redirectUrl || "/portal/dashboard",
+            redirectUrlComplete: redirectUrl || "/onboarding",
         });
     };
 
     // Animate step transitions
     useEffect(() => {
-        if (!stepRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (
+            !stepRef.current ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+            return;
         gsap.fromTo(
             stepRef.current,
             { opacity: 0, x: 20 },
@@ -202,10 +249,15 @@ export default function SignUpPage() {
                     </h1>
                 </div>
 
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-6"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
-                        <span className="text-sm">You&apos;re already signed in to your account.</span>
+                        <span className="text-sm">
+                            You&apos;re already signed in to your account.
+                        </span>
                     </div>
                 </div>
 
@@ -214,15 +266,28 @@ export default function SignUpPage() {
                 </p>
 
                 <div className="space-y-3">
-                    <button onClick={() => router.push("/portal/dashboard")} className="btn btn-primary w-full">
+                    <button
+                        onClick={() => router.push("/portal/dashboard")}
+                        className="btn btn-primary w-full"
+                    >
                         <i className="fa-duotone fa-regular fa-gauge-high" />
                         Go to Dashboard
                     </button>
-                    <button onClick={handleSignOut} className="btn btn-ghost w-full border border-base-300" disabled={isLoading}>
+                    <button
+                        onClick={handleSignOut}
+                        className="btn btn-ghost w-full border border-base-300"
+                        disabled={isLoading}
+                    >
                         {isLoading ? (
-                            <><span className="loading loading-spinner loading-sm" /> Signing out...</>
+                            <>
+                                <span className="loading loading-spinner loading-sm" />{" "}
+                                Signing out...
+                            </>
                         ) : (
-                            <><i className="fa-duotone fa-regular fa-right-from-bracket" /> Sign Out & Create New Account</>
+                            <>
+                                <i className="fa-duotone fa-regular fa-right-from-bracket" />{" "}
+                                Sign Out & Create New Account
+                            </>
                         )}
                     </button>
                 </div>
@@ -240,10 +305,16 @@ export default function SignUpPage() {
                     </h1>
                 </div>
 
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-6"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
-                        <span className="text-sm">We sent a verification code to <strong>{email}</strong></span>
+                        <span className="text-sm">
+                            We sent a verification code to{" "}
+                            <strong>{email}</strong>
+                        </span>
                     </div>
                 </div>
 
@@ -272,16 +343,26 @@ export default function SignUpPage() {
                         />
                     </fieldset>
 
-                    <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-full"
+                        disabled={isLoading || !isLoaded}
+                    >
                         {isLoading ? (
-                            <><span className="loading loading-spinner loading-sm" /> Verifying...</>
+                            <>
+                                <span className="loading loading-spinner loading-sm" />{" "}
+                                Verifying...
+                            </>
                         ) : (
                             "Verify Email"
                         )}
                     </button>
                 </form>
 
-                <button onClick={() => setPendingVerification(false)} className="btn btn-ghost btn-sm w-full mt-4">
+                <button
+                    onClick={() => setPendingVerification(false)}
+                    className="btn btn-ghost btn-sm w-full mt-4"
+                >
                     <i className="fa-solid fa-arrow-left" /> Back to sign up
                 </button>
             </div>
@@ -302,10 +383,15 @@ export default function SignUpPage() {
             </div>
 
             {isFromInvitation && (
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-6"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-envelope-open-text text-info mt-0.5" />
-                        <span className="text-sm">Complete sign-up to accept your invitation</span>
+                        <span className="text-sm">
+                            Complete sign-up to accept your invitation
+                        </span>
                     </div>
                 </div>
             )}
@@ -325,7 +411,9 @@ export default function SignUpPage() {
                     onClick={() => signUpWithOAuth("oauth_google")}
                 >
                     <i className="fa-brands fa-google text-lg" />
-                    <span className="text-sm font-semibold">Continue with Google</span>
+                    <span className="text-sm font-semibold">
+                        Continue with Google
+                    </span>
                 </button>
                 <button
                     type="button"
@@ -333,7 +421,9 @@ export default function SignUpPage() {
                     onClick={() => signUpWithOAuth("oauth_github")}
                 >
                     <i className="fa-brands fa-github text-lg" />
-                    <span className="text-sm font-semibold">Continue with GitHub</span>
+                    <span className="text-sm font-semibold">
+                        Continue with GitHub
+                    </span>
                 </button>
                 <button
                     type="button"
@@ -341,14 +431,18 @@ export default function SignUpPage() {
                     onClick={() => signUpWithOAuth("oauth_microsoft")}
                 >
                     <i className="fa-brands fa-microsoft text-lg" />
-                    <span className="text-sm font-semibold">Continue with Microsoft</span>
+                    <span className="text-sm font-semibold">
+                        Continue with Microsoft
+                    </span>
                 </button>
             </div>
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-base-300" />
-                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
                 <div className="flex-1 h-px bg-base-300" />
             </div>
 
@@ -419,25 +513,37 @@ export default function SignUpPage() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
                         >
-                            <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                            <i
+                                className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                            />
                         </button>
                     </div>
-                    <p className="text-xs text-base-content/40 mt-1.5">Must be at least 8 characters</p>
+                    <p className="text-xs text-base-content/40 mt-1.5">
+                        Must be at least 8 characters
+                    </p>
                 </fieldset>
 
                 <fieldset>
                     <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Referral Code
-                        <span className="text-base-content/30 font-normal normal-case tracking-normal ml-1">(optional)</span>
+                        <span className="text-base-content/30 font-normal normal-case tracking-normal ml-1">
+                            (optional)
+                        </span>
                     </label>
                     <input
                         type="text"
                         placeholder="e.g. abc12345"
                         className={`input input-bordered w-full tracking-wider ${
-                            referralStatus === "valid" ? "input-success" : referralStatus === "invalid" ? "input-error" : ""
+                            referralStatus === "valid"
+                                ? "input-success"
+                                : referralStatus === "invalid"
+                                  ? "input-error"
+                                  : ""
                         }`}
                         value={referralCode}
-                        onChange={(e) => setReferralCode(e.target.value.toLowerCase().trim())}
+                        onChange={(e) =>
+                            setReferralCode(e.target.value.toLowerCase().trim())
+                        }
                         disabled={isLoading}
                         maxLength={8}
                     />
@@ -461,9 +567,16 @@ export default function SignUpPage() {
                     )}
                 </fieldset>
 
-                <button type="submit" className="btn btn-primary w-full mt-2" disabled={isLoading || !isLoaded}>
+                <button
+                    type="submit"
+                    className="btn btn-primary w-full mt-2"
+                    disabled={isLoading || !isLoaded}
+                >
                     {isLoading ? (
-                        <><span className="loading loading-spinner loading-sm" /> Creating account...</>
+                        <>
+                            <span className="loading loading-spinner loading-sm" />{" "}
+                            Creating account...
+                        </>
                     ) : (
                         "Create Account"
                     )}
@@ -474,7 +587,11 @@ export default function SignUpPage() {
             <div className="text-center mt-8 text-sm text-base-content/50">
                 Already have an account?{" "}
                 <Link
-                    href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-in"}
+                    href={
+                        redirectUrl
+                            ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`
+                            : "/sign-in"
+                    }
                     className="text-primary font-semibold hover:underline"
                 >
                     Sign in

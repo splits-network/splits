@@ -5,7 +5,7 @@ import {
     loadResendConfig,
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
@@ -13,6 +13,16 @@ import { ServiceRegistry } from './clients';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
+
+// Initialize Sentry at module level so startup errors are captured before main() runs
+if (process.env.SENTRY_DSN) {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        environment: process.env.NODE_ENV ?? 'development',
+        release: process.env.SENTRY_RELEASE,
+        tracesSampleRate: 0.1,
+    });
+}
 
 async function main() {
     const baseConfig = loadBaseConfig('notification-service');
@@ -33,6 +43,19 @@ async function main() {
         prettyPrint: baseConfig.nodeEnv === 'development',
     });
 
+    // Register process-level error handlers as early as possible.
+    // For uncaughtException / unhandledRejection: logs the full error, flushes
+    // Sentry so the event is not lost, then exits with code 1.
+    setupProcessErrorHandlers({
+        logger,
+        ...(process.env.SENTRY_DSN && {
+            onFatalError: async (error) => {
+                Sentry.captureException(error);
+                await Sentry.flush(2000);
+            },
+        }),
+    });
+
     logger.info(
         { identityServiceUrl, atsServiceUrl, networkServiceUrl, candidateWebsiteUrl },
         'Service URLs configured'
@@ -50,23 +73,16 @@ async function main() {
 
     app.setErrorHandler(errorHandler);
 
-    // Initialize Sentry if DSN is provided
-    const sentryDsn = process.env.SENTRY_DSN;
-    if (sentryDsn) {
-        Sentry.init({
-            dsn: sentryDsn,
-            environment: baseConfig.nodeEnv,
-            release: process.env.SENTRY_RELEASE,
-            tracesSampleRate: 0.1,
-        });
-
-        app.addHook('onError', async (request, reply, error) => {
+    // Capture per-request errors with route context.
+    // Sentry.captureException is a no-op when Sentry was not initialized.
+    app.addHook('onError', async (request, reply, error) => {
+        if (process.env.SENTRY_DSN) {
             Sentry.captureException(error, {
                 tags: { service: baseConfig.serviceName },
                 extra: { path: request.url, method: request.method },
             });
-        });
-    }
+        }
+    });
 
     // Initialize repository and notification service
     const repository = new NotificationRepository(
@@ -190,16 +206,6 @@ async function main() {
 
         await app.close();
         process.exit(0);
-    });
-
-    // Handle uncaught errors
-    process.on('unhandledRejection', (reason, promise) => {
-        logger.error({ reason, promise }, 'Unhandled promise rejection');
-    });
-
-    process.on('uncaughtException', (error) => {
-        logger.error({ error }, 'Uncaught exception');
-        process.exit(1);
     });
 
     // Start server
