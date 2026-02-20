@@ -4,18 +4,12 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import {
-    duration,
-    easing,
-    stagger,
-    fadeUp,
-    scaleIn,
-    popIn,
-} from "@/components/landing/shared/animation-utils";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
+
+/* ─── Data ───────────────────────────────────────────────────────────────── */
 
 const partnerTypes = [
     {
@@ -23,29 +17,25 @@ const partnerTypes = [
         title: "Recruiting Firms",
         description:
             "White-label solutions, team management, and revenue sharing opportunities for established recruiting organizations.",
-        color: "primary",
     },
     {
         icon: "fa-duotone fa-regular fa-plug",
         title: "Technology Partners",
         description:
             "Integrate your tools with our platform through our API, create custom workflows, and reach our growing user base.",
-        color: "secondary",
     },
     {
         icon: "fa-duotone fa-regular fa-handshake",
         title: "Associations",
         description:
             "Special pricing for members, co-branded experiences, and collaboration on industry education and best practices.",
-        color: "accent",
     },
 ];
 
-const benefits = [
+const benefitCategories = [
     {
         icon: "fa-duotone fa-regular fa-dollar-sign",
         title: "Revenue Opportunities",
-        color: "success",
         items: [
             "Revenue sharing on referrals",
             "White-label licensing opportunities",
@@ -55,7 +45,6 @@ const benefits = [
     {
         icon: "fa-duotone fa-regular fa-code",
         title: "Technical Support",
-        color: "info",
         items: [
             "Priority API access and support",
             "Dedicated integration assistance",
@@ -65,7 +54,6 @@ const benefits = [
     {
         icon: "fa-duotone fa-regular fa-bullhorn",
         title: "Marketing & Visibility",
-        color: "primary",
         items: [
             "Featured in partner directory",
             "Co-branded content opportunities",
@@ -75,7 +63,6 @@ const benefits = [
     {
         icon: "fa-duotone fa-regular fa-graduation-cap",
         title: "Training & Resources",
-        color: "secondary",
         items: [
             "Partner onboarding program",
             "Sales and marketing materials",
@@ -89,20 +76,22 @@ const partnershipOpportunities = [
         icon: "fa-duotone fa-regular fa-building",
         title: "Recruiting Firm Partners",
         description:
-            "Perfect for established recruiting firms who want to offer split placement capabilities to their recruiters while maintaining their brand",
-        color: "primary",
+            "Perfect for established recruiting firms who want to offer split placement capabilities to their recruiters while maintaining their brand.",
         features: [
             {
                 title: "White-Label Platform",
-                description: "Custom branding and domain for your recruiting network",
+                description:
+                    "Custom branding and domain for your recruiting network",
             },
             {
                 title: "Team Management",
-                description: "Manage multiple recruiters under your organization",
+                description:
+                    "Manage multiple recruiters under your organization",
             },
             {
                 title: "Revenue Share",
-                description: "Earn from your recruiters' platform subscriptions",
+                description:
+                    "Earn from your recruiters' platform subscriptions",
             },
         ],
     },
@@ -111,19 +100,21 @@ const partnershipOpportunities = [
         title: "Technology Integration Partners",
         description:
             "For software vendors who want to integrate their solutions with Splits Network and reach our growing user base.",
-        color: "secondary",
         features: [
             {
                 title: "API Access",
-                description: "Full API documentation and integration support",
+                description:
+                    "Full API documentation and integration support",
             },
             {
                 title: "Marketplace Listing",
-                description: "Featured placement in our integrations directory",
+                description:
+                    "Featured placement in our integrations directory",
             },
             {
                 title: "Technical Support",
-                description: "Dedicated support for integration development",
+                description:
+                    "Dedicated support for integration development",
             },
         ],
     },
@@ -132,19 +123,21 @@ const partnershipOpportunities = [
         title: "Industry Association Partners",
         description:
             "For recruiting associations who want to provide value-added services to their members and promote best practices in split placements.",
-        color: "accent",
         features: [
             {
                 title: "Member Benefits",
-                description: "Special pricing and features for association members",
+                description:
+                    "Special pricing and features for association members",
             },
             {
                 title: "Co-Branded Experience",
-                description: "Association branding and customized onboarding",
+                description:
+                    "Association branding and customized onboarding",
             },
             {
                 title: "Education Programs",
-                description: "Joint training and certification opportunities",
+                description:
+                    "Joint training and certification opportunities",
             },
         ],
     },
@@ -156,485 +149,568 @@ const processSteps = [
         title: "Submit Application",
         description:
             "Fill out our partner application form and tell us about your organization and partnership goals.",
-        color: "primary",
     },
     {
         number: 2,
         title: "Discovery Call",
         description:
             "Meet with our partnerships team to discuss opportunities and alignment.",
-        color: "secondary",
     },
     {
         number: 3,
         title: "Agreement & Onboarding",
         description:
             "Sign partnership agreement and complete onboarding with dedicated support.",
-        color: "accent",
     },
     {
         number: 4,
         title: "Launch Partnership",
         description:
             "Go live with co-marketing, technical integration, or white-label deployment.",
-        isSuccess: true,
     },
 ];
 
-export function PartnersContent() {
-    const heroRef = useRef<HTMLElement>(null);
-    const overviewRef = useRef<HTMLElement>(null);
-    const benefitsRef = useRef<HTMLElement>(null);
-    const opportunitiesRef = useRef<HTMLElement>(null);
-    const currentPartnersRef = useRef<HTMLElement>(null);
-    const processRef = useRef<HTMLElement>(null);
-    const ctaRef = useRef<HTMLElement>(null);
+const stats = [
+    { value: "3", label: "Partnership Tiers" },
+    { value: "40+", label: "API Endpoints" },
+    { value: "48hr", label: "Response Time" },
+    { value: "100%", label: "Revenue Visibility" },
+];
 
-    // Hero animations
+/* ─── Component ──────────────────────────────────────────────────────────── */
+
+export function PartnersBaselContent() {
+    const mainRef = useRef<HTMLElement>(null);
+
     useGSAP(
         () => {
-            if (!heroRef.current) return;
+            if (!mainRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = heroRef.current.querySelector(".hero-content");
-            gsap.fromTo(
-                content,
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.hero,
-                    ease: easing.smooth,
-                }
-            );
-        },
-        { scope: heroRef }
-    );
-
-    // Overview section animations
-    useGSAP(
-        () => {
-            if (!overviewRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading = overviewRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: overviewRef.current,
-                        start: "top 80%",
-                    },
-                });
+            if (prefersReducedMotion) {
+                mainRef.current
+                    .querySelectorAll(".opacity-0")
+                    .forEach((el) => {
+                        (el as HTMLElement).style.opacity = "1";
+                    });
+                return;
             }
 
-            // Cards stagger in
-            const cards = overviewRef.current.querySelectorAll(".partner-type-card");
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.normal,
-                    scrollTrigger: {
-                        trigger: overviewRef.current,
-                        start: "top 75%",
-                    },
-                }
-            );
+            const $ = (sel: string) =>
+                mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) =>
+                mainRef.current!.querySelector(sel);
 
-            // Icons pop
-            const icons = overviewRef.current.querySelectorAll(".type-icon");
-            gsap.fromTo(icons, popIn.from, {
-                ...popIn.to,
-                stagger: stagger.normal,
-                delay: 0.2,
-                scrollTrigger: {
-                    trigger: overviewRef.current,
-                    start: "top 75%",
-                },
+            /* ── HERO ──────────────────────────────────────────── */
+            const heroTl = gsap.timeline({
+                defaults: { ease: "power3.out" },
             });
-        },
-        { scope: overviewRef }
-    );
 
-    // Benefits section animations
-    useGSAP(
-        () => {
-            if (!benefitsRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading = benefitsRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: benefitsRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Benefit cards stagger in
-            const cards = benefitsRef.current.querySelectorAll(".benefit-card");
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    stagger: stagger.normal,
-                    scrollTrigger: {
-                        trigger: benefitsRef.current,
-                        start: "top 75%",
-                    },
-                }
-            );
-
-            // List items stagger
-            const listItems = benefitsRef.current.querySelectorAll(".benefit-item");
-            gsap.fromTo(
-                listItems,
-                { opacity: 0, x: -15 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: duration.fast,
-                    ease: easing.smooth,
-                    stagger: stagger.tight,
-                    delay: 0.3,
-                    scrollTrigger: {
-                        trigger: benefitsRef.current,
-                        start: "top 70%",
-                    },
-                }
-            );
-        },
-        { scope: benefitsRef }
-    );
-
-    // Opportunities section animations
-    useGSAP(
-        () => {
-            if (!opportunitiesRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading =
-                opportunitiesRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: opportunitiesRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Opportunity cards slide in
-            const cards =
-                opportunitiesRef.current.querySelectorAll(".opportunity-card");
-            cards.forEach((card, index) => {
-                const fromX = index % 2 === 0 ? -50 : 50;
-                gsap.fromTo(
-                    card,
-                    { opacity: 0, x: fromX },
+            heroTl
+                .fromTo(
+                    $1(".hero-kicker"),
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.6 },
+                )
+                .fromTo(
+                    $(".hero-headline-word"),
+                    { opacity: 0, y: 80, rotateX: 40 },
                     {
                         opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 85%",
-                        },
-                    }
+                        y: 0,
+                        rotateX: 0,
+                        duration: 1,
+                        stagger: 0.12,
+                    },
+                    "-=0.3",
+                )
+                .fromTo(
+                    $1(".hero-subtitle"),
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.7 },
+                    "-=0.5",
+                )
+                .fromTo(
+                    $(".hero-meta-item"),
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+                    "-=0.3",
                 );
-            });
 
-            // Feature boxes stagger in
-            const features =
-                opportunitiesRef.current.querySelectorAll(".feature-box");
-            features.forEach((feature) => {
+            // Hero image scale reveal + parallax
+            gsap.fromTo(
+                $1(".hero-img-wrap"),
+                { opacity: 0, scale: 1.08 },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 1.4,
+                    ease: "power2.out",
+                    delay: 0.2,
+                },
+            );
+
+            const heroImg = $1(".hero-img-wrap img");
+            if (heroImg) {
+                gsap.to(heroImg, {
+                    yPercent: 12,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: $1(".hero-section"),
+                        start: "top top",
+                        end: "bottom top",
+                        scrub: true,
+                    },
+                });
+            }
+
+            /* ── SECTION REVEALS ───────────────────────────────── */
+            $(".article-block").forEach((block) => {
                 gsap.fromTo(
-                    feature,
-                    { opacity: 0, scale: 0.9 },
+                    block,
+                    { opacity: 0, y: 50 },
                     {
                         opacity: 1,
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
+                        y: 0,
+                        duration: 0.8,
+                        ease: "power3.out",
                         scrollTrigger: {
-                            trigger: feature.closest(".opportunity-card"),
+                            trigger: block,
                             start: "top 80%",
                         },
-                    }
+                    },
                 );
             });
-        },
-        { scope: opportunitiesRef }
-    );
 
-    // Current partners section animations
-    useGSAP(
-        () => {
-            if (!currentPartnersRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content =
-                currentPartnersRef.current.querySelector(".partners-content");
-            if (content) {
-                gsap.fromTo(content, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: currentPartnersRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            const alert = currentPartnersRef.current.querySelector(".alert");
-            if (alert) {
-                gsap.fromTo(alert, scaleIn.from, {
-                    ...scaleIn.to,
-                    delay: 0.3,
-                    scrollTrigger: {
-                        trigger: currentPartnersRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-        },
-        { scope: currentPartnersRef }
-    );
-
-    // Process section animations
-    useGSAP(
-        () => {
-            if (!processRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading = processRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: processRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Step cards slide in from left
-            const cards = processRef.current.querySelectorAll(".step-card");
-            cards.forEach((card, index) => {
+            /* ── SPLIT-SCREEN SECTIONS ─────────────────────────── */
+            $(".split-text-left").forEach((el) => {
                 gsap.fromTo(
-                    card,
+                    el,
                     { opacity: 0, x: -60 },
                     {
                         opacity: 1,
                         x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        delay: index * stagger.normal,
+                        duration: 0.8,
+                        ease: "power3.out",
                         scrollTrigger: {
-                            trigger: processRef.current,
-                            start: "top 75%",
+                            trigger: el,
+                            start: "top 70%",
                         },
-                    }
+                    },
                 );
             });
 
-            // Number badges pop
-            const numbers = processRef.current.querySelectorAll(".step-number");
-            gsap.fromTo(
-                numbers,
-                { opacity: 0, scale: 0, rotation: -180 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    rotation: 0,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.normal,
-                    delay: 0.2,
-                    scrollTrigger: {
-                        trigger: processRef.current,
-                        start: "top 75%",
-                    },
-                }
-            );
-        },
-        { scope: processRef }
-    );
-
-    // CTA section animations
-    useGSAP(
-        () => {
-            if (!ctaRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = ctaRef.current.querySelector(".cta-content");
-            if (content) {
+            $(".split-img-right").forEach((el) => {
                 gsap.fromTo(
-                    content,
-                    { opacity: 0, y: 40 },
+                    el,
+                    { opacity: 0, x: 60 },
+                    {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.8,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 70%",
+                        },
+                    },
+                );
+            });
+
+            $(".split-text-right").forEach((el) => {
+                gsap.fromTo(
+                    el,
+                    { opacity: 0, x: 60 },
+                    {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.8,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 70%",
+                        },
+                    },
+                );
+            });
+
+            $(".split-img-left").forEach((el) => {
+                gsap.fromTo(
+                    el,
+                    { opacity: 0, x: -60 },
+                    {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.8,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 70%",
+                        },
+                    },
+                );
+            });
+
+            /* ── PULL QUOTES ───────────────────────────────────── */
+            $(".pull-quote-block").forEach((quote) => {
+                gsap.fromTo(
+                    quote,
+                    { opacity: 0, scale: 0.96 },
+                    {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.9,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: quote,
+                            start: "top 80%",
+                        },
+                    },
+                );
+            });
+
+            /* ── INLINE IMAGES ─────────────────────────────────── */
+            $(".inline-image").forEach((imgEl) => {
+                gsap.fromTo(
+                    imgEl,
+                    { opacity: 0, y: 30 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: duration.hero,
-                        ease: easing.smooth,
+                        duration: 1,
+                        ease: "power2.out",
                         scrollTrigger: {
-                            trigger: ctaRef.current,
-                            start: "top 80%",
+                            trigger: imgEl,
+                            start: "top 85%",
                         },
-                    }
+                    },
                 );
-            }
+
+                const innerImg = imgEl.querySelector("img");
+                if (innerImg) {
+                    gsap.to(innerImg, {
+                        yPercent: 10,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: imgEl,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: true,
+                        },
+                    });
+                }
+            });
+
+            /* ── STATS BAR ─────────────────────────────────────── */
+            gsap.fromTo(
+                $(".stat-item"),
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    stagger: 0.1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: $1(".stats-bar"),
+                        start: "top 85%",
+                    },
+                },
+            );
+
+            /* ── CTA ───────────────────────────────────────────── */
+            gsap.fromTo(
+                $1(".final-cta-content"),
+                { opacity: 0, y: 50 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: $1(".final-cta"),
+                        start: "top 80%",
+                    },
+                },
+            );
         },
-        { scope: ctaRef }
+        { scope: mainRef },
     );
 
-    // Hover handlers for cards
-    const handleCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: -8,
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            duration: 0.3,
-            ease: "power2.out",
-        });
-        const icon = e.currentTarget.querySelector(".type-icon, .card-icon");
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1.15,
-                rotation: 5,
-                duration: 0.3,
-                ease: "back.out(1.4)",
-            });
-        }
-    };
-
-    const handleCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: 0,
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-            duration: 0.3,
-            ease: "power2.out",
-        });
-        const icon = e.currentTarget.querySelector(".type-icon, .card-icon");
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1,
-                rotation: 0,
-                duration: 0.3,
-                ease: "power2.out",
-            });
-        }
-    };
-
-    // Hover handlers for CTA buttons
-    const handleButtonEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1.05,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
-
-    const handleButtonLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
-
     return (
-        <>
-            {/* Hero Section */}
-            <section
-                ref={heroRef}
-                className="hero bg-gradient-to-r from-secondary to-accent text-secondary-content py-20 overflow-hidden"
-            >
-                <div className="hero-content text-center max-w-5xl opacity-0">
-                    <div>
-                        <h1 className="text-5xl font-bold mb-6">Partner With Us</h1>
-                        <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                            Join our partner ecosystem and help build the future of
-                            collaborative recruiting
+        <main ref={mainRef} className="overflow-hidden">
+            {/* ═══════════════════════════════════════════════════════════
+                1. HERO -- Split-screen 60/40 with diagonal clip
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
+                {/* Right image panel -- sits behind on mobile, 40% on desktop */}
+                <div
+                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    style={{
+                        clipPath:
+                            "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
+                >
+                    <img
+                        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1920&q=80"
+                        alt="Two professionals reviewing a shared strategy document in a modern office"
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-neutral/60 lg:bg-neutral/20"></div>
+                </div>
+
+                {/* Content panel -- 60% on desktop */}
+                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                    <div className="max-w-2xl">
+                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                            <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
+                            {/* COPY: Hero kicker text */}
+                            Partnerships
                         </p>
+
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
+                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                {/* COPY: Headline word 1 */}
+                                Grow
+                            </span>{" "}
+                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                {/* COPY: Headline word 2 */}
+                                the Network
+                            </span>{" "}
+                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                                {/* COPY: Headline word 3, accented */}
+                                With Us.
+                            </span>
+                        </h1>
+
+                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 opacity-0">
+                            {/* COPY: Hero subtitle describing the partner program */}
+                            Splits Network is building its founding partner cohort. Recruiting firms, technology providers, and industry associations that join now shape the platform from the inside.
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-6">
+                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                                <i className="fa-duotone fa-regular fa-users mr-1"></i>
+                                {/* COPY: Meta item 1 */}
+                                3 Partnership Tiers
+                            </span>
+                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                                <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
+                                {/* COPY: Meta item 2 */}
+                                Revenue Share Model
+                            </span>
+                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                                <i className="fa-duotone fa-regular fa-rocket mr-1"></i>
+                                {/* COPY: Meta item 3 */}
+                                Founding Cohort Open
+                            </span>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Partner Program Overview */}
-            <section ref={overviewRef} className="py-20 bg-base-100 overflow-hidden">
-                <div className="container mx-auto px-4">
-                    <div className="section-heading max-w-5xl mx-auto text-center mb-16 opacity-0">
-                        <h2 className="text-4xl font-bold mb-6">
-                            Why Partner With Splits Network?
-                        </h2>
-                        <p className="text-lg text-base-content/70 max-w-3xl mx-auto">
-                            We're building more than a platform—we're creating an
-                            ecosystem. Whether you're a recruiting firm, technology
-                            provider, or industry association, there's a place for you in
-                            our partner network.
-                        </p>
+            {/* ═══════════════════════════════════════════════════════════
+                2. FULL-BLEED IMAGE BREAK
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+                <img
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80"
+                    alt="Team gathered around a shared workspace, focused on a collaborative planning session"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-neutral/50"></div>
+                <div className="absolute bottom-6 left-6 lg:left-12">
+                    <span className="text-sm uppercase tracking-[0.2em] text-white/70">
+                        {/* COPY: Caption for first full-bleed image */}
+                        Partnerships built on shared infrastructure, not handshake deals
+                    </span>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                3. SECTION 1 -- Partner Program (split-screen 60 text / 40 image)
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 bg-base-200">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+                        {/* Text -- 3 of 5 columns (60%) */}
+                        <div className="split-text-left lg:col-span-3 opacity-0">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                                {/* COPY: Section 1 kicker */}
+                                01 -- The Ecosystem
+                            </p>
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
+                                {/* COPY: Section 1 headline */}
+                                A platform is only as
+                                <br />
+                                strong as its network.
+                            </h2>
+                            <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
+                                <p>
+                                    {/* COPY: Section 1 body paragraph 1 -- describe the partner ecosystem vision */}
+                                    Split-fee recruiting runs on trust, speed, and reach. No single firm has all three at scale. The Splits Network partner program connects recruiting organizations, technology providers, and industry associations into a shared infrastructure where each partner strengthens the others.
+                                </p>
+                                <p>
+                                    {/* COPY: Section 1 body paragraph 2 -- describe partnership value proposition */}
+                                    This is a founding cohort, not an open marketplace. Partners who join now get direct input on product direction, priority API access, and revenue share terms that reward early commitment. The window is intentionally small. The impact is not.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Image -- 2 of 5 columns (40%) */}
+                        <div className="split-img-right lg:col-span-2 opacity-0">
+                            <div
+                                className="relative overflow-hidden"
+                                style={{
+                                    clipPath:
+                                        "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)",
+                                }}
+                            >
+                                <img
+                                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80"
+                                    alt="Small team mapping out a strategic plan on a glass whiteboard"
+                                    className="w-full h-[500px] object-cover"
+                                />
+                                <div className="absolute inset-0 bg-primary/10"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        {partnerTypes.map((type, index) => (
+                    {/* Partner type cards below */}
+                    <div className="article-block grid md:grid-cols-3 gap-8 mt-16 opacity-0">
+                        {partnerTypes.map((type, i) => (
                             <div
-                                key={index}
-                                className="partner-type-card card bg-base-200 shadow cursor-pointer opacity-0"
-                                onMouseEnter={handleCardEnter}
-                                onMouseLeave={handleCardLeave}
+                                key={i}
+                                className="border-l-4 border-primary pl-6 py-2"
                             >
-                                <div className="card-body text-center">
-                                    <div
-                                        className={`type-icon w-16 h-16 rounded-full bg-${type.color}/20 flex items-center justify-center mx-auto mb-4`}
-                                    >
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-primary/10 flex items-center justify-center rounded-none flex-shrink-0">
                                         <i
-                                            className={`${type.icon} text-${type.color} text-2xl`}
+                                            className={`${type.icon} text-primary`}
                                         ></i>
                                     </div>
-                                    <h3 className="card-title justify-center text-xl mb-3">
+                                    <h3 className="font-bold text-lg">
                                         {type.title}
                                     </h3>
-                                    <p className="text-base-content/70 text-sm">
-                                        {type.description}
-                                    </p>
+                                </div>
+                                <p className="text-sm text-base-content/60 leading-relaxed">
+                                    {type.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                4. PULL QUOTE 1
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="border-l-4 border-secondary pl-8 lg:pl-12">
+                            <i className="fa-duotone fa-regular fa-quote-left text-4xl text-secondary/30 mb-6 block"></i>
+                            <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
+                                {/* COPY: Pull quote 1 -- about the value of partnership in recruiting */}
+                                &ldquo;Every recruiter has a network. The ones who win are the ones who connect their network to a bigger one.&rdquo;
+                            </blockquote>
+                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                                {/* COPY: Pull quote 1 attribution */}
+                                -- The case for structured split-fee partnerships
+                            </cite>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                5. SECTION 2 -- Benefits (split-screen 40 image / 60 text)
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 bg-base-100">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
+                        {/* Image -- 2 of 5 columns (40%) */}
+                        <div className="split-img-left lg:col-span-2 opacity-0">
+                            <div
+                                className="relative overflow-hidden"
+                                style={{
+                                    clipPath:
+                                        "polygon(0 0, 92% 0, 100% 100%, 0% 100%)",
+                                }}
+                            >
+                                <img
+                                    src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80"
+                                    alt="Professional meeting at a clean conference table with laptops and documents"
+                                    className="w-full h-[600px] object-cover"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Text -- 3 of 5 columns (60%) */}
+                        <div className="split-text-right lg:col-span-3 opacity-0">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
+                                {/* COPY: Section 2 kicker */}
+                                02 -- The Returns
+                            </p>
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-10">
+                                {/* COPY: Section 2 headline */}
+                                Built for mutual
+                                <br />
+                                advantage.
+                            </h2>
+
+                            <div className="space-y-8">
+                                {benefitCategories.map((benefit, i) => (
+                                    <div key={i} className="flex items-start gap-4">
+                                        <div className="w-10 h-10 flex-shrink-0 bg-secondary/10 flex items-center justify-center rounded-none">
+                                            <i
+                                                className={`${benefit.icon} text-secondary`}
+                                            ></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-lg mb-2">
+                                                {benefit.title}
+                                            </h4>
+                                            <ul className="space-y-1">
+                                                {benefit.items.map(
+                                                    (item, j) => (
+                                                        <li
+                                                            key={j}
+                                                            className="text-sm text-base-content/60 leading-relaxed flex items-start gap-2"
+                                                        >
+                                                            <i className="fa-duotone fa-regular fa-check text-secondary mt-0.5 text-xs"></i>
+                                                            <span>
+                                                                {item}
+                                                            </span>
+                                                        </li>
+                                                    ),
+                                                )}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                6. STATS BAR
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="stats-bar bg-neutral text-neutral-content py-10">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                        {stats.map((stat, i) => (
+                            <div key={i} className="stat-item opacity-0">
+                                <div className="text-3xl md:text-4xl font-black tracking-tight">
+                                    {/* COPY: Stat value */}
+                                    {stat.value}
+                                </div>
+                                <div className="text-sm uppercase tracking-wider opacity-70 mt-1">
+                                    {/* COPY: Stat label */}
+                                    {stat.label}
                                 </div>
                             </div>
                         ))}
@@ -642,165 +718,54 @@ export function PartnersContent() {
                 </div>
             </section>
 
-            {/* Partner Benefits */}
-            <section ref={benefitsRef} className="py-20 bg-base-200 overflow-hidden">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center opacity-0">
-                            Partner Benefits
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-8">
-                            {benefits.map((benefit, index) => (
-                                <div
-                                    key={index}
-                                    className="benefit-card card bg-base-100 shadow opacity-0"
-                                >
-                                    <div className="card-body">
-                                        <h3 className="card-title">
-                                            <i
-                                                className={`card-icon ${benefit.icon} text-${benefit.color}`}
-                                            ></i>
-                                            {benefit.title}
-                                        </h3>
-                                        <ul className="space-y-2 mt-4">
-                                            {benefit.items.map((item, itemIndex) => (
-                                                <li
-                                                    key={itemIndex}
-                                                    className="benefit-item flex items-start gap-2 opacity-0"
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Partnership Opportunities */}
-            <section
-                ref={opportunitiesRef}
-                className="py-20 bg-base-100 overflow-hidden"
-            >
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center opacity-0">
-                            Partnership Opportunities
+            {/* ═══════════════════════════════════════════════════════════
+                7. SECTION 3 -- Partnership Opportunities (article body block)
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 bg-base-100">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                            {/* COPY: Section 3 kicker */}
+                            03 -- The Paths
+                        </p>
+                        <h2 className="text-3xl md:text-5xl font-black leading-[0.95] tracking-tight mb-10">
+                            {/* COPY: Section 3 headline */}
+                            Three ways in.
+                            <br />
+                            One shared network.
                         </h2>
 
-                        <div className="space-y-8">
-                            {partnershipOpportunities.map((opp, index) => (
+                        <div className="space-y-12">
+                            {partnershipOpportunities.map((opp, i) => (
                                 <div
-                                    key={index}
-                                    className="opportunity-card card bg-base-200 shadow opacity-0"
+                                    key={i}
+                                    className="border-l-4 border-primary pl-6"
                                 >
-                                    <div className="card-body">
-                                        <h3 className="card-title text-2xl mb-4">
-                                            <i className={`${opp.icon} text-${opp.color}`}></i>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <i
+                                            className={`${opp.icon} text-primary text-xl`}
+                                        ></i>
+                                        <h3 className="text-2xl font-black">
                                             {opp.title}
                                         </h3>
-                                        <p className="text-base-content/70 mb-4">
-                                            {opp.description}
-                                        </p>
-                                        <div className="grid md:grid-cols-3 gap-4">
-                                            {opp.features.map((feature, featureIndex) => (
-                                                <div
-                                                    key={featureIndex}
-                                                    className="feature-box bg-base-100 p-4 rounded-lg opacity-0"
-                                                >
-                                                    <div className="font-bold mb-2">
-                                                        {feature.title}
-                                                    </div>
-                                                    <p className="text-sm text-base-content/60">
-                                                        {feature.description}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Current Partners */}
-            <section
-                ref={currentPartnersRef}
-                className="py-20 bg-neutral text-neutral-content overflow-hidden"
-            >
-                <div className="container mx-auto px-4">
-                    <div className="partners-content max-w-5xl mx-auto text-center opacity-0">
-                        <h2 className="text-4xl font-bold mb-6">Our Partners</h2>
-                        <p className="text-lg opacity-80 mb-12">
-                            Growing our ecosystem with industry-leading organizations
-                        </p>
-                        <div className="alert alert-info opacity-0">
-                            <i className="fa-duotone fa-regular fa-info-circle"></i>
-                            <span>
-                                We're actively building our partner network. Be among our
-                                founding partners and help shape the future of
-                                collaborative recruiting.
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Application Process */}
-            <section ref={processRef} className="py-20 bg-base-100 overflow-hidden">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center opacity-0">
-                            How to Become a Partner
-                        </h2>
-                        <div className="space-y-6">
-                            {processSteps.map((step, index) => (
-                                <div
-                                    key={index}
-                                    className={`step-card card shadow opacity-0 ${
-                                        step.isSuccess
-                                            ? "bg-success text-success-content"
-                                            : "bg-base-200"
-                                    }`}
-                                >
-                                    <div className="card-body">
-                                        <div className="flex items-start gap-4">
+                                    <p className="text-base-content/70 leading-relaxed mb-6">
+                                        {opp.description}
+                                    </p>
+                                    <div className="grid sm:grid-cols-3 gap-4">
+                                        {opp.features.map((feature, j) => (
                                             <div
-                                                className={`step-number w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                    step.isSuccess
-                                                        ? "bg-success-content/20"
-                                                        : `bg-${step.color}/20`
-                                                }`}
+                                                key={j}
+                                                className="bg-base-200 p-4 rounded-none"
                                             >
-                                                <span
-                                                    className={`text-xl font-bold ${
-                                                        step.isSuccess ? "" : `text-${step.color}`
-                                                    }`}
-                                                >
-                                                    {step.number}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg mb-2">
-                                                    {step.title}
-                                                </h3>
-                                                <p
-                                                    className={
-                                                        step.isSuccess
-                                                            ? "opacity-90"
-                                                            : "text-base-content/70"
-                                                    }
-                                                >
-                                                    {step.description}
+                                                <div className="font-bold text-sm mb-1">
+                                                    {feature.title}
+                                                </div>
+                                                <p className="text-sm text-base-content/60 leading-relaxed">
+                                                    {feature.description}
                                                 </p>
                                             </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             ))}
@@ -809,35 +774,160 @@ export function PartnersContent() {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section
-                ref={ctaRef}
-                className="py-20 bg-primary text-primary-content overflow-hidden"
-            >
-                <div className="container mx-auto px-4 text-center">
-                    <div className="cta-content opacity-0">
-                        <h2 className="text-4xl font-bold mb-6">
-                            Ready to Partner With Us?
+            {/* ═══════════════════════════════════════════════════════════
+                8. PULL QUOTE 2 (centered variant)
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="pull-quote-block py-20 bg-primary text-primary-content opacity-0">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
+                        <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
+                            {/* COPY: Pull quote 2 -- about partnership impact on recruiting */}
+                            &ldquo;One platform. Shared infrastructure. Every partner makes the network more valuable for every other partner.&rdquo;
+                        </blockquote>
+                        <cite className="text-sm uppercase tracking-[0.2em] text-primary-content/50 not-italic">
+                            {/* COPY: Pull quote 2 attribution */}
+                            -- The compound advantage of ecosystem partnerships
+                        </cite>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                9. SECTION 4 -- Application Process (split-screen 60 text / 40 image)
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 bg-base-200">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+                        {/* Text -- 3 of 5 columns (60%) */}
+                        <div className="split-text-left lg:col-span-3 opacity-0">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                                {/* COPY: Section 4 kicker */}
+                                04 -- Getting Started
+                            </p>
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-10">
+                                {/* COPY: Section 4 headline */}
+                                Application to launch
+                                <br />
+                                in four steps.
+                            </h2>
+
+                            <div className="space-y-6">
+                                {processSteps.map((step) => (
+                                    <div
+                                        key={step.number}
+                                        className="flex items-start gap-5"
+                                    >
+                                        <div className="w-12 h-12 flex-shrink-0 bg-primary flex items-center justify-center rounded-none">
+                                            <span className="text-xl font-black text-primary-content">
+                                                {step.number}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-lg mb-1">
+                                                {step.title}
+                                            </h4>
+                                            <p className="text-sm text-base-content/60 leading-relaxed">
+                                                {step.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Image -- 2 of 5 columns (40%) */}
+                        <div className="split-img-right lg:col-span-2 opacity-0">
+                            <div
+                                className="relative overflow-hidden"
+                                style={{
+                                    clipPath:
+                                        "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)",
+                                }}
+                            >
+                                <img
+                                    src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80"
+                                    alt="Professional reviewing and signing partnership documents at a clean desk"
+                                    className="w-full h-[520px] object-cover"
+                                />
+                                <div className="absolute inset-0 bg-primary/10"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                10. FULL-BLEED IMAGE -- Statement
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+                <img
+                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
+                    alt="Abstract aerial view of interconnected city lights forming a network pattern"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-neutral/70 flex items-center justify-center">
+                    <p className="text-3xl md:text-5xl lg:text-6xl font-black text-white text-center leading-[0.95] tracking-tight px-6">
+                        {/* COPY: Statement line 1 */}
+                        One connected ecosystem.
+                        <br />
+                        <span className="text-secondary">
+                            {/* COPY: Statement line 2, accented */}
+                            Built by its partners.
+                        </span>
+                    </p>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                11. FINAL CTA
+               ═══════════════════════════════════════════════════════════ */}
+            <section className="final-cta py-20 md:py-28 bg-primary text-primary-content">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
+                            {/* COPY: CTA headline */}
+                            Join the founding
+                            <br />
+                            partner cohort.
                         </h2>
-                        <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                            Join our partner ecosystem and help shape the future of
-                            collaborative recruiting.
+                        <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
+                            {/* COPY: CTA subtitle */}
+                            The partner program is accepting applications from recruiting firms, technology providers, and industry associations. Early partners get priority terms, direct product input, and founding-tier revenue share.
                         </p>
-                        <a
-                            href="mailto:partnerships@splits.network"
-                            className="btn btn-lg btn-neutral"
-                            onMouseEnter={handleButtonEnter}
-                            onMouseLeave={handleButtonLeave}
-                        >
-                            <i className="fa-duotone fa-regular fa-envelope"></i>
-                            Contact Partnerships Team
-                        </a>
-                        <p className="mt-6 text-sm opacity-75">
-                            Questions? Email us at partnerships@splits.network
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                            <a
+                                href="mailto:partnerships@splits.network"
+                                className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg rounded-none"
+                            >
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
+                                {/* COPY: Primary CTA button text */}
+                                Apply Now
+                            </a>
+                            <a
+                                href="/partners"
+                                className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50 rounded-none"
+                            >
+                                <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                                {/* COPY: Secondary CTA button text */}
+                                View Program Details
+                            </a>
+                        </div>
+
+                        <p className="text-sm opacity-60">
+                            {/* COPY: CTA footer text */}
+                            Questions about the program?{" "}
+                            <a
+                                href="mailto:partnerships@splits.network"
+                                className="underline hover:opacity-100 transition-opacity"
+                            >
+                                partnerships@splits.network
+                            </a>
                         </p>
                     </div>
                 </div>
             </section>
-        </>
+        </main>
     );
 }
