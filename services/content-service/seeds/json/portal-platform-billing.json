@@ -1,0 +1,241 @@
+{
+  "slug": "platform/billing",
+  "app": "portal",
+  "title": "Billing & Payments | Splits Network Platform",
+  "description": "Automated fee calculation, invoicing, and payment processing for split-fee placements. Stripe-powered payouts, guarantee period tracking, and transparent fee splits — all handled automatically.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "BILLING & PAYMENTS",
+      "kickerIcon": "fa-duotone fa-regular fa-file-invoice-dollar",
+      "headlineWords": [
+        {
+          "text": "Fees"
+        },
+        {
+          "text": "Calculated."
+        },
+        {
+          "text": "Splits",
+          "accent": true
+        },
+        {
+          "text": "Enforced."
+        },
+        {
+          "text": "Payments"
+        },
+        {
+          "text": "Automatic."
+        }
+      ],
+      "subtitle": "From placement confirmation to payout, the billing system handles every calculation, every invoice, and every transfer. Split percentages, guarantee periods, and fee structures are locked in at the start — not disputed at the end.",
+      "image": "/images/content/platform-billing-hero.jpg",
+      "imageAlt": "Billing dashboard showing placement fees, pending payouts, and completed transactions",
+      "buttons": [
+        {
+          "label": "See How Billing Works",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-credit-card"
+        },
+        {
+          "label": "View Pricing",
+          "href": "/pricing",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "$2.4M+",
+          "label": "Paid Out Monthly"
+        },
+        {
+          "value": "100%",
+          "label": "Automated Calculations"
+        },
+        {
+          "value": "Stripe",
+          "label": "Payment Processing"
+        },
+        {
+          "value": "Zero",
+          "label": "Fee Disputes",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE PROBLEM WITH MANUAL BILLING",
+      "kickerColor": "primary",
+      "heading": "Placement Fees Shouldn't Be Negotiated Twice",
+      "paragraphs": [
+        "In traditional split-fee arrangements, the placement happens and then the billing conversation starts. Who calculates the fee? What percentage applies? When does the guarantee period end? These questions cost time, damage relationships, and occasionally end in disputes that neither party wanted.",
+        "Splits Network eliminates ambiguity entirely. <strong>Fee structures are agreed upon when a recruiter engages a role, not after a candidate is hired.</strong> When a placement is confirmed, the system calculates the fee, issues the invoice, processes the payment, and records everything — automatically."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "HOW IT WORKS",
+      "heading": "From Offer Acceptance to Paid Out",
+      "paragraphs": [
+        "The billing lifecycle follows the placement lifecycle. Every step is tracked. Every number is visible to the relevant parties. Nothing requires a follow-up email."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-handshake",
+          "title": "Agreed at Engagement",
+          "body": "The hiring company posts the role with fee terms — total percentage and split ratio. Recruiters agree to these terms before submitting candidates. The numbers are fixed."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-check-circle",
+          "title": "Triggered at Confirmation",
+          "body": "When the hiring company confirms a placement, the system immediately calculates the total fee, applies the agreed split, and generates invoices for both parties."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-clock",
+          "title": "Tracked Through Guarantee",
+          "body": "The guarantee period countdown begins at start date. If the candidate leaves before the guarantee expires, the system manages the refund or replacement process per the agreed terms."
+        }
+      ],
+      "image": "/images/content/billing-workflow.jpg",
+      "imageAlt": "Billing timeline showing fee calculation, invoice generation, and payout confirmation",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "BILLING CAPABILITIES",
+      "heading": "Every Scenario, Handled",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-percent",
+          "title": "Configurable Fee Structures",
+          "description": "Set placement fees as a percentage of first-year salary. Define custom split ratios per role — 50/50, 60/40, 70/30, or any configuration that works for your arrangement."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice",
+          "title": "Automated Invoicing",
+          "description": "Invoices generate automatically on placement confirmation. Both the hiring company and the placing recruiter receive itemized breakdowns immediately."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Guarantee Period Tracking",
+          "description": "Define guarantee periods from 30 to 180 days. The platform tracks start dates, monitors status, and manages refund or replacement obligations automatically."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-stripe",
+          "title": "Stripe Integration",
+          "description": "All payments are processed through Stripe. ACH transfers, credit card payments, and international payouts are supported with full transaction history."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-receipt",
+          "title": "Transaction History",
+          "description": "Complete ledger of every placement fee, split payment, refund, and adjustment. Exportable for your accounting team in any format.",
+          "badge": "Pro"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-people-arrows",
+          "title": "Multi-Party Splits",
+          "description": "When multiple recruiters contribute to a placement — one sourcing, one managing the process — the system can distribute fees across multiple recipients per the agreed terms.",
+          "badge": "Pro"
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "We used to spend two weeks chasing invoices after every placement. Now the payment is in process before I've even called to congratulate the candidate. It's changed how I think about the business.",
+      "citation": "Rebecca Torres, Founder, Torres Executive Search",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "WHO BENEFITS",
+      "heading": "Clarity for Every Party",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Hiring Companies",
+          "description": "Know your fee obligation before the hire is made. Receive clean invoices automatically. Manage guarantee periods without spreadsheets.",
+          "metric": "100%",
+          "metricLabel": "fee transparency upfront"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiters",
+          "description": "Stop chasing payments. Your split is calculated and transferred automatically once the guarantee period closes. Track every pending payout in your dashboard.",
+          "metric": "Zero",
+          "metricLabel": "collections emails sent"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-calculator",
+          "title": "Finance Teams",
+          "description": "Every transaction is logged, categorized, and exportable. Reconciliation takes minutes, not days. Audit trails are complete by default.",
+          "metric": "Export-ready",
+          "metricLabel": "accounting records"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "Billing Questions",
+      "items": [
+        {
+          "question": "When does money actually change hands?",
+          "answer": "Payments are initiated when the guarantee period completes with no reported issues. The hiring company is invoiced at placement confirmation. The payout to the placing recruiter processes when the guarantee window closes. Exact timing depends on payment method — ACH typically settles in 2–3 business days."
+        },
+        {
+          "question": "What happens if a candidate leaves during the guarantee period?",
+          "answer": "If a candidate leaves within the guarantee period, the hiring company can request a refund or replacement per the terms set on the original role listing. The platform manages the refund workflow and adjusts any pending payout accordingly."
+        },
+        {
+          "question": "Can companies pay via invoice rather than card?",
+          "answer": "Yes. Enterprise accounts support ACH bank transfer and invoice-based billing with net-30 terms. Contact sales to configure this for your account."
+        },
+        {
+          "question": "Are there platform fees on top of placement fees?",
+          "answer": "Splits Network charges a platform fee on each completed placement. The fee percentage depends on your subscription plan — it's lower on paid plans than the Starter tier. All platform fees are disclosed before you post a role."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Automated Billing From Day One",
+      "subtitle": "Set your fee terms once. Every placement after that is handled automatically.",
+      "buttons": [
+        {
+          "label": "Get Started Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-file-invoice-dollar"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

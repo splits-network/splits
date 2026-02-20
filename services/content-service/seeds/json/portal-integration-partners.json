@@ -1,0 +1,250 @@
+{
+  "slug": "integration-partners",
+  "app": "portal",
+  "title": "Integration Partners | Splits Network",
+  "description": "Splits Network integrates with your existing recruiting stack. ATS platforms, HRIS, background check providers, payroll, and financial systems — 40+ active integrations.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "4 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "INTEGRATIONS",
+      "kickerIcon": "fa-duotone fa-regular fa-plug-circle-bolt",
+      "headlineWords": [
+        {
+          "text": "Your"
+        },
+        {
+          "text": "Stack,"
+        },
+        {
+          "text": "Connected",
+          "accent": true
+        }
+      ],
+      "subtitle": "Splits Network integrates with the tools your team already uses. ATS platforms, HRIS systems, background check providers, and payroll — your workflow stays intact.",
+      "image": "/images/content/integrations-hero.jpg",
+      "imageAlt": "Integration partner logos arranged around the Splits Network platform interface",
+      "buttons": [
+        {
+          "label": "View All Integrations",
+          "href": "#integration-categories",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-grid-2"
+        },
+        {
+          "label": "Request an Integration",
+          "href": "mailto:integrations@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "40+",
+          "label": "Active Integrations"
+        },
+        {
+          "value": "6",
+          "label": "Integration Categories"
+        },
+        {
+          "value": "REST + Webhooks",
+          "label": "API Architecture",
+          "borderColor": "border-accent"
+        },
+        {
+          "value": "99.9%",
+          "label": "API Uptime"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE APPROACH",
+      "kickerColor": "primary",
+      "heading": "Integrations That Work With Your Process",
+      "paragraphs": [
+        "We don't ask your team to replace existing tools. We connect to them. Splits Network operates as the split-fee layer on top of your existing recruiting stack — syncing candidate data, propagating status updates, and triggering events in the systems your team relies on.",
+        "Every integration is maintained through a versioned REST API and event-driven webhooks. Data flows in both directions. What changes in Splits Network reflects in your ATS. What closes in your payroll system confirms the placement on our end."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "ATS PLATFORMS",
+      "heading": "Applicant Tracking Systems",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "Greenhouse",
+          "description": "Bi-directional candidate sync. Role data imported from Greenhouse; submissions and stage updates pushed back automatically."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "Lever",
+          "description": "Connect your Lever account to push Splits Network candidates into existing pipelines and receive stage-change webhooks."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "Workday Recruiting",
+          "description": "Enterprise-grade sync with Workday. Supports requisition import, candidate push, and offer confirmation events."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "BambooHR",
+          "description": "Pull active job openings directly from BambooHR into the Splits Network marketplace with one-time OAuth connection."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "JazzHR",
+          "description": "Import roles and export candidates to JazzHR pipelines. Automated status mirroring keeps both systems current."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "iCIMS",
+          "description": "Full iCIMS Talent Cloud integration for enterprise hiring teams. Supports multi-requisition workflows."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "HRIS & HR PLATFORMS",
+      "heading": "Human Resources Systems",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "Workday HCM",
+          "description": "Confirm placements against Workday employee records. Start date verification triggers the guarantee period clock automatically."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "SAP SuccessFactors",
+          "description": "Sync open requisitions from SuccessFactors and receive placement confirmations back for payroll and onboarding initiation."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "ADP Workforce Now",
+          "description": "New hire records in ADP confirm placement outcomes and trigger fee processing on the Splits Network side."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "Rippling",
+          "description": "Rippling's unified HR platform connects onboarding directly to placement verification. One workflow from offer to employed."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "Gusto",
+          "description": "For growing companies on Gusto, new employee records in payroll serve as placement confirmation for fee release."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "Personio",
+          "description": "European HRIS integration for multinational companies. Supports EU data residency requirements."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "BACKGROUND CHECKS",
+      "heading": "Verify Before You Hire",
+      "paragraphs": [
+        "Background check results flow into Splits Network candidate profiles, keeping all pre-hire verification in one place. Hiring managers see check status directly in the pipeline without switching tools."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Checkr",
+          "description": "Criminal background, employment history, and education verification — triggered from within the candidate pipeline."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "HireRight",
+          "description": "Enterprise background screening with global coverage. Supports multi-country candidate verification."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Sterling",
+          "description": "Healthcare and finance-specific screening packages. Compliance-ready workflows for regulated industries."
+        }
+      ],
+      "image": "/images/content/background-check-integration.jpg",
+      "imageAlt": "Candidate profile showing background check status alongside pipeline stage",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "PAYMENTS & BILLING",
+      "heading": "Financial Integrations",
+      "columns": 2,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-credit-card",
+          "title": "Stripe",
+          "description": "All placement fee billing and recruiter payouts run through Stripe. ACH, card, and wire support. Global currency handling."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice",
+          "title": "QuickBooks",
+          "description": "Placement invoices sync to QuickBooks automatically. Reconcile recruiting spend against your books without manual entry."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice",
+          "title": "Xero",
+          "description": "Xero integration for accounting teams. Invoices, payments, and payout records all sync with your Xero ledger."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-building-columns",
+          "title": "NetSuite",
+          "description": "Enterprise financial integration with Oracle NetSuite for companies that require ERP-level billing reconciliation."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "03",
+      "kicker": "DEVELOPER API",
+      "kickerColor": "secondary",
+      "heading": "Build Custom Integrations",
+      "paragraphs": [
+        "The Splits Network public API exposes the full platform model. Roles, candidates, pipelines, placements, and payouts are all accessible via authenticated REST endpoints. Webhooks notify your systems in real time when key events occur.",
+        "API documentation is versioned and maintained at <strong>developer.splits.network</strong>. We support OAuth 2.0 and API key authentication. Rate limits, error codes, and sandbox environments are documented in full."
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "Missing an Integration?",
+      "subtitle": "Our integrations roadmap is driven by what our users need. Submit a request and we'll prioritize accordingly.",
+      "buttons": [
+        {
+          "label": "Request an Integration",
+          "href": "mailto:integrations@splits.network",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-plug-circle-plus"
+        },
+        {
+          "label": "View API Docs",
+          "href": "https://developer.splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "integrations@splits.network",
+      "bg": "neutral"
+    }
+  ]
+}

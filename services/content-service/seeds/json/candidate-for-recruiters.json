@@ -1,0 +1,240 @@
+{
+  "slug": "for-recruiters",
+  "app": "candidate",
+  "title": "For Recruiters | Applicant Network",
+  "description": "Join Applicant Network to access a pool of engaged, pre-qualified candidates who opted in to be found. Built-in messaging, pipeline tracking, and split-fee integration included.",
+  "category": "marketing",
+  "author": "Applicant Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "FOR RECRUITERS",
+      "kickerIcon": "fa-duotone fa-regular fa-user-tie",
+      "headlineWords": [
+        {
+          "text": "Candidates"
+        },
+        {
+          "text": "Who",
+          "accent": true
+        },
+        {
+          "text": "Are"
+        },
+        {
+          "text": "Already"
+        },
+        {
+          "text": "Looking"
+        }
+      ],
+      "subtitle": "Applicant Network gives recruiters direct access to a pool of engaged, pre-qualified candidates. No cold outreach, no resume parsing from job boards. Every candidate on this platform opted in.",
+      "image": "/images/content/recruiter-hero.jpg",
+      "imageAlt": "Recruiter reviewing candidate profiles on a modern analytics dashboard",
+      "buttons": [
+        {
+          "label": "Join as Recruiter",
+          "href": "/recruiters/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-arrow-right"
+        },
+        {
+          "label": "How It Works",
+          "href": "/recruiters/how-it-works",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "50,000+",
+          "label": "Active Candidates"
+        },
+        {
+          "value": "3,200+",
+          "label": "Verified Recruiters",
+          "borderColor": "border-primary"
+        },
+        {
+          "value": "< 48 hrs",
+          "label": "Avg. First Response"
+        },
+        {
+          "value": "94%",
+          "label": "Placement Success Rate"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE DIFFERENCE",
+      "kickerColor": "primary",
+      "heading": "A Candidate Pool That Actually Engages",
+      "paragraphs": [
+        "Most recruiting tools put you in front of passive candidates — people who may or may not respond, who uploaded a resume to a database years ago and haven't touched it since. Applicant Network is built on a different premise.",
+        "Every candidate here created an active profile. They set their preferences, uploaded current materials, and are checking for matched opportunities. When you reach out, you're not interrupting — you're delivering what they asked for. That changes the entire dynamic of a conversation."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "QUALIFIED PIPELINE",
+      "heading": "Profiles Built for Recruiters to Use",
+      "paragraphs": [
+        "Candidates complete structured profiles covering skills, experience, salary expectations, and job preferences. You see the relevant detail before your first message — no preliminary screening call required."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-list-check",
+          "title": "Structured Profiles",
+          "body": "Skills, experience, salary band, and availability — organized for rapid evaluation."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-location-dot",
+          "title": "Preference-Matched",
+          "body": "Search by role type, location, remote preference, and compensation range. Filter once, review relevant results."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-circle-check",
+          "title": "Opt-In Visibility",
+          "body": "Candidates control their visibility. When they show up in your search, they're open to contact."
+        }
+      ],
+      "image": "/images/content/recruiter-candidate-profiles.jpg",
+      "imageAlt": "Structured candidate profile showing skills, experience, and job preferences",
+      "layout": "text-right",
+      "bg": "base-200"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "The quality of candidates on Applicant Network is unlike anything I've seen on a traditional job board. Every profile I open is current, complete, and from someone who actually wants to hear from me.",
+      "citation": "James Okafor, Senior Technical Recruiter",
+      "bg": "base-100",
+      "style": "left-border"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "RECRUITER TOOLS",
+      "heading": "Everything You Need to Work Faster",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-messages",
+          "title": "Built-In Messaging",
+          "description": "Reach candidates directly through the platform. All conversations are tracked, timestamped, and stored in one place.",
+          "metric": "< 48 hrs",
+          "metricLabel": "avg. candidate response"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-line",
+          "title": "Pipeline Tracking",
+          "description": "Track every candidate through every stage of your process. One dashboard, full visibility, no spreadsheets.",
+          "metric": "100%",
+          "metricLabel": "interaction history"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-bell",
+          "title": "Match Alerts",
+          "description": "Save a search once. Get notified when new candidates match your criteria — without logging in every day.",
+          "metric": "Real-time",
+          "metricLabel": "notifications"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "PLATFORM FEATURES",
+      "heading": "Built for the Way Recruiters Actually Work",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-magnifying-glass",
+          "title": "Advanced Search",
+          "description": "Filter by skill set, years of experience, location, work authorization, and compensation expectations."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-folder-open",
+          "title": "Candidate Shortlists",
+          "description": "Save and organize candidates across multiple roles. Share shortlists with clients or hiring managers."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-handshake",
+          "title": "Split-Fee Ready",
+          "description": "Submit candidates to split-fee roles on Splits Network directly from your Applicant Network account."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Verified Credentials",
+          "description": "Candidates confirm work history and certifications. You review qualified profiles, not embellished ones."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-star",
+          "title": "Candidate Ratings",
+          "description": "Leave structured feedback after placements. Build a track record that candidates and colleagues can see."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-plug",
+          "title": "ATS Integration",
+          "description": "Connect with your existing applicant tracking system. Candidate data flows where you already work."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "faq",
+      "kicker": "COMMON QUESTIONS",
+      "heading": "What Recruiters Ask Before Joining",
+      "items": [
+        {
+          "question": "Is there a cost to join as a recruiter?",
+          "answer": "Recruiter accounts are free to create. Access to the full candidate database and messaging tools is included with any active Splits Network subscription, or available as a standalone plan."
+        },
+        {
+          "question": "How is this different from LinkedIn or a job board?",
+          "answer": "Job boards aggregate resumes from people who may not be actively seeking. LinkedIn requires cold outreach with no signal on intent. On Applicant Network, every candidate created a profile specifically to be found by recruiters — and set their preferences for the kind of roles they want."
+        },
+        {
+          "question": "Can I post roles directly on the platform?",
+          "answer": "Yes. Roles posted on Splits Network appear as matched opportunities in candidates' feeds on Applicant Network. You manage everything from a single dashboard."
+        },
+        {
+          "question": "What does the split-fee integration mean for me?",
+          "answer": "If you specialize in a particular niche, you can submit candidates to open split-fee roles posted by other recruiters — and earn a portion of the placement fee. Applicant Network is your candidate source; Splits Network is where those candidates get matched to opportunities."
+        },
+        {
+          "question": "How do I know a candidate is actually interested in moving?",
+          "answer": "Candidates set an availability status — actively looking, open to opportunities, or not available. You can filter by this status, so you're only reaching people who want to hear from you."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "Access the Candidates Others Can't Reach",
+      "subtitle": "Join 3,200+ recruiters already sourcing from the most engaged candidate pool in the network.",
+      "buttons": [
+        {
+          "label": "Join as Recruiter",
+          "href": "/recruiters/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "See Pricing",
+          "href": "/recruiters/pricing",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "recruiters@applicant.network",
+      "bg": "primary"
+    }
+  ]
+}

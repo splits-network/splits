@@ -1,0 +1,239 @@
+{
+  "slug": "platform/ai-matching",
+  "app": "portal",
+  "title": "AI Matching | Splits Network Platform",
+  "description": "AI-powered candidate-to-role matching built into Splits Network. Score candidates across 40+ dimensions and surface the strongest fits in minutes, not hours.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "AI MATCHING",
+      "kickerIcon": "fa-duotone fa-regular fa-robot",
+      "headlineWords": [
+        {
+          "text": "The"
+        },
+        {
+          "text": "Right"
+        },
+        {
+          "text": "Candidate,"
+        },
+        {
+          "text": "Found",
+          "accent": true
+        },
+        {
+          "text": "Faster"
+        }
+      ],
+      "subtitle": "Splits Network's AI matching engine scores every candidate against every open role across 40+ dimensions — skills, experience depth, industry context, and compensation alignment. Recruiters see the strongest matches first.",
+      "image": "/images/content/ai-matching-hero.jpg",
+      "imageAlt": "AI matching interface showing candidate fit scores against role requirements",
+      "buttons": [
+        {
+          "label": "See It in Action",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-sparkles"
+        },
+        {
+          "label": "Request a Demo",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "40+",
+          "label": "Match Dimensions"
+        },
+        {
+          "value": "95%",
+          "label": "Accuracy Rate"
+        },
+        {
+          "value": "68%",
+          "label": "Faster Shortlisting"
+        },
+        {
+          "value": "3.2x",
+          "label": "Higher Interview Rate",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE OLD WAY",
+      "kickerColor": "primary",
+      "heading": "Manual Matching Doesn't Scale",
+      "paragraphs": [
+        "A recruiter with 200 candidates and 15 open roles faces a combinatorial problem that no spreadsheet can solve. Manual matching relies on memory and pattern recognition — both of which degrade under volume.",
+        "The cost is real. Qualified candidates get overlooked. Strong roles stay open too long. Submissions that don't fit waste everyone's time. <strong>Matching accuracy directly determines placement rate — and placement rate is the business.</strong>"
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "THE ENGINE",
+      "heading": "How the Matching Works",
+      "paragraphs": [
+        "The matching engine runs the moment a candidate profile is updated or a new role is posted. It evaluates fit across structured signals — not just keyword overlap."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-layer-group",
+          "title": "Skills Depth Analysis",
+          "body": "Distinguishes between surface-level exposure and demonstrated proficiency. A candidate who used a technology in one project is scored differently from someone with five years of production experience."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Industry Context Mapping",
+          "body": "Understands that experience in regulated industries — healthcare, finance, government — carries context that transfers selectively. Role requirements and candidate history are mapped accordingly."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-scale-balanced",
+          "title": "Compensation Alignment",
+          "body": "Cross-references candidate compensation expectations against role budget. Surfaces only candidates whose expectations fall within the role's range, eliminating late-stage surprises."
+        }
+      ],
+      "image": "/images/content/ai-match-engine.jpg",
+      "imageAlt": "Candidate match score breakdown showing skills, experience, and alignment dimensions",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "03",
+      "kicker": "BEFORE AND AFTER",
+      "heading": "From Hours of Review to Minutes of Action",
+      "paragraphs": [
+        "The difference isn't just speed. It's what the recruiter does with the time saved — more candidate conversations, more client engagement, more placements."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-hourglass-half",
+          "title": "Before: Manual Triage",
+          "body": "2–4 hours reviewing candidate profiles per role. Decisions based on gut and proximity bias. Submissions often misaligned with what the hiring manager actually needs."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-bolt",
+          "title": "After: AI-Assisted Shortlisting",
+          "body": "Top candidates surfaced in minutes. Each with a scored breakdown the recruiter can review, override, or act on immediately. Submissions that land interviews, not just inboxes."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-sliders",
+          "title": "Always Recruiter-Controlled",
+          "body": "AI recommends. Recruiters decide. Every match score can be reviewed, every dimension inspected. The engine augments judgment — it doesn't replace it."
+        }
+      ],
+      "image": "/images/content/ai-before-after.jpg",
+      "imageAlt": "Side-by-side comparison of manual screening workflow versus AI-assisted shortlisting",
+      "layout": "text-right",
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "The match scores changed how I work completely. I used to spend Monday mornings triaging. Now I spend them on calls. My submission-to-interview rate went from 34% to 61% in two months.",
+      "citation": "Marcus Webb, Independent Technical Recruiter",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "MATCHING FEATURES",
+      "heading": "Precision Across Every Stage",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-magnifying-glass",
+          "title": "Reverse Match",
+          "description": "Given a role, find the best candidates in your database. Given a candidate, find the roles where they're most competitive."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-bell",
+          "title": "Match Alerts",
+          "description": "Get notified when a new candidate enters your database whose profile scores highly against an open role. Act before competing recruiters do."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-circle-info",
+          "title": "Transparent Scoring",
+          "description": "Every match score includes a dimension-by-dimension breakdown. Understand exactly why a candidate ranked where they did."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-arrows-rotate",
+          "title": "Continuous Reranking",
+          "description": "As candidate profiles are updated and role requirements change, match scores update automatically. Your shortlist stays current."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-thumbs-up",
+          "title": "Feedback Learning",
+          "description": "When you mark a submission as strong or weak, the engine incorporates that signal. Matching improves the more you use it.",
+          "badge": "Pro"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-database",
+          "title": "Cross-Network Matching",
+          "description": "Pro subscribers can opt in to anonymous cross-network matching — discovering candidates represented by other recruiters available for split placement.",
+          "badge": "Pro"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "AI Matching Questions",
+      "items": [
+        {
+          "question": "Does AI matching require additional setup?",
+          "answer": "No. Matching runs automatically on all candidate profiles and role listings. The more complete a candidate profile and role description, the more accurate the scores — but there is no separate configuration step."
+        },
+        {
+          "question": "Can I override or adjust match scores?",
+          "answer": "Yes. Match scores are recommendations, not mandates. You can view the dimension breakdown, adjust weighting for your specific needs, and always choose to submit any candidate you believe is the right fit."
+        },
+        {
+          "question": "Is matching available on all plans?",
+          "answer": "Basic match scoring is available on all plans. Advanced features — feedback learning, cross-network matching, and custom dimension weighting — are available on Pro and Enterprise plans."
+        },
+        {
+          "question": "How does the engine handle non-traditional career paths?",
+          "answer": "The engine evaluates demonstrated skills and outcomes, not just job titles and tenure. Candidates with unconventional paths who demonstrate the required competencies score accordingly. The goal is finding the right fit, not the right resume format."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Match Smarter. Place Faster.",
+      "subtitle": "AI matching is built into every Splits Network account. Start free and see your first match scores today.",
+      "buttons": [
+        {
+          "label": "Start Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-sparkles"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

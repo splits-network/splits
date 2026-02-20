@@ -1,0 +1,236 @@
+{
+  "slug": "how-it-works",
+  "app": "portal",
+  "title": "How It Works | Splits Network",
+  "description": "A clear walkthrough of the split-fee recruiting process — from role posting to automated fee distribution. Understand the model before you engage.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "5 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "HOW IT WORKS",
+      "kickerIcon": "fa-duotone fa-regular fa-circle-nodes",
+      "headlineWords": [
+        {
+          "text": "Split-Fee"
+        },
+        {
+          "text": "Recruiting,"
+        },
+        {
+          "text": "Explained",
+          "accent": true
+        }
+      ],
+      "subtitle": "The split-fee model has connected recruiters for decades. Splits Network gives it the infrastructure to work at scale — transparent, tracked, and paid automatically.",
+      "image": "/images/content/how-it-works-hero.jpg",
+      "imageAlt": "Network diagram illustrating the connection between companies, recruiters, and candidates",
+      "buttons": [
+        {
+          "label": "Get Started",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "For Companies",
+          "href": "/for-companies",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE MODEL",
+      "kickerColor": "primary",
+      "heading": "What Split-Fee Recruiting Actually Means",
+      "paragraphs": [
+        "In traditional recruiting, a single agency owns the relationship with both the company and the candidate. They collect the full placement fee. Split-fee recruiting changes that dynamic: the hiring company posts a role, any qualified recruiter can engage, and when a placement is made, the fee is divided between the job-posting party and the placing recruiter.",
+        "The result is broader candidate coverage for companies, access to more roles for recruiters, and a marketplace where specialization is rewarded. <strong>Everyone earns based on their contribution.</strong> Splits Network is the platform that makes this model operationally viable — handling agreements, pipelines, and payments in one place."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "timeline",
+      "kicker": "THE PROCESS",
+      "heading": "From Role Posted to Placement Paid",
+      "subtitle": "Five clear steps. Every stage is tracked on the platform so all parties have full visibility.",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Company Posts a Role",
+          "description": "A hiring company creates a role listing with job requirements, compensation range, and fee structure. They set the total placement fee and the split percentage — for example, 20% of first-year salary, split 50/50. Terms are public before any recruiter engages.",
+          "icon": "fa-duotone fa-regular fa-briefcase"
+        },
+        {
+          "number": 2,
+          "title": "Recruiters Discover and Engage",
+          "description": "Specialized recruiters browse the marketplace and engage with roles matching their expertise and candidate network. Each engagement is a formal agreement — the recruiter sees and accepts the fee terms before beginning work.",
+          "icon": "fa-duotone fa-regular fa-magnifying-glass"
+        },
+        {
+          "number": 3,
+          "title": "Candidates Are Matched and Submitted",
+          "description": "Engaged recruiters submit candidates through the platform. AI matching scores each submission against the role requirements. Hiring managers review candidates in their shared ATS pipeline, advance them through stages, and coordinate interviews.",
+          "icon": "fa-duotone fa-regular fa-users"
+        },
+        {
+          "number": 4,
+          "title": "Placement Is Made",
+          "description": "When the hiring company makes an offer and the candidate accepts, the placement is confirmed on the platform. The system logs the start date, verifies the hire, and begins the guarantee period clock.",
+          "icon": "fa-duotone fa-regular fa-trophy"
+        },
+        {
+          "number": 5,
+          "title": "Fees Split Automatically",
+          "description": "After the guarantee period passes, the placement fee is calculated against the confirmed compensation. The company is invoiced via Stripe. The placing recruiter's share is paid out automatically. Every amount is visible to all parties.",
+          "icon": "fa-duotone fa-regular fa-money-bill-wave"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "FOR COMPANIES",
+      "heading": "One Posting, Many Recruiters",
+      "paragraphs": [
+        "When a role goes live on Splits Network, it reaches every recruiter in the network simultaneously. Specialists engage based on their expertise — not based on who has an existing agency relationship with you."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-chart-network",
+          "title": "Broader Reach",
+          "body": "Multiple recruiters working a single role means more candidate pathways. You're no longer dependent on one agency's network."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-eye",
+          "title": "Full Visibility",
+          "body": "See every submission, every pipeline stage, every recruiter interaction. Nothing happens off-platform."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-circle-dollar",
+          "title": "Pay on Results",
+          "body": "No retainers, no upfront fees. You pay a placement fee only when a hire is made."
+        }
+      ],
+      "image": "/images/content/company-dashboard.jpg",
+      "imageAlt": "Company hiring dashboard showing multiple recruiter submissions for an open role",
+      "layout": "text-left",
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "03",
+      "kicker": "FOR RECRUITERS",
+      "heading": "Access Every Role, Earn What You Place",
+      "paragraphs": [
+        "The marketplace is open. Any recruiter can browse all posted roles and engage with those matching their specialization. Fee terms are visible upfront — no negotiation, no ambiguity."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-filter",
+          "title": "Filter to Your Niche",
+          "body": "Search by industry, role type, location, and fee range. Only engage with roles where you have a genuine competitive edge."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-paper-plane",
+          "title": "Submit With Confidence",
+          "body": "Your submission is tracked, time-stamped, and attributed. You always know where your candidates stand."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+          "title": "Transparent Earnings",
+          "body": "Your split percentage is locked when you engage. No surprises when the placement closes."
+        }
+      ],
+      "image": "/images/content/recruiter-marketplace.jpg",
+      "imageAlt": "Recruiter browsing available roles in the Splits Network marketplace",
+      "layout": "text-right",
+      "bg": "base-200"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "The split-fee model has existed for decades. What's changed is the infrastructure to make it work at scale. That's what Splits Network built.",
+      "bg": "neutral",
+      "style": "centered"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "WHY IT WORKS",
+      "heading": "Aligned Incentives at Every Step",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Companies Get Coverage",
+          "description": "Broader recruiter engagement means more qualified candidates, faster. Competition among recruiters keeps quality high.",
+          "metric": "< 21 days",
+          "metricLabel": "average time to fill"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiters Get Access",
+          "description": "Independent recruiters can work premium roles that would otherwise require an agency relationship to reach.",
+          "metric": "3x",
+          "metricLabel": "more placements on average"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-scale-balanced",
+          "title": "Terms Are Enforceable",
+          "description": "Every agreement is recorded on the platform. Dispute resolution is built in. No handshake deals, no missing paperwork.",
+          "metric": "100%",
+          "metricLabel": "of terms tracked"
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "Process Questions",
+      "items": [
+        {
+          "question": "What happens if a candidate declines after an offer is made?",
+          "answer": "The placement is not confirmed until the candidate starts. If an offer is declined, the role remains active and engaged recruiters can continue submitting. No fee is triggered."
+        },
+        {
+          "question": "How long is the standard guarantee period?",
+          "answer": "The guarantee period is set by the hiring company when they post the role — typically 30, 60, or 90 days. If the candidate leaves within that period, the fee is either refunded or a replacement candidate is sourced, per the agreed terms."
+        },
+        {
+          "question": "Can multiple recruiters submit the same candidate?",
+          "answer": "The platform tracks first-submission attribution. If two recruiters submit the same candidate, the first submission holds. This protects the recruiting community and ensures clear credit."
+        },
+        {
+          "question": "What if I'm both the job-poster and the placing recruiter?",
+          "answer": "That's a standard scenario. Recruiting agencies can post roles and work them internally while also opening them to the broader network for split engagement. You control who sees the role and on what terms."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "Ready to See It Work?",
+      "subtitle": "Post your first role or explore the marketplace. Setup takes under ten minutes.",
+      "buttons": [
+        {
+          "label": "Get Started",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

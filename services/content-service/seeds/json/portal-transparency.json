@@ -1,0 +1,229 @@
+{
+  "slug": "transparency",
+  "app": "portal",
+  "title": "Transparency | Splits Network",
+  "description": "Splits Network is built on transparent fees, locked-in terms, immutable candidate attribution, and automated payments. Every agreement recorded. Every payment verified.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "6 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "TRANSPARENCY",
+      "kickerIcon": "fa-duotone fa-regular fa-eye",
+      "headlineWords": [
+        {
+          "text": "Nothing"
+        },
+        {
+          "text": "Hidden,"
+        },
+        {
+          "text": "Everything",
+          "accent": true
+        },
+        {
+          "text": "Tracked"
+        }
+      ],
+      "subtitle": "Recruiting has a trust problem. Fees negotiated behind closed doors. Candidates submitted without attribution. Terms that shift after a placement closes. Splits Network was built to end that.",
+      "image": "/images/content/transparency-hero.jpg",
+      "imageAlt": "Clean dashboard interface displaying fee breakdown and placement timeline with full detail",
+      "buttons": [
+        {
+          "label": "See How It Works",
+          "href": "/how-it-works",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-circle-nodes"
+        },
+        {
+          "label": "Read the Terms",
+          "href": "/terms",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE PROBLEM",
+      "kickerColor": "primary",
+      "heading": "Why Recruiting Lacks Trust",
+      "paragraphs": [
+        "Traditional recruiting operates on verbal agreements, relationship capital, and institutional memory. When disputes arise — over fee amounts, candidate ownership, or guarantee terms — there's often no authoritative record. The result is friction, missed payments, and damaged relationships.",
+        "For independent recruiters, the stakes are higher. They're working on contingency, and if the terms aren't in writing and verified by a system, they're vulnerable. Hiring companies face the same problem in reverse: they have no visibility into how their roles are being worked, who's been submitted, or where a candidate stands at any given moment.",
+        "Splits Network was designed around a single principle: <strong>every agreement, every action, and every payment must be recorded, visible, and verifiable.</strong> Transparency isn't a feature — it's the architecture."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "TRANSPARENT BY DESIGN",
+      "heading": "What We Publish, and Why",
+      "columns": 2,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-tag",
+          "title": "Fee Structures Published Upfront",
+          "description": "Before any recruiter engages with a role, they see the total placement fee and their split percentage. There is no negotiation after the fact. The terms you agreed to are the terms that govern the placement."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+          "title": "Immutable Submission Records",
+          "description": "Every candidate submission is time-stamped and attributed. If two recruiters submit the same candidate, the first submission holds — and there's no ambiguity because the record is on the platform."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "Shared Pipeline Visibility",
+          "description": "Hiring companies, job-posting recruiters, and placing recruiters all see the same pipeline. Stage changes are logged. There is no information asymmetry between parties."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+          "title": "Automated Fee Calculation",
+          "description": "When a hire is confirmed, the fee is calculated from the recorded compensation — not from a manual invoice. The math is shown to all parties before payment is processed."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-scale-balanced",
+          "title": "Dispute Resolution on Record",
+          "description": "If a dispute arises, both parties have access to the same platform record. Our resolution process starts from verifiable facts, not competing recollections."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-mixed",
+          "title": "Earnings and Payout History",
+          "description": "Every recruiter has a complete record of their earnings, pending payouts, and historical placements. Every company has a corresponding billing history."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "Before Splits Network, I had two placements where fees were disputed after the fact. Both took months to resolve. Since joining, every placement has been clean — the terms were on record before I submitted a single candidate.",
+      "citation": "David Osei, Independent Recruiter, 14 Years in Tech Recruiting",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "FOR COMPANIES",
+      "heading": "Visibility Into Every Hire",
+      "paragraphs": [
+        "Hiring companies on Splits Network see everything. Which recruiters are engaged on a role, how many candidates have been submitted, where each candidate stands in the pipeline, and what fees will be owed when a placement closes."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-users",
+          "title": "Recruiter Engagement Tracking",
+          "body": "See exactly which recruiters have accepted your role terms and are actively working on your behalf."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-gantt",
+          "title": "Pipeline Audit Trail",
+          "body": "Every stage change, every note, every interview scheduling action is logged with a timestamp and user attribution."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-circle-dollar",
+          "title": "Fee Visibility Before Hire",
+          "body": "Before you confirm a placement, the fee is calculated and displayed. No surprises on the invoice."
+        }
+      ],
+      "image": "/images/content/company-transparency.jpg",
+      "imageAlt": "Hiring manager viewing full pipeline audit trail and fee summary before confirming a hire",
+      "layout": "text-right",
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "03",
+      "kicker": "FOR RECRUITERS",
+      "heading": "Your Work, Attributed and Protected",
+      "paragraphs": [
+        "Independent recruiters are the most vulnerable party in traditional split-fee arrangements. Splits Network gives them the record-keeping and legal scaffolding that protects their work and ensures their earnings."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-fingerprint",
+          "title": "Candidate Attribution",
+          "body": "Your submission record is permanent. The candidate you found and represented is attributed to you — regardless of how long the process takes."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-contract",
+          "title": "Locked-In Terms",
+          "body": "The fee and split you agreed to when you engaged are the terms that apply at close. They cannot be changed unilaterally."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-money-bill-transfer",
+          "title": "Payout Visibility",
+          "body": "Your earnings dashboard shows every pending payout with an expected release date. No chasing invoices."
+        }
+      ],
+      "image": "/images/content/recruiter-attribution.jpg",
+      "imageAlt": "Recruiter earnings dashboard showing attributed placements and payout schedule",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "04",
+      "kicker": "OUR COMMITMENTS",
+      "kickerColor": "secondary",
+      "heading": "What We Commit to Every User",
+      "paragraphs": [
+        "These are not aspirations. They are design requirements that every feature on the platform must satisfy.",
+        "<strong>Terms are immutable once agreed.</strong> No party can modify the fee or split percentage after both parties have engaged. Changes require a new agreement. <strong>Submissions are first-come, permanent.</strong> Candidate attribution is set at submission time and does not change. <strong>Payments are calculated, not negotiated.</strong> When a placement closes, the fee is derived from recorded compensation data — not from a manual invoice that either party creates. <strong>Disputes start from the record.</strong> Our resolution process treats the platform log as the authoritative account. We do not adjudicate based on claims unsupported by platform data."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "Transparency in recruiting isn't idealism. It's what allows both parties to trust the process enough to engage in the first place.",
+      "bg": "neutral",
+      "style": "centered"
+    },
+    {
+      "type": "faq",
+      "kicker": "COMMON QUESTIONS",
+      "heading": "Transparency in Practice",
+      "items": [
+        {
+          "question": "Can a company change the fee after I've submitted a candidate?",
+          "answer": "No. Once you engage with a role and accept the posted fee terms, those terms are locked. Any change to the fee structure creates a new role version, and your engagement under the original terms remains valid for any candidates already submitted."
+        },
+        {
+          "question": "What if a candidate I submitted is hired months later?",
+          "answer": "Your submission record is permanent. If a candidate you submitted is hired — even after a long process — your attribution is intact and your fee applies."
+        },
+        {
+          "question": "Do hiring companies see my candidate's contact details?",
+          "answer": "Candidate contact details are controlled by the submitting recruiter. You choose what profile information is visible to the hiring company before making an introduction. Full contact details are shared only when you explicitly authorize it."
+        },
+        {
+          "question": "What happens if a company disputes a fee after placement?",
+          "answer": "Our dispute resolution process begins with the platform record. If the submission timestamp, engagement agreement, and placement confirmation are all on record, the outcome is clear. We do not entertain disputes that attempt to relitigate terms that were agreed on the platform."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "Recruiting You Can Account For",
+      "subtitle": "Every term agreed. Every candidate tracked. Every payment verified. That is what Splits Network was built to deliver.",
+      "buttons": [
+        {
+          "label": "Get Started",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "Read the Terms",
+          "href": "/terms",
+          "variant": "outline"
+        }
+      ],
+      "bg": "primary"
+    }
+  ]
+}

@@ -14,7 +14,6 @@ import ApplicationDetails from "@/app/portal/applications/components/shared/deta
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { DetailPanel as PlacementDetailPanel } from "@/app/portal/placements/components/shared/detail-panel";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
-import { accentAt } from "@/app/portal/roles/components/shared/accent";
 
 interface DetailPanelProps {
     id: string;
@@ -338,7 +337,6 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
         <div className="p-6">
             <JobDetail
                 job={job}
-                accent={accentAt(1)}
                 onRefresh={fetchJob}
             />
         </div>

@@ -587,44 +587,43 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                     {/* Theme toggle */}
                     <ThemeToggle className="header-right-item opacity-0" />
 
-                    {showSignedIn ? (
-                        <>
-                            {/* Dashboard link */}
-                            <Link
-                                href="/portal/dashboard"
-                                className="hidden lg:flex btn btn-ghost btn-md btn-square"
-                                title="Dashboard"
-                            >
-                                <i className="fa-duotone fa-regular fa-gauge text-base-content/60" />
-                            </Link>
-
-                            {/* Notifications */}
-                            <div>
-                                <NotificationBell />
-                            </div>
-
-                            {/* User */}
-                            <div className="pl-3 ml-1 border-l border-base-300">
-                                <UserDropdown />
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <Link
-                                href="/sign-in"
-                                className="header-right-item opacity-0 btn btn-ghost hidden xl:flex"
-                            >
-                                Sign In
-                            </Link>
-                            <Link
-                                href="/sign-up"
-                                className="header-right-item opacity-0 btn btn-primary"
-                            >
-                                <i className="fa-duotone fa-regular fa-rocket" />
-                                Get Started
-                            </Link>
-                        </>
-                    )}
+                    {/* Auth actions — stable wrapper so GSAP animation
+                        persists across Clerk auth state re-renders */}
+                    <div className="header-right-item opacity-0 flex items-center gap-2">
+                        {showSignedIn ? (
+                            <>
+                                <Link
+                                    href="/portal/dashboard"
+                                    className="hidden lg:flex btn btn-ghost btn-md btn-square"
+                                    title="Dashboard"
+                                >
+                                    <i className="fa-duotone fa-regular fa-gauge text-base-content/60" />
+                                </Link>
+                                <div>
+                                    <NotificationBell />
+                                </div>
+                                <div className="pl-3 ml-1 border-l border-base-300">
+                                    <UserDropdown />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/sign-in"
+                                    className="btn btn-ghost hidden xl:flex"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    href="/sign-up"
+                                    className="btn btn-primary"
+                                >
+                                    <i className="fa-duotone fa-regular fa-rocket" />{" "}
+                                    Get Started
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </>
             }
             mobileMenu={

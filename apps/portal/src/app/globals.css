@@ -3,7 +3,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-@plugin "@splits-network/memphis-ui/plugin";
 @import "./themes/light.css";
 @import "./themes/dark.css";
 
@@ -85,7 +84,7 @@
     animation: fade-in 0.2s ease-out;
 }
 
-/* Memphis markdown editor overrides */
+/* Markdown editor overrides */
 .w-md-editor {
     border-radius: 0 !important;
 }
@@ -198,7 +197,7 @@
 } */
 
 .expanded-row td {
-    @apply border-t-4 border-coral border-b-0 bg-base-100;
+    @apply border-t-4 border-primary border-b-0 bg-base-100;
 }
 
 .expanded-row td:first-child {

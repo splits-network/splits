@@ -1,0 +1,237 @@
+{
+  "slug": "platform/ats",
+  "app": "portal",
+  "title": "ATS | Splits Network Platform",
+  "description": "A built-in applicant tracking system designed for split-fee recruiting. Kanban pipelines, collaborative notes, interview scheduling, and automatic fee tracking — all in one platform.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "APPLICANT TRACKING",
+      "kickerIcon": "fa-duotone fa-regular fa-table-columns",
+      "headlineWords": [
+        {
+          "text": "An"
+        },
+        {
+          "text": "ATS"
+        },
+        {
+          "text": "Built",
+          "accent": true
+        },
+        {
+          "text": "for"
+        },
+        {
+          "text": "Split-Fee"
+        }
+      ],
+      "subtitle": "Generic applicant tracking systems were designed for internal HR teams. Splits Network's ATS is built for the split-fee model — where multiple recruiters work a role, candidates have multiple advocates, and every submission carries financial weight.",
+      "image": "/images/content/platform-ats-hero.jpg",
+      "imageAlt": "Kanban pipeline view showing candidate stages across multiple active roles",
+      "buttons": [
+        {
+          "label": "See the Pipeline",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-table-columns"
+        },
+        {
+          "label": "Request a Demo",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "Unlimited",
+          "label": "Pipeline Stages"
+        },
+        {
+          "value": "Multi-Recruiter",
+          "label": "Role Collaboration"
+        },
+        {
+          "value": "One Click",
+          "label": "Candidate Submission"
+        },
+        {
+          "value": "Zero",
+          "label": "External Tools Needed",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE DIFFERENCE",
+      "kickerColor": "primary",
+      "heading": "Why Generic ATS Tools Fall Short",
+      "paragraphs": [
+        "Most ATS platforms assume a single hiring team owns every candidate. In split-fee recruiting, that assumption breaks immediately. Candidates are represented by external recruiters. Submissions come from multiple sources. Fee terms vary by role and recruiter.",
+        "Splits Network's ATS understands this model natively. <strong>Every candidate record tracks who submitted them, what fee terms apply, which stage they're in, and who needs to take action next.</strong> No retrofitting required."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "THE PIPELINE",
+      "heading": "Kanban That Reflects How You Actually Hire",
+      "paragraphs": [
+        "Configure your pipeline stages to match your actual hiring process — not a generic template. Move candidates through stages with one click, trigger automated notifications, and keep every stakeholder aligned."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-grip",
+          "title": "Drag-and-Drop Stages",
+          "body": "Advance candidates through your pipeline visually. Stage changes automatically notify the submitting recruiter and update the timeline record."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-screwdriver-wrench",
+          "title": "Configurable Workflows",
+          "body": "Define the stages that match your process: application review, screening, technical interview, final round, offer. Add as many stages as the role requires."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-users-gear",
+          "title": "Role-Level Permissions",
+          "body": "Hiring managers see candidates for their roles. Recruiters see the candidates they submitted. Privacy controls ensure the right people see the right information."
+        }
+      ],
+      "image": "/images/content/ats-pipeline.jpg",
+      "imageAlt": "Kanban view of active candidate pipeline showing stages from submission to offer",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "ATS CAPABILITIES",
+      "heading": "Every Tool You Need, Nothing You Don't",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-user-circle",
+          "title": "Candidate Profiles",
+          "description": "Rich profiles with resume parsing, skills extraction, work history, and all submission and communication history in one record."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-calendar",
+          "title": "Interview Scheduling",
+          "description": "Coordinate interviews directly in the platform. Send calendar invites, track confirmations, and log feedback without leaving the pipeline."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-note-sticky",
+          "title": "Collaborative Notes",
+          "description": "Hiring managers and recruiters can leave notes on candidate records. Context is shared, decisions are documented, and nothing gets lost in email."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-paper-plane",
+          "title": "One-Click Submission",
+          "description": "Recruiters submit candidates from their talent pool directly to a role. Fee terms are attached automatically based on the role's split structure."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-lines",
+          "title": "Resume Management",
+          "description": "Store, version, and share candidate resumes within the platform. No more attaching files to emails or losing track of which version was submitted."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+          "title": "Full Audit Trail",
+          "description": "Every stage change, note, submission, and decision is timestamped and logged. Complete accountability for every candidate's journey.",
+          "badge": "Pro"
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "We replaced three separate tools — a spreadsheet tracker, a shared inbox, and a legacy ATS — with Splits Network. The built-in ATS handles everything those tools did and understands the split-fee context they never could.",
+      "citation": "Operations Director, Boutique Recruiting Firm",
+      "bg": "neutral",
+      "style": "centered"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "FOR EVERY STAKEHOLDER",
+      "heading": "One Pipeline, Multiple Perspectives",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Hiring Companies",
+          "description": "See every candidate submitted for your roles, their current stage, and the recruiter who submitted them. Advance, reject, or request more information from one view.",
+          "metric": "100%",
+          "metricLabel": "submission visibility"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiters",
+          "description": "Track every candidate you've submitted across all active roles. Know exactly where they stand and what action is needed without chasing hiring managers for updates.",
+          "metric": "Zero",
+          "metricLabel": "update emails needed"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-people-group",
+          "title": "Recruiting Teams",
+          "description": "Manage your entire team's candidate pipeline in one place. Assign candidates to team members, review activity, and prevent duplicate submissions.",
+          "metric": "All roles",
+          "metricLabel": "in one dashboard"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "ATS Questions",
+      "items": [
+        {
+          "question": "Can I import candidates from an existing ATS?",
+          "answer": "Yes. Splits Network supports CSV import for candidate records, and our Enterprise plan includes direct integration with major ATS platforms including Greenhouse, Lever, and Workday."
+        },
+        {
+          "question": "How many pipeline stages can I create?",
+          "answer": "Unlimited. Configure as many stages as your hiring process requires. Stages can be created, renamed, and reordered at any time without affecting existing candidate records."
+        },
+        {
+          "question": "Can multiple recruiters work the same role without seeing each other's candidates?",
+          "answer": "Yes. Each recruiter only sees the candidates they submitted unless a hiring manager explicitly shares a record. Competing recruiters working the same role maintain full candidate confidentiality."
+        },
+        {
+          "question": "Does the ATS connect to the billing system?",
+          "answer": "Directly. When a candidate is moved to the hired stage, the placement fee is calculated automatically based on the role's fee structure and split terms. No manual invoice creation required."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Run Your Pipeline From One Place",
+      "subtitle": "The ATS is built in. No integration required, no separate subscription, no migration project.",
+      "buttons": [
+        {
+          "label": "Start Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-table-columns"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

@@ -1,0 +1,2882 @@
+[
+  {
+    "slug": "for-recruiters",
+    "app": "candidate",
+    "title": "For Recruiters | Applicant Network",
+    "description": "Join Applicant Network to access a pool of engaged, pre-qualified candidates who opted in to be found. Built-in messaging, pipeline tracking, and split-fee integration included.",
+    "category": "marketing",
+    "author": "Applicant Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "FOR RECRUITERS",
+        "kickerIcon": "fa-duotone fa-regular fa-user-tie",
+        "headlineWords": [
+          {
+            "text": "Candidates"
+          },
+          {
+            "text": "Who",
+            "accent": true
+          },
+          {
+            "text": "Are"
+          },
+          {
+            "text": "Already"
+          },
+          {
+            "text": "Looking"
+          }
+        ],
+        "subtitle": "Applicant Network gives recruiters direct access to a pool of engaged, pre-qualified candidates. No cold outreach, no resume parsing from job boards. Every candidate on this platform opted in.",
+        "image": "/images/content/recruiter-hero.jpg",
+        "imageAlt": "Recruiter reviewing candidate profiles on a modern analytics dashboard",
+        "buttons": [
+          {
+            "label": "Join as Recruiter",
+            "href": "/recruiters/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-arrow-right"
+          },
+          {
+            "label": "How It Works",
+            "href": "/recruiters/how-it-works",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "50,000+",
+            "label": "Active Candidates"
+          },
+          {
+            "value": "3,200+",
+            "label": "Verified Recruiters",
+            "borderColor": "border-primary"
+          },
+          {
+            "value": "< 48 hrs",
+            "label": "Avg. First Response"
+          },
+          {
+            "value": "94%",
+            "label": "Placement Success Rate"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE DIFFERENCE",
+        "kickerColor": "primary",
+        "heading": "A Candidate Pool That Actually Engages",
+        "paragraphs": [
+          "Most recruiting tools put you in front of passive candidates — people who may or may not respond, who uploaded a resume to a database years ago and haven't touched it since. Applicant Network is built on a different premise.",
+          "Every candidate here created an active profile. They set their preferences, uploaded current materials, and are checking for matched opportunities. When you reach out, you're not interrupting — you're delivering what they asked for. That changes the entire dynamic of a conversation."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "QUALIFIED PIPELINE",
+        "heading": "Profiles Built for Recruiters to Use",
+        "paragraphs": [
+          "Candidates complete structured profiles covering skills, experience, salary expectations, and job preferences. You see the relevant detail before your first message — no preliminary screening call required."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-list-check",
+            "title": "Structured Profiles",
+            "body": "Skills, experience, salary band, and availability — organized for rapid evaluation."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-location-dot",
+            "title": "Preference-Matched",
+            "body": "Search by role type, location, remote preference, and compensation range. Filter once, review relevant results."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-circle-check",
+            "title": "Opt-In Visibility",
+            "body": "Candidates control their visibility. When they show up in your search, they're open to contact."
+          }
+        ],
+        "image": "/images/content/recruiter-candidate-profiles.jpg",
+        "imageAlt": "Structured candidate profile showing skills, experience, and job preferences",
+        "layout": "text-right",
+        "bg": "base-200"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "The quality of candidates on Applicant Network is unlike anything I've seen on a traditional job board. Every profile I open is current, complete, and from someone who actually wants to hear from me.",
+        "citation": "James Okafor, Senior Technical Recruiter",
+        "bg": "base-100",
+        "style": "left-border"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "RECRUITER TOOLS",
+        "heading": "Everything You Need to Work Faster",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-messages",
+            "title": "Built-In Messaging",
+            "description": "Reach candidates directly through the platform. All conversations are tracked, timestamped, and stored in one place.",
+            "metric": "< 48 hrs",
+            "metricLabel": "avg. candidate response"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-line",
+            "title": "Pipeline Tracking",
+            "description": "Track every candidate through every stage of your process. One dashboard, full visibility, no spreadsheets.",
+            "metric": "100%",
+            "metricLabel": "interaction history"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-bell",
+            "title": "Match Alerts",
+            "description": "Save a search once. Get notified when new candidates match your criteria — without logging in every day.",
+            "metric": "Real-time",
+            "metricLabel": "notifications"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "PLATFORM FEATURES",
+        "heading": "Built for the Way Recruiters Actually Work",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-magnifying-glass",
+            "title": "Advanced Search",
+            "description": "Filter by skill set, years of experience, location, work authorization, and compensation expectations."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-folder-open",
+            "title": "Candidate Shortlists",
+            "description": "Save and organize candidates across multiple roles. Share shortlists with clients or hiring managers."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-handshake",
+            "title": "Split-Fee Ready",
+            "description": "Submit candidates to split-fee roles on Splits Network directly from your Applicant Network account."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Verified Credentials",
+            "description": "Candidates confirm work history and certifications. You review qualified profiles, not embellished ones."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-star",
+            "title": "Candidate Ratings",
+            "description": "Leave structured feedback after placements. Build a track record that candidates and colleagues can see."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-plug",
+            "title": "ATS Integration",
+            "description": "Connect with your existing applicant tracking system. Candidate data flows where you already work."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "faq",
+        "kicker": "COMMON QUESTIONS",
+        "heading": "What Recruiters Ask Before Joining",
+        "items": [
+          {
+            "question": "Is there a cost to join as a recruiter?",
+            "answer": "Recruiter accounts are free to create. Access to the full candidate database and messaging tools is included with any active Splits Network subscription, or available as a standalone plan."
+          },
+          {
+            "question": "How is this different from LinkedIn or a job board?",
+            "answer": "Job boards aggregate resumes from people who may not be actively seeking. LinkedIn requires cold outreach with no signal on intent. On Applicant Network, every candidate created a profile specifically to be found by recruiters — and set their preferences for the kind of roles they want."
+          },
+          {
+            "question": "Can I post roles directly on the platform?",
+            "answer": "Yes. Roles posted on Splits Network appear as matched opportunities in candidates' feeds on Applicant Network. You manage everything from a single dashboard."
+          },
+          {
+            "question": "What does the split-fee integration mean for me?",
+            "answer": "If you specialize in a particular niche, you can submit candidates to open split-fee roles posted by other recruiters — and earn a portion of the placement fee. Applicant Network is your candidate source; Splits Network is where those candidates get matched to opportunities."
+          },
+          {
+            "question": "How do I know a candidate is actually interested in moving?",
+            "answer": "Candidates set an availability status — actively looking, open to opportunities, or not available. You can filter by this status, so you're only reaching people who want to hear from you."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "Access the Candidates Others Can't Reach",
+        "subtitle": "Join 3,200+ recruiters already sourcing from the most engaged candidate pool in the network.",
+        "buttons": [
+          {
+            "label": "Join as Recruiter",
+            "href": "/recruiters/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "See Pricing",
+            "href": "/recruiters/pricing",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "recruiters@applicant.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "features",
+    "app": "portal",
+    "title": "Features | Splits Network",
+    "description": "Explore the complete Splits Network platform — role marketplace, ATS, AI matching, messaging, analytics, and automated billing. Every tool for split-fee recruiting in one place.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "5 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "PLATFORM FEATURES",
+        "kickerIcon": "fa-duotone fa-regular fa-grid-2",
+        "headlineWords": [
+          {
+            "text": "Every"
+          },
+          {
+            "text": "Tool"
+          },
+          {
+            "text": "Recruiting",
+            "accent": true
+          },
+          {
+            "text": "Requires"
+          }
+        ],
+        "subtitle": "From role posting to placement payout, Splits Network provides the complete infrastructure for split-fee recruiting. One platform, every workflow.",
+        "image": "/images/content/features-hero.jpg",
+        "imageAlt": "Recruiter navigating Splits Network dashboard across multiple feature panels",
+        "buttons": [
+          {
+            "label": "Start Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "View Pricing",
+            "href": "/pricing",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "14",
+            "label": "Core Features"
+          },
+          {
+            "value": "3,200+",
+            "label": "Active Recruiters"
+          },
+          {
+            "value": "99.9%",
+            "label": "Platform Uptime",
+            "borderColor": "border-accent"
+          },
+          {
+            "value": "< 2s",
+            "label": "Avg. Load Time"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE PLATFORM",
+        "kickerColor": "primary",
+        "heading": "Built for the Full Recruiting Cycle",
+        "paragraphs": [
+          "Most recruiting tools solve one problem. An ATS manages candidates. A job board surfaces roles. A payment processor handles fees. Splits Network connects all of it — a single platform where the marketplace, pipeline management, messaging, and billing work together without stitching together separate tools.",
+          "Every feature is designed around the split-fee model. That means role visibility is structured for multi-recruiter engagement, pipelines are shared across parties with clear permissions, and payments trigger automatically when verified outcomes occur."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "MARKETPLACE",
+        "heading": "Find and Fill Roles",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-briefcase",
+            "title": "Role Marketplace",
+            "description": "Browse hundreds of verified open roles. Filter by specialty, location, fee structure, and company type to find the best fit for your candidate pool."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-bell",
+            "title": "Smart Alerts",
+            "description": "Set preferences once. Get notified when roles matching your recruiting niche are posted. Engage before the competition."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Verified Companies",
+            "description": "Every company on the platform passes verification before posting. No ghost jobs, no unresponsive hiring managers."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-handshake",
+            "title": "Split Agreements",
+            "description": "Fee splits are displayed before engagement. Agree to terms once, and they're locked in for the duration of the placement."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-gauge-high",
+            "title": "Real-Time Activity",
+            "description": "See which recruiters are engaged on a role, how many candidates have been submitted, and where each stands in the pipeline."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-tag",
+            "title": "Fee Transparency",
+            "description": "Total placement fee, split percentages, and payout timelines are displayed clearly on every role card."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "APPLICANT TRACKING",
+        "heading": "A Purpose-Built ATS",
+        "paragraphs": [
+          "Splits Network includes a native applicant tracking system designed specifically for collaborative recruiting. Unlike standalone ATS tools grafted onto a job board, ours is built from the ground up for split-fee workflows."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "Shared Pipelines",
+            "description": "Candidates move through stages visible to all authorized parties — company, job-posting recruiter, and placing recruiter."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-pen-to-square",
+            "title": "Customizable Stages",
+            "description": "Build hiring workflows that reflect how you actually hire. Unlimited stages, drag-and-drop configuration."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-lock",
+            "title": "Role-Based Access",
+            "description": "Hiring managers see what they need. Recruiters see their submissions. Sensitive data stays controlled."
+          }
+        ],
+        "image": "/images/content/ats-pipeline.jpg",
+        "imageAlt": "Candidate pipeline view with multiple hiring stages and status indicators",
+        "layout": "text-right",
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "INTELLIGENCE",
+        "heading": "AI Across Every Workflow",
+        "columns": 2,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-robot",
+            "title": "AI Candidate Matching",
+            "description": "The platform evaluates candidate profiles against role requirements and surfaces the strongest fits first. Match scores are transparent and explainable — not a black box."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-wand-magic-sparkles",
+            "title": "Role Recommendations",
+            "description": "Recruiters receive personalized role recommendations based on their placement history, active candidate pool, and specialty areas."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-magnifying-glass",
+            "title": "Resume Parsing",
+            "description": "Structured data extraction from uploaded resumes. Skills, experience, and credentials are indexed automatically for search and matching."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-network",
+            "title": "Predictive Analytics",
+            "description": "Time-to-fill forecasting, placement probability scores, and revenue projections based on your active pipeline."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "We replaced three separate tools with Splits Network. The ATS, the marketplace, and billing are now one workflow. Our team closes roles 40% faster.",
+        "citation": "Marcus Chen, Director of Recruiting Operations",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "COMMUNICATION & PAYMENTS",
+        "heading": "Collaborate and Get Paid",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-messages",
+            "title": "Direct Messaging",
+            "description": "Threaded conversations between recruiters, hiring managers, and candidates. All communication stays on-platform and tied to the relevant role."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+            "title": "Automated Billing",
+            "description": "Placement fees are calculated and invoiced automatically when a hire is confirmed. No manual billing, no chasing payments."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-money-bill-wave",
+            "title": "Stripe Payouts",
+            "description": "Recruiter earnings are paid via Stripe on a fixed cadence after the guarantee period. Track every pending and completed payout in your dashboard."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-calendar-check",
+            "title": "Interview Scheduling",
+            "description": "Coordinate interview availability between recruiters and hiring teams without leaving the platform."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-mixed",
+            "title": "Performance Analytics",
+            "description": "Track placement rates, time-to-fill, earnings per role, and pipeline health across all your active engagements."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-people-group",
+            "title": "Candidate Database",
+            "description": "Your candidate network follows you across every role. Build relationships, track interactions, and re-engage past candidates efficiently."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "faq",
+        "kicker": "COMMON QUESTIONS",
+        "heading": "Feature Details",
+        "items": [
+          {
+            "question": "Does Splits Network replace my existing ATS?",
+            "answer": "For most split-fee workflows, yes. The built-in ATS handles candidate tracking across all roles with full pipeline visibility. If your organization uses an enterprise ATS, we support integrations via our API and partner connections."
+          },
+          {
+            "question": "How does AI matching work?",
+            "answer": "Our matching engine evaluates candidates against role requirements across structured skills, experience depth, location, and compensation expectations. Match scores are displayed as percentages with a breakdown by category — you always know why a candidate ranks where they do."
+          },
+          {
+            "question": "Are there limits on messaging or candidate submissions?",
+            "answer": "Starter plan includes generous monthly limits. Pro and Enterprise plans have unlimited submissions and messaging. All plans have visibility into their current usage in the dashboard."
+          },
+          {
+            "question": "Which features are available on the free plan?",
+            "answer": "The Starter plan includes full marketplace access, candidate submissions, direct messaging, and basic pipeline management. AI matching, advanced analytics, and custom ATS stages are available on paid plans."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "See the Platform in Action",
+        "subtitle": "Start free and explore every feature. No credit card required.",
+        "buttons": [
+          {
+            "label": "Start Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "Book a Demo",
+            "href": "mailto:demo@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "demo@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "how-it-works",
+    "app": "portal",
+    "title": "How It Works | Splits Network",
+    "description": "A clear walkthrough of the split-fee recruiting process — from role posting to automated fee distribution. Understand the model before you engage.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "5 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "HOW IT WORKS",
+        "kickerIcon": "fa-duotone fa-regular fa-circle-nodes",
+        "headlineWords": [
+          {
+            "text": "Split-Fee"
+          },
+          {
+            "text": "Recruiting,"
+          },
+          {
+            "text": "Explained",
+            "accent": true
+          }
+        ],
+        "subtitle": "The split-fee model has connected recruiters for decades. Splits Network gives it the infrastructure to work at scale — transparent, tracked, and paid automatically.",
+        "image": "/images/content/how-it-works-hero.jpg",
+        "imageAlt": "Network diagram illustrating the connection between companies, recruiters, and candidates",
+        "buttons": [
+          {
+            "label": "Get Started",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "For Companies",
+            "href": "/for-companies",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE MODEL",
+        "kickerColor": "primary",
+        "heading": "What Split-Fee Recruiting Actually Means",
+        "paragraphs": [
+          "In traditional recruiting, a single agency owns the relationship with both the company and the candidate. They collect the full placement fee. Split-fee recruiting changes that dynamic: the hiring company posts a role, any qualified recruiter can engage, and when a placement is made, the fee is divided between the job-posting party and the placing recruiter.",
+          "The result is broader candidate coverage for companies, access to more roles for recruiters, and a marketplace where specialization is rewarded. <strong>Everyone earns based on their contribution.</strong> Splits Network is the platform that makes this model operationally viable — handling agreements, pipelines, and payments in one place."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "timeline",
+        "kicker": "THE PROCESS",
+        "heading": "From Role Posted to Placement Paid",
+        "subtitle": "Five clear steps. Every stage is tracked on the platform so all parties have full visibility.",
+        "steps": [
+          {
+            "number": 1,
+            "title": "Company Posts a Role",
+            "description": "A hiring company creates a role listing with job requirements, compensation range, and fee structure. They set the total placement fee and the split percentage — for example, 20% of first-year salary, split 50/50. Terms are public before any recruiter engages.",
+            "icon": "fa-duotone fa-regular fa-briefcase"
+          },
+          {
+            "number": 2,
+            "title": "Recruiters Discover and Engage",
+            "description": "Specialized recruiters browse the marketplace and engage with roles matching their expertise and candidate network. Each engagement is a formal agreement — the recruiter sees and accepts the fee terms before beginning work.",
+            "icon": "fa-duotone fa-regular fa-magnifying-glass"
+          },
+          {
+            "number": 3,
+            "title": "Candidates Are Matched and Submitted",
+            "description": "Engaged recruiters submit candidates through the platform. AI matching scores each submission against the role requirements. Hiring managers review candidates in their shared ATS pipeline, advance them through stages, and coordinate interviews.",
+            "icon": "fa-duotone fa-regular fa-users"
+          },
+          {
+            "number": 4,
+            "title": "Placement Is Made",
+            "description": "When the hiring company makes an offer and the candidate accepts, the placement is confirmed on the platform. The system logs the start date, verifies the hire, and begins the guarantee period clock.",
+            "icon": "fa-duotone fa-regular fa-trophy"
+          },
+          {
+            "number": 5,
+            "title": "Fees Split Automatically",
+            "description": "After the guarantee period passes, the placement fee is calculated against the confirmed compensation. The company is invoiced via Stripe. The placing recruiter's share is paid out automatically. Every amount is visible to all parties.",
+            "icon": "fa-duotone fa-regular fa-money-bill-wave"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "FOR COMPANIES",
+        "heading": "One Posting, Many Recruiters",
+        "paragraphs": [
+          "When a role goes live on Splits Network, it reaches every recruiter in the network simultaneously. Specialists engage based on their expertise — not based on who has an existing agency relationship with you."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-chart-network",
+            "title": "Broader Reach",
+            "body": "Multiple recruiters working a single role means more candidate pathways. You're no longer dependent on one agency's network."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-eye",
+            "title": "Full Visibility",
+            "body": "See every submission, every pipeline stage, every recruiter interaction. Nothing happens off-platform."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-circle-dollar",
+            "title": "Pay on Results",
+            "body": "No retainers, no upfront fees. You pay a placement fee only when a hire is made."
+          }
+        ],
+        "image": "/images/content/company-dashboard.jpg",
+        "imageAlt": "Company hiring dashboard showing multiple recruiter submissions for an open role",
+        "layout": "text-left",
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "03",
+        "kicker": "FOR RECRUITERS",
+        "heading": "Access Every Role, Earn What You Place",
+        "paragraphs": [
+          "The marketplace is open. Any recruiter can browse all posted roles and engage with those matching their specialization. Fee terms are visible upfront — no negotiation, no ambiguity."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-filter",
+            "title": "Filter to Your Niche",
+            "body": "Search by industry, role type, location, and fee range. Only engage with roles where you have a genuine competitive edge."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-paper-plane",
+            "title": "Submit With Confidence",
+            "body": "Your submission is tracked, time-stamped, and attributed. You always know where your candidates stand."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+            "title": "Transparent Earnings",
+            "body": "Your split percentage is locked when you engage. No surprises when the placement closes."
+          }
+        ],
+        "image": "/images/content/recruiter-marketplace.jpg",
+        "imageAlt": "Recruiter browsing available roles in the Splits Network marketplace",
+        "layout": "text-right",
+        "bg": "base-200"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "The split-fee model has existed for decades. What's changed is the infrastructure to make it work at scale. That's what Splits Network built.",
+        "bg": "neutral",
+        "style": "centered"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "WHY IT WORKS",
+        "heading": "Aligned Incentives at Every Step",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Companies Get Coverage",
+            "description": "Broader recruiter engagement means more qualified candidates, faster. Competition among recruiters keeps quality high.",
+            "metric": "< 21 days",
+            "metricLabel": "average time to fill"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiters Get Access",
+            "description": "Independent recruiters can work premium roles that would otherwise require an agency relationship to reach.",
+            "metric": "3x",
+            "metricLabel": "more placements on average"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-scale-balanced",
+            "title": "Terms Are Enforceable",
+            "description": "Every agreement is recorded on the platform. Dispute resolution is built in. No handshake deals, no missing paperwork.",
+            "metric": "100%",
+            "metricLabel": "of terms tracked"
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Process Questions",
+        "items": [
+          {
+            "question": "What happens if a candidate declines after an offer is made?",
+            "answer": "The placement is not confirmed until the candidate starts. If an offer is declined, the role remains active and engaged recruiters can continue submitting. No fee is triggered."
+          },
+          {
+            "question": "How long is the standard guarantee period?",
+            "answer": "The guarantee period is set by the hiring company when they post the role — typically 30, 60, or 90 days. If the candidate leaves within that period, the fee is either refunded or a replacement candidate is sourced, per the agreed terms."
+          },
+          {
+            "question": "Can multiple recruiters submit the same candidate?",
+            "answer": "The platform tracks first-submission attribution. If two recruiters submit the same candidate, the first submission holds. This protects the recruiting community and ensures clear credit."
+          },
+          {
+            "question": "What if I'm both the job-poster and the placing recruiter?",
+            "answer": "That's a standard scenario. Recruiting agencies can post roles and work them internally while also opening them to the broader network for split engagement. You control who sees the role and on what terms."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "Ready to See It Work?",
+        "subtitle": "Post your first role or explore the marketplace. Setup takes under ten minutes.",
+        "buttons": [
+          {
+            "label": "Get Started",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "integration-partners",
+    "app": "portal",
+    "title": "Integration Partners | Splits Network",
+    "description": "Splits Network integrates with your existing recruiting stack. ATS platforms, HRIS, background check providers, payroll, and financial systems — 40+ active integrations.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "4 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "INTEGRATIONS",
+        "kickerIcon": "fa-duotone fa-regular fa-plug-circle-bolt",
+        "headlineWords": [
+          {
+            "text": "Your"
+          },
+          {
+            "text": "Stack,"
+          },
+          {
+            "text": "Connected",
+            "accent": true
+          }
+        ],
+        "subtitle": "Splits Network integrates with the tools your team already uses. ATS platforms, HRIS systems, background check providers, and payroll — your workflow stays intact.",
+        "image": "/images/content/integrations-hero.jpg",
+        "imageAlt": "Integration partner logos arranged around the Splits Network platform interface",
+        "buttons": [
+          {
+            "label": "View All Integrations",
+            "href": "#integration-categories",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-grid-2"
+          },
+          {
+            "label": "Request an Integration",
+            "href": "mailto:integrations@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "40+",
+            "label": "Active Integrations"
+          },
+          {
+            "value": "6",
+            "label": "Integration Categories"
+          },
+          {
+            "value": "REST + Webhooks",
+            "label": "API Architecture",
+            "borderColor": "border-accent"
+          },
+          {
+            "value": "99.9%",
+            "label": "API Uptime"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE APPROACH",
+        "kickerColor": "primary",
+        "heading": "Integrations That Work With Your Process",
+        "paragraphs": [
+          "We don't ask your team to replace existing tools. We connect to them. Splits Network operates as the split-fee layer on top of your existing recruiting stack — syncing candidate data, propagating status updates, and triggering events in the systems your team relies on.",
+          "Every integration is maintained through a versioned REST API and event-driven webhooks. Data flows in both directions. What changes in Splits Network reflects in your ATS. What closes in your payroll system confirms the placement on our end."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "ATS PLATFORMS",
+        "heading": "Applicant Tracking Systems",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "Greenhouse",
+            "description": "Bi-directional candidate sync. Role data imported from Greenhouse; submissions and stage updates pushed back automatically."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "Lever",
+            "description": "Connect your Lever account to push Splits Network candidates into existing pipelines and receive stage-change webhooks."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "Workday Recruiting",
+            "description": "Enterprise-grade sync with Workday. Supports requisition import, candidate push, and offer confirmation events."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "BambooHR",
+            "description": "Pull active job openings directly from BambooHR into the Splits Network marketplace with one-time OAuth connection."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "JazzHR",
+            "description": "Import roles and export candidates to JazzHR pipelines. Automated status mirroring keeps both systems current."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "iCIMS",
+            "description": "Full iCIMS Talent Cloud integration for enterprise hiring teams. Supports multi-requisition workflows."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "HRIS & HR PLATFORMS",
+        "heading": "Human Resources Systems",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "Workday HCM",
+            "description": "Confirm placements against Workday employee records. Start date verification triggers the guarantee period clock automatically."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "SAP SuccessFactors",
+            "description": "Sync open requisitions from SuccessFactors and receive placement confirmations back for payroll and onboarding initiation."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "ADP Workforce Now",
+            "description": "New hire records in ADP confirm placement outcomes and trigger fee processing on the Splits Network side."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "Rippling",
+            "description": "Rippling's unified HR platform connects onboarding directly to placement verification. One workflow from offer to employed."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "Gusto",
+            "description": "For growing companies on Gusto, new employee records in payroll serve as placement confirmation for fee release."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "Personio",
+            "description": "European HRIS integration for multinational companies. Supports EU data residency requirements."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "BACKGROUND CHECKS",
+        "heading": "Verify Before You Hire",
+        "paragraphs": [
+          "Background check results flow into Splits Network candidate profiles, keeping all pre-hire verification in one place. Hiring managers see check status directly in the pipeline without switching tools."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Checkr",
+            "description": "Criminal background, employment history, and education verification — triggered from within the candidate pipeline."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "HireRight",
+            "description": "Enterprise background screening with global coverage. Supports multi-country candidate verification."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Sterling",
+            "description": "Healthcare and finance-specific screening packages. Compliance-ready workflows for regulated industries."
+          }
+        ],
+        "image": "/images/content/background-check-integration.jpg",
+        "imageAlt": "Candidate profile showing background check status alongside pipeline stage",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "PAYMENTS & BILLING",
+        "heading": "Financial Integrations",
+        "columns": 2,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-credit-card",
+            "title": "Stripe",
+            "description": "All placement fee billing and recruiter payouts run through Stripe. ACH, card, and wire support. Global currency handling."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice",
+            "title": "QuickBooks",
+            "description": "Placement invoices sync to QuickBooks automatically. Reconcile recruiting spend against your books without manual entry."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice",
+            "title": "Xero",
+            "description": "Xero integration for accounting teams. Invoices, payments, and payout records all sync with your Xero ledger."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-building-columns",
+            "title": "NetSuite",
+            "description": "Enterprise financial integration with Oracle NetSuite for companies that require ERP-level billing reconciliation."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "03",
+        "kicker": "DEVELOPER API",
+        "kickerColor": "secondary",
+        "heading": "Build Custom Integrations",
+        "paragraphs": [
+          "The Splits Network public API exposes the full platform model. Roles, candidates, pipelines, placements, and payouts are all accessible via authenticated REST endpoints. Webhooks notify your systems in real time when key events occur.",
+          "API documentation is versioned and maintained at <strong>developer.splits.network</strong>. We support OAuth 2.0 and API key authentication. Rate limits, error codes, and sandbox environments are documented in full."
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "Missing an Integration?",
+        "subtitle": "Our integrations roadmap is driven by what our users need. Submit a request and we'll prioritize accordingly.",
+        "buttons": [
+          {
+            "label": "Request an Integration",
+            "href": "mailto:integrations@splits.network",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-plug-circle-plus"
+          },
+          {
+            "label": "View API Docs",
+            "href": "https://developer.splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "integrations@splits.network",
+        "bg": "neutral"
+      }
+    ]
+  },
+  {
+    "slug": "transparency",
+    "app": "portal",
+    "title": "Transparency | Splits Network",
+    "description": "Splits Network is built on transparent fees, locked-in terms, immutable candidate attribution, and automated payments. Every agreement recorded. Every payment verified.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "6 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "TRANSPARENCY",
+        "kickerIcon": "fa-duotone fa-regular fa-eye",
+        "headlineWords": [
+          {
+            "text": "Nothing"
+          },
+          {
+            "text": "Hidden,"
+          },
+          {
+            "text": "Everything",
+            "accent": true
+          },
+          {
+            "text": "Tracked"
+          }
+        ],
+        "subtitle": "Recruiting has a trust problem. Fees negotiated behind closed doors. Candidates submitted without attribution. Terms that shift after a placement closes. Splits Network was built to end that.",
+        "image": "/images/content/transparency-hero.jpg",
+        "imageAlt": "Clean dashboard interface displaying fee breakdown and placement timeline with full detail",
+        "buttons": [
+          {
+            "label": "See How It Works",
+            "href": "/how-it-works",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-circle-nodes"
+          },
+          {
+            "label": "Read the Terms",
+            "href": "/terms",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE PROBLEM",
+        "kickerColor": "primary",
+        "heading": "Why Recruiting Lacks Trust",
+        "paragraphs": [
+          "Traditional recruiting operates on verbal agreements, relationship capital, and institutional memory. When disputes arise — over fee amounts, candidate ownership, or guarantee terms — there's often no authoritative record. The result is friction, missed payments, and damaged relationships.",
+          "For independent recruiters, the stakes are higher. They're working on contingency, and if the terms aren't in writing and verified by a system, they're vulnerable. Hiring companies face the same problem in reverse: they have no visibility into how their roles are being worked, who's been submitted, or where a candidate stands at any given moment.",
+          "Splits Network was designed around a single principle: <strong>every agreement, every action, and every payment must be recorded, visible, and verifiable.</strong> Transparency isn't a feature — it's the architecture."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "TRANSPARENT BY DESIGN",
+        "heading": "What We Publish, and Why",
+        "columns": 2,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-tag",
+            "title": "Fee Structures Published Upfront",
+            "description": "Before any recruiter engages with a role, they see the total placement fee and their split percentage. There is no negotiation after the fact. The terms you agreed to are the terms that govern the placement."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+            "title": "Immutable Submission Records",
+            "description": "Every candidate submission is time-stamped and attributed. If two recruiters submit the same candidate, the first submission holds — and there's no ambiguity because the record is on the platform."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-table-columns",
+            "title": "Shared Pipeline Visibility",
+            "description": "Hiring companies, job-posting recruiters, and placing recruiters all see the same pipeline. Stage changes are logged. There is no information asymmetry between parties."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+            "title": "Automated Fee Calculation",
+            "description": "When a hire is confirmed, the fee is calculated from the recorded compensation — not from a manual invoice. The math is shown to all parties before payment is processed."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-scale-balanced",
+            "title": "Dispute Resolution on Record",
+            "description": "If a dispute arises, both parties have access to the same platform record. Our resolution process starts from verifiable facts, not competing recollections."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-mixed",
+            "title": "Earnings and Payout History",
+            "description": "Every recruiter has a complete record of their earnings, pending payouts, and historical placements. Every company has a corresponding billing history."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "Before Splits Network, I had two placements where fees were disputed after the fact. Both took months to resolve. Since joining, every placement has been clean — the terms were on record before I submitted a single candidate.",
+        "citation": "David Osei, Independent Recruiter, 14 Years in Tech Recruiting",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "FOR COMPANIES",
+        "heading": "Visibility Into Every Hire",
+        "paragraphs": [
+          "Hiring companies on Splits Network see everything. Which recruiters are engaged on a role, how many candidates have been submitted, where each candidate stands in the pipeline, and what fees will be owed when a placement closes."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-users",
+            "title": "Recruiter Engagement Tracking",
+            "body": "See exactly which recruiters have accepted your role terms and are actively working on your behalf."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-gantt",
+            "title": "Pipeline Audit Trail",
+            "body": "Every stage change, every note, every interview scheduling action is logged with a timestamp and user attribution."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-circle-dollar",
+            "title": "Fee Visibility Before Hire",
+            "body": "Before you confirm a placement, the fee is calculated and displayed. No surprises on the invoice."
+          }
+        ],
+        "image": "/images/content/company-transparency.jpg",
+        "imageAlt": "Hiring manager viewing full pipeline audit trail and fee summary before confirming a hire",
+        "layout": "text-right",
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "03",
+        "kicker": "FOR RECRUITERS",
+        "heading": "Your Work, Attributed and Protected",
+        "paragraphs": [
+          "Independent recruiters are the most vulnerable party in traditional split-fee arrangements. Splits Network gives them the record-keeping and legal scaffolding that protects their work and ensures their earnings."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-fingerprint",
+            "title": "Candidate Attribution",
+            "body": "Your submission record is permanent. The candidate you found and represented is attributed to you — regardless of how long the process takes."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-contract",
+            "title": "Locked-In Terms",
+            "body": "The fee and split you agreed to when you engaged are the terms that apply at close. They cannot be changed unilaterally."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-money-bill-transfer",
+            "title": "Payout Visibility",
+            "body": "Your earnings dashboard shows every pending payout with an expected release date. No chasing invoices."
+          }
+        ],
+        "image": "/images/content/recruiter-attribution.jpg",
+        "imageAlt": "Recruiter earnings dashboard showing attributed placements and payout schedule",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "04",
+        "kicker": "OUR COMMITMENTS",
+        "kickerColor": "secondary",
+        "heading": "What We Commit to Every User",
+        "paragraphs": [
+          "These are not aspirations. They are design requirements that every feature on the platform must satisfy.",
+          "<strong>Terms are immutable once agreed.</strong> No party can modify the fee or split percentage after both parties have engaged. Changes require a new agreement. <strong>Submissions are first-come, permanent.</strong> Candidate attribution is set at submission time and does not change. <strong>Payments are calculated, not negotiated.</strong> When a placement closes, the fee is derived from recorded compensation data — not from a manual invoice that either party creates. <strong>Disputes start from the record.</strong> Our resolution process treats the platform log as the authoritative account. We do not adjudicate based on claims unsupported by platform data."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "Transparency in recruiting isn't idealism. It's what allows both parties to trust the process enough to engage in the first place.",
+        "bg": "neutral",
+        "style": "centered"
+      },
+      {
+        "type": "faq",
+        "kicker": "COMMON QUESTIONS",
+        "heading": "Transparency in Practice",
+        "items": [
+          {
+            "question": "Can a company change the fee after I've submitted a candidate?",
+            "answer": "No. Once you engage with a role and accept the posted fee terms, those terms are locked. Any change to the fee structure creates a new role version, and your engagement under the original terms remains valid for any candidates already submitted."
+          },
+          {
+            "question": "What if a candidate I submitted is hired months later?",
+            "answer": "Your submission record is permanent. If a candidate you submitted is hired — even after a long process — your attribution is intact and your fee applies."
+          },
+          {
+            "question": "Do hiring companies see my candidate's contact details?",
+            "answer": "Candidate contact details are controlled by the submitting recruiter. You choose what profile information is visible to the hiring company before making an introduction. Full contact details are shared only when you explicitly authorize it."
+          },
+          {
+            "question": "What happens if a company disputes a fee after placement?",
+            "answer": "Our dispute resolution process begins with the platform record. If the submission timestamp, engagement agreement, and placement confirmation are all on record, the outcome is clear. We do not entertain disputes that attempt to relitigate terms that were agreed on the platform."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "Recruiting You Can Account For",
+        "subtitle": "Every term agreed. Every candidate tracked. Every payment verified. That is what Splits Network was built to deliver.",
+        "buttons": [
+          {
+            "label": "Get Started",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "Read the Terms",
+            "href": "/terms",
+            "variant": "outline"
+          }
+        ],
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "updates",
+    "app": "portal",
+    "title": "Platform Updates | Splits Network",
+    "description": "The Splits Network changelog — new features, improvements, and what's coming next. Shipped on a two-week cadence.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "4 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "PLATFORM UPDATES",
+        "kickerIcon": "fa-duotone fa-regular fa-sparkles",
+        "headlineWords": [
+          {
+            "text": "What's"
+          },
+          {
+            "text": "New",
+            "accent": true
+          },
+          {
+            "text": "on"
+          },
+          {
+            "text": "Splits"
+          },
+          {
+            "text": "Network"
+          }
+        ],
+        "subtitle": "A running record of platform changes, new features, and improvements. We ship on a two-week cadence. Everything significant lands here.",
+        "buttons": [
+          {
+            "label": "Follow Updates",
+            "href": "https://linkedin.com/company/splits-network",
+            "variant": "primary",
+            "icon": "fa-brands fa-linkedin"
+          },
+          {
+            "label": "Request a Feature",
+            "href": "mailto:feedback@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "47",
+            "label": "Releases This Year"
+          },
+          {
+            "value": "2 weeks",
+            "label": "Average Ship Cadence"
+          },
+          {
+            "value": "312",
+            "label": "Issues Closed",
+            "borderColor": "border-accent"
+          },
+          {
+            "value": "94%",
+            "label": "User-Requested Features"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "timeline",
+        "kicker": "RECENT RELEASES",
+        "heading": "2026 Changelog",
+        "subtitle": "Major releases and meaningful improvements. Minor patches and bug fixes are tracked in the developer changelog.",
+        "steps": [
+          {
+            "number": 1,
+            "title": "AI Match Scoring v2 — February 2026",
+            "description": "Rebuilt the candidate-role matching engine from the ground up. Match scores now include a four-category breakdown: skills alignment, experience depth, location compatibility, and compensation fit. Scores are explainable — every recruiter and hiring manager can see why a candidate ranked where they did. Average placement accuracy improved by 18% in beta.",
+            "icon": "fa-duotone fa-regular fa-robot"
+          },
+          {
+            "number": 2,
+            "title": "Shared Pipeline Views — January 2026",
+            "description": "Companies and recruiters now share a single, synchronized pipeline view. Stage changes by either party appear in real time for all authorized users. No more parallel tracking in separate tools. Includes a full audit log with timestamps and user attribution for every action.",
+            "icon": "fa-duotone fa-regular fa-table-columns"
+          },
+          {
+            "number": 3,
+            "title": "Stripe Payout Improvements — January 2026",
+            "description": "Recruiter payout processing migrated to Stripe Connect Express. Payouts now release within 24 hours of the guarantee period end — down from 3–5 business days. Earnings dashboard redesigned with projected payout dates, pending balance breakdown, and full payout history export.",
+            "icon": "fa-duotone fa-regular fa-money-bill-wave"
+          },
+          {
+            "number": 4,
+            "title": "Greenhouse Integration — December 2025",
+            "description": "Greenhouse is now supported as a bi-directional ATS integration. Roles can be imported directly from your Greenhouse account. Candidate submissions and stage updates sync back automatically. OAuth-based setup takes under five minutes. Lever and BambooHR integrations are in closed beta.",
+            "icon": "fa-duotone fa-regular fa-plug-circle-bolt"
+          },
+          {
+            "number": 5,
+            "title": "Role Marketplace Redesign — November 2025",
+            "description": "The marketplace received a full layout overhaul. Role cards now show fee amounts, split percentages, recruiter engagement count, and time posted at a glance. Advanced filtering by industry, role type, location radius, and fee range. Save searches and get notified when new matching roles are posted.",
+            "icon": "fa-duotone fa-regular fa-briefcase"
+          },
+          {
+            "number": 6,
+            "title": "Candidate Database — October 2025",
+            "description": "Recruiters can now maintain a personal candidate database across all roles and submissions. Tag candidates by skill set, industry, and availability. Notes and interaction history are tracked per candidate. Re-engage past candidates against new roles with one click.",
+            "icon": "fa-duotone fa-regular fa-people-group"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "The shared pipeline view changed how our team collaborates with recruiters. We went from weekly check-in calls to checking the platform. Everything we need is already there.",
+        "citation": "Talent Acquisition Lead, Series C SaaS Company",
+        "bg": "base-100",
+        "style": "left-border"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "COMING SOON",
+        "kickerColor": "secondary",
+        "heading": "What We're Building Next",
+        "paragraphs": [
+          "Our roadmap is public and driven by user feedback. Here is what is currently in active development for Q1 and Q2 2026.",
+          "<strong>Interview scheduling.</strong> Native interview coordination between recruiters and hiring teams — without a separate tool. Calendar sync, availability matching, and confirmation notifications. Closed beta in March 2026.",
+          "<strong>Mobile app.</strong> A native iOS and Android app for recruiters who manage their pipeline on the move. Full marketplace access, candidate submissions, messaging, and earnings tracking. Public beta in April 2026.",
+          "<strong>Lever and BambooHR integrations.</strong> Currently in closed beta alongside select enterprise customers. General availability in March 2026."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "IMPROVEMENTS",
+        "heading": "Also Shipped in 2025",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-bell",
+            "title": "Smart Notification Engine",
+            "description": "Consolidated in-app and email notifications. Choose what triggers alerts and how you receive them. No more notification fatigue."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-magnifying-glass",
+            "title": "Resume Parser v3",
+            "description": "Improved extraction of skills, credentials, and experience from unstructured resume formats. Accuracy up 23% from v2."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-messages",
+            "title": "Threaded Messaging",
+            "description": "Conversations are now threaded by role and candidate. Context stays organized even across long placements."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Two-Factor Authentication",
+            "description": "TOTP-based 2FA available for all accounts. Enterprise plans can enforce 2FA organization-wide."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-mixed",
+            "title": "Analytics Dashboard v2",
+            "description": "Rebuilt analytics with customizable date ranges, funnel visualization, and CSV export for all reports."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-wand-magic-sparkles",
+            "title": "Role Description Assistant",
+            "description": "AI-assisted role description writing. Input the essentials; the assistant drafts a structured, searchable job description."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "02",
+        "kicker": "HOW WE SHIP",
+        "kickerColor": "primary",
+        "heading": "Our Development Philosophy",
+        "paragraphs": [
+          "Splits Network ships on a two-week cycle. Each release includes a defined set of improvements — features, fixes, and infrastructure changes — and we don't move goalposts mid-cycle. This discipline keeps our roadmap visible and predictable.",
+          "Feature requests from active users carry direct weight in prioritization. We track requests in the open and publish which have been accepted into the roadmap. If you submitted a request that shipped, you'll see it here."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Shape What We Build Next",
+        "subtitle": "Submit a feature request, report a bug, or join our beta program. Your input determines what ships in the next cycle.",
+        "buttons": [
+          {
+            "label": "Submit Feedback",
+            "href": "mailto:feedback@splits.network",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-comment-plus"
+          },
+          {
+            "label": "Join Beta Program",
+            "href": "mailto:beta@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "feedback@splits.network",
+        "bg": "neutral"
+      }
+    ]
+  },
+  {
+    "slug": "platform/analytics",
+    "app": "portal",
+    "title": "Analytics | Splits Network Platform",
+    "description": "Real-time recruiting analytics built into the Splits Network platform. Track pipeline health, recruiter performance, placement metrics, and revenue forecasting in one dashboard.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "PLATFORM ANALYTICS",
+        "kickerIcon": "fa-duotone fa-regular fa-chart-mixed",
+        "headlineWords": [
+          {
+            "text": "Data"
+          },
+          {
+            "text": "That"
+          },
+          {
+            "text": "Drives",
+            "accent": true
+          },
+          {
+            "text": "Better"
+          },
+          {
+            "text": "Decisions"
+          }
+        ],
+        "subtitle": "Real-time visibility into every metric that matters. Pipeline health, recruiter performance, placement trends, and revenue forecasting — all in one dashboard built for recruiting operations.",
+        "image": "/images/content/platform-analytics-hero.jpg",
+        "imageAlt": "Recruiting analytics dashboard showing pipeline and revenue metrics",
+        "buttons": [
+          {
+            "label": "See the Dashboard",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-chart-line"
+          },
+          {
+            "label": "Request a Demo",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "180+",
+            "label": "Metrics Tracked"
+          },
+          {
+            "value": "Real-Time",
+            "label": "Data Refresh"
+          },
+          {
+            "value": "12-Month",
+            "label": "Revenue Forecasting"
+          },
+          {
+            "value": "100%",
+            "label": "Pipeline Visibility",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE PROBLEM",
+        "kickerColor": "primary",
+        "heading": "Recruiting Without Data Is Guesswork",
+        "paragraphs": [
+          "Most recruiting teams manage their operations across spreadsheets, email threads, and disconnected tools. The result: no clear picture of what's working, where candidates are stalling, or which recruiters are performing.",
+          "Splits Network analytics changes that. Every submission, every stage transition, every placement, and every fee is tracked automatically. <strong>You get the complete picture without building the infrastructure yourself.</strong>"
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "DASHBOARD CAPABILITIES",
+        "heading": "Everything on One Screen",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-gauge-high",
+            "title": "Pipeline Health",
+            "description": "See how many candidates are active at each stage across all open roles. Identify bottlenecks before they become missed deadlines.",
+            "stats": "Live view"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiter Performance",
+            "description": "Track submission-to-interview rates, interview-to-offer ratios, and placements per recruiter. Know who's delivering.",
+            "stats": "Per-recruiter breakdown"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-money-bill-wave",
+            "title": "Revenue Forecasting",
+            "description": "Model expected placement revenue based on active pipeline. Includes guarantee period tracking and projected payout dates.",
+            "stats": "12-month horizon",
+            "badge": "Pro"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-clock",
+            "title": "Time-to-Fill",
+            "description": "Measure average time from role posting to accepted offer, by role type, seniority level, and recruiter."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-pie",
+            "title": "Source Attribution",
+            "description": "Understand which recruiters and candidate sources drive your most successful hires. Allocate your fee budget where it delivers."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-calendar-check",
+            "title": "Activity Heatmaps",
+            "description": "Visualize submission volume, interview scheduling, and offer activity by day and week. Plan capacity with confidence.",
+            "badge": "Pro"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "RECRUITER INSIGHTS",
+        "heading": "Know Who's Performing",
+        "paragraphs": [
+          "When multiple recruiters are working your roles, knowing who to engage more — and who to let go — is the difference between a fast hire and a stalled one."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-ranking-star",
+            "title": "Ranked Leaderboards",
+            "body": "Compare recruiters by placement rate, speed, and candidate quality score across any time period."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-arrow-trend-up",
+            "title": "Trend Analysis",
+            "body": "See whether performance is improving or declining week over week. Act on the signal before it becomes a pattern."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-envelope-open-text",
+            "title": "Submission Quality",
+            "description": "Track what percentage of submitted candidates make it to interview stage. Quality is measurable.",
+            "body": "Track what percentage of submitted candidates advance. Quality, not just volume, is what the metric reveals."
+          }
+        ],
+        "image": "/images/content/recruiter-performance.jpg",
+        "imageAlt": "Recruiter performance leaderboard showing placement rates and earnings",
+        "layout": "text-right",
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "We cut our time-to-fill by 30% in one quarter by using the pipeline analytics to identify exactly where candidates were stalling. The data was always there — we just couldn't see it before.",
+        "citation": "Head of Talent Acquisition, Series C Technology Company",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "WHO BENEFITS",
+        "heading": "Analytics Built for Every Role",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Hiring Companies",
+            "description": "Full visibility into every recruiter's activity on your roles. Approve, reject, and redirect without losing context.",
+            "metric": "30%",
+            "metricLabel": "reduction in time-to-fill"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiting Leads",
+            "description": "Understand your team's collective output. Identify training opportunities, capacity gaps, and top performers.",
+            "metric": "2x",
+            "metricLabel": "more placements per recruiter"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-chart-line",
+            "title": "Finance Teams",
+            "description": "Forecast recruiting fee spend with confidence. Every pending payout, every guarantee period, every projected revenue — tracked.",
+            "metric": "±8%",
+            "metricLabel": "revenue forecast accuracy"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Analytics Questions",
+        "items": [
+          {
+            "question": "Is analytics available on all plans?",
+            "answer": "Core metrics — pipeline health, placement counts, and basic recruiter activity — are available on all plans. Advanced analytics including revenue forecasting, heatmaps, and custom exports are Pro and Enterprise features."
+          },
+          {
+            "question": "How current is the data?",
+            "answer": "Dashboard metrics refresh in real time as activity occurs on the platform. Revenue forecasting models are recalculated daily based on current pipeline state."
+          },
+          {
+            "question": "Can I export analytics data?",
+            "answer": "Pro and Enterprise plans include CSV and Excel exports for all dashboard reports. Enterprise plans also include API access for connecting to your BI tools of choice."
+          },
+          {
+            "question": "Are analytics shared between recruiters and companies?",
+            "answer": "No. Companies see analytics for their roles and the recruiters working them. Recruiters see their own performance data. Neither party sees the other's private pipeline data."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Stop Guessing. Start Knowing.",
+        "subtitle": "Every placement, every pipeline stage, every payout — tracked automatically. Start your free account today.",
+        "buttons": [
+          {
+            "label": "Get Started Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-chart-line"
+          },
+          {
+            "label": "Request a Demo",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "platform/ai-matching",
+    "app": "portal",
+    "title": "AI Matching | Splits Network Platform",
+    "description": "AI-powered candidate-to-role matching built into Splits Network. Score candidates across 40+ dimensions and surface the strongest fits in minutes, not hours.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "AI MATCHING",
+        "kickerIcon": "fa-duotone fa-regular fa-robot",
+        "headlineWords": [
+          {
+            "text": "The"
+          },
+          {
+            "text": "Right"
+          },
+          {
+            "text": "Candidate,"
+          },
+          {
+            "text": "Found",
+            "accent": true
+          },
+          {
+            "text": "Faster"
+          }
+        ],
+        "subtitle": "Splits Network's AI matching engine scores every candidate against every open role across 40+ dimensions — skills, experience depth, industry context, and compensation alignment. Recruiters see the strongest matches first.",
+        "image": "/images/content/ai-matching-hero.jpg",
+        "imageAlt": "AI matching interface showing candidate fit scores against role requirements",
+        "buttons": [
+          {
+            "label": "See It in Action",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-sparkles"
+          },
+          {
+            "label": "Request a Demo",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "40+",
+            "label": "Match Dimensions"
+          },
+          {
+            "value": "95%",
+            "label": "Accuracy Rate"
+          },
+          {
+            "value": "68%",
+            "label": "Faster Shortlisting"
+          },
+          {
+            "value": "3.2x",
+            "label": "Higher Interview Rate",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE OLD WAY",
+        "kickerColor": "primary",
+        "heading": "Manual Matching Doesn't Scale",
+        "paragraphs": [
+          "A recruiter with 200 candidates and 15 open roles faces a combinatorial problem that no spreadsheet can solve. Manual matching relies on memory and pattern recognition — both of which degrade under volume.",
+          "The cost is real. Qualified candidates get overlooked. Strong roles stay open too long. Submissions that don't fit waste everyone's time. <strong>Matching accuracy directly determines placement rate — and placement rate is the business.</strong>"
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "THE ENGINE",
+        "heading": "How the Matching Works",
+        "paragraphs": [
+          "The matching engine runs the moment a candidate profile is updated or a new role is posted. It evaluates fit across structured signals — not just keyword overlap."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-layer-group",
+            "title": "Skills Depth Analysis",
+            "body": "Distinguishes between surface-level exposure and demonstrated proficiency. A candidate who used a technology in one project is scored differently from someone with five years of production experience."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Industry Context Mapping",
+            "body": "Understands that experience in regulated industries — healthcare, finance, government — carries context that transfers selectively. Role requirements and candidate history are mapped accordingly."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-scale-balanced",
+            "title": "Compensation Alignment",
+            "body": "Cross-references candidate compensation expectations against role budget. Surfaces only candidates whose expectations fall within the role's range, eliminating late-stage surprises."
+          }
+        ],
+        "image": "/images/content/ai-match-engine.jpg",
+        "imageAlt": "Candidate match score breakdown showing skills, experience, and alignment dimensions",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "03",
+        "kicker": "BEFORE AND AFTER",
+        "heading": "From Hours of Review to Minutes of Action",
+        "paragraphs": [
+          "The difference isn't just speed. It's what the recruiter does with the time saved — more candidate conversations, more client engagement, more placements."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-hourglass-half",
+            "title": "Before: Manual Triage",
+            "body": "2–4 hours reviewing candidate profiles per role. Decisions based on gut and proximity bias. Submissions often misaligned with what the hiring manager actually needs."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-bolt",
+            "title": "After: AI-Assisted Shortlisting",
+            "body": "Top candidates surfaced in minutes. Each with a scored breakdown the recruiter can review, override, or act on immediately. Submissions that land interviews, not just inboxes."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-sliders",
+            "title": "Always Recruiter-Controlled",
+            "body": "AI recommends. Recruiters decide. Every match score can be reviewed, every dimension inspected. The engine augments judgment — it doesn't replace it."
+          }
+        ],
+        "image": "/images/content/ai-before-after.jpg",
+        "imageAlt": "Side-by-side comparison of manual screening workflow versus AI-assisted shortlisting",
+        "layout": "text-right",
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "The match scores changed how I work completely. I used to spend Monday mornings triaging. Now I spend them on calls. My submission-to-interview rate went from 34% to 61% in two months.",
+        "citation": "Marcus Webb, Independent Technical Recruiter",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "MATCHING FEATURES",
+        "heading": "Precision Across Every Stage",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-magnifying-glass",
+            "title": "Reverse Match",
+            "description": "Given a role, find the best candidates in your database. Given a candidate, find the roles where they're most competitive."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-bell",
+            "title": "Match Alerts",
+            "description": "Get notified when a new candidate enters your database whose profile scores highly against an open role. Act before competing recruiters do."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-circle-info",
+            "title": "Transparent Scoring",
+            "description": "Every match score includes a dimension-by-dimension breakdown. Understand exactly why a candidate ranked where they did."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-arrows-rotate",
+            "title": "Continuous Reranking",
+            "description": "As candidate profiles are updated and role requirements change, match scores update automatically. Your shortlist stays current."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-thumbs-up",
+            "title": "Feedback Learning",
+            "description": "When you mark a submission as strong or weak, the engine incorporates that signal. Matching improves the more you use it.",
+            "badge": "Pro"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-database",
+            "title": "Cross-Network Matching",
+            "description": "Pro subscribers can opt in to anonymous cross-network matching — discovering candidates represented by other recruiters available for split placement.",
+            "badge": "Pro"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "AI Matching Questions",
+        "items": [
+          {
+            "question": "Does AI matching require additional setup?",
+            "answer": "No. Matching runs automatically on all candidate profiles and role listings. The more complete a candidate profile and role description, the more accurate the scores — but there is no separate configuration step."
+          },
+          {
+            "question": "Can I override or adjust match scores?",
+            "answer": "Yes. Match scores are recommendations, not mandates. You can view the dimension breakdown, adjust weighting for your specific needs, and always choose to submit any candidate you believe is the right fit."
+          },
+          {
+            "question": "Is matching available on all plans?",
+            "answer": "Basic match scoring is available on all plans. Advanced features — feedback learning, cross-network matching, and custom dimension weighting — are available on Pro and Enterprise plans."
+          },
+          {
+            "question": "How does the engine handle non-traditional career paths?",
+            "answer": "The engine evaluates demonstrated skills and outcomes, not just job titles and tenure. Candidates with unconventional paths who demonstrate the required competencies score accordingly. The goal is finding the right fit, not the right resume format."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Match Smarter. Place Faster.",
+        "subtitle": "AI matching is built into every Splits Network account. Start free and see your first match scores today.",
+        "buttons": [
+          {
+            "label": "Start Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-sparkles"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "platform/ats",
+    "app": "portal",
+    "title": "ATS | Splits Network Platform",
+    "description": "A built-in applicant tracking system designed for split-fee recruiting. Kanban pipelines, collaborative notes, interview scheduling, and automatic fee tracking — all in one platform.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "APPLICANT TRACKING",
+        "kickerIcon": "fa-duotone fa-regular fa-table-columns",
+        "headlineWords": [
+          {
+            "text": "An"
+          },
+          {
+            "text": "ATS"
+          },
+          {
+            "text": "Built",
+            "accent": true
+          },
+          {
+            "text": "for"
+          },
+          {
+            "text": "Split-Fee"
+          }
+        ],
+        "subtitle": "Generic applicant tracking systems were designed for internal HR teams. Splits Network's ATS is built for the split-fee model — where multiple recruiters work a role, candidates have multiple advocates, and every submission carries financial weight.",
+        "image": "/images/content/platform-ats-hero.jpg",
+        "imageAlt": "Kanban pipeline view showing candidate stages across multiple active roles",
+        "buttons": [
+          {
+            "label": "See the Pipeline",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-table-columns"
+          },
+          {
+            "label": "Request a Demo",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "Unlimited",
+            "label": "Pipeline Stages"
+          },
+          {
+            "value": "Multi-Recruiter",
+            "label": "Role Collaboration"
+          },
+          {
+            "value": "One Click",
+            "label": "Candidate Submission"
+          },
+          {
+            "value": "Zero",
+            "label": "External Tools Needed",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE DIFFERENCE",
+        "kickerColor": "primary",
+        "heading": "Why Generic ATS Tools Fall Short",
+        "paragraphs": [
+          "Most ATS platforms assume a single hiring team owns every candidate. In split-fee recruiting, that assumption breaks immediately. Candidates are represented by external recruiters. Submissions come from multiple sources. Fee terms vary by role and recruiter.",
+          "Splits Network's ATS understands this model natively. <strong>Every candidate record tracks who submitted them, what fee terms apply, which stage they're in, and who needs to take action next.</strong> No retrofitting required."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "THE PIPELINE",
+        "heading": "Kanban That Reflects How You Actually Hire",
+        "paragraphs": [
+          "Configure your pipeline stages to match your actual hiring process — not a generic template. Move candidates through stages with one click, trigger automated notifications, and keep every stakeholder aligned."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-grip",
+            "title": "Drag-and-Drop Stages",
+            "body": "Advance candidates through your pipeline visually. Stage changes automatically notify the submitting recruiter and update the timeline record."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-screwdriver-wrench",
+            "title": "Configurable Workflows",
+            "body": "Define the stages that match your process: application review, screening, technical interview, final round, offer. Add as many stages as the role requires."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-users-gear",
+            "title": "Role-Level Permissions",
+            "body": "Hiring managers see candidates for their roles. Recruiters see the candidates they submitted. Privacy controls ensure the right people see the right information."
+          }
+        ],
+        "image": "/images/content/ats-pipeline.jpg",
+        "imageAlt": "Kanban view of active candidate pipeline showing stages from submission to offer",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "ATS CAPABILITIES",
+        "heading": "Every Tool You Need, Nothing You Don't",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-user-circle",
+            "title": "Candidate Profiles",
+            "description": "Rich profiles with resume parsing, skills extraction, work history, and all submission and communication history in one record."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-calendar",
+            "title": "Interview Scheduling",
+            "description": "Coordinate interviews directly in the platform. Send calendar invites, track confirmations, and log feedback without leaving the pipeline."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-note-sticky",
+            "title": "Collaborative Notes",
+            "description": "Hiring managers and recruiters can leave notes on candidate records. Context is shared, decisions are documented, and nothing gets lost in email."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-paper-plane",
+            "title": "One-Click Submission",
+            "description": "Recruiters submit candidates from their talent pool directly to a role. Fee terms are attached automatically based on the role's split structure."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-lines",
+            "title": "Resume Management",
+            "description": "Store, version, and share candidate resumes within the platform. No more attaching files to emails or losing track of which version was submitted."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+            "title": "Full Audit Trail",
+            "description": "Every stage change, note, submission, and decision is timestamped and logged. Complete accountability for every candidate's journey.",
+            "badge": "Pro"
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "We replaced three separate tools — a spreadsheet tracker, a shared inbox, and a legacy ATS — with Splits Network. The built-in ATS handles everything those tools did and understands the split-fee context they never could.",
+        "citation": "Operations Director, Boutique Recruiting Firm",
+        "bg": "neutral",
+        "style": "centered"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "FOR EVERY STAKEHOLDER",
+        "heading": "One Pipeline, Multiple Perspectives",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Hiring Companies",
+            "description": "See every candidate submitted for your roles, their current stage, and the recruiter who submitted them. Advance, reject, or request more information from one view.",
+            "metric": "100%",
+            "metricLabel": "submission visibility"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiters",
+            "description": "Track every candidate you've submitted across all active roles. Know exactly where they stand and what action is needed without chasing hiring managers for updates.",
+            "metric": "Zero",
+            "metricLabel": "update emails needed"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-people-group",
+            "title": "Recruiting Teams",
+            "description": "Manage your entire team's candidate pipeline in one place. Assign candidates to team members, review activity, and prevent duplicate submissions.",
+            "metric": "All roles",
+            "metricLabel": "in one dashboard"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "ATS Questions",
+        "items": [
+          {
+            "question": "Can I import candidates from an existing ATS?",
+            "answer": "Yes. Splits Network supports CSV import for candidate records, and our Enterprise plan includes direct integration with major ATS platforms including Greenhouse, Lever, and Workday."
+          },
+          {
+            "question": "How many pipeline stages can I create?",
+            "answer": "Unlimited. Configure as many stages as your hiring process requires. Stages can be created, renamed, and reordered at any time without affecting existing candidate records."
+          },
+          {
+            "question": "Can multiple recruiters work the same role without seeing each other's candidates?",
+            "answer": "Yes. Each recruiter only sees the candidates they submitted unless a hiring manager explicitly shares a record. Competing recruiters working the same role maintain full candidate confidentiality."
+          },
+          {
+            "question": "Does the ATS connect to the billing system?",
+            "answer": "Directly. When a candidate is moved to the hired stage, the placement fee is calculated automatically based on the role's fee structure and split terms. No manual invoice creation required."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Run Your Pipeline From One Place",
+        "subtitle": "The ATS is built in. No integration required, no separate subscription, no migration project.",
+        "buttons": [
+          {
+            "label": "Start Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-table-columns"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "platform/billing",
+    "app": "portal",
+    "title": "Billing & Payments | Splits Network Platform",
+    "description": "Automated fee calculation, invoicing, and payment processing for split-fee placements. Stripe-powered payouts, guarantee period tracking, and transparent fee splits — all handled automatically.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "BILLING & PAYMENTS",
+        "kickerIcon": "fa-duotone fa-regular fa-file-invoice-dollar",
+        "headlineWords": [
+          {
+            "text": "Fees"
+          },
+          {
+            "text": "Calculated."
+          },
+          {
+            "text": "Splits",
+            "accent": true
+          },
+          {
+            "text": "Enforced."
+          },
+          {
+            "text": "Payments"
+          },
+          {
+            "text": "Automatic."
+          }
+        ],
+        "subtitle": "From placement confirmation to payout, the billing system handles every calculation, every invoice, and every transfer. Split percentages, guarantee periods, and fee structures are locked in at the start — not disputed at the end.",
+        "image": "/images/content/platform-billing-hero.jpg",
+        "imageAlt": "Billing dashboard showing placement fees, pending payouts, and completed transactions",
+        "buttons": [
+          {
+            "label": "See How Billing Works",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-credit-card"
+          },
+          {
+            "label": "View Pricing",
+            "href": "/pricing",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "$2.4M+",
+            "label": "Paid Out Monthly"
+          },
+          {
+            "value": "100%",
+            "label": "Automated Calculations"
+          },
+          {
+            "value": "Stripe",
+            "label": "Payment Processing"
+          },
+          {
+            "value": "Zero",
+            "label": "Fee Disputes",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE PROBLEM WITH MANUAL BILLING",
+        "kickerColor": "primary",
+        "heading": "Placement Fees Shouldn't Be Negotiated Twice",
+        "paragraphs": [
+          "In traditional split-fee arrangements, the placement happens and then the billing conversation starts. Who calculates the fee? What percentage applies? When does the guarantee period end? These questions cost time, damage relationships, and occasionally end in disputes that neither party wanted.",
+          "Splits Network eliminates ambiguity entirely. <strong>Fee structures are agreed upon when a recruiter engages a role, not after a candidate is hired.</strong> When a placement is confirmed, the system calculates the fee, issues the invoice, processes the payment, and records everything — automatically."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "HOW IT WORKS",
+        "heading": "From Offer Acceptance to Paid Out",
+        "paragraphs": [
+          "The billing lifecycle follows the placement lifecycle. Every step is tracked. Every number is visible to the relevant parties. Nothing requires a follow-up email."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-handshake",
+            "title": "Agreed at Engagement",
+            "body": "The hiring company posts the role with fee terms — total percentage and split ratio. Recruiters agree to these terms before submitting candidates. The numbers are fixed."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-check-circle",
+            "title": "Triggered at Confirmation",
+            "body": "When the hiring company confirms a placement, the system immediately calculates the total fee, applies the agreed split, and generates invoices for both parties."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-clock",
+            "title": "Tracked Through Guarantee",
+            "body": "The guarantee period countdown begins at start date. If the candidate leaves before the guarantee expires, the system manages the refund or replacement process per the agreed terms."
+          }
+        ],
+        "image": "/images/content/billing-workflow.jpg",
+        "imageAlt": "Billing timeline showing fee calculation, invoice generation, and payout confirmation",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "BILLING CAPABILITIES",
+        "heading": "Every Scenario, Handled",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-percent",
+            "title": "Configurable Fee Structures",
+            "description": "Set placement fees as a percentage of first-year salary. Define custom split ratios per role — 50/50, 60/40, 70/30, or any configuration that works for your arrangement."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice",
+            "title": "Automated Invoicing",
+            "description": "Invoices generate automatically on placement confirmation. Both the hiring company and the placing recruiter receive itemized breakdowns immediately."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-check",
+            "title": "Guarantee Period Tracking",
+            "description": "Define guarantee periods from 30 to 180 days. The platform tracks start dates, monitors status, and manages refund or replacement obligations automatically."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-stripe",
+            "title": "Stripe Integration",
+            "description": "All payments are processed through Stripe. ACH transfers, credit card payments, and international payouts are supported with full transaction history."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-receipt",
+            "title": "Transaction History",
+            "description": "Complete ledger of every placement fee, split payment, refund, and adjustment. Exportable for your accounting team in any format.",
+            "badge": "Pro"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-people-arrows",
+            "title": "Multi-Party Splits",
+            "description": "When multiple recruiters contribute to a placement — one sourcing, one managing the process — the system can distribute fees across multiple recipients per the agreed terms.",
+            "badge": "Pro"
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "We used to spend two weeks chasing invoices after every placement. Now the payment is in process before I've even called to congratulate the candidate. It's changed how I think about the business.",
+        "citation": "Rebecca Torres, Founder, Torres Executive Search",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "WHO BENEFITS",
+        "heading": "Clarity for Every Party",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Hiring Companies",
+            "description": "Know your fee obligation before the hire is made. Receive clean invoices automatically. Manage guarantee periods without spreadsheets.",
+            "metric": "100%",
+            "metricLabel": "fee transparency upfront"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiters",
+            "description": "Stop chasing payments. Your split is calculated and transferred automatically once the guarantee period closes. Track every pending payout in your dashboard.",
+            "metric": "Zero",
+            "metricLabel": "collections emails sent"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-calculator",
+            "title": "Finance Teams",
+            "description": "Every transaction is logged, categorized, and exportable. Reconciliation takes minutes, not days. Audit trails are complete by default.",
+            "metric": "Export-ready",
+            "metricLabel": "accounting records"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Billing Questions",
+        "items": [
+          {
+            "question": "When does money actually change hands?",
+            "answer": "Payments are initiated when the guarantee period completes with no reported issues. The hiring company is invoiced at placement confirmation. The payout to the placing recruiter processes when the guarantee window closes. Exact timing depends on payment method — ACH typically settles in 2–3 business days."
+          },
+          {
+            "question": "What happens if a candidate leaves during the guarantee period?",
+            "answer": "If a candidate leaves within the guarantee period, the hiring company can request a refund or replacement per the terms set on the original role listing. The platform manages the refund workflow and adjusts any pending payout accordingly."
+          },
+          {
+            "question": "Can companies pay via invoice rather than card?",
+            "answer": "Yes. Enterprise accounts support ACH bank transfer and invoice-based billing with net-30 terms. Contact sales to configure this for your account."
+          },
+          {
+            "question": "Are there platform fees on top of placement fees?",
+            "answer": "Splits Network charges a platform fee on each completed placement. The fee percentage depends on your subscription plan — it's lower on paid plans than the Starter tier. All platform fees are disclosed before you post a role."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Automated Billing From Day One",
+        "subtitle": "Set your fee terms once. Every placement after that is handled automatically.",
+        "buttons": [
+          {
+            "label": "Get Started Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-file-invoice-dollar"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "platform/messaging",
+    "app": "portal",
+    "title": "Messaging | Splits Network Platform",
+    "description": "Real-time messaging built into every recruiting workflow. Threaded conversations attached to roles, candidates, and placements — no more lost email chains or disconnected communication.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "3 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "MESSAGING",
+        "kickerIcon": "fa-duotone fa-regular fa-messages",
+        "headlineWords": [
+          {
+            "text": "Every"
+          },
+          {
+            "text": "Conversation,"
+          },
+          {
+            "text": "In",
+            "accent": true
+          },
+          {
+            "text": "Context"
+          }
+        ],
+        "subtitle": "Real-time messaging built directly into the recruiting workflow. Communicate with hiring managers, coordinate with fellow recruiters, and keep candidates informed — all within the platform, all attached to the record that matters.",
+        "image": "/images/content/platform-messaging-hero.jpg",
+        "imageAlt": "Messaging interface showing threaded conversation between recruiter and hiring manager about a candidate",
+        "buttons": [
+          {
+            "label": "See Messaging in Action",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-message-lines"
+          },
+          {
+            "label": "Request a Demo",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "Real-Time",
+            "label": "Message Delivery"
+          },
+          {
+            "value": "3 Types",
+            "label": "Conversation Contexts"
+          },
+          {
+            "value": "File Sharing",
+            "label": "Built In"
+          },
+          {
+            "value": "Zero",
+            "label": "External Tools Needed",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE COMMUNICATION PROBLEM",
+        "kickerColor": "primary",
+        "heading": "Recruiting Runs on Conversations That Get Lost",
+        "paragraphs": [
+          "A hiring manager sends feedback on a candidate by email. The recruiter replies from their personal inbox. The candidate update happens in a text message. Three days later, nobody can reconstruct what was agreed.",
+          "Splits Network messaging keeps every conversation attached to the platform record it belongs to. <strong>When you discuss a candidate, the conversation lives on the candidate's profile. When you negotiate a role, that thread stays on the role.</strong> The context is always there when you need it."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "CONVERSATION TYPES",
+        "heading": "The Right Thread for Every Relationship",
+        "paragraphs": [
+          "Different recruiting conversations require different contexts. The platform supports them all without mixing signals or breaking confidentiality."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Company-Recruiter Threads",
+            "body": "Direct communication between hiring managers and the recruiters working their roles. Discuss role requirements, provide candidate feedback, align on interview scheduling — all in one place."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-people-group",
+            "title": "Recruiter-to-Recruiter",
+            "body": "Coordinate split placements with other recruiters on the network. Share candidate context, align on submission strategy, and manage the handoff — privately and professionally."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user",
+            "title": "Candidate Updates",
+            "body": "Keep candidates informed at every stage. Send interview confirmations, status updates, and next steps directly through the platform. Every message is logged to the candidate record."
+          }
+        ],
+        "image": "/images/content/messaging-threads.jpg",
+        "imageAlt": "Messaging sidebar showing separate conversation threads by role, candidate, and recruiter",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "MESSAGING FEATURES",
+        "heading": "Built for Recruiting Workflows",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-paperclip",
+            "title": "File Sharing",
+            "description": "Attach resumes, job descriptions, interview guides, and offer letters directly to conversations. Files are stored with the thread — findable when you need them."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-bell",
+            "title": "Notification Preferences",
+            "description": "Control how and when you're notified. Configure in-app alerts, email digests, or real-time push notifications per conversation type."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-magnifying-glass",
+            "title": "Message Search",
+            "description": "Search across all conversations by keyword, sender, role, or date range. Find the message you need without scrolling through weeks of threads."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-link",
+            "title": "Record-Linked Threads",
+            "description": "Conversations automatically link to the role, candidate, or placement they relate to. Navigate directly from a message to the relevant record with one click."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-circle-check",
+            "title": "Read Receipts",
+            "description": "See when your messages have been read. Know whether a hiring manager has seen the candidate feedback you sent or whether a recruiter has acknowledged role updates."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+            "title": "Message History",
+            "description": "Full conversation history is retained indefinitely. When a new team member joins a role, they have complete context from day one.",
+            "badge": "Pro"
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "I can't overstate how much the messaging feature has changed our operations. Every conversation about a candidate is right there on the candidate record. No more searching email for what was agreed.",
+        "citation": "Simone Carter, Director of Recruiting Operations",
+        "bg": "neutral",
+        "style": "centered"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "FOR EVERY PARTY",
+        "heading": "Communication That Serves Everyone",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-building",
+            "title": "Hiring Companies",
+            "description": "Provide candidate feedback, share interview notes, and coordinate offers — all within the platform. No more managing recruiter relationships across separate email chains.",
+            "metric": "All feedback",
+            "metricLabel": "attached to candidate record"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Recruiters",
+            "description": "Stay coordinated with hiring managers without leaving the platform. Every conversation is logged, searchable, and connected to the role it belongs to.",
+            "metric": "Zero",
+            "metricLabel": "missed follow-ups"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-handshake",
+            "title": "Split Partners",
+            "description": "Coordinate split placements with other recruiters efficiently. Share candidate context, agree on split terms, and manage the collaboration — all in a private thread.",
+            "metric": "Confidential",
+            "metricLabel": "recruiter-to-recruiter threads"
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Messaging Questions",
+        "items": [
+          {
+            "question": "Are messages between recruiters visible to companies?",
+            "answer": "No. Recruiter-to-recruiter threads are private. Companies see only the conversations directly involving their roles and the recruiters communicating with them. Confidentiality between competing recruiters is maintained at the infrastructure level."
+          },
+          {
+            "question": "Can I message candidates directly through the platform?",
+            "answer": "Yes. You can send messages to candidates associated with your submissions. All candidate communications are logged to the candidate record and visible in the conversation history."
+          },
+          {
+            "question": "Does messaging integrate with email?",
+            "answer": "You can configure email notifications for new messages, ensuring you don't miss activity even when you're not logged in. Replies must be made within the platform to maintain the linked record structure."
+          },
+          {
+            "question": "Is there a message storage limit?",
+            "answer": "There are no message storage limits on any plan. All conversation history is retained indefinitely. File attachment storage limits vary by plan — see pricing for details."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "cta",
+        "heading": "Keep Every Conversation in Context",
+        "subtitle": "Messaging is built into every Splits Network account. No setup, no separate tool, no lost threads.",
+        "buttons": [
+          {
+            "label": "Start Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-messages"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  },
+  {
+    "slug": "platform/split-fees",
+    "app": "portal",
+    "title": "Split Fees | Splits Network Platform",
+    "description": "How split-fee recruiting works on Splits Network. Transparent fee structures, automated calculations, configurable splits, guarantee period tracking, and Stripe-powered payouts.",
+    "category": "marketing",
+    "author": "Splits Network",
+    "read_time": "4 min read",
+    "status": "published",
+    "published_at": "2026-02-20T00:00:00Z",
+    "blocks": [
+      {
+        "type": "hero",
+        "kicker": "SPLIT FEES",
+        "kickerIcon": "fa-duotone fa-regular fa-split",
+        "headlineWords": [
+          {
+            "text": "The"
+          },
+          {
+            "text": "Model"
+          },
+          {
+            "text": "That",
+            "accent": true
+          },
+          {
+            "text": "Makes"
+          },
+          {
+            "text": "This"
+          },
+          {
+            "text": "Work"
+          }
+        ],
+        "subtitle": "Split-fee recruiting connects recruiters who have roles with recruiters who have candidates. The placement happens. The fee is divided. Everyone wins. Splits Network is the infrastructure that makes this scalable, transparent, and enforceable.",
+        "image": "/images/content/split-fees-hero.jpg",
+        "imageAlt": "Split fee breakdown diagram showing role owner and candidate owner receiving their respective shares",
+        "buttons": [
+          {
+            "label": "How Splits Work",
+            "href": "/how-it-works",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-circle-info"
+          },
+          {
+            "label": "Start Splitting",
+            "href": "/sign-up",
+            "variant": "outline",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          }
+        ]
+      },
+      {
+        "type": "stats-bar",
+        "stats": [
+          {
+            "value": "$2.4M+",
+            "label": "Split Fees Paid Monthly"
+          },
+          {
+            "value": "50–70%",
+            "label": "Typical Placing Recruiter Share"
+          },
+          {
+            "value": "30–90",
+            "label": "Day Guarantee Windows"
+          },
+          {
+            "value": "100%",
+            "label": "Automated Calculation",
+            "borderColor": "border-accent"
+          }
+        ],
+        "bg": "neutral"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE CONCEPT",
+        "kickerColor": "primary",
+        "heading": "Split-Fee Recruiting, Explained",
+        "paragraphs": [
+          "In a split-fee arrangement, two recruiters share responsibility for a placement and divide the fee accordingly. The job-owning recruiter holds the client relationship and the open role. The candidate-owning recruiter holds the talent and does the sourcing.",
+          "The model has existed for decades in the recruiting industry — informal agreements, handshake deals, and arrangements managed through phone calls and spreadsheets. <strong>What's changed is the infrastructure to make it work at scale, with transparency, and without disputes.</strong>",
+          "That infrastructure is Splits Network."
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "HOW IT WORKS",
+        "heading": "Two Recruiters. One Placement. Transparent Terms.",
+        "paragraphs": [
+          "The split structure is defined before any candidate is submitted. Both parties see the same numbers. There is nothing to renegotiate after the fact."
+        ],
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-briefcase",
+            "title": "The Job-Owning Recruiter",
+            "body": "Holds the relationship with the hiring company. Posts the role on the platform with a defined fee percentage and split ratio. Manages the hiring process through to offer."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-group",
+            "title": "The Candidate-Owning Recruiter",
+            "body": "Has a strong candidate in their network. Sees the role on the marketplace, agrees to the posted split terms, and submits their candidate. If the placement happens, they earn their share."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+            "title": "The Platform",
+            "body": "Tracks the agreed terms, records every stage of the hiring process, calculates the fee on placement confirmation, and distributes payments to both parties automatically through Stripe."
+          }
+        ],
+        "image": "/images/content/split-fee-workflow.jpg",
+        "imageAlt": "Workflow diagram showing job-owning and candidate-owning recruiter roles and how the fee divides on placement",
+        "layout": "text-left",
+        "bg": "base-200"
+      },
+      {
+        "type": "feature-grid",
+        "kicker": "FEE INFRASTRUCTURE",
+        "heading": "Every Detail, Handled",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "fa-duotone fa-regular fa-sliders",
+            "title": "Configurable Split Ratios",
+            "description": "Set any split ratio that reflects your arrangement — 50/50, 60/40, 70/30. Ratios are visible to all parties before engagement begins."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-lock",
+            "title": "Terms Locked at Engagement",
+            "description": "The split percentage and fee structure are fixed when a recruiter accepts a role. They cannot be changed after a candidate is submitted. No retroactive renegotiation."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-shield-halved",
+            "title": "Guarantee Period Protection",
+            "description": "Guarantee periods of 30 to 90 days protect both parties. If a candidate leaves during the guarantee window, the refund or replacement obligation is clearly defined and managed automatically."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-calculator",
+            "title": "Automatic Fee Calculation",
+            "description": "Placement fees calculate instantly from confirmed salary and the posted percentage. Both parties receive a breakdown before any payment is initiated."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-receipt",
+            "title": "Itemized Invoicing",
+            "description": "Every placement generates separate invoices for the hiring company and the placing recruiter. Clear, professional documentation for accounting on both sides."
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-money-bill-transfer",
+            "title": "Stripe Payouts",
+            "description": "All fee transfers process through Stripe. Bank transfers, international payments, and payout tracking are handled natively with full transaction history."
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "pull-quote",
+        "quote": "The split-fee model gave me access to roles I could never source on my own. Before Splits Network, I had great candidates and no way to connect them to the right jobs. Now I earn fees on placements I couldn't have made independently.",
+        "citation": "David Okafor, Independent Technology Recruiter",
+        "bg": "neutral",
+        "style": "left-border"
+      },
+      {
+        "type": "article-body",
+        "sectionNumber": "03",
+        "kicker": "DISPUTE PREVENTION",
+        "kickerColor": "primary",
+        "heading": "The Infrastructure Makes Disputes Unlikely",
+        "paragraphs": [
+          "Most split-fee disputes arise because the terms weren't clear, the timeline wasn't recorded, or the expectations weren't aligned. Splits Network addresses each of these at the point of engagement.",
+          "When a recruiter accepts a role, the fee structure is confirmed in writing. When a candidate is submitted, the submission is timestamped and logged. When a placement is confirmed, the calculation is automatic and both parties see the same number. <strong>There is nothing ambiguous to dispute.</strong>"
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "benefits-cards",
+        "kicker": "FOR BOTH SIDES",
+        "heading": "A Better Deal for Everyone in the Split",
+        "cards": [
+          {
+            "icon": "fa-duotone fa-regular fa-briefcase",
+            "title": "Job-Owning Recruiters",
+            "description": "Access a network of recruiters with deep candidate pools you'd never reach independently. More recruiters on your roles means faster fills and broader coverage.",
+            "metric": "3,200+",
+            "metricLabel": "recruiters who can fill your roles"
+          },
+          {
+            "icon": "fa-duotone fa-regular fa-user-tie",
+            "title": "Candidate-Owning Recruiters",
+            "description": "Submit your best candidates to roles you didn't source. Earn 50–70% of the placement fee with terms defined before you engage. No relationship required.",
+            "metric": "500+",
+            "metricLabel": "roles open for split submissions"
+          }
+        ],
+        "bg": "base-100"
+      },
+      {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Split Fee Questions",
+        "items": [
+          {
+            "question": "What is the typical split ratio?",
+            "answer": "Split ratios are set by the job-owning recruiter when they post the role. The most common arrangement is 50/50 or 60/40 in favor of the placing recruiter. Ratios are visible before any recruiter engages, so both parties enter the arrangement with aligned expectations."
+          },
+          {
+            "question": "Who sets the total placement fee percentage?",
+            "answer": "The hiring company sets the total placement fee — typically 15–25% of first-year salary — when they post the role. The recruiter managing the role then sets the split ratio. The candidate-owning recruiter sees both figures before submitting."
+          },
+          {
+            "question": "What happens if my candidate is submitted to the same role by another recruiter?",
+            "answer": "If a candidate is submitted by two different recruiters, the first valid submission takes precedence. The platform timestamps every submission and flags potential conflicts. This is visible to the hiring company, who makes the final determination on which submission is active."
+          },
+          {
+            "question": "Can I use Splits Network for direct placements, not just splits?",
+            "answer": "Yes. The platform supports direct placements where one recruiter owns both the role and the candidate. In this case, there is no split — the full fee goes to the placing recruiter, minus the platform fee."
+          },
+          {
+            "question": "How does the platform handle international splits?",
+            "answer": "Splits Network supports international payments through Stripe. Currency conversion and international transfer fees apply. All amounts are displayed in USD on the platform; local currency conversion is handled by Stripe at the time of transfer."
+          }
+        ],
+        "bg": "base-200"
+      },
+      {
+        "type": "cta",
+        "heading": "Start Splitting. Start Earning.",
+        "subtitle": "Join 3,200+ recruiters using transparent split-fee infrastructure to place more and earn more.",
+        "buttons": [
+          {
+            "label": "Join Free",
+            "href": "/sign-up",
+            "variant": "primary",
+            "icon": "fa-duotone fa-regular fa-rocket"
+          },
+          {
+            "label": "Talk to Sales",
+            "href": "mailto:sales@splits.network",
+            "variant": "outline"
+          }
+        ],
+        "contactEmail": "sales@splits.network",
+        "bg": "primary"
+      }
+    ]
+  }
+]

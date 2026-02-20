@@ -1,0 +1,210 @@
+{
+  "slug": "updates",
+  "app": "portal",
+  "title": "Platform Updates | Splits Network",
+  "description": "The Splits Network changelog — new features, improvements, and what's coming next. Shipped on a two-week cadence.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "4 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "PLATFORM UPDATES",
+      "kickerIcon": "fa-duotone fa-regular fa-sparkles",
+      "headlineWords": [
+        {
+          "text": "What's"
+        },
+        {
+          "text": "New",
+          "accent": true
+        },
+        {
+          "text": "on"
+        },
+        {
+          "text": "Splits"
+        },
+        {
+          "text": "Network"
+        }
+      ],
+      "subtitle": "A running record of platform changes, new features, and improvements. We ship on a two-week cadence. Everything significant lands here.",
+      "buttons": [
+        {
+          "label": "Follow Updates",
+          "href": "https://linkedin.com/company/splits-network",
+          "variant": "primary",
+          "icon": "fa-brands fa-linkedin"
+        },
+        {
+          "label": "Request a Feature",
+          "href": "mailto:feedback@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "47",
+          "label": "Releases This Year"
+        },
+        {
+          "value": "2 weeks",
+          "label": "Average Ship Cadence"
+        },
+        {
+          "value": "312",
+          "label": "Issues Closed",
+          "borderColor": "border-accent"
+        },
+        {
+          "value": "94%",
+          "label": "User-Requested Features"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "timeline",
+      "kicker": "RECENT RELEASES",
+      "heading": "2026 Changelog",
+      "subtitle": "Major releases and meaningful improvements. Minor patches and bug fixes are tracked in the developer changelog.",
+      "steps": [
+        {
+          "number": 1,
+          "title": "AI Match Scoring v2 — February 2026",
+          "description": "Rebuilt the candidate-role matching engine from the ground up. Match scores now include a four-category breakdown: skills alignment, experience depth, location compatibility, and compensation fit. Scores are explainable — every recruiter and hiring manager can see why a candidate ranked where they did. Average placement accuracy improved by 18% in beta.",
+          "icon": "fa-duotone fa-regular fa-robot"
+        },
+        {
+          "number": 2,
+          "title": "Shared Pipeline Views — January 2026",
+          "description": "Companies and recruiters now share a single, synchronized pipeline view. Stage changes by either party appear in real time for all authorized users. No more parallel tracking in separate tools. Includes a full audit log with timestamps and user attribution for every action.",
+          "icon": "fa-duotone fa-regular fa-table-columns"
+        },
+        {
+          "number": 3,
+          "title": "Stripe Payout Improvements — January 2026",
+          "description": "Recruiter payout processing migrated to Stripe Connect Express. Payouts now release within 24 hours of the guarantee period end — down from 3–5 business days. Earnings dashboard redesigned with projected payout dates, pending balance breakdown, and full payout history export.",
+          "icon": "fa-duotone fa-regular fa-money-bill-wave"
+        },
+        {
+          "number": 4,
+          "title": "Greenhouse Integration — December 2025",
+          "description": "Greenhouse is now supported as a bi-directional ATS integration. Roles can be imported directly from your Greenhouse account. Candidate submissions and stage updates sync back automatically. OAuth-based setup takes under five minutes. Lever and BambooHR integrations are in closed beta.",
+          "icon": "fa-duotone fa-regular fa-plug-circle-bolt"
+        },
+        {
+          "number": 5,
+          "title": "Role Marketplace Redesign — November 2025",
+          "description": "The marketplace received a full layout overhaul. Role cards now show fee amounts, split percentages, recruiter engagement count, and time posted at a glance. Advanced filtering by industry, role type, location radius, and fee range. Save searches and get notified when new matching roles are posted.",
+          "icon": "fa-duotone fa-regular fa-briefcase"
+        },
+        {
+          "number": 6,
+          "title": "Candidate Database — October 2025",
+          "description": "Recruiters can now maintain a personal candidate database across all roles and submissions. Tag candidates by skill set, industry, and availability. Notes and interaction history are tracked per candidate. Re-engage past candidates against new roles with one click.",
+          "icon": "fa-duotone fa-regular fa-people-group"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "The shared pipeline view changed how our team collaborates with recruiters. We went from weekly check-in calls to checking the platform. Everything we need is already there.",
+      "citation": "Talent Acquisition Lead, Series C SaaS Company",
+      "bg": "base-100",
+      "style": "left-border"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "COMING SOON",
+      "kickerColor": "secondary",
+      "heading": "What We're Building Next",
+      "paragraphs": [
+        "Our roadmap is public and driven by user feedback. Here is what is currently in active development for Q1 and Q2 2026.",
+        "<strong>Interview scheduling.</strong> Native interview coordination between recruiters and hiring teams — without a separate tool. Calendar sync, availability matching, and confirmation notifications. Closed beta in March 2026.",
+        "<strong>Mobile app.</strong> A native iOS and Android app for recruiters who manage their pipeline on the move. Full marketplace access, candidate submissions, messaging, and earnings tracking. Public beta in April 2026.",
+        "<strong>Lever and BambooHR integrations.</strong> Currently in closed beta alongside select enterprise customers. General availability in March 2026."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "IMPROVEMENTS",
+      "heading": "Also Shipped in 2025",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-bell",
+          "title": "Smart Notification Engine",
+          "description": "Consolidated in-app and email notifications. Choose what triggers alerts and how you receive them. No more notification fatigue."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-magnifying-glass",
+          "title": "Resume Parser v3",
+          "description": "Improved extraction of skills, credentials, and experience from unstructured resume formats. Accuracy up 23% from v2."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-messages",
+          "title": "Threaded Messaging",
+          "description": "Conversations are now threaded by role and candidate. Context stays organized even across long placements."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Two-Factor Authentication",
+          "description": "TOTP-based 2FA available for all accounts. Enterprise plans can enforce 2FA organization-wide."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-mixed",
+          "title": "Analytics Dashboard v2",
+          "description": "Rebuilt analytics with customizable date ranges, funnel visualization, and CSV export for all reports."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-wand-magic-sparkles",
+          "title": "Role Description Assistant",
+          "description": "AI-assisted role description writing. Input the essentials; the assistant drafts a structured, searchable job description."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "02",
+      "kicker": "HOW WE SHIP",
+      "kickerColor": "primary",
+      "heading": "Our Development Philosophy",
+      "paragraphs": [
+        "Splits Network ships on a two-week cycle. Each release includes a defined set of improvements — features, fixes, and infrastructure changes — and we don't move goalposts mid-cycle. This discipline keeps our roadmap visible and predictable.",
+        "Feature requests from active users carry direct weight in prioritization. We track requests in the open and publish which have been accepted into the roadmap. If you submitted a request that shipped, you'll see it here."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Shape What We Build Next",
+      "subtitle": "Submit a feature request, report a bug, or join our beta program. Your input determines what ships in the next cycle.",
+      "buttons": [
+        {
+          "label": "Submit Feedback",
+          "href": "mailto:feedback@splits.network",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-comment-plus"
+        },
+        {
+          "label": "Join Beta Program",
+          "href": "mailto:beta@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "feedback@splits.network",
+      "bg": "neutral"
+    }
+  ]
+}

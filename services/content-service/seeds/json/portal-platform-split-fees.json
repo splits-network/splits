@@ -1,0 +1,250 @@
+{
+  "slug": "platform/split-fees",
+  "app": "portal",
+  "title": "Split Fees | Splits Network Platform",
+  "description": "How split-fee recruiting works on Splits Network. Transparent fee structures, automated calculations, configurable splits, guarantee period tracking, and Stripe-powered payouts.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "4 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "SPLIT FEES",
+      "kickerIcon": "fa-duotone fa-regular fa-split",
+      "headlineWords": [
+        {
+          "text": "The"
+        },
+        {
+          "text": "Model"
+        },
+        {
+          "text": "That",
+          "accent": true
+        },
+        {
+          "text": "Makes"
+        },
+        {
+          "text": "This"
+        },
+        {
+          "text": "Work"
+        }
+      ],
+      "subtitle": "Split-fee recruiting connects recruiters who have roles with recruiters who have candidates. The placement happens. The fee is divided. Everyone wins. Splits Network is the infrastructure that makes this scalable, transparent, and enforceable.",
+      "image": "/images/content/split-fees-hero.jpg",
+      "imageAlt": "Split fee breakdown diagram showing role owner and candidate owner receiving their respective shares",
+      "buttons": [
+        {
+          "label": "How Splits Work",
+          "href": "/how-it-works",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-circle-info"
+        },
+        {
+          "label": "Start Splitting",
+          "href": "/sign-up",
+          "variant": "outline",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "$2.4M+",
+          "label": "Split Fees Paid Monthly"
+        },
+        {
+          "value": "50–70%",
+          "label": "Typical Placing Recruiter Share"
+        },
+        {
+          "value": "30–90",
+          "label": "Day Guarantee Windows"
+        },
+        {
+          "value": "100%",
+          "label": "Automated Calculation",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE CONCEPT",
+      "kickerColor": "primary",
+      "heading": "Split-Fee Recruiting, Explained",
+      "paragraphs": [
+        "In a split-fee arrangement, two recruiters share responsibility for a placement and divide the fee accordingly. The job-owning recruiter holds the client relationship and the open role. The candidate-owning recruiter holds the talent and does the sourcing.",
+        "The model has existed for decades in the recruiting industry — informal agreements, handshake deals, and arrangements managed through phone calls and spreadsheets. <strong>What's changed is the infrastructure to make it work at scale, with transparency, and without disputes.</strong>",
+        "That infrastructure is Splits Network."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "HOW IT WORKS",
+      "heading": "Two Recruiters. One Placement. Transparent Terms.",
+      "paragraphs": [
+        "The split structure is defined before any candidate is submitted. Both parties see the same numbers. There is nothing to renegotiate after the fact."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-briefcase",
+          "title": "The Job-Owning Recruiter",
+          "body": "Holds the relationship with the hiring company. Posts the role on the platform with a defined fee percentage and split ratio. Manages the hiring process through to offer."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-group",
+          "title": "The Candidate-Owning Recruiter",
+          "body": "Has a strong candidate in their network. Sees the role on the marketplace, agrees to the posted split terms, and submits their candidate. If the placement happens, they earn their share."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+          "title": "The Platform",
+          "body": "Tracks the agreed terms, records every stage of the hiring process, calculates the fee on placement confirmation, and distributes payments to both parties automatically through Stripe."
+        }
+      ],
+      "image": "/images/content/split-fee-workflow.jpg",
+      "imageAlt": "Workflow diagram showing job-owning and candidate-owning recruiter roles and how the fee divides on placement",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "FEE INFRASTRUCTURE",
+      "heading": "Every Detail, Handled",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-sliders",
+          "title": "Configurable Split Ratios",
+          "description": "Set any split ratio that reflects your arrangement — 50/50, 60/40, 70/30. Ratios are visible to all parties before engagement begins."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-lock",
+          "title": "Terms Locked at Engagement",
+          "description": "The split percentage and fee structure are fixed when a recruiter accepts a role. They cannot be changed after a candidate is submitted. No retroactive renegotiation."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-halved",
+          "title": "Guarantee Period Protection",
+          "description": "Guarantee periods of 30 to 90 days protect both parties. If a candidate leaves during the guarantee window, the refund or replacement obligation is clearly defined and managed automatically."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-calculator",
+          "title": "Automatic Fee Calculation",
+          "description": "Placement fees calculate instantly from confirmed salary and the posted percentage. Both parties receive a breakdown before any payment is initiated."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-receipt",
+          "title": "Itemized Invoicing",
+          "description": "Every placement generates separate invoices for the hiring company and the placing recruiter. Clear, professional documentation for accounting on both sides."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-money-bill-transfer",
+          "title": "Stripe Payouts",
+          "description": "All fee transfers process through Stripe. Bank transfers, international payments, and payout tracking are handled natively with full transaction history."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "The split-fee model gave me access to roles I could never source on my own. Before Splits Network, I had great candidates and no way to connect them to the right jobs. Now I earn fees on placements I couldn't have made independently.",
+      "citation": "David Okafor, Independent Technology Recruiter",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "03",
+      "kicker": "DISPUTE PREVENTION",
+      "kickerColor": "primary",
+      "heading": "The Infrastructure Makes Disputes Unlikely",
+      "paragraphs": [
+        "Most split-fee disputes arise because the terms weren't clear, the timeline wasn't recorded, or the expectations weren't aligned. Splits Network addresses each of these at the point of engagement.",
+        "When a recruiter accepts a role, the fee structure is confirmed in writing. When a candidate is submitted, the submission is timestamped and logged. When a placement is confirmed, the calculation is automatic and both parties see the same number. <strong>There is nothing ambiguous to dispute.</strong>"
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "FOR BOTH SIDES",
+      "heading": "A Better Deal for Everyone in the Split",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-briefcase",
+          "title": "Job-Owning Recruiters",
+          "description": "Access a network of recruiters with deep candidate pools you'd never reach independently. More recruiters on your roles means faster fills and broader coverage.",
+          "metric": "3,200+",
+          "metricLabel": "recruiters who can fill your roles"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Candidate-Owning Recruiters",
+          "description": "Submit your best candidates to roles you didn't source. Earn 50–70% of the placement fee with terms defined before you engage. No relationship required.",
+          "metric": "500+",
+          "metricLabel": "roles open for split submissions"
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "Split Fee Questions",
+      "items": [
+        {
+          "question": "What is the typical split ratio?",
+          "answer": "Split ratios are set by the job-owning recruiter when they post the role. The most common arrangement is 50/50 or 60/40 in favor of the placing recruiter. Ratios are visible before any recruiter engages, so both parties enter the arrangement with aligned expectations."
+        },
+        {
+          "question": "Who sets the total placement fee percentage?",
+          "answer": "The hiring company sets the total placement fee — typically 15–25% of first-year salary — when they post the role. The recruiter managing the role then sets the split ratio. The candidate-owning recruiter sees both figures before submitting."
+        },
+        {
+          "question": "What happens if my candidate is submitted to the same role by another recruiter?",
+          "answer": "If a candidate is submitted by two different recruiters, the first valid submission takes precedence. The platform timestamps every submission and flags potential conflicts. This is visible to the hiring company, who makes the final determination on which submission is active."
+        },
+        {
+          "question": "Can I use Splits Network for direct placements, not just splits?",
+          "answer": "Yes. The platform supports direct placements where one recruiter owns both the role and the candidate. In this case, there is no split — the full fee goes to the placing recruiter, minus the platform fee."
+        },
+        {
+          "question": "How does the platform handle international splits?",
+          "answer": "Splits Network supports international payments through Stripe. Currency conversion and international transfer fees apply. All amounts are displayed in USD on the platform; local currency conversion is handled by Stripe at the time of transfer."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "Start Splitting. Start Earning.",
+      "subtitle": "Join 3,200+ recruiters using transparent split-fee infrastructure to place more and earn more.",
+      "buttons": [
+        {
+          "label": "Join Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

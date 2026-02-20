@@ -1,0 +1,242 @@
+{
+  "slug": "platform/analytics",
+  "app": "portal",
+  "title": "Analytics | Splits Network Platform",
+  "description": "Real-time recruiting analytics built into the Splits Network platform. Track pipeline health, recruiter performance, placement metrics, and revenue forecasting in one dashboard.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "PLATFORM ANALYTICS",
+      "kickerIcon": "fa-duotone fa-regular fa-chart-mixed",
+      "headlineWords": [
+        {
+          "text": "Data"
+        },
+        {
+          "text": "That"
+        },
+        {
+          "text": "Drives",
+          "accent": true
+        },
+        {
+          "text": "Better"
+        },
+        {
+          "text": "Decisions"
+        }
+      ],
+      "subtitle": "Real-time visibility into every metric that matters. Pipeline health, recruiter performance, placement trends, and revenue forecasting — all in one dashboard built for recruiting operations.",
+      "image": "/images/content/platform-analytics-hero.jpg",
+      "imageAlt": "Recruiting analytics dashboard showing pipeline and revenue metrics",
+      "buttons": [
+        {
+          "label": "See the Dashboard",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-chart-line"
+        },
+        {
+          "label": "Request a Demo",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "180+",
+          "label": "Metrics Tracked"
+        },
+        {
+          "value": "Real-Time",
+          "label": "Data Refresh"
+        },
+        {
+          "value": "12-Month",
+          "label": "Revenue Forecasting"
+        },
+        {
+          "value": "100%",
+          "label": "Pipeline Visibility",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE PROBLEM",
+      "kickerColor": "primary",
+      "heading": "Recruiting Without Data Is Guesswork",
+      "paragraphs": [
+        "Most recruiting teams manage their operations across spreadsheets, email threads, and disconnected tools. The result: no clear picture of what's working, where candidates are stalling, or which recruiters are performing.",
+        "Splits Network analytics changes that. Every submission, every stage transition, every placement, and every fee is tracked automatically. <strong>You get the complete picture without building the infrastructure yourself.</strong>"
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "DASHBOARD CAPABILITIES",
+      "heading": "Everything on One Screen",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-gauge-high",
+          "title": "Pipeline Health",
+          "description": "See how many candidates are active at each stage across all open roles. Identify bottlenecks before they become missed deadlines.",
+          "stats": "Live view"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiter Performance",
+          "description": "Track submission-to-interview rates, interview-to-offer ratios, and placements per recruiter. Know who's delivering.",
+          "stats": "Per-recruiter breakdown"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-money-bill-wave",
+          "title": "Revenue Forecasting",
+          "description": "Model expected placement revenue based on active pipeline. Includes guarantee period tracking and projected payout dates.",
+          "stats": "12-month horizon",
+          "badge": "Pro"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-clock",
+          "title": "Time-to-Fill",
+          "description": "Measure average time from role posting to accepted offer, by role type, seniority level, and recruiter."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-pie",
+          "title": "Source Attribution",
+          "description": "Understand which recruiters and candidate sources drive your most successful hires. Allocate your fee budget where it delivers."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-calendar-check",
+          "title": "Activity Heatmaps",
+          "description": "Visualize submission volume, interview scheduling, and offer activity by day and week. Plan capacity with confidence.",
+          "badge": "Pro"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "RECRUITER INSIGHTS",
+      "heading": "Know Who's Performing",
+      "paragraphs": [
+        "When multiple recruiters are working your roles, knowing who to engage more — and who to let go — is the difference between a fast hire and a stalled one."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-ranking-star",
+          "title": "Ranked Leaderboards",
+          "body": "Compare recruiters by placement rate, speed, and candidate quality score across any time period."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-arrow-trend-up",
+          "title": "Trend Analysis",
+          "body": "See whether performance is improving or declining week over week. Act on the signal before it becomes a pattern."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-envelope-open-text",
+          "title": "Submission Quality",
+          "description": "Track what percentage of submitted candidates make it to interview stage. Quality is measurable.",
+          "body": "Track what percentage of submitted candidates advance. Quality, not just volume, is what the metric reveals."
+        }
+      ],
+      "image": "/images/content/recruiter-performance.jpg",
+      "imageAlt": "Recruiter performance leaderboard showing placement rates and earnings",
+      "layout": "text-right",
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "We cut our time-to-fill by 30% in one quarter by using the pipeline analytics to identify exactly where candidates were stalling. The data was always there — we just couldn't see it before.",
+      "citation": "Head of Talent Acquisition, Series C Technology Company",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "WHO BENEFITS",
+      "heading": "Analytics Built for Every Role",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Hiring Companies",
+          "description": "Full visibility into every recruiter's activity on your roles. Approve, reject, and redirect without losing context.",
+          "metric": "30%",
+          "metricLabel": "reduction in time-to-fill"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiting Leads",
+          "description": "Understand your team's collective output. Identify training opportunities, capacity gaps, and top performers.",
+          "metric": "2x",
+          "metricLabel": "more placements per recruiter"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-line",
+          "title": "Finance Teams",
+          "description": "Forecast recruiting fee spend with confidence. Every pending payout, every guarantee period, every projected revenue — tracked.",
+          "metric": "±8%",
+          "metricLabel": "revenue forecast accuracy"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "Analytics Questions",
+      "items": [
+        {
+          "question": "Is analytics available on all plans?",
+          "answer": "Core metrics — pipeline health, placement counts, and basic recruiter activity — are available on all plans. Advanced analytics including revenue forecasting, heatmaps, and custom exports are Pro and Enterprise features."
+        },
+        {
+          "question": "How current is the data?",
+          "answer": "Dashboard metrics refresh in real time as activity occurs on the platform. Revenue forecasting models are recalculated daily based on current pipeline state."
+        },
+        {
+          "question": "Can I export analytics data?",
+          "answer": "Pro and Enterprise plans include CSV and Excel exports for all dashboard reports. Enterprise plans also include API access for connecting to your BI tools of choice."
+        },
+        {
+          "question": "Are analytics shared between recruiters and companies?",
+          "answer": "No. Companies see analytics for their roles and the recruiters working them. Recruiters see their own performance data. Neither party sees the other's private pipeline data."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Stop Guessing. Start Knowing.",
+      "subtitle": "Every placement, every pipeline stage, every payout — tracked automatically. Start your free account today.",
+      "buttons": [
+        {
+          "label": "Get Started Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-chart-line"
+        },
+        {
+          "label": "Request a Demo",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

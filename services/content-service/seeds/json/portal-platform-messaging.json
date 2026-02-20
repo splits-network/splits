@@ -1,0 +1,234 @@
+{
+  "slug": "platform/messaging",
+  "app": "portal",
+  "title": "Messaging | Splits Network Platform",
+  "description": "Real-time messaging built into every recruiting workflow. Threaded conversations attached to roles, candidates, and placements — no more lost email chains or disconnected communication.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "3 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "MESSAGING",
+      "kickerIcon": "fa-duotone fa-regular fa-messages",
+      "headlineWords": [
+        {
+          "text": "Every"
+        },
+        {
+          "text": "Conversation,"
+        },
+        {
+          "text": "In",
+          "accent": true
+        },
+        {
+          "text": "Context"
+        }
+      ],
+      "subtitle": "Real-time messaging built directly into the recruiting workflow. Communicate with hiring managers, coordinate with fellow recruiters, and keep candidates informed — all within the platform, all attached to the record that matters.",
+      "image": "/images/content/platform-messaging-hero.jpg",
+      "imageAlt": "Messaging interface showing threaded conversation between recruiter and hiring manager about a candidate",
+      "buttons": [
+        {
+          "label": "See Messaging in Action",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-message-lines"
+        },
+        {
+          "label": "Request a Demo",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "Real-Time",
+          "label": "Message Delivery"
+        },
+        {
+          "value": "3 Types",
+          "label": "Conversation Contexts"
+        },
+        {
+          "value": "File Sharing",
+          "label": "Built In"
+        },
+        {
+          "value": "Zero",
+          "label": "External Tools Needed",
+          "borderColor": "border-accent"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE COMMUNICATION PROBLEM",
+      "kickerColor": "primary",
+      "heading": "Recruiting Runs on Conversations That Get Lost",
+      "paragraphs": [
+        "A hiring manager sends feedback on a candidate by email. The recruiter replies from their personal inbox. The candidate update happens in a text message. Three days later, nobody can reconstruct what was agreed.",
+        "Splits Network messaging keeps every conversation attached to the platform record it belongs to. <strong>When you discuss a candidate, the conversation lives on the candidate's profile. When you negotiate a role, that thread stays on the role.</strong> The context is always there when you need it."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "CONVERSATION TYPES",
+      "heading": "The Right Thread for Every Relationship",
+      "paragraphs": [
+        "Different recruiting conversations require different contexts. The platform supports them all without mixing signals or breaking confidentiality."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Company-Recruiter Threads",
+          "body": "Direct communication between hiring managers and the recruiters working their roles. Discuss role requirements, provide candidate feedback, align on interview scheduling — all in one place."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-people-group",
+          "title": "Recruiter-to-Recruiter",
+          "body": "Coordinate split placements with other recruiters on the network. Share candidate context, align on submission strategy, and manage the handoff — privately and professionally."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user",
+          "title": "Candidate Updates",
+          "body": "Keep candidates informed at every stage. Send interview confirmations, status updates, and next steps directly through the platform. Every message is logged to the candidate record."
+        }
+      ],
+      "image": "/images/content/messaging-threads.jpg",
+      "imageAlt": "Messaging sidebar showing separate conversation threads by role, candidate, and recruiter",
+      "layout": "text-left",
+      "bg": "base-200"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "MESSAGING FEATURES",
+      "heading": "Built for Recruiting Workflows",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-paperclip",
+          "title": "File Sharing",
+          "description": "Attach resumes, job descriptions, interview guides, and offer letters directly to conversations. Files are stored with the thread — findable when you need them."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-bell",
+          "title": "Notification Preferences",
+          "description": "Control how and when you're notified. Configure in-app alerts, email digests, or real-time push notifications per conversation type."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-magnifying-glass",
+          "title": "Message Search",
+          "description": "Search across all conversations by keyword, sender, role, or date range. Find the message you need without scrolling through weeks of threads."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-link",
+          "title": "Record-Linked Threads",
+          "description": "Conversations automatically link to the role, candidate, or placement they relate to. Navigate directly from a message to the relevant record with one click."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-circle-check",
+          "title": "Read Receipts",
+          "description": "See when your messages have been read. Know whether a hiring manager has seen the candidate feedback you sent or whether a recruiter has acknowledged role updates."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-clock-rotate-left",
+          "title": "Message History",
+          "description": "Full conversation history is retained indefinitely. When a new team member joins a role, they have complete context from day one.",
+          "badge": "Pro"
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "I can't overstate how much the messaging feature has changed our operations. Every conversation about a candidate is right there on the candidate record. No more searching email for what was agreed.",
+      "citation": "Simone Carter, Director of Recruiting Operations",
+      "bg": "neutral",
+      "style": "centered"
+    },
+    {
+      "type": "benefits-cards",
+      "kicker": "FOR EVERY PARTY",
+      "heading": "Communication That Serves Everyone",
+      "cards": [
+        {
+          "icon": "fa-duotone fa-regular fa-building",
+          "title": "Hiring Companies",
+          "description": "Provide candidate feedback, share interview notes, and coordinate offers — all within the platform. No more managing recruiter relationships across separate email chains.",
+          "metric": "All feedback",
+          "metricLabel": "attached to candidate record"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-user-tie",
+          "title": "Recruiters",
+          "description": "Stay coordinated with hiring managers without leaving the platform. Every conversation is logged, searchable, and connected to the role it belongs to.",
+          "metric": "Zero",
+          "metricLabel": "missed follow-ups"
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-handshake",
+          "title": "Split Partners",
+          "description": "Coordinate split placements with other recruiters efficiently. Share candidate context, agree on split terms, and manage the collaboration — all in a private thread.",
+          "metric": "Confidential",
+          "metricLabel": "recruiter-to-recruiter threads"
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "faq",
+      "kicker": "FAQ",
+      "heading": "Messaging Questions",
+      "items": [
+        {
+          "question": "Are messages between recruiters visible to companies?",
+          "answer": "No. Recruiter-to-recruiter threads are private. Companies see only the conversations directly involving their roles and the recruiters communicating with them. Confidentiality between competing recruiters is maintained at the infrastructure level."
+        },
+        {
+          "question": "Can I message candidates directly through the platform?",
+          "answer": "Yes. You can send messages to candidates associated with your submissions. All candidate communications are logged to the candidate record and visible in the conversation history."
+        },
+        {
+          "question": "Does messaging integrate with email?",
+          "answer": "You can configure email notifications for new messages, ensuring you don't miss activity even when you're not logged in. Replies must be made within the platform to maintain the linked record structure."
+        },
+        {
+          "question": "Is there a message storage limit?",
+          "answer": "There are no message storage limits on any plan. All conversation history is retained indefinitely. File attachment storage limits vary by plan — see pricing for details."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "cta",
+      "heading": "Keep Every Conversation in Context",
+      "subtitle": "Messaging is built into every Splits Network account. No setup, no separate tool, no lost threads.",
+      "buttons": [
+        {
+          "label": "Start Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-messages"
+        },
+        {
+          "label": "Talk to Sales",
+          "href": "mailto:sales@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "sales@splits.network",
+      "bg": "primary"
+    }
+  ]
+}

@@ -1,14 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import {
-    getAllArticleSlugs,
-    getAllArticles,
-    getArticleBySlug,
-} from "@/lib/press";
+import { getAllArticleSlugs, getArticleBySlug } from "@/lib/press";
 import { buildCanonical, PORTAL_BASE_URL } from "@/lib/seo";
 import { JsonLd } from "@splits-network/shared-ui";
-import { pressBaselComponents } from "../press-mdx-components";
+import { pressComponents } from "@/lib/press-mdx-components";
 import { ArticleLayout } from "./article-layout";
 
 interface PageProps {
@@ -45,20 +41,10 @@ export async function generateMetadata({
     };
 }
 
-export default async function PressBaselArticlePage({ params }: PageProps) {
+export default async function PressArticlePage({ params }: PageProps) {
     const { slug } = await params;
     const article = getArticleBySlug(slug);
     if (!article) notFound();
-
-    /* Resolve prev/next articles for sidebar navigation */
-    const allArticles = getAllArticles();
-    const currentIndex = allArticles.findIndex((a) => a.slug === slug);
-    const prevArticle =
-        currentIndex < allArticles.length - 1
-            ? allArticles[currentIndex + 1]
-            : null;
-    const nextArticle =
-        currentIndex > 0 ? allArticles[currentIndex - 1] : null;
 
     const newsArticleJsonLd = {
         "@context": "https://schema.org",
@@ -85,14 +71,10 @@ export default async function PressBaselArticlePage({ params }: PageProps) {
     return (
         <>
             <JsonLd data={newsArticleJsonLd} id={`press-${slug}-jsonld`} />
-            <ArticleLayout
-                article={article}
-                prevArticle={prevArticle}
-                nextArticle={nextArticle}
-            >
+            <ArticleLayout article={article}>
                 <MDXRemote
                     source={article.content}
-                    components={pressBaselComponents}
+                    components={pressComponents}
                 />
             </ArticleLayout>
         </>

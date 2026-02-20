@@ -1,0 +1,272 @@
+{
+  "slug": "features",
+  "app": "portal",
+  "title": "Features | Splits Network",
+  "description": "Explore the complete Splits Network platform — role marketplace, ATS, AI matching, messaging, analytics, and automated billing. Every tool for split-fee recruiting in one place.",
+  "category": "marketing",
+  "author": "Splits Network",
+  "read_time": "5 min read",
+  "status": "published",
+  "published_at": "2026-02-20T00:00:00Z",
+  "blocks": [
+    {
+      "type": "hero",
+      "kicker": "PLATFORM FEATURES",
+      "kickerIcon": "fa-duotone fa-regular fa-grid-2",
+      "headlineWords": [
+        {
+          "text": "Every"
+        },
+        {
+          "text": "Tool"
+        },
+        {
+          "text": "Recruiting",
+          "accent": true
+        },
+        {
+          "text": "Requires"
+        }
+      ],
+      "subtitle": "From role posting to placement payout, Splits Network provides the complete infrastructure for split-fee recruiting. One platform, every workflow.",
+      "image": "/images/content/features-hero.jpg",
+      "imageAlt": "Recruiter navigating Splits Network dashboard across multiple feature panels",
+      "buttons": [
+        {
+          "label": "Start Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "View Pricing",
+          "href": "/pricing",
+          "variant": "outline"
+        }
+      ]
+    },
+    {
+      "type": "stats-bar",
+      "stats": [
+        {
+          "value": "14",
+          "label": "Core Features"
+        },
+        {
+          "value": "3,200+",
+          "label": "Active Recruiters"
+        },
+        {
+          "value": "99.9%",
+          "label": "Platform Uptime",
+          "borderColor": "border-accent"
+        },
+        {
+          "value": "< 2s",
+          "label": "Avg. Load Time"
+        }
+      ],
+      "bg": "neutral"
+    },
+    {
+      "type": "article-body",
+      "sectionNumber": "01",
+      "kicker": "THE PLATFORM",
+      "kickerColor": "primary",
+      "heading": "Built for the Full Recruiting Cycle",
+      "paragraphs": [
+        "Most recruiting tools solve one problem. An ATS manages candidates. A job board surfaces roles. A payment processor handles fees. Splits Network connects all of it — a single platform where the marketplace, pipeline management, messaging, and billing work together without stitching together separate tools.",
+        "Every feature is designed around the split-fee model. That means role visibility is structured for multi-recruiter engagement, pipelines are shared across parties with clear permissions, and payments trigger automatically when verified outcomes occur."
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "MARKETPLACE",
+      "heading": "Find and Fill Roles",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-briefcase",
+          "title": "Role Marketplace",
+          "description": "Browse hundreds of verified open roles. Filter by specialty, location, fee structure, and company type to find the best fit for your candidate pool."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-bell",
+          "title": "Smart Alerts",
+          "description": "Set preferences once. Get notified when roles matching your recruiting niche are posted. Engage before the competition."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-shield-check",
+          "title": "Verified Companies",
+          "description": "Every company on the platform passes verification before posting. No ghost jobs, no unresponsive hiring managers."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-handshake",
+          "title": "Split Agreements",
+          "description": "Fee splits are displayed before engagement. Agree to terms once, and they're locked in for the duration of the placement."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-gauge-high",
+          "title": "Real-Time Activity",
+          "description": "See which recruiters are engaged on a role, how many candidates have been submitted, and where each stands in the pipeline."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-tag",
+          "title": "Fee Transparency",
+          "description": "Total placement fee, split percentages, and payout timelines are displayed clearly on every role card."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "split-editorial",
+      "sectionNumber": "02",
+      "kicker": "APPLICANT TRACKING",
+      "heading": "A Purpose-Built ATS",
+      "paragraphs": [
+        "Splits Network includes a native applicant tracking system designed specifically for collaborative recruiting. Unlike standalone ATS tools grafted onto a job board, ours is built from the ground up for split-fee workflows."
+      ],
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-table-columns",
+          "title": "Shared Pipelines",
+          "description": "Candidates move through stages visible to all authorized parties — company, job-posting recruiter, and placing recruiter."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-pen-to-square",
+          "title": "Customizable Stages",
+          "description": "Build hiring workflows that reflect how you actually hire. Unlimited stages, drag-and-drop configuration."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-lock",
+          "title": "Role-Based Access",
+          "description": "Hiring managers see what they need. Recruiters see their submissions. Sensitive data stays controlled."
+        }
+      ],
+      "image": "/images/content/ats-pipeline.jpg",
+      "imageAlt": "Candidate pipeline view with multiple hiring stages and status indicators",
+      "layout": "text-right",
+      "bg": "base-100"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "INTELLIGENCE",
+      "heading": "AI Across Every Workflow",
+      "columns": 2,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-robot",
+          "title": "AI Candidate Matching",
+          "description": "The platform evaluates candidate profiles against role requirements and surfaces the strongest fits first. Match scores are transparent and explainable — not a black box."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-wand-magic-sparkles",
+          "title": "Role Recommendations",
+          "description": "Recruiters receive personalized role recommendations based on their placement history, active candidate pool, and specialty areas."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-magnifying-glass",
+          "title": "Resume Parsing",
+          "description": "Structured data extraction from uploaded resumes. Skills, experience, and credentials are indexed automatically for search and matching."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-network",
+          "title": "Predictive Analytics",
+          "description": "Time-to-fill forecasting, placement probability scores, and revenue projections based on your active pipeline."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "pull-quote",
+      "quote": "We replaced three separate tools with Splits Network. The ATS, the marketplace, and billing are now one workflow. Our team closes roles 40% faster.",
+      "citation": "Marcus Chen, Director of Recruiting Operations",
+      "bg": "neutral",
+      "style": "left-border"
+    },
+    {
+      "type": "feature-grid",
+      "kicker": "COMMUNICATION & PAYMENTS",
+      "heading": "Collaborate and Get Paid",
+      "columns": 3,
+      "items": [
+        {
+          "icon": "fa-duotone fa-regular fa-messages",
+          "title": "Direct Messaging",
+          "description": "Threaded conversations between recruiters, hiring managers, and candidates. All communication stays on-platform and tied to the relevant role."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-file-invoice-dollar",
+          "title": "Automated Billing",
+          "description": "Placement fees are calculated and invoiced automatically when a hire is confirmed. No manual billing, no chasing payments."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-money-bill-wave",
+          "title": "Stripe Payouts",
+          "description": "Recruiter earnings are paid via Stripe on a fixed cadence after the guarantee period. Track every pending and completed payout in your dashboard."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-calendar-check",
+          "title": "Interview Scheduling",
+          "description": "Coordinate interview availability between recruiters and hiring teams without leaving the platform."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-chart-mixed",
+          "title": "Performance Analytics",
+          "description": "Track placement rates, time-to-fill, earnings per role, and pipeline health across all your active engagements."
+        },
+        {
+          "icon": "fa-duotone fa-regular fa-people-group",
+          "title": "Candidate Database",
+          "description": "Your candidate network follows you across every role. Build relationships, track interactions, and re-engage past candidates efficiently."
+        }
+      ],
+      "bg": "base-100"
+    },
+    {
+      "type": "faq",
+      "kicker": "COMMON QUESTIONS",
+      "heading": "Feature Details",
+      "items": [
+        {
+          "question": "Does Splits Network replace my existing ATS?",
+          "answer": "For most split-fee workflows, yes. The built-in ATS handles candidate tracking across all roles with full pipeline visibility. If your organization uses an enterprise ATS, we support integrations via our API and partner connections."
+        },
+        {
+          "question": "How does AI matching work?",
+          "answer": "Our matching engine evaluates candidates against role requirements across structured skills, experience depth, location, and compensation expectations. Match scores are displayed as percentages with a breakdown by category — you always know why a candidate ranks where they do."
+        },
+        {
+          "question": "Are there limits on messaging or candidate submissions?",
+          "answer": "Starter plan includes generous monthly limits. Pro and Enterprise plans have unlimited submissions and messaging. All plans have visibility into their current usage in the dashboard."
+        },
+        {
+          "question": "Which features are available on the free plan?",
+          "answer": "The Starter plan includes full marketplace access, candidate submissions, direct messaging, and basic pipeline management. AI matching, advanced analytics, and custom ATS stages are available on paid plans."
+        }
+      ],
+      "bg": "base-200"
+    },
+    {
+      "type": "cta",
+      "heading": "See the Platform in Action",
+      "subtitle": "Start free and explore every feature. No credit card required.",
+      "buttons": [
+        {
+          "label": "Start Free",
+          "href": "/sign-up",
+          "variant": "primary",
+          "icon": "fa-duotone fa-regular fa-rocket"
+        },
+        {
+          "label": "Book a Demo",
+          "href": "mailto:demo@splits.network",
+          "variant": "outline"
+        }
+      ],
+      "contactEmail": "demo@splits.network",
+      "bg": "primary"
+    }
+  ]
+}
