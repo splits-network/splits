@@ -135,10 +135,10 @@ function SSOCallbackInner() {
                     const isInternalUrl = redirectUrl.startsWith("/");
                     const finalRedirectUrl = isInternalUrl
                         ? redirectUrl
-                        : "/portal/dashboard";
+                        : "/onboarding";
                     router.replace(finalRedirectUrl);
                 } else {
-                    router.replace("/portal/dashboard");
+                    router.replace("/onboarding");
                 }
             } catch (error: any) {
                 console.error("[SSO_CALLBACK] Error:", error);
@@ -148,7 +148,7 @@ function SSOCallbackInner() {
                 setStatus("error");
 
                 setTimeout(() => {
-                    router.replace("/portal/dashboard");
+                    router.replace("/onboarding");
                 }, 3000);
             }
         }

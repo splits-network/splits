@@ -7,7 +7,7 @@
  */
 
 import type { ApiClient } from '@/lib/api-client';
-import type { CandidateProfileData } from '@/components/onboarding/types';
+import type { CandidateProfileData } from '@/app/onboarding/types';
 
 /**
  * Determines if the onboarding modal should be shown based on the user's onboarding status.

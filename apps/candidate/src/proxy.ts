@@ -17,6 +17,7 @@ export default clerkMiddleware(async (auth, request) => {
 
     // Protected routes that require authentication
     const isProtectedRoute = path.startsWith('/portal/') ||
+        path.startsWith('/onboarding') ||
         path.startsWith('/api/v2/') ||
         path.startsWith('/api/notifications/') ||
         path === '/api/healthcheck';
@@ -28,23 +29,12 @@ export default clerkMiddleware(async (auth, request) => {
 });
 
 export const config = {
+    // layout.tsx calls auth() on every route, so Clerk middleware must run on
+    // all page routes. Use the Clerk-recommended catch-all that excludes only
+    // static assets and Next.js internals.
     matcher: [
-        // Root and auth routes (for auth-based redirect and Clerk context)
-        '/',
-        '/sign-in(.*)',
-        '/sign-up(.*)',
-        '/sso-callback(.*)',
-
-        // All public pages — layout.tsx calls auth() on every route so Clerk
-        // middleware must run here even though auth is not required
-
-        // Protected routes that require authentication
-        '/portal/(.*)',     // Main authenticated portal
-
-        // Protected API routes only
-        '/api/v2/(.*)',     // V2 API routes
-        '/api/notifications/(.*)', // Notification APIs
-        '/api/healthcheck', // Internal health check
+        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        '/(api)(.*)',
     ],
 };
 

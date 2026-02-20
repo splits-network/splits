@@ -1,25 +1,34 @@
 "use client";
 
 /**
- * Resume Step - Step 3 of Candidate Onboarding
- * Optional resume upload
+ * Step 3: Resume Upload (Basel Edition)
+ * Optional resume upload to /documents endpoint via FormData.
  */
 
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useOnboarding } from "../onboarding-provider";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import type {
+    CandidateOnboardingState,
+    CandidateOnboardingActions,
+} from "../types";
 
 const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.txt";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-export function ResumeStep() {
-    const { state, updateProfileData, candidateId } = useOnboarding();
+interface ResumeStepProps {
+    state: CandidateOnboardingState;
+    actions: CandidateOnboardingActions;
+}
+
+export function ResumeStep({ state, actions }: ResumeStepProps) {
     const { getToken } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -50,23 +59,20 @@ export function ResumeStep() {
 
             const apiClient = createAuthenticatedClient(token);
 
-            // Ensure candidateId is available
-            if (!candidateId) {
+            if (!state.candidateId) {
                 throw new Error("No candidate ID available for file upload");
             }
 
-            // Direct upload with FormData (matches working pattern)
             const formData = new FormData();
             formData.append("file", file);
             formData.append("entity_type", "candidate");
-            formData.append("entity_id", candidateId);
+            formData.append("entity_id", state.candidateId);
             formData.append("document_type", "resume");
 
             const response = await apiClient.post("/documents", formData);
 
-            // Update state with document ID from V2 response
             const documentId = response.data?.id || response.id;
-            updateProfileData({
+            actions.updateProfileData({
                 resumeFile: file,
                 resumeUploaded: true,
                 resumeDocumentId: documentId,
@@ -94,11 +100,14 @@ export function ResumeStep() {
                     );
                 }
             } catch (error) {
-                console.error("[ResumeStep] Failed to delete document:", error);
+                console.error(
+                    "[ResumeStep] Failed to delete document:",
+                    error,
+                );
             }
         }
 
-        updateProfileData({
+        actions.updateProfileData({
             resumeFile: null,
             resumeUploaded: false,
             resumeDocumentId: undefined,
@@ -110,38 +119,32 @@ export function ResumeStep() {
         state.profileData.resumeUploaded && state.profileData.resumeFile;
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-warning/10 flex items-center justify-center">
-                    <i className="fa-duotone fa-regular fa-file-lines text-3xl text-warning"></i>
-                </div>
-                <h2 className="text-xl font-bold mb-2 flex items-center justify-center gap-2">
-                    Upload Your Resume
-                    <span className="badge badge-warning badge-sm">
-                        Optional
-                    </span>
-                </h2>
-                <p className="text-base-content/70 text-sm">
-                    A resume helps recruiters understand your experience better.
-                </p>
-            </div>
+        <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
+                Step 3
+            </p>
+            <h1 className="text-3xl font-black tracking-tight mb-1">
+                Upload Your Resume
+            </h1>
+            <p className="text-base-content/50 mb-8">
+                A resume helps recruiters understand your experience. This step
+                is optional.
+            </p>
 
             {/* Upload Area */}
-            <div className="mx-auto">
+            <div className="mb-6">
                 {hasUploadedResume ? (
-                    // Show uploaded file
-                    <div className="border-2 border-success border-dashed rounded-lg p-6">
+                    <div className="border-2 border-success border-dashed p-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center">
-                                    <i className="fa-duotone fa-regular fa-file-check text-2xl text-success"></i>
+                                <div className="w-12 h-12 bg-success/10 flex items-center justify-center">
+                                    <i className="fa-duotone fa-regular fa-file-check text-2xl text-success" />
                                 </div>
                                 <div>
-                                    <p className="font-medium truncate max-w-[200px]">
+                                    <p className="font-semibold truncate max-w-[200px]">
                                         {state.profileData.resumeFile?.name}
                                     </p>
-                                    <p className="text-xs text-base-content/60">
+                                    <p className="text-xs text-base-content/50">
                                         {state.profileData.resumeFile?.size
                                             ? `${(state.profileData.resumeFile.size / 1024).toFixed(1)} KB`
                                             : "Uploaded"}
@@ -154,30 +157,29 @@ export function ResumeStep() {
                                 onClick={handleRemoveFile}
                                 title="Remove file"
                             >
-                                <i className="fa-duotone fa-regular fa-xmark"></i>
+                                <i className="fa-duotone fa-regular fa-xmark" />
                             </button>
                         </div>
                         <p className="text-xs text-success mt-3 text-center">
-                            <i className="fa-duotone fa-regular fa-check-circle mr-1"></i>
-                            Resume uploaded successfully!
+                            <i className="fa-solid fa-check mr-1" />
+                            Resume uploaded successfully
                         </p>
                     </div>
                 ) : (
-                    // Show upload input
-                    <div className="border-2 border-dashed border-base-300 rounded-lg p-8 hover:border-coral transition-colors">
+                    <div className="border-2 border-dashed border-base-300 p-8 hover:border-primary/50 transition-colors">
                         <div className="text-center">
                             {uploading ? (
                                 <>
-                                    <span className="loading loading-spinner loading-lg text-primary"></span>
-                                    <p className="mt-3 text-sm text-base-content/70">
+                                    <span className="loading loading-spinner loading-lg text-primary" />
+                                    <p className="mt-3 text-sm text-base-content/60">
                                         Uploading your resume...
                                     </p>
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-duotone fa-regular fa-cloud-arrow-up text-4xl text-base-content/40"></i>
+                                    <i className="fa-duotone fa-regular fa-cloud-arrow-up text-4xl text-base-content/30" />
                                     <p className="mt-3 text-sm">
-                                        <label className="link link-primary cursor-pointer">
+                                        <label className="link link-primary cursor-pointer font-semibold">
                                             Click to upload
                                             <input
                                                 type="file"
@@ -189,8 +191,8 @@ export function ResumeStep() {
                                         </label>{" "}
                                         or drag and drop
                                     </p>
-                                    <p className="text-xs text-base-content/60 mt-1">
-                                        PDF, DOC, DOCX, or TXT - Max 10MB
+                                    <p className="text-xs text-base-content/40 mt-1">
+                                        PDF, DOC, DOCX, or TXT &mdash; Max 10MB
                                     </p>
                                 </>
                             )}
@@ -198,29 +200,45 @@ export function ResumeStep() {
                     </div>
                 )}
 
-                {/* Error Message */}
                 {uploadError && (
-                    <div className="alert alert-error mt-4">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                    <div className="border-l-4 border-error bg-error/5 p-4 mt-4 flex items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error" />
                         <span className="text-sm">{uploadError}</span>
                     </div>
                 )}
             </div>
 
-            {/* Skip Note */}
-            <div className="bg-base-200 rounded-lg p-4 mx-auto">
+            {/* Info note */}
+            <div className="border-l-4 border-info bg-info/5 p-5 mb-6">
                 <div className="flex items-start gap-3">
-                    <i className="fa-duotone fa-regular fa-lightbulb text-info text-xl mt-0.5"></i>
+                    <i className="fa-duotone fa-regular fa-lightbulb text-info text-lg mt-0.5" />
                     <div>
-                        <h4 className="font-medium text-sm">
-                            No resume ready?
-                        </h4>
-                        <p className="text-xs text-base-content/70 mt-1">
-                            No problem! You can skip this step and upload your
+                        <h4 className="text-sm font-bold">No resume ready?</h4>
+                        <p className="text-xs text-base-content/50 mt-1">
+                            No problem. You can skip this step and upload your
                             resume later from your profile page.
                         </p>
                     </div>
                 </div>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between pt-6 border-t border-base-300">
+                <button
+                    className="btn btn-ghost"
+                    onClick={() => actions.setStep(2)}
+                    disabled={state.submitting}
+                >
+                    <i className="fa-solid fa-arrow-left text-xs" /> Back
+                </button>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => actions.setStep(4)}
+                    disabled={state.submitting}
+                >
+                    Continue
+                    <i className="fa-solid fa-arrow-right text-xs" />
+                </button>
             </div>
         </div>
     );
