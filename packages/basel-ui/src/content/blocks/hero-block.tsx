@@ -32,13 +32,15 @@ export function HeroBlockComponent({ block }: { block: HeroBlock; index: number 
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
                         {block.headlineWords.map((word, i) => (
-                            <span
-                                key={i}
-                                className={`hero-headline-word inline-block opacity-0 ${
-                                    word.accent ? 'text-primary' : 'text-base-content'
-                                }`}
-                            >
-                                {word.text}
+                            <span key={i}>
+                                <span
+                                    className={`hero-headline-word inline-block opacity-0 ${
+                                        word.accent ? 'text-primary' : 'text-base-content'
+                                    }`}
+                                >
+                                    {word.text}
+                                </span>
+                                {i < block.headlineWords.length - 1 && ' '}
                             </span>
                         ))}
                     </h1>
