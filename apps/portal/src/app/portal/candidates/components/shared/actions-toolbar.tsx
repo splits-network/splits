@@ -15,7 +15,6 @@ import type { Candidate } from "../../types";
 import { Button } from "@splits-network/basel-ui";
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
-import EditCandidateModal from "../modals/edit-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -29,13 +28,11 @@ export interface CandidateActionsToolbarProps {
         viewDetails?: boolean;
         message?: boolean;
         sendJobOpportunity?: boolean;
-        edit?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
     };
     onRefresh?: () => void;
     onViewDetails?: (candidateId: string) => void;
-    onEdit?: (candidateId: string) => void;
     onVerify?: (candidate: Candidate) => void;
     onMessage?: (
         conversationId: string,
@@ -56,7 +53,6 @@ export default function CandidateActionsToolbar({
     showActions = {},
     onRefresh,
     onViewDetails,
-    onEdit,
     onVerify,
     onMessage,
     className = "",
@@ -70,7 +66,6 @@ export default function CandidateActionsToolbar({
     /* ── Modal states ── */
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
 
     /* ── Loading states ── */
@@ -168,7 +163,6 @@ export default function CandidateActionsToolbar({
         message: showActions.message !== false,
         sendJobOpportunity:
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
-        edit: showActions.edit !== false && canManageCandidate,
         verify: showActions.verify !== false && canVerifyCandidate,
         endRepresentation:
             showActions.endRepresentation !== false &&
@@ -204,17 +198,6 @@ export default function CandidateActionsToolbar({
                     candidateName={candidate.full_name || "Unknown"}
                 />
             )}
-            {showEditModal && (
-                <EditCandidateModal
-                    candidateId={candidate.id}
-                    isOpen={showEditModal}
-                    onClose={() => setShowEditModal(false)}
-                    onSuccess={() => {
-                        setShowEditModal(false);
-                        refresh();
-                    }}
-                />
-            )}
             {showVerifyModal && (
                 <VerificationModal
                     candidate={candidate}
@@ -248,17 +231,6 @@ export default function CandidateActionsToolbar({
                         ></Button>
                     )}
 
-                    {/* Edit */}
-                    {actions.edit && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-pen-to-square"
-                            variant="btn-ghost"
-                            size={size}
-                            onClick={() => setShowEditModal(true)}
-                            title="Edit Candidate"
-                        ></Button>
-                    )}
-
                     {/* Verify */}
                     {actions.verify &&
                         candidate.verification_status !== "verified" && (
@@ -287,7 +259,6 @@ export default function CandidateActionsToolbar({
                     {/* Divider before Message */}
                     {actions.message &&
                         (actions.sendJobOpportunity ||
-                            actions.edit ||
                             actions.verify ||
                             actions.endRepresentation) && (
                             <div className="w-px h-4 bg-base-content/20 mx-0.5" />
@@ -358,19 +329,6 @@ export default function CandidateActionsToolbar({
                     </button>
                 )}
 
-                {/* Edit */}
-                {actions.edit && (
-                    <button
-                        onClick={() => setShowEditModal(true)}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
-                        style={{ borderRadius: 0 }}
-                        title="Edit Candidate"
-                    >
-                        <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        <span className="hidden md:inline">Edit</span>
-                    </button>
-                )}
-
                 {/* Verify */}
                 {actions.verify &&
                     candidate.verification_status !== "verified" && (
@@ -403,7 +361,6 @@ export default function CandidateActionsToolbar({
                 {/* Divider before Message */}
                 {actions.message &&
                     (actions.sendJobOpportunity ||
-                        actions.edit ||
                         actions.verify ||
                         actions.endRepresentation) && (
                         <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
