@@ -26,6 +26,7 @@ export function ThemeToggle({ className, size = "md" }: ThemeToggleProps) {
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
             <i
+                key={isDark ? "sun" : "moon"}
                 className={`fa-duotone fa-regular ${isDark ? "fa-sun-bright" : "fa-moon"} text-base-content/60`}
             />
         </button>
