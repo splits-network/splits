@@ -38,7 +38,11 @@ const keyStats = [
         label: "saved with annual billing",
         semantic: "border-accent",
     },
-    { value: "$0", label: "hidden fees at any tier", semantic: "border-warning" },
+    {
+        value: "$0",
+        label: "hidden fees at any tier",
+        semantic: "border-warning",
+    },
 ];
 
 const comparisonFeatures = [
@@ -546,12 +550,11 @@ export function PricingContent() {
                 <div
                     className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
                     style={{
-                        clipPath:
-                            "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                 >
                     <img
-                        src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80"
+                        src="https://images.unsplash.com/photo-1606002830191-c1b4f20e6cda?w=800&q=80"
                         alt="Professional recruiter in modern office"
                         className="w-full h-full object-cover"
                     />
@@ -562,8 +565,7 @@ export function PricingContent() {
                 <div
                     className="absolute inset-0 bg-primary/5 pointer-events-none hidden lg:block"
                     style={{
-                        clipPath:
-                            "polygon(0 0, 55% 0, 45% 100%, 0% 100%)",
+                        clipPath: "polygon(0 0, 55% 0, 45% 100%, 0% 100%)",
                     }}
                 />
 
@@ -592,9 +594,9 @@ export function PricingContent() {
 
                         <p className="hero-body text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
                             Three tiers. One transparent model. Your
-                            subscription is the only recurring cost --
-                            placement earnings are yours to keep. Start free,
-                            scale when the math makes sense.
+                            subscription is the only recurring cost -- placement
+                            earnings are yours to keep. Start free, scale when
+                            the math makes sense.
                         </p>
 
                         <div className="hero-cta-row flex flex-wrap items-center gap-4 opacity-0">
@@ -770,9 +772,7 @@ export function PricingContent() {
                         </span>
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] text-base-content">
                             Three Plans.{" "}
-                            <span className="text-accent">
-                                One Standard.
-                            </span>
+                            <span className="text-accent">One Standard.</span>
                         </h2>
                     </div>
 
@@ -785,14 +785,14 @@ export function PricingContent() {
                     </div>
 
                     <div className="max-w-3xl mt-10 text-sm text-base-content/50">
-                        Splits Network does not guarantee placements, income,
-                        or role availability. All payout amounts are calculated
-                        at hire time based on role terms, recruiter
-                        participation, and active subscription tier. Placement
-                        fee percentages are set by hiring companies and
-                        confirmed before recruiter engagement. Annual billing
-                        savings are based on comparison to monthly rates for
-                        the same tier. Prices shown are in USD.
+                        Splits Network does not guarantee placements, income, or
+                        role availability. All payout amounts are calculated at
+                        hire time based on role terms, recruiter participation,
+                        and active subscription tier. Placement fee percentages
+                        are set by hiring companies and confirmed before
+                        recruiter engagement. Annual billing savings are based
+                        on comparison to monthly rates for the same tier. Prices
+                        shown are in USD.
                     </div>
                 </div>
             </section>
@@ -867,9 +867,9 @@ export function PricingContent() {
                         </h2>
                         <p className="text-lg text-base-content/60 leading-relaxed">
                             Companies access the full recruiter network without
-                            a subscription, a listing fee, or a per-seat
-                            charge. Post as many roles as you need and manage
-                            every pipeline from a single dashboard.
+                            a subscription, a listing fee, or a per-seat charge.
+                            Post as many roles as you need and manage every
+                            pipeline from a single dashboard.
                         </p>
                     </div>
 
@@ -930,11 +930,11 @@ export function PricingContent() {
                                 </div>
                             </div>
                             <p className="text-sm leading-relaxed text-base-content/60">
-                                A $120,000 hire at a 20% fee generates a
-                                $24,000 placement fee. The majority goes to the
-                                placing recruiter; the platform retains a
-                                transparent processing percentage disclosed at
-                                role creation.
+                                A $120,000 hire at a 20% fee generates a $24,000
+                                placement fee. The majority goes to the placing
+                                recruiter; the platform retains a transparent
+                                processing percentage disclosed at role
+                                creation.
                             </p>
                         </div>
                     </div>
@@ -1069,8 +1069,7 @@ export function PricingContent() {
                 <div
                     className="absolute inset-0 bg-primary/5 pointer-events-none hidden lg:block"
                     style={{
-                        clipPath:
-                            "polygon(50% 0, 100% 0, 100% 100%, 30% 100%)",
+                        clipPath: "polygon(50% 0, 100% 0, 100% 100%, 30% 100%)",
                     }}
                 />
 
