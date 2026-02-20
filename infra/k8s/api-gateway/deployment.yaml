@@ -109,6 +109,8 @@ spec:
                         value: "http://search-service:80"
                       - name: GPT_SERVICE_URL
                         value: "http://gpt-service:80"
+                      - name: CONTENT_SERVICE_URL
+                        value: "http://content-service:3015"
                   resources:
                       requests:
                           cpu: 200m
