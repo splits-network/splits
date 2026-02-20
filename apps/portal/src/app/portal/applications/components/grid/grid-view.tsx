@@ -16,7 +16,8 @@ export function GridView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedApplication = applications.find((a) => a.id === selectedId) ?? null;
+    const selectedApplication =
+        applications.find((a) => a.id === selectedId) ?? null;
 
     return (
         <div className="flex gap-6">
@@ -49,7 +50,7 @@ export function GridView({
                     isOpen
                     className="md:w-[45%] md:flex-shrink-0 md:self-start bg-base-100 border-l-4 border-primary"
                 >
-                    <div className="h-[calc(100vh-140px)] sticky top-[140px] overflow-y-auto">
+                    <div className="h-full sticky top-[140px] overflow-y-auto">
                         <DetailLoader
                             applicationId={selectedApplication.id}
                             onClose={() => onSelect(selectedApplication)}

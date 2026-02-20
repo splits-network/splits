@@ -4,7 +4,7 @@ import type { Job } from "../../types";
 import { TableRow } from "./table-row";
 
 const COLUMNS = [
-    "",          // chevron
+    "", // chevron
     "Title",
     "Company",
     "Location",
@@ -13,7 +13,7 @@ const COLUMNS = [
     "Status",
     "Apps",
     "Posted",
-    "",          // actions
+    "", // actions
 ] as const;
 
 export function TableView({
@@ -21,11 +21,13 @@ export function TableView({
     onSelect,
     selectedId,
     onRefresh,
+    onUpdateItem,
 }: {
     jobs: Job[];
     onSelect: (j: Job) => void;
     selectedId: string | null;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     return (
         <div className="overflow-x-auto border-2 border-base-300">
@@ -52,6 +54,7 @@ export function TableView({
                             colSpan={COLUMNS.length}
                             onSelect={() => onSelect(job)}
                             onRefresh={onRefresh}
+                            onUpdateItem={onUpdateItem}
                         />
                     ))}
                 </tbody>

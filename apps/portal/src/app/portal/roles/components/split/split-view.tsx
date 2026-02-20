@@ -10,16 +10,21 @@ export function SplitView({
     onSelect,
     selectedId,
     onRefresh,
+    onUpdateItem,
 }: {
     jobs: Job[];
     onSelect: (j: Job) => void;
     selectedId: string | null;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
 
     return (
-        <div className="flex border-2 border-base-300" style={{ minHeight: 600 }}>
+        <div
+            className="flex border-2 border-base-300"
+            style={{ minHeight: 600 }}
+        >
             {/* Left list — hidden on mobile when a job is selected */}
             <div
                 className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
@@ -46,6 +51,7 @@ export function SplitView({
                         jobId={selectedJob.id}
                         onClose={() => onSelect(selectedJob)}
                         onRefresh={onRefresh}
+                        onUpdateItem={onUpdateItem}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center p-12">

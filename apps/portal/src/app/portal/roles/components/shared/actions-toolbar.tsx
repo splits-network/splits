@@ -29,6 +29,9 @@ export interface RoleActionsToolbarProps {
         share?: boolean;
     };
     onRefresh?: () => void;
+    /** Synchronously patches the item in the React Query cache so every view
+     *  using the same query key re-renders immediately on mutation success. */
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
     onViewDetails?: (jobId: string) => void;
     onViewPipeline?: (jobId: string) => void;
     className?: string;
@@ -43,6 +46,7 @@ export default function RoleActionsToolbar({
     size = "sm",
     showActions = {},
     onRefresh,
+    onUpdateItem,
     onViewDetails,
     onViewPipeline,
     className = "",
@@ -100,6 +104,7 @@ export default function RoleActionsToolbar({
             const client = createAuthenticatedClient(token);
             await client.patch(`/jobs/${job.id}`, { status: newStatus });
             toast.success(`Role status updated to ${newStatus}!`);
+            onUpdateItem?.(job.id, { status: newStatus });
             refresh();
         } catch (error: any) {
             console.error("Failed to update status:", error);

@@ -21,7 +21,7 @@ import CompanyContacts from "@/components/company-contacts";
 import { categorizeDocuments } from "../../lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
-import AIReviewPanel from "@/app/portal/applications/components/shared/ai-review-panel";
+import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { CandidateDetail } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
 
@@ -84,9 +84,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         const el = tabScrollRef.current;
         if (!el) return;
         setCanScrollLeft(el.scrollLeft > 0);
-        setCanScrollRight(
-            el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-        );
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
     }, []);
 
     useEffect(() => {
@@ -298,8 +296,7 @@ function OverviewTab({ application }: { application: Application }) {
         ((recruiter as any)?.first_name && (recruiter as any)?.last_name
             ? `${(recruiter as any).first_name} ${(recruiter as any).last_name}`
             : null);
-    const recruiterEmail =
-        recruiter?.email || recruiter?.user?.email || null;
+    const recruiterEmail = recruiter?.email || recruiter?.user?.email || null;
     const recruiterInitials = recruiterName
         ? recruiterName
               .split(" ")
@@ -309,10 +306,7 @@ function OverviewTab({ application }: { application: Application }) {
         : "?";
 
     // Truncate text to ~5 lines (approx 400 chars)
-    const truncateText = (
-        text: string | null | undefined,
-        maxLength = 400,
-    ) => {
+    const truncateText = (text: string | null | undefined, maxLength = 400) => {
         if (!text) return null;
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength).trim() + "...";
@@ -356,7 +350,8 @@ function OverviewTab({ application }: { application: Application }) {
                                 <div className="flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-money-bill-wave text-accent" />
                                     ${job.salary_min?.toLocaleString() || "..."}{" "}
-                                    - ${job.salary_max?.toLocaleString() || "..."}
+                                    - $
+                                    {job.salary_max?.toLocaleString() || "..."}
                                 </div>
                             )}
                         </div>
@@ -448,10 +443,7 @@ function OverviewTab({ application }: { application: Application }) {
             </div>
 
             {/* AI Analysis (compact reuse) */}
-            <AIReviewPanel
-                applicationId={application.id}
-                variant="compact"
-            />
+            <AIReviewPanel applicationId={application.id} variant="compact" />
         </div>
     );
 }
@@ -592,10 +584,7 @@ function DocumentsTab({ application }: { application: Application }) {
         <>
             <div className="space-y-6">
                 {candidateDocuments.length > 0 &&
-                    renderDocumentList(
-                        candidateDocuments,
-                        "From Candidate",
-                    )}
+                    renderDocumentList(candidateDocuments, "From Candidate")}
                 {companyDocuments.length > 0 &&
                     renderDocumentList(companyDocuments, "From Company")}
             </div>

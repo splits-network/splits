@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import SettingsContent from "./settings-content";
+import SettingsContent from "@/components/basel/company-settings/settings-content";
 
 export default async function CompanySettingsPage() {
     const { getToken } = await auth();

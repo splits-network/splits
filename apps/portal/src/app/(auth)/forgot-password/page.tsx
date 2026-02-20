@@ -1,13 +1,14 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 
 export default function ForgotPasswordPage() {
-    const { isLoaded, signIn } = useSignIn();
+    const { isLoaded, signIn, setActive } = useSignIn();
+    const { isSignedIn } = useAuth();
     const router = useRouter();
 
     const [email, setEmail] = useState("");
@@ -21,16 +22,28 @@ export default function ForgotPasswordPage() {
 
     const stepRef = useRef<HTMLDivElement>(null);
 
+    // Redirect already-signed-in users away — their active session causes 422 on signIn.create()
+    useEffect(() => {
+        if (isSignedIn) router.push("/portal/dashboard");
+    }, [isSignedIn, router]);
+
     const handleSendCode = async (e: FormEvent) => {
         e.preventDefault();
         if (!isLoaded) return;
         setError("");
         setIsLoading(true);
         try {
-            await signIn.create({ strategy: "reset_password_email_code", identifier: email });
+            await signIn.create({
+                strategy: "reset_password_email_code",
+                identifier: email,
+            });
             setSuccessfulCreation(true);
         } catch (err: any) {
-            setError(err.errors?.[0]?.message || "Failed to send reset code");
+            setError(
+                err.errors?.[0]?.longMessage ||
+                    err.errors?.[0]?.message ||
+                    "Failed to send reset code",
+            );
         } finally {
             setIsLoading(false);
         }
@@ -42,15 +55,29 @@ export default function ForgotPasswordPage() {
         setError("");
         setIsLoading(true);
         try {
-            const result = await signIn.attemptFirstFactor({ strategy: "reset_password_email_code", code, password });
-            if (result.status === "complete") {
+            const result = await signIn.attemptFirstFactor({
+                strategy: "reset_password_email_code",
+                code,
+                password,
+            });
+
+            if (result.status === "needs_second_factor") {
+                setError(
+                    "Two-factor authentication is required. Please contact support.",
+                );
+            } else if (result.status === "complete") {
+                await setActive({ session: result.createdSessionId });
                 setComplete(true);
-                setTimeout(() => router.push("/sign-in"), 2000);
+                setTimeout(() => router.push("/portal/dashboard"), 2000);
             } else {
                 setError("Password reset incomplete. Please try again.");
             }
         } catch (err: any) {
-            setError(err.errors?.[0]?.message || "Failed to reset password");
+            setError(
+                err.errors?.[0]?.longMessage ||
+                    err.errors?.[0]?.message ||
+                    "Failed to reset password",
+            );
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +85,11 @@ export default function ForgotPasswordPage() {
 
     // Animate step transitions
     useEffect(() => {
-        if (!stepRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (
+            !stepRef.current ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+            return;
         gsap.fromTo(
             stepRef.current,
             { opacity: 0, x: 20 },
@@ -77,7 +108,7 @@ export default function ForgotPasswordPage() {
                     Password reset successful
                 </h1>
                 <p className="text-base-content/50 mb-6">
-                    Your password has been updated. Redirecting to sign in...
+                    Your password has been updated. Redirecting to dashboard...
                 </p>
                 <span className="loading loading-spinner loading-lg text-primary" />
             </div>
@@ -94,10 +125,15 @@ export default function ForgotPasswordPage() {
                     </h1>
                 </div>
 
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-6" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-6"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
-                        <span className="text-sm">We sent a reset code to <strong>{email}</strong></span>
+                        <span className="text-sm">
+                            We sent a reset code to <strong>{email}</strong>
+                        </span>
                     </div>
                 </div>
 
@@ -130,7 +166,7 @@ export default function ForgotPasswordPage() {
                             New Password
                         </label>
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
@@ -144,22 +180,36 @@ export default function ForgotPasswordPage() {
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
                             >
-                                <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                                <i
+                                    className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                                />
                             </button>
                         </div>
-                        <p className="text-xs text-base-content/40 mt-1.5">Must be at least 8 characters</p>
+                        <p className="text-xs text-base-content/40 mt-1.5">
+                            Must be at least 8 characters
+                        </p>
                     </fieldset>
 
-                    <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-full"
+                        disabled={isLoading || !isLoaded}
+                    >
                         {isLoading ? (
-                            <><span className="loading loading-spinner loading-sm" /> Resetting password...</>
+                            <>
+                                <span className="loading loading-spinner loading-sm" />{" "}
+                                Resetting password...
+                            </>
                         ) : (
                             "Reset Password"
                         )}
                     </button>
                 </form>
 
-                <button onClick={() => setSuccessfulCreation(false)} className="btn btn-ghost btn-sm w-full mt-4">
+                <button
+                    onClick={() => setSuccessfulCreation(false)}
+                    className="btn btn-ghost btn-sm w-full mt-4"
+                >
                     <i className="fa-solid fa-arrow-left" /> Back
                 </button>
             </div>
@@ -186,12 +236,13 @@ export default function ForgotPasswordPage() {
             )}
 
             <form onSubmit={handleSendCode} className="space-y-4">
+                <div id="clerk-captcha" />
                 <fieldset>
                     <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Email Address
                     </label>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                         <input
                             type="email"
                             value={email}
@@ -203,9 +254,16 @@ export default function ForgotPasswordPage() {
                     </div>
                 </fieldset>
 
-                <button type="submit" className="btn btn-primary w-full" disabled={isLoading || !isLoaded}>
+                <button
+                    type="submit"
+                    className="btn btn-primary w-full"
+                    disabled={isLoading || !isLoaded}
+                >
                     {isLoading ? (
-                        <><span className="loading loading-spinner loading-sm" /> Sending code...</>
+                        <>
+                            <span className="loading loading-spinner loading-sm" />{" "}
+                            Sending code...
+                        </>
                     ) : (
                         "Send Reset Code"
                     )}
@@ -215,13 +273,18 @@ export default function ForgotPasswordPage() {
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-base-300" />
-                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
                 <div className="flex-1 h-px bg-base-300" />
             </div>
 
             <div className="text-center text-sm text-base-content/50">
                 Remember your password?{" "}
-                <Link href="/sign-in" className="text-primary font-semibold hover:underline">
+                <Link
+                    href="/sign-in"
+                    className="text-primary font-semibold hover:underline"
+                >
                     Sign in
                 </Link>
             </div>

@@ -92,6 +92,7 @@ export default function RolesPage() {
         total,
         totalPages,
         refresh,
+        updateItem,
     } = useStandardList<Job, UnifiedJobFilters>({
         endpoint: "/jobs",
         defaultFilters: { status: undefined, job_owner_filter: "all" },
@@ -162,7 +163,8 @@ export default function RolesPage() {
                                     No matching roles
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    Adjust your search or clear filters to see available positions.
+                                    Adjust your search or clear filters to see
+                                    available positions.
                                 </p>
                                 <button
                                     onClick={() => {

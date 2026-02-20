@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 import type { StandardListParams, StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
 
@@ -121,6 +122,9 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     /** @deprecated Use `refresh` instead */
     refetch: () => Promise<void>;
     reset: () => void;
+    /** Optimistically patch an item in the cached list by id. All views sharing
+     *  this query key update in the same render tick — no re-fetch required. */
+    updateItem: (id: string, patch: Partial<T>) => void;
 }
 
 // ===== CONSTANTS =====
@@ -213,17 +217,6 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         };
     }, [syncToUrl, searchParams, defaultSortBy, defaultSortOrder, defaultLimit]);
 
-    // Core state
-    const [data, setData] = useState<T[]>([]);
-    const [pagination, setPagination] = useState<PaginationResponse>({
-        total: 0,
-        page: DEFAULT_PAGE,
-        limit: defaultLimit,
-        total_pages: 0,
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
     // Search state (separate input for controlled component)
     const initialState = getInitialState();
     const [searchInput, setSearchInputState] = useState(initialState.search);
@@ -239,6 +232,106 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Pagination state
     const [page, setPage] = useState(initialState.page);
     const [limit, setLimitState] = useState(initialState.limit);
+
+    // ── React Query ────────────────────────────────────────────────────────────
+
+    const queryClient = useQueryClient();
+
+    // Strip null/undefined/'' so filters like { status: undefined } don't
+    // pollute the cache key or the API call.
+    const activeFilters = useMemo(() => {
+        const result: Record<string, any> = {};
+        Object.keys(filters).forEach(key => {
+            if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
+                result[key] = filters[key];
+            }
+        });
+        return result;
+    }, [filters]);
+
+    // Stable cache key — changes whenever any fetch input changes.
+    // React Query detects the change, evicts the old entry, and refetches.
+    const queryKey = useMemo(() => [
+        'standardList',
+        endpoint ?? 'custom',
+        page,
+        limit,
+        searchQuery,
+        sortBy,
+        sortOrder,
+        JSON.stringify(activeFilters),
+        include ?? '',
+    ], [endpoint, page, limit, searchQuery, sortBy, sortOrder, activeFilters, include]);
+
+    const query = useQuery({
+        queryKey,
+        queryFn: async (): Promise<FetchResponse<T>> => {
+            const fetchParams: FetchParams<F> = {
+                page,
+                limit,
+                sort_by: sortBy,
+                sort_order: sortOrder,
+                ...(searchQuery && { search: searchQuery }),
+                ...(Object.keys(activeFilters).length > 0 && { filters: activeFilters as F }),
+            };
+
+            // Custom fetcher takes priority over built-in endpoint logic.
+            const currentFetchFn = fetchFnRef.current;
+            if (currentFetchFn) {
+                return currentFetchFn(fetchParams);
+            }
+
+            if (!endpoint) {
+                throw new Error('Either endpoint or fetchFn must be provided');
+            }
+
+            const params: StandardListParams = {
+                page,
+                limit,
+                sort_by: sortBy,
+                sort_order: sortOrder,
+            };
+            if (searchQuery) params.search = searchQuery;
+            if (include) params.include = include;
+            if (Object.keys(activeFilters).length > 0) params.filters = activeFilters;
+
+            if (requireAuth) {
+                const token = await getToken();
+                if (!token) throw new Error('Not authenticated');
+                const client = createAuthenticatedClient(token);
+                return client.get<StandardListResponse<T>>(endpoint, { params });
+            } else {
+                const client = new ApiClient();
+                return client.get<StandardListResponse<T>>(endpoint, { params });
+            }
+        },
+        enabled: autoFetch,
+    });
+
+    // Derive data, pagination, loading, and error from the query state.
+    // transformData is applied on read rather than stored in the cache, so
+    // a changed transform function never requires a cache invalidation.
+    const data = useMemo<T[]>(() => {
+        const raw = query.data?.data ?? [];
+        return transformDataRef.current ? transformDataRef.current(raw) : raw;
+    }, [query.data]);
+
+    const pagination: PaginationResponse = query.data?.pagination ?? {
+        total: 0,
+        page: DEFAULT_PAGE,
+        limit: defaultLimit,
+        total_pages: 0,
+    };
+
+    // isFetching is true during both initial loads and background refetches,
+    // preserving the previous setLoading(true/false) behaviour for consumers
+    // that gate on `loading && data.length === 0`.
+    const loading = query.isFetching;
+    const error: string | null = query.isError
+        ? (query.error instanceof Error ? query.error.message : 'Failed to load data')
+        : null;
+
+    // ── End React Query ────────────────────────────────────────────────────────
 
     // View mode state (persisted to localStorage)
     // Always initialize with 'grid' to avoid hydration mismatch
@@ -315,97 +408,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
-
-    // Fetch data
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            // Build params for fetching
-            const activeFilters: Record<string, any> = {};
-            Object.keys(filters).forEach(key => {
-                if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
-                    activeFilters[key] = filters[key];
-                }
-            });
-
-            const fetchParams: FetchParams<F> = {
-                page,
-                limit,
-                sort_by: sortBy,
-                sort_order: sortOrder,
-                ...(searchQuery && { search: searchQuery }),
-                ...(Object.keys(activeFilters).length > 0 && { filters: activeFilters as F }),
-            };
-
-            let response: FetchResponse<T>;
-
-            // Use ref to get latest fetchFn without causing dependency changes
-            const currentFetchFn = fetchFnRef.current;
-            if (currentFetchFn) {
-                // Use custom fetch function
-                response = await currentFetchFn(fetchParams);
-            } else if (endpoint) {
-                // Use built-in fetch with endpoint
-                const params: StandardListParams = {
-                    page,
-                    limit,
-                    sort_by: sortBy,
-                    sort_order: sortOrder,
-                };
-
-                if (searchQuery) {
-                    params.search = searchQuery;
-                }
-
-                if (include) {
-                    params.include = include;
-                }
-
-                if (Object.keys(activeFilters).length > 0) {
-                    params.filters = activeFilters;
-                }
-
-                // Handle authentication based on requireAuth option
-                if (requireAuth) {
-                    const token = await getToken();
-                    if (!token) {
-                        setError('Not authenticated');
-                        return;
-                    }
-                    const client = createAuthenticatedClient(token);
-                    response = await client.get<StandardListResponse<T>>(endpoint, { params });
-                } else {
-                    // Public endpoint - no auth required
-                    const client = new ApiClient(); // Works without token for public endpoints
-                    response = await client.get<StandardListResponse<T>>(endpoint, { params });
-                }
-            } else {
-                throw new Error('Either endpoint or fetchFn must be provided');
-            }
-
-            let items = response.data || [];
-            // Use ref to get latest transformData without causing dependency changes
-            const currentTransformData = transformDataRef.current;
-            if (currentTransformData) {
-                items = currentTransformData(items);
-            }
-
-            setData(items);
-            if (response.pagination) {
-                setPagination(response.pagination);
-            }
-        } catch (err: any) {
-            console.error(`Failed to fetch:`, err);
-            setError(err.message || `Failed to load data`);
-        } finally {
-            setLoading(false);
-        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include]);
+    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
 
     // Debounced search
     const setSearchInput = useCallback((value: string) => {
@@ -507,13 +511,6 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         };
     }, []);
 
-    // Fetch data when dependencies change
-    useEffect(() => {
-        if (autoFetch) {
-            fetchData();
-        }
-    }, [fetchData, autoFetch]);
-
     // Update URL when state changes (after initial mount)
     useEffect(() => {
         if (isInitialMount.current) {
@@ -522,6 +519,26 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         }
         updateUrl();
     }, [updateUrl]);
+
+    // Trigger a background refetch without clearing the current data — consumers
+    // see no loading flash when calling refresh() after a mutation.
+    const refresh = useCallback((): Promise<void> => {
+        return queryClient.invalidateQueries({ queryKey });
+    }, [queryClient, queryKey]);
+
+    // Synchronously patch one item in the cached list. All components reading
+    // from this query key re-render in the same tick with the updated value.
+    const updateItem = useCallback((id: string, patch: Partial<T>) => {
+        queryClient.setQueryData(queryKey, (old: FetchResponse<T> | undefined) => {
+            if (!old) return old;
+            return {
+                ...old,
+                data: old.data.map((item: any) =>
+                    item.id === id ? { ...item, ...patch } : item
+                ),
+            };
+        });
+    }, [queryClient, queryKey]);
 
     return {
         // Data
@@ -571,8 +588,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         setViewMode,
 
         // Actions
-        refresh: fetchData,
-        refetch: fetchData, // Alias for backward compatibility
+        refresh,
+        refetch: refresh, // Alias for backward compatibility
         reset,
+        updateItem,
     };
 }

@@ -28,7 +28,7 @@ export function RoleSelector({
                             key={role.id}
                             className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                                 isSelected
-                                    ? "bg-primary/10 border-2 border-coral"
+                                    ? "bg-primary/10 border-2 border-primary"
                                     : "bg-base-200 border-2 border-transparent hover:bg-base-300"
                             }`}
                         >

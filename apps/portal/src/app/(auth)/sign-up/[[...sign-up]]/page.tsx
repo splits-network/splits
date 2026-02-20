@@ -415,16 +415,7 @@ export default function SignUpPage() {
                         Continue with Google
                     </span>
                 </button>
-                <button
-                    type="button"
-                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
-                    onClick={() => signUpWithOAuth("oauth_github")}
-                >
-                    <i className="fa-brands fa-github text-lg" />
-                    <span className="text-sm font-semibold">
-                        Continue with GitHub
-                    </span>
-                </button>
+
                 <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
@@ -435,6 +426,25 @@ export default function SignUpPage() {
                         Continue with Microsoft
                     </span>
                 </button>
+
+                <div className="flex items-center gap-3 my-6">
+                    {/* More Providers Coming Soon */}
+                    <div className="flex-1 h-px bg-base-300" />
+                    <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                        more providers coming soon
+                    </span>
+                    <div className="flex-1 h-px bg-base-300" />
+                </div>
+                {/* <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signUpWithOAuth("oauth_github")}
+                >
+                    <i className="fa-brands fa-github text-lg" />
+                    <span className="text-sm font-semibold">
+                        Continue with GitHub
+                    </span>
+                </button> */}
             </div>
 
             {/* Divider */}
@@ -448,8 +458,6 @@ export default function SignUpPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div id="clerk-captcha" />
-
                 <div className="grid grid-cols-2 gap-4">
                     <fieldset>
                         <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
@@ -477,12 +485,12 @@ export default function SignUpPage() {
                     </fieldset>
                 </div>
 
-                <fieldset>
-                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                <fieldset className="">
+                    <legend className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">
                         Email Address
-                    </label>
+                    </legend>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                         <input
                             type="email"
                             value={email}
@@ -495,11 +503,11 @@ export default function SignUpPage() {
                 </fieldset>
 
                 <fieldset>
-                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                    <legend className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Password
-                    </label>
+                    </legend>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                         <input
                             type={showPassword ? "text" : "password"}
                             value={password}
@@ -566,6 +574,9 @@ export default function SignUpPage() {
                         </p>
                     )}
                 </fieldset>
+                <div className="flex justify-center">
+                    <div id="clerk-captcha" />
+                </div>
 
                 <button
                     type="submit"

@@ -1,6 +1,5 @@
 /**
  * Basel status color system for candidates — DaisyUI semantic tokens only.
- * Replaces Memphis accent cycling (coral, teal, yellow, purple).
  */
 
 export type ViewMode = "table" | "grid" | "split";

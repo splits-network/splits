@@ -49,23 +49,33 @@ export default function SignInPage() {
                 switch (signInAttempt.status) {
                     case "needs_second_factor":
                         setErrorType("needs_2fa");
-                        setError("Two-factor authentication required. Please complete the second authentication step.");
+                        setError(
+                            "Two-factor authentication required. Please complete the second authentication step.",
+                        );
                         break;
                     case "needs_identifier":
                         setErrorType("missing_identifier");
-                        setError("Please provide your email address to continue.");
+                        setError(
+                            "Please provide your email address to continue.",
+                        );
                         break;
                     case "needs_first_factor":
                         setErrorType("needs_verification");
-                        setError("Additional authentication required. Please complete the verification step.");
+                        setError(
+                            "Additional authentication required. Please complete the verification step.",
+                        );
                         break;
                     case "needs_new_password":
                         setErrorType("password_reset_required");
-                        setError("Password reset required. Please update your password.");
+                        setError(
+                            "Password reset required. Please update your password.",
+                        );
                         break;
                     default:
                         setErrorType("unknown_status");
-                        setError(`Authentication incomplete (${signInAttempt.status}). Please contact support if this continues.`);
+                        setError(
+                            `Authentication incomplete (${signInAttempt.status}). Please contact support if this continues.`,
+                        );
                 }
             }
         } catch (err: any) {
@@ -84,26 +94,39 @@ export default function SignInPage() {
                     case "identifier_already_signed_in":
                         setErrorType("already_signed_in");
                         setError("You are already signed in. Redirecting...");
-                        setTimeout(() => router.push(redirectUrl || "/portal/dashboard"), 1500);
+                        setTimeout(
+                            () =>
+                                router.push(redirectUrl || "/portal/dashboard"),
+                            1500,
+                        );
                         break;
                     case "too_many_requests":
                         setErrorType("rate_limited");
-                        setError("Too many sign-in attempts. Please wait a moment and try again.");
+                        setError(
+                            "Too many sign-in attempts. Please wait a moment and try again.",
+                        );
                         break;
                     default:
                         setErrorType("clerk_error");
-                        setError(clerkError.message || "Invalid email or password");
+                        setError(
+                            clerkError.message || "Invalid email or password",
+                        );
                 }
             } else {
                 setErrorType("generic_error");
-                setError(err.message || "An unexpected error occurred. Please try again.");
+                setError(
+                    err.message ||
+                        "An unexpected error occurred. Please try again.",
+                );
             }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const signInWithOAuth = (provider: "oauth_google" | "oauth_github" | "oauth_microsoft") => {
+    const signInWithOAuth = (
+        provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
+    ) => {
         if (!isLoaded) return;
         signIn.authenticateWithRedirect({
             strategy: provider,
@@ -139,26 +162,43 @@ export default function SignInPage() {
             )}
 
             {errorType === "needs_2fa" && (
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-4" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-4"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-shield-check text-info mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold">Two-factor authentication is enabled</p>
-                            <p className="text-sm text-base-content/60">Check your authenticator app or SMS for the verification code.</p>
+                            <p className="text-sm font-bold">
+                                Two-factor authentication is enabled
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                Check your authenticator app or SMS for the
+                                verification code.
+                            </p>
                         </div>
                     </div>
                 </div>
             )}
 
             {errorType === "account_not_found" && (
-                <div className="bg-info/10 border-l-4 border-info p-4 mb-4" role="alert">
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-4"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold">Don&apos;t have an account yet?</p>
+                            <p className="text-sm font-bold">
+                                Don&apos;t have an account yet?
+                            </p>
                             <p className="text-sm text-base-content/60">
                                 <Link
-                                    href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
+                                    href={
+                                        redirectUrl
+                                            ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                                            : "/sign-up"
+                                    }
                                     className="text-primary font-semibold hover:underline"
                                 >
                                     Create your Splits Network account
@@ -171,14 +211,24 @@ export default function SignInPage() {
             )}
 
             {errorType === "incorrect_password" && (
-                <div className="bg-warning/10 border-l-4 border-warning p-4 mb-4" role="alert">
+                <div
+                    className="bg-warning/10 border-l-4 border-warning p-4 mb-4"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-key text-warning mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold">Password incorrect</p>
+                            <p className="text-sm font-bold">
+                                Password incorrect
+                            </p>
                             <p className="text-sm text-base-content/60">
                                 Double-check your password or{" "}
-                                <Link href="/forgot-password" className="text-primary font-semibold hover:underline">reset your password</Link>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-primary font-semibold hover:underline"
+                                >
+                                    reset your password
+                                </Link>
                             </p>
                         </div>
                     </div>
@@ -186,12 +236,20 @@ export default function SignInPage() {
             )}
 
             {errorType === "rate_limited" && (
-                <div className="bg-warning/10 border-l-4 border-warning p-4 mb-4" role="alert">
+                <div
+                    className="bg-warning/10 border-l-4 border-warning p-4 mb-4"
+                    role="alert"
+                >
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-clock text-warning mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold">Too many attempts</p>
-                            <p className="text-sm text-base-content/60">For security, please wait a few minutes before trying again.</p>
+                            <p className="text-sm font-bold">
+                                Too many attempts
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                For security, please wait a few minutes before
+                                trying again.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -205,30 +263,38 @@ export default function SignInPage() {
                     onClick={() => signInWithOAuth("oauth_google")}
                 >
                     <i className="fa-brands fa-google text-lg" />
-                    <span className="text-sm font-semibold">Continue with Google</span>
+                    <span className="text-sm font-semibold">
+                        Continue with Google
+                    </span>
                 </button>
-                <button
+                {/* <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signInWithOAuth("oauth_github")}
                 >
                     <i className="fa-brands fa-github text-lg" />
-                    <span className="text-sm font-semibold">Continue with GitHub</span>
-                </button>
+                    <span className="text-sm font-semibold">
+                        Continue with GitHub
+                    </span>
+                </button> */}
                 <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signInWithOAuth("oauth_microsoft")}
                 >
                     <i className="fa-brands fa-microsoft text-lg" />
-                    <span className="text-sm font-semibold">Continue with Microsoft</span>
+                    <span className="text-sm font-semibold">
+                        Continue with Microsoft
+                    </span>
                 </button>
             </div>
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-base-300" />
-                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
                 <div className="flex-1 h-px bg-base-300" />
             </div>
 
@@ -241,11 +307,14 @@ export default function SignInPage() {
                         Email Address
                     </label>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setError("");
+                            }}
                             placeholder="you@company.com"
                             className={`input input-bordered w-full pl-10 ${errorType === "account_not_found" ? "input-error" : ""}`}
                             required
@@ -266,11 +335,14 @@ export default function SignInPage() {
                         </Link>
                     </div>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
                         <input
                             type={showPassword ? "text" : "password"}
                             value={password}
-                            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                setError("");
+                            }}
                             placeholder="Enter your password"
                             className={`input input-bordered w-full pl-10 pr-10 ${errorType === "incorrect_password" ? "input-error" : ""}`}
                             required
@@ -280,7 +352,9 @@ export default function SignInPage() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
                         >
-                            <i className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`} />
+                            <i
+                                className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                            />
                         </button>
                     </div>
                 </fieldset>
@@ -291,7 +365,10 @@ export default function SignInPage() {
                     disabled={isLoading || !isLoaded}
                 >
                     {isLoading ? (
-                        <><span className="loading loading-spinner loading-sm" /> Signing in...</>
+                        <>
+                            <span className="loading loading-spinner loading-sm" />{" "}
+                            Signing in...
+                        </>
                     ) : (
                         "Sign In"
                     )}
@@ -302,7 +379,11 @@ export default function SignInPage() {
             <div className="text-center mt-8 text-sm text-base-content/50">
                 Don&apos;t have an account?{" "}
                 <Link
-                    href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : "/sign-up"}
+                    href={
+                        redirectUrl
+                            ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                            : "/sign-up"
+                    }
                     className="text-primary font-semibold hover:underline"
                 >
                     Sign up

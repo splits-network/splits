@@ -10,11 +10,13 @@ export function GridView({
     onSelectAction,
     selectedId,
     onRefreshAction,
+    onUpdateItemAction,
 }: {
     jobs: Job[];
     onSelectAction: (j: Job) => void;
     selectedId: string | null;
     onRefreshAction?: () => void;
+    onUpdateItemAction?: (id: string, patch: Partial<Job>) => void;
 }) {
     const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
 
@@ -38,6 +40,7 @@ export function GridView({
                             isSelected={selectedId === job.id}
                             onSelect={() => onSelectAction(job)}
                             onRefresh={onRefreshAction}
+                            onUpdateItem={onUpdateItemAction}
                         />
                     ))}
                 </div>
@@ -53,6 +56,7 @@ export function GridView({
                         jobId={selectedJob.id}
                         onClose={() => onSelectAction(selectedJob)}
                         onRefresh={onRefreshAction}
+                        onUpdateItem={onUpdateItemAction}
                     />
                 </MobileDetailOverlay>
             )}

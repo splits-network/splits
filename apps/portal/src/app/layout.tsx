@@ -20,6 +20,7 @@ import { UserProfileProvider, type UserProfile } from "@/contexts";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { QueryProvider } from "@/providers/query-provider";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -160,20 +161,24 @@ export default async function RootLayout({
                     ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <ThemeProvider>
-                        <UserProfileProvider initialProfile={initialProfile}>
-                            <ToastProvider>
-                                <Header />
-                                <ServiceStatusProvider statusHref="/public/status" />
-                                <ServiceStatusDebugger />
-                                <main className="grow">{children}</main>
-                                <Footer />
-                                <CookieConsent />
-                            </ToastProvider>
-                            <DevDebugPanel />
-                            <PortalActivityTrackerWrapper />
-                        </UserProfileProvider>
-                    </ThemeProvider>
+                    <QueryProvider>
+                        <ThemeProvider>
+                            <UserProfileProvider
+                                initialProfile={initialProfile}
+                            >
+                                <ToastProvider>
+                                    <Header />
+                                    <ServiceStatusProvider statusHref="/public/status" />
+                                    <ServiceStatusDebugger />
+                                    <main className="grow">{children}</main>
+                                    <Footer />
+                                    <CookieConsent />
+                                </ToastProvider>
+                                <DevDebugPanel />
+                                <PortalActivityTrackerWrapper />
+                            </UserProfileProvider>
+                        </ThemeProvider>
+                    </QueryProvider>
 
                     {/* HelpNinja widget loaded after page becomes interactive */}
                     {/** Commented out temporarily */}

@@ -95,7 +95,7 @@ export function TierComparison({
                         <div className="text-xs opacity-70">Your payout</div>
                         {/* Upgrade Value Highlight */}
                         {upgradeValue.paidVsFree > 0 && (
-                            <div className="mt-1 pt-1 border-t border-coral-content/20">
+                            <div className="mt-1 pt-1 border-t border-primary-content/20">
                                 <div className="badge badge-success badge-sm gap-1">
                                     <i className="fa-duotone fa-regular fa-arrow-up text-[10px]"></i>
                                     +{formatCurrency(upgradeValue.paidVsFree)}
@@ -110,7 +110,7 @@ export function TierComparison({
 
                 {/* Premium Tier */}
                 <div
-                    className={`card bg-base-200 shadow border-2 border-yellow ${currentTier === "premium" ? "ring-2 ring-primary" : ""}`}
+                    className={`card bg-base-200 shadow border-2 border-warning ${currentTier === "premium" ? "ring-2 ring-primary" : ""}`}
                 >
                     <div className="card-body p-3 text-center">
                         {currentTier === "premium" && (

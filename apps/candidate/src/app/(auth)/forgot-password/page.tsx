@@ -1,19 +1,25 @@
-'use client';
+"use client";
 
-import { useSignIn } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
-import Link from 'next/link';
+import { useSignIn, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function ForgotPasswordPage() {
-    const { isLoaded, signIn } = useSignIn();
+    const { isLoaded, signIn, setActive } = useSignIn();
+    const { isSignedIn } = useAuth();
     const router = useRouter();
 
-    const [email, setEmail] = useState('');
-    const [code, setCode] = useState('');
-    const [password, setPassword] = useState('');
+    // Redirect already-signed-in users — active session causes 422 on signIn.create()
+    useEffect(() => {
+        if (isSignedIn) router.push("/portal/dashboard");
+    }, [isSignedIn, router]);
+
+    const [email, setEmail] = useState("");
+    const [code, setCode] = useState("");
+    const [password, setPassword] = useState("");
     const [successfulCreation, setSuccessfulCreation] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [complete, setComplete] = useState(false);
 
@@ -21,18 +27,22 @@ export default function ForgotPasswordPage() {
         e.preventDefault();
         if (!isLoaded) return;
 
-        setError('');
+        setError("");
         setIsLoading(true);
 
         try {
             await signIn.create({
-                strategy: 'reset_password_email_code',
+                strategy: "reset_password_email_code",
                 identifier: email,
             });
 
             setSuccessfulCreation(true);
         } catch (err: any) {
-            setError(err.errors?.[0]?.message || 'Failed to send reset code');
+            setError(
+                err.errors?.[0]?.longMessage ||
+                    err.errors?.[0]?.message ||
+                    "Failed to send reset code",
+            );
         } finally {
             setIsLoading(false);
         }
@@ -42,26 +52,33 @@ export default function ForgotPasswordPage() {
         e.preventDefault();
         if (!isLoaded) return;
 
-        setError('');
+        setError("");
         setIsLoading(true);
 
         try {
             const result = await signIn.attemptFirstFactor({
-                strategy: 'reset_password_email_code',
+                strategy: "reset_password_email_code",
                 code,
                 password,
             });
 
-            if (result.status === 'complete') {
+            if (result.status === "needs_second_factor") {
+                setError(
+                    "Two-factor authentication is required. Please contact support.",
+                );
+            } else if (result.status === "complete") {
+                await setActive({ session: result.createdSessionId });
                 setComplete(true);
-                setTimeout(() => {
-                    router.push('/sign-in');
-                }, 2000);
+                setTimeout(() => router.push("/portal/dashboard"), 2000);
             } else {
-                setError('Password reset incomplete. Please try again.');
+                setError("Password reset incomplete. Please try again.");
             }
         } catch (err: any) {
-            setError(err.errors?.[0]?.message || 'Failed to reset password');
+            setError(
+                err.errors?.[0]?.longMessage ||
+                    err.errors?.[0]?.message ||
+                    "Failed to reset password",
+            );
         } finally {
             setIsLoading(false);
         }
@@ -79,7 +96,8 @@ export default function ForgotPasswordPage() {
                             Password Reset Successful
                         </h2>
                         <p className="text-base-content/70 mb-4">
-                            Your password has been updated. Redirecting to sign in...
+                            Your password has been updated. Redirecting to sign
+                            in...
                         </p>
                         <span className="loading loading-spinner loading-lg text-primary"></span>
                     </div>
@@ -111,7 +129,9 @@ export default function ForgotPasswordPage() {
 
                         <form onSubmit={handleReset} className="space-y-4">
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Reset Code</legend>
+                                <legend className="fieldset-legend">
+                                    Reset Code
+                                </legend>
                                 <input
                                     type="text"
                                     placeholder="123456"
@@ -125,18 +145,24 @@ export default function ForgotPasswordPage() {
                             </fieldset>
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">New Password</legend>
+                                <legend className="fieldset-legend">
+                                    New Password
+                                </legend>
                                 <input
                                     type="password"
                                     placeholder="••••••••"
                                     className="input w-full"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     required
                                     disabled={isLoading}
                                     minLength={8}
                                 />
-                                <p className="fieldset-label">Must be at least 8 characters</p>
+                                <p className="fieldset-label">
+                                    Must be at least 8 characters
+                                </p>
                             </fieldset>
 
                             <button
@@ -150,7 +176,7 @@ export default function ForgotPasswordPage() {
                                         Resetting password...
                                     </>
                                 ) : (
-                                    'Reset Password'
+                                    "Reset Password"
                                 )}
                             </button>
                         </form>
@@ -177,7 +203,8 @@ export default function ForgotPasswordPage() {
                             Forgot Password?
                         </h2>
                         <p className="text-sm text-base-content/70">
-                            Enter your email address and we'll send you a code to reset your password.
+                            Enter your email address and we'll send you a code
+                            to reset your password.
                         </p>
                     </div>
 
@@ -189,6 +216,7 @@ export default function ForgotPasswordPage() {
                     )}
 
                     <form onSubmit={handleSendCode} className="space-y-4">
+                        <div id="clerk-captcha" />
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Email</legend>
                             <input
@@ -213,7 +241,7 @@ export default function ForgotPasswordPage() {
                                     Sending code...
                                 </>
                             ) : (
-                                'Send Reset Code'
+                                "Send Reset Code"
                             )}
                         </button>
                     </form>
@@ -221,7 +249,7 @@ export default function ForgotPasswordPage() {
                     <div className="divider"></div>
 
                     <p className="text-center text-sm">
-                        Remember your password?{' '}
+                        Remember your password?{" "}
                         <Link href="/sign-in" className="link link-primary">
                             Sign in
                         </Link>

@@ -23,11 +23,13 @@ export function JobDetail({
     job,
     onClose,
     onRefresh,
+    onUpdateItem,
     accent: _accent,
 }: {
     job: Job;
     onClose?: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
     /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
     accent?: unknown;
 }) {
@@ -107,6 +109,7 @@ export function JobDetail({
                         variant="descriptive"
                         size="sm"
                         onRefresh={onRefresh}
+                        onUpdateItem={onUpdateItem}
                         showActions={{ viewDetails: false }}
                     />
                 </div>
@@ -300,10 +303,12 @@ export function DetailLoader({
     jobId,
     onClose,
     onRefresh,
+    onUpdateItem,
 }: {
     jobId: string;
     onClose: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const { getToken } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
@@ -350,5 +355,12 @@ export function DetailLoader({
 
     if (!job) return null;
 
-    return <JobDetail job={job} onClose={onClose} onRefresh={onRefresh} />;
+    return (
+        <JobDetail
+            job={job}
+            onClose={onClose}
+            onRefresh={onRefresh}
+            onUpdateItem={onUpdateItem}
+        />
+    );
 }

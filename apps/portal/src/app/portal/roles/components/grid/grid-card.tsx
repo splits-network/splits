@@ -18,11 +18,13 @@ export function GridCard({
     isSelected,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     job: Job;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const name = companyName(job);
     const salary = salaryDisplay(job);
@@ -135,6 +137,7 @@ export function GridCard({
                         variant="icon-only"
                         size="sm"
                         onRefresh={onRefresh}
+                        onUpdateItem={onUpdateItem}
                         showActions={{
                             viewDetails: false,
                             statusActions: true,

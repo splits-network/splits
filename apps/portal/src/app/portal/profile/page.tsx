@@ -14,6 +14,9 @@ import { SpecializationsSection } from "@/components/basel/profile/specializatio
 import { BioSection } from "@/components/basel/profile/bio-section";
 import { PrivacySection } from "@/components/basel/profile/privacy-section";
 import { PayoutsSection } from "@/components/basel/profile/payouts-section";
+import { SubscriptionSection } from "@/components/basel/profile/subscription-section";
+import { PaymentSection } from "@/components/basel/profile/payment-section";
+import { HistorySection } from "@/components/basel/profile/history-section";
 import {
     MarketplaceSettingsProvider,
     useMarketplaceSettings,
@@ -28,6 +31,9 @@ type Section =
     | "specializations"
     | "bio"
     | "privacy"
+    | "subscription"
+    | "payment"
+    | "history"
     | "payouts"
     | "notifications"
     | "integrations"
@@ -39,6 +45,11 @@ interface NavItem {
     icon: string;
 }
 
+interface NavGroup {
+    title: string;
+    items: NavItem[];
+}
+
 const COMING_SOON: Section[] = ["notifications", "integrations", "admin"];
 
 const MARKETPLACE_SECTIONS: Section[] = [
@@ -46,8 +57,8 @@ const MARKETPLACE_SECTIONS: Section[] = [
     "specializations",
     "bio",
     "privacy",
-    "payouts",
 ];
+
 
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
     notifications: "Configure email and in-app notification preferences",
@@ -67,60 +78,91 @@ export default function ProfileBaselPage() {
     const mainRef = useRef<HTMLElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    /* ── Build nav items based on user roles ─────────────────────────────── */
+    /* ── Build grouped nav based on user roles ────────────────────────────── */
 
-    const navItems: NavItem[] = useMemo(() => {
-        const items: NavItem[] = [
+    const navGroups: NavGroup[] = useMemo(() => {
+        const groups: NavGroup[] = [
             {
-                key: "account",
-                label: "Account",
-                icon: "fa-duotone fa-regular fa-user",
-            },
-            {
-                key: "security",
-                label: "Security",
-                icon: "fa-duotone fa-regular fa-shield",
+                title: "Account",
+                items: [
+                    {
+                        key: "account",
+                        label: "Account",
+                        icon: "fa-duotone fa-regular fa-user",
+                    },
+                    {
+                        key: "security",
+                        label: "Security",
+                        icon: "fa-duotone fa-regular fa-shield",
+                    },
+                ],
             },
         ];
 
         if (isRecruiter) {
-            items.push(
-                {
-                    key: "marketplace",
-                    label: "Marketplace",
-                    icon: "fa-duotone fa-regular fa-store",
-                },
-                {
-                    key: "specializations",
-                    label: "Specializations",
-                    icon: "fa-duotone fa-regular fa-bullseye",
-                },
-                {
-                    key: "bio",
-                    label: "Bio & Content",
-                    icon: "fa-duotone fa-regular fa-pen-to-square",
-                },
-                {
-                    key: "privacy",
-                    label: "Privacy",
-                    icon: "fa-duotone fa-regular fa-shield-check",
-                },
-                {
-                    key: "payouts",
-                    label: "Payouts",
-                    icon: "fa-duotone fa-regular fa-money-bill-transfer",
-                },
-            );
+            groups.push({
+                title: "Marketplace",
+                items: [
+                    {
+                        key: "marketplace",
+                        label: "Marketplace",
+                        icon: "fa-duotone fa-regular fa-store",
+                    },
+                    {
+                        key: "specializations",
+                        label: "Specializations",
+                        icon: "fa-duotone fa-regular fa-bullseye",
+                    },
+                    {
+                        key: "bio",
+                        label: "Bio & Content",
+                        icon: "fa-duotone fa-regular fa-pen-to-square",
+                    },
+                    {
+                        key: "privacy",
+                        label: "Privacy",
+                        icon: "fa-duotone fa-regular fa-shield-check",
+                    },
+                ],
+            });
+
+            groups.push({
+                title: "Billing",
+                items: [
+                    {
+                        key: "subscription",
+                        label: "Subscription",
+                        icon: "fa-duotone fa-regular fa-box",
+                    },
+                    {
+                        key: "payment",
+                        label: "Payment Methods",
+                        icon: "fa-duotone fa-regular fa-wallet",
+                    },
+                    {
+                        key: "history",
+                        label: "Invoice History",
+                        icon: "fa-duotone fa-regular fa-receipt",
+                    },
+                    {
+                        key: "payouts",
+                        label: "Payouts",
+                        icon: "fa-duotone fa-regular fa-money-bill-transfer",
+                    },
+                ],
+            });
         }
 
-        items.push({
-            key: "notifications",
-            label: "Notifications",
-            icon: "fa-duotone fa-regular fa-bell",
-        });
+        const systemItems: NavItem[] = [
+            {
+                key: "notifications",
+                label: "Notifications",
+                icon: "fa-duotone fa-regular fa-bell",
+            },
+        ];
 
         if (isRecruiter || isCompanyAdmin || isPlatformAdmin) {
-            items.push({
+            systemItems.push({
                 key: "integrations",
                 label: "Integrations",
                 icon: "fa-duotone fa-regular fa-plug",
@@ -128,14 +170,19 @@ export default function ProfileBaselPage() {
         }
 
         if (isPlatformAdmin) {
-            items.push({
+            systemItems.push({
                 key: "admin",
                 label: "Administration",
                 icon: "fa-duotone fa-regular fa-crown",
             });
         }
 
-        return items;
+        groups.push({
+            title: "System",
+            items: systemItems,
+        });
+
+        return groups;
     }, [isRecruiter, isCompanyAdmin, isPlatformAdmin]);
 
     /* ── GSAP: page load animation ───────────────────────────────────────── */
@@ -231,36 +278,60 @@ export default function ProfileBaselPage() {
     const isComingSoon = COMING_SOON.includes(active);
     const isMarketplaceSection = MARKETPLACE_SECTIONS.includes(active);
 
+    // Flatten groups to find icon for coming-soon sections
+    const allNavItems = navGroups.flatMap((g) => g.items);
+
     /* ── Render ───────────────────────────────────────────────────────────── */
 
     const contentPanel = (
         <div className="grid lg:grid-cols-5 gap-10 lg:gap-14">
             {/* ── Sidebar Nav ─────────────────────────────────────────── */}
             <div className="lg:col-span-1">
-                <nav className="space-y-1">
-                    {navItems.map((item) => (
-                        <button
-                            key={item.key}
-                            onClick={() => setActive(item.key)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
-                                active === item.key
-                                    ? "bg-primary text-primary-content"
-                                    : "text-base-content/60 hover:bg-base-200"
-                            }`}
-                        >
-                            <i
-                                className={`${item.icon} w-4 text-center`}
-                            />
-                            {item.label}
-                            {COMING_SOON.includes(item.key) && (
-                                <BaselStatusPill
-                                    color="warning"
-                                    className="ml-auto"
-                                >
-                                    Soon
-                                </BaselStatusPill>
-                            )}
-                        </button>
+                <nav>
+                    {navGroups.map((group, gi) => (
+                        <div key={group.title}>
+                            {/* Group header */}
+                            <div
+                                className={`flex items-center gap-3 pb-2 ${gi > 0 ? "pt-4" : ""}`}
+                            >
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-base-content/30">
+                                    {group.title}
+                                </span>
+                                <div className="flex-1 h-px bg-base-300" />
+                            </div>
+
+                            {/* Group items */}
+                            <div className="space-y-1">
+                                {group.items.map((item) => (
+                                    <button
+                                        key={item.key}
+                                        onClick={() =>
+                                            setActive(item.key)
+                                        }
+                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
+                                            active === item.key
+                                                ? "bg-primary text-primary-content"
+                                                : "text-base-content/60 hover:bg-base-200"
+                                        }`}
+                                    >
+                                        <i
+                                            className={`${item.icon} w-4 text-center`}
+                                        />
+                                        {item.label}
+                                        {COMING_SOON.includes(
+                                            item.key,
+                                        ) && (
+                                            <BaselStatusPill
+                                                color="warning"
+                                                className="ml-auto"
+                                            >
+                                                Soon
+                                            </BaselStatusPill>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     ))}
                 </nav>
             </div>
@@ -272,10 +343,11 @@ export default function ProfileBaselPage() {
                     <MarketplaceSaveIndicator />
                 )}
 
-                {/* Section content */}
+                {/* Account sections */}
                 {active === "account" && <AccountSection />}
                 {active === "security" && <SecuritySection />}
 
+                {/* Marketplace sections (recruiter only) */}
                 {isRecruiter && active === "marketplace" && (
                     <MarketplaceSection />
                 )}
@@ -286,15 +358,27 @@ export default function ProfileBaselPage() {
                 {isRecruiter && active === "privacy" && (
                     <PrivacySection />
                 )}
+
+                {/* Billing sections (recruiter only) */}
+                {isRecruiter && active === "subscription" && (
+                    <SubscriptionSection />
+                )}
+                {isRecruiter && active === "payment" && (
+                    <PaymentSection />
+                )}
+                {isRecruiter && active === "history" && (
+                    <HistorySection />
+                )}
                 {isRecruiter && active === "payouts" && (
                     <PayoutsSection />
                 )}
 
+                {/* Coming soon sections */}
                 {isComingSoon && (
                     <ComingSoonContent
                         section={active}
                         icon={
-                            navItems.find((n) => n.key === active)
+                            allNavItems.find((n) => n.key === active)
                                 ?.icon ||
                             "fa-duotone fa-regular fa-clock"
                         }

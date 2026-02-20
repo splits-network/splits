@@ -20,6 +20,7 @@ export function TableRow({
     colSpan,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     job: Job;
     idx: number;
@@ -27,6 +28,7 @@ export function TableRow({
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
@@ -111,6 +113,7 @@ export function TableRow({
                             variant="icon-only"
                             size="xs"
                             onRefresh={onRefresh}
+                            onUpdateItem={onUpdateItem}
                             showActions={{
                                 viewDetails: false,
                                 statusActions: false,
@@ -132,6 +135,7 @@ export function TableRow({
                             jobId={job.id}
                             onClose={onSelect}
                             onRefresh={onRefresh}
+                            onUpdateItem={onUpdateItem}
                         />
                     </td>
                 </tr>
