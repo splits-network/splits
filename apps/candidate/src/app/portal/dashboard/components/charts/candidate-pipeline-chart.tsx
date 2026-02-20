@@ -59,13 +59,16 @@ const PIPELINE_STAGES = [
 ] as const;
 
 // Map stages to DaisyUI semantic color keys
-const STAGE_COLOR_KEYS: Record<string, keyof ReturnType<typeof useBaselChartColors>> = {
+const STAGE_COLOR_KEYS: Record<
+    string,
+    keyof ReturnType<typeof useBaselChartColors>
+> = {
     "In Review": "info",
-    "Submitted": "primary",
-    "Screen": "secondary",
-    "Interview": "warning",
-    "Offer": "accent",
-    "Hired": "success",
+    Submitted: "primary",
+    Screen: "secondary",
+    Interview: "warning",
+    Offer: "accent",
+    Hired: "success",
 };
 
 export default function CandidatePipelineChart({
@@ -87,10 +90,7 @@ export default function CandidatePipelineChart({
                 app.stage === "expired"
             )
                 return;
-            if (
-                app.job?.status === "closed" ||
-                app.job?.status === "filled"
-            )
+            if (app.job?.status === "closed" || app.job?.status === "filled")
                 return;
 
             const mapped = STAGE_MAPPING[app.stage];
@@ -130,7 +130,7 @@ export default function CandidatePipelineChart({
                         {
                             label: "Browse Jobs",
                             icon: "fa-duotone fa-regular fa-search",
-                            href: "/public/jobs",
+                            href: "/jobs",
                             style: "btn-primary",
                         },
                     ]}
@@ -165,10 +165,7 @@ export default function CandidatePipelineChart({
                         }}
                         barSize={28}
                     >
-                        <XAxis
-                            type="number"
-                            hide
-                        />
+                        <XAxis type="number" hide />
                         <YAxis
                             type="category"
                             dataKey="name"
@@ -196,10 +193,7 @@ export default function CandidatePipelineChart({
                             strokeWidth={0}
                         >
                             {stages.map((entry, i) => (
-                                <Cell
-                                    key={i}
-                                    fill={entry.color}
-                                />
+                                <Cell key={i} fill={entry.color} />
                             ))}
                             <LabelList
                                 dataKey="count"

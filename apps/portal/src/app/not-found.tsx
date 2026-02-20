@@ -1,186 +1,234 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-    title: "Off the Map | Splits Network",
-};
+import { useRef } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 /**
- * Memphis 404 — Portal (Splits Network)
+ * Basel 404 — Portal (Splits Network)
  *
- * Design: "Off the Map" — centered white card on dark background
- * (auth-page style), with map-pin illustration, heading, links.
- * Functional, direct — gets recruiters back to work fast.
+ * Editorial design: split-screen hero with diagonal clip-path,
+ * typography-driven hierarchy, quick-link navigation cards.
  */
 export default function NotFound() {
+    const mainRef = useRef<HTMLDivElement>(null);
+
+    useGSAP(
+        () => {
+            if (!mainRef.current) return;
+            if (
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ) {
+                mainRef.current
+                    .querySelectorAll(".opacity-0")
+                    .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
+                return;
+            }
+
+            const $ = (s: string) =>
+                mainRef.current!.querySelectorAll(s);
+            const $1 = (s: string) =>
+                mainRef.current!.querySelector(s);
+
+            const tl = gsap.timeline({
+                defaults: { ease: "power3.out" },
+            });
+
+            const kicker = $1(".nf-kicker");
+            if (kicker) {
+                tl.fromTo(
+                    kicker,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                );
+            }
+
+            const words = $(".nf-headline-word");
+            if (words.length) {
+                tl.fromTo(
+                    words,
+                    { opacity: 0, y: 60, rotateX: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        duration: 0.8,
+                        stagger: 0.1,
+                    },
+                    "-=0.3",
+                );
+            }
+
+            const body = $1(".nf-body");
+            if (body) {
+                tl.fromTo(
+                    body,
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                    "-=0.4",
+                );
+            }
+
+            const ctas = $1(".nf-ctas");
+            if (ctas) {
+                tl.fromTo(
+                    ctas,
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                    "-=0.3",
+                );
+            }
+
+            const links = $1(".nf-links");
+            if (links) {
+                gsap.fromTo(
+                    links,
+                    { opacity: 0, y: 40 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        ease: "power3.out",
+                        delay: 0.8,
+                    },
+                );
+            }
+        },
+        { scope: mainRef },
+    );
+
     return (
-        <div className="min-h-screen relative overflow-hidden bg-dark">
-            {/* ── Color Bar ─────────────────────────────────────────────── */}
-            <div className="flex h-1.5">
-                <div className="flex-1 bg-coral" />
-                <div className="flex-1 bg-teal" />
-                <div className="flex-1 bg-yellow" />
-                <div className="flex-1 bg-purple" />
-            </div>
+        <div ref={mainRef} className="min-h-screen bg-base-100">
+            {/* ── Hero Section ──────────────────────────────────────── */}
+            <section className="relative min-h-[70vh] flex items-center bg-neutral text-neutral-content overflow-hidden">
+                {/* Diagonal clip-path panel */}
+                <div
+                    className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
+                    style={{
+                        clipPath:
+                            "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
+                    aria-hidden="true"
+                />
 
-            {/* ── Memphis Background Shapes ──────────────────────────────── */}
-            <div
-                className="absolute inset-0 pointer-events-none"
-                aria-hidden="true"
-            >
-                <div className="absolute top-[12%] right-[8%] w-10 h-10 rounded-full border-4 border-teal opacity-10" />
-                <div className="absolute bottom-[20%] left-[10%] w-8 h-8 bg-coral opacity-10 rotate-12" />
-                <div className="absolute top-[50%] left-[6%] w-6 h-6 rounded-full bg-yellow opacity-10" />
-                <div className="absolute bottom-[35%] right-[12%] w-7 h-7 bg-purple opacity-10 rotate-45" />
-                <svg
-                    className="absolute top-[20%] left-[30%] opacity-10"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                >
-                    <line
-                        x1="12"
-                        y1="2"
-                        x2="12"
-                        y2="22"
-                        className="stroke-purple"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                    />
-                    <line
-                        x1="2"
-                        y1="12"
-                        x2="22"
-                        y2="12"
-                        className="stroke-purple"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                    />
-                </svg>
-            </div>
+                {/* Top accent line */}
+                <div
+                    className="absolute top-0 left-0 right-0 h-1 bg-primary"
+                    aria-hidden="true"
+                />
 
-            {/* ── Main Content ───────────────────────────────────────────── */}
-            <div className="relative z-10 min-h-[calc(100vh-6px)] flex flex-col items-center justify-center px-4 py-16">
-                {/* ── Centered Card ──────────────────────────────────────── */}
-                <div className="border-4 border-teal bg-white w-full max-w-lg">
-                    {/* Top color strip */}
-                    <div className="h-1.5 bg-teal" />
+                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                    <div className="max-w-2xl">
+                        {/* Kicker */}
+                        <p className="nf-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4 opacity-0">
+                            Not Found
+                        </p>
 
-                    <div className="p-8 text-center">
-                        {/* Map Illustration — pin with X on a gridded frame */}
-                        <div
-                            className="relative w-36 h-36 mx-auto mb-6"
-                            aria-hidden="true"
-                        >
-                            {/* Map frame */}
-                            <div className="absolute inset-2 border-4 border-teal" />
-                            {/* Grid lines */}
-                            <div className="absolute top-1/2 inset-x-4 h-px bg-teal opacity-20" />
-                            <div className="absolute inset-y-4 left-1/2 w-px bg-teal opacity-20" />
-                            {/* Map pin — circle + stem */}
-                            <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                                <div className="w-10 h-10 rounded-full bg-coral flex items-center justify-center">
-                                    <i className="fa-solid fa-xmark text-sm text-white" />
-                                </div>
-                                <div className="w-1.5 h-5 bg-coral -mt-0.5" />
-                            </div>
-                            {/* Memphis accents */}
-                            <div className="absolute -top-1 -right-2 w-5 h-5 rounded-full bg-yellow" />
-                            <div className="absolute -bottom-2 -left-1 w-6 h-6 bg-purple rotate-45" />
-                        </div>
-
-                        {/* Badge */}
-                        <span className="inline-block px-4 py-1.5 bg-teal text-dark text-xs font-black uppercase tracking-[0.2em] mb-6">
-                            Off the Map
-                        </span>
-
-                        {/* Heading */}
-                        <h1 className="text-xl md:text-3xl font-black uppercase tracking-tight text-dark mb-3">
-                            Lost Page. Your{" "}
-                            <span className="text-teal">Pipeline</span> Is
-                            Intact.
+                        {/* Headline */}
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-6">
+                            <span className="nf-headline-word inline-block opacity-0">
+                                This page doesn&apos;t exist
+                            </span>{" "}
+                            <span className="nf-headline-word inline-block opacity-0">
+                                in your{" "}
+                                <span className="text-primary">
+                                    pipeline
+                                </span>
+                                .
+                            </span>
                         </h1>
 
                         {/* Body */}
-                        <p className="text-base text-dark/60 mb-8">
-                            This URL goes nowhere. Every role, candidate, and
-                            active split you&apos;re tracking is still right
-                            where you left it.
+                        <p className="nf-body text-lg leading-relaxed text-neutral-content/70 max-w-xl mb-8 opacity-0">
+                            The URL you followed doesn&apos;t match any page
+                            in Splits Network. This usually means the link is
+                            outdated, the resource was moved, or the address
+                            was entered incorrectly. Your dashboard and active
+                            roles are exactly where you left them.
                         </p>
 
                         {/* CTAs */}
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                        <div className="nf-ctas flex flex-col sm:flex-row gap-3 opacity-0">
                             <Link
                                 href="/portal/dashboard"
-                                className="btn btn-teal btn-md gap-2"
+                                className="btn btn-primary btn-md w-full sm:w-auto gap-2"
                             >
-                                <i className="fa-duotone fa-regular fa-gauge-high" />
-                                Open Dashboard
+                                <i className="fa-duotone fa-regular fa-grid-2" />
+                                Go to Dashboard
                             </Link>
                             <Link
                                 href="/portal/roles"
-                                className="btn btn-coral btn-outline btn-md gap-2"
+                                className="btn btn-ghost btn-md w-full sm:w-auto gap-2 text-neutral-content"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase" />
-                                View Roles
-                            </Link>
-                        </div>
-
-                        {/* ── Divider ────────────────────────────────────── */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="flex-1 h-px bg-dark/10" />
-                            <span className="text-xs font-black uppercase tracking-wider text-dark/40">
-                                Back to Your{" "}
-                                <span className="text-teal">Desk</span>
-                            </span>
-                            <div className="flex-1 h-px bg-dark/10" />
-                        </div>
-
-                        {/* ── Quick Links ────────────────────────────────── */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <Link
-                                href="/portal/dashboard"
-                                className="btn btn-teal btn-outline btn-sm gap-2 justify-start"
-                            >
-                                <i className="fa-duotone fa-regular fa-gauge-high" />
-                                Dashboard
-                            </Link>
-                            <Link
-                                href="/portal/roles"
-                                className="btn btn-coral btn-outline btn-sm gap-2 justify-start"
-                            >
-                                <i className="fa-duotone fa-regular fa-briefcase" />
-                                Roles
-                            </Link>
-                            <Link
-                                href="/portal/candidates"
-                                className="btn btn-purple btn-outline btn-sm gap-2 justify-start"
-                            >
-                                <i className="fa-duotone fa-regular fa-users" />
-                                Candidates
-                            </Link>
-                            <Link
-                                href="/portal/invitations"
-                                className="btn btn-yellow btn-outline btn-sm gap-2 justify-start"
-                            >
-                                <i className="fa-duotone fa-regular fa-envelope" />
-                                Invitations
+                                Browse Roles
                             </Link>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                {/* ── Support Footer ─────────────────────────────────────── */}
-                <p className="mt-8 text-xs text-white/40">
-                    Something broken?{" "}
-                    <a
-                        href="mailto:support@splits.network"
-                        className="text-teal underline"
-                    >
-                        support@splits.network
-                    </a>
+            {/* ── Quick Links Section ──────────────────────────────── */}
+            <section className="nf-links container mx-auto px-6 lg:px-12 py-12 lg:py-16 opacity-0">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
+                    Pick up where you left off
                 </p>
-            </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                        {
+                            label: "Dashboard",
+                            icon: "fa-duotone fa-regular fa-grid-2",
+                            href: "/portal/dashboard",
+                        },
+                        {
+                            label: "Roles",
+                            icon: "fa-duotone fa-regular fa-briefcase",
+                            href: "/portal/roles",
+                        },
+                        {
+                            label: "Candidates",
+                            icon: "fa-duotone fa-regular fa-users",
+                            href: "/portal/candidates",
+                        },
+                        {
+                            label: "Invitations",
+                            icon: "fa-duotone fa-regular fa-envelope-open-text",
+                            href: "/portal/invitations",
+                        },
+                    ].map((link) => (
+                        <Link
+                            key={link.label}
+                            href={link.href}
+                            className="border-l-4 border-primary bg-base-200 p-5 hover:bg-base-300 transition-colors group"
+                        >
+                            <i
+                                className={`${link.icon} text-xl text-primary mb-3 block`}
+                            />
+                            <span className="text-base font-medium text-base-content group-hover:text-primary transition-colors">
+                                {link.label}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
+
+                {/* ── Footer ───────────────────────────────────────── */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-12 pt-6 border-t border-base-300">
+                    <p className="text-sm text-base-content/60">
+                        Need help? Contact us at{" "}
+                        <a
+                            href="mailto:support@splits.network"
+                            className="text-primary underline"
+                        >
+                            support@splits.network
+                        </a>
+                    </p>
+                    <p className="text-sm font-mono text-base-content/40 mt-2 sm:mt-0">
+                        Error 404 — Page Not Found
+                    </p>
+                </div>
+            </section>
         </div>
     );
 }

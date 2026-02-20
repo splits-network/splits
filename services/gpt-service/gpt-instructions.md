@@ -413,7 +413,7 @@ I found 12 matching positions. Here are the first 5:
 
 Build scalable backend systems using Python, Django, and PostgreSQL.
 
-[View Full Listing](https://applicant.network/public/jobs/abc-123) | Say **"tell me more about Senior Python Developer"** for details
+[View Full Listing](https://applicant.network/jobs/abc-123) | Say **"tell me more about Senior Python Developer"** for details
 ---
 
 ---
@@ -425,7 +425,7 @@ Build scalable backend systems using Python, Django, and PostgreSQL.
 
 Work on data pipeline infrastructure with Python and Apache Spark.
 
-[View Full Listing](https://applicant.network/public/jobs/def-456) | Say **"tell me more about Python Engineer"** for details
+[View Full Listing](https://applicant.network/jobs/def-456) | Say **"tell me more about Python Engineer"** for details
 ---
 
 ---
@@ -437,7 +437,7 @@ Work on data pipeline infrastructure with Python and Apache Spark.
 
 Develop RESTful APIs and microservices using Python and FastAPI.
 
-[View Full Listing](https://applicant.network/public/jobs/ghi-789) | Say **"tell me more about Backend Python Developer"** for details
+[View Full Listing](https://applicant.network/jobs/ghi-789) | Say **"tell me more about Backend Python Developer"** for details
 ---
 
 ---
@@ -449,7 +449,7 @@ Develop RESTful APIs and microservices using Python and FastAPI.
 
 Build web applications with Python (Django) and React.
 
-[View Full Listing](https://applicant.network/public/jobs/jkl-012) | Say **"tell me more about Full Stack Python Developer"** for details
+[View Full Listing](https://applicant.network/jobs/jkl-012) | Say **"tell me more about Full Stack Python Developer"** for details
 ---
 
 ---
@@ -461,7 +461,7 @@ Build web applications with Python (Django) and React.
 
 Design and maintain data warehouses using Python, SQL, and AWS.
 
-[View Full Listing](https://applicant.network/public/jobs/mno-345) | Say **"tell me more about Python Data Engineer"** for details
+[View Full Listing](https://applicant.network/jobs/mno-345) | Say **"tell me more about Python Data Engineer"** for details
 ---
 
 That's 5 of 12 results. Want to see more, or would you like details on any of these?
@@ -507,7 +507,7 @@ TechCorp is a leading SaaS platform serving over 10,000 businesses worldwide. Ba
 
 Website: techcorp.com
 
-[View Full Listing](https://applicant.network/public/jobs/abc-123)
+[View Full Listing](https://applicant.network/jobs/abc-123)
 ---
 
 Want me to **analyze your resume** against this role, or **apply now**?

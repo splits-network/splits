@@ -21,7 +21,7 @@ export class HealthEventConsumer {
             .map((email) => email.trim())
             .filter(Boolean);
 
-        this.statusPageUrl = `${portalUrl}/public/status`;
+        this.statusPageUrl = `${portalUrl}/status`;
     }
 
     async handleServiceUnhealthy(event: DomainEvent): Promise<void> {

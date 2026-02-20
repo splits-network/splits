@@ -19,7 +19,7 @@ export function AdminBulkActions({
 
     return (
         <div
-            className={`sticky top-0 z-20 bg-primary/10 border border-coral/20 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 ${className}`}
+            className={`sticky top-0 z-20 bg-primary/10 border border-primary/20 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 ${className}`}
         >
             <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">

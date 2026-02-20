@@ -26,11 +26,13 @@ export default function QuickActionsGrid({
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             {/* Browse Jobs - always prominent */}
             <Link
-                href="/public/jobs"
+                href="/jobs"
                 className="border-4 border-dark bg-coral text-white p-3 flex flex-col items-start gap-1 hover:-translate-y-0.5 transition-transform"
             >
                 <i className="fa-duotone fa-regular fa-search text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Browse Jobs</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Browse Jobs
+                </span>
                 <span className="text-[10px] opacity-80">
                     Find opportunities
                 </span>
@@ -44,12 +46,18 @@ export default function QuickActionsGrid({
                 }`}
             >
                 {hasMessages && (
-                    <Badge color="coral" size="xs" className="absolute -top-2 -right-2">
+                    <Badge
+                        color="coral"
+                        size="xs"
+                        className="absolute -top-2 -right-2"
+                    >
                         {messageCount}
                     </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-messages text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Messages</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Messages
+                </span>
                 <span className="text-[10px] opacity-60">
                     {hasMessages
                         ? `${messageCount} unread`
@@ -61,16 +69,24 @@ export default function QuickActionsGrid({
             <Link
                 href="/portal/profile"
                 className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
-                    needsProfileCompletion ? "bg-yellow/20 text-dark" : "bg-white text-dark"
+                    needsProfileCompletion
+                        ? "bg-yellow/20 text-dark"
+                        : "bg-white text-dark"
                 }`}
             >
                 {needsProfileCompletion && (
-                    <Badge color="yellow" size="xs" className="absolute -top-2 -right-2">
+                    <Badge
+                        color="yellow"
+                        size="xs"
+                        className="absolute -top-2 -right-2"
+                    >
                         {profileCompletion}%
                     </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-user text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Profile</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Profile
+                </span>
                 <span className="text-[10px] opacity-60">
                     {needsProfileCompletion
                         ? "Complete profile"
@@ -82,16 +98,24 @@ export default function QuickActionsGrid({
             <Link
                 href="/portal/notifications"
                 className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
-                    hasNotifications ? "bg-teal text-dark" : "bg-white text-dark"
+                    hasNotifications
+                        ? "bg-teal text-dark"
+                        : "bg-white text-dark"
                 }`}
             >
                 {hasNotifications && (
-                    <Badge color="coral" size="xs" className="absolute -top-2 -right-2">
+                    <Badge
+                        color="coral"
+                        size="xs"
+                        className="absolute -top-2 -right-2"
+                    >
                         {notificationCount}
                     </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-bell text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Notifications</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Notifications
+                </span>
                 <span className="text-[10px] opacity-60">
                     {hasNotifications
                         ? `${notificationCount} new`
@@ -103,16 +127,24 @@ export default function QuickActionsGrid({
             <Link
                 href="/portal/documents"
                 className={`border-4 border-dark p-3 flex flex-col items-start gap-1 relative hover:-translate-y-0.5 transition-transform ${
-                    needsResume ? "bg-purple/20 text-dark" : "bg-white text-dark"
+                    needsResume
+                        ? "bg-purple/20 text-dark"
+                        : "bg-white text-dark"
                 }`}
             >
                 {needsResume && (
-                    <Badge color="purple" size="xs" className="absolute -top-2 -right-2">
+                    <Badge
+                        color="purple"
+                        size="xs"
+                        className="absolute -top-2 -right-2"
+                    >
                         !
                     </Badge>
                 )}
                 <i className="fa-duotone fa-regular fa-upload text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Documents</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Documents
+                </span>
                 <span className="text-[10px] opacity-60">
                     {needsResume ? "Upload resume" : "Manage files"}
                 </span>
@@ -124,7 +156,9 @@ export default function QuickActionsGrid({
                 className="border-4 border-dark bg-white text-dark p-3 flex flex-col items-start gap-1 hover:-translate-y-0.5 transition-transform"
             >
                 <i className="fa-duotone fa-regular fa-list text-lg"></i>
-                <span className="text-xs font-black uppercase tracking-widest">Applications</span>
+                <span className="text-xs font-black uppercase tracking-widest">
+                    Applications
+                </span>
                 <span className="text-[10px] opacity-60">Track progress</span>
             </Link>
         </div>

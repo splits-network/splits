@@ -504,7 +504,7 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
 
                         <div className="flex flex-wrap gap-4">
                             <Link
-                                href="/public/jobs"
+                                href="/jobs"
                                 className="hero-cta btn btn-primary btn-lg shadow-lg opacity-0"
                             >
                                 <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
@@ -940,7 +940,7 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
                                     Create Free Account
                                 </Link>
                                 <Link
-                                    href="/public/jobs"
+                                    href="/jobs"
                                     className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
                                 >
                                     <i className="fa-duotone fa-regular fa-magnifying-glass"></i>

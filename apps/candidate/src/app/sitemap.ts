@@ -7,29 +7,29 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network";
 
 const staticRoutes = [
     { path: "", changeFrequency: "weekly", priority: 1.0 },
-    { path: "/public/jobs", changeFrequency: "daily", priority: 0.9 },
-    { path: "/public/marketplace", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/public/about", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/public/contact", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/public/help", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/public/how-it-works", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/public/for-recruiters", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/public/resources/career-guides", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/switch-careers", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/networking", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/remote-work", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/negotiating-offers", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/first-90-days", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/career-guides/personal-branding", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/industry-trends", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/interview-prep", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/resume-tips", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/salary-insights", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/resources/success-stories", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/public/status", changeFrequency: "monthly", priority: 0.4 },
-    { path: "/public/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
-    { path: "/public/cookie-policy", changeFrequency: "yearly", priority: 0.3 },
-    { path: "/public/terms-of-service", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/jobs", changeFrequency: "daily", priority: 0.9 },
+    { path: "/marketplace", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/about", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/help", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/how-it-works", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/for-recruiters", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/resources/career-guides", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/switch-careers", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/networking", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/remote-work", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/negotiating-offers", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/first-90-days", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/career-guides/personal-branding", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/industry-trends", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/interview-prep", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/resume-tips", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/salary-insights", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/resources/success-stories", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/status", changeFrequency: "monthly", priority: 0.4 },
+    { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/cookie-policy", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/terms-of-service", changeFrequency: "yearly", priority: 0.3 },
 ];
 
 const appRoot = join(process.cwd(), "apps", "candidate", "src", "app");
@@ -120,7 +120,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const jobs = await fetchJobs();
         entries.push(
             ...jobs.map((job) => ({
-                url: `${baseUrl}/public/jobs/${job.id}`,
+                url: `${baseUrl}/jobs/${job.id}`,
                 lastModified: toDate(job.updated_at ?? job.created_at),
                 changeFrequency: "daily" as MetadataRoute.Sitemap[number]["changeFrequency"],
                 priority: 0.8,
@@ -134,7 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const recruiters = await fetchRecruiters();
         entries.push(
             ...recruiters.map((recruiter) => ({
-                url: `${baseUrl}/public/marketplace/${recruiter.id}`,
+                url: `${baseUrl}/marketplace/${recruiter.id}`,
                 lastModified: toDate(recruiter.updated_at ?? recruiter.created_at),
                 changeFrequency: "weekly" as MetadataRoute.Sitemap[number]["changeFrequency"],
                 priority: 0.7,

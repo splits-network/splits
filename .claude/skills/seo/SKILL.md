@@ -22,20 +22,22 @@ The single biggest SEO lever is getting content into the initial HTML response. 
 
 ### Decision Matrix
 
-| Page Location | Rendering Requirement |
-|---------------|----------------------|
-| `apps/corporate/src/app/` | 100% Server — all pages must be fully SSR |
-| `apps/*/src/app/public/` | Server-first — content in HTML, client for interactivity |
-| `apps/*/src/app/portal/` | Client OK — behind auth, not indexed |
+| Page Location             | Rendering Requirement                                    |
+| ------------------------- | -------------------------------------------------------- |
+| `apps/corporate/src/app/` | 100% Server — all pages must be fully SSR                |
+| `apps/*/src/app/`         | Server-first — content in HTML, client for interactivity |
+| `apps/*/src/app/portal/`  | Client OK — behind auth, not indexed                     |
 
 ## Audit Scope
 
 ### Architecture (Critical)
+
 - Client-page anti-pattern on public routes
 - Client-side data fetching for primary content
 - Content missing from initial HTML response
 
 ### Metadata (High)
+
 - Missing `metadata` or `generateMetadata` exports
 - Title under 60 chars with primary keyword
 - Description 150-160 chars
@@ -43,11 +45,13 @@ The single biggest SEO lever is getting content into the initial HTML response. 
 - Canonical URLs
 
 ### Indexing (High)
+
 - Sitemap coverage (all public routes included)
 - robots.txt configuration (AI crawlers allowed)
 - No important routes blocked
 
 ### On-Page (Medium)
+
 - Heading hierarchy (one h1, proper nesting)
 - JSON-LD structured data on entity pages
 - Image alt text

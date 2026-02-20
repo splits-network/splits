@@ -5,14 +5,14 @@ Site: https://applicant.network
 Contact: hello@applicant.network
 
 Key pages:
-- /public/jobs
-- /public/jobs/rss.xml
-- /public/jobs/atom.xml
-- /public/how-it-works
-- /public/help
-- /public/resources
-- /public/resources/career-guides
-- /public/resources/interview-prep
-- /public/resources/resume-tips
-- /public/resources/salary-insights
-- /public/status
+- /jobs
+- /jobs/rss.xml
+- /jobs/atom.xml
+- /how-it-works
+- /help
+- /resources
+- /resources/career-guides
+- /resources/interview-prep
+- /resources/resume-tips
+- /resources/salary-insights
+- /status

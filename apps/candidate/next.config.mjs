@@ -2,27 +2,27 @@
 const nextConfig = {
     reactStrictMode: true,
     transpilePackages: [
-        '@splits-network/shared-types',
-        '@splits-network/shared-config',
-        '@splits-network/shared-ui',
-        '@splits-network/basel-ui',
+        "@splits-network/shared-types",
+        "@splits-network/shared-config",
+        "@splits-network/shared-ui",
+        "@splits-network/basel-ui",
     ],
-    serverExternalPackages: ['@supabase/supabase-js'],
+    serverExternalPackages: ["@supabase/supabase-js"],
     async redirects() {
         return [
             {
-                source: '/public/privacy',
-                destination: '/public/privacy-policy',
+                source: "/public/privacy",
+                destination: "/privacy-policy",
                 permanent: true,
             },
             {
-                source: '/public/cookies',
-                destination: '/public/cookie-policy',
+                source: "/public/cookies",
+                destination: "/cookie-policy",
                 permanent: true,
             },
             {
-                source: '/public/terms',
-                destination: '/public/terms-of-service',
+                source: "/public/terms",
+                destination: "/terms-of-service",
                 permanent: true,
             },
         ];

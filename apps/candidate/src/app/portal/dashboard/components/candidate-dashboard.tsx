@@ -35,8 +35,7 @@ export default function CandidateDashboard({
         error: dataError,
     } = useCandidateDashboardData();
 
-    const { unreadMessages, unreadNotifications } =
-        useCandidateNotifications();
+    const { unreadMessages, unreadNotifications } = useCandidateNotifications();
 
     const {
         profileCompletion,
@@ -62,16 +61,16 @@ export default function CandidateDashboard({
             ).matches;
 
             if (prefersReducedMotion) {
-                const hidden =
-                    contentRef.current.querySelectorAll("[class*='opacity-0']");
+                const hidden = contentRef.current.querySelectorAll(
+                    "[class*='opacity-0']",
+                );
                 gsap.set(hidden, { opacity: 1 });
                 return;
             }
 
             const $ = (sel: string) =>
                 contentRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                contentRef.current!.querySelector(sel);
+            const $1 = (sel: string) => contentRef.current!.querySelector(sel);
 
             /* KPI cards stagger */
             const kpiCards = $(".kpi-card");
@@ -250,9 +249,7 @@ export default function CandidateDashboard({
                     activeRecruiters={activeRecruiters}
                     unreadMessages={unreadMessages}
                     unreadNotifications={unreadNotifications}
-                    profileCompletion={
-                        profileCompletion?.percentage || 100
-                    }
+                    profileCompletion={profileCompletion?.percentage || 100}
                     hasResume={hasResume}
                 />
             )}
@@ -501,9 +498,7 @@ export default function CandidateDashboard({
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="font-semibold text-base-content truncate">
-                                                            {
-                                                                rel.recruiter_name
-                                                            }
+                                                            {rel.recruiter_name}
                                                         </div>
                                                         <div className="text-[10px] text-base-content/40">
                                                             Since{" "}
@@ -540,7 +535,7 @@ export default function CandidateDashboard({
                                                 History
                                             </Link>
                                             <Link
-                                                href="/public/marketplace"
+                                                href="/marketplace"
                                                 className="btn btn-ghost btn-sm flex-1"
                                                 style={{ borderRadius: 0 }}
                                             >
@@ -571,7 +566,7 @@ export default function CandidateDashboard({
                                                 History
                                             </Link>
                                             <Link
-                                                href="/public/marketplace"
+                                                href="/marketplace"
                                                 className="btn btn-primary btn-sm"
                                                 style={{ borderRadius: 0 }}
                                             >
@@ -599,9 +594,7 @@ export default function CandidateDashboard({
                         </h2>
                     </div>
                     <QuickActionsGrid
-                        profileCompletion={
-                            profileCompletion?.percentage || 100
-                        }
+                        profileCompletion={profileCompletion?.percentage || 100}
                         messageCount={unreadMessages}
                         notificationCount={unreadNotifications}
                         hasResume={hasResume}

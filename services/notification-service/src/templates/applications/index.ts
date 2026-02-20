@@ -44,7 +44,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> or reply to this email.'
+        'Need help? Visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a> or reply to this email.'
     )}
     `.trim();
 
@@ -636,7 +636,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Questions about your review? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
+        'Questions about your review? Visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
     )}
     `.trim();
 
@@ -740,7 +740,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help interpreting the AI review? Check out our <a href="https://splits.network/public/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
+        'Need help interpreting the AI review? Check out our <a href="https://splits.network/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
     )}
     `.trim();
 
@@ -808,7 +808,7 @@ ${paragraph(
     )}
 
 ${paragraph(
-        'Questions? Reply to this email or visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a>.'
+        'Questions? Reply to this email or visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a>.'
     )}
     `.trim();
 
@@ -908,32 +908,32 @@ ${heading({ level: 1, text: 'New Note on Application' })}
 ${paragraph(`Hi <strong>${data.recipientName}</strong>,`)}
 
 ${paragraph(
-    `<strong>${data.addedByName}</strong> (${data.addedByRole}) added a note to the application for <strong>${data.candidateName}</strong>.`
-)}
+        `<strong>${data.addedByName}</strong> (${data.addedByRole}) added a note to the application for <strong>${data.candidateName}</strong>.`
+    )}
 
 ${infoCard({
-    title: 'Application Details',
-    items: [
-        { label: 'Candidate', value: data.candidateName },
-        { label: 'Position', value: data.jobTitle },
-        { label: 'Company', value: data.companyName },
-    ],
-})}
+        title: 'Application Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+        ],
+    })}
 
 ${heading({ level: 3, text: 'Note Preview' })}
 ${paragraph(`<em>"${data.notePreview}"</em>`)}
 
 ${button({
-    href: data.applicationUrl,
-    text: 'View Full Note →',
-    variant: 'primary',
-})}
+        href: data.applicationUrl,
+        text: 'View Full Note →',
+        variant: 'primary',
+    })}
 
 ${divider()}
 
 ${paragraph(
-    'You can reply to this note directly in the application portal.'
-)}
+        'You can reply to this note directly in the application portal.'
+    )}
     `.trim();
 
     return baseEmailTemplate({
@@ -986,7 +986,7 @@ ${paragraph(
     )}
 
 ${paragraph(
-        'Need tips on crafting better proposals? Visit our <a href="https://splits.network/public/help/proposals" style="color: #233876; text-decoration: underline;">Proposal Guide</a>.'
+        'Need tips on crafting better proposals? Visit our <a href="https://splits.network/help/proposals" style="color: #233876; text-decoration: underline;">Proposal Guide</a>.'
     )}
     `.trim();
 

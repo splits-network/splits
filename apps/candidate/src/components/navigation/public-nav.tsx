@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function PublicNav() {
     return (
@@ -13,10 +13,13 @@ export default function PublicNav() {
                 <div className="flex-none">
                     <ul className="menu menu-horizontal px-1">
                         <li>
-                            <Link href="/public/jobs">Browse Jobs</Link>
+                            <Link href="/jobs">Browse Jobs</Link>
                         </li>
                         <li>
-                            <Link href="/sign-in" className="btn btn-primary btn-sm">
+                            <Link
+                                href="/sign-in"
+                                className="btn btn-primary btn-sm"
+                            >
                                 Sign In
                             </Link>
                         </li>

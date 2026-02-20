@@ -123,7 +123,7 @@ export default function RoleActionsToolbar({
         const candidateAppUrl =
             process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
             "https://staging.applicant.network";
-        const shareUrl = `${candidateAppUrl}/public/jobs/${job.id}`;
+        const shareUrl = `${candidateAppUrl}/jobs/${job.id}`;
         const shareData = {
             title: `${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`,
             text: `Check out this job opportunity: ${job.title || "Job Opportunity"}${job.company?.name ? ` at ${job.company.name}` : ""}`,

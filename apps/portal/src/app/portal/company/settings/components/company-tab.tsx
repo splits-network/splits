@@ -109,9 +109,9 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             {error && (
-                <div className="border-4 border-coral bg-coral-light p-4">
+                <div className="border-4 border-error bg-error-light p-4">
                     <p className="text-sm font-bold text-dark flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral" />
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error" />
                         {error}
                     </p>
                 </div>

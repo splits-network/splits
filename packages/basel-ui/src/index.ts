@@ -131,6 +131,15 @@ export {
     type BaselSeparatorLabelProps,
 } from './display';
 
+// Content components (CMS article renderer + block components)
+export {
+    BaselArticleRenderer,
+    type BaselArticleRendererProps,
+    BaselArticleAnimated,
+    type BaselArticleAnimatedProps,
+    useArticleAnimations,
+} from './content';
+
 // Color utilities
 export {
     type BaselSemanticColor,

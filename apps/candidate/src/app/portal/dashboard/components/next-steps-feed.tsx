@@ -95,10 +95,7 @@ export default function NextStepsFeed({
             }
 
             // P2: Upcoming interviews
-            if (
-                app.stage === "interview" ||
-                app.stage === "final_interview"
-            ) {
+            if (app.stage === "interview" || app.stage === "final_interview") {
                 result.push({
                     id: `interview-${app.id}`,
                     priority: 2,
@@ -134,9 +131,13 @@ export default function NextStepsFeed({
             // P4: Stale applications (14+ days)
             if (
                 app.updated_at &&
-                !["rejected", "withdrawn", "hired", "expired", "draft"].includes(
-                    app.stage,
-                )
+                ![
+                    "rejected",
+                    "withdrawn",
+                    "hired",
+                    "expired",
+                    "draft",
+                ].includes(app.stage)
             ) {
                 const daysSinceUpdate = Math.floor(
                     (now.getTime() - new Date(app.updated_at).getTime()) /
@@ -161,9 +162,13 @@ export default function NextStepsFeed({
 
             // P6: Recent submissions
             if (
-                !["rejected", "withdrawn", "hired", "expired", "draft"].includes(
-                    app.stage,
-                )
+                ![
+                    "rejected",
+                    "withdrawn",
+                    "hired",
+                    "expired",
+                    "draft",
+                ].includes(app.stage)
             ) {
                 result.push({
                     id: `recent-${app.id}`,
@@ -180,7 +185,9 @@ export default function NextStepsFeed({
             }
         });
 
-        return result.sort((a, b) => a.priority - b.priority).slice(0, MAX_ITEMS);
+        return result
+            .sort((a, b) => a.priority - b.priority)
+            .slice(0, MAX_ITEMS);
     }, [applications]);
 
     if (loading) {
@@ -275,7 +282,7 @@ export default function NextStepsFeed({
                         {
                             label: "Browse Jobs",
                             icon: "fa-duotone fa-regular fa-search",
-                            href: "/public/jobs",
+                            href: "/jobs",
                             style: "btn-primary",
                         },
                     ]}

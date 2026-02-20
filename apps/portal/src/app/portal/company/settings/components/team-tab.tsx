@@ -31,14 +31,14 @@ interface TeamTabProps {
     companyId: string;
 }
 
-function getRoleBadgeColor(role: string): "coral" | "teal" | "purple" {
+function getRoleBadgeColor(role: string): "primary" | "secondary" | "accent" {
     switch (role) {
         case "company_admin":
-            return "coral";
+            return "primary";
         case "hiring_manager":
-            return "teal";
+            return "secondary";
         default:
-            return "purple";
+            return "accent";
     }
 }
 
@@ -139,9 +139,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
             });
 
             const scopeText =
-                inviteScope === "company"
-                    ? "your company"
-                    : "the organization";
+                inviteScope === "company" ? "your company" : "the organization";
             toast.success(
                 `Invitation sent to ${inviteEmail} for ${scopeText}.`,
             );
@@ -171,9 +169,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                     fetchInvitations();
                 } catch (error: any) {
                     console.error("Failed to revoke invitation:", error);
-                    toast.error(
-                        error.message || "Failed to revoke invitation",
-                    );
+                    toast.error(error.message || "Failed to revoke invitation");
                 } finally {
                     setConfirmModal(null);
                 }
@@ -249,9 +245,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                             <Select
                                 label="Access Scope"
                                 value={inviteScope}
-                                onChange={(e) =>
-                                    setInviteScope(e.target.value)
-                                }
+                                onChange={(e) => setInviteScope(e.target.value)}
                                 options={SCOPES}
                                 disabled={inviting}
                             />
@@ -394,7 +388,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                 key={member.id}
                                 className={`flex items-center gap-4 p-4 ${idx < members.length - 1 ? "border-b-2 border-cream" : ""}`}
                             >
-                                <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center border-4 border-coral bg-coral">
+                                <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center border-4 border-err bg-coral">
                                     <span className="text-xs font-black text-white">
                                         {(
                                             member.users?.name ||

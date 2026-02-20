@@ -54,3 +54,6 @@ export type {
     SkillProficiency,
     DegreeLevel,
 } from './models';
+
+// Content CMS block types and page structure
+export * from './content';

@@ -10,18 +10,41 @@ interface QuickActionsGridProps {
 }
 
 // Static class maps so Tailwind can detect them at build time
-const COLOR_CLASSES: Record<string, { bg: string; border: string; text: string }> = {
-    primary: { bg: "bg-primary/10", border: "border-primary", text: "text-primary" },
-    secondary: { bg: "bg-secondary/10", border: "border-secondary", text: "text-secondary" },
-    accent: { bg: "bg-accent/10", border: "border-accent", text: "text-accent" },
-    success: { bg: "bg-success/10", border: "border-success", text: "text-success" },
-    warning: { bg: "bg-warning/10", border: "border-warning", text: "text-warning" },
+const COLOR_CLASSES: Record<
+    string,
+    { bg: string; border: string; text: string }
+> = {
+    primary: {
+        bg: "bg-primary/10",
+        border: "border-primary",
+        text: "text-primary",
+    },
+    secondary: {
+        bg: "bg-secondary/10",
+        border: "border-secondary",
+        text: "text-secondary",
+    },
+    accent: {
+        bg: "bg-accent/10",
+        border: "border-accent",
+        text: "text-accent",
+    },
+    success: {
+        bg: "bg-success/10",
+        border: "border-success",
+        text: "text-success",
+    },
+    warning: {
+        bg: "bg-warning/10",
+        border: "border-warning",
+        text: "text-warning",
+    },
     info: { bg: "bg-info/10", border: "border-info", text: "text-info" },
 };
 
 const ACTIONS = [
     {
-        href: "/public/jobs",
+        href: "/jobs",
         icon: "fa-search",
         label: "Browse Jobs",
         description: "Find opportunities",
@@ -68,7 +91,7 @@ const ACTIONS = [
         color: "success",
     },
     {
-        href: "/public/marketplace",
+        href: "/marketplace",
         icon: "fa-store",
         label: "Marketplace",
         description: "Find recruiters",
@@ -129,7 +152,8 @@ export default function QuickActionsGrid({
             {ACTIONS.map((action) => {
                 const badge = getBadge(action.badgeKey);
                 const highlighted = isHighlighted(action);
-                const colors = COLOR_CLASSES[action.color] || COLOR_CLASSES.primary;
+                const colors =
+                    COLOR_CLASSES[action.color] || COLOR_CLASSES.primary;
 
                 return (
                     <Link

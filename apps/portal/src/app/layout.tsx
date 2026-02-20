@@ -20,6 +20,7 @@ import { UserProfileProvider, type UserProfile } from "@/contexts";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { getHeaderNav, getFooterNav } from "@/lib/content";
 import { QueryProvider } from "@/providers/query-provider";
 
 export const metadata: Metadata = {
@@ -75,7 +76,7 @@ export default async function RootLayout({
     // Fetch user profile server-side so UserProfileProvider has data immediately
     // on first render — eliminates loading flash across all authenticated pages.
     // auth() requires clerkMiddleware() to have run on this route — public routes
-    // (/public/*) are outside the middleware matcher, so we catch and fall back to null.
+    // (/*) are outside the middleware matcher, so we catch and fall back to null.
     let initialProfile: UserProfile | null = null;
     try {
         const { getToken, userId } = await auth();
@@ -87,6 +88,13 @@ export default async function RootLayout({
     } catch {
         // Public route not covered by clerkMiddleware — profile not available server-side
     }
+
+    // Fetch CMS navigation data (ISR cached, 5 min)
+    const [headerNav, footerNav] = await Promise.all([
+        getHeaderNav(),
+        getFooterNav(),
+    ]);
+
     const webAppJsonLd = {
         "@context": "https://schema.org",
         "@type": "WebApplication",
@@ -167,11 +175,11 @@ export default async function RootLayout({
                                 initialProfile={initialProfile}
                             >
                                 <ToastProvider>
-                                    <Header />
-                                    <ServiceStatusProvider statusHref="/public/status" />
+                                    <Header navItems={headerNav?.items} />
+                                    <ServiceStatusProvider statusHref="/status" />
                                     <ServiceStatusDebugger />
                                     <main className="grow">{children}</main>
-                                    <Footer />
+                                    <Footer footerNav={footerNav} />
                                     <CookieConsent />
                                 </ToastProvider>
                                 <DevDebugPanel />

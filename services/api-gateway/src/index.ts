@@ -411,6 +411,21 @@ async function main() {
             return;
         }
 
+        // Skip auth for public content pages endpoints (CMS pages)
+        // GET /api/v2/pages - list published pages
+        // GET /api/v2/pages/by-slug/:slug - get page by slug
+        // GET /api/v2/pages/:id - get page by ID
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/pages')) {
+            return;
+        }
+
+        // Skip auth for public navigation endpoints (CMS navigation)
+        // GET /api/v2/navigation - get nav config by app + location
+        // GET /api/v2/navigation/:id - get nav config by ID
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/navigation')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }
@@ -433,6 +448,7 @@ async function main() {
     services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
     services.register('search', process.env.SEARCH_SERVICE_URL || 'http://localhost:3013');
     services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
+    services.register('content', process.env.CONTENT_SERVICE_URL || 'http://localhost:3015');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

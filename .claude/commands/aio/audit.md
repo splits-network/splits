@@ -18,55 +18,55 @@ Spawn the `aio` agent to perform an AI optimization audit.
 AI crawlers cannot execute JavaScript. If content isn't in the initial HTML, it doesn't exist to AI.
 
 1. **Server-rendering check**
-   - Scan all public `page.tsx` files for `"use client"` (should be 0)
-   - Identify pages that wrap a client component doing all the rendering
-   - Flag `useEffect`, `useSWR`, `useQuery` fetching primary content in public trees
-   - Verify important text content is in server-rendered components
+    - Scan all public `page.tsx` files for `"use client"` (should be 0)
+    - Identify pages that wrap a client component doing all the rendering
+    - Flag `useEffect`, `useSWR`, `useQuery` fetching primary content in public trees
+    - Verify important text content is in server-rendered components
 
 2. **Content blocking check**
-   - Cookie consent banners that block content before acceptance
-   - Login/signup interstitials on public pages
-   - Loading spinners as the default state (AI sees the spinner, not content)
+    - Cookie consent banners that block content before acceptance
+    - Login/signup interstitials on public pages
+    - Loading spinners as the default state (AI sees the spinner, not content)
 
 3. **AI crawler access**
-   - Check `robots.ts` for AI bot rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended)
-   - Flag if AI crawlers are not explicitly allowed
-   - Check for `llms.txt` at domain root
+    - Check `robots.ts` for AI bot rules (GPTBot, ClaudeBot, PerplexityBot, Google-Extended)
+    - Flag if AI crawlers are not explicitly allowed
+    - Check for `llms.txt` at domain root
 
 ### Phase 2: Content Structure (High)
 
 4. **First-paragraph quality**
-   - For each public page, read the opening paragraph
-   - Does it directly answer what the page is about?
-   - Or is it generic/vague ("Welcome to..." / "We're excited...")?
+    - For each public page, read the opening paragraph
+    - Does it directly answer what the page is about?
+    - Or is it generic/vague ("Welcome to..." / "We're excited...")?
 
 5. **Heading analysis**
-   - Are headings in question format matching natural queries?
-   - "How Does Split-Fee Recruiting Work?" vs "Our Process"
-   - Do headings follow logical h1 → h2 → h3 hierarchy?
+    - Are headings in question format matching natural queries?
+    - "How Does Split-Fee Recruiting Work?" vs "Our Process"
+    - Do headings follow logical h1 → h2 → h3 hierarchy?
 
 6. **Structured content**
-   - Are lists/tables used for structured info? (not buried in prose)
-   - Are pricing/feature comparisons in `<table>` format?
-   - Are step-by-step processes in ordered lists?
+    - Are lists/tables used for structured info? (not buried in prose)
+    - Are pricing/feature comparisons in `<table>` format?
+    - Are step-by-step processes in ordered lists?
 
 7. **Schema.org structured data**
-   - FAQ sections → `FAQPage` schema
-   - How-to content → `HowTo` schema
-   - Documentation → `TechArticle` schema
-   - Job listings → `JobPosting` schema
-   - Blog/press → `Article` schema
+    - FAQ sections → `FAQPage` schema
+    - How-to content → `HowTo` schema
+    - Documentation → `TechArticle` schema
+    - Job listings → `JobPosting` schema
+    - Blog/press → `Article` schema
 
 ### Phase 3: Content Quality (Medium)
 
 8. **Specificity check**
-   - Are statistics contextual (what + why, not just numbers)?
-   - Are claims backed with specific data?
-   - Are domain terms explicitly defined?
+    - Are statistics contextual (what + why, not just numbers)?
+    - Are claims backed with specific data?
+    - Are domain terms explicitly defined?
 
 9. **Topical focus**
-   - Does each page have one clear primary topic?
-   - Are related topics linked rather than crammed onto one page?
+    - Does each page have one clear primary topic?
+    - Are related topics linked rather than crammed onto one page?
 
 10. **Content uniqueness**
     - Are Memphis/Basel variants canonical-tagged correctly?
@@ -83,6 +83,7 @@ AI crawlers cannot execute JavaScript. If content isn't in the initial HTML, it 
 ## Output
 
 Generate an audit report with:
+
 - **Score**: X/100
 - **Issues grouped by severity**: Critical → High → Medium → Low
 - **Specific file paths** for each issue
@@ -95,20 +96,23 @@ Generate an audit report with:
 Focus the audit on pages most likely to be cited by AI:
 
 ### Must Audit
-- Documentation pages (`/public/documentation/**`)
-- How it works pages (`/public/how-it-works`)
-- Features pages (`/public/features`)
-- Pricing pages (`/public/pricing`)
+
+- Documentation pages (`/documentation/**`)
+- How it works pages (`/how-it-works`)
+- Features pages (`/features`)
+- Pricing pages (`/pricing`)
 - FAQ sections on any page
-- Resource pages (`/public/resources/**`)
+- Resource pages (`/resources/**`)
 
 ### Should Audit
+
 - About pages
 - For-recruiters / For-companies pages
 - Blog/press articles
 - Marketplace/job listings (candidate app)
 
 ### Skip
+
 - Authenticated pages (`/portal/**`)
 - Admin pages
 - Settings pages

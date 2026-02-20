@@ -12,13 +12,15 @@
         "vault:setup": "psql $DATABASE_URL -f infra/migrations/001_setup_vault.sql -f infra/migrations/002_vault_helpers.sql",
         "vault:populate": "node scripts/populate-vault.js",
         "test:notifications": "tsx scripts/test-ts",
-        "test:notifications:e2e": "tsx scripts/test-notification-e2e.ts"
+        "test:notifications:e2e": "tsx scripts/test-notification-e2e.ts",
+        "seed:content": "tsx -r dotenv/config services/content-service/seeds/seed-content.ts"
     },
     "devDependencies": {
-        "tsx": "^4.19.2",
+        "@types/amqplib": "^0.10.6",
         "@types/node": "^22.10.2",
         "amqplib": "^0.10.5",
-        "@types/amqplib": "^0.10.6"
+        "dotenv": "^16.4.7",
+        "tsx": "^4.19.2"
     },
     "engines": {
         "node": ">=20.0.0",

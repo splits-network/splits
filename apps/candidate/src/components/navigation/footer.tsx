@@ -3,45 +3,52 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BaselFooter } from "@splits-network/basel-ui";
+import type {
+    FooterNavConfig,
+    FooterSection,
+    FooterSocialLink,
+    FooterTrustStat,
+    FooterLinkItem,
+} from "@splits-network/shared-types";
 
-// ─── Footer Data ────────────────────────────────────────────────────────────
+// ─── Default Footer Data (fallback when CMS is unavailable) ─────────────────
 
-const FOOTER_SECTIONS = [
+const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
     {
         title: "Platform",
         links: [
-            { label: "Browse Jobs", href: "/public/jobs" },
-            { label: "How It Works", href: "/public/how-it-works" },
-            { label: "Find a Recruiter", href: "/public/marketplace" },
-            { label: "Help Center", href: "/public/help" },
-            { label: "System Status", href: "/public/status" },
+            { label: "Browse Jobs", href: "/jobs" },
+            { label: "How It Works", href: "/how-it-works" },
+            { label: "Find a Recruiter", href: "/marketplace" },
+            { label: "Help Center", href: "/help" },
+            { label: "System Status", href: "/status" },
         ],
     },
     {
         title: "Resources",
         links: [
-            { label: "Career Guides", href: "/public/resources/career-guides" },
-            { label: "Resume Tips", href: "/public/resources/resume-tips" },
+            { label: "Career Guides", href: "/resources/career-guides" },
+            { label: "Resume Tips", href: "/resources/resume-tips" },
             {
                 label: "Interview Prep",
-                href: "/public/resources/interview-prep",
+                href: "/resources/interview-prep",
             },
             {
                 label: "Salary Insights",
-                href: "/public/resources/salary-insights",
+                href: "/resources/salary-insights",
             },
             {
                 label: "Industry Trends",
-                href: "/public/resources/industry-trends",
+                href: "/resources/industry-trends",
             },
         ],
     },
     {
         title: "Company",
         links: [
-            { label: "About Us", href: "/public/about" },
-            { label: "Contact", href: "/public/contact" },
-            { label: "For Recruiters", href: "/public/for-recruiters" },
+            { label: "About Us", href: "/about" },
+            { label: "Contact", href: "/contact" },
+            { label: "For Recruiters", href: "/for-recruiters" },
             {
                 label: "Splits Network",
                 href: "https://splits.network",
@@ -52,14 +59,14 @@ const FOOTER_SECTIONS = [
     {
         title: "Legal",
         links: [
-            { label: "Privacy Policy", href: "/public/privacy-policy" },
-            { label: "Terms of Service", href: "/public/terms-of-service" },
-            { label: "Cookie Policy", href: "/public/cookie-policy" },
+            { label: "Privacy Policy", href: "/privacy-policy" },
+            { label: "Terms of Service", href: "/terms-of-service" },
+            { label: "Cookie Policy", href: "/cookie-policy" },
         ],
     },
 ];
 
-const SOCIAL_LINKS = [
+const DEFAULT_SOCIAL_LINKS: FooterSocialLink[] = [
     {
         icon: "fa-brands fa-linkedin-in",
         href: "https://linkedin.com",
@@ -82,13 +89,13 @@ const SOCIAL_LINKS = [
     },
 ];
 
-const LEGAL_LINKS = [
-    { label: "Privacy Policy", href: "/public/privacy-policy" },
-    { label: "Terms of Service", href: "/public/terms-of-service" },
-    { label: "Cookie Policy", href: "/public/cookie-policy" },
+const DEFAULT_LEGAL_LINKS: FooterLinkItem[] = [
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms-of-service" },
+    { label: "Cookie Policy", href: "/cookie-policy" },
 ];
 
-const TRUST_STATS = [
+const DEFAULT_TRUST_STATS: FooterTrustStat[] = [
     { value: "2,847", label: "Recruiters" },
     { value: "518", label: "Companies" },
     { value: "12,340", label: "Candidates" },
@@ -97,9 +104,18 @@ const TRUST_STATS = [
 
 // ─── Footer Component ───────────────────────────────────────────────────────
 
-export default function Footer() {
+export default function Footer({
+    footerNav,
+}: {
+    footerNav?: FooterNavConfig | null;
+}) {
     const [email, setEmail] = useState("");
     const [subscribed, setSubscribed] = useState(false);
+
+    const sections = footerNav?.sections ?? DEFAULT_FOOTER_SECTIONS;
+    const socialLinks = footerNav?.socialLinks ?? DEFAULT_SOCIAL_LINKS;
+    const trustStats = footerNav?.trustStats ?? DEFAULT_TRUST_STATS;
+    const legalLinks = footerNav?.legalLinks ?? DEFAULT_LEGAL_LINKS;
 
     const handleSubscribe = (e: React.FormEvent) => {
         e.preventDefault();
@@ -129,7 +145,7 @@ export default function Footer() {
                             Get Started Free
                         </Link>
                         <Link
-                            href="/public/jobs"
+                            href="/jobs"
                             className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
                         >
                             <i className="fa-duotone fa-regular fa-briefcase" />
@@ -168,10 +184,7 @@ export default function Footer() {
                             </div>
                         </div>
                     ) : (
-                        <form
-                            onSubmit={handleSubscribe}
-                            className="flex gap-2"
-                        >
+                        <form onSubmit={handleSubscribe} className="flex gap-2">
                             <input
                                 type="email"
                                 value={email}
@@ -205,12 +218,12 @@ export default function Footer() {
                         />
                     </div>
                     <p className="text-sm opacity-50 leading-relaxed mb-4">
-                        Connecting talented candidates with amazing opportunities
-                        through expert recruiters in a single transparent
-                        marketplace.
+                        Connecting talented candidates with amazing
+                        opportunities through expert recruiters in a single
+                        transparent marketplace.
                     </p>
                     <div className="flex gap-2">
-                        {SOCIAL_LINKS.map((social) => (
+                        {socialLinks.map((social) => (
                             <a
                                 key={social.label}
                                 href={social.href}
@@ -227,7 +240,7 @@ export default function Footer() {
             }
             columns={
                 <>
-                    {FOOTER_SECTIONS.map((section) => (
+                    {sections.map((section) => (
                         <div key={section.title}>
                             <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
                                 {section.title}
@@ -261,7 +274,7 @@ export default function Footer() {
             }
             stats={
                 <>
-                    {TRUST_STATS.map((stat) => (
+                    {trustStats.map((stat) => (
                         <div key={stat.label} className="text-center">
                             <div className="text-2xl font-black text-primary">
                                 {stat.value}
@@ -283,7 +296,7 @@ export default function Footer() {
                         </span>
                     </div>
                     <div className="flex items-center gap-4">
-                        {LEGAL_LINKS.map((link) => (
+                        {legalLinks.map((link) => (
                             <Link
                                 key={link.label}
                                 href={link.href}

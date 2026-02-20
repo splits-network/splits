@@ -13,7 +13,8 @@ export type ServiceName =
     | 'document'
     | 'automation'
     | 'search'
-    | 'gpt';
+    | 'gpt'
+    | 'content';
 
 export interface ResourceDefinition {
     name: string;

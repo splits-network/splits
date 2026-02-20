@@ -111,18 +111,15 @@ export default function NotFound() {
                         </span>
                     </h1>
                     <p className="text-base text-white/60">
-                        This page has nothing for you. The marketplace
-                        does — open roles, active recruiters, and real
-                        momentum waiting behind every other link.
+                        This page has nothing for you. The marketplace does —
+                        open roles, active recruiters, and real momentum waiting
+                        behind every other link.
                     </p>
                 </div>
 
                 {/* ── CTAs ────────────────────────────────────────────────── */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-16">
-                    <Link
-                        href="/public/jobs"
-                        className="btn btn-purple btn-lg gap-2"
-                    >
+                    <Link href="/jobs" className="btn btn-purple btn-lg gap-2">
                         <i className="fa-duotone fa-regular fa-magnifying-glass" />
                         Explore Jobs
                     </Link>
@@ -138,12 +135,11 @@ export default function NotFound() {
                 {/* ── Quick Links ─────────────────────────────────────────── */}
                 <div className="border-4 border-dark bg-white p-8 max-w-2xl w-full">
                     <h2 className="text-sm font-black uppercase tracking-wider text-dark mb-6">
-                        Choose Your{" "}
-                        <span className="text-purple">Move</span>
+                        Choose Your <span className="text-purple">Move</span>
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <Link
-                            href="/public/jobs"
+                            href="/jobs"
                             className="border-4 border-purple p-4 flex flex-col items-center gap-2 text-center hover:-translate-y-0.5 transition-transform"
                         >
                             <i className="fa-duotone fa-regular fa-briefcase text-2xl text-purple" />
@@ -170,7 +166,7 @@ export default function NotFound() {
                             </span>
                         </Link>
                         <Link
-                            href="/public/recruiters"
+                            href="/recruiters"
                             className="border-4 border-yellow p-4 flex flex-col items-center gap-2 text-center hover:-translate-y-0.5 transition-transform"
                         >
                             <i className="fa-duotone fa-regular fa-users text-2xl text-yellow" />

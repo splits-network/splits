@@ -3,10 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
+import type { NavItem } from "@splits-network/shared-types";
 
-// ─── Nav Links Data ─────────────────────────────────────────────────────────
+// ─── Default Nav Data (fallback when CMS is unavailable) ────────────────────
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS: NavItem[] = [
     { label: "For Recruiters", href: "#for-recruiters" },
     { label: "For Candidates", href: "#for-candidates" },
     { label: "For Companies", href: "#for-companies" },
@@ -30,7 +31,9 @@ function handleSmoothScroll(
 
 // ─── Header Component ───────────────────────────────────────────────────────
 
-export function Header() {
+export function Header({ navItems }: { navItems?: NavItem[] }) {
+    const links = navItems ?? DEFAULT_NAV_LINKS;
+
     return (
         <BaselHeader
             position="sticky"
@@ -49,11 +52,11 @@ export function Header() {
             }
             nav={
                 <>
-                    {NAV_LINKS.map((link) => (
+                    {links.map((link) => (
                         <a
-                            key={link.href}
-                            href={link.href}
-                            onClick={(e) => handleSmoothScroll(e, link.href)}
+                            key={link.label}
+                            href={link.href || "#"}
+                            onClick={(e) => handleSmoothScroll(e, link.href || "#")}
                             className="px-3 py-2 text-md font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
                         >
                             {link.label}
@@ -81,12 +84,12 @@ export function Header() {
             mobileMenu={
                 <div className="space-y-4">
                     <nav className="space-y-1">
-                        {NAV_LINKS.map((link) => (
+                        {links.map((link) => (
                             <a
                                 key={link.href}
-                                href={link.href}
+                                href={link.href || "#"}
                                 onClick={(e) =>
-                                    handleSmoothScroll(e, link.href)
+                                    handleSmoothScroll(e, link.href || "#")
                                 }
                                 className="block px-4 py-2.5 text-sm font-semibold text-base-content/70 hover:text-primary hover:bg-base-200 transition-colors"
                             >

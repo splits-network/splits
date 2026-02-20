@@ -4,60 +4,89 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useState } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
+import type { NavItem, NavSubItem } from "@splits-network/shared-types";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 import Image from "next/image";
 
-// ─── Nav Data ───────────────────────────────────────────────────────────────
+// ─── Default Nav Data (fallback when CMS is unavailable) ────────────────────
 
-const RESOURCE_LINKS = [
+const DEFAULT_NAV_ITEMS: NavItem[] = [
     {
-        name: "Career Guides",
-        href: "/public/resources/career-guides",
-        icon: "fa-duotone fa-regular fa-book",
+        label: "How It Works",
+        href: "/how-it-works",
     },
     {
-        name: "Salary Insights",
-        href: "/public/resources/salary-insights",
-        icon: "fa-duotone fa-regular fa-chart-line",
+        label: "Find Jobs",
+        href: "/jobs",
     },
     {
-        name: "Interview Prep",
-        href: "/public/resources/interview-prep",
-        icon: "fa-duotone fa-regular fa-user-tie",
+        label: "Resources",
+        subItems: [
+            {
+                label: "Career Guides",
+                href: "/resources/career-guides",
+                icon: "fa-duotone fa-regular fa-book",
+                desc: "Actionable career advice",
+            },
+            {
+                label: "Salary Insights",
+                href: "/resources/salary-insights",
+                icon: "fa-duotone fa-regular fa-chart-line",
+                desc: "Compensation data",
+            },
+            {
+                label: "Interview Prep",
+                href: "/resources/interview-prep",
+                icon: "fa-duotone fa-regular fa-user-tie",
+                desc: "Practice and frameworks",
+            },
+            {
+                label: "Success Stories",
+                href: "/resources/success-stories",
+                icon: "fa-duotone fa-regular fa-star",
+                desc: "Real candidate journeys",
+            },
+            {
+                label: "Resume Tips",
+                href: "/resources/resume-tips",
+                icon: "fa-duotone fa-regular fa-file-alt",
+                desc: "Stand out to recruiters",
+            },
+            {
+                label: "Industry Trends",
+                href: "/resources/industry-trends",
+                icon: "fa-duotone fa-regular fa-display-chart-up",
+                desc: "Market intelligence",
+            },
+        ],
     },
     {
-        name: "Success Stories",
-        href: "/public/resources/success-stories",
-        icon: "fa-duotone fa-regular fa-star",
+        label: "Find a Recruiter",
+        href: "/marketplace",
     },
     {
-        name: "Resume Tips",
-        href: "/public/resources/resume-tips",
-        icon: "fa-duotone fa-regular fa-file-alt",
-    },
-    {
-        name: "Industry Trends",
-        href: "/public/resources/industry-trends",
-        icon: "fa-duotone fa-regular fa-display-chart-up",
-    },
-];
-
-const COMPANY_LINKS = [
-    {
-        name: "Browse All Companies",
-        href: "/public/companies",
-        icon: "fa-duotone fa-regular fa-building",
-    },
-    {
-        name: "Featured Employers",
-        href: "/public/companies/featured",
-        icon: "fa-duotone fa-regular fa-crown",
-    },
-    {
-        name: "Company Reviews",
-        href: "/public/companies/reviews",
-        icon: "fa-duotone fa-regular fa-star",
+        label: "Companies",
+        subItems: [
+            {
+                label: "Browse All Companies",
+                href: "/companies",
+                icon: "fa-duotone fa-regular fa-building",
+                desc: "Explore employers",
+            },
+            {
+                label: "Featured Employers",
+                href: "/companies/featured",
+                icon: "fa-duotone fa-regular fa-crown",
+                desc: "Top companies hiring",
+            },
+            {
+                label: "Company Reviews",
+                href: "/companies/reviews",
+                icon: "fa-duotone fa-regular fa-star",
+                desc: "Employee feedback",
+            },
+        ],
     },
 ];
 
@@ -71,7 +100,7 @@ function NavDropdown({
     onToggle,
 }: {
     label: string;
-    items: { name: string; href: string; icon: string }[];
+    items: NavSubItem[];
     columns?: boolean;
     activeDropdown: string | null;
     onToggle: (label: string) => void;
@@ -114,7 +143,7 @@ function NavDropdown({
                                         className={`${link.icon} text-primary text-xs`}
                                     />
                                 </div>
-                                {link.name}
+                                {link.label}
                             </Link>
                         ))}
                     </div>
@@ -126,9 +155,11 @@ function NavDropdown({
 
 // ─── Header Component ───────────────────────────────────────────────────────
 
-export default function Header() {
+export default function Header({ navItems }: { navItems?: NavItem[] }) {
     const { isSignedIn } = useAuth();
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+    const items = navItems ?? DEFAULT_NAV_ITEMS;
 
     const toggleDropdown = (label: string) => {
         setActiveDropdown(activeDropdown === label ? null : label);
@@ -149,41 +180,26 @@ export default function Header() {
             }
             nav={
                 <>
-                    <Link
-                        href="/public/how-it-works"
-                        className="px-3 py-2 font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                    >
-                        How It Works
-                    </Link>
-
-                    <Link
-                        href="/public/jobs"
-                        className="px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                    >
-                        Find Jobs
-                    </Link>
-
-                    <NavDropdown
-                        label="Resources"
-                        items={RESOURCE_LINKS}
-                        columns
-                        activeDropdown={activeDropdown}
-                        onToggle={toggleDropdown}
-                    />
-
-                    <Link
-                        href="/public/marketplace"
-                        className="px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                    >
-                        Find a Recruiter
-                    </Link>
-
-                    <NavDropdown
-                        label="Companies"
-                        items={COMPANY_LINKS}
-                        activeDropdown={activeDropdown}
-                        onToggle={toggleDropdown}
-                    />
+                    {items.map((item) =>
+                        item.subItems?.length ? (
+                            <NavDropdown
+                                key={item.label}
+                                label={item.label}
+                                items={item.subItems}
+                                columns={item.subItems.length > 3}
+                                activeDropdown={activeDropdown}
+                                onToggle={toggleDropdown}
+                            />
+                        ) : (
+                            <Link
+                                key={item.label}
+                                href={item.href || "#"}
+                                className="px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                            >
+                                {item.label}
+                            </Link>
+                        ),
+                    )}
                 </>
             }
             actions={
@@ -226,29 +242,22 @@ export default function Header() {
             mobileMenu={
                 <>
                     <nav className="space-y-1">
-                        <Link
-                            href="/public/how-it-works"
-                            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                        >
-                            <i className="fa-duotone fa-regular fa-circle-info text-xs text-primary" />
-                            How It Works
-                        </Link>
-
-                        <Link
-                            href="/public/jobs"
-                            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                        >
-                            <i className="fa-duotone fa-regular fa-briefcase text-xs text-primary" />
-                            Find Jobs
-                        </Link>
-
-                        <Link
-                            href="/public/marketplace"
-                            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                        >
-                            <i className="fa-duotone fa-regular fa-users text-xs text-primary" />
-                            Find a Recruiter
-                        </Link>
+                        {items
+                            .filter((item) => !item.subItems?.length)
+                            .map((item) => (
+                                <Link
+                                    key={item.label}
+                                    href={item.href || "#"}
+                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
+                                >
+                                    {item.icon && (
+                                        <i
+                                            className={`${item.icon} text-xs text-primary`}
+                                        />
+                                    )}
+                                    {item.label}
+                                </Link>
+                            ))}
 
                         {isSignedIn && (
                             <>

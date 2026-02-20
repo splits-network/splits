@@ -194,6 +194,24 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         ],
     },
     {
+        id: "content",
+        title: "Content",
+        icon: "fa-file-pen",
+        defaultOpen: false,
+        items: [
+            {
+                href: "/portal/admin/content/pages",
+                label: "Pages",
+                icon: "fa-file-lines",
+            },
+            {
+                href: "/portal/admin/content/navigation",
+                label: "Navigation",
+                icon: "fa-compass",
+            },
+        ],
+    },
+    {
         id: "settings",
         title: "Settings",
         icon: "fa-gear",

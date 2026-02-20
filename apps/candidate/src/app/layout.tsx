@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
+import { getHeaderNav, getFooterNav } from "@/lib/content";
 import CookieConsent from "@/components/cookie-consent";
 import {
     ServiceStatusProvider,
@@ -119,11 +120,17 @@ export default async function RootLayout({
             "@type": "SearchAction",
             target: {
                 "@type": "EntryPoint",
-                urlTemplate: `${appUrl}/public/jobs?search={search_term_string}`,
+                urlTemplate: `${appUrl}/jobs?search={search_term_string}`,
             },
             "query-input": "required name=search_term_string",
         },
     };
+
+    // Fetch CMS navigation data (ISR cached, 5 min)
+    const [headerNav, footerNav] = await Promise.all([
+        getHeaderNav(),
+        getFooterNav(),
+    ]);
 
     if (!publishableKey) {
         throw new Error(
@@ -169,11 +176,11 @@ export default async function RootLayout({
                         <UserProfileProvider initialProfile={initialProfile}>
                             <ServiceStatusProvider statusHref="/status" />
                             <ToastProvider>
-                                <Header />
+                                <Header navItems={headerNav?.items} />
                                 <main className="flex-1 pt-[68px]">
                                     {children}
                                 </main>
-                                <Footer />
+                                <Footer footerNav={footerNav} />
                                 {/* <CookieConsent /> */}
                             </ToastProvider>
                         </UserProfileProvider>

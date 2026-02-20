@@ -142,7 +142,7 @@ export function CTASection() {
                             Create Free Account
                         </Link>
                         <Link
-                            href="/public/jobs"
+                            href="/jobs"
                             className="cta-btn btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary opacity-0"
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}

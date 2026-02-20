@@ -43,7 +43,7 @@ export function AdminStatsBanner({
 
 function StatBannerItem({ stat }: { stat: StatItem }) {
     const colorClasses = {
-        primary: "border-coral/30 bg-primary/5",
+        primary: "border-primary/30 bg-primary/5",
         secondary: "border-secondary/30 bg-secondary/5",
         accent: "border-yellow/30 bg-accent/5",
         success: "border-success/30 bg-success/5",

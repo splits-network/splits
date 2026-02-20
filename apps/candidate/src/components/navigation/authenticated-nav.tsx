@@ -1,12 +1,15 @@
-import Link from 'next/link';
-import UserDropdown from './user-dropdown';
+import Link from "next/link";
+import UserDropdown from "./user-dropdown";
 
 export default function AuthenticatedNav() {
     return (
         <nav className="navbar bg-base-100 shadow">
             <div className="container mx-auto">
                 <div className="flex-1">
-                    <Link href="/portal/dashboard" className="btn btn-ghost text-xl">
+                    <Link
+                        href="/portal/dashboard"
+                        className="btn btn-ghost text-xl"
+                    >
                         <i className="fa-duotone fa-regular fa-briefcase"></i>
                         Applicant Network
                     </Link>
@@ -14,7 +17,7 @@ export default function AuthenticatedNav() {
                 <div className="flex-none">
                     <ul className="menu menu-horizontal px-1 gap-2">
                         <li>
-                            <Link href="/public/jobs">Browse Jobs</Link>
+                            <Link href="/jobs">Browse Jobs</Link>
                         </li>
                         <li>
                             <Link href="/portal/dashboard">

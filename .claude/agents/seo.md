@@ -26,6 +26,7 @@ export default function Page() { return <ClientPage />; }
 ```
 
 This anti-pattern:
+
 - Pushes HTML generation to the browser (bad for SEO / AI indexing / initial load)
 - Duplicates fetch logic (server can't reuse it)
 - Creates waterfalls (client fetch after hydration)
@@ -81,10 +82,12 @@ import { JobsClient } from "./jobs-client";
 
 export const metadata: Metadata = {
     title: "Open Positions",
-    description: "Browse open recruiting positions on the split-fee marketplace.",
+    description:
+        "Browse open recruiting positions on the split-fee marketplace.",
     openGraph: {
         title: "Open Positions — Splits Network",
-        description: "Browse open recruiting positions on the split-fee marketplace.",
+        description:
+            "Browse open recruiting positions on the split-fee marketplace.",
     },
 };
 
@@ -113,7 +116,7 @@ export default async function JobsPage({ searchParams }: Props) {
 
 export function JobsClient({ initialJobs, initialParams }: Props) {
     // UI state only — view mode, filters, selected items
-    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+    const [viewMode, setViewMode] = useState<"table" | "grid">("table");
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     // Client fetching ONLY for progressive enhancement
@@ -130,33 +133,36 @@ export function JobsClient({ initialJobs, initialParams }: Props) {
 
 ### The Decision Matrix
 
-| Page Type | Rendering | Reason |
-|-----------|-----------|--------|
-| Marketing pages (corporate) | **100% Server** | Must be fully indexable |
-| Public job listings | **Server + client enhancement** | Listings indexable, filters are client |
-| Blog/articles/press | **100% Server** | Content must be in initial HTML |
-| Pricing pages | **100% Server** | Comparison content must be indexable |
-| Documentation | **100% Server** | Knowledge base is high-value for SEO + AIO |
-| How it works / Features | **100% Server** | Core product pages must rank |
-| Authenticated dashboards | **Client OK** | Not indexed, user-specific |
-| Admin/settings | **Client OK** | Behind auth, no SEO value |
-| Candidate profiles (if public) | **Server** | Recruiters search for candidates |
+| Page Type                      | Rendering                       | Reason                                     |
+| ------------------------------ | ------------------------------- | ------------------------------------------ |
+| Marketing pages (corporate)    | **100% Server**                 | Must be fully indexable                    |
+| Public job listings            | **Server + client enhancement** | Listings indexable, filters are client     |
+| Blog/articles/press            | **100% Server**                 | Content must be in initial HTML            |
+| Pricing pages                  | **100% Server**                 | Comparison content must be indexable       |
+| Documentation                  | **100% Server**                 | Knowledge base is high-value for SEO + AIO |
+| How it works / Features        | **100% Server**                 | Core product pages must rank               |
+| Authenticated dashboards       | **Client OK**                   | Not indexed, user-specific                 |
+| Admin/settings                 | **Client OK**                   | Behind auth, no SEO value                  |
+| Candidate profiles (if public) | **Server**                      | Recruiters search for candidates           |
 
 ### Where Client Fetching Is Legit
 
 Client-side fetching is fine when:
+
 - It's **user-specific** and should not be indexed (dashboards, private pages)
 - It's **purely progressive enhancement** (load more, realtime updates)
 - It depends on **client-only signals** (viewport, device APIs)
 - You're doing **optimistic UI** that's better handled client-first
 
 **Practical rule of thumb:**
+
 - If the page should be **indexable or shareable** → Server renders the list, client enhances interactions
 - If the page is **behind auth or highly personalized** → Client fetching is fine, SEO is irrelevant anyway
 
 ## App Classification
 
 ### Corporate App (`apps/corporate/`) — employment-networks.com
+
 - **ALL pages must be 100% server-rendered**
 - Every page needs `generateMetadata()` or `export const metadata`
 - Rich JSON-LD structured data on every content page
@@ -165,38 +171,45 @@ Client-side fetching is fine when:
 - Zero `"use client"` in page.tsx files
 
 ### Portal App (`apps/portal/`) — splits.network
-- **Public pages** (`/public/*`): Server-rendered, full SEO treatment
+
+- **Public pages** (`/*`): Server-rendered, full SEO treatment
 - **Authenticated pages** (`/portal/*`): Client fetching is fine — not indexed
 - Current state: 28 authenticated pages use `"use client"` (correct), 0 public pages do (correct)
 
 ### Candidate App (`apps/candidate/`) — applicant.network
-- **Public pages** (`/public/*`): Server-rendered — job search, marketplace, resources
+
+- **Public pages** (`/*`): Server-rendered — job search, marketplace, resources
 - **Authenticated pages** (`/portal/*`): Client fetching is fine
 
 ## Current SEO Infrastructure
 
 ### Root Metadata (layouts)
+
 - `apps/portal/src/app/layout.tsx` — metadataBase: https://splits.network, OpenGraph, Twitter Cards, JSON-LD (WebApplication)
 - `apps/candidate/src/app/layout.tsx` — metadataBase: https://applicant.network
 - `apps/corporate/src/app/layout.tsx` — metadataBase: https://employment-networks.com, 3 JSON-LD schemas (Organization, SoftwareApplication, WebSite)
 
 ### Sitemaps
+
 - `apps/portal/src/app/sitemap.ts` — comprehensive with priority/frequency logic
 - `apps/candidate/src/app/sitemap.ts`
 - `apps/corporate/src/app/sitemap.ts`
 
 ### robots.txt
+
 - `apps/portal/src/app/robots.ts` — blocks /api, /portal, /sign-in, /sign-up
 - `apps/candidate/src/app/robots.ts` — blocks /api, /portal, /sign-in, /sign-up
 - `apps/corporate/src/app/robots.ts` — blocks /api only
 - **GAP: No AI crawler rules** (GPTBot, ClaudeBot, PerplexityBot not mentioned)
 
 ### JSON-LD Utility
+
 - `packages/shared-ui/src/seo/json-ld.tsx` — XSS-safe serializer component
 - ALWAYS use the `<JsonLd data={...} />` component for structured data
 - Never use raw `dangerouslySetInnerHTML` for new JSON-LD
 
 ### Current Coverage
+
 - 66+ pages export metadata or generateMetadata
 - All three apps have OpenGraph and Twitter Card meta tags on root layout
 - Corporate site has the most structured data (Organization, SoftwareApplication, WebSite schemas)
@@ -204,11 +217,12 @@ Client-side fetching is fine when:
 ## Metadata Pattern (Next.js 16)
 
 ### Static Pages
+
 ```typescript
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Page Title",  // uses template "%s | Brand Name"
+    title: "Page Title", // uses template "%s | Brand Name"
     description: "150-160 char description with primary keywords.",
     openGraph: {
         title: "Page Title — Brand Name",
@@ -219,6 +233,7 @@ export const metadata: Metadata = {
 ```
 
 ### Dynamic Pages
+
 ```typescript
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const data = await fetchData(params.id);
@@ -250,6 +265,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 ## Sitemap Configuration
 
 ### Priority Guidelines
+
 - Homepage: `1.0`
 - Core product pages (features, pricing, how-it-works): `0.9`
 - Documentation/help pages: `0.7`
@@ -257,6 +273,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 - Legal pages (privacy, terms, cookies): `0.3`
 
 ### Change Frequency
+
 - Homepage, pricing: `weekly`
 - Features, about: `monthly`
 - Legal pages: `yearly`
@@ -265,6 +282,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 ## Structured Data (schema.org)
 
 ### Domain-Specific Types
+
 - **Jobs**: `schema.org/JobPosting` — title, description, datePosted, validThrough, hiringOrganization, jobLocation, baseSalary
 - **Companies**: `schema.org/Organization` — name, url, logo, description, contactPoint
 - **People/Recruiters**: `schema.org/Person` — name, jobTitle, worksFor
@@ -275,32 +293,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 - **Pricing**: `schema.org/Product` with `schema.org/Offer`
 
 ### Implementation
+
 ```tsx
 import { JsonLd } from "@splits-network/shared-ui";
 
-<JsonLd data={{
-    "@context": "https://schema.org",
-    "@type": "JobPosting",
-    title: job.title,
-    description: job.description,
-    datePosted: job.created_at,
-    hiringOrganization: {
-        "@type": "Organization",
-        name: job.company_name,
-    },
-}} />
+<JsonLd
+    data={{
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        title: job.title,
+        description: job.description,
+        datePosted: job.created_at,
+        hiringOrganization: {
+            "@type": "Organization",
+            name: job.company_name,
+        },
+    }}
+/>;
 ```
 
 ## URL Structure Rules
-- Portal public: `/public/{page-name}` (kebab-case)
+
+- Portal public: `/{page-name}` (kebab-case)
 - Portal authenticated: `/portal/{section}/{entity?}` (not indexed)
-- Candidate public: `/public/{page-name}`
+- Candidate public: `/{page-name}`
 - Corporate: `/{page-name}` (top-level)
 - No trailing slashes
 - No uppercase in URLs
 - Use hyphens, not underscores
 
 ## Technical SEO Checks
+
 - Server-rendered content (RSC) for all public pages
 - No important content behind client-only rendering
 - Proper `<html lang="en">` attribute (already set in all layouts)
@@ -313,11 +336,13 @@ import { JsonLd } from "@splits-network/shared-ui";
 When auditing, check in priority order:
 
 ### Critical (Rendering Architecture)
+
 1. **Client-page anti-pattern**: Public `page.tsx` that is just a wrapper for a `"use client"` component doing all the work
 2. **Client-fetched public content**: Data fetched in `useEffect` / `useSWR` / `useQuery` that should be server-fetched
 3. **Missing initial HTML**: Key content not in server response (inspect with `curl` or view-source)
 
 ### High (Metadata & Indexing)
+
 4. Pages missing metadata export (grep for `page.tsx` files without `metadata` or `generateMetadata`)
 5. Duplicate title tags across pages
 6. Missing OpenGraph images
@@ -325,12 +350,14 @@ When auditing, check in priority order:
 8. Missing canonical URLs
 
 ### Medium (On-Page)
+
 9. Broken internal links
 10. Missing alt text on images
 11. Heading hierarchy violations (multiple h1s, skipped levels)
 12. Thin content (pages with very little indexable text)
 
 ### Low (Enhancement)
+
 13. Missing structured data (JSON-LD) on entity pages
 14. Missing Twitter card metadata
 15. Missing breadcrumb structured data
@@ -338,49 +365,57 @@ When auditing, check in priority order:
 ## Audit Detection Patterns
 
 ### Detecting Client-Page Anti-Pattern
+
 ```bash
 # Find public page.tsx files that import a "use client" component and render only that
-grep -rn "import.*Client" apps/*/src/app/public/**/page.tsx
+grep -rn "import.*Client" apps/*/src/app/**/page.tsx
 grep -rn "import.*Client" apps/corporate/src/app/**/page.tsx
 
 # Check if any public page.tsx has "use client" directly
-grep -rn "use client" apps/*/src/app/public/**/page.tsx
+grep -rn "use client" apps/*/src/app/**/page.tsx
 grep -rn "use client" apps/corporate/src/app/**/page.tsx
 ```
 
 ### Detecting Missing Metadata
+
 ```bash
 # Find page.tsx files without metadata export
 # Compare against: grep -rn "export.*metadata\|generateMetadata" apps/*/src/app/**/page.tsx
 ```
 
 ### Detecting Client-Only Data Fetching on Public Pages
+
 ```bash
 # In public page trees, look for useEffect/useSWR/useQuery in components that render main content
-grep -rn "useEffect\|useSWR\|useQuery\|useFetch" apps/*/src/app/public/**/*.tsx
+grep -rn "useEffect\|useSWR\|useQuery\|useFetch" apps/*/src/app/**/*.tsx
 ```
 
 ## Output Format
 
 ### Audit Report
+
 ```markdown
 ## SEO Audit: {app-name}
 
 ### Score: X/100
 
 ### Architecture Issues (Critical)
+
 1. **[page-path]** — Client-page anti-pattern: imports ClientPage, no server content
    Fix: Move data fetching to page.tsx, pass as props to client component
 
 ### Metadata Issues (High)
+
 2. **[page-path]** — No metadata export, page not indexable
 3. **[page-path]** — Duplicate title with [other-page]
 
 ### On-Page Issues (Medium)
+
 4. **[page-path]** — Missing OpenGraph tags
 5. **[page-path]** — Multiple h1 elements
 
 ### Passing
+
 - ✓ Sitemap exists and covers N routes
 - ✓ Robots.txt configured
 - ✓ All images have alt text

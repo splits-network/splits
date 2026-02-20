@@ -139,7 +139,7 @@ export function HeroSection() {
                         className="flex flex-col sm:flex-row gap-4 justify-center pt-6"
                     >
                         <Link
-                            href="/public/jobs"
+                            href="/jobs"
                             className="btn btn-primary btn-lg gap-2 shadow hover:shadow-lg transition-all"
                         >
                             <i className="fa-duotone fa-regular fa-magnifying-glass"></i>

@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
+import type { NavItem } from "@splits-network/shared-types";
 import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 
@@ -15,134 +16,119 @@ if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-/* ─── Navigation Data ────────────────────────────────────────────────────── */
+/* ─── Default Navigation Data (fallback when CMS is unavailable) ─────────── */
 
-interface NavSubItem {
-    icon: string;
-    label: string;
-    desc: string;
-    href?: string;
-}
-
-interface NavItemDef {
-    label: string;
-    icon: string;
-    hasDropdown: boolean;
-    href?: string;
-    subItems?: NavSubItem[];
-}
-
-const NAV_ITEMS: NavItemDef[] = [
+const DEFAULT_NAV_ITEMS: NavItem[] = [
     {
         label: "Platform",
         icon: "fa-duotone fa-regular fa-grid-2",
-        hasDropdown: true,
         subItems: [
             {
                 icon: "fa-duotone fa-regular fa-briefcase",
                 label: "ATS",
                 desc: "Track every candidate",
-                href: "/public/platform/ats",
+                href: "/platform/ats",
             },
             {
                 icon: "fa-duotone fa-regular fa-handshake",
                 label: "Split Fees",
                 desc: "Fair, transparent splits",
-                href: "/public/platform/split-fees",
+                href: "/platform/split-fees",
             },
             {
                 icon: "fa-duotone fa-regular fa-chart-mixed",
                 label: "Analytics",
                 desc: "Real-time insights",
-                href: "/public/platform/analytics",
+                href: "/platform/analytics",
             },
             {
                 icon: "fa-duotone fa-regular fa-messages",
                 label: "Messaging",
                 desc: "Built-in communication",
-                href: "/public/platform/messaging",
+                href: "/platform/messaging",
             },
             {
                 icon: "fa-duotone fa-regular fa-robot",
                 label: "AI Matching",
                 desc: "Smart candidate pairing",
-                href: "/public/platform/ai-matching",
+                href: "/platform/ai-matching",
             },
             {
                 icon: "fa-duotone fa-regular fa-file-invoice-dollar",
                 label: "Billing",
                 desc: "Automated payouts",
-                href: "/public/platform/billing",
+                href: "/platform/billing",
             },
         ],
     },
     {
         label: "Network",
         icon: "fa-duotone fa-regular fa-circle-nodes",
-        hasDropdown: true,
         subItems: [
             {
                 icon: "fa-duotone fa-regular fa-user-tie",
                 label: "For Recruiters",
                 desc: "Grow your business",
-                href: "/public/for-recruiters",
+                href: "/for-recruiters",
             },
             {
                 icon: "fa-duotone fa-regular fa-building",
                 label: "For Companies",
                 desc: "Find top talent",
-                href: "/public/for-companies",
+                href: "/for-companies",
             },
             {
                 icon: "fa-duotone fa-regular fa-address-book",
                 label: "Directory",
                 desc: "Browse the network",
+                href: "#",
             },
         ],
     },
     {
         label: "Pricing",
         icon: "fa-duotone fa-regular fa-tag",
-        hasDropdown: false,
-        href: "/public/pricing",
+        href: "/pricing",
     },
     {
         label: "Resources",
         icon: "fa-duotone fa-regular fa-books",
-        hasDropdown: true,
         subItems: [
             {
                 icon: "fa-duotone fa-regular fa-gears",
                 label: "How It Works",
                 desc: "See the platform in action",
-                href: "/public/how-it-works",
+                href: "/how-it-works",
             },
             {
                 icon: "fa-duotone fa-regular fa-life-ring",
                 label: "Help Center",
                 desc: "Get support",
+                href: "#",
             },
             {
                 icon: "fa-duotone fa-regular fa-newspaper",
                 label: "Blog",
                 desc: "Latest industry insights",
+                href: "#",
             },
         ],
     },
     {
         label: "Company",
         icon: "fa-duotone fa-regular fa-building-columns",
-        hasDropdown: true,
         subItems: [
             {
                 icon: "fa-duotone fa-regular fa-users",
                 label: "About",
                 desc: "Our story & mission",
+                href: "#",
             },
             {
                 icon: "fa-duotone fa-regular fa-envelope",
                 label: "Contact",
                 desc: "Get in touch",
+                href: "#",
             },
         ],
     },
@@ -150,7 +136,7 @@ const NAV_ITEMS: NavItemDef[] = [
 
 /* ─── Desktop Nav Content ────────────────────────────────────────────────── */
 
-function DesktopNavContent() {
+function DesktopNavContent({ items }: { items: NavItem[] }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const navRef = useRef<HTMLDivElement>(null);
 
@@ -171,89 +157,92 @@ function DesktopNavContent() {
 
     return (
         <div ref={navRef} className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-                <div key={item.label} className="relative">
-                    {item.href && !item.hasDropdown ? (
-                        <Link
-                            href={item.href}
-                            className="nav-link-item opacity-0 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                        >
-                            {item.label}
-                        </Link>
-                    ) : (
-                        <button
-                            onClick={() =>
-                                item.hasDropdown && toggleDropdown(item.label)
-                            }
-                            className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                        >
-                            {item.label}
-                            {item.hasDropdown && (
-                                <i
-                                    className={`fa-solid fa-chevron-down text-sm transition-transform ${
-                                        activeDropdown === item.label
-                                            ? "rotate-180"
-                                            : ""
-                                    }`}
-                                />
-                            )}
-                        </button>
-                    )}
-
-                    {/* Dropdown */}
-                    {item.hasDropdown &&
-                        item.subItems &&
-                        activeDropdown === item.label && (
-                            <div
-                                className="absolute top-full left-0 mt-1 bg-base-100 border border-base-300 shadow-lg py-2 z-50"
-                                style={{
-                                    width:
-                                        item.subItems.length > 3
-                                            ? "520px"
-                                            : "300px",
-                                }}
+            {items.map((item) => {
+                const hasDropdown = !!item.subItems?.length;
+                return (
+                    <div key={item.label} className="relative">
+                        {item.href && !hasDropdown ? (
+                            <Link
+                                href={item.href}
+                                className="nav-link-item opacity-0 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
                             >
-                                <div className="px-4 py-2 border-b border-base-300 mb-1">
-                                    <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
-                                        {item.label}
-                                    </span>
-                                </div>
-                                <div
-                                    className={
-                                        item.subItems.length > 3
-                                            ? "grid grid-cols-2 gap-0.5"
-                                            : ""
-                                    }
-                                >
-                                    {item.subItems.map((sub, i) => (
-                                        <Link
-                                            key={i}
-                                            href={sub.href || "#"}
-                                            onClick={() =>
-                                                setActiveDropdown(null)
-                                            }
-                                            className="flex items-center gap-3 px-4 py-2.5 text-md text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
-                                        >
-                                            <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
-                                                <i
-                                                    className={`${sub.icon} text-primary text-sm`}
-                                                />
-                                            </div>
-                                            <div>
-                                                <div className="text-md font-semibold">
-                                                    {sub.label}
-                                                </div>
-                                                <div className="text-sm text-base-content/50">
-                                                    {sub.desc}
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
+                                {item.label}
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={() =>
+                                    hasDropdown && toggleDropdown(item.label)
+                                }
+                                className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                            >
+                                {item.label}
+                                {hasDropdown && (
+                                    <i
+                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
+                                            activeDropdown === item.label
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    />
+                                )}
+                            </button>
                         )}
-                </div>
-            ))}
+
+                        {/* Dropdown */}
+                        {hasDropdown &&
+                            item.subItems &&
+                            activeDropdown === item.label && (
+                                <div
+                                    className="absolute top-full left-0 mt-1 bg-base-100 border border-base-300 shadow-lg py-2 z-50"
+                                    style={{
+                                        width:
+                                            item.subItems.length > 3
+                                                ? "520px"
+                                                : "300px",
+                                    }}
+                                >
+                                    <div className="px-4 py-2 border-b border-base-300 mb-1">
+                                        <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                    <div
+                                        className={
+                                            item.subItems.length > 3
+                                                ? "grid grid-cols-2 gap-0.5"
+                                                : ""
+                                        }
+                                    >
+                                        {item.subItems.map((sub, i) => (
+                                            <Link
+                                                key={i}
+                                                href={sub.href || "#"}
+                                                onClick={() =>
+                                                    setActiveDropdown(null)
+                                                }
+                                                className="flex items-center gap-3 px-4 py-2.5 text-md text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+                                            >
+                                                <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
+                                                    <i
+                                                        className={`${sub.icon} text-primary text-sm`}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="text-md font-semibold">
+                                                        {sub.label}
+                                                    </div>
+                                                    <div className="text-sm text-base-content/50">
+                                                        {sub.desc}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -326,7 +315,13 @@ function SearchPanel() {
 
 /* ─── Mobile Menu Content ────────────────────────────────────────────────── */
 
-function MobileMenuContent({ isSignedIn }: { isSignedIn: boolean }) {
+function MobileMenuContent({
+    items,
+    isSignedIn,
+}: {
+    items: NavItem[];
+    isSignedIn: boolean;
+}) {
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
     return (
@@ -343,9 +338,9 @@ function MobileMenuContent({ isSignedIn }: { isSignedIn: boolean }) {
 
             {/* Accordion navigation */}
             <nav className="space-y-1 mb-4">
-                {NAV_ITEMS.map((item) => (
+                {items.map((item) => (
                     <div key={item.label}>
-                        {item.subItems ? (
+                        {item.subItems?.length ? (
                             <div>
                                 <button
                                     onClick={() =>
@@ -447,10 +442,12 @@ function MobileMenuContent({ isSignedIn }: { isSignedIn: boolean }) {
 
 /* ─── Main Header Component ──────────────────────────────────────────────── */
 
-export function Header() {
+export function Header({ navItems }: { navItems?: NavItem[] }) {
     const { isSignedIn, isLoaded } = useAuth();
     const containerRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
+
+    const items = navItems ?? DEFAULT_NAV_ITEMS;
 
     useEffect(() => {
         setMounted(true);
@@ -579,7 +576,7 @@ export function Header() {
                     </Link>
                 </span>
             }
-            nav={<DesktopNavContent />}
+            nav={<DesktopNavContent items={items} />}
             actions={
                 <>
                     {/* Search */}
@@ -630,7 +627,9 @@ export function Header() {
                     )}
                 </>
             }
-            mobileMenu={<MobileMenuContent isSignedIn={!!showSignedIn} />}
+            mobileMenu={
+                <MobileMenuContent items={items} isSignedIn={!!showSignedIn} />
+            }
         />
     );
 }

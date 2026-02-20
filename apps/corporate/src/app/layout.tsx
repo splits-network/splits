@@ -6,6 +6,7 @@ import { ServiceStatusProvider, ThemeScript, ThemeProvider } from "@splits-netwo
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { getHeaderNav } from "@/lib/content";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://employment-networks.com"),
@@ -47,11 +48,14 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    // Fetch CMS navigation data (ISR cached, 5 min)
+    const headerNav = await getHeaderNav();
+
     const clarityId = process.env.NEXT_PUBLIC_CORPORATE_CLARITY_ID;
     const gaId = process.env.NEXT_PUBLIC_CORPORATE_GA_ID;
     const organizationJsonLd = {
@@ -111,7 +115,7 @@ export default function RootLayout({
             <body className="antialiased flex flex-col min-h-screen">
                 <ThemeProvider>
                 <ServiceStatusProvider statusHref="/status" />
-                <Header />
+                <Header navItems={headerNav?.items} />
                 <main className="flex-grow">{children}</main>
                 <Footer />
                 </ThemeProvider>

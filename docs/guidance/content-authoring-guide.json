@@ -1,0 +1,634 @@
+{
+    "_instructions": "Copy this entire document into ChatGPT, Claude, or any AI tool. Then describe the article you want to create. The AI will produce valid JSON that can be uploaded directly to the Splits Network CMS via POST /api/v2/pages/import.",
+
+    "output_format": {
+        "slug": "string — URL path (lowercase, hyphens, slashes allowed). Example: 'about', 'resources/career-guides'",
+        "app": "'portal' | 'candidate' | 'corporate'",
+        "title": "string — Page title (used in <title> tag and OG)",
+        "description": "string — Meta description (150-160 chars ideal)",
+        "og_image": "string (optional) — URL to Open Graph image",
+        "category": "'marketing' | 'resource' | 'legal' | 'blog' | 'press' | 'article'",
+        "author": "string (optional) — Author name",
+        "read_time": "string (optional) — e.g. '5 min read'",
+        "blocks": "ContentBlock[] — ordered array of blocks (see schema below)"
+    },
+
+    "block_types": {
+        "hero": {
+            "description": "Full-width hero section. Split-screen layout with text on left, image on right. Should be the FIRST block on every page.",
+            "fields": {
+                "type": "'hero' (required)",
+                "kicker": "string (optional) — Small label above headline, e.g. 'ABOUT US', 'INDUSTRY INSIGHTS'",
+                "kickerIcon": "string (optional) — FontAwesome class, e.g. 'fa-duotone fa-regular fa-building'",
+                "headlineWords": "array of { text: string, accent?: boolean } — Each word in the headline. Set accent: true for 1-2 words to highlight in theme accent color.",
+                "subtitle": "string (optional) — Paragraph below headline",
+                "image": "string (optional) — URL to hero image",
+                "imageAlt": "string (optional) — Alt text for hero image",
+                "meta": "array of { icon?: string, label: string } (optional) — Info pills below subtitle (date, read time, category)",
+                "buttons": "array of ContentButton (optional) — CTA buttons"
+            },
+            "example": {
+                "type": "hero",
+                "kicker": "CAREER RESOURCES",
+                "kickerIcon": "fa-duotone fa-regular fa-graduation-cap",
+                "headlineWords": [
+                    { "text": "Your" },
+                    { "text": "Complete", "accent": true },
+                    { "text": "Guide" },
+                    { "text": "to" },
+                    { "text": "Career", "accent": true },
+                    { "text": "Growth" }
+                ],
+                "subtitle": "Expert strategies and actionable advice to help you navigate your next career move with confidence.",
+                "image": "/images/content/career-hero.jpg",
+                "imageAlt": "Professional reviewing career opportunities",
+                "meta": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-calendar",
+                        "label": "February 2026"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-clock",
+                        "label": "8 min read"
+                    }
+                ],
+                "buttons": [
+                    {
+                        "label": "Get Started",
+                        "href": "#tips",
+                        "variant": "primary",
+                        "icon": "fa-duotone fa-regular fa-arrow-right"
+                    },
+                    {
+                        "label": "View Resources",
+                        "href": "/resources",
+                        "variant": "outline"
+                    }
+                ]
+            }
+        },
+
+        "article-body": {
+            "description": "Text content section with optional numbered section indicator. Use for main article prose.",
+            "fields": {
+                "type": "'article-body' (required)",
+                "sectionNumber": "string (optional) — e.g. '01', '02'. Shows as a numbered indicator.",
+                "kicker": "string (optional) — Section label above heading",
+                "kickerColor": "string (optional) — DaisyUI semantic color: 'primary', 'secondary', 'accent', 'warning'",
+                "heading": "string (required) — Section heading",
+                "paragraphs": "string[] (required) — Array of paragraph strings. Supports basic HTML (<strong>, <em>, <a>, <br>).",
+                "bg": "'base-100' | 'base-200' (optional) — Background color. Alternate between blocks for visual rhythm."
+            },
+            "example": {
+                "type": "article-body",
+                "sectionNumber": "01",
+                "kicker": "THE FOUNDATION",
+                "kickerColor": "primary",
+                "heading": "Know Your Market Value",
+                "paragraphs": [
+                    "Understanding your market value is the cornerstone of any successful career strategy. In today's dynamic job market, salary benchmarks can shift rapidly based on demand, geography, and specialization.",
+                    "Start by researching compensation data on platforms like Glassdoor, Levels.fyi, and industry-specific salary surveys. <strong>Don't just look at base salary</strong> — factor in equity, bonuses, benefits, and growth trajectory."
+                ],
+                "bg": "base-100"
+            }
+        },
+
+        "split-editorial": {
+            "description": "60/40 split layout with text on one side and image on the other. Use for visual storytelling sections.",
+            "fields": {
+                "type": "'split-editorial' (required)",
+                "sectionNumber": "string (optional)",
+                "kicker": "string (optional)",
+                "kickerColor": "string (optional)",
+                "heading": "string (required)",
+                "paragraphs": "string[] (optional)",
+                "items": "array of { icon?: string, title: string, body: string } (optional) — Bullet points with icons",
+                "image": "string (required) — Image URL",
+                "imageAlt": "string (required)",
+                "imageOverlayColor": "string (optional) — DaisyUI color for diagonal overlay",
+                "layout": "'text-left' | 'text-right' (required) — Which side has the text",
+                "bg": "'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "split-editorial",
+                "sectionNumber": "02",
+                "kicker": "OUR APPROACH",
+                "heading": "Built for Transparency",
+                "paragraphs": [
+                    "Every split fee, every commission, every placement — tracked and visible to all parties."
+                ],
+                "items": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-shield-check",
+                        "title": "Verified Partners",
+                        "body": "Every recruiter on our network is vetted and verified before joining."
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-chart-line",
+                        "title": "Real-Time Tracking",
+                        "body": "Track your candidates, placements, and earnings in real time."
+                    }
+                ],
+                "image": "/images/content/transparency.jpg",
+                "imageAlt": "Dashboard showing transparent fee tracking",
+                "layout": "text-left",
+                "bg": "base-200"
+            }
+        },
+
+        "full-bleed-image": {
+            "description": "Full-width image break. Use between text sections to add visual breathing room.",
+            "fields": {
+                "type": "'full-bleed-image' (required)",
+                "image": "string (required)",
+                "imageAlt": "string (required)",
+                "caption": "string (optional)",
+                "overlayText": "string (optional) — Large overlay text on the image",
+                "overlayAccentText": "string (optional) — Accent-colored portion of overlay text",
+                "height": "string (optional) — CSS height, default 'h-[60vh]'"
+            },
+            "example": {
+                "type": "full-bleed-image",
+                "image": "/images/content/office-team.jpg",
+                "imageAlt": "Team collaborating in modern office space",
+                "overlayText": "Connecting",
+                "overlayAccentText": "talent with opportunity"
+            }
+        },
+
+        "pull-quote": {
+            "description": "Large quotation block. Use to highlight key insights or testimonials.",
+            "fields": {
+                "type": "'pull-quote' (required)",
+                "quote": "string (required)",
+                "citation": "string (optional) — Attribution, e.g. 'Sarah Chen, VP of Talent'",
+                "bg": "'neutral' | 'primary' | 'secondary' | 'base-100' | 'base-200' (optional)",
+                "style": "'left-border' | 'centered' (optional, default 'left-border')"
+            },
+            "example": {
+                "type": "pull-quote",
+                "quote": "The split-fee model transformed how we source talent. We went from struggling to fill roles to having qualified candidates within days.",
+                "citation": "Marcus Rodriguez, Head of Recruiting at TechCorp",
+                "bg": "neutral",
+                "style": "left-border"
+            }
+        },
+
+        "stats-bar": {
+            "description": "Row of key metrics/statistics. Use to add credibility with data points.",
+            "fields": {
+                "type": "'stats-bar' (required)",
+                "stats": "array of { value: string, label: string, borderColor?: string } (required) — 3-5 stats recommended",
+                "bg": "'neutral' | 'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "stats-bar",
+                "stats": [
+                    { "value": "10,000+", "label": "Placements Made" },
+                    { "value": "3,200", "label": "Active Recruiters" },
+                    {
+                        "value": "98%",
+                        "label": "Client Satisfaction",
+                        "borderColor": "border-accent"
+                    },
+                    { "value": "< 21 days", "label": "Avg. Time to Fill" }
+                ],
+                "bg": "neutral"
+            }
+        },
+
+        "inline-image": {
+            "description": "Image with caption inside the content flow. Smaller than full-bleed, used within article sections.",
+            "fields": {
+                "type": "'inline-image' (required)",
+                "image": "string (required)",
+                "imageAlt": "string (required)",
+                "caption": "string (optional)",
+                "height": "string (optional) — CSS class, default 'h-[50vh]'"
+            },
+            "example": {
+                "type": "inline-image",
+                "image": "/images/content/interview-prep.jpg",
+                "imageAlt": "Candidate preparing for a video interview",
+                "caption": "Virtual interviews have become the standard — preparation is key."
+            }
+        },
+
+        "feature-grid": {
+            "description": "Grid of feature cards with icons. Use for feature lists, service offerings, or benefit breakdowns.",
+            "fields": {
+                "type": "'feature-grid' (required)",
+                "heading": "string (optional)",
+                "kicker": "string (optional)",
+                "subtitle": "string (optional)",
+                "columns": "2 | 3 | 4 (optional, default 3)",
+                "items": "array of { icon?: string, iconColor?: string, badge?: string, title: string, description: string, stats?: string }",
+                "bg": "'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "feature-grid",
+                "kicker": "PLATFORM FEATURES",
+                "heading": "Everything You Need",
+                "subtitle": "A complete toolkit for modern recruiting teams.",
+                "columns": 3,
+                "items": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-magnifying-glass",
+                        "title": "Smart Matching",
+                        "description": "AI-powered candidate matching finds the best fits for your roles.",
+                        "stats": "95% accuracy"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-messages",
+                        "title": "Built-in Messaging",
+                        "description": "Communicate directly with candidates and recruiters.",
+                        "badge": "New"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-chart-mixed",
+                        "title": "Analytics Dashboard",
+                        "description": "Track every metric that matters to your hiring success."
+                    }
+                ],
+                "bg": "base-200"
+            }
+        },
+
+        "timeline": {
+            "description": "Vertical timeline of steps. Use for how-it-works flows, processes, or historical milestones.",
+            "fields": {
+                "type": "'timeline' (required)",
+                "heading": "string (optional)",
+                "kicker": "string (optional)",
+                "subtitle": "string (optional)",
+                "steps": "array of { number?: number, title: string, description: string, icon?: string }",
+                "bg": "'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "timeline",
+                "kicker": "HOW IT WORKS",
+                "heading": "Get Started in 4 Steps",
+                "steps": [
+                    {
+                        "number": 1,
+                        "title": "Create Your Profile",
+                        "description": "Sign up and complete your recruiter or company profile.",
+                        "icon": "fa-duotone fa-regular fa-user-plus"
+                    },
+                    {
+                        "number": 2,
+                        "title": "Post or Browse Roles",
+                        "description": "Companies post roles; recruiters browse the marketplace.",
+                        "icon": "fa-duotone fa-regular fa-briefcase"
+                    },
+                    {
+                        "number": 3,
+                        "title": "Submit Candidates",
+                        "description": "Recruiters submit qualified candidates to open roles.",
+                        "icon": "fa-duotone fa-regular fa-paper-plane"
+                    },
+                    {
+                        "number": 4,
+                        "title": "Split the Fee",
+                        "description": "When a placement is made, the fee is split transparently.",
+                        "icon": "fa-duotone fa-regular fa-handshake"
+                    }
+                ]
+            }
+        },
+
+        "faq": {
+            "description": "Accordion FAQ section. Use for common questions at the bottom of informational pages.",
+            "fields": {
+                "type": "'faq' (required)",
+                "heading": "string (optional)",
+                "kicker": "string (optional)",
+                "subtitle": "string (optional)",
+                "items": "array of { question: string, answer: string }",
+                "bg": "'neutral' | 'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "faq",
+                "kicker": "FAQ",
+                "heading": "Common Questions",
+                "items": [
+                    {
+                        "question": "How does the split-fee model work?",
+                        "answer": "When a recruiter places a candidate in a company's role, the placement fee is split between the company and recruiter according to pre-agreed terms. All fees are tracked transparently on the platform."
+                    },
+                    {
+                        "question": "Is there a cost to join?",
+                        "answer": "Recruiters can join for free with our Starter plan. Companies pay a subscription that includes access to the recruiter marketplace, ATS, and analytics."
+                    },
+                    {
+                        "question": "How long does onboarding take?",
+                        "answer": "Most teams are fully onboarded within 24 hours. Our guided setup walks you through profile creation, role posting, and team invitations."
+                    }
+                ],
+                "bg": "base-200"
+            }
+        },
+
+        "benefits-cards": {
+            "description": "Grid of benefit/value-prop cards with optional metrics. Use for selling points, advantages, or team values.",
+            "fields": {
+                "type": "'benefits-cards' (required)",
+                "heading": "string (optional)",
+                "kicker": "string (optional)",
+                "subtitle": "string (optional)",
+                "cards": "array of { icon?: string, title: string, description: string, metric?: string, metricLabel?: string }",
+                "bg": "'base-100' | 'base-200' (optional)"
+            },
+            "example": {
+                "type": "benefits-cards",
+                "kicker": "WHY SPLITS NETWORK",
+                "heading": "The Recruiter Advantage",
+                "cards": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-dollar-sign",
+                        "title": "Higher Earnings",
+                        "description": "Split fees mean more revenue per placement than traditional models.",
+                        "metric": "40%",
+                        "metricLabel": "higher avg. payout"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-globe",
+                        "title": "Wider Reach",
+                        "description": "Access roles from companies you'd never reach on your own.",
+                        "metric": "500+",
+                        "metricLabel": "active companies"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-bolt",
+                        "title": "Faster Placements",
+                        "description": "AI matching and streamlined workflows cut time-to-fill.",
+                        "metric": "3x",
+                        "metricLabel": "faster than average"
+                    }
+                ]
+            }
+        },
+
+        "cta": {
+            "description": "Call-to-action section. Should be the LAST block on every page.",
+            "fields": {
+                "type": "'cta' (required)",
+                "heading": "string (required)",
+                "subtitle": "string (optional)",
+                "buttons": "array of ContentButton (required) — 1-2 buttons",
+                "contactEmail": "string (optional) — Displayed below buttons",
+                "bg": "'primary' | 'secondary' | 'neutral' | 'base-100' (optional)"
+            },
+            "example": {
+                "type": "cta",
+                "heading": "Ready to Transform Your Recruiting?",
+                "subtitle": "Join thousands of recruiters and companies already on the network.",
+                "buttons": [
+                    {
+                        "label": "Start Free Trial",
+                        "href": "/sign-up",
+                        "variant": "primary",
+                        "icon": "fa-duotone fa-regular fa-rocket"
+                    },
+                    {
+                        "label": "Talk to Sales",
+                        "href": "/contact",
+                        "variant": "outline"
+                    }
+                ],
+                "contactEmail": "hello@splits.network",
+                "bg": "primary"
+            }
+        }
+    },
+
+    "content_button_schema": {
+        "label": "string (required) — Button text",
+        "href": "string (required) — URL or anchor",
+        "icon": "string (optional) — FontAwesome class",
+        "variant": "'primary' | 'secondary' | 'accent' | 'warning' | 'outline' | 'ghost' (required)"
+    },
+
+    "composition_rules": [
+        "1. ALWAYS start with a 'hero' block.",
+        "2. ALWAYS end with a 'cta' block.",
+        "3. Alternate bg colors between adjacent blocks for visual rhythm: base-100, base-200, base-100, base-200...",
+        "4. Use 'pull-quote' blocks to break up long text sections (every 2-3 article-body blocks).",
+        "5. Use 'stats-bar' with bg 'neutral' for high-impact data sections.",
+        "6. Use 'split-editorial' to alternate image sides: text-left, then text-right, then text-left.",
+        "7. Use 'full-bleed-image' or 'inline-image' as visual breathers between dense text.",
+        "8. Use numbered sectionNumbers ('01', '02', '03') for article-body and split-editorial blocks to create a structured reading flow.",
+        "9. Keep paragraphs concise — 2-4 sentences each. Long blocks of text hurt readability.",
+        "10. For icons, use FontAwesome duotone format: 'fa-duotone fa-regular fa-{icon-name}'."
+    ],
+
+    "full_page_example": {
+        "slug": "for-recruiters",
+        "app": "portal",
+        "title": "For Recruiters | Splits Network",
+        "description": "Join the split-fee recruiting marketplace. Access exclusive roles, earn higher commissions, and grow your recruiting business.",
+        "category": "marketing",
+        "author": "Splits Network",
+        "read_time": "4 min read",
+        "blocks": [
+            {
+                "type": "hero",
+                "kicker": "FOR RECRUITERS",
+                "kickerIcon": "fa-duotone fa-regular fa-user-tie",
+                "headlineWords": [
+                    { "text": "Grow" },
+                    { "text": "Your" },
+                    { "text": "Recruiting", "accent": true },
+                    { "text": "Business" }
+                ],
+                "subtitle": "Access premium roles from top companies, split fees transparently, and scale your placements with powerful tools.",
+                "image": "/images/content/recruiter-hero.jpg",
+                "imageAlt": "Recruiter reviewing candidate profiles on laptop",
+                "buttons": [
+                    {
+                        "label": "Join Free",
+                        "href": "/sign-up",
+                        "variant": "primary",
+                        "icon": "fa-duotone fa-regular fa-rocket"
+                    },
+                    {
+                        "label": "See How It Works",
+                        "href": "#how-it-works",
+                        "variant": "outline"
+                    }
+                ]
+            },
+            {
+                "type": "stats-bar",
+                "stats": [
+                    { "value": "3,200+", "label": "Active Recruiters" },
+                    { "value": "$2.4M", "label": "Paid Out Monthly" },
+                    { "value": "500+", "label": "Companies" },
+                    {
+                        "value": "40%",
+                        "label": "Higher Avg. Fee",
+                        "borderColor": "border-accent"
+                    }
+                ],
+                "bg": "neutral"
+            },
+            {
+                "type": "article-body",
+                "sectionNumber": "01",
+                "kicker": "THE OPPORTUNITY",
+                "kickerColor": "primary",
+                "heading": "A Better Way to Recruit",
+                "paragraphs": [
+                    "Traditional recruiting is broken. Independent recruiters struggle to access quality roles, while agencies take a massive cut of every placement fee. The split-fee model changes everything.",
+                    "On Splits Network, you connect directly with hiring companies. <strong>No middlemen, no hidden fees.</strong> Every commission split is agreed upon upfront and tracked transparently on the platform."
+                ],
+                "bg": "base-100"
+            },
+            {
+                "type": "split-editorial",
+                "sectionNumber": "02",
+                "kicker": "MARKETPLACE",
+                "heading": "Access Exclusive Roles",
+                "paragraphs": [
+                    "Browse hundreds of open roles from verified companies across industries. Filter by specialty, location, fee structure, and more."
+                ],
+                "items": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-filter",
+                        "title": "Smart Filters",
+                        "body": "Find roles that match your expertise and candidate pool."
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-bell",
+                        "title": "Instant Alerts",
+                        "body": "Get notified when new roles match your preferences."
+                    }
+                ],
+                "image": "/images/content/marketplace.jpg",
+                "imageAlt": "Role marketplace interface showing available positions",
+                "layout": "text-left",
+                "bg": "base-200"
+            },
+            {
+                "type": "pull-quote",
+                "quote": "I tripled my placements in the first quarter. The marketplace gives me access to roles I could never find on my own.",
+                "citation": "Jennifer Park, Independent Recruiter",
+                "bg": "base-100",
+                "style": "left-border"
+            },
+            {
+                "type": "feature-grid",
+                "kicker": "TOOLS",
+                "heading": "Built for Recruiters",
+                "columns": 3,
+                "items": [
+                    {
+                        "icon": "fa-duotone fa-regular fa-robot",
+                        "title": "AI Matching",
+                        "description": "Our AI suggests the best candidates for each role.",
+                        "stats": "95% accuracy"
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-messages",
+                        "title": "Direct Messaging",
+                        "description": "Chat with hiring managers and candidates in one place."
+                    },
+                    {
+                        "icon": "fa-duotone fa-regular fa-chart-mixed",
+                        "title": "Performance Analytics",
+                        "description": "Track your placement rate, earnings, and pipeline health."
+                    }
+                ],
+                "bg": "base-200"
+            },
+            {
+                "type": "timeline",
+                "kicker": "HOW IT WORKS",
+                "heading": "Start Placing in 4 Steps",
+                "steps": [
+                    {
+                        "number": 1,
+                        "title": "Create Your Profile",
+                        "description": "Sign up free and showcase your recruiting specialties.",
+                        "icon": "fa-duotone fa-regular fa-user-plus"
+                    },
+                    {
+                        "number": 2,
+                        "title": "Browse the Marketplace",
+                        "description": "Find roles that match your expertise and candidate network.",
+                        "icon": "fa-duotone fa-regular fa-magnifying-glass"
+                    },
+                    {
+                        "number": 3,
+                        "title": "Submit Candidates",
+                        "description": "Present your best candidates directly to hiring companies.",
+                        "icon": "fa-duotone fa-regular fa-paper-plane"
+                    },
+                    {
+                        "number": 4,
+                        "title": "Earn Your Split",
+                        "description": "Get paid transparently when your candidate is hired.",
+                        "icon": "fa-duotone fa-regular fa-money-bill-wave"
+                    }
+                ],
+                "bg": "base-100"
+            },
+            {
+                "type": "faq",
+                "kicker": "FAQ",
+                "heading": "Recruiter Questions",
+                "items": [
+                    {
+                        "question": "Is it free to join as a recruiter?",
+                        "answer": "Yes! Our Starter plan is completely free. You can browse roles, submit candidates, and earn placement fees at no cost. Premium plans offer additional features like AI matching and priority support."
+                    },
+                    {
+                        "question": "How are fees split?",
+                        "answer": "Fee splits are set by the hiring company when they post a role. Typical splits range from 50/50 to 70/30 in favor of the placing recruiter. All terms are visible before you engage."
+                    },
+                    {
+                        "question": "Can I use Splits Network alongside my existing business?",
+                        "answer": "Absolutely. Most recruiters use Splits Network as an additional channel alongside their existing client relationships. It's incremental revenue, not a replacement."
+                    }
+                ],
+                "bg": "base-200"
+            },
+            {
+                "type": "cta",
+                "heading": "Ready to Scale Your Placements?",
+                "subtitle": "Join 3,200+ recruiters already earning more on Splits Network.",
+                "buttons": [
+                    {
+                        "label": "Join Free Today",
+                        "href": "/sign-up",
+                        "variant": "primary",
+                        "icon": "fa-duotone fa-regular fa-rocket"
+                    },
+                    {
+                        "label": "Contact Sales",
+                        "href": "/contact",
+                        "variant": "outline"
+                    }
+                ],
+                "contactEmail": "recruiters@splits.network",
+                "bg": "primary"
+            }
+        ]
+    },
+
+    "import_instructions": {
+        "endpoint": "POST /api/v2/pages/import",
+        "authentication": "Required — Bearer token with platform admin role",
+        "content_type": "application/json",
+        "body": "The full page JSON object (same structure as full_page_example above)",
+        "query_params": {
+            "upsert": "Set to 'true' to update an existing page with the same slug+app combination instead of failing"
+        },
+        "notes": [
+            "Pages are created with status 'draft' by default. Use PATCH /api/v2/pages/:id to publish.",
+            "The slug must be unique per app. Use ?upsert=true to overwrite existing content.",
+            "All block types in the blocks array are validated — invalid types will be rejected.",
+            "Images should be uploaded to Supabase Storage first, then referenced by URL."
+        ]
+    }
+}

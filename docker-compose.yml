@@ -626,6 +626,31 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  content-service:
+    build:
+      context: .
+      dockerfile: services/content-service/Dockerfile
+      target: development
+    container_name: splits-content-service
+    ports:
+      - "3015:3015"
+    environment:
+      NODE_ENV: development
+      PORT: 3015
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+    volumes:
+      - ./services/content-service/src:/app/services/content-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   api-gateway:
     build:
       context: .
@@ -655,6 +680,7 @@ services:
       CHAT_SERVICE_URL: http://chat-service:3011
       SEARCH_SERVICE_URL: http://search-service:3013
       GPT_SERVICE_URL: http://gpt-service:3014
+      CONTENT_SERVICE_URL: http://content-service:3015
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

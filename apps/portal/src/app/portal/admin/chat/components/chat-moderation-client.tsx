@@ -204,7 +204,7 @@ export default function ChatModerationClient() {
                                         }
                                         className={`w-full text-left rounded-lg border px-3 py-3 hover:bg-base-200/70 ${
                                             selectedReport?.id === report.id
-                                                ? "border-coral bg-base-200/70"
+                                                ? "border-primary bg-base-200/70"
                                                 : "border-base-200 bg-base-100"
                                         }`}
                                     >

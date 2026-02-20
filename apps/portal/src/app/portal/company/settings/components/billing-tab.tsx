@@ -90,11 +90,9 @@ export function BillingTab({ company }: BillingTabProps) {
                             profile.billing_address?.city || "",
                         billing_address_state:
                             profile.billing_address?.state || "",
-                        billing_address_zip:
-                            profile.billing_address?.zip || "",
+                        billing_address_zip: profile.billing_address?.zip || "",
                         billing_address_country:
-                            profile.billing_address?.country ||
-                            "United States",
+                            profile.billing_address?.country || "United States",
                         stripe_tax_id: profile.stripe_tax_id || "",
                         invoice_delivery_method:
                             profile.invoice_delivery_method || "email",
@@ -157,21 +155,18 @@ export function BillingTab({ company }: BillingTabProps) {
             if (formData.billing_address_country)
                 billingAddress.country = formData.billing_address_country;
 
-            await client.post(
-                `/company-billing-profiles/${company!.id}`,
-                {
-                    billing_terms: formData.billing_terms,
-                    billing_email: billingEmail,
-                    billing_contact_name:
-                        formData.billing_contact_name.trim() || null,
-                    billing_address:
-                        Object.keys(billingAddress).length > 0
-                            ? billingAddress
-                            : null,
-                    stripe_tax_id: formData.stripe_tax_id.trim() || null,
-                    invoice_delivery_method: formData.invoice_delivery_method,
-                },
-            );
+            await client.post(`/company-billing-profiles/${company!.id}`, {
+                billing_terms: formData.billing_terms,
+                billing_email: billingEmail,
+                billing_contact_name:
+                    formData.billing_contact_name.trim() || null,
+                billing_address:
+                    Object.keys(billingAddress).length > 0
+                        ? billingAddress
+                        : null,
+                stripe_tax_id: formData.stripe_tax_id.trim() || null,
+                invoice_delivery_method: formData.invoice_delivery_method,
+            });
 
             setSuccess(true);
             refreshBilling();
@@ -197,9 +192,9 @@ export function BillingTab({ company }: BillingTabProps) {
     return (
         <div className="space-y-8">
             {error && (
-                <div className="border-4 border-coral bg-coral-light p-4">
+                <div className="border-4 border-error bg-error-light p-4">
                     <p className="text-sm font-bold text-dark flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation text-coral" />
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error" />
                         {error}
                     </p>
                 </div>
@@ -281,9 +276,7 @@ export function BillingTab({ company }: BillingTabProps) {
                                     <Button
                                         color="yellow"
                                         size="sm"
-                                        onClick={() =>
-                                            setSetupDrawerOpen(true)
-                                        }
+                                        onClick={() => setSetupDrawerOpen(true)}
                                     >
                                         Complete Setup
                                     </Button>
@@ -404,9 +397,7 @@ export function BillingTab({ company }: BillingTabProps) {
                         <Button
                             type="submit"
                             color="purple"
-                            disabled={
-                                saving || !formData.billing_email.trim()
-                            }
+                            disabled={saving || !formData.billing_email.trim()}
                         >
                             <ButtonLoading
                                 loading={saving}

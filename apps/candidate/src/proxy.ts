@@ -37,7 +37,6 @@ export const config = {
 
         // All public pages — layout.tsx calls auth() on every route so Clerk
         // middleware must run here even though auth is not required
-        '/public/(.*)',
 
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal

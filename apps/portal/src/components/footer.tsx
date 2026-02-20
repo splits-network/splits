@@ -8,60 +8,65 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { BaselFooter } from "@splits-network/basel-ui";
+import type {
+    FooterNavConfig,
+    FooterSection,
+    FooterSocialLink,
+    FooterTrustStat,
+    FooterLinkItem,
+} from "@splits-network/shared-types";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-/* ─── Footer Link Data ───────────────────────────────────────────────────── */
+/* ─── Default Footer Data (fallback when CMS is unavailable) ─────────────── */
 
-const FOOTER_SECTIONS = [
+const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
     {
         title: "Platform",
         links: [
-            { label: "Features", href: "/public/features" },
-            { label: "Pricing", href: "/public/pricing" },
-            { label: "How It Works", href: "/public/how-it-works" },
-            { label: "Transparency", href: "/public/transparency" },
-            { label: "Integrations", href: "/public/integration-partners" },
-            { label: "Updates", href: "/public/updates" },
+            { label: "Features", href: "/features" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "How It Works", href: "/how-it-works" },
+            { label: "Transparency", href: "/transparency" },
+            { label: "Integrations", href: "/integration-partners" },
+            { label: "Updates", href: "/updates" },
         ],
     },
     {
         title: "Company",
         links: [
-            { label: "About Us", href: "/public/about" },
-            { label: "Careers", href: "/public/careers" },
-            { label: "Blog", href: "/public/blog" },
-            { label: "Press", href: "/public/press" },
-            { label: "Brand Kit", href: "/public/brand" },
-            { label: "Partners", href: "/public/partners" },
+            { label: "About Us", href: "/about" },
+            { label: "Careers", href: "/careers" },
+            { label: "Blog", href: "/blog" },
+            { label: "Press", href: "/press" },
+            { label: "Brand Kit", href: "/brand" },
+            { label: "Partners", href: "/partners" },
         ],
     },
     {
         title: "Resources",
         links: [
             { label: "Help Center", href: "#" },
-            { label: "Contact Us", href: "/public/contact-memphis" },
-            { label: "Documentation", href: "/public/documentation" },
+            { label: "Contact Us", href: "/contact-memphis" },
+            { label: "Documentation", href: "/documentation" },
             { label: "API Reference", href: "#" },
-            { label: "System Status", href: "/public/status-memphis" },
+            { label: "System Status", href: "/status-memphis" },
         ],
     },
     {
         title: "Legal",
         links: [
-            { label: "Privacy Policy", href: "/public/privacy-policy" },
-            { label: "Terms of Service", href: "/public/terms-of-service" },
-            { label: "Cookie Policy", href: "/public/cookie-policy" },
+            { label: "Privacy Policy", href: "/privacy-policy" },
+            { label: "Terms of Service", href: "/terms-of-service" },
+            { label: "Cookie Policy", href: "/cookie-policy" },
             { label: "Security", href: "#" },
         ],
     },
 ];
 
-/* ─── Social Links ───────────────────────────────────────────────────────── */
-
-const SOCIAL_LINKS = [
+const DEFAULT_SOCIAL_LINKS: FooterSocialLink[] = [
     {
         icon: "fa-brands fa-x-twitter",
         label: "Twitter",
@@ -94,31 +99,32 @@ const SOCIAL_LINKS = [
     },
 ];
 
-/* ─── Trust Stats ────────────────────────────────────────────────────────── */
-
-const TRUST_STATS = [
+const DEFAULT_TRUST_STATS: FooterTrustStat[] = [
     { value: "2,847", label: "Recruiters" },
     { value: "518", label: "Companies" },
     { value: "12,340", label: "Candidates" },
     { value: "$42M+", label: "In Placements" },
 ];
 
-/* ─── Bottom Legal Links ─────────────────────────────────────────────────── */
-
-const LEGAL_LINKS = [
-    { label: "Privacy", href: "/public/privacy-policy" },
-    { label: "Terms", href: "/public/terms-of-service" },
-    { label: "Cookies", href: "/public/cookie-policy" },
+const DEFAULT_LEGAL_LINKS: FooterLinkItem[] = [
+    { label: "Privacy", href: "/privacy-policy" },
+    { label: "Terms", href: "/terms-of-service" },
+    { label: "Cookies", href: "/cookie-policy" },
     { label: "Sitemap", href: "/sitemap.xml" },
 ];
 
 /* ─── Footer Component ───────────────────────────────────────────────────── */
 
-export function Footer() {
+export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const [email, setEmail] = useState("");
     const [subscribed, setSubscribed] = useState(false);
+
+    const sections = footerNav?.sections ?? DEFAULT_FOOTER_SECTIONS;
+    const socialLinks = footerNav?.socialLinks ?? DEFAULT_SOCIAL_LINKS;
+    const trustStats = footerNav?.trustStats ?? DEFAULT_TRUST_STATS;
+    const legalLinks = footerNav?.legalLinks ?? DEFAULT_LEGAL_LINKS;
 
     // Offset footer when sidebar is visible (authenticated portal routes)
     const hasSidebar = pathname.startsWith("/portal/");
@@ -362,7 +368,7 @@ export function Footer() {
                             transparent ecosystem.
                         </p>
                         <div className="social-row flex gap-2">
-                            {SOCIAL_LINKS.map((social) => (
+                            {socialLinks.map((social) => (
                                 <a
                                     key={social.label}
                                     href={social.href}
@@ -379,7 +385,7 @@ export function Footer() {
                 }
                 columns={
                     <>
-                        {FOOTER_SECTIONS.map((section) => (
+                        {sections.map((section) => (
                             <div
                                 key={section.title}
                                 className="footer-col opacity-0"
@@ -406,7 +412,7 @@ export function Footer() {
                 }
                 stats={
                     <>
-                        {TRUST_STATS.map((stat) => (
+                        {trustStats.map((stat) => (
                             <div
                                 key={stat.label}
                                 className="footer-stat text-center opacity-0"
@@ -431,7 +437,7 @@ export function Footer() {
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
-                            {LEGAL_LINKS.map((link) => (
+                            {legalLinks.map((link) => (
                                 <Link
                                     key={link.label}
                                     href={link.href}

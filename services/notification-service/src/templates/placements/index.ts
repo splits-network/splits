@@ -226,7 +226,7 @@ ${paragraph(
     )}
 
 ${button({
-        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/public/help`,
+        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/help`,
         text: 'Contact Support',
         variant: 'secondary',
     })}

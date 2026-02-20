@@ -6,7 +6,7 @@ Spawn the `seo` agent to fix SEO issues identified during audit.
 
 ```
 /seo:fix portal                           # Fix all SEO issues in portal app
-/seo:fix apps/portal/src/app/public/pricing/page.tsx  # Fix specific page
+/seo:fix apps/portal/src/app/pricing/page.tsx  # Fix specific page
 /seo:fix metadata portal                  # Fix only metadata issues
 /seo:fix architecture portal              # Fix only architecture issues
 /seo:fix sitemap portal                   # Fix sitemap coverage
@@ -20,19 +20,21 @@ Spawn the `seo` agent to fix SEO issues identified during audit.
 **Client-page anti-pattern → Server-first refactor**
 
 Before:
+
 ```tsx
 // page.tsx — BAD: just a wrapper
-import { PricingClient } from './pricing-client';
+import { PricingClient } from "./pricing-client";
 export default function PricingPage() {
     return <PricingClient />;
 }
 ```
 
 After:
+
 ```tsx
 // page.tsx — GOOD: server fetches, renders, then enhances
 import type { Metadata } from "next";
-import { PricingClient } from './pricing-client';
+import { PricingClient } from "./pricing-client";
 
 export const metadata: Metadata = {
     title: "Pricing",
@@ -44,8 +46,9 @@ export default async function PricingPage() {
     return (
         <main>
             <h1>Pricing</h1>
-            <PricingTable plans={plans} />        {/* Server-rendered content */}
-            <PricingClient plans={plans} />       {/* Client: toggle annual/monthly, FAQ accordion */}
+            <PricingTable plans={plans} /> {/* Server-rendered content */}
+            <PricingClient plans={plans} />{" "}
+            {/* Client: toggle annual/monthly, FAQ accordion */}
         </main>
     );
 }
@@ -54,12 +57,14 @@ export default async function PricingPage() {
 **Client data fetching → Server fetch with props**
 
 Before:
+
 ```tsx
 // 'use client' component fetching primary data
-const { data: jobs } = useSWR('/api/jobs');
+const { data: jobs } = useSWR("/api/jobs");
 ```
 
 After:
+
 ```tsx
 // Server component fetches, passes to client
 export default async function JobsPage() {
@@ -71,6 +76,7 @@ export default async function JobsPage() {
 ### Metadata Fixes (High)
 
 **Missing metadata → Add metadata export**
+
 ```tsx
 export const metadata: Metadata = {
     title: "Page Title",
@@ -83,6 +89,7 @@ export const metadata: Metadata = {
 ```
 
 **Missing canonical → Add alternates**
+
 ```tsx
 export const metadata: Metadata = {
     alternates: {
@@ -94,12 +101,14 @@ export const metadata: Metadata = {
 ### Sitemap Fixes
 
 **Missing routes → Add to sitemap.ts**
+
 - Add new routes to the appropriate routes array
 - Set correct `changeFrequency` and `priority`
 
 ### robots.txt Fixes
 
 **Missing AI crawler rules → Add explicit allows**
+
 ```typescript
 rules: [
     { userAgent: '*', allow: '/', disallow: [...] },
@@ -113,14 +122,17 @@ rules: [
 ### On-Page Fixes
 
 **Heading hierarchy → Restructure headings**
+
 - Ensure one `<h1>` per page
 - Fix skipped levels (h1 → h3 → insert h2)
 
 **Missing alt text → Add descriptive alt**
+
 - Content images: descriptive alt text
 - Decorative images: `alt=""`
 
 **Missing JSON-LD → Add structured data**
+
 ```tsx
 import { JsonLd } from "@splits-network/shared-ui";
 <JsonLd data={{ "@context": "https://schema.org", "@type": "...", ... }} />
