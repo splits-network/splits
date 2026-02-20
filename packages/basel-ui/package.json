@@ -16,6 +16,9 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },
+    "dependencies": {
+        "@splits-network/shared-types": "workspace:*"
+    },
     "devDependencies": {
         "@types/react": "^19.0.1",
         "@types/react-dom": "^19.0.2",

@@ -290,6 +290,9 @@ importers:
       '@gsap/react':
         specifier: ^2.1.0
         version: 2.1.2(gsap@3.14.2)(react@19.2.1)
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       gsap:
         specifier: ^3.12.0
         version: 3.14.2
