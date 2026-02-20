@@ -120,6 +120,9 @@ importers:
       '@splits-network/memphis-ui':
         specifier: workspace:*
         version: link:../../packages/memphis-ui
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@splits-network/shared-ui':
         specifier: workspace:*
         version: link:../../packages/shared-ui
