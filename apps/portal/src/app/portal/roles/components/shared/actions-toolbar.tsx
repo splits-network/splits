@@ -9,6 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "../modals/role-wizard-modal";
 import SubmitCandidateModal from "../modals/submit-candidate-modal";
+import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
 import { Button, ExpandableButton } from "@splits-network/basel-ui";
 
@@ -54,6 +55,7 @@ export default function RoleActionsToolbar({
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [showPipelineModal, setShowPipelineModal] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
@@ -150,7 +152,13 @@ export default function RoleActionsToolbar({
     /* ── Handlers ── */
 
     const handleViewDetails = () => onViewDetails?.(job.id);
-    const handleViewPipeline = () => onViewPipeline?.(job.id);
+    const handleViewPipeline = () => {
+        if (onViewPipeline) {
+            onViewPipeline(job.id);
+        } else {
+            setShowPipelineModal(true);
+        }
+    };
     const handleEditSuccess = () => {
         setShowEditModal(false);
         refresh();
@@ -160,7 +168,7 @@ export default function RoleActionsToolbar({
 
     const actions = {
         viewDetails: showActions.viewDetails !== false,
-        viewPipeline: showActions.viewPipeline === true,
+        viewPipeline: showActions.viewPipeline !== false,
         submitCandidate:
             showActions.submitCandidate !== false && canSubmitCandidate,
         edit: showActions.edit !== false && canManageRole,
@@ -315,28 +323,38 @@ export default function RoleActionsToolbar({
     /* ── Modals ── */
 
     const modals = (
-        <ModalPortal>
-            {showEditModal && (
-                <RoleWizardModal
-                    isOpen={showEditModal}
-                    jobId={job.id}
-                    mode="edit"
-                    onClose={() => setShowEditModal(false)}
-                    onSuccess={handleEditSuccess}
-                />
-            )}
-            {showSubmitModal && (
-                <SubmitCandidateModal
+        <>
+            <ModalPortal>
+                {showEditModal && (
+                    <RoleWizardModal
+                        isOpen={showEditModal}
+                        jobId={job.id}
+                        mode="edit"
+                        onClose={() => setShowEditModal(false)}
+                        onSuccess={handleEditSuccess}
+                    />
+                )}
+                {showSubmitModal && (
+                    <SubmitCandidateModal
+                        roleId={job.id}
+                        roleTitle={job.title || "Untitled Role"}
+                        companyName={
+                            job.company?.name || job.company_id || undefined
+                        }
+                        onClose={() => setShowSubmitModal(false)}
+                        onSuccess={refresh}
+                    />
+                )}
+            </ModalPortal>
+            {showPipelineModal && (
+                <PipelineModal
+                    isOpen={showPipelineModal}
                     roleId={job.id}
                     roleTitle={job.title || "Untitled Role"}
-                    companyName={
-                        job.company?.name || job.company_id || undefined
-                    }
-                    onClose={() => setShowSubmitModal(false)}
-                    onSuccess={refresh}
+                    onClose={() => setShowPipelineModal(false)}
                 />
             )}
-        </ModalPortal>
+        </>
     );
 
     /* ── Icon-Only Variant ── */
