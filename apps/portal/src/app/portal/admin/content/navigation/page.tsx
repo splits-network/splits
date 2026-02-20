@@ -14,6 +14,7 @@ import type {
 } from "@splits-network/shared-types";
 import { HeaderNavEditor } from "@/components/basel/admin/navigation/header-nav-editor";
 import { FooterNavEditor } from "@/components/basel/admin/navigation/footer-nav-editor";
+import { ImportJsonModal } from "@/components/basel/admin/shared/import-json-modal";
 
 type ContentApp = "portal" | "candidate" | "corporate";
 type NavLocation = "header" | "footer";
@@ -46,6 +47,7 @@ export default function NavigationAdminPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
 
     // Current config from server
     const [serverConfig, setServerConfig] = useState<
@@ -118,6 +120,38 @@ export default function NavigationAdminPage() {
         }
     }
 
+    function handleImportConfig(data: unknown) {
+        const config = data as HeaderNavConfig | FooterNavConfig;
+        // Basic validation
+        if (activeLocation === "header") {
+            if (!config || !("items" in config) || !Array.isArray((config as HeaderNavConfig).items)) {
+                toast.error('Header config must have an "items" array');
+                return;
+            }
+        } else {
+            const fc = config as FooterNavConfig;
+            if (!fc || typeof fc !== "object") {
+                toast.error("Invalid footer config");
+                return;
+            }
+        }
+        setDraftConfig(config);
+        setIsDirty(true);
+        setShowImportModal(false);
+        toast.success("Config imported — review and save when ready");
+    }
+
+    function handleExportConfig() {
+        const json = JSON.stringify(draftConfig, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `nav-${activeApp}-${activeLocation}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     function handleAppChange(value: string) {
         if (isDirty) {
             if (!window.confirm("You have unsaved changes. Switch anyway?"))
@@ -145,6 +179,31 @@ export default function NavigationAdminPage() {
                 ]}
                 actions={
                     <div className="flex items-center gap-2">
+                        <a
+                            href="/cms-content-schema.json"
+                            download="cms-content-schema.json"
+                            className="btn btn-ghost btn-sm"
+                            title="Download schema for LLM content generation"
+                        >
+                            <i className="fa-duotone fa-regular fa-file-arrow-down"></i>
+                            Schema
+                        </a>
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={handleExportConfig}
+                            disabled={loading}
+                            title="Export current config as JSON"
+                        >
+                            <i className="fa-duotone fa-regular fa-download"></i>
+                            Export
+                        </button>
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setShowImportModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-file-import"></i>
+                            Import
+                        </button>
                         {isDirty && (
                             <span className="text-xs text-warning font-medium flex items-center gap-1">
                                 <i className="fa-duotone fa-regular fa-circle-dot text-[8px]"></i>
@@ -200,6 +259,19 @@ export default function NavigationAdminPage() {
                     </div>
                 </div>
             )}
+
+            <ImportJsonModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImportConfig}
+                title={`Import ${activeLocation === "header" ? "Header" : "Footer"} Navigation`}
+                description={`Paste or upload a JSON file matching the ${activeLocation} navigation schema. This will replace the current draft — review and save when ready.`}
+                placeholder={
+                    activeLocation === "header"
+                        ? '{\n  "items": [\n    { "label": "Pricing", "href": "/pricing" },\n    { "label": "Platform", "subItems": [...] }\n  ]\n}'
+                        : '{\n  "sections": [...],\n  "socialLinks": [...],\n  "trustStats": [...],\n  "legalLinks": [...]\n}'
+                }
+            />
         </div>
     );
 }

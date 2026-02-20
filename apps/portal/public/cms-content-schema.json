@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Splits Network CMS Content Schema",
+  "description": "Schema and instructions for generating CMS content for Splits Network. Use this as context to produce valid page and navigation JSON that can be imported directly into the CMS admin.",
+
+  "instructions": {
+    "overview": "Splits Network uses a block-based CMS. Each page is composed of ordered blocks (hero, article-body, stats-bar, etc.). Navigation configs define header menus and footer link sections for each app (portal, candidate, corporate).",
+    "icons": "All icons use FontAwesome Duotone format: 'fa-duotone fa-regular fa-{name}'. Social icons use: 'fa-brands fa-{name}'.",
+    "images": "Image URLs should be absolute paths or full URLs (e.g., '/images/content/hero.jpg' or 'https://...'). The CMS does not host images — provide URLs to externally hosted assets.",
+    "html_in_text": "Paragraph fields (paragraphs[]) accept inline HTML: <strong>, <em>, <a href='...'>, <br>. Do NOT use block-level HTML (<div>, <p>, <section>).",
+    "colors": "Background colors use DaisyUI semantic tokens: 'base-100', 'base-200', 'neutral', 'primary', 'secondary'. Button variants: 'primary', 'secondary', 'accent', 'warning', 'outline', 'ghost'.",
+    "slugs": "Slugs must be lowercase, start/end with alphanumeric, and may contain hyphens and forward slashes. Regex: /^[a-z0-9][a-z0-9\\-\\/]*[a-z0-9]$/",
+    "apps": "Three apps: 'portal' (main recruiter app at splits.network), 'candidate' (candidate portal at applicant.network), 'corporate' (marketing site at employment-networks.com)."
+  },
+
+  "page": {
+    "description": "A content page with metadata and an ordered array of blocks.",
+    "fields": {
+      "title": { "type": "string", "required": true, "description": "Page title (used in browser tab and SEO)" },
+      "slug": { "type": "string", "required": true, "description": "URL path slug (e.g., 'for-recruiters', 'pricing/enterprise')" },
+      "app": { "type": "string", "required": true, "enum": ["portal", "candidate", "corporate"], "description": "Which app this page belongs to" },
+      "description": { "type": "string", "description": "SEO meta description (150-160 chars recommended)" },
+      "og_image": { "type": "string", "description": "Open Graph image URL for social sharing" },
+      "category": { "type": "string", "description": "Content category (e.g., 'marketing', 'help', 'legal', 'blog')" },
+      "status": { "type": "string", "enum": ["draft", "published", "archived"], "default": "draft" },
+      "author": { "type": "string", "description": "Content author name" },
+      "read_time": { "type": "string", "description": "Reading time estimate (e.g., '4 min read')" },
+      "blocks": { "type": "array", "required": true, "description": "Ordered array of content blocks (see block_types below)" },
+      "meta": { "type": "object", "description": "Optional custom metadata key-value pairs" }
+    }
+  },
+
+  "block_types": {
+    "hero": {
+      "description": "Full-height hero section with headline, subtitle, image, and CTA buttons. Typically the first block on a page.",
+      "fields": {
+        "type": { "const": "hero" },
+        "headlineWords": {
+          "type": "array",
+          "required": true,
+          "items": { "text": "string", "accent": "boolean (optional, highlights word in primary color)" },
+          "description": "Headline split into words. Mark key words with accent:true for visual emphasis."
+        },
+        "kicker": { "type": "string", "description": "Small uppercase label above headline (e.g., 'FOR RECRUITERS')" },
+        "kickerIcon": { "type": "string", "description": "FontAwesome icon for kicker" },
+        "subtitle": { "type": "string", "description": "Supporting text below headline" },
+        "image": { "type": "string", "description": "Hero background image URL" },
+        "imageAlt": { "type": "string", "description": "Alt text for hero image" },
+        "meta": {
+          "type": "array",
+          "items": { "icon": "string (optional)", "label": "string" },
+          "description": "Small metadata items below subtitle (e.g., '5 min read', 'Published Jan 10')"
+        },
+        "buttons": { "$ref": "#/shared_types/buttons" }
+      },
+      "example": {
+        "type": "hero",
+        "kicker": "FOR RECRUITERS",
+        "kickerIcon": "fa-duotone fa-regular fa-user-tie",
+        "headlineWords": [
+          { "text": "Grow " },
+          { "text": "Your " },
+          { "text": "Recruiting ", "accent": true },
+          { "text": "Business" }
+        ],
+        "subtitle": "Access premium split-fee roles, transparent commissions, and a network of 3,200+ recruiters.",
+        "image": "/images/content/recruiter-hero.jpg",
+        "imageAlt": "Recruiter reviewing candidate profiles on the Splits Network platform",
+        "buttons": [
+          { "label": "Join Free", "href": "/sign-up", "variant": "primary", "icon": "fa-duotone fa-regular fa-rocket" },
+          { "label": "See How It Works", "href": "/how-it-works", "variant": "outline" }
+        ]
+      }
+    },
+
+    "article-body": {
+      "description": "Text section with heading and paragraphs. The workhorse block for long-form content.",
+      "fields": {
+        "type": { "const": "article-body" },
+        "heading": { "type": "string", "required": true },
+        "paragraphs": { "type": "string[]", "required": true, "description": "Array of paragraph strings. Supports inline HTML (<strong>, <em>, <a>)." },
+        "sectionNumber": { "type": "string", "description": "Section label (e.g., '01', '02')" },
+        "kicker": { "type": "string", "description": "Small label above heading" },
+        "kickerColor": { "type": "string", "description": "DaisyUI text color class: 'text-primary', 'text-secondary', 'text-accent'" },
+        "bg": { "type": "string", "enum": ["base-100", "base-200"] }
+      },
+      "example": {
+        "type": "article-body",
+        "sectionNumber": "01",
+        "kicker": "THE OPPORTUNITY",
+        "heading": "A Better Way to Recruit",
+        "paragraphs": [
+          "Traditional recruiting is broken. Agencies take massive cuts, communication is opaque, and independent recruiters are locked out of the best roles.",
+          "Splits Network changes everything. Connect directly with hiring companies, negotiate <strong>fair, transparent splits</strong>, and build your business on your terms."
+        ],
+        "bg": "base-100"
+      }
+    },
+
+    "split-editorial": {
+      "description": "Side-by-side layout with text content on one side and an image on the other. Great for feature showcases.",
+      "fields": {
+        "type": { "const": "split-editorial" },
+        "heading": { "type": "string", "required": true },
+        "image": { "type": "string", "required": true },
+        "imageAlt": { "type": "string", "required": true },
+        "layout": { "type": "string", "required": true, "enum": ["text-left", "text-right"] },
+        "sectionNumber": { "type": "string" },
+        "kicker": { "type": "string" },
+        "kickerColor": { "type": "string" },
+        "paragraphs": { "type": "string[]" },
+        "items": {
+          "type": "array",
+          "items": { "icon": "string (optional)", "title": "string", "body": "string" },
+          "description": "Feature list items displayed below paragraphs"
+        },
+        "imageOverlayColor": { "type": "string", "description": "DaisyUI color for image overlay (e.g., 'primary')" },
+        "bg": { "type": "string", "enum": ["base-100", "base-200"] }
+      },
+      "example": {
+        "type": "split-editorial",
+        "sectionNumber": "02",
+        "kicker": "MARKETPLACE",
+        "heading": "Access Exclusive Roles",
+        "paragraphs": ["Browse hundreds of open roles from vetted companies looking for split-fee recruiting partners."],
+        "items": [
+          { "icon": "fa-duotone fa-regular fa-filter", "title": "Smart Filters", "body": "Find roles that match your expertise, location, and fee preferences." },
+          { "icon": "fa-duotone fa-regular fa-bell", "title": "Instant Alerts", "body": "Get notified when new roles match your profile." }
+        ],
+        "image": "/images/content/marketplace.jpg",
+        "imageAlt": "Marketplace interface showing available roles",
+        "layout": "text-left",
+        "bg": "base-200"
+      }
+    },
+
+    "stats-bar": {
+      "description": "Horizontal bar displaying key statistics. Best with 2-4 stats.",
+      "fields": {
+        "type": { "const": "stats-bar" },
+        "stats": {
+          "type": "array",
+          "required": true,
+          "items": { "value": "string", "label": "string", "borderColor": "string (optional, e.g., 'border-accent')" }
+        },
+        "bg": { "type": "string", "enum": ["neutral", "base-100", "base-200"] }
+      },
+      "example": {
+        "type": "stats-bar",
+        "stats": [
+          { "value": "3,200+", "label": "Active Recruiters" },
+          { "value": "$2.4M", "label": "Paid Out Monthly" },
+          { "value": "500+", "label": "Companies" },
+          { "value": "40%", "label": "Higher Avg. Fee" }
+        ],
+        "bg": "neutral"
+      }
+    },
+
+    "feature-grid": {
+      "description": "Grid of feature cards with icons, titles, and descriptions. Configurable columns (2-4).",
+      "fields": {
+        "type": { "const": "feature-grid" },
+        "items": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "icon": "string (optional)",
+            "iconColor": "string (optional, DaisyUI color)",
+            "badge": "string (optional, small label)",
+            "title": "string",
+            "description": "string",
+            "stats": "string (optional, metric below description)"
+          }
+        },
+        "heading": { "type": "string" },
+        "kicker": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "columns": { "type": "number", "enum": [2, 3, 4], "default": 3 },
+        "bg": { "type": "string", "enum": ["base-100", "base-200"] }
+      },
+      "example": {
+        "type": "feature-grid",
+        "kicker": "YOUR TOOLKIT",
+        "heading": "Built for Recruiters",
+        "columns": 3,
+        "items": [
+          { "icon": "fa-duotone fa-regular fa-robot", "title": "AI Matching", "description": "Our AI suggests the best candidates for each role based on skills, experience, and culture fit.", "stats": "95% accuracy" },
+          { "icon": "fa-duotone fa-regular fa-messages", "title": "Direct Messaging", "description": "Chat directly with hiring managers and candidates in real-time." },
+          { "icon": "fa-duotone fa-regular fa-chart-mixed", "title": "Analytics Dashboard", "description": "Track placements, pipeline health, and revenue in one place." }
+        ],
+        "bg": "base-200"
+      }
+    },
+
+    "benefits-cards": {
+      "description": "Grid of benefit/value-prop cards with optional metrics. Similar to feature-grid but centered text with accent styling.",
+      "fields": {
+        "type": { "const": "benefits-cards" },
+        "cards": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "icon": "string (optional)",
+            "title": "string",
+            "description": "string",
+            "metric": "string (optional, large highlighted value)",
+            "metricLabel": "string (optional, label for metric)"
+          }
+        },
+        "heading": { "type": "string" },
+        "kicker": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "bg": { "type": "string", "enum": ["base-100", "base-200"] }
+      },
+      "example": {
+        "type": "benefits-cards",
+        "kicker": "WHY SPLITS NETWORK",
+        "heading": "The Recruiter Advantage",
+        "cards": [
+          { "icon": "fa-duotone fa-regular fa-money-bill-trend-up", "title": "Higher Fees", "description": "Our recruiters earn 15-25% more per placement on average.", "metric": "+22%", "metricLabel": "Average Increase" },
+          { "icon": "fa-duotone fa-regular fa-handshake", "title": "Direct Access", "description": "Work directly with hiring managers — no intermediaries." }
+        ]
+      }
+    },
+
+    "timeline": {
+      "description": "Vertical timeline showing sequential steps or milestones.",
+      "fields": {
+        "type": { "const": "timeline" },
+        "steps": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "number": "number (optional, auto-increments if omitted)",
+            "title": "string",
+            "description": "string",
+            "icon": "string (optional, replaces number)"
+          }
+        },
+        "heading": { "type": "string" },
+        "kicker": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "bg": { "type": "string", "enum": ["base-100", "base-200"] }
+      },
+      "example": {
+        "type": "timeline",
+        "kicker": "HOW IT WORKS",
+        "heading": "Start Placing in 4 Steps",
+        "steps": [
+          { "number": 1, "title": "Create Your Profile", "description": "Sign up free and set your specialties, locations, and fee preferences.", "icon": "fa-duotone fa-regular fa-user-plus" },
+          { "number": 2, "title": "Browse the Marketplace", "description": "Find open roles that match your expertise.", "icon": "fa-duotone fa-regular fa-magnifying-glass" },
+          { "number": 3, "title": "Submit Candidates", "description": "Present your best candidates directly to hiring companies.", "icon": "fa-duotone fa-regular fa-paper-plane" },
+          { "number": 4, "title": "Earn Your Split", "description": "Get paid when your candidate is placed. Transparent, automated payouts.", "icon": "fa-duotone fa-regular fa-trophy" }
+        ],
+        "bg": "base-100"
+      }
+    },
+
+    "faq": {
+      "description": "Accordion-style FAQ section with expandable question/answer pairs.",
+      "fields": {
+        "type": { "const": "faq" },
+        "items": {
+          "type": "array",
+          "required": true,
+          "items": { "question": "string", "answer": "string" }
+        },
+        "heading": { "type": "string" },
+        "kicker": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "bg": { "type": "string", "enum": ["neutral", "base-100", "base-200"] }
+      },
+      "example": {
+        "type": "faq",
+        "kicker": "FAQ",
+        "heading": "Common Questions",
+        "items": [
+          { "question": "Is it free to join?", "answer": "Yes! Our Starter plan is completely free with no time limit. You only pay when you upgrade for advanced features." },
+          { "question": "How are fees split?", "answer": "Fee splits are set by the hiring company when they post a role. Typical splits range from 40-60% depending on the role and your contribution." }
+        ],
+        "bg": "base-200"
+      }
+    },
+
+    "pull-quote": {
+      "description": "Large highlighted quote with optional citation. Great for testimonials or key statements.",
+      "fields": {
+        "type": { "const": "pull-quote" },
+        "quote": { "type": "string", "required": true },
+        "citation": { "type": "string", "description": "Attribution (e.g., 'Jennifer Park, Independent Recruiter')" },
+        "bg": { "type": "string", "enum": ["neutral", "primary", "secondary", "base-100", "base-200"] },
+        "style": { "type": "string", "enum": ["left-border", "centered"], "default": "left-border" }
+      },
+      "example": {
+        "type": "pull-quote",
+        "quote": "I tripled my placements in the first quarter after joining Splits Network.",
+        "citation": "Jennifer Park, Independent Recruiter",
+        "bg": "neutral",
+        "style": "left-border"
+      }
+    },
+
+    "full-bleed-image": {
+      "description": "Full-width image with optional text overlay. Creates visual breaks between content sections.",
+      "fields": {
+        "type": { "const": "full-bleed-image" },
+        "image": { "type": "string", "required": true },
+        "imageAlt": { "type": "string", "required": true },
+        "caption": { "type": "string" },
+        "overlayText": { "type": "string", "description": "Large text centered on image" },
+        "overlayAccentText": { "type": "string", "description": "Accent-colored continuation of overlay text" },
+        "height": { "type": "string", "default": "45vh", "description": "CSS height value" }
+      }
+    },
+
+    "inline-image": {
+      "description": "Contained image block with optional caption. Less dramatic than full-bleed.",
+      "fields": {
+        "type": { "const": "inline-image" },
+        "image": { "type": "string", "required": true },
+        "imageAlt": { "type": "string", "required": true },
+        "caption": { "type": "string" },
+        "height": { "type": "string", "default": "45vh" }
+      }
+    },
+
+    "cta": {
+      "description": "Call-to-action section with heading, subtitle, buttons, and optional contact email. Typically the last block on a page.",
+      "fields": {
+        "type": { "const": "cta" },
+        "heading": { "type": "string", "required": true },
+        "buttons": { "$ref": "#/shared_types/buttons", "required": true },
+        "subtitle": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "bg": { "type": "string", "enum": ["primary", "secondary", "neutral", "base-100"] }
+      },
+      "example": {
+        "type": "cta",
+        "heading": "Ready to Scale Your Placements?",
+        "subtitle": "Join 3,200+ recruiters already earning more on Splits Network.",
+        "buttons": [
+          { "label": "Join Free Today", "href": "/sign-up", "variant": "primary", "icon": "fa-duotone fa-regular fa-rocket" },
+          { "label": "Contact Sales", "href": "mailto:hello@splits.network", "variant": "outline" }
+        ],
+        "contactEmail": "hello@splits.network",
+        "bg": "primary"
+      }
+    }
+  },
+
+  "shared_types": {
+    "buttons": {
+      "type": "array",
+      "items": {
+        "label": { "type": "string", "required": true },
+        "href": { "type": "string", "required": true },
+        "icon": { "type": "string", "description": "FontAwesome icon class" },
+        "variant": { "type": "string", "required": true, "enum": ["primary", "secondary", "accent", "warning", "outline", "ghost"] }
+      }
+    }
+  },
+
+  "navigation": {
+    "header": {
+      "description": "Header navigation config. Supports top-level links and dropdown menus with sub-items.",
+      "fields": {
+        "items": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "label": { "type": "string", "required": true, "description": "Menu item label" },
+            "icon": { "type": "string", "description": "FontAwesome icon (shown in mobile menu)" },
+            "href": { "type": "string", "description": "Direct link URL. Set to null if item has subItems." },
+            "subItems": {
+              "type": "array",
+              "description": "Dropdown items. If present, the parent item becomes a dropdown trigger.",
+              "items": {
+                "icon": { "type": "string", "required": true },
+                "label": { "type": "string", "required": true },
+                "desc": { "type": "string", "required": true, "description": "Short description shown in dropdown" },
+                "href": { "type": "string", "required": true }
+              }
+            }
+          }
+        }
+      },
+      "example": {
+        "items": [
+          {
+            "label": "Platform",
+            "icon": "fa-duotone fa-regular fa-grid-2",
+            "subItems": [
+              { "icon": "fa-duotone fa-regular fa-briefcase", "label": "ATS", "desc": "Track every candidate", "href": "/platform/ats" },
+              { "icon": "fa-duotone fa-regular fa-handshake", "label": "Split Fees", "desc": "Fair, transparent splits", "href": "/platform/split-fees" }
+            ]
+          },
+          { "label": "Pricing", "icon": "fa-duotone fa-regular fa-tag", "href": "/pricing" }
+        ]
+      }
+    },
+
+    "footer": {
+      "description": "Footer navigation config with link sections, social links, trust stats, and legal links.",
+      "fields": {
+        "sections": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "title": { "type": "string", "required": true, "description": "Column heading (e.g., 'Platform', 'Company')" },
+            "links": {
+              "type": "array",
+              "items": {
+                "label": { "type": "string", "required": true },
+                "href": { "type": "string", "required": true },
+                "external": { "type": "boolean", "description": "If true, link opens in new tab" }
+              }
+            }
+          }
+        },
+        "socialLinks": {
+          "type": "array",
+          "items": {
+            "icon": { "type": "string", "required": true, "description": "fa-brands icon (e.g., 'fa-brands fa-linkedin-in')" },
+            "href": { "type": "string", "required": true },
+            "label": { "type": "string", "required": true, "description": "Accessible label (e.g., 'LinkedIn')" }
+          }
+        },
+        "trustStats": {
+          "type": "array",
+          "items": {
+            "value": { "type": "string", "required": true, "description": "Stat number (e.g., '3,200+')" },
+            "label": { "type": "string", "required": true, "description": "Stat description (e.g., 'Recruiters')" }
+          }
+        },
+        "legalLinks": {
+          "type": "array",
+          "items": {
+            "label": { "type": "string", "required": true },
+            "href": { "type": "string", "required": true }
+          }
+        }
+      },
+      "example": {
+        "sections": [
+          {
+            "title": "Platform",
+            "links": [
+              { "label": "Features", "href": "/features" },
+              { "label": "Pricing", "href": "/pricing" },
+              { "label": "How It Works", "href": "/how-it-works" }
+            ]
+          },
+          {
+            "title": "Company",
+            "links": [
+              { "label": "About Us", "href": "/about" },
+              { "label": "Blog", "href": "/blog" },
+              { "label": "Careers", "href": "/careers" }
+            ]
+          }
+        ],
+        "socialLinks": [
+          { "icon": "fa-brands fa-linkedin-in", "href": "https://www.linkedin.com/company/employment-networks-inc", "label": "LinkedIn" },
+          { "icon": "fa-brands fa-x-twitter", "href": "https://x.com/employ_network", "label": "Twitter" }
+        ],
+        "trustStats": [
+          { "value": "3,200+", "label": "Recruiters" },
+          { "value": "$42M+", "label": "In Placements" }
+        ],
+        "legalLinks": [
+          { "label": "Privacy Policy", "href": "/privacy-policy" },
+          { "label": "Terms of Service", "href": "/terms-of-service" }
+        ]
+      }
+    }
+  },
+
+  "import_formats": {
+    "page_import": {
+      "description": "JSON format for importing a single page. Include all page fields plus the blocks array.",
+      "example": {
+        "title": "For Recruiters",
+        "slug": "for-recruiters",
+        "app": "portal",
+        "description": "Learn how Splits Network helps independent recruiters grow their business.",
+        "category": "marketing",
+        "status": "draft",
+        "blocks": [
+          { "type": "hero", "headlineWords": [{ "text": "Your Page " }, { "text": "Here", "accent": true }], "subtitle": "..." },
+          { "type": "cta", "heading": "Get Started", "buttons": [{ "label": "Sign Up", "href": "/sign-up", "variant": "primary" }], "bg": "primary" }
+        ]
+      }
+    },
+    "navigation_import": {
+      "description": "JSON format for importing navigation config. Provide the config object directly (header or footer format).",
+      "header_example": {
+        "items": [
+          { "label": "Pricing", "href": "/pricing" }
+        ]
+      },
+      "footer_example": {
+        "sections": [],
+        "socialLinks": [],
+        "trustStats": [],
+        "legalLinks": []
+      }
+    }
+  }
+}

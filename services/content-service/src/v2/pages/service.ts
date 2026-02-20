@@ -56,7 +56,15 @@ export class PageServiceV2 {
             data.published_at = new Date().toISOString();
         }
 
-        const page = await this.repository.createPage(data, clerkUserId);
+        let page;
+        try {
+            page = await this.repository.createPage(data, clerkUserId);
+        } catch (error: any) {
+            if (error.message?.includes('duplicate') || error.message?.includes('unique') || error.message?.includes('23505')) {
+                throw new Error(`A page with slug "${data.slug}" already exists for the ${data.app} app`);
+            }
+            throw error;
+        }
 
         this.publishEvent('page.created', {
             pageId: page.id,

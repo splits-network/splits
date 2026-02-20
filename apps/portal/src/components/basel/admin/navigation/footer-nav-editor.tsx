@@ -33,7 +33,15 @@ function SectionTitle({
     );
 }
 
-export function FooterNavEditor({ config, onChange }: FooterNavEditorProps) {
+export function FooterNavEditor({ config: raw, onChange }: FooterNavEditorProps) {
+    // Ensure all arrays exist — API may return partial config
+    const config: FooterNavConfig = {
+        sections: raw.sections ?? [],
+        socialLinks: raw.socialLinks ?? [],
+        trustStats: raw.trustStats ?? [],
+        legalLinks: raw.legalLinks ?? [],
+    };
+
     const update = useCallback(
         (patch: Partial<FooterNavConfig>) => onChange({ ...config, ...patch }),
         [config, onChange],

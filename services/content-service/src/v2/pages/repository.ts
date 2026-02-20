@@ -103,9 +103,21 @@ export class PageRepository {
 
     /**
      * Create a new page (ADMIN — requires platform_admin).
+     * Hard-deletes any soft-deleted page with the same slug+app first
+     * so the unique constraint doesn't block reuse of deleted slugs.
      */
     async createPage(page: PageCreate, clerkUserId: string): Promise<any> {
         await this.requirePlatformAdmin(clerkUserId);
+
+        // Remove soft-deleted rows that would block the unique constraint
+        if (page.slug && page.app) {
+            await this.supabase
+                .from('content_pages')
+                .delete()
+                .eq('slug', page.slug)
+                .eq('app', page.app)
+                .not('deleted_at', 'is', null);
+        }
 
         const { data, error } = await this.supabase
             .from('content_pages')
@@ -154,9 +166,20 @@ export class PageRepository {
 
     /**
      * Upsert a page by slug+app (ADMIN — used by import endpoint).
+     * Hard-deletes any soft-deleted page with the same slug+app first.
      */
     async upsertPage(page: PageCreate, clerkUserId: string): Promise<any> {
         await this.requirePlatformAdmin(clerkUserId);
+
+        // Remove soft-deleted rows that would block the upsert
+        if (page.slug && page.app) {
+            await this.supabase
+                .from('content_pages')
+                .delete()
+                .eq('slug', page.slug)
+                .eq('app', page.app)
+                .not('deleted_at', 'is', null);
+        }
 
         const { data, error } = await this.supabase
             .from('content_pages')

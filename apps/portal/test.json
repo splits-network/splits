@@ -1,0 +1,237 @@
+{
+    "title": "Platform Features",
+    "slug": "features",
+    "app": "portal",
+    "description": "Explore the powerful features that help recruiters scale placements, increase split-fee earnings, and build stronger hiring partnerships.",
+    "og_image": "/images/content/features-og.jpg",
+    "category": "marketing",
+    "status": "draft",
+    "author": "Splits Network Team",
+    "read_time": "6 min read",
+    "blocks": [
+        {
+            "type": "hero",
+            "kicker": "PLATFORM FEATURES",
+            "kickerIcon": "fa-duotone fa-regular fa-grid-2",
+            "headlineWords": [
+                { "text": "Everything " },
+                { "text": "You " },
+                { "text": "Need ", "accent": true },
+                { "text": "to " },
+                { "text": "Scale " },
+                { "text": "Your " },
+                { "text": "Placements" }
+            ],
+            "subtitle": "From split-fee transparency to AI-powered matching, Splits Network equips recruiters with the tools to win more roles and close more deals.",
+            "image": "/images/content/features-hero.jpg",
+            "imageAlt": "Recruiter dashboard showing marketplace roles and analytics",
+            "meta": [
+                {
+                    "icon": "fa-duotone fa-regular fa-clock",
+                    "label": "6 min read"
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-chart-line",
+                    "label": "Built for Independent Recruiters"
+                }
+            ],
+            "buttons": [
+                {
+                    "label": "Join Free",
+                    "href": "/sign-up",
+                    "variant": "primary",
+                    "icon": "fa-duotone fa-regular fa-rocket"
+                },
+                {
+                    "label": "See Pricing",
+                    "href": "/pricing",
+                    "variant": "outline"
+                }
+            ]
+        },
+        {
+            "type": "stats-bar",
+            "stats": [
+                { "value": "3,200+", "label": "Active Recruiters" },
+                { "value": "$42M+", "label": "In Placements" },
+                { "value": "500+", "label": "Hiring Companies" },
+                { "value": "40-60%", "label": "Typical Fee Splits" }
+            ],
+            "bg": "neutral"
+        },
+        {
+            "type": "feature-grid",
+            "kicker": "CORE PLATFORM",
+            "heading": "Built Specifically for Split-Fee Recruiting",
+            "subtitle": "Every feature is designed to remove friction, increase transparency, and maximize your earning potential.",
+            "columns": 3,
+            "bg": "base-200",
+            "items": [
+                {
+                    "icon": "fa-duotone fa-regular fa-briefcase",
+                    "iconColor": "primary",
+                    "title": "Live Role Marketplace",
+                    "description": "Browse verified split-fee roles from vetted hiring companies. Filter by industry, compensation range, and fee structure.",
+                    "stats": "Hundreds of active roles"
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-percent",
+                    "iconColor": "secondary",
+                    "title": "Transparent Fee Splits",
+                    "description": "Know your split before submitting candidates. No hidden terms, no unclear agreements."
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-user-check",
+                    "iconColor": "accent",
+                    "title": "Direct Hiring Access",
+                    "description": "Communicate directly with hiring companies. Eliminate layers and move faster."
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-robot",
+                    "iconColor": "primary",
+                    "title": "AI-Powered Matching",
+                    "description": "Our AI analyzes role requirements and recruiter specialties to suggest high-fit opportunities.",
+                    "stats": "Smarter targeting"
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-messages",
+                    "iconColor": "secondary",
+                    "title": "Integrated Messaging",
+                    "description": "Keep all conversations organized in-platform with searchable, secure messaging."
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-chart-mixed",
+                    "iconColor": "accent",
+                    "title": "Performance Analytics",
+                    "description": "Track submissions, interviews, placements, and revenue in one unified dashboard."
+                }
+            ]
+        },
+        {
+            "type": "split-editorial",
+            "sectionNumber": "01",
+            "kicker": "MARKETPLACE",
+            "kickerColor": "text-primary",
+            "heading": "Access High-Quality Roles Instantly",
+            "paragraphs": [
+                "Stop relying on fragmented job boards and private email chains. Splits Network centralizes premium split-fee roles in one marketplace.",
+                "Filter by specialty, compensation band, and fee structure to focus only on roles that align with your expertise."
+            ],
+            "items": [
+                {
+                    "icon": "fa-duotone fa-regular fa-filter",
+                    "title": "Advanced Filters",
+                    "body": "Refine by location, industry, compensation, and split percentage."
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-bell",
+                    "title": "Instant Alerts",
+                    "body": "Receive notifications when new roles match your profile."
+                }
+            ],
+            "image": "/images/content/marketplace-interface.jpg",
+            "imageAlt": "Marketplace interface displaying active recruiting roles",
+            "layout": "text-left",
+            "bg": "base-100"
+        },
+        {
+            "type": "split-editorial",
+            "sectionNumber": "02",
+            "kicker": "ANALYTICS",
+            "kickerColor": "text-secondary",
+            "heading": "Understand and Optimize Your Pipeline",
+            "paragraphs": [
+                "Data drives better placements. See which industries convert fastest, which roles yield the highest fees, and where your pipeline needs attention.",
+                "Make informed decisions backed by real performance insights."
+            ],
+            "items": [
+                {
+                    "icon": "fa-duotone fa-regular fa-chart-line",
+                    "title": "Revenue Tracking",
+                    "body": "Monitor total fees earned and projected payouts."
+                },
+                {
+                    "icon": "fa-duotone fa-regular fa-user-group",
+                    "title": "Submission Insights",
+                    "body": "Track candidate progress from submission to placement."
+                }
+            ],
+            "image": "/images/content/analytics-dashboard.jpg",
+            "imageAlt": "Recruiter analytics dashboard showing placements and revenue metrics",
+            "layout": "text-right",
+            "bg": "base-200"
+        },
+        {
+            "type": "timeline",
+            "kicker": "HOW IT WORKS",
+            "heading": "Start Closing Placements in 4 Steps",
+            "bg": "base-100",
+            "steps": [
+                {
+                    "number": 1,
+                    "title": "Create Your Recruiter Profile",
+                    "description": "Set your specialties, industries, and preferred split ranges.",
+                    "icon": "fa-duotone fa-regular fa-user-plus"
+                },
+                {
+                    "number": 2,
+                    "title": "Browse & Claim Roles",
+                    "description": "Select opportunities that match your expertise.",
+                    "icon": "fa-duotone fa-regular fa-magnifying-glass"
+                },
+                {
+                    "number": 3,
+                    "title": "Submit Qualified Candidates",
+                    "description": "Present vetted candidates directly to hiring partners.",
+                    "icon": "fa-duotone fa-regular fa-paper-plane"
+                },
+                {
+                    "number": 4,
+                    "title": "Earn Your Split",
+                    "description": "Receive transparent payouts when your candidate is placed.",
+                    "icon": "fa-duotone fa-regular fa-trophy"
+                }
+            ]
+        },
+        {
+            "type": "faq",
+            "kicker": "FAQ",
+            "heading": "Feature Questions",
+            "bg": "base-200",
+            "items": [
+                {
+                    "question": "Is it free to join?",
+                    "answer": "Yes. Recruiters can join for free and browse available roles. Advanced features may require an upgraded plan."
+                },
+                {
+                    "question": "How are split fees determined?",
+                    "answer": "Hiring companies define the split percentage when posting a role. The terms are visible before submission."
+                },
+                {
+                    "question": "Do I communicate directly with companies?",
+                    "answer": "Yes. Splits Network enables direct communication to reduce delays and improve placement speed."
+                }
+            ]
+        },
+        {
+            "type": "cta",
+            "heading": "Ready to Increase Your Placement Revenue?",
+            "subtitle": "Join thousands of recruiters already growing their business on Splits Network.",
+            "contactEmail": "hello@splits.network",
+            "bg": "primary",
+            "buttons": [
+                {
+                    "label": "Join Free Today",
+                    "href": "/sign-up",
+                    "variant": "primary",
+                    "icon": "fa-duotone fa-regular fa-rocket"
+                },
+                {
+                    "label": "Contact Sales",
+                    "href": "mailto:hello@splits.network",
+                    "variant": "outline"
+                }
+            ]
+        }
+    ]
+}

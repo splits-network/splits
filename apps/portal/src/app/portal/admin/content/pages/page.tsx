@@ -17,6 +17,7 @@ import { AdminPageHeader, useAdminConfirm } from "../../components";
 import { ButtonLoading } from "@splits-network/shared-ui";
 import type { ContentPage } from "@splits-network/shared-types";
 import { CreatePageModal } from "@/components/basel/admin/pages/create-page-modal";
+import { ImportJsonModal } from "@/components/basel/admin/shared/import-json-modal";
 
 interface PageFilters {
     app?: string;
@@ -56,6 +57,8 @@ export default function ContentPagesAdminPage() {
     const confirm = useAdminConfirm();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importing, setImporting] = useState(false);
 
     const defaultFilters = useMemo<PageFilters>(() => ({}), []);
 
@@ -121,6 +124,30 @@ export default function ContentPagesAdminPage() {
         }
     }
 
+    async function handleImportPage(data: unknown) {
+        const pageData = data as Record<string, unknown>;
+        if (!pageData.title || !pageData.slug || !pageData.app || !pageData.blocks) {
+            toast.error("JSON must include title, slug, app, and blocks");
+            return;
+        }
+        setImporting(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+            const result = await apiClient.post("/pages", pageData);
+            const created = result.data as ContentPage;
+            toast.success(`Page "${created.title}" imported`);
+            setShowImportModal(false);
+            router.push(`/portal/admin/content/pages/${created.id}`);
+        } catch (err) {
+            console.error("Failed to import page:", err);
+            toast.error("Failed to import page — check JSON format");
+        } finally {
+            setImporting(false);
+        }
+    }
+
     const publishedCount = pages.filter((p) => p.status === "published").length;
     const draftCount = pages.filter((p) => p.status === "draft").length;
 
@@ -134,13 +161,31 @@ export default function ContentPagesAdminPage() {
                     { label: "Pages" },
                 ]}
                 actions={
-                    <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setShowCreateModal(true)}
-                    >
-                        <i className="fa-duotone fa-regular fa-plus mr-1"></i>
-                        Create Page
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href="/cms-content-schema.json"
+                            download="cms-content-schema.json"
+                            className="btn btn-ghost btn-sm"
+                            title="Download schema for LLM content generation"
+                        >
+                            <i className="fa-duotone fa-regular fa-file-arrow-down"></i>
+                            Schema
+                        </a>
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setShowImportModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-file-import"></i>
+                            Import
+                        </button>
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-plus mr-1"></i>
+                            Create Page
+                        </button>
+                    </div>
                 }
             />
 
@@ -336,6 +381,15 @@ export default function ContentPagesAdminPage() {
                     setShowCreateModal(false);
                     router.push(`/portal/admin/content/pages/${pageId}`);
                 }}
+            />
+
+            <ImportJsonModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImportPage}
+                title="Import Page from JSON"
+                description="Paste or upload a JSON file matching the CMS page schema. Must include title, slug, app, and blocks. Download the schema file for LLM instructions."
+                placeholder={'{\n  "title": "Page Title",\n  "slug": "page-slug",\n  "app": "portal",\n  "status": "draft",\n  "blocks": [\n    { "type": "hero", "headlineWords": [...] },\n    { "type": "cta", "heading": "...", "buttons": [...] }\n  ]\n}'}
             />
         </div>
     );
