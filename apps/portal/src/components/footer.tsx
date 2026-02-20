@@ -49,10 +49,10 @@ const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
         title: "Resources",
         links: [
             { label: "Help Center", href: "#" },
-            { label: "Contact Us", href: "/contact-memphis" },
+            { label: "Contact Us", href: "/contact" },
             { label: "Documentation", href: "/documentation" },
             { label: "API Reference", href: "#" },
-            { label: "System Status", href: "/status-memphis" },
+            { label: "System Status", href: "/status" },
         ],
     },
     {

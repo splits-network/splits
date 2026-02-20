@@ -1,0 +1,32 @@
+{
+    "name": "@splits-network/status",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --webpack --port 3103",
+        "build": "next build --webpack",
+        "start": "next start --port 3103",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@gsap/react": "^2.1.2",
+        "@splits-network/basel-ui": "workspace:*",
+        "@splits-network/shared-types": "workspace:*",
+        "@splits-network/shared-ui": "workspace:*",
+        "gsap": "^3.14.2",
+        "next": "^16.1.0",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.1"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.17",
+        "@types/node": "^24.10.1",
+        "@types/react": "^19.0.1",
+        "@types/react-dom": "^19.0.2",
+        "autoprefixer": "^10.4.20",
+        "daisyui": "^5.5.8",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^4.1.17",
+        "typescript": "^5.9.3"
+    }
+}

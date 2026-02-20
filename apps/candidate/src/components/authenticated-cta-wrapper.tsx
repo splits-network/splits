@@ -15,16 +15,12 @@ export function AuthenticatedCTAWrapper({
 }: AuthenticatedCTAWrapperProps) {
     const { isSignedIn, isLoaded } = useAuth();
 
-    // Don't render anything while Clerk is loading to prevent flash
-    if (!isLoaded) {
-        return null;
-    }
-
     // Hide CTA content for authenticated users
-    if (isSignedIn) {
+    if (isLoaded && isSignedIn) {
         return null;
     }
 
-    // Show CTA content for non-authenticated users
+    // Render while loading (elements start opacity-0 so no flash) and for non-authenticated users.
+    // Must be in the DOM before GSAP runs so animations can attach.
     return <>{children}</>;
 }

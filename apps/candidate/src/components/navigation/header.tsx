@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import type { NavItem, NavSubItem } from "@splits-network/shared-types";
 import UserDropdown from "./user-dropdown";
@@ -158,6 +158,7 @@ function NavDropdown({
 export default function Header({ navItems }: { navItems?: NavItem[] }) {
     const { isSignedIn } = useAuth();
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const items = navItems ?? DEFAULT_NAV_ITEMS;
 
@@ -165,8 +166,29 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
         setActiveDropdown(activeDropdown === label ? null : label);
     };
 
+    // Publish header height as CSS variable for banner/sidebar positioning
+    useEffect(() => {
+        if (!containerRef.current) {
+            document.documentElement.style.setProperty("--header-h", "0px");
+            return;
+        }
+        const el = containerRef.current;
+        const update = () => {
+            document.documentElement.style.setProperty(
+                "--header-h",
+                `${el.offsetHeight}px`,
+            );
+        };
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <BaselHeader
+            containerRef={containerRef}
+            position="sticky"
             logo={
                 <Link href="/" className="flex-shrink-0">
                     <Image
