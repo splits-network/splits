@@ -98,50 +98,64 @@ export default function DocumentViewerModal({
         /\.(txt|md|csv)$/i.test(document.file_name);
 
     return (
-        <dialog className="modal modal-open">
-            <div className="modal-box max-w-6xl h-[90vh] p-0 flex flex-col">
+        <div className="modal modal-open" role="dialog">
+            <div
+                className="modal-box max-w-6xl h-[90vh] p-0 flex flex-col"
+                style={{ borderRadius: 0 }}
+            >
                 {/* Header */}
-                <div className="p-4 border-b border-base-300 flex justify-between items-start bg-base-100 shrink-0">
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold truncate mb-1">
-                            {document.file_name}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-2 text-sm text-base-content/70">
-                            <span className="capitalize">
-                                {document.document_type}
-                            </span>
-                            {document.file_size && (
-                                <>
-                                    <span>&bull;</span>
-                                    <span>
-                                        {(document.file_size / 1024).toFixed(1)}{" "}
-                                        KB
+                <div className="bg-neutral text-neutral-content px-8 py-6 shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 min-w-0">
+                            <div className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center flex-shrink-0">
+                                <i className="fa-duotone fa-regular fa-file"></i>
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="text-lg font-black tracking-tight truncate">
+                                    {document.file_name}
+                                </h3>
+                                <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-content/60">
+                                    <span className="capitalize">
+                                        {document.document_type}
                                     </span>
-                                </>
-                            )}
-                            {document.is_primary && (
-                                <span className="badge badge-primary badge-sm">
-                                    <i className="fa-duotone fa-regular fa-star mr-1"></i>
-                                    Primary
-                                </span>
-                            )}
+                                    {document.file_size && (
+                                        <>
+                                            <span>&bull;</span>
+                                            <span>
+                                                {(
+                                                    document.file_size / 1024
+                                                ).toFixed(1)}{" "}
+                                                KB
+                                            </span>
+                                        </>
+                                    )}
+                                    {document.is_primary && (
+                                        <span className="badge badge-primary badge-sm">
+                                            <i className="fa-duotone fa-regular fa-star mr-1"></i>
+                                            Primary
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            onClick={handleDownloadClick}
-                            className="btn btn-ghost"
-                            title="Download"
-                            disabled={!signedUrl}
-                        >
-                            <i className="fa-duotone fa-regular fa-download fa-lg"></i>
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="btn btn-sm btn-square btn-ghost"
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={handleDownloadClick}
+                                className="btn btn-ghost btn-sm text-neutral-content/60 hover:text-neutral-content"
+                                style={{ borderRadius: 0 }}
+                                title="Download"
+                                disabled={!signedUrl}
+                            >
+                                <i className="fa-duotone fa-regular fa-download fa-lg"></i>
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -196,6 +210,7 @@ export default function DocumentViewerModal({
                                         <button
                                             onClick={handleDownloadClick}
                                             className="btn btn-primary"
+                                            style={{ borderRadius: 0 }}
                                         >
                                             <i className="fa-duotone fa-regular fa-download mr-2"></i>
                                             Download File
@@ -208,22 +223,27 @@ export default function DocumentViewerModal({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-base-300 bg-base-100 shrink-0">
+                <div className="border-t border-base-300 bg-base-100 p-4 shrink-0">
                     <div className="flex justify-between items-center">
                         <div className="text-sm text-base-content/60">
                             <i className="fa-duotone fa-regular fa-circle-info mr-2"></i>
                             Tip: You can download this document using the button
                             above
                         </div>
-                        <button onClick={onClose} className="btn btn-sm">
+                        <button
+                            onClick={onClose}
+                            className="btn btn-ghost btn-sm"
+                            style={{ borderRadius: 0 }}
+                        >
                             Close
                         </button>
                     </div>
                 </div>
             </div>
-            <form method="dialog" className="modal-backdrop" onClick={onClose}>
-                <button>close</button>
-            </form>
-        </dialog>
+            <div
+                className="modal-backdrop bg-neutral/60"
+                onClick={onClose}
+            />
+        </div>
     );
 }

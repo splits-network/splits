@@ -3,7 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import type { WizardData } from "../proposal-response-wizard";
+import type { WizardData } from "../../modals/proposal-response-wizard";
+
+function ReviewRow({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="flex items-start justify-between gap-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-base-content/50 flex-shrink-0 pt-0.5">
+                {label}
+            </span>
+            <span className="text-sm text-base-content/80 text-right">
+                {value}
+            </span>
+        </div>
+    );
+}
 
 interface ReviewSubmitStepProps {
     wizardData: WizardData;
@@ -14,17 +27,11 @@ interface ReviewSubmitStepProps {
         required: boolean;
         options?: string[];
     }>;
-    onBack: () => void;
-    onSubmit: () => void;
-    submitting: boolean;
 }
 
 export function ReviewSubmitStep({
     wizardData,
     questions,
-    onBack,
-    onSubmit,
-    submitting,
 }: ReviewSubmitStepProps) {
     const { getToken } = useAuth();
     const [existingDocs, setExistingDocs] = useState<any[]>([]);
@@ -75,8 +82,10 @@ export function ReviewSubmitStep({
     return (
         <div className="space-y-6">
             <div>
-                <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-check-circle"></i>{" "}
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Final Step
+                </p>
+                <h4 className="text-sm font-black tracking-tight mb-2">
                     Review Your Application
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -85,31 +94,30 @@ export function ReviewSubmitStep({
                 </p>
             </div>
 
-            {/* Documents Summary */}
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h5 className="font-semibold flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-file text-primary"></i>
-                        Documents ({totalDocCount})
-                    </h5>
+            {/* Documents Section */}
+            <div className="bg-base-200 p-6 space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                    Documents ({totalDocCount})
+                </p>
 
-                    {loadingDocs ? (
-                        <div className="flex items-center justify-center py-4">
-                            <span className="loading loading-spinner"></span>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {/* Primary Document */}
-                            {primaryDocument && (
-                                <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10">
+                {loadingDocs ? (
+                    <div className="flex items-center justify-center py-4">
+                        <span className="loading loading-spinner"></span>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {/* Primary Document */}
+                        {primaryDocument && (
+                            <div className="bg-primary/10 border-l-4 border-primary p-4">
+                                <div className="flex items-center gap-3">
                                     <i className="fa-duotone fa-regular fa-star text-primary"></i>
                                     <div className="flex-1">
-                                        <div className="font-medium">
+                                        <div className="font-bold text-sm">
                                             {"name" in primaryDocument
                                                 ? primaryDocument.name
                                                 : primaryDocument.file_name}
                                         </div>
-                                        <div className="text-sm text-base-content/60">
+                                        <div className="text-xs text-base-content/40">
                                             Primary Resume
                                             {wizardData.primaryExistingDocId
                                                 ? " (Existing)"
@@ -117,164 +125,129 @@ export function ReviewSubmitStep({
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
 
-                            {/* Existing Selected Documents (not primary) */}
-                            {selectedExistingDocs.map((doc) => {
-                                if (doc.id === wizardData.primaryExistingDocId)
-                                    return null;
-                                return (
-                                    <div
-                                        key={doc.id}
-                                        className="flex items-center gap-3 p-3 rounded-lg bg-base-200"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
-                                        <div className="flex-1">
-                                            <div className="font-medium">
-                                                {doc.file_name}
-                                            </div>
-                                            <div className="text-sm text-base-content/60">
-                                                {doc.document_type} •{" "}
-                                                {(doc.file_size / 1024).toFixed(
-                                                    1,
-                                                )}{" "}
-                                                KB
-                                                {" • Existing"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        {/* Existing Selected Documents (not primary) */}
+                        {selectedExistingDocs.map((doc) => {
+                            if (doc.id === wizardData.primaryExistingDocId)
+                                return null;
+                            return (
+                                <ReviewRow
+                                    key={doc.id}
+                                    label={doc.document_type}
+                                    value={
+                                        <span>
+                                            {doc.file_name}
+                                            <span className="text-base-content/40 ml-2">
+                                                {(doc.file_size / 1024).toFixed(1)} KB • Existing
+                                            </span>
+                                        </span>
+                                    }
+                                />
+                            );
+                        })}
 
-                            {/* New Uploaded Documents (not primary) */}
-                            {wizardData.documents.map((doc, index) => {
-                                if (index === wizardData.primaryResumeIndex)
-                                    return null;
-                                return (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-3 p-3 rounded-lg bg-base-200"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-file-arrow-up text-success"></i>
-                                        <div className="flex-1">
-                                            <div className="font-medium">
-                                                {doc.name}
-                                            </div>
-                                            <div className="text-sm text-base-content/60">
-                                                {(doc.size / 1024).toFixed(1)}{" "}
-                                                KB • New Upload
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                        {/* New Uploaded Documents (not primary) */}
+                        {wizardData.documents.map((doc, index) => {
+                            if (index === wizardData.primaryResumeIndex)
+                                return null;
+                            return (
+                                <ReviewRow
+                                    key={index}
+                                    label="New Upload"
+                                    value={
+                                        <span>
+                                            {doc.name}
+                                            <span className="text-base-content/40 ml-2">
+                                                {(doc.size / 1024).toFixed(1)} KB
+                                            </span>
+                                        </span>
+                                    }
+                                />
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
-            {/* Cover Letter Summary */}
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h5 className="font-semibold flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
-                        Cover Letter
-                    </h5>
+            {/* Cover Letter Section */}
+            <div className="bg-base-200 p-6 space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                    Cover Letter
+                </p>
 
-                    {/* Show uploaded cover letter files */}
-                    {selectedExistingDocs.filter(
-                        (doc) => doc.document_type === "cover_letter",
-                    ).length > 0 && (
-                        <div className="mb-4">
-                            <div className="text-sm font-medium mb-2">
-                                Uploaded Cover Letter Files:
-                            </div>
-                            <div className="space-y-2">
-                                {selectedExistingDocs
-                                    .filter(
-                                        (doc) =>
-                                            doc.document_type ===
-                                            "cover_letter",
-                                    )
-                                    .map((doc) => (
-                                        <div
-                                            key={doc.id}
-                                            className="flex items-center gap-2 p-2 rounded bg-base-200"
-                                        >
-                                            <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
-                                            <span className="font-medium">
-                                                {doc.file_name}
-                                            </span>
-                                            <span className="text-sm text-base-content/60">
-                                                (
-                                                {(doc.file_size / 1024).toFixed(
-                                                    1,
-                                                )}{" "}
-                                                KB)
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Show cover letter text */}
-                    {wizardData.coverLetter ? (
-                        <div className="text-base-content/70 p-3 rounded-lg bg-base-200 whitespace-pre-wrap">
-                            {wizardData.coverLetter}
-                        </div>
-                    ) : (
-                        <div className="text-base-content/50 p-3 rounded-lg bg-base-200 text-center italic">
-                            {selectedExistingDocs.filter(
-                                (doc) => doc.document_type === "cover_letter",
-                            ).length > 0
-                                ? "Using uploaded cover letter file only"
-                                : "No cover letter provided"}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Pre-screen Answers Summary */}
-            {answeredQuestions.length > 0 && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h5 className="font-semibold flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-clipboard-question text-primary"></i>
-                            Pre-screening Answers ({answeredQuestions.length})
-                        </h5>
-                        <div className="space-y-4">
-                            {answeredQuestions.map((question) => (
-                                <div key={question.id}>
-                                    <div className="font-medium text-sm mb-1">
-                                        {question.question}
-                                    </div>
-                                    <div className="text-base-content/70 p-3 rounded-lg bg-base-200">
-                                        {
-                                            wizardData.preScreenAnswers[
-                                                question.id
-                                            ]
-                                        }
-                                    </div>
+                {/* Show uploaded cover letter files */}
+                {selectedExistingDocs.filter(
+                    (doc) => doc.document_type === "cover_letter",
+                ).length > 0 && (
+                    <div className="space-y-2 mb-2">
+                        {selectedExistingDocs
+                            .filter(
+                                (doc) =>
+                                    doc.document_type === "cover_letter",
+                            )
+                            .map((doc) => (
+                                <div
+                                    key={doc.id}
+                                    className="flex items-center gap-2 p-2 bg-base-100"
+                                >
+                                    <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
+                                    <span className="font-bold text-sm">
+                                        {doc.file_name}
+                                    </span>
+                                    <span className="text-xs text-base-content/40">
+                                        ({(doc.file_size / 1024).toFixed(1)} KB)
+                                    </span>
                                 </div>
                             ))}
-                        </div>
+                    </div>
+                )}
+
+                {/* Show cover letter text */}
+                {wizardData.coverLetter ? (
+                    <div className="bg-base-100 p-4 text-sm text-base-content/70 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto">
+                        {wizardData.coverLetter}
+                    </div>
+                ) : selectedExistingDocs.filter(
+                      (doc) => doc.document_type === "cover_letter",
+                  ).length > 0 ? null : (
+                    <p className="text-sm text-base-content/30 italic">
+                        No cover letter provided
+                    </p>
+                )}
+            </div>
+
+            {/* Pre-screen Answers Section */}
+            {answeredQuestions.length > 0 && (
+                <div className="bg-base-200 p-6 space-y-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                        Screening Answers ({answeredQuestions.length})
+                    </p>
+                    <div className="space-y-3">
+                        {answeredQuestions.map((question, index) => (
+                            <div key={question.id}>
+                                <p className="text-xs text-base-content/50 mb-0.5">
+                                    {index + 1}. {question.question}
+                                </p>
+                                <p className="text-sm font-bold">
+                                    {wizardData.preScreenAnswers[question.id]}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* Notes Summary */}
+            {/* Notes Section */}
             {wizardData.notes && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h5 className="font-semibold flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-note-sticky text-primary"></i>
-                            Your Notes
-                        </h5>
-                        <div className="text-base-content/70 p-3 rounded-lg bg-base-200 whitespace-pre-wrap">
-                            {wizardData.notes}
-                        </div>
-                    </div>
+                <div className="bg-base-200 p-6 space-y-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                        Additional Notes
+                    </p>
+                    <p className="text-sm text-base-content/70 whitespace-pre-wrap">
+                        {wizardData.notes}
+                    </p>
                 </div>
             )}
 
@@ -282,44 +255,13 @@ export function ReviewSubmitStep({
             <div className="alert alert-warning">
                 <i className="fa-duotone fa-regular fa-exclamation-triangle"></i>
                 <div>
-                    <div className="font-semibold">Before you submit</div>
+                    <div className="font-bold text-sm">Before you submit</div>
                     <div className="text-sm">
                         Once submitted, your application will be reviewed by AI
                         and forwarded to the employer. Make sure all information
                         is accurate and complete.
                     </div>
                 </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-between">
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="btn btn-outline"
-                    disabled={submitting}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                    Back
-                </button>
-                <button
-                    type="button"
-                    onClick={onSubmit}
-                    className="btn btn-primary"
-                    disabled={submitting}
-                >
-                    {submitting ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Submitting...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-paper-plane"></i>
-                            Submit Application
-                        </>
-                    )}
-                </button>
             </div>
         </div>
     );

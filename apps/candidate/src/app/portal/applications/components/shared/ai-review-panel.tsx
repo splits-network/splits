@@ -4,33 +4,47 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { AIReview } from "@splits-network/shared-types";
-import { StatCard, StatCardGrid } from "@/components/ui";
+import {
+    BaselStatusPill,
+    BaselMicroStat,
+    BaselCheckList,
+    type BaselSemanticColor,
+    semanticBorder,
+    semanticBg10,
+    semanticText,
+} from "@splits-network/basel-ui";
 
-type AIReviewVariant = "full" | "badge" | "mini-card";
+/* ─── Types ──────────────────────────────────────────────────────────────── */
+
+type AIReviewVariant = "full" | "compact" | "badge" | "mini-card";
 
 interface AIReviewPanelProps {
-    aiReviewId: string;
+    applicationId: string;
     variant?: AIReviewVariant;
 }
 
-const getRecommendationColor = (recommendation: string | null) => {
-    if (!recommendation) return "badge-ghost";
+/* ─── Color Mappers ──────────────────────────────────────────────────────── */
+
+const getRecommendationColor = (
+    recommendation: string | null,
+): BaselSemanticColor => {
+    if (!recommendation) return "neutral";
     switch (recommendation) {
         case "strong_fit":
-            return "badge-success";
+            return "success";
         case "good_fit":
-            return "badge-info";
+            return "primary";
         case "fair_fit":
-            return "badge-warning";
+            return "warning";
         case "poor_fit":
-            return "badge-error";
+            return "error";
         default:
-            return "badge-ghost";
+            return "neutral";
     }
 };
 
 const getRecommendationLabel = (recommendation: string | null) => {
-    if (!recommendation) return "Not Yet Analyzed";
+    if (!recommendation) return "N/A";
     switch (recommendation) {
         case "strong_fit":
             return "Strong Match";
@@ -39,18 +53,10 @@ const getRecommendationLabel = (recommendation: string | null) => {
         case "fair_fit":
             return "Fair Match";
         case "poor_fit":
-            return "Needs Improvement";
+            return "Poor Match";
         default:
             return recommendation;
     }
-};
-
-const getFitScoreColor = (score: number | null) => {
-    if (!score) return "neutral";
-    if (score >= 90) return "success";
-    if (score >= 70) return "info";
-    if (score >= 50) return "warning";
-    return "error";
 };
 
 const getFitScoreIcon = (score: number | null) => {
@@ -61,6 +67,14 @@ const getFitScoreIcon = (score: number | null) => {
     return "fa-duotone fa-regular fa-triangle-exclamation";
 };
 
+const getScoreColor = (score: number | null): BaselSemanticColor => {
+    if (!score) return "warning";
+    if (score >= 90) return "success";
+    if (score >= 70) return "primary";
+    if (score >= 50) return "warning";
+    return "error";
+};
+
 const getConfidenceIcon = (confidence: number | null) => {
     if (!confidence) return "fa-duotone fa-regular fa-question";
     if (confidence >= 90) return "fa-duotone fa-regular fa-shield-check";
@@ -69,15 +83,8 @@ const getConfidenceIcon = (confidence: number | null) => {
     return "fa-duotone fa-regular fa-shield-exclamation";
 };
 
-const getConfidenceColor = (confidence: number | null) => {
-    if (!confidence) return "neutral";
-    if (confidence >= 90) return "success";
-    if (confidence >= 70) return "info";
-    if (confidence >= 50) return "warning";
-    return "error";
-};
-
-const getLocationLabel = (compatibility: string) => {
+const getLocationLabel = (compatibility: string | null) => {
+    if (!compatibility) return "Unknown";
     switch (compatibility) {
         case "perfect":
             return "Perfect Match";
@@ -92,199 +99,188 @@ const getLocationLabel = (compatibility: string) => {
     }
 };
 
-export default function AIReviewPanel({ aiReviewId, variant = "full" }: AIReviewPanelProps) {
+/* ─── Section Header ─────────────────────────────────────────────────────── */
+
+function SectionHeader({ children }: { children: React.ReactNode }) {
+    return (
+        <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent mb-1">
+                Intelligence
+            </p>
+            <h3 className="text-xl font-black tracking-tight text-base-content flex items-center gap-2">
+                <i className="fa-duotone fa-regular fa-robot" />
+                {children}
+            </h3>
+        </div>
+    );
+}
+
+/* ─── Component ──────────────────────────────────────────────────────────── */
+
+export default function AIReviewPanel({
+    applicationId,
+    variant = "full",
+}: AIReviewPanelProps) {
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
-    const [aiReview, setAIReview] = useState<any | null>(null);
+    const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [requesting, setRequesting] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
+        async function fetchAIReview() {
             try {
                 const token = await getToken();
-                if (!token) {
-                    setError("Authentication required");
-                    setLoading(false);
-                    return;
-                }
-                const client = createAuthenticatedClient(token);
+                if (!token) return;
 
-                // Fetch AI review
-                const response = await client.get<{ data: any }>(
-                    `/ai-reviews/${aiReviewId}`,
+                const client = createAuthenticatedClient(token);
+                const response = await client.get<{ data: AIReview[] }>(
+                    "/ai-reviews",
+                    {
+                        params: { application_id: applicationId },
+                    },
                 );
-                setAIReview(response.data);
-                setError(null);
-            } catch (err) {
-                // Network errors or other API errors
-                console.error("Error fetching data:", err);
-                const errorMsg =
-                    err instanceof Error ? err.message : "Unable to load data";
-                // Check if it's a service unavailability error
-                if (
-                    errorMsg.includes("500") ||
-                    errorMsg.includes("fetch failed") ||
-                    errorMsg.includes("Service call failed")
-                ) {
-                    // Service unavailable - silently set to null to hide the panel
-                    console.warn("AI review service temporarily unavailable");
-                    setAIReview(null);
-                    setError(null);
+
+                const reviews = response.data;
+                if (reviews && reviews.length > 0) {
+                    setAIReview(reviews[0]);
                 } else {
-                    setError("Unable to load AI review at this time");
+                    setAIReview(null);
+                }
+            } catch (err) {
+                console.error("Error fetching AI review:", err);
+                if (err instanceof Error && err.message.includes("404")) {
+                    setAIReview(null);
+                } else {
+                    const errorMsg =
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load AI review";
+                    if (
+                        errorMsg.includes("500") ||
+                        errorMsg.includes("fetch failed") ||
+                        errorMsg.includes("Service call failed")
+                    ) {
+                        console.warn(
+                            "AI review service temporarily unavailable",
+                        );
+                        setAIReview(null);
+                    } else {
+                        setError(errorMsg);
+                    }
                 }
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchData();
-    }, [aiReviewId]);
+        fetchAIReview();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [applicationId]);
 
-    const handleRequestNewReview = async () => {
-        setRequesting(true);
-        setError(null);
-        try {
-            const token = await getToken();
-            if (!token) {
-                setError("Authentication required");
-                return;
-            }
-            const client = createAuthenticatedClient(token);
-            const response = await client.post<{ data: AIReview }>(
-                "/ai-reviews",
-                { application_id: aiReview?.application_id },
-            );
-            // V2 API returns { data: {...} } envelope
-            setAIReview(response.data);
-        } catch (err) {
-            console.error("Error requesting new AI review:", err);
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to request new review",
-            );
-        } finally {
-            setRequesting(false);
-        }
-    };
+    /* ── Badge variant ────────────────────────────────────────────────────── */
 
-    // Badge variant: inline span only, invisible during load/error/null
     if (variant === "badge") {
-        if (loading || error || !aiReview || aiReview.fit_score == null) return null;
+        if (loading || error || !aiReview || aiReview.fit_score == null)
+            return null;
+        const color = getRecommendationColor(aiReview.recommendation);
         return (
-            <span className={`badge badge-xs ${getRecommendationColor(aiReview.recommendation)} ml-1`}>
+            <BaselStatusPill color={color} className="ml-1">
                 {Math.round(aiReview.fit_score)}%
-            </span>
+            </BaselStatusPill>
         );
     }
 
-    // Mini-card variant: small overview card
+    /* ── Mini-card variant ────────────────────────────────────────────────── */
+
     if (variant === "mini-card") {
         if (loading) {
             return (
-                <div className="card bg-base-200 p-4 animate-pulse">
-                    <div className="h-4 bg-base-300 rounded w-24 mb-2" />
-                    <div className="h-3 bg-base-300 rounded w-32" />
+                <div className="bg-base-100 border-l-4 border-base-300 p-4 animate-pulse">
+                    <div className="h-4 bg-base-300 w-24 mb-2" />
+                    <div className="h-3 bg-base-300 w-32" />
                 </div>
             );
         }
         if (error || !aiReview || aiReview.fit_score == null) return null;
+        const color = getScoreColor(aiReview.fit_score);
         return (
-            <div className="card bg-base-200 p-4">
-                <h4 className="font-semibold mb-2">AI Fit Score</h4>
-                <div className="flex items-center gap-2">
-                    <progress
-                        className="progress progress-accent w-20"
-                        value={aiReview.fit_score}
-                        max="100"
-                    />
-                    <span className="font-bold">
+            <div
+                className={`bg-base-100 border-l-4 ${semanticBorder[color]} p-4 shadow-sm`}
+            >
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/50 mb-2">
+                    AI Fit Score
+                </p>
+                <div className="flex items-center gap-3">
+                    <span
+                        className={`text-3xl font-black ${semanticText[color]}`}
+                    >
                         {Math.round(aiReview.fit_score)}%
                     </span>
+                    {aiReview.recommendation && (
+                        <BaselStatusPill
+                            color={getRecommendationColor(
+                                aiReview.recommendation,
+                            )}
+                        >
+                            {getRecommendationLabel(aiReview.recommendation)}
+                        </BaselStatusPill>
+                    )}
                 </div>
-                {aiReview.recommendation && (
-                    <span
-                        className={`badge badge-xs mt-1 ${getRecommendationColor(aiReview.recommendation)}`}
-                    >
-                        {getRecommendationLabel(aiReview.recommendation)}
-                    </span>
-                )}
             </div>
         );
     }
+
+    /* ── Loading state ────────────────────────────────────────────────────── */
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title">
-                        <i className="fa-duotone fa-regular fa-robot"></i>
-                        AI Analysis
-                    </h2>
-                    <div className="flex items-center justify-center py-8">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
+            <div className="bg-base-100 border-l-4 border-accent p-6 shadow-sm">
+                <SectionHeader>AI Analysis</SectionHeader>
+                <div className="flex items-center justify-center py-8 gap-3">
+                    <span className="loading loading-dots loading-md text-accent" />
                 </div>
             </div>
         );
     }
+
+    /* ── Error state ──────────────────────────────────────────────────────── */
 
     if (error) {
         return (
-            <div className="card-body">
-                <h2 className="card-title">
-                    <i className="fa-duotone fa-regular fa-robot"></i>
-                    AI Analysis
-                </h2>
-                <div className="alert alert-warning">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                    <div>
-                        <div className="font-semibold">
-                            Unable to Load AI Review
-                        </div>
-                        <div className="text-sm mt-1">{error}</div>
-                        <div className="text-sm mt-2">
-                            Please try refreshing the page or check back later.
+            <div className="bg-base-100 border-l-4 border-error p-6 shadow-sm">
+                <SectionHeader>AI Analysis</SectionHeader>
+                <div className="bg-error/10 border-l-4 border-error p-4 mt-4">
+                    <div className="flex items-start gap-2">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                        <div>
+                            <span className="font-bold text-base-content">
+                                Unable to Load AI Review
+                            </span>
+                            <p className="text-sm mt-1 text-base-content/70">
+                                {error}
+                            </p>
+                            <p className="text-sm mt-1 text-base-content/50">
+                                Please try again or check back later.
+                            </p>
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={handleRequestNewReview}
-                    disabled={requesting}
-                    className="btn btn-primary btn-sm"
-                >
-                    {requesting ? (
-                        <>
-                            <span className="loading loading-spinner loading-xs"></span>
-                            Requesting Review...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-rotate"></i>
-                            Request New Review
-                        </>
-                    )}
-                </button>
             </div>
         );
     }
 
+    /* ── Empty state ──────────────────────────────────────────────────────── */
+
     if (!aiReview) {
         return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title">
-                        <i className="fa-duotone fa-regular fa-robot"></i>
-                        AI Analysis
-                    </h2>
-                    <div className="alert alert-info">
-                        <i className="fa-duotone fa-regular fa-circle-info"></i>
-                        <span>
-                            Your application is being reviewed by our AI system.
-                            You'll receive an email when the analysis is
-                            complete.
+            <div className="bg-base-100 border-l-4 border-info p-6 shadow-sm">
+                <SectionHeader>AI Analysis</SectionHeader>
+                <div className="bg-info/10 border-l-4 border-info p-4 mt-4">
+                    <div className="flex items-start gap-2">
+                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
+                        <span className="text-base-content/70 text-sm">
+                            AI analysis is in progress or not available for this
+                            application.
                         </span>
                     </div>
                 </div>
@@ -292,232 +288,299 @@ export default function AIReviewPanel({ aiReviewId, variant = "full" }: AIReview
         );
     }
 
-    return (
-        <div className="">
-            <h2 className="mb-4">
-                <i className="fa-duotone fa-regular fa-robot mr-2"></i>
-                AI Analysis
-            </h2>
+    /* ── Compact variant ──────────────────────────────────────────────────── */
 
-            <div className="flex flex-col gap-4">
-                {/* Fit Score */}
-                <div className="flex flex-col md:flex-row gap-4">
-                    <StatCardGrid
-                        direction="responsive"
-                        className="shadow-lg bg-base-200/50 w-full"
-                    >
-                        <StatCard
-                            title="Match Score"
-                            value={
-                                aiReview.fit_score != null
-                                    ? `${Math.round(aiReview.fit_score)}%`
-                                    : "Not reviewed"
-                            }
-                            icon={getFitScoreIcon(aiReview.fit_score)}
-                            color={getFitScoreColor(aiReview.fit_score)}
-                            description={
-                                <span
-                                    className={`badge ${getRecommendationColor(
-                                        aiReview.recommendation,
-                                    )} badge-sm gap-1.5`}
-                                >
-                                    {getRecommendationLabel(
-                                        aiReview.recommendation,
-                                    )}
-                                </span>
-                            }
-                        />
-                        <StatCard
-                            title="Confidence Level"
-                            value={
-                                aiReview.confidence_level != null
-                                    ? `${aiReview.confidence_level}%`
-                                    : "N/A"
-                            }
-                            icon={getConfidenceIcon(aiReview.confidence_level)}
-                            color={getConfidenceColor(
-                                aiReview.confidence_level,
-                            )}
-                            description="AI confidence in analysis"
-                        />
-                        <StatCard
-                            title="Skills Match"
-                            value={
-                                aiReview.skills_match.match_percentage != null
-                                    ? `${aiReview.skills_match.match_percentage}%`
-                                    : "N/A"
-                            }
-                            icon="fa-duotone fa-regular fa-list-check"
-                            color={getFitScoreColor(
-                                aiReview.skills_match.match_percentage,
-                            )}
-                            description="Job skills match percentage"
-                        />
-                    </StatCardGrid>
+    if (variant === "compact") {
+        const fitColor = getScoreColor(aiReview.fit_score);
+        const confColor = getScoreColor(aiReview.confidence_level);
+
+        return (
+            <div
+                className={`bg-base-100 border-l-4 ${semanticBorder[fitColor]} p-6 shadow-sm`}
+            >
+                <SectionHeader>AI Analysis</SectionHeader>
+
+                {/* Metric stats */}
+                <div className="grid grid-cols-2 gap-3 mt-4 mb-5">
+                    <BaselMicroStat
+                        value={`${aiReview.fit_score ? Math.round(aiReview.fit_score) : "N/A"}%`}
+                        label="Match Score"
+                        color={fitColor}
+                        className={`${semanticBg10[fitColor]} p-3`}
+                    />
+                    <BaselMicroStat
+                        value={`${aiReview.confidence_level || "N/A"}%`}
+                        label="Confidence"
+                        color={confColor}
+                        className={`${semanticBg10[confColor]} p-3`}
+                    />
                 </div>
 
-                {/* Overall Summary */}
-                <div className="mt-4">
-                    <h3 className="font-semibold text-lg mb-2">Summary</h3>
-                    <p className="text-base-content/80">
+                {aiReview.overall_summary && (
+                    <div className="mb-4">
+                        <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-2">
+                            Summary
+                        </h4>
+                        <p className="text-sm text-base-content/70 leading-relaxed">
+                            {aiReview.overall_summary}
+                        </p>
+                    </div>
+                )}
+
+                {aiReview.strengths && aiReview.strengths.length > 0 && (
+                    <div className="mb-4">
+                        <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-2 flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-circle-check text-success" />
+                            Top Strengths
+                        </h4>
+                        <BaselCheckList
+                            items={aiReview.strengths.slice(0, 3)}
+                            color="success"
+                            icon="fa-duotone fa-regular fa-circle-check"
+                        />
+                    </div>
+                )}
+
+                {aiReview.concerns && aiReview.concerns.length > 0 && (
+                    <div>
+                        <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-2 flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning" />
+                            Areas to Address
+                        </h4>
+                        <BaselCheckList
+                            items={aiReview.concerns.slice(0, 2)}
+                            color="warning"
+                            icon="fa-duotone fa-regular fa-triangle-exclamation"
+                        />
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    /* ── Full variant ─────────────────────────────────────────────────────── */
+
+    const fitColor = getScoreColor(aiReview.fit_score);
+    const confColor = getScoreColor(aiReview.confidence_level);
+    const skillsColor = getScoreColor(aiReview.skills_match_percentage);
+
+    return (
+        <div className="space-y-6">
+            <SectionHeader>AI Analysis</SectionHeader>
+
+            {/* KPI metrics grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div
+                    className={`bg-base-100 border-t-4 ${semanticBorder[fitColor]} p-5 shadow-sm`}
+                >
+                    <div className="flex items-center gap-3 mb-3">
+                        <div
+                            className={`w-10 h-10 ${semanticBg10[fitColor]} flex items-center justify-center`}
+                        >
+                            <i
+                                className={`${getFitScoreIcon(aiReview.fit_score)} ${semanticText[fitColor]}`}
+                            />
+                        </div>
+                    </div>
+                    <div
+                        className={`text-3xl font-black ${semanticText[fitColor]}`}
+                    >
+                        {aiReview.fit_score
+                            ? Math.round(aiReview.fit_score)
+                            : "N/A"}
+                        %
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                        Match Score
+                    </div>
+                </div>
+                <div
+                    className={`bg-base-100 border-t-4 ${semanticBorder[confColor]} p-5 shadow-sm`}
+                >
+                    <div className="flex items-center gap-3 mb-3">
+                        <div
+                            className={`w-10 h-10 ${semanticBg10[confColor]} flex items-center justify-center`}
+                        >
+                            <i
+                                className={`${getConfidenceIcon(aiReview.confidence_level)} ${semanticText[confColor]}`}
+                            />
+                        </div>
+                    </div>
+                    <div
+                        className={`text-3xl font-black ${semanticText[confColor]}`}
+                    >
+                        {aiReview.confidence_level || "N/A"}%
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                        Confidence Level
+                    </div>
+                </div>
+                <div
+                    className={`bg-base-100 border-t-4 ${semanticBorder[skillsColor]} p-5 shadow-sm`}
+                >
+                    <div className="flex items-center gap-3 mb-3">
+                        <div
+                            className={`w-10 h-10 ${semanticBg10[skillsColor]} flex items-center justify-center`}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular fa-list-check ${semanticText[skillsColor]}`}
+                            />
+                        </div>
+                    </div>
+                    <div
+                        className={`text-3xl font-black ${semanticText[skillsColor]}`}
+                    >
+                        {aiReview.skills_match_percentage || "N/A"}%
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                        Skills Match
+                    </div>
+                </div>
+            </div>
+
+            {/* Overall Summary */}
+            {aiReview.overall_summary && (
+                <div className="bg-base-100 border-l-4 border-accent p-5 shadow-sm">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-2">
+                        Summary
+                    </h4>
+                    <p className="text-sm text-base-content/70 leading-relaxed">
                         {aiReview.overall_summary}
                     </p>
                 </div>
+            )}
 
-                {/* Strengths */}
-                {aiReview.strengths && aiReview.strengths.length > 0 && (
-                    <div className="mt-4">
-                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
-                            Your Strengths
-                        </h3>
-                        <ul className="list-disc list-inside space-y-1">
-                            {aiReview.strengths.map(
-                                (strength: any, index: any) => (
-                                    <li
-                                        key={index}
-                                        className="text-base-content/80"
-                                    >
-                                        {strength}
-                                    </li>
-                                ),
-                            )}
-                        </ul>
-                    </div>
-                )}
+            {/* Strengths & Concerns */}
+            {(aiReview.strengths?.length || aiReview.concerns?.length) && (
+                <div className="grid md:grid-cols-2 gap-4">
+                    {aiReview.strengths && aiReview.strengths.length > 0 && (
+                        <div className="bg-success/5 border-l-4 border-success p-5">
+                            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-3 flex items-center gap-2">
+                                <i className="fa-duotone fa-regular fa-circle-check text-success" />
+                                Key Strengths
+                            </h4>
+                            <BaselCheckList
+                                items={aiReview.strengths}
+                                color="success"
+                                icon="fa-duotone fa-regular fa-circle-check"
+                            />
+                        </div>
+                    )}
 
-                {/* Concerns */}
-                {aiReview.concerns && aiReview.concerns.length > 0 && (
-                    <div className="mt-4">
-                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-warning"></i>
-                            Areas to Address
-                        </h3>
-                        <ul className="list-disc list-inside space-y-1">
-                            {aiReview.concerns.map(
-                                (concern: string, index: number) => (
-                                    <li
-                                        key={index}
-                                        className="text-base-content/80"
-                                    >
-                                        {concern}
-                                    </li>
-                                ),
-                            )}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Skills Match */}
-                {aiReview.skills_match.match_percentage !== null && (
-                    <div className="">
-                        <h3 className="font-semibold text-lg">
-                            Skill Fit Analysis
-                        </h3>
-                    </div>
-                )}
-
-                <div className="mb-2">
-                    <span className="text-sm font-medium">Matched Skills:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                        {aiReview.skills_match.matched_skills &&
-                        aiReview.skills_match.matched_skills.length > 0 ? (
-                            <ul className="list-disc list-inside marker:text-success marker:text-xl">
-                                {aiReview.skills_match.matched_skills.map(
-                                    (skill: string, index: number) => (
-                                        <li key={index} className="text-sm">
-                                            {skill}
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        ) : (
-                            <span className="text-sm text-base-content/60 italic">
-                                No matched skills identified
-                            </span>
-                        )}
-                    </div>
+                    {aiReview.concerns && aiReview.concerns.length > 0 && (
+                        <div className="bg-warning/5 border-l-4 border-warning p-5">
+                            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-3 flex items-center gap-2">
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning" />
+                                Areas to Address
+                            </h4>
+                            <BaselCheckList
+                                items={aiReview.concerns}
+                                color="warning"
+                                icon="fa-duotone fa-regular fa-triangle-exclamation"
+                            />
+                        </div>
+                    )}
                 </div>
+            )}
 
-                <div>
-                    <span className="text-sm font-medium">
-                        Skills to Develop:
-                    </span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                        {aiReview.skills_match.missing_skills &&
-                        aiReview.skills_match.missing_skills.length > 0 ? (
-                            <ul className="list-disc list-inside marker:text-warning marker:text-xl">
-                                {aiReview.skills_match.missing_skills.map(
-                                    (skill: string, index: number) => (
-                                        <li key={index} className="text-sm">
-                                            {skill}
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        ) : (
-                            <span className="text-sm text-base-content/60 italic">
-                                You have all required skills!
-                            </span>
-                        )}
-                    </div>
-                </div>
+            {/* Skills Analysis */}
+            {aiReview.skills_match_percentage !== null && (
+                <div className="bg-base-100 border-l-4 border-primary p-5 shadow-sm">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-4">
+                        Skills Analysis
+                    </h4>
 
-                {/* Experience & Location */}
-                <div className="flex flex-col gap-4">
-                    {aiReview.experience_analysis.candidate_years !== null &&
-                        aiReview.experience_analysis.required_years !==
-                            null && (
-                            <div>
-                                <h4 className="font-medium text-sm mb-1">
-                                    Experience
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                    {aiReview.experience_analysis
-                                        .meets_requirement ? (
-                                        <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
-                                    ) : (
-                                        <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
+                    {aiReview.matched_skills &&
+                        aiReview.matched_skills.length > 0 && (
+                            <div className="mb-4">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">
+                                    Matched Skills
+                                </span>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {aiReview.matched_skills.map(
+                                        (skill, index) => (
+                                            <BaselStatusPill
+                                                key={index}
+                                                color="success"
+                                            >
+                                                {skill}
+                                            </BaselStatusPill>
+                                        ),
                                     )}
-                                    <span className="text-sm">
-                                        {
-                                            aiReview.experience_analysis
-                                                .candidate_years
-                                        }{" "}
-                                        years (Required:{" "}
-                                        {
-                                            aiReview.experience_analysis
-                                                .required_years
-                                        }
-                                        )
-                                    </span>
                                 </div>
                             </div>
                         )}
 
-                    {aiReview.location_compatibility && (
-                        <div>
-                            <h4 className="font-medium text-sm mb-1">
-                                Location
+                    {aiReview.missing_skills &&
+                        aiReview.missing_skills.length > 0 && (
+                            <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">
+                                    Missing Skills
+                                </span>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {aiReview.missing_skills.map(
+                                        (skill, index) => (
+                                            <BaselStatusPill
+                                                key={index}
+                                                color="warning"
+                                            >
+                                                {skill}
+                                            </BaselStatusPill>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                </div>
+            )}
+
+            {/* Experience & Location */}
+            <div className="grid grid-cols-2 gap-4">
+                {aiReview.candidate_years !== null &&
+                    aiReview.required_years !== null && (
+                        <div className="bg-base-100 border-t-4 border-warning p-5 shadow-sm text-center">
+                            <h4 className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 mb-3">
+                                Experience
                             </h4>
-                            <span className="text-sm">
-                                {getLocationLabel(
-                                    aiReview.location_compatibility,
+                            <div className="flex items-center justify-center gap-2">
+                                {aiReview.meets_experience_requirement ? (
+                                    <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-circle-xmark text-warning text-xl" />
                                 )}
-                            </span>
+                                <span className="text-sm font-bold text-base-content">
+                                    {aiReview.candidate_years} yrs (Req:{" "}
+                                    {aiReview.required_years})
+                                </span>
+                            </div>
                         </div>
                     )}
-                </div>
 
-                {/* Analysis Info */}
-                <div className="mt-4 text-xs text-base-content/60 text-right col-span-4">
-                    <p>
-                        Analyzed by {aiReview.model_version ?? "AI"} on{" "}
-                        {aiReview.analyzed_at
-                            ? new Date(aiReview.analyzed_at).toLocaleString()
-                            : "N/A"}
-                    </p>
+                <div className="bg-base-100 border-t-4 border-accent p-5 shadow-sm text-center">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 mb-3">
+                        Location
+                    </h4>
+                    <span className="text-sm font-bold text-base-content">
+                        {getLocationLabel(aiReview.location_compatibility)}
+                    </span>
                 </div>
+            </div>
+
+            {/* Analysis Metadata */}
+            <div className="text-xs text-base-content/40 border-t border-base-300 pt-4">
+                <p className="mb-2">
+                    Analyzed by {aiReview.model_version ?? "AI"} on{" "}
+                    {aiReview.analyzed_at
+                        ? new Date(aiReview.analyzed_at).toLocaleString()
+                        : "N/A"}
+                </p>
+                <p className="leading-relaxed">
+                    It is recommended to use this analysis as a supplementary
+                    tool alongside human judgment. Always review the full
+                    application materials before making any decisions. AI
+                    analysis may not capture all nuances of a
+                    candidate&apos;s qualifications or potential.
+                </p>
             </div>
         </div>
     );

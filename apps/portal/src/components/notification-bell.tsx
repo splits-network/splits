@@ -340,7 +340,7 @@ export default function NotificationBell() {
             >
                 <i className="fa-duotone fa-regular fa-bell text-base-content/60" />
                 {unreadCount > 0 && (
-                    <span className="badge badge-sm bg-primary text-white absolute -top-1 -right-1 rounded-full">
+                    <span className="badge badge-sm bg-accent text-white absolute -top-1 -right-1 rounded-full">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}

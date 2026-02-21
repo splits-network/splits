@@ -16,7 +16,6 @@ interface UploadDocumentsStepProps {
         primaryResumeIndex: number | null,
         primaryExistingDocId: string | null,
     ) => void;
-    onNext: () => void;
 }
 
 const ALLOWED_TYPES = [
@@ -33,7 +32,6 @@ export function UploadDocumentsStep({
     primaryResumeIndex,
     primaryExistingDocId,
     onUpdate,
-    onNext,
 }: UploadDocumentsStepProps) {
     const { getToken } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -172,31 +170,17 @@ export function UploadDocumentsStep({
         onUpdate(documents, newExistingIds, null, docId);
     };
 
-    const handleNext = () => {
-        const totalDocCount = length + existingDocumentIds.length;
-        if (totalDocCount === 0) {
-            setError(
-                "Please upload at least one document or select from your existing ",
-            );
-            return;
-        }
-        if (primaryResumeIndex === null && primaryExistingDocId === null) {
-            setError("Please select a primary resume.");
-            return;
-        }
-        setError(null);
-        onNext();
-    };
-
-    const totalDocCount = length + existingDocumentIds.length;
+    const totalDocCount = documents.length + existingDocumentIds.length;
     const hasPrimary =
         primaryResumeIndex !== null || primaryExistingDocId !== null;
 
     return (
         <div className="space-y-6">
             <div>
-                <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-file-upload"></i>{" "}
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Step 1
+                </p>
+                <h4 className="text-sm font-black tracking-tight mb-2">
                     Select or Upload Documents
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -206,9 +190,11 @@ export function UploadDocumentsStep({
             </div>
 
             {error && (
-                <div className="alert alert-error">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
+                <div className="bg-error/5 border-l-4 border-error p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                        <span className="text-sm">{error}</span>
+                    </div>
                 </div>
             )}
 
@@ -219,7 +205,9 @@ export function UploadDocumentsStep({
                 </div>
             ) : existingDocs.length > 0 ? (
                 <div className="space-y-3">
-                    <h5 className="font-semibold">Your Existing Documents</h5>
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                        Your Existing Documents
+                    </h5>
                     <div className="space-y-2">
                         {existingDocs.map((doc) => {
                             const isSelected = existingDocumentIds.includes(
@@ -230,9 +218,9 @@ export function UploadDocumentsStep({
                             return (
                                 <div
                                     key={doc.id}
-                                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                                    className={`flex items-center justify-between p-4 transition-colors ${
                                         isSelected
-                                            ? "bg-primary/10 border-2 border-coral"
+                                            ? "bg-primary/10 border-2 border-primary"
                                             : "bg-base-200"
                                     }`}
                                 >
@@ -247,10 +235,10 @@ export function UploadDocumentsStep({
                                         />
                                         <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">
+                                            <div className="font-bold text-sm truncate">
                                                 {doc.file_name}
                                             </div>
-                                            <div className="text-sm text-base-content/60">
+                                            <div className="text-xs text-base-content/40">
                                                 {doc.document_type} •{" "}
                                                 {(doc.file_size / 1024).toFixed(
                                                     1,
@@ -261,7 +249,7 @@ export function UploadDocumentsStep({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="badge badge-primary">
+                                            <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary Resume
                                             </span>
                                         ) : isSelected ? (
@@ -284,12 +272,14 @@ export function UploadDocumentsStep({
                     </div>
                 </div>
             ) : (
-                <div className="alert">
-                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                    <span>
-                        You don't have any existing Upload your first documents
-                        below.
-                    </span>
+                <div className="bg-info/5 border-l-4 border-info p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
+                        <span className="text-sm">
+                            You don't have any existing documents. Upload your first documents
+                            below.
+                        </span>
+                    </div>
                 </div>
             )}
 
@@ -305,6 +295,7 @@ export function UploadDocumentsStep({
                     multiple
                     accept=".pdf,.doc,.docx"
                     className="file-input file-input-primary w-full"
+                    style={{ borderRadius: 0 }}
                 />
                 <p className="fieldset-label">
                     Accepted formats: PDF, DOC, DOCX • Maximum size: 5MB per
@@ -313,10 +304,10 @@ export function UploadDocumentsStep({
             </fieldset>
 
             {/* Newly Uploaded Documents */}
-            {length > 0 && (
+            {documents.length > 0 && (
                 <div className="space-y-3">
-                    <h5 className="font-semibold">
-                        Newly Uploaded Documents ({length})
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                        Newly Uploaded Documents ({documents.length})
                     </h5>
                     <div className="space-y-2">
                         {documents.map((doc, index) => {
@@ -325,19 +316,19 @@ export function UploadDocumentsStep({
                             return (
                                 <div
                                     key={index}
-                                    className={`flex items-center justify-between p-4 rounded-lg ${
+                                    className={`flex items-center justify-between p-4 ${
                                         isPrimary
-                                            ? "bg-primary/10 border-2 border-coral"
+                                            ? "bg-primary/10 border-2 border-primary"
                                             : "bg-base-200"
                                     }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <i className="fa-duotone fa-regular fa-file text-success"></i>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">
+                                            <div className="font-bold text-sm truncate">
                                                 {doc.name}
                                             </div>
-                                            <div className="text-sm text-base-content/60">
+                                            <div className="text-xs text-base-content/40">
                                                 {(doc.size / 1024).toFixed(1)}{" "}
                                                 KB • New upload
                                             </div>
@@ -345,7 +336,7 @@ export function UploadDocumentsStep({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="badge badge-primary">
+                                            <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary Resume
                                             </span>
                                         ) : (
@@ -382,7 +373,7 @@ export function UploadDocumentsStep({
                 <div className="alert alert-success">
                     <i className="fa-duotone fa-regular fa-check-circle"></i>
                     <div>
-                        <div className="font-semibold">Ready to Continue</div>
+                        <div className="font-bold text-sm">Ready to Continue</div>
                         <div className="text-sm">
                             {totalDocCount} document
                             {totalDocCount > 1 ? "s" : ""} selected with primary
@@ -391,18 +382,6 @@ export function UploadDocumentsStep({
                     </div>
                 </div>
             )}
-
-            <div className="flex justify-end">
-                <button
-                    type="button"
-                    onClick={handleNext}
-                    className="btn btn-primary"
-                    disabled={totalDocCount === 0 || !hasPrimary}
-                >
-                    Next: Answer Questions
-                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                </button>
-            </div>
         </div>
     );
 }

@@ -15,6 +15,7 @@
         "@gsap/react": "^2.1.2",
         "@sentry/nextjs": "^10.32.1",
         "@splits-network/basel-ui": "workspace:*",
+        "@splits-network/chat-ui": "workspace:*",
         "@splits-network/shared-api-client": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
         "@splits-network/memphis-ui": "workspace:*",

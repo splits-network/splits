@@ -143,7 +143,6 @@ export const APPLICATION_STAGES = [
     { value: "expired", label: "Expired" },
 ] as const;
 
-// Stages where a candidate can withdraw
 export const WITHDRAWABLE_STAGES = [
     "submitted",
     "screen",
@@ -158,9 +157,7 @@ export const WITHDRAWABLE_STAGES = [
 
 // ===== HELPERS =====
 
-export function getRecommendationLabel(
-    recommendation: string,
-): string {
+export function getRecommendationLabel(recommendation: string): string {
     switch (recommendation) {
         case "strong_fit":
             return "Strong Fit";
@@ -175,9 +172,7 @@ export function getRecommendationLabel(
     }
 }
 
-export function getRecommendationColor(
-    recommendation: string,
-): string {
+export function getRecommendationColor(recommendation: string): string {
     switch (recommendation) {
         case "strong_fit":
             return "badge-success";

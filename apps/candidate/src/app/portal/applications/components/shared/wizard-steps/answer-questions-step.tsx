@@ -14,16 +14,12 @@ interface AnswerQuestionsStepProps {
     questions: Question[];
     answers: { [questionId: string]: string };
     onUpdate: (answers: { [questionId: string]: string }) => void;
-    onNext: () => void;
-    onBack: () => void;
 }
 
 export function AnswerQuestionsStep({
     questions,
     answers,
     onUpdate,
-    onNext,
-    onBack,
 }: AnswerQuestionsStepProps) {
     const [error, setError] = useState<string | null>(null);
 
@@ -46,26 +42,6 @@ export function AnswerQuestionsStep({
         );
 
         return unansweredRequired.length === 0;
-    };
-
-    const handleNext = () => {
-        setError(null);
-
-        // Validate required questions are answered
-        const unansweredRequired = questions.filter(
-            (q) =>
-                q.is_required &&
-                (!answers[q.id] || answers[q.id].trim() === ""),
-        );
-
-        if (unansweredRequired.length > 0) {
-            setError(
-                `Please answer all required questions (${unansweredRequired.length} remaining)`,
-            );
-            return;
-        }
-
-        onNext();
     };
 
     const renderQuestion = (question: Question) => {
@@ -104,7 +80,7 @@ export function AnswerQuestionsStep({
                         {question.options?.map((option) => (
                             <label
                                 key={option}
-                                className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
+                                className="flex items-center gap-3 p-3 cursor-pointer hover:bg-base-100 transition-colors"
                             >
                                 <input
                                     type="radio"
@@ -130,6 +106,7 @@ export function AnswerQuestionsStep({
                 return (
                     <textarea
                         className="textarea w-full"
+                        style={{ borderRadius: 0 }}
                         value={answer}
                         onChange={(e) =>
                             handleAnswerChange(question.id, e.target.value)
@@ -141,85 +118,81 @@ export function AnswerQuestionsStep({
         }
     };
 
+    if (questions.length === 0) {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                        Step 3
+                    </p>
+                    <h4 className="text-sm font-black tracking-tight mb-2">
+                        Pre-screening Questions
+                    </h4>
+                </div>
+
+                <div className="bg-info/5 border-l-4 border-info p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
+                        <span className="text-sm">
+                            No pre-screening questions required. You can proceed to
+                            the next step.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div>
-                <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>{" "}
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Step 3
+                </p>
+                <h4 className="text-sm font-black tracking-tight mb-2">
                     Pre-screening Questions
                 </h4>
                 <p className="text-base-content/70 text-sm">
-                    {questions.length === 0
-                        ? "No pre-screening questions for this position."
-                        : `Answer the following ${questions.length} question${questions.length !== 1 ? "s" : ""} from the employer.`}
+                    Answer the following {questions.length} question
+                    {questions.length !== 1 ? "s" : ""} from the employer.
                 </p>
             </div>
 
             {error && (
-                <div className="alert alert-error">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
+                <div className="bg-error/5 border-l-4 border-error p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                        <span className="text-sm">{error}</span>
+                    </div>
                 </div>
             )}
 
-            {questions.length === 0 ? (
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                    <span>
-                        No pre-screening questions required. Click Next to
-                        continue.
-                    </span>
-                </div>
-            ) : (
-                <div className="space-y-6">
-                    {questions.map((question, index) => (
-                        <div
-                            key={question.id}
-                            className="card bg-base-100 shadow"
-                        >
-                            <div className="card-body">
-                                <div className="flex items-start justify-between gap-4 mb-3">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="badge badge-neutral">
-                                                Question {index + 1}
-                                            </span>
-                                            {question.is_required && (
-                                                <span className="badge badge-error badge-sm">
-                                                    Required
-                                                </span>
-                                            )}
-                                        </div>
-                                        <h5 className="font-semibold text-base">
-                                            {question.question}
-                                        </h5>
-                                    </div>
+            <div className="space-y-6">
+                {questions.map((question, index) => (
+                    <div
+                        key={question.id}
+                        className="bg-base-200 p-6 border-2 border-base-300"
+                    >
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-neutral/15 text-neutral-content">
+                                        Question {index + 1}
+                                    </span>
+                                    {question.is_required && (
+                                        <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-error/15 text-error">
+                                            Required
+                                        </span>
+                                    )}
                                 </div>
-                                {renderQuestion(question)}
+                                <h5 className="font-bold text-sm mt-2">
+                                    {question.question}
+                                </h5>
                             </div>
                         </div>
-                    ))}
-                </div>
-            )}
-
-            <div className="flex justify-between">
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="btn btn-outline"
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                    Back
-                </button>
-                <button
-                    type="button"
-                    onClick={handleNext}
-                    className="btn btn-primary"
-                    disabled={!isValid()}
-                >
-                    Next: Add Notes
-                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                </button>
+                        {renderQuestion(question)}
+                    </div>
+                ))}
             </div>
         </div>
     );

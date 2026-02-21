@@ -82,6 +82,36 @@ export interface ChatSidebarProviderProps {
 
 // ── Provider ─────────────────────────────────────────────────────────────
 
+const STORAGE_KEY = "chat-sidebar-state";
+
+type PersistedState = {
+    isOpen: boolean;
+    isMinimized: boolean;
+    view: "list" | "thread";
+    activeConversationId: string | null;
+    activeConversationMeta: { otherUserName: string | null } | null;
+};
+
+function loadPersistedState(): PersistedState | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw) as PersistedState;
+    } catch {
+        return null;
+    }
+}
+
+function persistState(state: PersistedState) {
+    if (typeof window === "undefined") return;
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+        // quota exceeded or private browsing — ignore
+    }
+}
+
 const REALTIME_EVENTS = new Set([
     "message.created",
     "message.updated",
@@ -99,12 +129,18 @@ export function ChatSidebarProvider({
     onIncomingMessage,
     messagesPagePath = "/portal/messages",
 }: ChatSidebarProviderProps) {
-    // ── Sidebar state ────────────────────────────────────────────────────
-    const [isOpen, setIsOpen] = useState(false);
-    const [isMinimized, setIsMinimized] = useState(false);
-    const [view, setView] = useState<"list" | "thread">("list");
-    const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-    const [activeConversationMeta, setActiveConversationMeta] = useState<{ otherUserName: string | null } | null>(null);
+    // ── Sidebar state (restored from localStorage) ────────────────────
+    const [persisted] = useState(() => loadPersistedState());
+    const [isOpen, setIsOpen] = useState(persisted?.isOpen ?? false);
+    const [isMinimized, setIsMinimized] = useState(persisted?.isMinimized ?? false);
+    const [view, setView] = useState<"list" | "thread">(persisted?.view ?? "list");
+    const [activeConversationId, setActiveConversationId] = useState<string | null>(persisted?.activeConversationId ?? null);
+    const [activeConversationMeta, setActiveConversationMeta] = useState<{ otherUserName: string | null } | null>(persisted?.activeConversationMeta ?? null);
+
+    // Persist UI state to localStorage on change
+    useEffect(() => {
+        persistState({ isOpen, isMinimized, view, activeConversationId, activeConversationMeta });
+    }, [isOpen, isMinimized, view, activeConversationId, activeConversationMeta]);
 
     // ── Conversations state ──────────────────────────────────────────────
     const [conversations, setConversations] = useState<ConversationRow[]>([]);

@@ -14,11 +14,12 @@ import { Presence } from "@/components/presense";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
-import { ProposalResponseWizard } from "./proposal-response-wizard";
-import { DeclineModal } from "./decline-modal";
+import { ProposalResponseWizard } from "../modals/proposal-response-wizard";
+import { DeclineModal } from "../modals/decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
 
-// Stages where "Move to Draft" is available
+/* ─── Constants ─────────────────────────────────────────────────────────── */
+
 const BACK_TO_DRAFT_STAGES = [
     "ai_reviewed",
     "ai_review",
@@ -27,8 +28,9 @@ const BACK_TO_DRAFT_STAGES = [
     "rejected",
 ];
 
-// Stages where "Submit" is available
 const SUBMITTABLE_STAGES = ["draft", "ai_reviewed"];
+
+/* ─── Types ─────────────────────────────────────────────────────────────── */
 
 interface ActionsToolbarProps {
     item: Application;
@@ -37,6 +39,8 @@ interface ActionsToolbarProps {
     onStageChange?: () => void;
     onViewDetails?: (id: string) => void;
 }
+
+/* ─── Component ─────────────────────────────────────────────────────────── */
 
 export default function ActionsToolbar({
     item,
@@ -143,7 +147,7 @@ export default function ActionsToolbar({
         }
     };
 
-    // Submit handler (context-aware: draft → AI review, ai_reviewed → submit)
+    // Submit handler
     const handleSubmit = async () => {
         if (item.stage === "draft") {
             await actions.submitToAiReview(item.id);
@@ -152,7 +156,7 @@ export default function ActionsToolbar({
         }
     };
 
-    // Back to draft handler (context-aware: ai_reviewed uses return-to-draft endpoint)
+    // Back to draft handler
     const handleBackToDraft = async () => {
         if (item.stage === "ai_reviewed") {
             await actions.returnToDraft(item.id);
@@ -223,15 +227,55 @@ export default function ActionsToolbar({
 
     const isLoading = actions.loading !== null;
 
-    // ========== DESCRIPTIVE VARIANT ==========
+    /* ── Modals ── */
+
+    const modals = (
+        <ModalPortal>
+            {showEditWizard && item.job && (
+                <ApplicationWizardModal
+                    jobId={item.job.id || item.job_id}
+                    jobTitle={item.job.title}
+                    companyName={item.job.company?.name || "Company"}
+                    onClose={() => setShowEditWizard(false)}
+                    onSuccess={() => {
+                        setShowEditWizard(false);
+                        onStageChange?.();
+                    }}
+                    existingApplication={item}
+                />
+            )}
+
+            {showProposalWizard && (
+                <ProposalResponseWizard
+                    isOpen={showProposalWizard}
+                    onClose={() => setShowProposalWizard(false)}
+                    applicationId={item.id}
+                    jobTitle={item.job?.title || "this position"}
+                    preScreenQuestions={preScreenQuestions || []}
+                    onComplete={handleCompleteProposal}
+                />
+            )}
+
+            <DeclineModal
+                isOpen={showDeclineModal}
+                onClose={() => setShowDeclineModal(false)}
+                onSubmit={handleDeclineProposal}
+                jobTitle={item.job?.title || "this position"}
+            />
+        </ModalPortal>
+    );
+
+    /* ── Descriptive Variant ── */
+
     if (variant === "descriptive") {
         return (
             <>
-                <div className="flex items-center gap-2 flex-wrap">
-                    {/* Edit — only in draft */}
+                <div className="flex items-center gap-1 flex-wrap">
+                    {/* Edit -- only in draft */}
                     {canEdit && (
                         <button
-                            className={`btn btn-primary ${getSizeClass()}`}
+                            className={`btn btn-primary ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
                             disabled={isLoading}
                             onClick={() => setShowEditWizard(true)}
                             title="Edit your application"
@@ -239,16 +283,17 @@ export default function ActionsToolbar({
                             {actions.loading === "edit" ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-pen-to-square mr-1" />
+                                <i className="fa-duotone fa-regular fa-pen-to-square" />
                             )}
-                            Edit
+                            <span className="hidden md:inline">Edit</span>
                         </button>
                     )}
 
-                    {/* Move to Draft — available in several stages */}
+                    {/* Move to Draft */}
                     {canBackToDraft && (
                         <button
-                            className={`btn ${confirmAction ? "btn-success" : "btn-outline"} ${getSizeClass()}`}
+                            className={`btn ${confirmAction === "back-to-draft" ? "btn-success" : "btn-outline"} ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
                             disabled={isLoading}
                             onClick={() =>
                                 handleConfirmClick(
@@ -262,18 +307,21 @@ export default function ActionsToolbar({
                             actions.loading === "return-to-draft" ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-file-pen mr-1" />
+                                <i className="fa-duotone fa-regular fa-file-pen" />
                             )}
-                            {confirmAction === "back-to-draft"
-                                ? "Confirm?"
-                                : "Move to Draft"}
+                            <span className="hidden md:inline">
+                                {confirmAction === "back-to-draft"
+                                    ? "Confirm?"
+                                    : "Move to Draft"}
+                            </span>
                         </button>
                     )}
 
-                    {/* Submit — draft or ai_reviewed */}
+                    {/* Submit */}
                     {canSubmit && (
                         <button
-                            className={`btn btn-success ${getSizeClass()}`}
+                            className={`btn btn-success ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
                             disabled={isLoading}
                             onClick={() =>
                                 handleConfirmClick("submit", handleSubmit)
@@ -284,18 +332,21 @@ export default function ActionsToolbar({
                             actions.loading === "submit-ai" ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-paper-plane mr-1" />
+                                <i className="fa-duotone fa-regular fa-paper-plane" />
                             )}
-                            {confirmAction === "submit"
-                                ? "Confirm?"
-                                : getSubmitLabel()}
+                            <span className="hidden md:inline">
+                                {confirmAction === "submit"
+                                    ? "Confirm?"
+                                    : getSubmitLabel()}
+                            </span>
                         </button>
                     )}
 
                     {/* Withdraw */}
                     {canWithdraw && (
                         <button
-                            className={`btn btn-error btn-outline ${getSizeClass()}`}
+                            className={`btn btn-error btn-outline ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
                             disabled={isLoading}
                             onClick={() =>
                                 handleConfirmClick("withdraw", handleWithdraw)
@@ -305,26 +356,29 @@ export default function ActionsToolbar({
                             {actions.loading === "withdraw" ? (
                                 <span className="loading loading-spinner loading-xs" />
                             ) : (
-                                <i className="fa-duotone fa-regular fa-ban mr-1" />
+                                <i className="fa-duotone fa-regular fa-ban" />
                             )}
-                            {confirmAction === "withdraw"
-                                ? "Confirm?"
-                                : "Withdraw"}
+                            <span className="hidden md:inline">
+                                {confirmAction === "withdraw"
+                                    ? "Confirm?"
+                                    : "Withdraw"}
+                            </span>
                         </button>
                     )}
 
-                    {/* Divider — only show if there are action buttons before message */}
+                    {/* Divider */}
                     {(canEdit ||
                         canBackToDraft ||
                         canSubmit ||
                         canWithdraw) && (
-                        <div className="divider divider-horizontal mx-0" />
+                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                     )}
 
-                    {/* Message Recruiter — always visible */}
+                    {/* Message Recruiter */}
                     <span title={chatDisabledReason || undefined}>
                         <button
-                            className={`btn btn-outline ${getSizeClass()}`}
+                            className={`btn btn-outline ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
                             disabled={!recruiterUserId || startingChat}
                             onClick={handleMessageRecruiter}
                         >
@@ -333,19 +387,22 @@ export default function ActionsToolbar({
                             ) : (
                                 <>
                                     <Presence status={presenceStatus} />
-                                    <i className="fa-duotone fa-regular fa-messages ml-1" />
-                                    Message
+                                    <i className="fa-duotone fa-regular fa-messages" />
+                                    <span className="hidden md:inline">
+                                        Message
+                                    </span>
                                 </>
                             )}
                         </button>
                     </span>
 
-                    {/* Proposal actions — contextual */}
+                    {/* Proposal actions */}
                     {isProposal && (
                         <>
-                            <div className="divider divider-horizontal mx-0" />
+                            <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                             <button
-                                className={`btn btn-primary ${getSizeClass()}`}
+                                className={`btn btn-primary ${getSizeClass()} gap-2`}
+                                style={{ borderRadius: 0 }}
                                 disabled={isJobClosed || isLoading}
                                 onClick={handleAcceptProposal}
                                 title={
@@ -354,68 +411,42 @@ export default function ActionsToolbar({
                                         : "Accept and apply"
                                 }
                             >
-                                <i className="fa-duotone fa-regular fa-check mr-1" />
-                                Accept & Apply
+                                <i className="fa-duotone fa-regular fa-check" />
+                                <span className="hidden md:inline">
+                                    Accept & Apply
+                                </span>
                             </button>
                             <button
-                                className={`btn btn-outline ${getSizeClass()}`}
+                                className={`btn btn-outline ${getSizeClass()} gap-2`}
+                                style={{ borderRadius: 0 }}
                                 disabled={isJobClosed || isLoading}
                                 onClick={() => setShowDeclineModal(true)}
                                 title="Decline this proposal"
                             >
-                                <i className="fa-duotone fa-regular fa-times mr-1" />
-                                Decline
+                                <i className="fa-duotone fa-regular fa-times" />
+                                <span className="hidden md:inline">
+                                    Decline
+                                </span>
                             </button>
                         </>
                     )}
                 </div>
 
-                {/* Modals - portaled to body to escape drawer stacking context */}
-                <ModalPortal>
-                    {showEditWizard && item.job && (
-                        <ApplicationWizardModal
-                            jobId={item.job.id || item.job_id}
-                            jobTitle={item.job.title}
-                            companyName={item.job.company?.name || "Company"}
-                            onClose={() => setShowEditWizard(false)}
-                            onSuccess={() => {
-                                setShowEditWizard(false);
-                                onStageChange?.();
-                            }}
-                            existingApplication={item}
-                        />
-                    )}
-
-                    {showProposalWizard && (
-                        <ProposalResponseWizard
-                            isOpen={showProposalWizard}
-                            onClose={() => setShowProposalWizard(false)}
-                            applicationId={item.id}
-                            jobTitle={item.job?.title || "this position"}
-                            preScreenQuestions={preScreenQuestions || []}
-                            onComplete={handleCompleteProposal}
-                        />
-                    )}
-
-                    <DeclineModal
-                        isOpen={showDeclineModal}
-                        onClose={() => setShowDeclineModal(false)}
-                        onSubmit={handleDeclineProposal}
-                        jobTitle={item.job?.title || "this position"}
-                    />
-                </ModalPortal>
+                {modals}
             </>
         );
     }
 
-    // ========== ICON-ONLY VARIANT ==========
+    /* ── Icon-Only Variant ── */
+
     return (
         <>
             <div className="flex items-center gap-1">
-                {/* Edit — only shown in draft */}
+                {/* Edit */}
                 {canEdit && (
                     <button
                         className={`btn btn-ghost btn-square ${getSizeClass()}`}
+                        style={{ borderRadius: 0 }}
                         disabled={isLoading}
                         onClick={() => setShowEditWizard(true)}
                         title="Edit draft"
@@ -428,10 +459,11 @@ export default function ActionsToolbar({
                     </button>
                 )}
 
-                {/* Move to Draft — only shown when applicable */}
+                {/* Move to Draft */}
                 {canBackToDraft && (
                     <button
                         className={`btn btn-ghost btn-square ${getSizeClass()}`}
+                        style={{ borderRadius: 0 }}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick(
@@ -456,10 +488,11 @@ export default function ActionsToolbar({
                     </button>
                 )}
 
-                {/* Submit — only shown when applicable */}
+                {/* Submit */}
                 {canSubmit && (
                     <button
                         className={`btn btn-success ${getSizeClass()}`}
+                        style={{ borderRadius: 0 }}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick("submit", handleSubmit)
@@ -484,10 +517,11 @@ export default function ActionsToolbar({
                     </button>
                 )}
 
-                {/* Withdraw — only shown when applicable */}
+                {/* Withdraw */}
                 {canWithdraw && (
                     <button
                         className={`btn btn-ghost text-error btn-square ${getSizeClass()}`}
+                        style={{ borderRadius: 0 }}
                         disabled={isLoading}
                         onClick={() =>
                             handleConfirmClick("withdraw", handleWithdraw)
@@ -507,12 +541,14 @@ export default function ActionsToolbar({
                         )}
                     </button>
                 )}
-                {/* Proposal actions — contextual */}
+
+                {/* Proposal actions */}
                 {isProposal && (
                     <>
                         <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
                             className={`btn btn-success ${getSizeClass()}`}
+                            style={{ borderRadius: 0 }}
                             disabled={isJobClosed || isLoading}
                             onClick={handleAcceptProposal}
                             title={
@@ -526,6 +562,7 @@ export default function ActionsToolbar({
                         </button>
                         <button
                             className={`btn btn-error btn-square ${getSizeClass()}`}
+                            style={{ borderRadius: 0 }}
                             disabled={isJobClosed || isLoading}
                             onClick={() => setShowDeclineModal(true)}
                             title="Decline proposal"
@@ -535,7 +572,7 @@ export default function ActionsToolbar({
                     </>
                 )}
 
-                {/* Divider — only if there are action buttons before message */}
+                {/* Divider */}
                 {(canEdit ||
                     canBackToDraft ||
                     canSubmit ||
@@ -544,10 +581,11 @@ export default function ActionsToolbar({
                     <div className="w-px h-4 bg-base-300 mx-0.5" />
                 )}
 
-                {/* Message — always visible */}
+                {/* Message */}
                 <span title={chatDisabledReason || undefined}>
                     <button
                         className={`btn btn-ghost btn-square relative ${getSizeClass()}`}
+                        style={{ borderRadius: 0 }}
                         disabled={!recruiterUserId || startingChat}
                         onClick={handleMessageRecruiter}
                         title="Message recruiter"
@@ -570,6 +608,7 @@ export default function ActionsToolbar({
                         <div className="w-px h-4 bg-base-300 mx-0.5" />
                         <button
                             className={`btn btn-primary btn-square ${getSizeClass()}`}
+                            style={{ borderRadius: 0 }}
                             onClick={() => onViewDetails(item.id)}
                             title="View details"
                         >
@@ -579,40 +618,7 @@ export default function ActionsToolbar({
                 )}
             </div>
 
-            {/* Modals - portaled to body to escape drawer stacking context */}
-            <ModalPortal>
-                {showEditWizard && item.job && (
-                    <ApplicationWizardModal
-                        jobId={item.job.id || item.job_id}
-                        jobTitle={item.job.title}
-                        companyName={item.job.company?.name || "Company"}
-                        onClose={() => setShowEditWizard(false)}
-                        onSuccess={() => {
-                            setShowEditWizard(false);
-                            onStageChange?.();
-                        }}
-                        existingApplication={item}
-                    />
-                )}
-
-                {showProposalWizard && (
-                    <ProposalResponseWizard
-                        isOpen={showProposalWizard}
-                        onClose={() => setShowProposalWizard(false)}
-                        applicationId={item.id}
-                        jobTitle={item.job?.title || "this position"}
-                        preScreenQuestions={preScreenQuestions || []}
-                        onComplete={handleCompleteProposal}
-                    />
-                )}
-
-                <DeclineModal
-                    isOpen={showDeclineModal}
-                    onClose={() => setShowDeclineModal(false)}
-                    onSubmit={handleDeclineProposal}
-                    jobTitle={item.job?.title || "this position"}
-                />
-            </ModalPortal>
+            {modals}
         </>
     );
 }

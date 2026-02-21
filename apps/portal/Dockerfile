@@ -13,6 +13,7 @@ COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
+COPY packages/chat-ui/package.json ./packages/chat-ui/
 COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY apps/portal/package.json ./apps/portal/
 RUN pnpm install --frozen-lockfile
@@ -57,6 +58,7 @@ COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
+COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/portal ./apps/portal
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
@@ -65,6 +67,7 @@ RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
 RUN pnpm --filter @splits-network/basel-ui build
+RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/memphis-ui build
 # Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
@@ -82,6 +85,7 @@ COPY --from=build /app/packages/shared-config/package.json ./packages/shared-con
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
+COPY --from=build /app/packages/chat-ui/package.json ./packages/chat-ui/
 COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY --from=build /app/apps/portal/package.json ./apps/portal/
 
@@ -94,6 +98,7 @@ COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
+COPY --from=build /app/packages/chat-ui/dist ./packages/chat-ui/dist
 COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/apps/portal/.next ./apps/portal/.next
 COPY --from=build /app/apps/portal/public ./apps/portal/public
