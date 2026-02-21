@@ -530,6 +530,12 @@ importers:
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
       amqplib:
         specifier: ^0.10.5
         version: 0.10.9
@@ -629,6 +635,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -876,6 +885,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -992,6 +1004,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -1249,6 +1264,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -1414,6 +1432,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -1478,6 +1499,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging
@@ -1527,6 +1551,9 @@ importers:
       '@splits-network/shared-fastify':
         specifier: workspace:*
         version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
       '@splits-network/shared-logging':
         specifier: workspace:*
         version: link:../../packages/shared-logging

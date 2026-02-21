@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { RecruiterCandidateRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate, TerminateRecruiterCandidateRequest } from './types';
@@ -13,7 +13,7 @@ export class RecruiterCandidateServiceV2 {
 
     constructor(
         private repository: RecruiterCandidateRepository,
-        private eventPublisher: EventPublisherV2,
+        private eventPublisher: IEventPublisher,
         private supabase?: SupabaseClient
     ) {
         // V2 services use direct database queries, not HTTP clients

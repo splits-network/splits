@@ -1,6 +1,6 @@
 import { MarketplaceMetricsRepository } from './repository';
 import { MetricFilters, MetricUpdate, CreateMetricInput } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -12,7 +12,7 @@ export class MarketplaceMetricsServiceV2 {
     constructor(
         private repository: MarketplaceMetricsRepository,
         private supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) { }
 
     /**

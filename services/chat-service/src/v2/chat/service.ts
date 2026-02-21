@@ -13,7 +13,7 @@ import {
     ResyncResponseWithParticipants,
 } from "./types";
 import { ChatEventPublisher } from "./events";
-import { EventPublisher } from "../shared/events";
+import { EventPublisher, IEventPublisher } from "../shared/events";
 
 export class ChatServiceV2 {
     private accessResolver: AccessContextResolver;
@@ -21,7 +21,7 @@ export class ChatServiceV2 {
     constructor(
         private repository: ChatRepository,
         private eventPublisher?: ChatEventPublisher,
-        private domainPublisher?: EventPublisher,
+        private domainPublisher?: IEventPublisher,
     ) {
         this.accessResolver = new AccessContextResolver(
             this.repository.getSupabase(),

@@ -13,7 +13,7 @@ import {
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { EventPublisher } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { AIReviewRepository } from "./v2/reviews/repository";
@@ -123,22 +123,30 @@ async function main() {
         logger.error({ err: error }, "Failed to connect event publisher");
     }
 
-    // Initialize AI review service (needed for domain consumer)
+    // Initialize AI review repository
     const reviewRepository = new AIReviewRepository(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
     );
-    const aiReviewService = new AIReviewServiceV2(
-        reviewRepository,
-        eventPublisher || undefined,
-        logger,
-    );
 
-    // Create Supabase client for health check
+    // Create Supabase client (needed for outbox + health check)
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
+    // Set up transactional outbox for durable event delivery
+    const outboxPublisher = eventPublisher ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger) : null;
+    const outboxWorker = eventPublisher ? new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger) : null;
+    outboxWorker?.start();
+    if (outboxWorker) logger.info('📤 Outbox worker started - events will be durably delivered');
+
+    // Initialize AI review service (needed for domain consumer)
+    const aiReviewService = new AIReviewServiceV2(
+        reviewRepository,
+        outboxPublisher || undefined,
+        logger,
     );
 
     // Register V2 routes (passing the same service instance)
@@ -146,7 +154,7 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey:
             dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher: eventPublisher || undefined,
+        eventPublisher: outboxPublisher || undefined,
         logger,
         aiReviewService, // Pass the service instance so routes use the same one
     });
@@ -163,7 +171,7 @@ async function main() {
             aiReviewService,
             resumeExtractionService,
             resumeExtractionRepository,
-            eventPublisher || undefined,
+            outboxPublisher || undefined,
             logger,
         );
         await domainConsumer.connect();
@@ -203,6 +211,7 @@ async function main() {
         logger.info("SIGTERM received, shutting down ai-service gracefully");
         try {
             await app.close();
+            outboxWorker?.stop();
             if (domainConsumer) {
                 await domainConsumer.close();
             }

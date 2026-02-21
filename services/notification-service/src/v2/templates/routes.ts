@@ -4,13 +4,13 @@ import { TemplateServiceV2 } from './service';
 import { NotificationTemplateRepository } from './repository';
 import { TemplateCreateInput, TemplateUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { resolveAccessContext } from '../shared/access';
 
 interface RegisterTemplateRoutesConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerTemplateRoutes(

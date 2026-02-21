@@ -2,7 +2,7 @@
  * Team Service - Business logic for teams, members, and invitations
  */
 
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { TeamRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { TeamFilters, TeamUpdate, TeamMemberFilters, CreateTeamRequest, CreateTeamInvitationRequest } from './types';
@@ -10,7 +10,7 @@ import { TeamFilters, TeamUpdate, TeamMemberFilters, CreateTeamRequest, CreateTe
 export class TeamServiceV2 {
     constructor(
         private repository: TeamRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: IEventPublisher
     ) {}
 
     // ── Teams ──

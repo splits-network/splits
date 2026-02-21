@@ -1,14 +1,14 @@
 import { buildPaginationResponse } from '../shared/helpers';
 import { MetricFilters, MetricUpdate } from './types';
 import { CreateMetricInput, MarketplaceMetricsRepository } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import type { AccessContext } from '../shared/access';
 
 export class MarketplaceMetricsServiceV2 {
     constructor(
         private repository: MarketplaceMetricsRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {

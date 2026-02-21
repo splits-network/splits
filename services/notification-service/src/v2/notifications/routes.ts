@@ -4,13 +4,13 @@ import { NotificationServiceV2 } from './service';
 import { NotificationRepositoryV2 } from './repository';
 import { NotificationUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { resolveAccessContext } from '../shared/access';
 
 interface RegisterNotificationRoutesConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerNotificationRoutes(

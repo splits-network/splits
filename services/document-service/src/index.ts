@@ -7,10 +7,11 @@ import {
 } from "@splits-network/shared-config";
 import { StorageClient } from "./storage.js";
 import { registerV2Routes } from "./v2/routes.js";
-import { EventPublisher } from "./v2/shared/events.js";
+import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events.js";
 
 async function start() {
     let eventPublisher: EventPublisher | null = null;
+    let outboxWorker: OutboxWorker | null = null;
     try {
         const baseConfig = loadBaseConfig("document-service");
         const dbConfig = loadDatabaseConfig();
@@ -65,21 +66,27 @@ async function start() {
             }
         });
 
+        // Create Supabase client (needed for outbox + health check)
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseClient = createClient(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        );
+
+        // Set up transactional outbox for durable event delivery
+        const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+        outboxWorker = new OutboxWorker(supabaseClient, eventPublisher!, baseConfig.serviceName, logger);
+        outboxWorker.start();
+        logger.info('📤 Outbox worker started - events will be durably delivered');
+
         // Register V2 routes
         await registerV2Routes(fastify, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey:
                 dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
             storage,
-            eventPublisher,
+            eventPublisher: outboxPublisher,
         });
-
-        // Create Supabase client for health check
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabaseClient = createClient(
-            dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-        );
 
         // Register standardized health check
         registerHealthCheck(fastify, {
@@ -105,6 +112,7 @@ async function start() {
             );
             try {
                 await fastify.close();
+                outboxWorker?.stop();
                 if (eventPublisher) {
                     await eventPublisher.close();
                 }
@@ -122,6 +130,7 @@ async function start() {
         logger.info(`Document service listening on port ${baseConfig.port}`);
     } catch (error) {
         console.error("Failed to start document service", error);
+        outboxWorker?.stop();
         if (eventPublisher) {
             try {
                 await eventPublisher.close();

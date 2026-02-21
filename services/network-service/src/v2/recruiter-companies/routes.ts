@@ -7,7 +7,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterCompanyRepository } from './repository';
 import { RecruiterCompanyServiceV2 } from './service';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../helpers';
 import { StandardListParams } from '@splits-network/shared-types';
 import {
@@ -83,7 +83,7 @@ const updateSchema = {
 export async function recruiterCompanyRoutes(
     app: FastifyInstance, 
     supabase: SupabaseClient,
-    eventPublisher: EventPublisherV2
+    eventPublisher: IEventPublisher
 ) {
     const repository = new RecruiterCompanyRepository(supabase);
     const service = new RecruiterCompanyServiceV2(repository, supabase, eventPublisher);

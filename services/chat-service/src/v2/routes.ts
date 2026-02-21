@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { IEventPublisher } from './shared/events';
 import { registerChatRoutes } from './chat/routes';
 
 interface RegisterConfig {
@@ -6,7 +7,7 @@ interface RegisterConfig {
     supabaseKey: string;
     rabbitMqUrl: string;
     redisConfig: { host: string; port: number; password?: string };
-    eventPublisher: import('./shared/events').EventPublisher;
+    eventPublisher: IEventPublisher;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {

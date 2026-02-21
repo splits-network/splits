@@ -4,7 +4,7 @@
  */
 
 import { JobRepository } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { JobFilters, JobUpdate } from './types';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
@@ -19,7 +19,7 @@ export class JobServiceV2 {
     constructor(
         private repository: JobRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }

@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
 import { PayoutRepository } from './repository';
@@ -21,7 +21,7 @@ export class PayoutServiceV2 {
         private transactionRepository: PlacementPayoutTransactionRepository,
         private recruiterConnectRepository: RecruiterConnectRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher,
+        private eventPublisher?: IEventPublisher,
         stripeSecretKey?: string
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {

@@ -66,7 +66,7 @@ export function GridCard({
             </div>
 
             {/* Name */}
-            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1">
+            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1 truncate">
                 {name}
             </h3>
             {candidate.email && (

@@ -4,7 +4,7 @@ import { DomainEvent } from '@splits-network/shared-types';
 import { AIReviewServiceV2 } from './v2/reviews/service';
 import { ResumeExtractionService } from './v2/resume-extraction/service';
 import { ResumeExtractionRepository } from './v2/resume-extraction/repository';
-import { EventPublisher } from './v2/shared/events';
+import { EventPublisher, IEventPublisher } from './v2/shared/events';
 
 /**
  * Domain Event Consumer for AI Service
@@ -24,9 +24,9 @@ export class DomainEventConsumer {
         private aiReviewService: AIReviewServiceV2,
         private resumeExtractionService: ResumeExtractionService,
         private resumeExtractionRepository: ResumeExtractionRepository,
-        private eventPublisher: EventPublisher | undefined,
+        private eventPublisher: IEventPublisher | undefined,
         private logger: Logger
-    ) {}
+    ) { }
 
     async connect(): Promise<void> {
         try {
@@ -37,7 +37,7 @@ export class DomainEventConsumer {
 
             // Assert exchange exists
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
-            
+
             // Create durable queue for AI service
             await this.channel.assertQueue(this.queue, { durable: true });
 
@@ -87,25 +87,25 @@ export class DomainEventConsumer {
                     }, 'Received event');
 
                     await this.handleEvent(event);
-                    
+
                     // Acknowledge message after successful processing
                     this.channel?.ack(msg);
-                    
+
                     this.logger.info({
                         event_type: event.event_type,
                         event_id: event.event_id
                     }, 'Event processed successfully');
-                    
+
                 } catch (error) {
-                    const errorDetails = error instanceof Error 
+                    const errorDetails = error instanceof Error
                         ? { message: error.message, stack: error.stack }
                         : { error: String(error) };
-                    
+
                     this.logger.error({
                         ...errorDetails,
                         message: msg.content.toString()
                     }, 'Error processing event');
-                    
+
                     // Negative acknowledge - requeue the message
                     this.channel?.nack(msg, false, true);
                 }

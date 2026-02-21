@@ -100,18 +100,9 @@ export function SubscriptionSection() {
             const subscriptionData = subResponse.data;
             setSubscription(subscriptionData);
 
-            if (subscriptionData?.plan_id) {
-                try {
-                    const planResponse = await client.get<{
-                        data: Plan;
-                    }>(`/plans/${subscriptionData.plan_id}`);
-                    setPlan(planResponse.data);
-                } catch (planErr) {
-                    console.warn(
-                        "Could not fetch plan details:",
-                        planErr,
-                    );
-                }
+            // The backend joins plan data via plan:plans(*), so use it directly
+            if (subscriptionData?.plan) {
+                setPlan(subscriptionData.plan);
             }
         } catch (err: any) {
             console.error("Failed to fetch subscription:", err);
@@ -208,15 +199,53 @@ export function SubscriptionSection() {
         );
     }
 
-    /* ── Active subscription ──────────────────────────────────────────────── */
+    /* ── Subscription exists but plan data is missing ─────────────────────── */
 
-    const planName = plan?.name || "Recruiter Plan";
-    const planDescription =
-        plan?.description ||
-        "Full access to job opportunities and candidate management";
-    const price = plan?.price_monthly || 99;
-    const currency = plan?.currency || "usd";
-    const billingInterval = plan?.billing_interval || "monthly";
+    if (!plan) {
+        return (
+            <div>
+                <h2 className="text-xl font-black tracking-tight mb-1">
+                    Subscription
+                </h2>
+                <p className="text-base text-base-content/50 mb-8">
+                    Manage your plan and billing cycle.
+                </p>
+                <BaselEmptyState
+                    icon="fa-duotone fa-regular fa-box"
+                    title="No Plan Selected"
+                    description="Your subscription is active but no plan is assigned. Select a plan to get started."
+                    actions={[
+                        {
+                            label: "Select a Plan",
+                            style: "btn-primary",
+                            onClick: () => setShowPlanModal(true),
+                        },
+                    ]}
+                />
+
+                {showPlanModal && (
+                    <BaselPlanModal
+                        isOpen={showPlanModal}
+                        onClose={() => setShowPlanModal(false)}
+                        currentSubscription={subscription}
+                        currentPlan={null}
+                        onPlanChanged={() => {
+                            setShowPlanModal(false);
+                            fetchSubscription();
+                        }}
+                    />
+                )}
+            </div>
+        );
+    }
+
+    /* ── Active subscription with plan ─────────────────────────────────────── */
+
+    const planName = plan.name;
+    const planDescription = plan.description;
+    const price = plan.price_monthly ?? 0;
+    const currency = plan.currency || "usd";
+    const billingInterval = plan.billing_interval || "monthly";
     const features = getPlanFeatures(plan);
 
     return (
@@ -244,9 +273,11 @@ export function SubscriptionSection() {
                         </BaselStatusPill>
                     </div>
 
-                    <p className="text-sm text-base-content/60 mb-4">
-                        {planDescription}
-                    </p>
+                    {planDescription && (
+                        <p className="text-sm text-base-content/60 mb-4">
+                            {planDescription}
+                        </p>
+                    )}
 
                     <div className="text-3xl font-black text-base-content">
                         {formatPrice(price, currency)}

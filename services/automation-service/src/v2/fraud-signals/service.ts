@@ -1,14 +1,14 @@
 import { buildPaginationResponse } from '../shared/helpers';
 import { FraudSignalFilters, FraudSignalUpdate } from './types';
 import { CreateFraudSignalInput, FraudSignalRepository } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import type { AccessContext } from '../shared/access';
 
 export class FraudSignalServiceV2 {
     constructor(
         private repository: FraudSignalRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {

@@ -1,5 +1,5 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { NotificationTemplateRepository } from './repository';
 import { EmailTemplate, TemplateCreateInput, TemplateFilters, TemplateUpdate } from './types';
 import type { AccessContext } from '../shared/access';
@@ -8,7 +8,7 @@ export class TemplateServiceV2 {
     constructor(
         private repository: NotificationTemplateRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {

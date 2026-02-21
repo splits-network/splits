@@ -1,14 +1,14 @@
 import { buildPaginationResponse } from '../shared/helpers';
 import { MatchFilters, MatchUpdate } from './types';
 import { CandidateMatchRepository, CreateMatchInput } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import type { AccessContext } from '../shared/access';
 
 export class CandidateMatchServiceV2 {
     constructor(
         private repository: CandidateMatchRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {

@@ -24,12 +24,12 @@ import {
     GptResumeAnalysisRequest,
     GptResumeAnalysisResponse,
 } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 
 interface ActionRoutesConfig {
     repository: GptActionRepository;
     oauthService: OAuthService;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 /**

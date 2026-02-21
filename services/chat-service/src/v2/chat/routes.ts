@@ -6,7 +6,7 @@ import { ChatStorageClient } from "./storage";
 import { requireUserContext } from "../shared/helpers";
 import { JobQueue } from "@splits-network/shared-job-queue";
 import { ChatEventPublisher } from "./events";
-import { EventPublisher } from "../shared/events";
+import { EventPublisher, IEventPublisher } from "../shared/events";
 import Redis from "ioredis";
 
 interface RegisterChatRoutesConfig {
@@ -14,7 +14,7 @@ interface RegisterChatRoutesConfig {
     supabaseKey: string;
     rabbitMqUrl: string;
     redisConfig: { host: string; port: number; password?: string };
-    eventPublisher: EventPublisher;
+    eventPublisher: IEventPublisher;
 }
 
 export async function registerChatRoutes(
@@ -68,8 +68,8 @@ export async function registerChatRoutes(
             const userIds = Array.isArray(rawUserIds)
                 ? rawUserIds.flatMap((value) => String(value).split(","))
                 : typeof rawUserIds === "string"
-                  ? rawUserIds.split(",")
-                  : [];
+                    ? rawUserIds.split(",")
+                    : [];
             const normalized = userIds
                 .map((value) => value.trim())
                 .filter(Boolean)

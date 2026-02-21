@@ -5,7 +5,7 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 import { PageRepository } from './pages/repository';
 import { PageServiceV2 } from './pages/service';
 import { registerPageRoutes } from './pages/routes';
@@ -15,7 +15,7 @@ import { registerNavigationRoutes } from './navigation/routes';
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {

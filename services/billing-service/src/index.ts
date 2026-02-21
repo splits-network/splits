@@ -7,7 +7,7 @@ import { registerWebhookRoutes } from './routes/webhooks/routes';
 import { BillingService } from './service'; // V1 - Keep for webhook compatibility until V2 migration
 import { BillingRepository } from './repository'; // V1 - Keep for webhook compatibility until V2 migration
 import { registerV2Routes } from './v2/routes';
-import { EventPublisher as V2EventPublisher } from './v2/shared/events';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
 import { PlacementSnapshotService } from './v2/placement-snapshot/service';
@@ -152,12 +152,18 @@ async function main() {
     const snapshotRepository = new PlacementSnapshotRepository(supabase);
     const snapshotService = new PlacementSnapshotService(snapshotRepository);
 
+    // Set up transactional outbox for durable event delivery
+    const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
+    const outboxWorker = new OutboxWorker(supabase, v2EventPublisher, baseConfig.serviceName, logger);
+    outboxWorker.start();
+    logger.info('📤 Outbox worker started - events will be durably delivered');
+
     // Register V2 routes (plans, subscriptions, payouts)
     // This also initializes PayoutServiceV2
     const v2Services = await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher: v2EventPublisher,
+        eventPublisher: outboxPublisher,
     });
 
     // Phase 6: Initialize billing event consumer with payout service
@@ -213,6 +219,7 @@ async function main() {
 
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down billing service');
+        outboxWorker.stop();
         await billingEventConsumer.close();
         await v2EventPublisher.close();
         await app.close();

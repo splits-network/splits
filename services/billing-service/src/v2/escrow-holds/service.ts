@@ -2,7 +2,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { EscrowHoldRepository } from './repository';
 import { PayoutAuditRepository } from '../audit/repository';
 import {
@@ -14,12 +14,12 @@ import {
 
 export class EscrowHoldServiceV2 {
     private repository: EscrowHoldRepository;
-    private eventPublisher: EventPublisher;
+    private eventPublisher: IEventPublisher;
     private auditRepository: PayoutAuditRepository;
 
     constructor(
         supabase: SupabaseClient,
-        eventPublisher: EventPublisher,
+        eventPublisher: IEventPublisher,
         auditRepository: PayoutAuditRepository
     ) {
         this.repository = new EscrowHoldRepository(supabase);

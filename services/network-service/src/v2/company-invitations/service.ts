@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyInvitationRepository } from './repository';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import {
@@ -22,7 +22,7 @@ export class CompanyInvitationServiceV2 {
     constructor(
         private repository: CompanyInvitationRepository,
         private supabase: SupabaseClient,
-        private eventPublisher?: EventPublisherV2,
+        private eventPublisher?: IEventPublisher,
         private portalUrl?: string
     ) {
         this.accessResolver = new AccessContextResolver(supabase);

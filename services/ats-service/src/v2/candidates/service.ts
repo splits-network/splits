@@ -5,7 +5,7 @@
 
 import { CandidateRepository } from './repository';
 import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -16,7 +16,7 @@ export class CandidateServiceV2 {
     constructor(
         private repository: CandidateRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }

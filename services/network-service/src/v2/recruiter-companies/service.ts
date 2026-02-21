@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterCompanyRepository } from './repository';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import {
@@ -25,7 +25,7 @@ export class RecruiterCompanyServiceV2 {
     constructor(
         private repository: RecruiterCompanyRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisherV2
+        private eventPublisher?: IEventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }

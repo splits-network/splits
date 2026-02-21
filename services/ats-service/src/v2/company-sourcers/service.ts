@@ -1,5 +1,5 @@
 import { CompanySourcerRepository } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterCompany, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
@@ -8,7 +8,7 @@ import { StandardListParams, StandardListResponse } from '@splits-network/shared
 export class CompanySourcerServiceV2 {
     constructor(
         private repository: CompanySourcerRepository,
-        private eventPublisher: EventPublisher,
+        private eventPublisher: IEventPublisher,
         private supabase: SupabaseClient
     ) { }
 

@@ -10,10 +10,17 @@ export interface EventPayload {
 }
 
 /**
+ * Minimal interface for event publishing
+ */
+export interface IEventPublisher {
+    publish(eventType: string, payload: Record<string, any>, sourceService?: string): Promise<void>;
+}
+
+/**
  * Event publisher for analytics service
  * Minimal events - analytics is primarily a consumer
  */
-export class EventPublisher {
+export class EventPublisher implements IEventPublisher {
     constructor(private rabbitMqUrl: string) { }
 
     async publish(eventType: string, data: Record<string, any>): Promise<void> {

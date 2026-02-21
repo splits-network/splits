@@ -9,7 +9,7 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-ne
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
-import { EventPublisher } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -106,13 +106,26 @@ async function main() {
     );
     await eventPublisher.connect();
 
+    // Create Supabase client for outbox
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+    );
+
+    // Set up transactional outbox for durable event delivery
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const outboxWorker = new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger);
+    outboxWorker.start();
+    logger.info('📤 Outbox worker started - events will be durably delivered');
+
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey:
             dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         rabbitMqUrl: rabbitConfig.url,
         redisConfig,
-        eventPublisher,
+        eventPublisher: outboxPublisher,
     });
 
     app.get("/health", async (request, reply) => {
@@ -126,6 +139,7 @@ async function main() {
 
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");
+        outboxWorker.stop();
         await eventPublisher.close();
         await app.close();
         process.exit(0);
@@ -140,6 +154,7 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
+        outboxWorker.stop();
         await eventPublisher.close();
         process.exit(1);
     }

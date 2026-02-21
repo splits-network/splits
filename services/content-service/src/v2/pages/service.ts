@@ -4,28 +4,39 @@
  * Business logic, validation, and event publishing for CMS pages.
  */
 
-import { VALID_BLOCK_TYPES } from '@splits-network/shared-types';
-import { PageRepository } from './repository';
-import { PageFilters, PageCreate, PageUpdate } from './types';
-import { validatePaginationParams, buildPaginationResponse } from '../shared/pagination';
-import { EventPublisher } from '../shared/events';
+import { VALID_BLOCK_TYPES } from "@splits-network/shared-types";
+import { PageRepository } from "./repository";
+import { PageFilters, PageCreate, PageUpdate } from "./types";
+import {
+    validatePaginationParams,
+    buildPaginationResponse,
+} from "../shared/pagination";
+import { IEventPublisher } from "../shared/events";
 
 export class PageServiceV2 {
     constructor(
         private repository: PageRepository,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher,
     ) {}
 
     /**
      * List pages with pagination (PUBLIC).
      */
     async getPages(filters: PageFilters) {
-        const { page, limit } = validatePaginationParams(filters.page, filters.limit);
-        const { data, total } = await this.repository.findPages({ ...filters, page, limit });
+        const { page, limit } = validatePaginationParams(
+            filters.page,
+            filters.limit,
+        );
+        const { data, total } = await this.repository.findPages({
+            ...filters,
+            page,
+            limit,
+        });
 
         return {
             data,
-            pagination: buildPaginationResponse(data, total, page, limit).pagination,
+            pagination: buildPaginationResponse(data, total, page, limit)
+                .pagination,
         };
     }
 
@@ -52,7 +63,7 @@ export class PageServiceV2 {
         this.validatePageData(data);
 
         // Auto-set published_at when creating as published
-        if (data.status === 'published' && !data.published_at) {
+        if (data.status === "published" && !data.published_at) {
             data.published_at = new Date().toISOString();
         }
 
@@ -60,13 +71,19 @@ export class PageServiceV2 {
         try {
             page = await this.repository.createPage(data, clerkUserId);
         } catch (error: any) {
-            if (error.message?.includes('duplicate') || error.message?.includes('unique') || error.message?.includes('23505')) {
-                throw new Error(`A page with slug "${data.slug}" already exists for the ${data.app} app`);
+            if (
+                error.message?.includes("duplicate") ||
+                error.message?.includes("unique") ||
+                error.message?.includes("23505")
+            ) {
+                throw new Error(
+                    `A page with slug "${data.slug}" already exists for the ${data.app} app`,
+                );
             }
             throw error;
         }
 
-        this.publishEvent('page.created', {
+        this.publishEvent("page.created", {
             pageId: page.id,
             slug: page.slug,
             app: page.app,
@@ -94,13 +111,17 @@ export class PageServiceV2 {
         }
 
         // Auto-set published_at on status transition to published
-        if (updates.status === 'published' && current.status !== 'published' && !updates.published_at) {
+        if (
+            updates.status === "published" &&
+            current.status !== "published" &&
+            !updates.published_at
+        ) {
             updates.published_at = new Date().toISOString();
         }
 
         const page = await this.repository.updatePage(id, clerkUserId, updates);
 
-        this.publishEvent('page.updated', {
+        this.publishEvent("page.updated", {
             pageId: page.id,
             slug: page.slug,
             app: page.app,
@@ -120,7 +141,7 @@ export class PageServiceV2 {
 
         await this.repository.deletePage(id, clerkUserId);
 
-        this.publishEvent('page.deleted', {
+        this.publishEvent("page.deleted", {
             pageId: id,
             slug: page.slug,
             app: page.app,
@@ -135,14 +156,14 @@ export class PageServiceV2 {
 
         // Imported pages default to draft
         if (!data.status) {
-            data.status = 'draft';
+            data.status = "draft";
         }
 
         const page = upsert
             ? await this.repository.upsertPage(data, clerkUserId)
             : await this.repository.createPage(data, clerkUserId);
 
-        this.publishEvent('page.imported', {
+        this.publishEvent("page.imported", {
             pageId: page.id,
             slug: page.slug,
             app: page.app,
@@ -155,19 +176,21 @@ export class PageServiceV2 {
     /* ─── Validation ────────────────────────────────────────────────────── */
 
     private validatePageData(data: PageCreate): void {
-        if (!data.title?.trim()) throw new Error('Title is required');
-        if (!data.slug?.trim()) throw new Error('Slug is required');
-        if (!data.app?.trim()) throw new Error('App is required');
+        if (!data.title?.trim()) throw new Error("Title is required");
+        if (!data.slug?.trim()) throw new Error("Slug is required");
+        if (!data.app?.trim()) throw new Error("App is required");
 
-        const validApps = ['portal', 'candidate', 'corporate'];
+        const validApps = ["portal", "candidate", "corporate"];
         if (!validApps.includes(data.app)) {
-            throw new Error(`Invalid app: ${data.app}. Must be one of: ${validApps.join(', ')}`);
+            throw new Error(
+                `Invalid app: ${data.app}. Must be one of: ${validApps.join(", ")}`,
+            );
         }
 
         this.validateSlug(data.slug);
 
         if (!Array.isArray(data.blocks)) {
-            throw new Error('Blocks must be an array');
+            throw new Error("Blocks must be an array");
         }
 
         this.validateBlocks(data.blocks);
@@ -176,7 +199,7 @@ export class PageServiceV2 {
     private validateSlug(slug: string): void {
         if (!/^[a-z0-9][a-z0-9\-\/]*[a-z0-9]$/.test(slug) && slug.length > 1) {
             throw new Error(
-                'Slug must be lowercase, using only letters, numbers, hyphens, and slashes'
+                "Slug must be lowercase, using only letters, numbers, hyphens, and slashes",
             );
         }
     }
@@ -189,7 +212,7 @@ export class PageServiceV2 {
             }
             if (!VALID_BLOCK_TYPES.includes(block.type)) {
                 throw new Error(
-                    `Block at index ${i} has invalid type "${block.type}". Valid types: ${VALID_BLOCK_TYPES.join(', ')}`
+                    `Block at index ${i} has invalid type "${block.type}". Valid types: ${VALID_BLOCK_TYPES.join(", ")}`,
                 );
             }
         }
@@ -197,11 +220,16 @@ export class PageServiceV2 {
 
     /* ─── Events ────────────────────────────────────────────────────────── */
 
-    private publishEvent(eventType: string, payload: Record<string, any>): void {
+    private publishEvent(
+        eventType: string,
+        payload: Record<string, any>,
+    ): void {
         if (!this.eventPublisher) return;
 
-        this.eventPublisher.publish(eventType, payload).catch((error) => {
-            console.error(`Failed to publish ${eventType} event:`, error);
-        });
+        this.eventPublisher
+            .publish(eventType, payload)
+            .catch((error: unknown) => {
+                console.error(`Failed to publish ${eventType} event:`, error);
+            });
     }
 }

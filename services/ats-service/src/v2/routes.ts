@@ -12,7 +12,7 @@ import { PlacementServiceV2 } from './placements/service';
 import { CandidateSourcerRepository } from './candidate-sourcers/repository';
 import { CandidateSourcerServiceV2 } from './candidate-sourcers/service';
 import { CompanySourcerRepository } from './company-sourcers/repository';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 import { registerJobRoutes } from './jobs/routes';
 import { registerCompanyRoutes } from './companies/routes';
 import { registerCandidateRoutes } from './candidates/routes';
@@ -35,7 +35,7 @@ import { registerApplicationNoteRoutes } from './application-notes/routes';
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {

@@ -6,7 +6,7 @@
 import { ApplicationRepository } from './repository';
 import { ApplicationFilters, ApplicationUpdate } from './types';
 import { autoAssignRecruiter } from './recruiter-auto-assign';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -17,7 +17,7 @@ export class ApplicationServiceV2 {
     constructor(
         private repository: ApplicationRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {
         this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);

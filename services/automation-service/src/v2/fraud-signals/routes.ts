@@ -7,13 +7,13 @@ import {
     requireUserContext,
     validatePaginationParams,
 } from "../shared/helpers";
-import { EventPublisher } from "../shared/events";
+import { EventPublisher, IEventPublisher } from "../shared/events";
 import { resolveAccessContext } from "../shared/access";
 
 interface RegisterFraudRoutesConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerFraudRoutes(

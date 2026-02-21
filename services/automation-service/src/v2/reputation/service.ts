@@ -8,13 +8,13 @@
 import { ReputationRepository } from './repository';
 import { calculateReputationScore } from './calculator';
 import { getTierFromScore, TierChangeEvent, RecruiterReputation } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { Logger } from '@splits-network/shared-logging';
 
 export class ReputationService {
     constructor(
         private repository: ReputationRepository,
-        private eventPublisher: EventPublisher | null,
+        private eventPublisher: IEventPublisher | null,
         private logger: Logger
     ) {}
 

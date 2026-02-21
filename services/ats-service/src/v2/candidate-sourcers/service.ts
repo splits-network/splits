@@ -1,5 +1,5 @@
 import { CandidateSourcerRepository } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateSourcer, CandidateSourcerCreate, CandidateSourcerFilters, CandidateSourcerUpdate } from './types';
@@ -8,7 +8,7 @@ import { StandardListParams, StandardListResponse } from '@splits-network/shared
 export class CandidateSourcerServiceV2 {
     constructor(
         private repository: CandidateSourcerRepository,
-        private eventPublisher: EventPublisher,
+        private eventPublisher: IEventPublisher,
         private supabase: SupabaseClient
     ) { }
 

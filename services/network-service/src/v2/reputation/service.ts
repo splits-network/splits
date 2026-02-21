@@ -2,7 +2,7 @@
  * Reputation Service - Business logic for recruiter reputation
  */
 
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { ReputationRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { ReputationFilters, ReputationUpdate } from './types';
@@ -10,7 +10,7 @@ import { ReputationFilters, ReputationUpdate } from './types';
 export class ReputationServiceV2 {
     constructor(
         private repository: ReputationRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: IEventPublisher
     ) {}
 
     async getReputations(

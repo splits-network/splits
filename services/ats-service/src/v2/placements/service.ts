@@ -5,7 +5,7 @@
 
 import { PlacementRepository } from './repository';
 import { PlacementFilters, PlacementUpdate } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -21,7 +21,7 @@ export class PlacementServiceV2 {
         private repository: PlacementRepository,
         private companySourcerRepo: CompanySourcerRepository,
         private candidateSourcerRepo: CandidateSourcerRepository,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {
         this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);

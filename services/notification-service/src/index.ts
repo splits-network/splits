@@ -11,7 +11,7 @@ import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
 import { registerV2Routes } from './v2/routes';
-import { EventPublisher as V2EventPublisher } from './v2/shared/events';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -137,19 +137,25 @@ async function main() {
         throw error;
     }
 
-    // Register V2 HTTP routes only
-    await registerV2Routes(app, {
-        supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher: v2EventPublisher,
-    });
-
-    // Create Supabase client for health checks
+    // Create Supabase client (needed for outbox + health checks)
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
+
+    // Set up transactional outbox for durable event delivery
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const outboxWorker = new OutboxWorker(supabaseClient, v2EventPublisher, baseConfig.serviceName, logger);
+    outboxWorker.start();
+    logger.info('📤 Outbox worker started - events will be durably delivered');
+
+    // Register V2 HTTP routes only
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: outboxPublisher,
+    });
 
     // Simple health check wrapper
     const createChecker = (name: string, originalChecker: () => Promise<any>) => {
@@ -198,6 +204,7 @@ async function main() {
         }
 
         try {
+            outboxWorker.stop();
             await v2EventPublisher.close();
             logger.info('V2 event publisher closed');
         } catch (error) {
@@ -219,6 +226,7 @@ async function main() {
             await Sentry.flush(2000);
         }
         await consumer.close();
+        outboxWorker.stop();
         await v2EventPublisher.close();
         process.exit(1);
     }

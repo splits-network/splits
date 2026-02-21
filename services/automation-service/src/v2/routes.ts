@@ -3,12 +3,12 @@ import { registerMatchRoutes } from './matches/routes';
 import { registerFraudRoutes } from './fraud-signals/routes';
 import { registerRuleRoutes } from './rules/routes';
 import { registerMetricRoutes } from './metrics/routes';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {

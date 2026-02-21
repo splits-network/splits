@@ -2,7 +2,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { PayoutScheduleRepository } from './repository';
 import { PayoutAuditRepository } from '../audit/repository';
 import { InvoiceEligibilityRepository } from './invoice-eligibility-repository';
@@ -19,13 +19,13 @@ const MAX_RETRY_ATTEMPTS = 3;
 
 export class PayoutScheduleServiceV2 {
     private repository: PayoutScheduleRepository;
-    private eventPublisher: EventPublisher;
+    private eventPublisher: IEventPublisher;
     private auditRepository: PayoutAuditRepository;
     private invoiceRepository: InvoiceEligibilityRepository;
 
     constructor(
         supabase: SupabaseClient,
-        eventPublisher: EventPublisher,
+        eventPublisher: IEventPublisher,
         auditRepository: PayoutAuditRepository,
         private payoutService: PayoutServiceV2
     ) {

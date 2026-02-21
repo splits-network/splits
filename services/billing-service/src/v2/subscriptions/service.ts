@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { buildPaginationResponse, isBillingAdmin } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
 import { PlanRepository } from '../plans/repository';
@@ -27,7 +27,7 @@ export class SubscriptionServiceV2 {
         private repository: SubscriptionRepository,
         private planRepository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher,
+        private eventPublisher?: IEventPublisher,
         stripeSecretKey?: string,
         private supabase?: SupabaseClient
     ) {

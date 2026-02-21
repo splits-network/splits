@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { MembershipUpdate } from './types';
 import { MembershipRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +14,7 @@ import type { AccessContext } from '../shared/access';
 export class MembershipServiceV2 {
     constructor(
         private repository: MembershipRepository,
-        private eventPublisher: EventPublisherV2,
+        private eventPublisher: IEventPublisher,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) { }

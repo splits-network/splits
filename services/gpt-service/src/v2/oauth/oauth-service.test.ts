@@ -20,7 +20,7 @@ const mockLogger: Logger = {
 } as any;
 
 // Mock event publisher
-const mockEventPublisher: EventPublisher = {
+const mockEventPublisher: IEventPublisher = {
     publish: vi.fn(),
 } as any;
 

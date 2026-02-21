@@ -1,21 +1,23 @@
 {
-  "name": "@splits-network/shared-job-queue",
-  "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsc --watch"
-  },
-  "dependencies": {
-    "amqplib": "^0.10.5",
-    "@splits-network/shared-logging": "workspace:*",
-    "@splits-network/shared-config": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/amqplib": "^0.10.5",
-    "@types/node": "^22.10.5",
-    "typescript": "^5.7.3"
-  }
+    "name": "@splits-network/shared-job-queue",
+    "version": "1.0.0",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "amqplib": "^0.10.5",
+        "@supabase/supabase-js": "^2.86.2",
+        "@splits-network/shared-logging": "workspace:*",
+        "@splits-network/shared-config": "workspace:*",
+        "@splits-network/shared-types": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/amqplib": "^0.10.5",
+        "@types/node": "^22.10.5",
+        "typescript": "^5.7.3"
+    }
 }

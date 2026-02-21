@@ -4,7 +4,7 @@ import { StorageClient } from "../../storage";
 import { DocumentFilters, DocumentUpdate, DocumentCreateInput } from "./types";
 import { buildPaginationResponse } from "../shared/helpers";
 import { DocumentRepositoryV2 } from "./repository";
-import { EventPublisher } from "../shared/events";
+import { EventPublisher, IEventPublisher } from "../shared/events";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -33,7 +33,7 @@ export class DocumentServiceV2 {
         supabase: SupabaseClient,
         private repository: DocumentRepositoryV2,
         private storage: StorageClient,
-        private eventPublisher?: EventPublisher,
+        private eventPublisher?: IEventPublisher,
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }

@@ -1,14 +1,14 @@
 import { NotificationFilters, NotificationUpdate, Notification } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 import { NotificationRepositoryV2 } from './repository';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import type { AccessContext } from '../shared/access';
 
 export class NotificationServiceV2 {
     constructor(
         private repository: NotificationRepositoryV2,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {

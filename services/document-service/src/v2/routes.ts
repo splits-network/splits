@@ -1,13 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { registerDocumentRoutes } from './documents/routes';
 import { StorageClient } from '../storage';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
     storage: StorageClient;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {

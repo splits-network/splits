@@ -2,7 +2,7 @@
  * Proposal Service - Business logic for candidate proposals
  */
 
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { ProposalRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { ProposalFilters, ProposalUpdate } from './types';
@@ -10,7 +10,7 @@ import { ProposalFilters, ProposalUpdate } from './types';
 export class ProposalServiceV2 {
     constructor(
         private repository: ProposalRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: IEventPublisher
     ) { }
 
     async getProposals(

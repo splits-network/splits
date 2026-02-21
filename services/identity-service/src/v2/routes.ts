@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2 } from './shared/events';
+import { IEventPublisher } from './shared/events';
 import { UserRepository } from './users/repository';
 import { UserServiceV2 } from './users/service';
 import { OrganizationRepository } from './organizations/repository';
@@ -28,7 +28,7 @@ import { resolveAccessContext } from './shared/access';
 interface IdentityV2Config {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher: EventPublisherV2;
+    eventPublisher: IEventPublisher;
     logger: Logger;
 }
 

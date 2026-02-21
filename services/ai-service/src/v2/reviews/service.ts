@@ -5,7 +5,7 @@
 
 import { AIReviewRepository } from './repository';
 import { AIReviewInput, AIReviewResult } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { Logger } from '@splits-network/shared-logging';
 
 export class AIReviewServiceV2 {
@@ -15,7 +15,7 @@ export class AIReviewServiceV2 {
 
     constructor(
         private repository: AIReviewRepository,
-        private eventPublisher: EventPublisher | undefined,
+        private eventPublisher: IEventPublisher | undefined,
         private logger: Logger
     ) {
         this.openaiApiKey = process.env.OPENAI_API_KEY || '';

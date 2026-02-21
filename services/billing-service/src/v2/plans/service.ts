@@ -1,4 +1,4 @@
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
 import { PlanRepository } from './repository';
@@ -8,7 +8,7 @@ export class PlanServiceV2 {
     constructor(
         private repository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {}
 
     async getPlans(filters: PlanListFilters = {}): Promise<{

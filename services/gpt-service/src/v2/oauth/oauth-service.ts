@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { SignJWT, jwtVerify, importPKCS8, type KeyLike } from 'jose';
 import { randomBytes, createHash } from 'crypto';
 import {
@@ -28,7 +28,7 @@ export class OAuthService {
     constructor(
         private supabase: SupabaseClient,
         private gptConfig: GptConfig,
-        private eventPublisher: EventPublisher,
+        private eventPublisher: IEventPublisher,
         private logger: Logger
     ) {
         this.initializePrivateKey();

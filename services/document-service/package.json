@@ -15,6 +15,7 @@
         "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-logging": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
+        "@splits-network/shared-job-queue": "workspace:*",
         "@supabase/supabase-js": "^2.48.0",
         "amqplib": "^0.10.5",
         "fastify": "^5.2.1",

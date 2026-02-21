@@ -4,7 +4,7 @@ import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupPr
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
-import { EventPublisherV2 } from './v2/shared/events';
+import { EventPublisherV2, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -115,20 +115,26 @@ async function main() {
         // Don't throw - service should continue without RabbitMQ
     }
 
-    // Register V2 routes only
-    await registerV2Routes(app, {
-        supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher,
-        logger,
-    });
-
-    // Create Supabase client for health checks
+    // Create Supabase client (needed for outbox + health checks)
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
+
+    // Set up transactional outbox for durable event delivery
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const outboxWorker = new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger);
+    outboxWorker.start();
+    logger.info('📤 Outbox worker started - events will be durably delivered');
+
+    // Register V2 routes only
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: outboxPublisher,
+        logger,
+    });
 
     // Register standardized health check with dependency monitoring
     registerHealthCheck(app, {
@@ -168,6 +174,7 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
+        outboxWorker.stop();
         await eventPublisher.close();
         process.exit(1);
     }
@@ -175,6 +182,7 @@ async function main() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
+        outboxWorker.stop();
         await eventPublisher.close();
         await app.close();
         process.exit(0);

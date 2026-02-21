@@ -5,7 +5,7 @@
 
 import { ApplicationNoteRepository } from './repository';
 import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate, ApplicationNote } from './types';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListResponse } from '@splits-network/shared-types';
@@ -16,7 +16,7 @@ export class ApplicationNoteServiceV2 {
     constructor(
         private repository: ApplicationNoteRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: IEventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }

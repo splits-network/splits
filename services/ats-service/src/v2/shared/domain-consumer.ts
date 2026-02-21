@@ -10,7 +10,7 @@ import { ApplicationRepository } from '../applications/repository';
 import { CandidateRepository } from '../candidates/repository';
 import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
 import { PlacementServiceV2 } from '../placements/service';
-import { EventPublisher } from './events';
+import { EventPublisher, IEventPublisher } from './events';
 
 interface DomainEvent {
     event_id: string;
@@ -31,7 +31,7 @@ export class DomainEventConsumer {
         private candidateRepository: CandidateRepository,
         private candidateSourcerRepository: CandidateSourcerRepository,
         private placementService: PlacementServiceV2,
-        private eventPublisher: EventPublisher,
+        private eventPublisher: IEventPublisher,
         private logger: Logger
     ) { }
 

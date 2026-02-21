@@ -8,13 +8,13 @@ import {
 import { DocumentRepositoryV2 } from "./repository";
 import { DocumentUpdate } from "./types";
 import { StorageClient } from "../../storage";
-import { EventPublisher } from "../shared/events";
+import { EventPublisher, IEventPublisher } from "../shared/events";
 
 interface RegisterDocumentRoutesConfig {
     supabaseUrl: string;
     supabaseKey: string;
     storage: StorageClient;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerDocumentRoutes(

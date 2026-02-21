@@ -3,7 +3,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { EventPublisher as V2EventPublisher } from './v2/shared/events';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { DomainEventConsumer } from './v2/shared/domain-consumer';
 import { ApplicationRepository } from './v2/applications/repository';
 import { CandidateRepository } from './v2/candidates/repository';
@@ -132,6 +132,13 @@ async function main() {
         candidateRepository.getSupabase()
     );
 
+    // Initialize outbox publisher (writes events to DB) and worker (delivers DB events → RabbitMQ)
+    const supabase = applicationRepository.getSupabase();
+    const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
+    const outboxWorker = new OutboxWorker(supabase, v2EventPublisher, baseConfig.serviceName, logger);
+    outboxWorker.start();
+    logger.info('📤 Outbox worker started - events will be durably delivered');
+
     // Initialize placement service for domain consumer
     const placementRepository = new (await import('./v2/placements/repository')).PlacementRepository(
         dbConfig.supabaseUrl,
@@ -145,7 +152,7 @@ async function main() {
         placementRepository,
         companySourcerRepository,
         candidateSourcerRepository,
-        v2EventPublisher
+        outboxPublisher
     );
 
     const domainConsumer = new DomainEventConsumer(
@@ -154,7 +161,7 @@ async function main() {
         candidateRepository,
         candidateSourcerRepository,
         placementService,
-        v2EventPublisher,
+        outboxPublisher,
         logger
     );
 
@@ -172,7 +179,7 @@ async function main() {
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher: v2EventPublisher,
+        eventPublisher: outboxPublisher,
     });
 
     // Health check endpoint
@@ -221,6 +228,7 @@ async function main() {
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
         await domainConsumer.disconnect();
+        outboxWorker.stop();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);
@@ -237,6 +245,7 @@ async function main() {
             await Sentry.flush(2000);
         }
         await domainConsumer.disconnect();
+        outboxWorker.stop();
         await v2EventPublisher.close();
         process.exit(1);
     }

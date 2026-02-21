@@ -7,7 +7,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyInvitationRepository } from './repository';
 import { CompanyInvitationServiceV2 } from './service';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../helpers';
 import { StandardListParams } from '@splits-network/shared-types';
 import {
@@ -65,7 +65,7 @@ const lookupSchema = {
 export async function companyInvitationRoutes(
     app: FastifyInstance,
     supabase: SupabaseClient,
-    eventPublisher: EventPublisherV2,
+    eventPublisher: IEventPublisher,
     portalUrl?: string
 ) {
     const repository = new CompanyInvitationRepository(supabase);

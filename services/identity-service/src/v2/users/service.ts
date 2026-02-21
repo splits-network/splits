@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { UserUpdate } from './types';
 import { UserRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +14,7 @@ import { StandardListParams } from '@splits-network/shared-types';
 export class UserServiceV2 {
     constructor(
         private repository: UserRepository,
-        private eventPublisher: EventPublisherV2,
+        private eventPublisher: IEventPublisher,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) { }

@@ -2,7 +2,7 @@
  * Assignment Service - Business logic for role assignments
  */
 
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { AssignmentRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { AssignmentFilters, AssignmentUpdate } from './types';
@@ -10,7 +10,7 @@ import { AssignmentFilters, AssignmentUpdate } from './types';
 export class AssignmentServiceV2 {
     constructor(
         private repository: AssignmentRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: IEventPublisher
     ) {}
 
     async getAssignments(

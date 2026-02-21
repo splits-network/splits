@@ -5,14 +5,14 @@
 import { FastifyInstance } from 'fastify';
 import { AIReviewRepository } from './reviews/repository';
 import { AIReviewServiceV2 } from './reviews/service';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 import { registerAIReviewRoutes } from './reviews/routes';
 import { Logger } from '@splits-network/shared-logging';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
     logger: Logger;
     aiReviewService?: AIReviewServiceV2; // Optional: if provided, use this instance
 }

@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { EventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events';
 import type { AccessContext } from '../shared/access';
 import { DiscountRepository } from './repository';
 import { PlanRepository } from '../plans/repository';
@@ -26,7 +26,7 @@ export class DiscountServiceV2 {
         private repository: DiscountRepository,
         private planRepository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher,
+        private eventPublisher?: IEventPublisher,
         stripeSecretKey?: string
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {

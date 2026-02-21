@@ -2,7 +2,7 @@
  * Recruiter Service - Business logic for recruiters
  */
 
-import { EventPublisherV2 } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { RecruiterRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterFilters, RecruiterUpdate } from './types';
@@ -10,7 +10,7 @@ import { RecruiterFilters, RecruiterUpdate } from './types';
 export class RecruiterServiceV2 {
     constructor(
         private repository: RecruiterRepository,
-        private eventPublisher: EventPublisherV2
+        private eventPublisher: IEventPublisher
     ) { }
 
     async getRecruiters(

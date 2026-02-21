@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { EventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events';
 import { PlanRepository } from './plans/repository';
 import { PlanServiceV2 } from './plans/service';
 import { SubscriptionRepository } from './subscriptions/repository';
@@ -36,7 +36,7 @@ import { resolveAccessContext } from './shared/access';
 interface BillingV2Config {
     supabaseUrl: string;
     supabaseKey: string;
-    eventPublisher?: EventPublisher;
+    eventPublisher?: IEventPublisher;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: BillingV2Config) {

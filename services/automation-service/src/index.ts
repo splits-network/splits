@@ -8,7 +8,7 @@ import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupPr
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
-import { EventPublisher } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
 import { ReputationRepository, ReputationService, ReputationEventConsumer } from "./v2/reputation";
 
@@ -20,6 +20,8 @@ async function main() {
     let v2EventPublisher: EventPublisher | null = null;
     let domainConsumer: DomainEventConsumer | null = null;
     let reputationConsumer: ReputationEventConsumer | null = null;
+    let outboxPublisher: OutboxPublisher | null = null;
+    let outboxWorker: OutboxWorker | null = null;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -80,6 +82,19 @@ async function main() {
             "V2 domain event consumer connected - listening for automation triggers",
         );
 
+        // Create Supabase client (needed for outbox + health check)
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseClient = createClient(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        );
+
+        // Set up transactional outbox for durable event delivery
+        outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+        outboxWorker = new OutboxWorker(supabaseClient, v2EventPublisher!, baseConfig.serviceName, logger);
+        outboxWorker.start();
+        logger.info('📤 Outbox worker started - events will be durably delivered');
+
         // Initialize reputation event consumer for reputation recalculation
         const reputationRepository = new ReputationRepository(
             dbConfig.supabaseUrl,
@@ -87,7 +102,7 @@ async function main() {
         );
         const reputationService = new ReputationService(
             reputationRepository,
-            v2EventPublisher,
+            outboxPublisher,
             logger,
         );
         reputationConsumer = new ReputationEventConsumer(
@@ -104,15 +119,8 @@ async function main() {
         await registerV2Routes(app, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey: dbConfig.supabaseServiceRoleKey!,
-            eventPublisher: v2EventPublisher,
+            eventPublisher: outboxPublisher,
         });
-
-        // Create Supabase client for health check
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabaseClient = createClient(
-            dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-        );
 
         // Register standardized health check
         registerHealthCheck(app, {
@@ -138,6 +146,7 @@ async function main() {
             );
             try {
                 await app.close();
+                outboxWorker?.stop();
                 if (v2EventPublisher) {
                     await v2EventPublisher.close();
                 }
@@ -161,6 +170,7 @@ async function main() {
             "Automation service started",
         );
     } catch (error) {
+        outboxWorker?.stop();
         if (v2EventPublisher) {
             try {
                 await v2EventPublisher.close();
