@@ -72,4 +72,59 @@ export class WebhookRepositoryV2 {
 
         if (error) throw error;
     }
+
+    /**
+     * Find candidate by user_id
+     */
+    async findCandidateByUserId(userId: string): Promise<{ id: string } | null> {
+        const { data, error } = await this.supabase
+            .from('candidates')
+            .select('id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Create a candidate record linked to a user
+     */
+    async createCandidate(userId: string, email: string, fullName: string): Promise<{ id: string }> {
+        const { data, error } = await this.supabase
+            .from('candidates')
+            .insert({
+                user_id: userId,
+                email,
+                full_name: fullName,
+                verification_status: 'unverified',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .select('id')
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Create user_role entry linking user to candidate
+     */
+    async createCandidateUserRole(userId: string, candidateId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('user_roles')
+            .insert({
+                user_id: userId,
+                role_name: 'candidate',
+                role_entity_id: candidateId,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            });
+
+        // Ignore duplicate (role already exists)
+        if (error && !error.message?.includes('duplicate') && error.code !== '23505') {
+            throw error;
+        }
+    }
 }

@@ -8,7 +8,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import type { Logger } from '@splits-network/shared-logging';
 import { EventPublisherV2 } from '../shared/events';
 import { WebhookRepositoryV2 } from './repository';
-import { ClerkWebhookEvent, ClerkUserData } from './types';
+import { ClerkWebhookEvent, ClerkUserData, WebhookSourceApp } from './types';
 
 export class WebhooksServiceV2 {
     private logger: Logger;
@@ -26,17 +26,18 @@ export class WebhooksServiceV2 {
     /**
      * Handle Clerk webhook events
      */
-    async handleClerkWebhook(event: ClerkWebhookEvent): Promise<void> {
+    async handleClerkWebhook(event: ClerkWebhookEvent, sourceApp: WebhookSourceApp = 'unknown'): Promise<void> {
         this.logger.info({
             type: event.type,
-            id: event.data.id
+            id: event.data.id,
+            sourceApp,
         }, 'Processing Clerk webhook event');
 
         try {
             switch (event.type) {
                 case 'user.created':
                 case 'user.updated':
-                    await this.handleUserCreatedOrUpdated(event.data);
+                    await this.handleUserCreatedOrUpdated(event.data, sourceApp);
                     break;
 
                 case 'user.deleted':
@@ -61,7 +62,7 @@ export class WebhooksServiceV2 {
      * Sync Clerk user data with internal database
      * Used by webhook events and other sync operations
      */
-    async syncClerkUser(clerkUserId: string, email: string, name?: string): Promise<void> {
+    async syncClerkUser(clerkUserId: string, email: string, name?: string, sourceApp: WebhookSourceApp = 'unknown'): Promise<void> {
         try {
             // Check if user exists
             const existingUser = await this.repository.findUserByClerkId(clerkUserId);
@@ -97,6 +98,11 @@ export class WebhooksServiceV2 {
                         changes: Object.keys(updates)
                     }, 'User updated from Clerk sync');
                 }
+
+                // Ensure candidate exists for candidate-app users
+                if (sourceApp === 'candidate') {
+                    await this.ensureCandidateExists(existingUser.id, email, name || email);
+                }
             } else {
                 // Create new user
                 const userData = {
@@ -122,6 +128,11 @@ export class WebhooksServiceV2 {
                     userId: newUser.id,
                     clerkUserId
                 }, 'User created from Clerk sync');
+
+                // Create candidate record for candidate-app signups
+                if (sourceApp === 'candidate') {
+                    await this.ensureCandidateExists(newUser.id, email, name || email);
+                }
             }
         } catch (error) {
             this.logger.error({
@@ -134,9 +145,37 @@ export class WebhooksServiceV2 {
     }
 
     /**
+     * Ensure a candidate record exists for a user.
+     * Creates candidate + user_role if not found. Idempotent.
+     */
+    private async ensureCandidateExists(userId: string, email: string, fullName: string): Promise<void> {
+        try {
+            const existing = await this.repository.findCandidateByUserId(userId);
+            if (existing) {
+                this.logger.info({ userId, candidateId: existing.id }, 'Candidate already exists for user');
+                return;
+            }
+
+            const candidate = await this.repository.createCandidate(userId, email, fullName);
+            await this.repository.createCandidateUserRole(userId, candidate.id);
+
+            this.logger.info({
+                userId,
+                candidateId: candidate.id,
+            }, 'Candidate created from webhook');
+        } catch (error) {
+            // Log but don't fail the webhook — candidate can be created by the fallback
+            this.logger.error({
+                userId,
+                error: error instanceof Error ? error.message : JSON.stringify(error)
+            }, 'Failed to create candidate from webhook (non-fatal)');
+        }
+    }
+
+    /**
      * Handle user created or updated webhook event
      */
-    private async handleUserCreatedOrUpdated(userData: ClerkWebhookEvent['data']): Promise<void> {
+    private async handleUserCreatedOrUpdated(userData: ClerkWebhookEvent['data'], sourceApp: WebhookSourceApp): Promise<void> {
         const email = userData.email_addresses?.[0]?.email_address;
         const name = userData.first_name && userData.last_name
             ? `${userData.first_name} ${userData.last_name}`.trim()
@@ -149,7 +188,7 @@ export class WebhooksServiceV2 {
             return;
         }
 
-        await this.syncClerkUser(userData.id, email, name || undefined);
+        await this.syncClerkUser(userData.id, email, name || undefined, sourceApp);
     }
 
     /**

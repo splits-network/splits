@@ -59,6 +59,8 @@ jobs:
                       path: apps/candidate
                     - name: corporate
                       path: apps/corporate
+                    - name: status
+                      path: apps/status
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -124,6 +126,14 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.employment-networks.com \
+                      .
+                  elif [ "${{ matrix.service.name }}" = "status" ]; then
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_APP_URL=https://staging.status.splits.network \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
                       .
                   else
                     docker build \
@@ -291,6 +301,7 @@ jobs:
                   export PORTAL_URL="https://staging.splits.network"
                   export CANDIDATE_URL="https://staging.applicant.network"
                   export CORPORATE_URL="https://staging.employment-networks.com"
+                  export STATUS_URL="https://staging.status.splits.network"
 
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do
@@ -367,7 +378,7 @@ jobs:
 
             - name: Deploy frontend apps
               run: |
-                  FRONTENDS="portal candidate corporate"
+                  FRONTENDS="portal candidate corporate status"
                   for app in $FRONTENDS; do
                     if [ -f "infra/k8s/$app/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$app/" --namespace=${{ env.NAMESPACE }}
@@ -379,6 +390,7 @@ jobs:
                   kubectl rollout status deployment/portal --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/candidate --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/corporate --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/status --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy staging ingress
               run: |

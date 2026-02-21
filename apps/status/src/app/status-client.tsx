@@ -137,6 +137,7 @@ export default function StatusClient({
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                    timeZone: "UTC",
                 },
             );
             if (!groups[day]) groups[day] = [];
@@ -421,72 +422,78 @@ export default function StatusClient({
 
                         {/* Past incidents grouped by day */}
                         {groupedIncidents.length > 0 && (
-                            <div className="space-y-8 mt-12">
-                                <h3 className="font-bold text-xl">
-                                    <i className="fa-duotone fa-regular fa-clock-rotate-left mr-2 text-secondary" />
+                            <details className="mt-12 group">
+                                <summary className="font-bold text-xl cursor-pointer list-none flex items-center gap-2 select-none">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-sm text-secondary transition-transform duration-200 group-open:rotate-90" />
+                                    <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1 text-secondary" />
                                     Past Incidents
-                                </h3>
-                                {groupedIncidents.map(
-                                    ([day, dayIncidents]) => (
-                                        <div key={day}>
-                                            <h4 className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-4 border-b border-base-300 pb-2">
-                                                {day}
-                                            </h4>
-                                            <div className="space-y-3">
-                                                {dayIncidents.map(
-                                                    (incident) => (
-                                                        <div
-                                                            key={incident.id}
-                                                            className="border-l-4 border-secondary bg-base-100 p-5 shadow-sm"
-                                                        >
-                                                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                                                                <div>
-                                                                    <p className="font-bold text-base">
-                                                                        {
-                                                                            incident.service_name
-                                                                        }
-                                                                    </p>
-                                                                    <p className="text-xs text-base-content/60 mt-1">
-                                                                        {incident.severity ===
-                                                                        "unhealthy"
-                                                                            ? "Service outage"
-                                                                            : "Degraded performance"}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="flex items-center gap-4">
-                                                                    <div className="text-right">
-                                                                        <p
-                                                                            className="text-xs font-bold text-base-content/60"
-                                                                            suppressHydrationWarning
-                                                                        >
-                                                                            {new Date(
-                                                                                incident.started_at,
-                                                                            ).toLocaleString()}
+                                    <span className="text-sm font-normal text-base-content/50 ml-2">
+                                        ({incidents.filter((i) => i.resolved_at).length})
+                                    </span>
+                                </summary>
+                                <div className="space-y-8 mt-6">
+                                    {groupedIncidents.map(
+                                        ([day, dayIncidents]) => (
+                                            <div key={day}>
+                                                <h4 className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-4 border-b border-base-300 pb-2">
+                                                    {day}
+                                                </h4>
+                                                <div className="space-y-3">
+                                                    {dayIncidents.map(
+                                                        (incident) => (
+                                                            <div
+                                                                key={incident.id}
+                                                                className="border-l-4 border-secondary bg-base-100 p-5 shadow-sm"
+                                                            >
+                                                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                                                    <div>
+                                                                        <p className="font-bold text-base">
+                                                                            {
+                                                                                incident.service_name
+                                                                            }
                                                                         </p>
-                                                                        <p className="text-xs text-base-content/50">
-                                                                            Duration:{" "}
-                                                                            {incident.duration_seconds !=
-                                                                            null
-                                                                                ? incident.duration_seconds <
-                                                                                  60
-                                                                                    ? `${incident.duration_seconds}s`
-                                                                                    : `${Math.round(incident.duration_seconds / 60)}m`
-                                                                                : "N/A"}
+                                                                        <p className="text-xs text-base-content/60 mt-1">
+                                                                            {incident.severity ===
+                                                                            "unhealthy"
+                                                                                ? "Service outage"
+                                                                                : "Degraded performance"}
                                                                         </p>
                                                                     </div>
-                                                                    <span className="badge badge-success badge-sm">
-                                                                        Resolved
-                                                                    </span>
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="text-right">
+                                                                            <p
+                                                                                className="text-xs font-bold text-base-content/60"
+                                                                                suppressHydrationWarning
+                                                                            >
+                                                                                {new Date(
+                                                                                    incident.started_at,
+                                                                                ).toLocaleString()}
+                                                                            </p>
+                                                                            <p className="text-xs text-base-content/50">
+                                                                                Duration:{" "}
+                                                                                {incident.duration_seconds !=
+                                                                                null
+                                                                                    ? incident.duration_seconds <
+                                                                                      60
+                                                                                        ? `${incident.duration_seconds}s`
+                                                                                        : `${Math.round(incident.duration_seconds / 60)}m`
+                                                                                    : "N/A"}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span className="badge badge-success badge-sm">
+                                                                            Resolved
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ),
-                                                )}
+                                                        ),
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ),
-                                )}
-                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </details>
                         )}
                     </div>
                 </div>

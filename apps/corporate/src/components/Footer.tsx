@@ -22,7 +22,7 @@ const PRODUCT_LINKS = [
 const COMPANY_LINKS = [
     { label: "About Us", href: "#about" },
     { label: "Contact", href: "/contact" },
-    { label: "System Status", href: "/status" },
+    { label: "System Status", href: "https://status.splits.network" },
 ];
 
 const LEGAL_LINKS = [

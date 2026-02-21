@@ -8,7 +8,7 @@ import { Webhook } from 'svix';
 import { createLogger } from '@splits-network/shared-logging';
 import type { Logger } from '@splits-network/shared-logging';
 import { WebhooksServiceV2 } from './service';
-import { ClerkWebhookEvent, WebhookHeaders } from './types';
+import { ClerkWebhookEvent, WebhookHeaders, WebhookSourceApp } from './types';
 
 // Webhook secrets for each Clerk instance (portal + candidate app)
 const SPLITS_WEBHOOK_SECRET = process.env.SPLITS_CLERK_WEBHOOK_SECRET;
@@ -110,12 +110,20 @@ export async function webhooksRoutesV2(
             const payload = JSON.stringify(request.body);
 
             // Try each secret until one verifies successfully
-            // (webhook could come from either the portal or candidate Clerk instance)
+            // Track which Clerk instance the webhook came from
+            const secretMap: Array<{ secret: string; source: WebhookSourceApp }> = [
+                ...(SPLITS_WEBHOOK_SECRET ? [{ secret: SPLITS_WEBHOOK_SECRET, source: 'portal' as const }] : []),
+                ...(APP_WEBHOOK_SECRET ? [{ secret: APP_WEBHOOK_SECRET, source: 'candidate' as const }] : []),
+                ...(LEGACY_WEBHOOK_SECRET ? [{ secret: LEGACY_WEBHOOK_SECRET, source: 'unknown' as const }] : []),
+            ];
+
             let event: ClerkWebhookEvent | null = null;
-            for (const secret of secrets) {
+            let sourceApp: WebhookSourceApp = 'unknown';
+            for (const entry of secretMap) {
                 try {
-                    const wh = new Webhook(secret);
+                    const wh = new Webhook(entry.secret);
                     event = wh.verify(payload, headers) as ClerkWebhookEvent;
+                    sourceApp = entry.source;
                     break; // Verification succeeded
                 } catch {
                     // This secret didn't match, try the next one
@@ -128,11 +136,12 @@ export async function webhooksRoutesV2(
 
             logger.info({
                 type: event.type,
-                id: event.data.id
+                id: event.data.id,
+                sourceApp,
             }, 'Received Clerk webhook');
 
             // Process the webhook event
-            await service.handleClerkWebhook(event);
+            await service.handleClerkWebhook(event, sourceApp);
 
             return reply.send({
                 data: {

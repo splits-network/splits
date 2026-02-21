@@ -59,6 +59,8 @@ jobs:
                       path: apps/candidate
                     - name: corporate
                       path: apps/corporate
+                    - name: status
+                      path: apps/status
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -124,6 +126,14 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://employment-networks.com \
+                      .
+                  elif [ "${{ matrix.service.name }}" = "status" ]; then
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_APP_URL=https://status.splits.network \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       .
                   else
                     docker build \
@@ -291,6 +301,7 @@ jobs:
                   export PORTAL_URL="https://splits.network"
                   export CANDIDATE_URL="https://applicant.network"
                   export CORPORATE_URL="https://employment-networks.com"
+                  export STATUS_URL="https://status.splits.network"
 
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do
@@ -397,6 +408,14 @@ jobs:
             - name: Wait for Corporate Website to be ready
               run: |
                   kubectl rollout status deployment/corporate --timeout=180s --namespace=splits-network
+
+            - name: Deploy Status App
+              run: |
+                  kubectl apply -f infra/k8s/status/ --namespace=splits-network
+
+            - name: Wait for Status App to be ready
+              run: |
+                  kubectl rollout status deployment/status --timeout=180s --namespace=splits-network
 
             - name: Deploy Ingress
               run: |

@@ -348,9 +348,10 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                     authHeaders
                 );
                 return reply.send(data);
-            } catch (error) {
-                console.error(`[DEBUG CANDIDATES] ServiceClient error:`, error);
-                throw error;
+            } catch (error: any) {
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch candidate' } });
             }
         }
     );

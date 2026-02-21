@@ -23,6 +23,7 @@ spec:
               - api.applicant.network
               - applicant.network
               - employment-networks.com
+              - status.splits.network
           secretName: splits-network-tls
     rules:
         - host: splits.network
@@ -87,6 +88,16 @@ spec:
                     backend:
                         service:
                             name: corporate
+                            port:
+                                number: 80
+        - host: status.splits.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: status
                             port:
                                 number: 80
 ---

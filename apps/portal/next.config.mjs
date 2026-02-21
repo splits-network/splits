@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    async redirects() {
+        return [
+            {
+                source: "/status",
+                destination: process.env.NEXT_PUBLIC_STATUS_URL || "https://status.splits.network",
+                permanent: true,
+            },
+        ];
+    },
     transpilePackages: [
         "@splits-network/shared-types",
         "@splits-network/shared-config",

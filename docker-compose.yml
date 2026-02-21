@@ -793,6 +793,31 @@ services:
       - api-gateway
     command: pnpm --filter @splits-network/candidate dev
 
+  status:
+    build:
+      context: .
+      dockerfile: apps/status/Dockerfile
+      target: development
+    container_name: splits-status
+    ports:
+      - "3103:3103"
+    environment:
+      NODE_ENV: development
+      PORT: 3103
+      NEXT_PUBLIC_APP_URL: http://localhost:3103
+      NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
+    volumes:
+      - ./apps/status/src:/app/apps/status/src
+      - ./apps/status/public:/app/apps/status/public
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/status/.next
+    networks:
+      - splits-network
+    depends_on:
+      - api-gateway
+    command: pnpm --filter @splits-network/status dev
+
 networks:
   splits-network:
     driver: bridge

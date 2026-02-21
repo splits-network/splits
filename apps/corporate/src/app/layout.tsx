@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ActivityTracker } from "@splits-network/shared-ui";
-import { ServiceStatusProvider, ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -114,7 +114,6 @@ export default async function RootLayout({
             </head>
             <body className="antialiased flex flex-col min-h-screen">
                 <ThemeProvider>
-                <ServiceStatusProvider statusHref="/status" />
                 <Header navItems={headerNav?.items} />
                 <main className="flex-grow">{children}</main>
                 <Footer />

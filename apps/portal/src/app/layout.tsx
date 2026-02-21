@@ -5,8 +5,6 @@ import { auth } from "@clerk/nextjs/server";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import {
-    ServiceStatusProvider,
-    ServiceStatusDebugger,
     ThemeScript,
     ThemeProvider,
 } from "@splits-network/basel-ui";
@@ -176,8 +174,6 @@ export default async function RootLayout({
                             >
                                 <ToastProvider>
                                     <Header navItems={headerNav?.items} />
-                                    <ServiceStatusProvider statusHref="/status" />
-                                    <ServiceStatusDebugger />
                                     <main className="grow">{children}</main>
                                     <Footer footerNav={footerNav} />
                                     <CookieConsent />

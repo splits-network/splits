@@ -7,7 +7,6 @@ import Footer from "@/components/navigation/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import CookieConsent from "@/components/cookie-consent";
 import {
-    ServiceStatusProvider,
     ThemeScript,
     ThemeProvider,
 } from "@splits-network/basel-ui";
@@ -176,7 +175,6 @@ export default async function RootLayout({
                         <UserProfileProvider initialProfile={initialProfile}>
                             <ToastProvider>
                                 <Header navItems={headerNav?.items} />
-                                <ServiceStatusProvider statusHref="/status" />
                                 <main className="flex-1">
                                     {children}
                                 </main>

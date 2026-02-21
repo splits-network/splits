@@ -9,7 +9,6 @@ const routes = [
     '',
     '/cookie-policy',
     '/privacy-policy',
-    '/status',
     '/terms-of-service',
 ];
 
@@ -27,11 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         url: `${baseUrl}${path}`,
         lastModified: getLastModifiedForPath(path),
         changeFrequency: path === '' ? 'weekly' : 'monthly',
-        priority:
-            path === ''
-                ? 1
-                : path === "/status"
-                  ? 0.4
-                  : 0.3,
+        priority: path === '' ? 1 : 0.3,
     }));
 }

@@ -29,3 +29,5 @@ export interface ClerkUserData {
     firstName: string | null;
     lastName: string | null;
 }
+
+export type WebhookSourceApp = 'portal' | 'candidate' | 'unknown';
