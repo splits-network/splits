@@ -31,6 +31,7 @@ export default function CandidateDashboard({
         stats,
         applications,
         activeRecruiters,
+        pendingInvitations,
         loading: dataLoading,
         error: dataError,
     } = useCandidateDashboardData();
@@ -47,6 +48,7 @@ export default function CandidateDashboard({
         () => activeRecruiters.map((r) => r.recruiter_email),
         [activeRecruiters],
     );
+    console.log("Recruiter User IDs for presence tracking:", recruiterUserIds);
     const presence = usePresence(recruiterUserIds);
 
     const contentRef = useRef<HTMLDivElement>(null);
@@ -239,6 +241,38 @@ export default function CandidateDashboard({
                         Failed to load dashboard data
                     </span>
                     <span className="ml-2 text-error/70">{dataError}</span>
+                </div>
+            )}
+
+            {/* ── Pending Invitations Banner ── */}
+            {!dataLoading && pendingInvitations.length > 0 && (
+                <div className="bg-primary/5 border-l-4 border-primary px-6 py-4">
+                    <div className="container mx-auto flex items-center gap-4">
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-lg flex-shrink-0"></i>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-base-content">
+                                {pendingInvitations.length === 1
+                                    ? `${pendingInvitations[0].recruiter_name} has invited you to work together`
+                                    : `You have ${pendingInvitations.length} pending recruiter invitations`}
+                            </p>
+                            <p className="text-xs text-base-content/60 mt-0.5">
+                                Review and respond to get started with your recruiter
+                            </p>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                            {pendingInvitations.slice(0, 2).map((inv) => (
+                                <Link
+                                    key={inv.id}
+                                    href={`/portal/invitation/${inv.invitation_token}`}
+                                    className="btn btn-primary btn-sm"
+                                >
+                                    {pendingInvitations.length === 1
+                                        ? "Review Invitation"
+                                        : inv.recruiter_name?.split(" ")[0] || "Review"}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 

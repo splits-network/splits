@@ -88,6 +88,33 @@ export class WebhookRepositoryV2 {
     }
 
     /**
+     * Find candidate by email (for claiming recruiter-created candidates)
+     */
+    async findCandidateByEmail(email: string): Promise<{ id: string; user_id: string | null } | null> {
+        const { data, error } = await this.supabase
+            .from('candidates')
+            .select('id, user_id')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Claim a candidate by updating its user_id.
+     * Used when a recruiter-created candidate (user_id IS NULL) signs up.
+     */
+    async claimCandidateForUser(candidateId: string, userId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('candidates')
+            .update({ user_id: userId, updated_at: new Date().toISOString() })
+            .eq('id', candidateId);
+
+        if (error) throw error;
+    }
+
+    /**
      * Create a candidate record linked to a user
      */
     async createCandidate(userId: string, email: string, fullName: string): Promise<{ id: string }> {

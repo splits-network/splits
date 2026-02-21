@@ -5,14 +5,13 @@ import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ensureUserAndCandidateInDatabase } from "@/lib/user-registration";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 type SSOStatus =
     | "authenticating"
-    | "creating_user"
-    | "creating_candidate"
+    | "setting_up"
     | "redirecting"
     | "error";
 
@@ -23,14 +22,9 @@ const STEPS = [
         icon: "fa-duotone fa-regular fa-shield-check",
     },
     {
-        key: "creating_user",
+        key: "setting_up",
         label: "Account",
         icon: "fa-duotone fa-regular fa-user-plus",
-    },
-    {
-        key: "creating_candidate",
-        label: "Profile",
-        icon: "fa-duotone fa-regular fa-id-card",
     },
     {
         key: "redirecting",
@@ -52,7 +46,7 @@ const STATS = [
     },
     {
         value: "100%",
-        label: "Transparent process visibility",
+        label: "Visibility into your pipeline",
         icon: "fa-duotone fa-regular fa-eye",
     },
 ];
@@ -61,12 +55,10 @@ function getStepIndex(status: SSOStatus): number {
     switch (status) {
         case "authenticating":
             return 0;
-        case "creating_user":
+        case "setting_up":
             return 1;
-        case "creating_candidate":
-            return 2;
         case "redirecting":
-            return 3;
+            return 2;
         case "error":
             return -1;
         default:
@@ -99,29 +91,19 @@ function SSOCallbackInner() {
                     throw new Error("Failed to get authentication token");
                 }
 
-                setStatus("creating_user");
-
                 if (!user) {
                     throw new Error("User data is unavailable");
                 }
 
-                const result = await ensureUserAndCandidateInDatabase(token, {
-                    clerk_user_id: user.id,
+                setStatus("setting_up");
+
+                const client = createAuthenticatedClient(token);
+                await client.post("/onboarding/init", {
                     email: user.primaryEmailAddress?.emailAddress || "",
                     name: user.fullName || user.firstName || "",
                     image_url: user.imageUrl,
+                    source_app: "candidate",
                 });
-
-                if (result.user && !result.candidate) {
-                    setStatus("creating_candidate");
-                }
-
-                if (!result.success) {
-                    console.warn(
-                        "[SSO_CALLBACK] User/Candidate creation warning:",
-                        result.error,
-                    );
-                }
 
                 setStatus("redirecting");
 
@@ -133,10 +115,15 @@ function SSOCallbackInner() {
                     router.replace(invitationRedirectUrl);
                 } else if (redirectUrl) {
                     const isInternalUrl = redirectUrl.startsWith("/");
-                    const finalRedirectUrl = isInternalUrl
-                        ? redirectUrl
-                        : "/onboarding";
-                    router.replace(finalRedirectUrl);
+                    if (isInternalUrl) {
+                        // Chain redirect_url through onboarding so new users
+                        // return to the intended page after completing onboarding
+                        router.replace(
+                            `/onboarding?redirect_url=${encodeURIComponent(redirectUrl)}`,
+                        );
+                    } else {
+                        router.replace("/onboarding");
+                    }
                 } else {
                     router.replace("/onboarding");
                 }
@@ -237,21 +224,14 @@ function SSOCallbackInner() {
                 return {
                     title: "Verifying credentials",
                     message:
-                        "Confirming your identity with the authentication provider.",
+                        "Confirming your identity. This only takes a moment.",
                     showSpinner: true,
                 };
-            case "creating_user":
+            case "setting_up":
                 return {
                     title: "Setting up your account",
                     message:
-                        "Creating your user record and preparing your workspace.",
-                    showSpinner: true,
-                };
-            case "creating_candidate":
-                return {
-                    title: "Building your profile",
-                    message:
-                        "Configuring your candidate profile so recruiters can match you to open roles.",
+                        "Creating your account and candidate profile.",
                     showSpinner: true,
                 };
             case "redirecting":
@@ -296,7 +276,7 @@ function SSOCallbackInner() {
                     {/* Heading */}
                     <div className="sso-heading opacity-0 mb-8">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
-                            Signing In
+                            Applicant Network
                         </p>
                         <h1 className="text-3xl font-black tracking-tight mb-2">
                             {content.title}
@@ -475,7 +455,7 @@ function LoadingFallback() {
                     </div>
                     <div className="mb-8">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
-                            Signing In
+                            Applicant Network
                         </p>
                         <h1 className="text-3xl font-black tracking-tight mb-2">
                             Verifying credentials

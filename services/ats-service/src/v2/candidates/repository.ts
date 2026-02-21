@@ -295,8 +295,53 @@ export class CandidateRepository {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            // Handle duplicate email: claim the existing candidate if it has no user_id
+            // This happens when a recruiter created the candidate, then the candidate signs up
+            const isDuplicateEmail = error.code === '23505' &&
+                (error.message?.includes('candidates_email_key') || error.message?.includes('duplicate'));
+
+            if (isDuplicateEmail && candidate.user_id && candidate.email) {
+                const claimed = await this.claimCandidateByEmail(candidate.email, candidate.user_id);
+                if (claimed) return claimed;
+            }
+
+            throw error;
+        }
         return data;
+    }
+
+    /**
+     * Claim a candidate by email — used when a recruiter-created candidate
+     * (user_id IS NULL) signs up and the email already exists.
+     * Returns the updated candidate or null if claim not possible.
+     */
+    private async claimCandidateByEmail(email: string, userId: string): Promise<any | null> {
+        // Find existing candidate with this email that has no user_id
+        const { data: existing, error: findError } = await this.supabase
+            .from('candidates')
+            .select('*')
+            .eq('email', email)
+            .is('user_id', null)
+            .single();
+
+        if (findError || !existing) return null;
+
+        // Claim it by setting user_id
+        const { data: claimed, error: updateError } = await this.supabase
+            .from('candidates')
+            .update({ user_id: userId, updated_at: new Date().toISOString() })
+            .eq('id', existing.id)
+            .select()
+            .single();
+
+        if (updateError) {
+            console.error('Failed to claim candidate by email:', updateError);
+            return null;
+        }
+
+        console.log(`Claimed candidate ${claimed.id} for user ${userId} (was recruiter-created with no user_id)`);
+        return claimed;
     }
 
     async updateCandidate(id: string, updates: CandidateUpdate): Promise<any> {

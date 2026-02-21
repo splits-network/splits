@@ -25,8 +25,11 @@ export class RecruiterCandidateServiceV2 {
     ): Promise<PaginationResponse<any>> {
         const result = await this.repository.findRecruiterCandidates(clerkUserId, filters);
 
+        // Flatten nested joins into top-level fields for frontend consumption
+        const enriched = (result.data || []).map((row: any) => this.enrichRelationship(row));
+
         return buildPaginationResponse(
-            result.data,
+            enriched,
             result.pagination.total || 0,
             filters.page || 1,
             filters.limit || 25
@@ -38,7 +41,7 @@ export class RecruiterCandidateServiceV2 {
         if (!relationship) {
             throw { statusCode: 404, message: 'Recruiter-Candidate relationship not found' };
         }
-        return relationship;
+        return this.enrichRelationship(relationship);
     }
 
     async createRecruiterCandidate(
@@ -88,6 +91,29 @@ export class RecruiterCandidateServiceV2 {
         });
 
         return relationship;
+    }
+
+    /**
+     * Flatten nested recruiter/candidate joins into top-level fields.
+     * Computes days_until_expiry from relationship_end_date.
+     */
+    private enrichRelationship(row: any): any {
+        const recruiterName = row.recruiter?.user?.name ?? null;
+        const recruiterEmail = row.recruiter?.user?.email ?? null;
+
+        let daysUntilExpiry: number | undefined;
+        if (row.relationship_end_date) {
+            const endDate = new Date(row.relationship_end_date);
+            const now = new Date();
+            daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        return {
+            ...row,
+            recruiter_name: recruiterName,
+            recruiter_email: recruiterEmail,
+            days_until_expiry: daysUntilExpiry,
+        };
     }
 
     private generateInvitationToken(): string {

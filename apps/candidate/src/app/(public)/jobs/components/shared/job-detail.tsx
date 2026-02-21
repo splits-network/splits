@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiClient } from "@/lib/api-client";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import ApplicationWizardModal from "@/components/application-wizard-modal";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
 import { statusColor } from "./status-color";
@@ -23,6 +27,15 @@ interface JobDetailProps {
 }
 
 export function JobDetail({ job, onClose }: JobDetailProps) {
+    const { isSignedIn, getToken } = useAuth();
+    const { success: toastSuccess } = useToast();
+
+    const [hasActiveRecruiter, setHasActiveRecruiter] = useState(false);
+    const [existingApplication, setExistingApplication] = useState<any>(null);
+    const [authLoading, setAuthLoading] = useState(false);
+    const [showWizard, setShowWizard] = useState(false);
+    const [isSharing, setIsSharing] = useState(false);
+
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const commute = formatCommuteTypes(job.commute_types);
@@ -34,6 +47,112 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     const preferredReqs = (job.requirements || [])
         .filter((r) => r.requirement_type === "preferred")
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+    // Fetch auth-dependent data when signed in
+    useEffect(() => {
+        if (!isSignedIn) return;
+        let cancelled = false;
+        setAuthLoading(true);
+
+        (async () => {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+
+                const authClient = createAuthenticatedClient(token);
+                const [recruitersRes, applicationsRes] = await Promise.all([
+                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
+                    authClient.get<{ data: any[] }>("/applications"),
+                ]);
+
+                if (cancelled) return;
+
+                setHasActiveRecruiter((recruitersRes.data?.length ?? 0) > 0);
+
+                const applications = Array.isArray(applicationsRes.data)
+                    ? applicationsRes.data
+                    : [];
+                const existing = applications.find(
+                    (app: any) =>
+                        app.job_id === job.id &&
+                        !["rejected", "withdrawn"].includes(app.stage),
+                );
+                setExistingApplication(existing || null);
+            } catch (err) {
+                console.error("Failed to fetch auth data for job detail:", err);
+            } finally {
+                if (!cancelled) setAuthLoading(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn, job.id]);
+
+    const getButtonConfig = () => {
+        if (!isSignedIn) {
+            return {
+                text: "Get Started",
+                icon: "fa-rocket",
+                action: () => {
+                    window.location.href = `/sign-up?redirect_url=${encodeURIComponent(`/jobs/${job.id}`)}`;
+                },
+            };
+        }
+
+        if (authLoading) {
+            return {
+                text: "Loading...",
+                icon: "fa-spinner fa-spin",
+                action: () => {},
+                disabled: true,
+            };
+        }
+
+        if (existingApplication) {
+            return {
+                text: "Already Applied",
+                icon: "fa-check-circle",
+                action: () => {},
+                disabled: true,
+            };
+        }
+
+        return {
+            text: hasActiveRecruiter ? "Send to Recruiter" : "Apply Now",
+            icon: hasActiveRecruiter ? "fa-user-tie" : "fa-paper-plane",
+            action: () => setShowWizard(true),
+        };
+    };
+
+    const buttonConfig = getButtonConfig();
+
+    const handleShare = async () => {
+        setIsSharing(true);
+        const shareUrl = `${window.location.origin}/jobs/${job.id}`;
+        const shareData = {
+            title: `${job.title} at ${name}`,
+            text: `Check out this role: ${job.title} at ${name}`,
+            url: shareUrl,
+        };
+        try {
+            if (navigator.share && navigator.canShare?.(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareUrl);
+                toastSuccess("Job link copied to clipboard!");
+            }
+        } catch (error: any) {
+            if (error.name !== "AbortError") {
+                await navigator.clipboard.writeText(shareUrl);
+                toastSuccess("Job link copied to clipboard!");
+            }
+        } finally {
+            setIsSharing(false);
+        }
+    };
 
     return (
         <div>
@@ -88,6 +207,13 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                                     {job.location}
                                 </span>
                             )}
+                            <Link
+                                href={`/jobs/${job.id}`}
+                                className="inline-flex items-center gap-1 text-primary hover:underline"
+                            >
+                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs" />
+                                Full page
+                            </Link>
                         </div>
                     </div>
 
@@ -105,14 +231,17 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
 
                 {/* CTA */}
                 <div className="mt-4 flex gap-3">
-                    <a
-                        href="/sign-up"
-                        className="btn btn-primary flex-1"
+                    <button
+                        className={`btn ${buttonConfig.disabled ? "btn-disabled" : "btn-primary"} flex-1`}
                         style={{ borderRadius: 0 }}
+                        onClick={buttonConfig.action}
+                        disabled={buttonConfig.disabled}
                     >
-                        <i className="fa-duotone fa-regular fa-paper-plane mr-2" />
-                        Apply Now
-                    </a>
+                        <i
+                            className={`fa-duotone fa-regular ${buttonConfig.icon} mr-2`}
+                        />
+                        {buttonConfig.text}
+                    </button>
                     <button
                         className="btn btn-outline"
                         style={{ borderRadius: 0 }}
@@ -120,13 +249,22 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     >
                         <i className="fa-duotone fa-regular fa-bookmark" />
                     </button>
+                    <button
+                        className="btn btn-outline"
+                        style={{ borderRadius: 0 }}
+                        title="Share"
+                        onClick={handleShare}
+                        disabled={isSharing}
+                    >
+                        <i className="fa-duotone fa-regular fa-share-nodes" />
+                    </button>
                 </div>
             </div>
 
             {/* Scrollable content */}
             <div className="p-6 space-y-8">
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-[2px] bg-base-300">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-[2px] bg-base-100">
                     <div className="bg-base-100 p-4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Compensation
@@ -192,16 +330,6 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             </p>
                         </div>
                     )}
-                    {job.guarantee_days && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Guarantee Period
-                            </p>
-                            <p className="font-bold text-sm">
-                                {job.guarantee_days} days
-                            </p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Must Have */}
@@ -258,7 +386,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             <img
                                 src={job.company.logo_url}
                                 alt={name}
-                                className="w-12 h-12 object-cover border-2 border-base-300"
+                                className="w-12 h-12 object-contain border-2 border-base-300"
                             />
                         ) : (
                             <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
@@ -292,26 +420,39 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 </div>
 
                 {/* Bottom CTA */}
-                <div className="border-t-2 border-base-300 pt-6">
-                    <div className="bg-primary/5 border-l-4 border-primary p-6">
-                        <h3 className="font-black text-lg tracking-tight mb-2">
-                            Interested in this role?
-                        </h3>
-                        <p className="text-sm text-base-content/60 mb-4">
-                            Create your profile on Splits Network to apply and
-                            get matched with more opportunities.
-                        </p>
-                        <a
-                            href="/sign-up"
-                            className="btn btn-primary"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-user-plus mr-2" />
-                            Get Started
-                        </a>
+                {!isSignedIn && (
+                    <div className="border-t-2 border-base-300 pt-6">
+                        <div className="bg-primary/5 border-l-4 border-primary p-6">
+                            <h3 className="font-black text-lg tracking-tight mb-2">
+                                Interested in this role?
+                            </h3>
+                            <p className="text-sm text-base-content/60 mb-4">
+                                Create your profile on Splits Network to apply
+                                and get matched with more opportunities.
+                            </p>
+                            <a
+                                href={`/sign-up?redirect_url=${encodeURIComponent(`/jobs/${job.id}`)}`}
+                                className="btn btn-primary"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-user-plus mr-2" />
+                                Get Started
+                            </a>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
+
+            {/* Application Wizard Modal */}
+            {showWizard && (
+                <ApplicationWizardModal
+                    jobId={job.id}
+                    jobTitle={job.title}
+                    companyName={name}
+                    onClose={() => setShowWizard(false)}
+                    onSuccess={() => setShowWizard(false)}
+                />
+            )}
         </div>
     );
 }

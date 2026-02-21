@@ -26,36 +26,58 @@ const STATS = [
     },
 ];
 
-const QUICK_ACTIONS = [
-    {
-        label: "Browse Open Roles",
-        icon: "fa-duotone fa-regular fa-briefcase",
-        href: "/portal/dashboard",
-        color: "btn-primary",
-    },
-    {
-        label: "Complete Your Profile",
-        icon: "fa-duotone fa-regular fa-user-pen",
-        href: "/portal/profile",
-        color: "btn-secondary",
-    },
-    {
-        label: "View Your Dashboard",
-        icon: "fa-duotone fa-regular fa-gauge-high",
-        href: "/portal/dashboard",
-        color: "btn-accent",
-    },
-];
+function getQuickActions(redirectUrl?: string) {
+    const actions = [];
 
-export function SuccessStep() {
+    if (redirectUrl) {
+        actions.push({
+            label: "Continue Where You Left Off",
+            icon: "fa-duotone fa-regular fa-arrow-right",
+            href: redirectUrl,
+            color: "btn-primary",
+        });
+    } else {
+        actions.push({
+            label: "Browse Open Roles",
+            icon: "fa-duotone fa-regular fa-briefcase",
+            href: "/portal/dashboard",
+            color: "btn-primary",
+        });
+    }
+
+    actions.push(
+        {
+            label: "Complete Your Profile",
+            icon: "fa-duotone fa-regular fa-user-pen",
+            href: "/portal/profile",
+            color: "btn-secondary",
+        },
+        {
+            label: "View Your Dashboard",
+            icon: "fa-duotone fa-regular fa-gauge-high",
+            href: "/portal/dashboard",
+            color: "btn-accent",
+        },
+    );
+
+    return actions;
+}
+
+interface SuccessStepProps {
+    redirectUrl?: string;
+}
+
+export function SuccessStep({ redirectUrl }: SuccessStepProps) {
+    const destination = redirectUrl || "/portal/dashboard";
+
     // Auto-redirect after 15 seconds
     // Hard navigation forces fresh profile fetch
     useEffect(() => {
         const timer = setTimeout(() => {
-            window.location.href = "/portal/dashboard";
+            window.location.href = destination;
         }, 15000);
         return () => clearTimeout(timer);
-    }, []);
+    }, [destination]);
 
     return (
         <div className="text-center py-4">
@@ -91,7 +113,7 @@ export function SuccessStep() {
 
             {/* Quick Actions */}
             <div className="flex flex-col gap-3 max-w-xs mx-auto">
-                {QUICK_ACTIONS.map((action) => (
+                {getQuickActions(redirectUrl).map((action) => (
                     <button
                         key={action.label}
                         onClick={() => {

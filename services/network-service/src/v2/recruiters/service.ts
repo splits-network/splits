@@ -112,6 +112,12 @@ export class RecruiterServiceV2 {
 
         const recruiter = await this.repository.updateRecruiter(id, updates);
 
+        // When status transitions to 'active', ensure user_roles entry exists
+        // This handles the invited-recruiter flow: created as 'pending', later activated
+        if (updates.status === 'active' && recruiter.user_id) {
+            await this.repository.createRecruiterUserRole(recruiter.user_id, recruiter.id);
+        }
+
         // Publish event
         await this.eventPublisher.publish('recruiter.updated', {
             recruiterId: id,

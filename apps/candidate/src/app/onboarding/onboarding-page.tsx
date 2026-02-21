@@ -12,6 +12,7 @@
  */
 
 import { useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useOnboarding } from "./use-onboarding";
@@ -44,6 +45,9 @@ const CANDIDATE_STEPS = [
 
 export function OnboardingPage() {
     const mainRef = useRef<HTMLDivElement>(null);
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get("redirect_url");
+
     const {
         state,
         actions,
@@ -52,7 +56,7 @@ export function OnboardingPage() {
         persisting,
         handleRetry,
         handleSignOut,
-    } = useOnboarding();
+    } = useOnboarding({ redirectUrl: redirectUrl || undefined });
 
     // Map currentStep to index in the step list
     const activeStepIndex = CANDIDATE_STEPS.findIndex(
@@ -241,7 +245,9 @@ export function OnboardingPage() {
                         {state.currentStep === 5 && (
                             <ReviewStep state={state} actions={actions} />
                         )}
-                        {state.currentStep === 6 && <SuccessStep />}
+                        {state.currentStep === 6 && (
+                            <SuccessStep redirectUrl={redirectUrl || undefined} />
+                        )}
                     </div>
                 </div>
 

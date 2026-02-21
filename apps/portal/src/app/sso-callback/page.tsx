@@ -5,7 +5,6 @@ import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ensureUserInDatabase } from "@/lib/user-registration";
 import {
     createAuthenticatedClient,
     createUnauthenticatedClient,
@@ -116,26 +115,27 @@ function SSOCallbackInner() {
                     }
                 }
 
-                const result = await ensureUserInDatabase(token, {
-                    clerk_user_id: currentUser.id,
+                const authClient = createAuthenticatedClient(token);
+                const initResponse = await authClient.post<{
+                    data: {
+                        user: any;
+                        was_existing: { user: boolean };
+                    };
+                }>("/onboarding/init", {
                     email:
                         currentUser.primaryEmailAddress?.emailAddress || "",
                     name:
                         currentUser.fullName || currentUser.firstName || "",
                     image_url: currentUser.imageUrl,
                     referred_by_recruiter_id: referredByRecruiterId,
+                    source_app: "portal",
                 });
 
-                if (!result.success) {
-                    console.warn(
-                        "[SSOCallback] User creation warning:",
-                        result.error,
-                    );
-                }
+                const userData = initResponse?.data?.user ?? null;
+                const wasExisting = initResponse?.data?.was_existing?.user ?? true;
 
-                if (recCode && result.success && !result.wasExisting) {
+                if (recCode && !wasExisting) {
                     try {
-                        const authClient = createAuthenticatedClient(token);
                         await authClient.post("/recruiter-codes/log", {
                             code: recCode,
                         });
@@ -156,7 +156,7 @@ function SSOCallbackInner() {
                         `/portal/accept-invitation?invitation_id=${invitationId}`,
                     );
                 } else if (
-                    result.user?.onboarding_status !== "completed"
+                    userData?.onboarding_status !== "completed"
                 ) {
                     // New or incomplete user → full-page onboarding wizard
                     router.replace("/onboarding");

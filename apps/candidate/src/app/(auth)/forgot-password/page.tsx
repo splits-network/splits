@@ -2,40 +2,41 @@
 
 import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import gsap from "gsap";
 
 export default function ForgotPasswordPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
     const { isSignedIn } = useAuth();
     const router = useRouter();
 
-    // Redirect already-signed-in users — active session causes 422 on signIn.create()
-    useEffect(() => {
-        if (isSignedIn) router.push("/portal/dashboard");
-    }, [isSignedIn, router]);
-
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [successfulCreation, setSuccessfulCreation] = useState(false);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [complete, setComplete] = useState(false);
 
+    const stepRef = useRef<HTMLDivElement>(null);
+
+    // Redirect already-signed-in users — active session causes 422 on signIn.create()
+    useEffect(() => {
+        if (isSignedIn) router.push("/portal/dashboard");
+    }, [isSignedIn, router]);
+
     const handleSendCode = async (e: FormEvent) => {
         e.preventDefault();
         if (!isLoaded) return;
-
         setError("");
         setIsLoading(true);
-
         try {
             await signIn.create({
                 strategy: "reset_password_email_code",
                 identifier: email,
             });
-
             setSuccessfulCreation(true);
         } catch (err: any) {
             setError(
@@ -51,10 +52,8 @@ export default function ForgotPasswordPage() {
     const handleReset = async (e: FormEvent) => {
         e.preventDefault();
         if (!isLoaded) return;
-
         setError("");
         setIsLoading(true);
-
         try {
             const result = await signIn.attemptFirstFactor({
                 strategy: "reset_password_email_code",
@@ -84,177 +83,212 @@ export default function ForgotPasswordPage() {
         }
     };
 
+    // Animate step transitions
+    useEffect(() => {
+        if (
+            !stepRef.current ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+            return;
+        gsap.fromTo(
+            stepRef.current,
+            { opacity: 0, x: 20 },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
+        );
+    }, [successfulCreation, complete]);
+
+    // Success state
     if (complete) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow">
-                    <div className="card-body items-center text-center">
-                        <div className="text-success text-6xl mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-check"></i>
-                        </div>
-                        <h2 className="card-title text-2xl font-bold mb-2">
-                            Password Reset Successful
-                        </h2>
-                        <p className="text-base-content/70 mb-4">
-                            Your password has been updated. Redirecting to sign
-                            in...
-                        </p>
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
-                    </div>
+            <div ref={stepRef} className="py-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-6 bg-success/10 flex items-center justify-center">
+                    <i className="fa-duotone fa-regular fa-circle-check text-success text-3xl" />
                 </div>
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Password updated
+                </h1>
+                <p className="text-base-content/50 mb-6">
+                    Your new password is active. Taking you to your dashboard
+                    now.
+                </p>
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }
 
+    // Reset code entry + new password step
     if (successfulCreation) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-2xl font-bold justify-center mb-6">
-                            Reset Your Password
-                        </h2>
+            <div ref={stepRef}>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-black tracking-tight mb-2">
+                        Check your inbox
+                    </h1>
+                </div>
 
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-envelope"></i>
-                            <span>We sent a reset code to {email}</span>
-                        </div>
-
-                        {error && (
-                            <div className="alert alert-error mb-4">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleReset} className="space-y-4">
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Reset Code
-                                </legend>
-                                <input
-                                    type="text"
-                                    placeholder="123456"
-                                    className="input w-full text-center text-2xl tracking-widest"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    maxLength={6}
-                                />
-                            </fieldset>
-
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    New Password
-                                </legend>
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="input w-full"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                    required
-                                    disabled={isLoading}
-                                    minLength={8}
-                                />
-                                <p className="fieldset-label">
-                                    Must be at least 8 characters
-                                </p>
-                            </fieldset>
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary w-full"
-                                disabled={isLoading || !isLoaded}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner"></span>
-                                        Resetting password...
-                                    </>
-                                ) : (
-                                    "Reset Password"
-                                )}
-                            </button>
-                        </form>
-
-                        <button
-                            onClick={() => setSuccessfulCreation(false)}
-                            className="btn btn-ghost btn-sm w-full mt-2"
-                        >
-                            Back
-                        </button>
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-6"
+                    role="alert"
+                >
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
+                        <span className="text-sm">
+                            We sent a reset code to <strong>{email}</strong>.
+                            It expires in 10 minutes.
+                        </span>
                     </div>
                 </div>
+
+                {error && (
+                    <div className="alert alert-error mb-4" role="alert">
+                        <i className="fa-solid fa-circle-xmark" />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                <form onSubmit={handleReset} className="space-y-4">
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            Reset Code
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="123456"
+                            className="input input-bordered w-full text-center text-2xl tracking-widest"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            maxLength={6}
+                        />
+                    </fieldset>
+
+                    <fieldset>
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                            New Password
+                        </label>
+                        <div className="relative">
+                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter new password"
+                                className="input input-bordered w-full pl-10 pr-10"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
+                            >
+                                <i
+                                    className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                                />
+                            </button>
+                        </div>
+                        <p className="text-xs text-base-content/40 mt-1.5">
+                            Must be at least 8 characters
+                        </p>
+                    </fieldset>
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-full"
+                        disabled={isLoading || !isLoaded}
+                    >
+                        {isLoading ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm" />{" "}
+                                Resetting password...
+                            </>
+                        ) : (
+                            "Reset Password"
+                        )}
+                    </button>
+                </form>
+
+                <button
+                    onClick={() => setSuccessfulCreation(false)}
+                    className="btn btn-ghost btn-sm w-full mt-4"
+                >
+                    <i className="fa-solid fa-arrow-left" /> Back
+                </button>
             </div>
         );
     }
 
+    // Initial email entry step
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow">
-                <div className="card-body">
-                    <div className="text-center mb-6">
-                        <i className="fa-duotone fa-regular fa-briefcase text-4xl text-primary mb-2"></i>
-                        <h2 className="card-title text-2xl font-bold justify-center">
-                            Forgot Password?
-                        </h2>
-                        <p className="text-sm text-base-content/70">
-                            Enter your email address and we'll send you a code
-                            to reset your password.
-                        </p>
-                    </div>
+        <div ref={stepRef}>
+            <div className="mb-8">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Reset your password
+                </h1>
+                <p className="text-base-content/50">
+                    Enter your email and we&apos;ll send a reset code.
+                </p>
+            </div>
 
-                    {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSendCode} className="space-y-4">
-                        <div id="clerk-captcha" />
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email</legend>
-                            <input
-                                type="email"
-                                placeholder="you@example.com"
-                                className="input w-full"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </fieldset>
-
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-full"
-                            disabled={isLoading || !isLoaded}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="loading loading-spinner"></span>
-                                    Sending code...
-                                </>
-                            ) : (
-                                "Send Reset Code"
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="divider"></div>
-
-                    <p className="text-center text-sm">
-                        Remember your password?{" "}
-                        <Link href="/sign-in" className="link link-primary">
-                            Sign in
-                        </Link>
-                    </p>
+            {error && (
+                <div className="alert alert-error mb-4" role="alert">
+                    <i className="fa-solid fa-circle-xmark" />
+                    <span>{error}</span>
                 </div>
+            )}
+
+            <form onSubmit={handleSendCode} className="space-y-4">
+                <div id="clerk-captcha" />
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Email Address
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="you@company.com"
+                            className="input input-bordered w-full pl-10"
+                            required
+                        />
+                    </div>
+                </fieldset>
+
+                <button
+                    type="submit"
+                    className="btn btn-primary w-full"
+                    disabled={isLoading || !isLoaded}
+                >
+                    {isLoading ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />{" "}
+                            Sending code...
+                        </>
+                    ) : (
+                        "Send Reset Code"
+                    )}
+                </button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
+
+            <div className="text-center text-sm text-base-content/50">
+                Remember your password?{" "}
+                <Link
+                    href="/sign-in"
+                    className="text-primary font-semibold hover:underline"
+                >
+                    Sign in
+                </Link>
             </div>
         </div>
     );

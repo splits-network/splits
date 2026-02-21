@@ -1,29 +1,30 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function SignInPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
+    const { isSignedIn } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect parameter (from invitation or other flow) and store in state
-    // so it persists through the entire sign-in flow even if URL changes
     const [redirectUrl] = useState(() => searchParams.get("redirect_url"));
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-
         if (!isLoaded) return;
+
+        setError("");
         setErrorType(null);
         setIsLoading(true);
 
@@ -35,15 +36,13 @@ export default function SignInPage() {
 
             if (signInAttempt.status === "complete") {
                 await setActive({ session: signInAttempt.createdSessionId });
-                const finalRedirectUrl = redirectUrl || "/portal/dashboard";
-                router.push(finalRedirectUrl);
+                router.push(redirectUrl || "/portal/dashboard");
             } else {
-                // Provide specific feedback based on status
                 switch (signInAttempt.status) {
                     case "needs_second_factor":
-                        setErrorType("two_factor");
+                        setErrorType("needs_2fa");
                         setError(
-                            "This account has two-factor authentication enabled. Please complete the second factor verification. If you need to disable 2FA, please sign in from a different browser where you have access to your second factor method.",
+                            "Two-factor authentication required. Please complete the second authentication step.",
                         );
                         break;
                     case "needs_identifier":
@@ -72,12 +71,9 @@ export default function SignInPage() {
                 }
             }
         } catch (err: any) {
-            // Provide specific feedback based on error type
             if (err.errors && err.errors.length > 0) {
-                const error = err.errors[0];
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                switch (errorCode) {
+                const clerkError = err.errors[0];
+                switch (clerkError.code) {
                     case "form_identifier_not_found":
                         setErrorType("account_not_found");
                         setError("No account found with this email address.");
@@ -87,11 +83,14 @@ export default function SignInPage() {
                         setError("Incorrect password. Please try again.");
                         break;
                     case "session_exists":
+                    case "identifier_already_signed_in":
                         setErrorType("already_signed_in");
                         setError("You are already signed in. Redirecting...");
-                        setTimeout(() => {
-                            router.push(redirectUrl || "/portal/dashboard");
-                        }, 1500);
+                        setTimeout(
+                            () =>
+                                router.push(redirectUrl || "/portal/dashboard"),
+                            1500,
+                        );
                         break;
                     case "too_many_requests":
                         setErrorType("rate_limited");
@@ -99,19 +98,11 @@ export default function SignInPage() {
                             "Too many sign-in attempts. Please wait a moment and try again.",
                         );
                         break;
-                    case "identifier_already_signed_in":
-                        setErrorType("already_signed_in");
-                        setError(
-                            "Already signed in with this account. Redirecting...",
-                        );
-                        setTimeout(() => {
-                            router.push(redirectUrl || "/portal/dashboard");
-                        }, 1500);
-                        break;
                     default:
                         setErrorType("clerk_error");
-                        // Use the original error message from Clerk for other cases
-                        setError(errorMessage || "Invalid email or password");
+                        setError(
+                            clerkError.message || "Invalid email or password",
+                        );
                 }
             } else {
                 setErrorType("generic_error");
@@ -129,210 +120,257 @@ export default function SignInPage() {
         provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
     ) => {
         if (!isLoaded) return;
-
-        const redirectUrlComplete = redirectUrl || "/portal/dashboard";
-
         signIn.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
-            redirectUrlComplete: redirectUrlComplete,
+            redirectUrlComplete: redirectUrl || "/portal/dashboard",
         });
     };
 
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            router.push(redirectUrl || "/portal/dashboard");
+        }
+    }, [isLoaded, isSignedIn, router, redirectUrl]);
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow">
-                <div className="card-body">
-                    <div className="text-center mb-6">
-                        <i className="fa-duotone fa-regular fa-briefcase text-4xl text-primary mb-2"></i>
-                        <h2 className="card-title text-2xl font-bold justify-center">
-                            Welcome Back
-                        </h2>
-                        <p className="text-sm text-base-content/70">
-                            Sign in to continue your job search
-                        </p>
-                    </div>
+        <>
+            {/* Heading */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-black tracking-tight mb-2">
+                    Welcome back
+                </h1>
+                <p className="text-base-content/50">
+                    Sign in to your Applicant Network account.
+                </p>
+            </div>
 
-                    {error && (
-                        <div className="mb-4">
-                            <div className="alert alert-error">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                <span>{error}</span>
-                            </div>
+            {/* Error alerts */}
+            {error && (
+                <div className="alert alert-error mb-4" role="alert">
+                    <i className="fa-solid fa-circle-xmark" />
+                    <span>{error}</span>
+                </div>
+            )}
 
-                            {/* Contextual help based on error type */}
-                            {errorType === "two_factor" && (
-                                <div className="alert alert-info mt-2">
-                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                    <div className="text-sm">
-                                        <p className="font-semibold">
-                                            Need help with 2FA?
-                                        </p>
-                                        <p>
-                                            You can try signing in using one of
-                                            the social options below, or contact
-                                            support if you need to disable
-                                            two-factor authentication.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {errorType === "account_not_found" && (
-                                <div className="alert alert-info mt-2">
-                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                    <div className="text-sm">
-                                        <p className="font-semibold">
-                                            Don't have an account yet?
-                                        </p>
-                                        <p>
-                                            <Link
-                                                href={
-                                                    redirectUrl
-                                                        ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
-                                                        : "/sign-up"
-                                                }
-                                                className="link link-primary"
-                                            >
-                                                Create a free account
-                                            </Link>{" "}
-                                            to get started with your job search.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {errorType === "incorrect_password" && (
-                                <div className="alert alert-info mt-2">
-                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                    <div className="text-sm">
-                                        <p>
-                                            <Link
-                                                href="/forgot-password"
-                                                className="link link-primary"
-                                            >
-                                                Forgot your password?
-                                            </Link>{" "}
-                                            Reset it to regain access to your
-                                            account.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {errorType === "rate_limited" && (
-                                <div className="alert alert-warning mt-2">
-                                    <i className="fa-duotone fa-regular fa-clock"></i>
-                                    <div className="text-sm">
-                                        <p>
-                                            Please wait 60 seconds before trying
-                                            again, or use one of the social
-                                            sign-in options below.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+            {errorType === "needs_2fa" && (
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-4"
+                    role="alert"
+                >
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-shield-check text-info mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">
+                                Two-factor authentication is enabled
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                Check your authenticator app or SMS for the
+                                verification code.
+                            </p>
                         </div>
-                    )}
+                    </div>
+                </div>
+            )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div id="clerk-captcha"></div>
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email</legend>
-                            <input
-                                type="email"
-                                placeholder="you@example.com"
-                                className="input w-full"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </fieldset>
+            {errorType === "account_not_found" && (
+                <div
+                    className="bg-info/10 border-l-4 border-info p-4 mb-4"
+                    role="alert"
+                >
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">
+                                Don&apos;t have an account yet?
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                <Link
+                                    href={
+                                        redirectUrl
+                                            ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                                            : "/sign-up"
+                                    }
+                                    className="text-primary font-semibold hover:underline"
+                                >
+                                    Create your account
+                                </Link>{" "}
+                                to get started.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Password
-                            </legend>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="input w-full"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                            <p className="fieldset-label">
+            {errorType === "incorrect_password" && (
+                <div
+                    className="bg-warning/10 border-l-4 border-warning p-4 mb-4"
+                    role="alert"
+                >
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-key text-warning mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">
+                                Password incorrect
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                Double-check your password or{" "}
                                 <Link
                                     href="/forgot-password"
-                                    className="link link-hover"
+                                    className="text-primary font-semibold hover:underline"
                                 >
-                                    Forgot password?
+                                    reset your password
                                 </Link>
                             </p>
-                        </fieldset>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-full"
-                            disabled={isLoading || !isLoaded}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="loading loading-spinner"></span>
-                                    Signing in...
-                                </>
-                            ) : (
-                                "Sign In"
-                            )}
-                        </button>
-                    </form>
+            {errorType === "rate_limited" && (
+                <div
+                    className="bg-warning/10 border-l-4 border-warning p-4 mb-4"
+                    role="alert"
+                >
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-clock text-warning mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold">
+                                Too many attempts
+                            </p>
+                            <p className="text-sm text-base-content/60">
+                                For security, please wait a few minutes before
+                                trying again.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                    <div className="divider">OR</div>
+            {/* Social login buttons */}
+            <div className="space-y-3 mb-6">
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signInWithOAuth("oauth_google")}
+                >
+                    <i className="fa-brands fa-google text-lg" />
+                    <span className="text-sm font-semibold">
+                        Continue with Google
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={() => signInWithOAuth("oauth_microsoft")}
+                >
+                    <i className="fa-brands fa-microsoft text-lg" />
+                    <span className="text-sm font-semibold">
+                        Continue with Microsoft
+                    </span>
+                </button>
+            </div>
 
-                    <div className="space-y-2">
-                        <button
-                            onClick={() => signInWithOAuth("oauth_google")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div id="clerk-captcha" />
+
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Email Address
+                    </label>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setError("");
+                            }}
+                            placeholder="you@company.com"
+                            className={`input input-bordered w-full pl-10 ${errorType === "account_not_found" ? "input-error" : ""}`}
+                            required
+                        />
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40">
+                            Password
+                        </label>
+                        <Link
+                            href="/forgot-password"
+                            className="text-xs text-primary font-semibold hover:underline"
                         >
-                            <i className="fa-brands fa-google"></i>
-                            Continue with Google
-                        </button>
+                            Forgot?
+                        </Link>
+                    </div>
+                    <div className="relative">
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                setError("");
+                            }}
+                            placeholder="Enter your password"
+                            className={`input input-bordered w-full pl-10 pr-10 ${errorType === "incorrect_password" ? "input-error" : ""}`}
+                            required
+                        />
                         <button
-                            onClick={() => signInWithOAuth("oauth_github")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
                         >
-                            <i className="fa-brands fa-github"></i>
-                            Continue with GitHub
-                        </button>
-                        <button
-                            onClick={() => signInWithOAuth("oauth_microsoft")}
-                            className="btn btn-outline w-full"
-                            disabled={!isLoaded}
-                        >
-                            <i className="fa-brands fa-microsoft"></i>
-                            Continue with Microsoft
+                            <i
+                                className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                            />
                         </button>
                     </div>
+                </fieldset>
 
-                    <p className="text-center text-sm mt-4">
-                        Don't have an account?{" "}
-                        <Link
-                            href={
-                                redirectUrl
-                                    ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
-                                    : "/sign-up"
-                            }
-                            className="link link-primary"
-                        >
-                            Create free account
-                        </Link>
-                    </p>
-                </div>
+                <button
+                    type="submit"
+                    className="btn btn-primary w-full mt-2"
+                    disabled={isLoading || !isLoaded}
+                >
+                    {isLoading ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />{" "}
+                            Signing in...
+                        </>
+                    ) : (
+                        "Sign In"
+                    )}
+                </button>
+            </form>
+
+            {/* Switch mode */}
+            <div className="text-center mt-8 text-sm text-base-content/50">
+                Don&apos;t have an account?{" "}
+                <Link
+                    href={
+                        redirectUrl
+                            ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                            : "/sign-up"
+                    }
+                    className="text-primary font-semibold hover:underline"
+                >
+                    Create your account
+                </Link>
             </div>
-        </div>
+        </>
     );
 }

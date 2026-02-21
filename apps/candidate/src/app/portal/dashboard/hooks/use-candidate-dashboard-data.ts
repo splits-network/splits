@@ -43,6 +43,15 @@ export interface ActiveRecruiter {
     days_until_expiry?: number;
 }
 
+export interface PendingInvitation {
+    id: string;
+    recruiter_name: string;
+    recruiter_email: string;
+    invitation_token: string;
+    invitation_expires_at: string;
+    invited_at: string;
+}
+
 const DEFAULT_STATS: CandidateStats = {
     applications: 0,
     activeApplications: 0,
@@ -57,6 +66,7 @@ export function useCandidateDashboardData() {
     const [stats, setStats] = useState<CandidateStats>(DEFAULT_STATS);
     const [applications, setApplications] = useState<Application[]>([]);
     const [activeRecruiters, setActiveRecruiters] = useState<ActiveRecruiter[]>([]);
+    const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -116,10 +126,25 @@ export function useCandidateDashboardData() {
             if (recruitersResult.status === 'fulfilled') {
                 const relationships = recruitersResult.value.data || [];
                 const active = relationships.filter(
-                    (rel: any) => rel.status === 'active'
+                    (rel: any) => rel.consent_given && rel.status === 'active'
                 );
                 newStats.active_relationships = active.length;
                 setActiveRecruiters(active);
+
+                // Pending invitations: has token, no consent, not declined
+                const pending: PendingInvitation[] = relationships
+                    .filter(
+                        (rel: any) => rel.invitation_token && !rel.consent_given && !rel.declined_at
+                    )
+                    .map((rel: any) => ({
+                        id: rel.id,
+                        recruiter_name: rel.recruiter_name || rel.recruiter_email || 'Unknown',
+                        recruiter_email: rel.recruiter_email || '',
+                        invitation_token: rel.invitation_token,
+                        invitation_expires_at: rel.invitation_expires_at || '',
+                        invited_at: rel.created_at || '',
+                    }));
+                setPendingInvitations(pending);
             }
 
             setStats(newStats);
@@ -136,5 +161,5 @@ export function useCandidateDashboardData() {
         refresh();
     }, [refresh]);
 
-    return { stats, applications, activeRecruiters, loading, error, refresh };
+    return { stats, applications, activeRecruiters, pendingInvitations, loading, error, refresh };
 }

@@ -22,27 +22,15 @@ export class RecruiterCandidateRepository {
      * Build select clause with optional includes
      * Supports: recruiter, candidate
      */
-    private buildSelectClause(include?: string): string {
-        // Base fields - always include relationship data
-        const baseFields = '*,candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))';
-
-        if (!include) {
-            return baseFields;
-        }
-
-        const includes = include.split(',').map(i => i.trim().toLowerCase());
-        let selectClause = baseFields;
-
-        for (const inc of includes) {
-            switch (inc) {
-                case 'recruiter':
-                    // Join with recruiters table and identity users for contact info
-                    selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))';
-                    break;
-            }
-        }
-
-        return selectClause;
+    private buildSelectClause(_include?: string): string {
+        // Always include both candidate and recruiter joins — these are fundamental
+        // relationship data, not optional enrichment. The recruiter's name/email are
+        // needed by every consumer (dashboard, list views, etc.).
+        return [
+            '*',
+            'candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))',
+            'recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))',
+        ].join(',');
     }
 
     async findRecruiterCandidates(

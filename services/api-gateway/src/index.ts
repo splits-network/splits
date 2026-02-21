@@ -426,6 +426,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for public candidate invitation endpoint (landing page)
+        // GET /api/v2/recruiter-candidates/invitations/:token - view invitation details
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/recruiter-candidates/invitations/')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }

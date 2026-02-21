@@ -14,12 +14,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth, useClerk } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
-import {
-    ensureUserAndCandidateInDatabase,
-    type CandidateData,
-    type UserData,
-} from "@/lib/user-registration";
-import { getCachedCurrentUserProfile } from "@/lib/current-user-profile";
+import type { CandidateData, UserData } from "@/lib/user-registration";
 import { buildCandidatePayload } from "@/lib/onboarding-actions";
 import type {
     CandidateOnboardingState,
@@ -50,7 +45,12 @@ const INITIAL_STATE: CandidateOnboardingState = {
     loading: true,
 };
 
-export function useOnboarding(): UseOnboardingReturn {
+interface UseOnboardingOptions {
+    redirectUrl?: string;
+}
+
+export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingReturn {
+    const redirectUrl = options?.redirectUrl;
     const { user } = useUser();
     const { getToken } = useAuth();
     const { signOut } = useClerk();
@@ -69,83 +69,58 @@ export function useOnboarding(): UseOnboardingReturn {
     useEffect(() => {
         if (!user || profileLoading) return;
 
+        // Active flag prevents Strict Mode double-execution race condition.
+        // When React unmounts+remounts in dev, the first init's cleanup sets active=false
+        // so its state updates are discarded, and only the second init runs to completion.
+        let active = true;
+
         const init = async () => {
             try {
                 const token = await getToken();
                 if (!token) throw new Error("No authentication token");
+                if (!active) return;
 
                 const client = createAuthenticatedClient(token);
-                let candidateData: CandidateData | null = null;
-                let userData: UserData | null = null;
 
-                // Step 1: Try /candidates/me endpoint first
-                try {
-                    const meResponse = await client.get<{
-                        data: CandidateData;
-                    }>("/candidates/me");
-                    if (meResponse?.data) {
-                        candidateData = meResponse.data;
-                    }
-                } catch (meError: any) {
-                    // 404 or 500 — candidate doesn't exist, continue to fallback
-                    console.log(
-                        "[useOnboarding] /candidates/me failed, trying fallback...",
-                    );
-                }
+                // Single call to init endpoint — handles user + candidate creation/claiming
+                setInitStatus("creating_account");
+                setInitMessage("Setting up your account...");
 
-                // Step 2: If /me failed, create user and candidate via fallback
-                if (!candidateData) {
-                    setInitStatus("creating_account");
-                    setInitMessage("Setting up your account...");
+                const initResponse = await client.post<{
+                    data: {
+                        user: UserData;
+                        candidate: CandidateData | null;
+                    };
+                }>("/onboarding/init", {
+                    email: user.primaryEmailAddress?.emailAddress || "",
+                    name: user.fullName || user.firstName || "",
+                    image_url: user.imageUrl,
+                    source_app: "candidate",
+                });
 
-                    const result = await ensureUserAndCandidateInDatabase(
-                        token,
-                        {
-                            clerk_user_id: user.id,
-                            email:
-                                user.primaryEmailAddress?.emailAddress || "",
-                            name: user.fullName || user.firstName || "",
-                            image_url: user.imageUrl,
-                        },
-                    );
+                if (!active) return;
 
-                    if (result.success && result.candidate) {
-                        candidateData = result.candidate;
-                        userData = result.user;
-                    } else if (result.success && !result.candidate) {
-                        throw new Error(
-                            "Failed to create candidate profile. Please try again.",
-                        );
-                    } else {
-                        throw new Error(
-                            result.error || "Failed to create user account",
-                        );
-                    }
-                }
+                const userData = initResponse?.data?.user ?? null;
+                const candidateData = initResponse?.data?.candidate ?? null;
 
                 if (!candidateData) {
                     throw new Error(
-                        "Unable to load or create candidate profile",
+                        "Failed to create candidate profile. Please try again.",
                     );
                 }
 
-                // Step 3: If we don't have user data yet, fetch it
-                if (!userData) {
-                    userData = (await getCachedCurrentUserProfile(
-                        async () => token,
-                    )) as UserData | null;
-                }
+                if (!active) return;
 
-                // Admin or already completed → go to dashboard
+                // Admin or already completed → go to redirect or dashboard
                 // Hard navigation to avoid stale UserProfile context redirect loop
                 if (isAdmin || userData?.onboarding_status === "completed") {
-                    window.location.href = "/portal/dashboard";
+                    window.location.href = redirectUrl || "/portal/dashboard";
                     return;
                 }
 
-                // Skipped → also go to dashboard (user must explicitly come back via banner)
+                // Skipped → also go to redirect or dashboard (user must explicitly come back via banner)
                 if (userData?.onboarding_status === "skipped") {
-                    window.location.href = "/portal/dashboard";
+                    window.location.href = redirectUrl || "/portal/dashboard";
                     return;
                 }
 
@@ -230,6 +205,8 @@ export function useOnboarding(): UseOnboardingReturn {
                         restoredProfileData.resumeDocumentId ?? undefined,
                 };
 
+                if (!active) return;
+
                 setState((prev) => ({
                     ...prev,
                     currentStep: restoredStep,
@@ -242,6 +219,7 @@ export function useOnboarding(): UseOnboardingReturn {
 
                 setInitStatus("ready");
             } catch (error) {
+                if (!active) return;
                 console.error(
                     "[useOnboarding] Failed to initialize:",
                     error,
@@ -256,6 +234,7 @@ export function useOnboarding(): UseOnboardingReturn {
         };
 
         init();
+        return () => { active = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, profileLoading, isAdmin]);
 
@@ -343,19 +322,11 @@ export function useOnboarding(): UseOnboardingReturn {
                     s.profileData,
                 );
 
-                // Update candidate profile and user status in parallel
-                await Promise.all([
-                    Object.keys(candidatePayload).length > 0
-                        ? apiClient.patch(
-                              `/candidates/${s.candidateId}`,
-                              candidatePayload,
-                          )
-                        : Promise.resolve(),
-                    apiClient.patch("/users/me", {
-                        onboarding_status: "completed",
-                        onboarding_completed_at: new Date().toISOString(),
-                    }),
-                ]);
+                // Single call — backend handles candidate update + onboarding completion
+                await apiClient.post("/onboarding/candidate", {
+                    candidate_id: s.candidateId,
+                    profile: candidatePayload,
+                });
 
                 // Move to success step
                 setState((prev) => ({
@@ -386,8 +357,8 @@ export function useOnboarding(): UseOnboardingReturn {
                     onboarding_status: "skipped",
                 });
 
-                // Hard navigation to dashboard
-                window.location.href = "/portal/dashboard";
+                // Hard navigation to redirect or dashboard
+                window.location.href = redirectUrl || "/portal/dashboard";
             } catch (error: any) {
                 setState((prev) => ({
                     ...prev,

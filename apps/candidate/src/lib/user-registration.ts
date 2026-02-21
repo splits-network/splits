@@ -1,15 +1,13 @@
 /**
  * User & Candidate Registration Utility
- * Ensures users and candidates exist in the database for SSO sign-ups
- * 
- * This module provides idempotent user/candidate creation that handles:
- * - First-time SSO sign-ups
- * - Race conditions with Clerk webhooks
- * - Duplicate key errors gracefully
+ *
+ * Thin wrapper around POST /onboarding/init — the backend handles
+ * idempotent user+candidate creation, duplicate detection, and claiming.
+ *
+ * Type exports are kept for consumers that need UserData / CandidateData shapes.
  */
 
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from '@/lib/current-user-profile';
 
 /**
  * Data required to register a new user
@@ -47,22 +45,22 @@ export interface CandidateData {
     user_id: string | null;
     email: string | null;
     full_name: string | null;
-    
+
     // Contact & Location
     phone?: string | null;
     location?: string | null;
-    
+
     // Professional Info
     current_title?: string | null;
     current_company?: string | null;
     bio?: string | null;
     skills?: string | null;  // Text field in DB
-    
+
     // Social/Portfolio Links
     linkedin_url?: string | null;
     github_url?: string | null;
     portfolio_url?: string | null;
-    
+
     // Job Preferences
     desired_job_type?: string | null;  // Text field in DB
     desired_salary_min?: number | null;
@@ -70,7 +68,7 @@ export interface CandidateData {
     open_to_remote?: boolean;
     open_to_relocation?: boolean;
     availability?: string | null;
-    
+
     // Marketplace Settings
     marketplace_visibility?: string;
     show_email?: boolean;
@@ -79,7 +77,7 @@ export interface CandidateData {
     show_current_company?: boolean;
     show_salary_expectations?: boolean;
     marketplace_profile?: Record<string, any>;
-    
+
     // Verification
     verification_status?: string;
     verification_metadata?: Record<string, any>;
@@ -89,7 +87,7 @@ export interface CandidateData {
     // Relationships
     recruiter_id?: string | null;
     created_by_user_id?: string | null;
-    
+
     // Timestamps
     created_at: string;
     updated_at: string;
@@ -109,206 +107,49 @@ export interface UserAndCandidateRegistrationResult {
 
 /**
  * Ensures both user and candidate records exist in the database.
- * 
- * This function is idempotent - safe to call multiple times.
- * It will:
- * 1. Check/create user via /users/me and /users/register
- * 2. Check/create candidate via /candidates/me and POST /candidates
- * 3. Handle duplicate key errors gracefully (race condition with webhook)
- * 
- * @param token - Clerk JWT token for authentication
- * @param data - User registration data from Clerk
- * @returns UserAndCandidateRegistrationResult with success status and data
+ *
+ * Delegates to POST /onboarding/init which handles all orchestration:
+ * - Idempotent user creation (GET first, POST if 404, handle 409 duplicate)
+ * - Idempotent candidate creation with recruiter-candidate claiming
+ * - Race condition handling with Clerk webhooks
+ *
+ * @deprecated Prefer calling POST /onboarding/init directly via createAuthenticatedClient.
  */
 export async function ensureUserAndCandidateInDatabase(
     token: string,
     data: UserRegistrationData
 ): Promise<UserAndCandidateRegistrationResult> {
     const client = createAuthenticatedClient(token);
-    
-    let user: UserData | null = null;
-    let candidate: CandidateData | null = null;
-    let userWasExisting = false;
-    let candidateWasExisting = false;
-    
+
     try {
-        // ========== STEP 1: Ensure User Exists ==========
-        
-        // Try /users/me first
-        try {
-            const existing = await getCachedCurrentUserProfile(async () => token, { force: true });
-            if (existing) {;
-                user = existing as UserData;
-                userWasExisting = true;
-            }
-        } catch (checkError: any) {
-            const status = checkError?.response?.status || checkError?.status;
-            if (status !== 404 && status !== 500) {
-                console.warn('[UserRegistration] Error checking existing user:', checkError);
-            }
-        }
-        
-        // If no user found, create via /users/register
-        if (!user) {
-            console.log('[UserRegistration] Creating new user for:', data.email);
-            
-            try {
-                const createResponse = await client.post<{ data: UserData }>('/users/register', {
-                    clerk_user_id: data.clerk_user_id,
-                    email: data.email,
-                    name: data.name || '',
-                    image_url: data.image_url,
-                });
+        const response = await client.post<{
+            data: { user: UserData; candidate: CandidateData | null };
+        }>('/onboarding/init', {
+            email: data.email,
+            name: data.name || '',
+            image_url: data.image_url,
+            source_app: 'candidate',
+        });
 
-                if (createResponse?.data) {
-                    user = createResponse.data;
-                    userWasExisting = false;
-                    setCachedCurrentUserProfile(createResponse.data);
-                }
-            } catch (createError: any) {
-                // Handle duplicate key error (race condition with webhook)
-                const errorMessage = createError?.message || createError?.response?.data?.error?.message || '';
-                const isDuplicateKey = 
-                    errorMessage.toLowerCase().includes('already registered') ||
-                    errorMessage.toLowerCase().includes('duplicate') ||
-                    errorMessage.toLowerCase().includes('already exists') ||
-                    createError?.response?.status === 409;
-
-                if (isDuplicateKey) {
-                    
-                    try {
-                        const retryUser = await getCachedCurrentUserProfile(async () => token, { force: true });
-                        if (retryUser) {
-                            user = retryUser as UserData;
-                            userWasExisting = true;
-                            setCachedCurrentUserProfile(retryUser);
-                        }
-                    } catch (retryError) {
-                        console.error('[UserRegistration] Failed to fetch user after duplicate error:', retryError);
-                    }
-                } else {
-                    throw createError;
-                }
-            }
-        }
-
-        if (!user) {
-            throw new Error('Failed to create or find user account');
-        }
-
-        // ========== STEP 2: Ensure Candidate Exists ==========
-        
-        // Try /candidates/me first
-        try {
-            const existingCandidateResponse = await client.get<{ data: CandidateData }>('/candidates/me');
-            if (existingCandidateResponse?.data) {
-                console.log('[UserRegistration] Candidate already exists:', existingCandidateResponse.data.id);
-                candidate = existingCandidateResponse.data;
-                candidateWasExisting = true;
-            }
-        } catch (checkError: any) {
-            const status = checkError?.response?.status || checkError?.status;
-            if (status !== 404 && status !== 500) {
-                console.warn('[UserRegistration] Error checking existing candidate:', checkError);
-            }
-        }
-
-        // If no candidate found, create via POST /candidates
-        if (!candidate) {
-            console.log('[UserRegistration] Creating new candidate for user:', user.id);
-            
-            try {
-                const createCandidateResponse = await client.post<{ data: CandidateData }>('/candidates', {
-                    user_id: user.id,
-                    full_name: data.name || data.email.split('@')[0],  // API expects full_name, not name
-                    email: data.email,
-                });
-
-                if (createCandidateResponse?.data) {
-                    console.log('[UserRegistration] Candidate created successfully:', createCandidateResponse.data.id);
-                    candidate = createCandidateResponse.data;
-                    candidateWasExisting = false;
-                }
-            } catch (createError: any) {
-                // Handle duplicate key error
-                const errorMessage = createError?.message || createError?.response?.data?.error?.message || '';
-                const isDuplicateKey = 
-                    errorMessage.toLowerCase().includes('duplicate') ||
-                    errorMessage.toLowerCase().includes('already exists') ||
-                    errorMessage.toLowerCase().includes('unique constraint') ||
-                    createError?.response?.status === 409;
-
-                if (isDuplicateKey) {
-                    console.log('[UserRegistration] Candidate created by webhook, fetching existing...');
-                    
-                    try {
-                        const retryResponse = await client.get<{ data: CandidateData }>('/candidates/me');
-                        if (retryResponse?.data) {
-                            candidate = retryResponse.data;
-                            candidateWasExisting = true;
-                        }
-                    } catch (retryError) {
-                        console.error('[UserRegistration] Failed to fetch candidate after duplicate error:', retryError);
-                    }
-                } else {
-                    // Log but don't fail - candidate creation might be handled elsewhere
-                    console.error('[UserRegistration] Failed to create candidate:', createError);
-                }
-            }
-        }
+        const user = response?.data?.user ?? null;
+        const candidate = response?.data?.candidate ?? null;
 
         return {
             success: true,
             user,
             candidate,
-            userWasExisting,
-            candidateWasExisting,
+            userWasExisting: true, // Backend is idempotent, we don't know
+            candidateWasExisting: true,
         };
-
     } catch (error: any) {
-        console.error('[UserRegistration] Failed to ensure user and candidate:', error);
+        console.error('[UserRegistration] POST /onboarding/init failed:', error);
         return {
             success: false,
-            user,
-            candidate,
+            user: null,
+            candidate: null,
             error: error?.message || 'Failed to create user account',
-            userWasExisting,
-            candidateWasExisting,
+            userWasExisting: false,
+            candidateWasExisting: false,
         };
-    }
-}
-
-/**
- * Check if a user exists in the database without creating them.
- * 
- * @param token - Clerk JWT token for authentication
- * @returns User data if exists, null otherwise
- */
-export async function checkUserExists(
-    token: string
-): Promise<UserData | null> {
-    try {
-        return await getCachedCurrentUserProfile(async () => token, { force: true }) as UserData | null;
-    } catch {
-        return null;
-    }
-}
-
-/**
- * Check if a candidate exists in the database without creating them.
- * 
- * @param token - Clerk JWT token for authentication
- * @returns Candidate data if exists, null otherwise
- */
-export async function checkCandidateExists(
-    token: string
-): Promise<CandidateData | null> {
-    const client = createAuthenticatedClient(token);
-
-    try {
-        const response = await client.get<{ data: CandidateData }>('/candidates/me');
-        return response?.data || null;
-    } catch {
-        return null;
     }
 }

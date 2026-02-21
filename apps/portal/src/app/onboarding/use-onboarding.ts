@@ -13,7 +13,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import type {
@@ -55,7 +54,6 @@ export function useOnboarding(): UseOnboardingReturn {
     const { user } = useUser();
     const { getToken } = useAuth();
     const { isAdmin, isLoading: profileLoading, logout } = useUserProfile();
-    const router = useRouter();
 
     const [state, setState] = useState<OnboardingState>(INITIAL_STATE);
     const [initStatus, setInitStatus] = useState<InitStatus>("loading");
@@ -77,19 +75,17 @@ export function useOnboarding(): UseOnboardingReturn {
 
                 const client = createAuthenticatedClient(token);
 
-                // Fetch user — SSO callback already created the user record
-                let data: any = null;
-                try {
-                    const response: any = await client.get("/users/me");
-                    data = response?.data ?? null;
-                } catch (fetchError: any) {
-                    if (fetchError?.status === 404) {
-                        // User doesn't exist — redirect back to SSO
-                        router.replace("/sso-callback");
-                        return;
-                    }
-                    throw fetchError;
-                }
+                // Single call — creates user if missing, returns existing otherwise
+                const initResponse = await client.post<{
+                    data: { user: any };
+                }>("/onboarding/init", {
+                    email: user.primaryEmailAddress?.emailAddress || "",
+                    name: user.fullName || user.firstName || "",
+                    image_url: user.imageUrl,
+                    source_app: "portal",
+                });
+
+                const data = initResponse?.data?.user ?? null;
 
                 if (!data) {
                     throw new Error("Unable to load user profile");
@@ -276,6 +272,7 @@ export function useOnboarding(): UseOnboardingReturn {
                 companyInfo,
                 selectedPlan,
                 stripePaymentInfo,
+                fromInvitation,
             } = stateRef.current;
             const billingEmail = companyInfo?.billing_email?.trim();
 
@@ -329,17 +326,7 @@ export function useOnboarding(): UseOnboardingReturn {
 
                 const client = createAuthenticatedClient(token);
 
-                // Get current user data
-                const response = await client.get("/users", {
-                    params: { limit: 1 },
-                });
-                if (!response?.data) throw new Error("No user data found");
-                const userData = Array.isArray(response.data)
-                    ? response.data[0]
-                    : response.data;
-                if (!userData) throw new Error("No user data found");
-
-                // ── Recruiter flow ──
+                // ── Recruiter flow — single backend call ──
                 if (selectedRole === "recruiter") {
                     if (!recruiterProfile) {
                         setState((prev) => ({
@@ -350,146 +337,72 @@ export function useOnboarding(): UseOnboardingReturn {
                         return;
                     }
 
-                    // Create recruiter profile
-                    await client.post("/recruiters", {
-                        user_id: userData.id,
-                        bio: recruiterProfile?.bio,
-                        phone: recruiterProfile?.phone,
-                        industries: recruiterProfile?.industries || [],
-                        specialties: recruiterProfile?.specialties || [],
-                        location: recruiterProfile?.location || [],
-                        tagline: recruiterProfile?.tagline || null,
-                        years_experience:
-                            recruiterProfile?.years_experience || null,
-                    });
+                    const isPaidPlan =
+                        selectedPlan &&
+                        selectedPlan.tier !== "starter" &&
+                        selectedPlan.price_monthly > 0;
 
-                    // Activate subscription if plan selected
-                    if (selectedPlan) {
-                        const isPaidPlan =
-                            selectedPlan.tier !== "starter" &&
-                            selectedPlan.price_monthly > 0;
+                    const planData: any = {
+                        plan_id: selectedPlan!.id,
+                        tier: selectedPlan!.tier,
+                    };
 
-                        const activateData: any = {
-                            plan_id: selectedPlan.id,
-                        };
-
-                        if (isPaidPlan && stripePaymentInfo) {
-                            activateData.payment_method_id =
-                                stripePaymentInfo.paymentMethodId;
-                            activateData.customer_id =
-                                stripePaymentInfo.customerId;
-                            if (stripePaymentInfo.appliedDiscount?.code) {
-                                activateData.promotion_code =
-                                    stripePaymentInfo.appliedDiscount.code;
-                            }
+                    if (isPaidPlan && stripePaymentInfo) {
+                        planData.payment_method_id =
+                            stripePaymentInfo.paymentMethodId;
+                        planData.customer_id =
+                            stripePaymentInfo.customerId;
+                        if (stripePaymentInfo.appliedDiscount?.code) {
+                            planData.promotion_code =
+                                stripePaymentInfo.appliedDiscount.code;
                         }
-
-                        await client.post(
-                            "/subscriptions/activate",
-                            activateData,
-                        );
                     }
 
-                    // ── Company flow ──
+                    await client.post("/onboarding/recruiter", {
+                        profile: {
+                            bio: recruiterProfile?.bio,
+                            phone: recruiterProfile?.phone,
+                            industries: recruiterProfile?.industries || [],
+                            specialties: recruiterProfile?.specialties || [],
+                            location: recruiterProfile?.location || [],
+                            tagline: recruiterProfile?.tagline || null,
+                            years_experience:
+                                recruiterProfile?.years_experience || null,
+                        },
+                        plan: planData,
+                    });
+
+                    // ── Company flow — single backend call ──
                 } else if (selectedRole === "company_admin") {
                     if (!companyInfo?.name) {
                         throw new Error("Company name is required");
                     }
 
-                    const orgSlug = companyInfo.name
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/^-+|-+$/g, "");
-
-                    const { data: organization } = await client.post(
-                        "/organizations",
-                        {
+                    await client.post("/onboarding/business", {
+                        company: {
                             name: companyInfo.name,
-                            type: "company",
-                            slug: orgSlug,
+                            website: companyInfo?.website || null,
+                            industry: companyInfo?.industry || null,
+                            size: companyInfo?.size || null,
+                            description: companyInfo?.description || null,
+                            headquarters_location:
+                                companyInfo?.headquarters_location || null,
+                            logo_url: companyInfo?.logo_url || null,
                         },
-                    );
-
-                    const { data: company } = await client.post("/companies", {
-                        identity_organization_id: organization.id,
-                        name: companyInfo.name,
-                        website: companyInfo?.website || null,
-                        industry: companyInfo?.industry || null,
-                        company_size: companyInfo?.size || null,
-                        description: companyInfo?.description || null,
-                        headquarters_location:
-                            companyInfo?.headquarters_location || null,
-                        logo_url: companyInfo?.logo_url || null,
-                    });
-
-                    // Create membership BEFORE billing profile
-                    await client.post("/memberships", {
-                        user_id: userData.id,
-                        role_name: selectedRole,
-                        organization_id: organization.id,
-                    });
-
-                    await client.post(
-                        `/company-billing-profiles/${company.id}`,
-                        {
+                        billing: {
                             billing_terms:
                                 companyInfo?.billing_terms || "net_30",
                             billing_email: billingEmail || "",
                             invoice_delivery_method: "email",
                         },
-                    );
-
-                    // Complete recruiter invitation relationship (non-blocking)
-                    if (stateRef.current.fromInvitation?.id) {
-                        try {
-                            await client.post(
-                                "/company-invitations/complete-relationship",
-                                {
-                                    invitation_id:
-                                        stateRef.current.fromInvitation.id,
-                                    company_id: company.id,
-                                },
-                            );
-                        } catch (relError) {
-                            console.error(
-                                "Failed to complete recruiter relationship:",
-                                relError,
-                            );
-                        }
-                    }
-
-                    // Create sourcer relationship from referral (non-blocking)
-                    if (
-                        userData.referred_by_recruiter_id &&
-                        !stateRef.current.fromInvitation?.id
-                    ) {
-                        try {
-                            await client.post(
-                                "/recruiter-companies/request-connection",
-                                {
-                                    recruiter_id:
-                                        userData.referred_by_recruiter_id,
-                                    company_id: company.id,
-                                    relationship_type: "sourcer",
-                                },
-                            );
-                        } catch (relError) {
-                            console.error(
-                                "Failed to create sourcer relationship:",
-                                relError,
-                            );
-                        }
-                    }
+                        from_invitation: fromInvitation?.id
+                            ? { id: fromInvitation.id }
+                            : undefined,
+                        referred_by_recruiter_id: undefined,
+                    });
                 } else {
                     throw new Error("Invalid role");
                 }
-
-                // Update user onboarding status
-                await client.patch(`/users/${userData.id}`, {
-                    onboarding_status: "completed",
-                    onboarding_step: 4,
-                    onboarding_completed_at: new Date().toISOString(),
-                });
 
                 // Move to success step
                 setState((prev) => ({

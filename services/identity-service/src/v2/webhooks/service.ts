@@ -146,16 +146,45 @@ export class WebhooksServiceV2 {
 
     /**
      * Ensure a candidate record exists for a user.
-     * Creates candidate + user_role if not found. Idempotent.
+     * Handles three cases:
+     * 1. Candidate already linked to this user → no-op
+     * 2. Candidate exists with same email but user_id IS NULL (recruiter-created) → claim it
+     * 3. No candidate exists → create new one
      */
     private async ensureCandidateExists(userId: string, email: string, fullName: string): Promise<void> {
         try {
+            // Case 1: Already linked by user_id
             const existing = await this.repository.findCandidateByUserId(userId);
             if (existing) {
                 this.logger.info({ userId, candidateId: existing.id }, 'Candidate already exists for user');
                 return;
             }
 
+            // Case 2: Recruiter-created candidate with same email but no user_id — claim it
+            const byEmail = await this.repository.findCandidateByEmail(email);
+            if (byEmail && !byEmail.user_id) {
+                await this.repository.claimCandidateForUser(byEmail.id, userId);
+                await this.repository.createCandidateUserRole(userId, byEmail.id);
+
+                this.logger.info({
+                    userId,
+                    candidateId: byEmail.id,
+                }, 'Claimed recruiter-created candidate for user (linked user_id)');
+                return;
+            }
+
+            if (byEmail && byEmail.user_id) {
+                // Candidate exists with a DIFFERENT user_id — don't steal it
+                this.logger.warn({
+                    userId,
+                    existingUserId: byEmail.user_id,
+                    candidateId: byEmail.id,
+                    email,
+                }, 'Candidate with this email already linked to a different user');
+                return;
+            }
+
+            // Case 3: No candidate at all — create new
             const candidate = await this.repository.createCandidate(userId, email, fullName);
             await this.repository.createCandidateUserRole(userId, candidate.id);
 

@@ -48,11 +48,11 @@ export function Header() {
                 </>
             }
             actions={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 py-2">
                     <ThemeToggle />
                     <a
                         href="https://splits.network"
-                        className="hidden md:inline-flex btn btn-ghost text-md font-semibold uppercase tracking-wider"
+                        className="hidden md:inline-flex btn btn-primary text-md font-semibold uppercase tracking-wider"
                     >
                         Splits Network
                     </a>

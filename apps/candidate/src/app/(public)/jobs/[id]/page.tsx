@@ -6,37 +6,7 @@ import JobDetailClient from "./components/job-detail-client";
 import { cache } from "react";
 import { JsonLd } from "@splits-network/shared-ui";
 import { buildCanonical, CANDIDATE_BASE_URL } from "@/lib/seo";
-
-interface JobRequirement {
-    id: string;
-    requirement_type: "mandatory" | "preferred";
-    description: string;
-    sort_order: number;
-}
-
-interface Job {
-    id: string;
-    title: string;
-    company?: {
-        name: string;
-        description?: string;
-        industry?: string;
-        headquarters_location?: string;
-        logo_url?: string;
-    };
-    department?: string;
-    location?: string;
-    salary_min?: number;
-    salary_max?: number;
-    employment_type?: string;
-    open_to_relocation?: boolean;
-    updated_at?: string;
-    created_at?: string;
-    status?: string;
-    description?: string;
-    candidate_description?: string;
-    requirements?: JobRequirement[];
-}
+import type { Job } from "../types";
 
 interface PageProps {
     params: Promise<{ id: string }>;
