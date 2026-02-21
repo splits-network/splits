@@ -38,6 +38,9 @@ importers:
       '@splits-network/basel-ui':
         specifier: workspace:*
         version: link:../../packages/basel-ui
+      '@splits-network/chat-ui':
+        specifier: workspace:*
+        version: link:../../packages/chat-ui
       '@splits-network/memphis-ui':
         specifier: workspace:*
         version: link:../../packages/memphis-ui
@@ -190,6 +193,9 @@ importers:
       '@splits-network/basel-ui':
         specifier: workspace:*
         version: link:../../packages/basel-ui
+      '@splits-network/chat-ui':
+        specifier: workspace:*
+        version: link:../../packages/chat-ui
       '@splits-network/memphis-ui':
         specifier: workspace:*
         version: link:../../packages/memphis-ui
