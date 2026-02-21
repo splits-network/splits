@@ -65,6 +65,9 @@ export {
     type ButtonProps,
     ExpandableButton,
     type ExpandableButtonProps,
+    SpeedDial,
+    type SpeedDialProps,
+    type SpeedDialAction,
 } from './buttons';
 
 // Form components

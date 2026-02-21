@@ -11,15 +11,18 @@ import {
     joinedAgo,
     isNew,
 } from "../shared/helpers";
+import RecruiterActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     recruiter,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     recruiter: RecruiterWithUser;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
@@ -28,7 +31,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -96,6 +99,17 @@ export function SplitItem({
                         {successRateDisplay(recruiter)} success
                     </span>
                 )}
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <RecruiterActionsToolbar
+                    recruiter={recruiter}
+                    variant="icon-only"
+                    size="xs"
+                    showActions={{ viewDetails: false }}
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

@@ -9,20 +9,23 @@ import {
     postedAgo,
     companyName,
 } from "../shared/helpers";
+import RoleActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     job,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     job: Job;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -78,6 +81,17 @@ export function SplitItem({
                 <span className="text-sm text-base-content/40">
                     {job.application_count ?? 0} apps
                 </span>
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <RoleActionsToolbar
+                    job={job}
+                    variant="icon-only"
+                    size="xs"
+                    showActions={{ viewDetails: false }}
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

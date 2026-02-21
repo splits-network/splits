@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { ExpandableButton } from "@splits-network/basel-ui";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { CompanyInvitation } from "../../types";
 import { getInviteLink } from "./helpers";
 
@@ -141,68 +141,69 @@ export default function InvitationActionsToolbar({
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.copyCode) {
+            speedDialActions.push({
+                key: "copyCode",
+                icon: "fa-duotone fa-regular fa-copy",
+                label: "Code",
+                variant: "btn-ghost",
+                onClick: handleCopyCode,
+                title: "Copy invite code",
+            });
+        }
+        if (actions.copyLink) {
+            speedDialActions.push({
+                key: "copyLink",
+                icon: "fa-duotone fa-regular fa-link",
+                label: "Link",
+                variant: "btn-ghost",
+                onClick: handleCopyLink,
+                title: "Copy invite link",
+            });
+        }
+        if (actions.share) {
+            speedDialActions.push({
+                key: "share",
+                icon: "fa-duotone fa-regular fa-share-nodes",
+                label: "Share",
+                variant: "btn-ghost",
+                onClick: handleShare,
+                title: "Share invitation",
+            });
+        }
+        if (actions.resend) {
+            speedDialActions.push({
+                key: "resend",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Resend",
+                variant: "btn-secondary",
+                onClick: handleResend,
+                disabled: resending,
+                loading: resending,
+                title: "Resend email",
+            });
+        }
+        if (actions.revoke) {
+            speedDialActions.push({
+                key: "revoke",
+                icon: "fa-duotone fa-regular fa-ban",
+                label: "Revoke",
+                variant: "btn-ghost",
+                onClick: handleRevoke,
+                disabled: revoking,
+                loading: revoking,
+                title: "Revoke invitation",
+            });
+        }
+
         return (
-            <div
-                className={`flex items-center ${getLayoutClass()} ${className}`}
-            >
-                {actions.copyCode && (
-                    <ExpandableButton
-                        icon="fa-duotone fa-regular fa-copy"
-                        label="Code"
-                        variant="btn-ghost"
-                        size={size}
-                        onClick={handleCopyCode}
-                        title="Copy invite code"
-                    />
-                )}
-                {actions.copyLink && (
-                    <ExpandableButton
-                        icon="fa-duotone fa-regular fa-link"
-                        label="Link"
-                        variant="btn-ghost"
-                        size={size}
-                        onClick={handleCopyLink}
-                        title="Copy invite link"
-                    />
-                )}
-                {actions.share && (
-                    <ExpandableButton
-                        icon="fa-duotone fa-regular fa-share-nodes"
-                        label="Share"
-                        variant="btn-ghost"
-                        size={size}
-                        onClick={handleShare}
-                        title="Share invitation"
-                    />
-                )}
-                {actions.resend && (
-                    <ExpandableButton
-                        icon="fa-duotone fa-regular fa-envelope"
-                        label="Resend"
-                        variant="btn-secondary"
-                        size={size}
-                        onClick={handleResend}
-                        disabled={resending}
-                        loading={resending}
-                        title="Resend email"
-                    />
-                )}
-                {actions.revoke && (
-                    <>
-                        <div className="w-px h-4 bg-base-content/20 mx-0.5" />
-                        <ExpandableButton
-                            icon="fa-duotone fa-regular fa-ban"
-                            label="Revoke"
-                            variant="btn-ghost"
-                            size={size}
-                            onClick={handleRevoke}
-                            disabled={revoking}
-                            loading={revoking}
-                            title="Revoke invitation"
-                        />
-                    </>
-                )}
-            </div>
+            <SpeedDial
+                actions={speedDialActions}
+                size={size ?? "sm"}
+                className={className}
+            />
         );
     }
 

@@ -10,17 +10,20 @@ import {
     extractRelationship,
     formatStatus,
 } from "../shared/helpers";
+import CompanyActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     item,
     activeTab,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     item: Company | CompanyRelationship;
     activeTab: CompanyTab;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     const isMarketplace = activeTab === "marketplace";
     const name = companyName(item, isMarketplace);
@@ -28,10 +31,14 @@ export function SplitItem({
     const location = companyLocation(item, isMarketplace);
     const relationship = extractRelationship(item, isMarketplace);
 
+    const company: Company = isMarketplace
+        ? (item as Company)
+        : ({ ...(item as CompanyRelationship).company, created_at: (item as CompanyRelationship).created_at } as Company);
+
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -93,6 +100,17 @@ export function SplitItem({
                     )}
                 </div>
             )}
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <CompanyActionsToolbar
+                    company={company}
+                    relationship={!isMarketplace ? (item as CompanyRelationship) : undefined}
+                    variant="icon-only"
+                    size="xs"
+                    onRefresh={onRefresh}
+                />
+            </div>
         </div>
     );
 }

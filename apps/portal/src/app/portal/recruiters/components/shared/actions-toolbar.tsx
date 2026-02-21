@@ -9,7 +9,7 @@ import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Button, ExpandableButton } from "@splits-network/basel-ui";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName } from "../../types";
 import { useCompanyContext } from "../../contexts/company-context";
@@ -149,68 +149,58 @@ export default function RecruiterActionsToolbar({
     // ===== ICON-ONLY VARIANT =====
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.inviteToCompany) {
+            speedDialActions.push({
+                key: "invite",
+                icon: "fa-duotone fa-regular fa-paper-plane",
+                label: "Invite to Company",
+                variant: "btn-primary",
+                onClick: handleInviteToCompany,
+                title: "Invite to Company",
+            });
+        }
+        if (actions.endRelationship) {
+            speedDialActions.push({
+                key: "endRelationship",
+                icon: "fa-duotone fa-regular fa-link-slash",
+                label: "End Relationship",
+                variant: "btn-ghost",
+                onClick: () => setShowTerminateModal(true),
+                title: "End Relationship",
+            });
+        }
+        if (actions.message) {
+            speedDialActions.push({
+                key: "message",
+                icon: "fa-duotone fa-regular fa-messages",
+                label: "Message Recruiter",
+                variant: "btn-ghost",
+                onClick: handleStartChat,
+                disabled: !canChat || startingChat,
+                loading: startingChat,
+                title: chatDisabledReason || "Message Recruiter",
+            });
+        }
+        if (actions.viewDetails && onViewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: handleViewDetails,
+                title: "View Details",
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {actions.inviteToCompany && (
-                        <ExpandableButton
-                            icon="fa-duotone fa-regular fa-paper-plane"
-                            label="Invite"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={handleInviteToCompany}
-                            title="Invite to Company"
-                        />
-                    )}
-
-                    {actions.endRelationship && (
-                        <ExpandableButton
-                            icon="fa-duotone fa-regular fa-link-slash"
-                            label="End"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={() => setShowTerminateModal(true)}
-                            title="End Relationship"
-                        />
-                    )}
-
-                    {actions.message &&
-                        (actions.inviteToCompany ||
-                            actions.endRelationship) && (
-                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
-                        )}
-
-                    {actions.message && (
-                        <span title={chatDisabledReason || undefined}>
-                            <ExpandableButton
-                                icon="fa-duotone fa-regular fa-messages"
-                                label="Message"
-                                variant="btn-ghost btn-square"
-                                size={size}
-                                onClick={handleStartChat}
-                                disabled={!canChat || startingChat}
-                                loading={startingChat}
-                                title="Message Recruiter"
-                            />
-                        </span>
-                    )}
-
-                    {actions.viewDetails && onViewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
-                            <ExpandableButton
-                                icon="fa-duotone fa-regular fa-eye"
-                                label="Details"
-                                variant="btn-primary btn-square"
-                                size={size}
-                                onClick={handleViewDetails}
-                                title="View Details"
-                            />
-                        </>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {inviteModal}
                 {terminateModal}
             </>

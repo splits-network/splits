@@ -12,6 +12,7 @@ import {
     formatMessageDate,
     getRequestStateDisplay,
 } from "@/app/portal/messages/types";
+import { ActionsToolbar } from "./actions-toolbar";
 
 /* ─── Role metadata — DaisyUI semantic tokens ──────────────────────────── */
 
@@ -96,7 +97,7 @@ export default function SplitItem({
         <button
             type="button"
             onClick={() => onSelect(convo.id)}
-            className={`conv-item w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
+            className={`relative conv-item w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
                 isSelected
                     ? "bg-base-100 border-l-4 border-l-primary"
                     : "border-l-4 border-l-transparent"
@@ -178,6 +179,15 @@ export default function SplitItem({
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <ActionsToolbar
+                    conversation={row}
+                    variant="icon-only"
+                    size="xs"
+                />
             </div>
         </button>
     );

@@ -43,7 +43,8 @@ export class SearchService {
                 query,
                 params.entity_type,
                 page,
-                limit
+                limit,
+                params.filters
             );
 
             return {

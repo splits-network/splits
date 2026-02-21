@@ -4,12 +4,29 @@ export type SearchableEntityType =
     | 'candidate' | 'job' | 'company' | 'recruiter'
     | 'application' | 'placement' | 'recruiter_candidate';
 
+export interface SearchFilters {
+    employment_type?: string;
+    job_level?: string;
+    commute_types?: string[];
+    job_status?: string;
+    department?: string;
+    salary_min?: number;
+    salary_max?: number;
+    open_to_relocation?: boolean;
+    desired_job_type?: string;
+    open_to_remote?: boolean;
+    availability?: string;
+    industry?: string;
+    company_size?: string;
+}
+
 export interface SearchParams {
     q: string;
     mode: SearchMode;
     entity_type?: SearchableEntityType;
     page?: number;
     limit?: number;
+    filters?: SearchFilters;
 }
 
 export interface SearchResult {

@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver, AccessContext } from '@splits-network/shared-access-context';
-import { SearchableEntityType, SearchResult, TypeaheadGroup, ENTITY_TYPE_LABELS } from './types';
+import { SearchableEntityType, SearchResult, TypeaheadGroup, ENTITY_TYPE_LABELS, SearchFilters } from './types';
 
 export class SearchRepository {
     private accessResolver: AccessContextResolver;
@@ -53,7 +53,8 @@ export class SearchRepository {
         query: string,
         entityType?: SearchableEntityType,
         page: number = 1,
-        limit: number = 25
+        limit: number = 25,
+        filters?: SearchFilters
     ): Promise<{ data: SearchResult[], total: number }> {
         const context = await this.accessResolver.resolve(clerkUserId);
 
@@ -70,6 +71,11 @@ export class SearchRepository {
         // Apply entity type filter if specified
         if (entityType) {
             queryBuilder = queryBuilder.eq('entity_type', entityType);
+        }
+
+        // Apply metadata filters
+        if (filters) {
+            queryBuilder = this.applyMetadataFilters(queryBuilder, filters);
         }
 
         // Apply pagination
@@ -141,6 +147,66 @@ export class SearchRepository {
             metadata: row.metadata || {},
             rank: 0, // Placeholder
         }));
+    }
+
+    /**
+     * Apply metadata-level field filters for advanced search.
+     * Uses JSONB operators on the metadata column.
+     */
+    private applyMetadataFilters(
+        queryBuilder: any,
+        filters: SearchFilters
+    ): any {
+        // Text equality filters (metadata->> extracts as text)
+        if (filters.employment_type) {
+            queryBuilder = queryBuilder.eq('metadata->>employment_type', filters.employment_type);
+        }
+        if (filters.job_level) {
+            queryBuilder = queryBuilder.eq('metadata->>job_level', filters.job_level);
+        }
+        if (filters.job_status) {
+            queryBuilder = queryBuilder.eq('metadata->>status', filters.job_status);
+        }
+        if (filters.department) {
+            queryBuilder = queryBuilder.eq('metadata->>department', filters.department);
+        }
+        if (filters.desired_job_type) {
+            queryBuilder = queryBuilder.eq('metadata->>desired_job_type', filters.desired_job_type);
+        }
+        if (filters.availability) {
+            queryBuilder = queryBuilder.eq('metadata->>availability', filters.availability);
+        }
+        if (filters.industry) {
+            queryBuilder = queryBuilder.ilike('metadata->>company_industry', `%${filters.industry}%`);
+        }
+        if (filters.company_size) {
+            queryBuilder = queryBuilder.eq('metadata->>company_size', filters.company_size);
+        }
+
+        // Boolean filters
+        if (filters.open_to_remote === true) {
+            queryBuilder = queryBuilder.eq('metadata->>open_to_remote', 'true');
+        }
+        if (filters.open_to_relocation === true) {
+            queryBuilder = queryBuilder.eq('metadata->>open_to_relocation', 'true');
+        }
+
+        // Array containment (commute_types is a JSONB array)
+        if (filters.commute_types && filters.commute_types.length > 0) {
+            queryBuilder = queryBuilder.contains('metadata->commute_types', JSON.stringify(filters.commute_types));
+        }
+
+        // Salary range (metadata-> returns JSONB, numeric comparison works)
+        if (filters.salary_min !== undefined) {
+            // Jobs where salary_max >= user's minimum (job pays enough)
+            queryBuilder = queryBuilder.gte('metadata->salary_max', filters.salary_min);
+        }
+        if (filters.salary_max !== undefined) {
+            // Jobs where salary_min <= user's maximum (job isn't too expensive)
+            queryBuilder = queryBuilder.lte('metadata->salary_min', filters.salary_max);
+        }
+
+        return queryBuilder;
     }
 
     /**

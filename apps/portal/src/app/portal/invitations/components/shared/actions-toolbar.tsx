@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Button, BaselConfirmModal } from "@splits-network/basel-ui";
+import { BaselConfirmModal, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Invitation } from "../../types";
 import { canResendInvitation } from "../../types";
 
@@ -111,63 +111,59 @@ export default function ActionsToolbar({
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
     const isLoading = resending || cancelling;
 
-    /* ── Icon-Only Variant ── */
+    /* ── Icon-Only Variant (SpeedDial) ── */
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.resend) {
+            speedDialActions.push({
+                key: "resend",
+                icon: "fa-duotone fa-regular fa-paper-plane",
+                label: "Resend Invitation",
+                variant: "btn-primary",
+                disabled: isLoading,
+                loading: resending,
+                onClick: handleResend,
+            });
+        }
+        if (actions.cancel) {
+            speedDialActions.push({
+                key: "cancel",
+                icon: "fa-duotone fa-regular fa-trash",
+                label: "Cancel Invitation",
+                variant: "btn-ghost",
+                disabled: isLoading,
+                loading: cancelling,
+                onClick: () => setConfirmDialog(true),
+            });
+        }
+        if (actions.viewDeclineReason) {
+            speedDialActions.push({
+                key: "decline-reason",
+                icon: "fa-duotone fa-regular fa-comment",
+                label: "View Decline Reason",
+                variant: "btn-ghost",
+                onClick: handleViewDeclineReason,
+            });
+        }
+        if (actions.viewCandidate) {
+            speedDialActions.push({
+                key: "view-candidate",
+                icon: "fa-duotone fa-regular fa-user",
+                label: "View Candidate",
+                variant: "btn-primary",
+                href: `/portal/candidates?candidateId=${invitation.candidate_id}`,
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${layoutClass} ${className}`}
-                >
-                    {actions.resend && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-paper-plane"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={handleResend}
-                            disabled={isLoading}
-                            loading={resending}
-                            title="Resend Invitation"
-                        />
-                    )}
-                    {actions.cancel && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-trash"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={() => setConfirmDialog(true)}
-                            disabled={isLoading}
-                            loading={cancelling}
-                            title="Cancel Invitation"
-                        />
-                    )}
-                    {actions.viewDeclineReason && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-comment"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={handleViewDeclineReason}
-                            title="View Decline Reason"
-                        />
-                    )}
-                    {actions.viewCandidate && (
-                        <>
-                            {(actions.resend ||
-                                actions.cancel ||
-                                actions.viewDeclineReason) && (
-                                <div className="w-px h-4 bg-base-300 mx-0.5" />
-                            )}
-                            <Button
-                                icon="fa-duotone fa-regular fa-user"
-                                variant="btn-primary btn-square"
-                                size={size}
-                                href={`/portal/candidates?candidateId=${invitation.candidate_id}`}
-                                title="View Candidate"
-                            />
-                        </>
-                    )}
-                </div>
-
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 <ModalPortal>
                     {confirmDialog && (
                         <BaselConfirmModal

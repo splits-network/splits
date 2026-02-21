@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SearchRepository } from './search/repository';
 import { SearchService, ValidationError } from './search/service';
-import { SearchMode, SearchableEntityType } from './search/types';
+import { SearchMode, SearchableEntityType, SearchFilters } from './search/types';
 
 interface RouteOptions extends FastifyPluginOptions {
     supabase: SupabaseClient;
@@ -56,6 +56,7 @@ export async function registerV2Routes(
                 entity_type?: string;
                 page?: string;
                 limit?: string;
+                filters?: string;
             };
 
             const q = query.q || '';
@@ -63,6 +64,21 @@ export async function registerV2Routes(
             const entity_type = query.entity_type as SearchableEntityType | undefined;
             const page = query.page ? parseInt(query.page, 10) : undefined;
             const limit = query.limit ? parseInt(query.limit, 10) : undefined;
+
+            // Parse filters JSON param
+            let filters: SearchFilters | undefined;
+            if (query.filters) {
+                try {
+                    filters = JSON.parse(query.filters) as SearchFilters;
+                } catch {
+                    return reply.status(400).send({
+                        error: {
+                            code: 'VALIDATION_ERROR',
+                            message: 'Invalid filters JSON',
+                        },
+                    });
+                }
+            }
 
             // Validate mode
             if (mode !== 'typeahead' && mode !== 'full') {
@@ -81,6 +97,7 @@ export async function registerV2Routes(
                 entity_type,
                 page,
                 limit,
+                filters,
             });
 
             // Return result (already has correct envelope format)

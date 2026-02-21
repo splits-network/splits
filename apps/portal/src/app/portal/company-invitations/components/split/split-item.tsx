@@ -9,15 +9,18 @@ import {
 } from "../../types";
 import { statusColor } from "../shared/status-color";
 import { isNew, postedAgo } from "../shared/helpers";
+import ConnectionActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     invitation,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     invitation: RecruiterCompanyRelationship;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     const { isCompanyUser } = useUserProfile();
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
@@ -26,7 +29,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -78,6 +81,16 @@ export function SplitItem({
                     </span>
                 </div>
             )}
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <ConnectionActionsToolbar
+                    invitation={invitation}
+                    variant="icon-only"
+                    size="xs"
+                    onRefresh={onRefresh}
+                />
+            </div>
         </div>
     );
 }

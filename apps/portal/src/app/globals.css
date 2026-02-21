@@ -219,3 +219,63 @@
 .expanded-row-detail td:last-child {
     @apply rounded-br-lg;
 }
+
+/* ============================================
+   SpeedDial / FAB — inline variant (not fixed)
+   Adapted from memphis-ui fab.css
+   ============================================ */
+
+.speed-dial {
+    @apply pointer-events-none relative z-20 inline-flex items-end text-sm whitespace-nowrap;
+
+    > * {
+        @apply pointer-events-auto flex items-center gap-2;
+    }
+
+    /* Trigger — stays in normal flow, sizes the container */
+    > [tabindex] {
+        @apply relative z-10 grid;
+        transition-property: opacity, visibility, rotate;
+        transition-duration: 0.2s;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Trigger icon rotation on expand */
+    > [tabindex] i {
+        transition: rotate 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:focus-within > [tabindex] i {
+        rotate: 45deg;
+    }
+
+    /* Action items — absolutely positioned, stacking upward from trigger */
+    > :nth-child(n + 2) {
+        @apply invisible scale-80 opacity-0 absolute right-0 justify-end;
+        transition-property: opacity, scale, visibility;
+        transition-duration: 0.2s;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Stack items upward using bottom offsets (trigger height + gap per item) */
+    > :nth-child(2) { bottom: calc(100% + 0.5rem); }
+    > :nth-child(3) { bottom: calc(200% + 1rem); transition-delay: 30ms; }
+    > :nth-child(4) { bottom: calc(300% + 1.5rem); transition-delay: 60ms; }
+    > :nth-child(5) { bottom: calc(400% + 2rem); transition-delay: 90ms; }
+    > :nth-child(6) { bottom: calc(500% + 2.5rem); transition-delay: 120ms; }
+    > :nth-child(7) { bottom: calc(600% + 3rem); transition-delay: 150ms; }
+    > :nth-child(8) { bottom: calc(700% + 3.5rem); transition-delay: 180ms; }
+
+    /* Expanded state — bump z to float above sticky controls-bar (z-30) */
+    &:focus-within {
+        @apply z-40;
+
+        > [tabindex]:first-child {
+            @apply pointer-events-none;
+        }
+
+        > :nth-child(n + 2) {
+            @apply visible scale-100 opacity-100;
+        }
+    }
+}

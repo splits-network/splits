@@ -12,7 +12,7 @@ import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
-import { Button } from "@splits-network/basel-ui";
+import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
@@ -212,98 +212,84 @@ export default function CandidateActionsToolbar({
         </ModalPortal>
     );
 
-    /* ── Icon-Only Variant ── */
+    /* ── Icon-Only Variant (SpeedDial) ── */
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.sendJobOpportunity) {
+            speedDialActions.push({
+                key: "send-job",
+                icon: "fa-duotone fa-regular fa-paper-plane",
+                label: "Send Job Opportunity",
+                variant: "btn-primary",
+                onClick: () => setShowSubmitWizard(true),
+            });
+        }
+        if (actions.verify && candidate.verification_status !== "verified") {
+            speedDialActions.push({
+                key: "verify",
+                icon: "fa-duotone fa-regular fa-badge-check",
+                label: "Verify Candidate",
+                variant: "btn-success",
+                onClick: () => setShowVerifyModal(true),
+            });
+        }
+        if (actions.endRepresentation) {
+            speedDialActions.push({
+                key: "end-rep",
+                icon: "fa-duotone fa-regular fa-link-slash",
+                label: "End Representation",
+                variant: "btn-error",
+                onClick: () => setShowTerminateModal(true),
+            });
+        }
+        if (actions.message) {
+            speedDialActions.push({
+                key: "message",
+                icon: "fa-duotone fa-regular fa-messages",
+                label: "Message Candidate",
+                variant: "btn-neutral btn-outline",
+                disabled: !canChat || startingChat,
+                loading: startingChat,
+                title: chatDisabledReason || undefined,
+                renderButton: (
+                    <span title={chatDisabledReason || undefined} className="relative inline-block">
+                        <Presence
+                            status={presenceStatus}
+                            className="absolute -top-1 -right-1 z-10"
+                        />
+                        <Button
+                            icon="fa-duotone fa-regular fa-messages"
+                            variant="btn-neutral btn-circle btn-outline"
+                            size={size}
+                            onClick={handleStartChat}
+                            disabled={!canChat || startingChat}
+                            loading={startingChat}
+                            title="Message Candidate"
+                        />
+                    </span>
+                ),
+            });
+        }
+        if (actions.viewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: onViewDetails ? handleViewDetails : undefined,
+                href: !onViewDetails ? `/portal/candidates?candidateId=${candidate.id}` : undefined,
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {/* Send Job Opportunity — Primary CTA */}
-                    {actions.sendJobOpportunity && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-paper-plane"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={() => setShowSubmitWizard(true)}
-                            title="Send Job Opportunity"
-                        ></Button>
-                    )}
-
-                    {/* Verify */}
-                    {actions.verify &&
-                        candidate.verification_status !== "verified" && (
-                            <Button
-                                icon="fa-duotone fa-regular fa-badge-check"
-                                variant="btn-success"
-                                size={size}
-                                onClick={() => setShowVerifyModal(true)}
-                                title="Verify Candidate"
-                            >
-                                Verify
-                            </Button>
-                        )}
-
-                    {/* End Representation */}
-                    {actions.endRepresentation && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-link-slash"
-                            variant="btn-error btn-square"
-                            size={size}
-                            onClick={() => setShowTerminateModal(true)}
-                            title="End Representation"
-                        ></Button>
-                    )}
-
-                    {/* Divider before Message */}
-                    {actions.message &&
-                        (actions.sendJobOpportunity ||
-                            actions.verify ||
-                            actions.endRepresentation) && (
-                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
-                        )}
-
-                    {/* Message */}
-                    {actions.message && (
-                        <span title={chatDisabledReason || undefined}>
-                            <Button
-                                icon="fa-duotone fa-regular fa-messages"
-                                variant="btn-neutral btn-square btn-outline"
-                                size={size}
-                                onClick={handleStartChat}
-                                disabled={!canChat || startingChat}
-                                loading={startingChat}
-                                title="Message Candidate"
-                            ></Button>
-                        </span>
-                    )}
-
-                    {/* Divider before View Details */}
-                    {actions.viewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-content/20 mx-0.5" />
-                            {onViewDetails ? (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    onClick={handleViewDetails}
-                                    title="View Details"
-                                ></Button>
-                            ) : (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    href={`/portal/candidates?candidateId=${candidate.id}`}
-                                    title="View Details"
-                                ></Button>
-                            )}
-                        </>
-                    )}
-                </div>
-
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {modals}
             </>
         );

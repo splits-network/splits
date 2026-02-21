@@ -27,12 +27,16 @@ export function ChatSidebarHeader({
         return (
             <div className="sticky top-0 z-10 backdrop-blur-md bg-base-100/90 border-b border-base-300">
                 <div className="h-0.5 bg-primary w-full" />
-                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <div className="px-3 py-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                        <h2 className="text-lg font-black tracking-tight">Messages</h2>
+                        <h2 className="text-lg font-black tracking-tight">
+                            Messages
+                        </h2>
                         {unreadTotalCount > 0 && (
                             <span className="badge badge-primary badge-sm">
-                                {unreadTotalCount > 99 ? "99+" : unreadTotalCount}
+                                {unreadTotalCount > 99
+                                    ? "99+"
+                                    : unreadTotalCount}
                             </span>
                         )}
                     </div>
@@ -63,7 +67,7 @@ export function ChatSidebarHeader({
             {/* Top accent line */}
             <div className="h-0.5 bg-primary w-full" />
 
-            <div className="px-4 py-3 flex items-center justify-between gap-3">
+            <div className="px-3 py-2 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                     {view === "thread" && (
                         <button
@@ -77,10 +81,13 @@ export function ChatSidebarHeader({
 
                     <div className="min-w-0">
                         {view === "list" ? (
-                            <h2 className="text-lg font-black tracking-tight">Messages</h2>
+                            <h2 className="text-lg font-black tracking-tight">
+                                Messages
+                            </h2>
                         ) : (
                             <h2 className="text-base font-bold truncate">
-                                {activeConversationMeta?.otherUserName || "Conversation"}
+                                {activeConversationMeta?.otherUserName ||
+                                    "Conversation"}
                             </h2>
                         )}
                     </div>

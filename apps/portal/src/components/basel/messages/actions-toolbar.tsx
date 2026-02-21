@@ -10,6 +10,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import ConfirmDialog from "@/components/confirm-dialog";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* Inline portal — avoids shared-ui CJS/ESM issue */
 import { useEffect, useState as usePortalState, type ReactNode } from "react";
@@ -280,67 +281,58 @@ export function ActionsToolbar({
     );
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.mute) {
+            speedDialActions.push({
+                key: "mute",
+                icon: `fa-duotone fa-regular ${isMuted ? "fa-volume" : "fa-volume-slash"}`,
+                label: isMuted ? "Unmute" : "Mute",
+                variant: "btn-ghost",
+                disabled: isLoading,
+                loading: muting,
+                onClick: handleMute,
+            });
+        }
+        if (actions.archive) {
+            speedDialActions.push({
+                key: "archive",
+                icon: "fa-duotone fa-regular fa-box-archive",
+                label: isArchived ? "Unarchive" : "Archive",
+                variant: "btn-ghost",
+                disabled: isLoading,
+                loading: archiving,
+                onClick: handleArchive,
+            });
+        }
+        if (actions.block) {
+            speedDialActions.push({
+                key: "block",
+                icon: "fa-duotone fa-regular fa-ban",
+                label: "Block User",
+                variant: "btn-ghost",
+                disabled: isLoading,
+                loading: blocking,
+                onClick: () => setConfirmBlock(true),
+            });
+        }
+        if (actions.report) {
+            speedDialActions.push({
+                key: "report",
+                icon: "fa-duotone fa-regular fa-flag",
+                label: "Report",
+                variant: "btn-ghost",
+                onClick: () => setShowReportModal(true),
+            });
+        }
+
         return (
             <>
-                <div className={`flex ${layoutClass} ${className}`}>
-                    {actions.mute && (
-                        <button
-                            onClick={handleMute}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
-                            title={isMuted ? "Unmute" : "Mute"}
-                            disabled={isLoading}
-                        >
-                            {muting ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i
-                                    className={`fa-duotone fa-regular ${isMuted ? "fa-volume" : "fa-volume-slash"}`}
-                                />
-                            )}
-                        </button>
-                    )}
-
-                    {actions.archive && (
-                        <button
-                            onClick={handleArchive}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
-                            title={isArchived ? "Unarchive" : "Archive"}
-                            disabled={isLoading}
-                        >
-                            {archiving ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-box-archive" />
-                            )}
-                        </button>
-                    )}
-
-                    {actions.block && (
-                        <button
-                            onClick={() => setConfirmBlock(true)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
-                            title="Block User"
-                            disabled={isLoading}
-                        >
-                            {blocking ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-ban" />
-                            )}
-                        </button>
-                    )}
-
-                    {actions.report && (
-                        <button
-                            onClick={() => setShowReportModal(true)}
-                            className={`btn ${sizeClass} btn-square btn-ghost`}
-                            title="Report"
-                        >
-                            <i className="fa-duotone fa-regular fa-flag" />
-                        </button>
-                    )}
-                </div>
-
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {reportModal}
             </>
         );

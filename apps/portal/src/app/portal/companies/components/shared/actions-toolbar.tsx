@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Button, ExpandableButton } from "@splits-network/basel-ui";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Company, CompanyRelationship } from "../../types";
 import RequestConnectionModal from "../modals/request-connection-modal";
 import TerminateModal from "../modals/terminate-company-modal";
@@ -70,61 +70,54 @@ export default function CompanyActionsToolbar({
         </ModalPortal>
     );
 
-    // Icon-only variant (matching roles Basel ExpandableButton pattern)
+    // Icon-only variant (SpeedDial)
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (!hasConnection) {
+            speedDialActions.push({
+                key: "connect",
+                icon: "fa-duotone fa-regular fa-link",
+                label: "Request Connection",
+                variant: "btn-primary",
+                onClick: () => setShowRequestModal(true),
+            });
+        }
+        if (relationship?.status === "active") {
+            speedDialActions.push({
+                key: "end-relationship",
+                icon: "fa-duotone fa-regular fa-link-slash",
+                label: "End Relationship",
+                variant: "btn-ghost",
+                onClick: () => setShowTerminateModal(true),
+            });
+        }
+        if (relationship?.status === "pending") {
+            speedDialActions.push({
+                key: "pending",
+                icon: "fa-duotone fa-regular fa-clock",
+                label: "Connection Pending",
+                variant: "btn-ghost",
+                disabled: true,
+            });
+        }
+        if (onViewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: onViewDetails,
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {/* Connect */}
-                    {!hasConnection && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-link"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={() => setShowRequestModal(true)}
-                            title="Request Connection"
-                        />
-                    )}
-
-                    {/* End Relationship */}
-                    {relationship?.status === "active" && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-link-slash"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={() => setShowTerminateModal(true)}
-                            title="End Relationship"
-                        />
-                    )}
-
-                    {/* Pending indicator */}
-                    {relationship?.status === "pending" && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-clock"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            disabled
-                            onClick={() => {}}
-                            title="Connection Pending"
-                        />
-                    )}
-
-                    {/* View Details */}
-                    {onViewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                            <Button
-                                icon="fa-duotone fa-regular fa-eye"
-                                variant="btn-primary btn-square"
-                                size={size}
-                                onClick={onViewDetails}
-                                title="View Details"
-                            />
-                        </>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size === "lg" ? "md" : (size ?? "sm")}
+                    className={className}
+                />
                 {modals}
             </>
         );

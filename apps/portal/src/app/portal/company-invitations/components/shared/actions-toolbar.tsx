@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { Button } from "@splits-network/basel-ui";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
 
@@ -127,43 +127,50 @@ export default function ConnectionActionsToolbar({
     // ===== ICON-ONLY VARIANT =====
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.accept) {
+            speedDialActions.push({
+                key: "accept",
+                icon: "fa-duotone fa-regular fa-check",
+                label: "Accept Connection",
+                variant: "btn-success",
+                onClick: handleAccept,
+                disabled: accepting,
+                loading: accepting,
+                title: "Accept Connection",
+            });
+        }
+        if (actions.decline) {
+            speedDialActions.push({
+                key: "decline",
+                icon: "fa-duotone fa-regular fa-xmark",
+                label: "Decline Connection",
+                variant: "btn-ghost",
+                onClick: handleDecline,
+                disabled: declining,
+                loading: declining,
+                title: "Decline Connection",
+            });
+        }
+        if (actions.terminate) {
+            speedDialActions.push({
+                key: "terminate",
+                icon: "fa-duotone fa-regular fa-link-slash",
+                label: "End Relationship",
+                variant: "btn-ghost",
+                onClick: () => setShowTerminateModal(true),
+                title: "End Relationship",
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {actions.accept && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-check"
-                            variant="btn-success btn-square"
-                            size={size}
-                            onClick={handleAccept}
-                            disabled={accepting}
-                            loading={accepting}
-                            title="Accept Connection"
-                        />
-                    )}
-                    {actions.decline && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-xmark"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={handleDecline}
-                            disabled={declining}
-                            loading={declining}
-                            title="Decline Connection"
-                        />
-                    )}
-                    {actions.terminate && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-link-slash"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={() => setShowTerminateModal(true)}
-                            title="End Relationship"
-                        />
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {terminateModal}
             </>
         );

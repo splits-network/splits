@@ -8,15 +8,18 @@ import {
     isExpiringSoon,
     getDaysUntilExpiry,
 } from "../shared/helpers";
+import InvitationActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     invitation,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     invitation: CompanyInvitation;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     const daysLeft = invitation.expires_at
         ? getDaysUntilExpiry(invitation.expires_at)
@@ -25,7 +28,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -78,6 +81,16 @@ export function SplitItem({
                         Sent
                     </span>
                 )}
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <InvitationActionsToolbar
+                    invitation={invitation}
+                    variant="icon-only"
+                    size="xs"
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

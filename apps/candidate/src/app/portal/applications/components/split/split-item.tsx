@@ -9,20 +9,23 @@ import {
     salaryDisplay,
     formatStage,
 } from "../shared/helpers";
+import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     app,
     isSelected,
     onSelect,
+    onStageChange,
 }: {
     app: Application;
     isSelected: boolean;
     onSelect: () => void;
+    onStageChange?: () => void;
 }) {
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -68,6 +71,16 @@ export function SplitItem({
                 <span className="text-sm text-base-content/40">
                     {recruiterName(app)}
                 </span>
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <ActionsToolbar
+                    item={app}
+                    variant="icon-only"
+                    size="xs"
+                    onStageChange={onStageChange}
+                />
             </div>
         </div>
     );

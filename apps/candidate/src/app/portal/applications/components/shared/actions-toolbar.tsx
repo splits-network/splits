@@ -17,6 +17,7 @@ import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { ProposalResponseWizard } from "../modals/proposal-response-wizard";
 import { DeclineModal } from "../modals/decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
+import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
@@ -437,187 +438,129 @@ export default function ActionsToolbar({
         );
     }
 
-    /* ── Icon-Only Variant ── */
+    /* ── Icon-Only Variant (SpeedDial) ── */
+
+    const speedDialActions: SpeedDialAction[] = [];
+
+    if (canEdit) {
+        speedDialActions.push({
+            key: "edit",
+            icon: "fa-duotone fa-regular fa-pen-to-square",
+            label: "Edit Draft",
+            variant: "btn-ghost",
+            loading: actions.loading === "edit",
+            disabled: isLoading,
+            onClick: () => setShowEditWizard(true),
+        });
+    }
+
+    if (canBackToDraft) {
+        speedDialActions.push({
+            key: "back-to-draft",
+            icon: confirmAction === "back-to-draft"
+                ? "fa-duotone fa-regular fa-check"
+                : "fa-duotone fa-regular fa-file-pen",
+            label: confirmAction === "back-to-draft" ? "Confirm?" : "Move to Draft",
+            variant: confirmAction === "back-to-draft" ? "btn-success" : "btn-ghost",
+            loading: actions.loading === "back-to-draft" || actions.loading === "return-to-draft",
+            disabled: isLoading,
+            onClick: () => handleConfirmClick("back-to-draft", handleBackToDraft),
+        });
+    }
+
+    if (canSubmit) {
+        speedDialActions.push({
+            key: "submit",
+            icon: confirmAction === "submit"
+                ? "fa-duotone fa-regular fa-check"
+                : "fa-duotone fa-regular fa-paper-plane",
+            label: confirmAction === "submit" ? "Confirm?" : getSubmitLabel(),
+            variant: "btn-success",
+            loading: actions.loading === "submit" || actions.loading === "submit-ai",
+            disabled: isLoading,
+            onClick: () => handleConfirmClick("submit", handleSubmit),
+        });
+    }
+
+    if (canWithdraw) {
+        speedDialActions.push({
+            key: "withdraw",
+            icon: confirmAction === "withdraw"
+                ? "fa-duotone fa-regular fa-check"
+                : "fa-duotone fa-regular fa-ban",
+            label: confirmAction === "withdraw" ? "Confirm?" : "Withdraw",
+            variant: "btn-error",
+            loading: actions.loading === "withdraw",
+            disabled: isLoading,
+            onClick: () => handleConfirmClick("withdraw", handleWithdraw),
+        });
+    }
+
+    if (isProposal) {
+        speedDialActions.push({
+            key: "accept",
+            icon: "fa-duotone fa-regular fa-handshake",
+            label: "Accept & Apply",
+            variant: "btn-success",
+            disabled: isJobClosed || isLoading,
+            title: isJobClosed ? "Position closed" : "Accept & Apply",
+            onClick: handleAcceptProposal,
+        });
+        speedDialActions.push({
+            key: "decline",
+            icon: "fa-duotone fa-regular fa-times",
+            label: "Decline",
+            variant: "btn-error",
+            disabled: isJobClosed || isLoading,
+            onClick: () => setShowDeclineModal(true),
+        });
+    }
+
+    speedDialActions.push({
+        key: "message",
+        icon: "fa-duotone fa-regular fa-messages",
+        label: "Message",
+        variant: "btn-ghost",
+        loading: startingChat,
+        disabled: !recruiterUserId || startingChat,
+        title: chatDisabledReason || "Message recruiter",
+        renderButton: (
+            <button
+                className={`btn btn-circle btn-${size} btn-ghost relative`}
+                disabled={!recruiterUserId || startingChat}
+                onClick={handleMessageRecruiter}
+                title={chatDisabledReason || "Message recruiter"}
+                aria-label="Message"
+            >
+                <Presence
+                    status={presenceStatus}
+                    className="absolute -top-1 -right-1"
+                />
+                {startingChat ? (
+                    <span className="loading loading-spinner loading-xs" />
+                ) : (
+                    <i className="fa-duotone fa-regular fa-messages transition-transform duration-150 group-hover:scale-110" />
+                )}
+            </button>
+        ),
+    });
+
+    if (onViewDetails) {
+        speedDialActions.push({
+            key: "details",
+            icon: "fa-duotone fa-regular fa-eye",
+            label: "View Details",
+            variant: "btn-primary",
+            onClick: () => onViewDetails(item.id),
+        });
+    }
 
     return (
         <>
-            <div className="flex items-center gap-1">
-                {/* Edit */}
-                {canEdit && (
-                    <button
-                        className={`btn btn-ghost btn-square ${getSizeClass()}`}
-                        style={{ borderRadius: 0 }}
-                        disabled={isLoading}
-                        onClick={() => setShowEditWizard(true)}
-                        title="Edit draft"
-                    >
-                        {actions.loading === "edit" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                        )}
-                    </button>
-                )}
-
-                {/* Move to Draft */}
-                {canBackToDraft && (
-                    <button
-                        className={`btn btn-ghost btn-square ${getSizeClass()}`}
-                        style={{ borderRadius: 0 }}
-                        disabled={isLoading}
-                        onClick={() =>
-                            handleConfirmClick(
-                                "back-to-draft",
-                                handleBackToDraft,
-                            )
-                        }
-                        title={
-                            confirmAction === "back-to-draft"
-                                ? "Click to confirm"
-                                : "Move to draft"
-                        }
-                    >
-                        {actions.loading === "back-to-draft" ||
-                        actions.loading === "return-to-draft" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : confirmAction === "back-to-draft" ? (
-                            <i className="fa-duotone fa-regular fa-check text-success" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-file-pen" />
-                        )}
-                    </button>
-                )}
-
-                {/* Submit */}
-                {canSubmit && (
-                    <button
-                        className={`btn btn-success ${getSizeClass()}`}
-                        style={{ borderRadius: 0 }}
-                        disabled={isLoading}
-                        onClick={() =>
-                            handleConfirmClick("submit", handleSubmit)
-                        }
-                        title={
-                            confirmAction === "submit"
-                                ? "Click to confirm"
-                                : getSubmitLabel()
-                        }
-                    >
-                        {actions.loading === "submit" ||
-                        actions.loading === "submit-ai" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : confirmAction === "submit" ? (
-                            <i className="fa-duotone fa-regular fa-check" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-paper-plane" />
-                        )}
-                        {confirmAction === "submit"
-                            ? "Confirm?"
-                            : getSubmitLabel()}
-                    </button>
-                )}
-
-                {/* Withdraw */}
-                {canWithdraw && (
-                    <button
-                        className={`btn btn-ghost text-error btn-square ${getSizeClass()}`}
-                        style={{ borderRadius: 0 }}
-                        disabled={isLoading}
-                        onClick={() =>
-                            handleConfirmClick("withdraw", handleWithdraw)
-                        }
-                        title={
-                            confirmAction === "withdraw"
-                                ? "Click to confirm withdrawal"
-                                : "Withdraw"
-                        }
-                    >
-                        {actions.loading === "withdraw" ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : confirmAction === "withdraw" ? (
-                            <i className="fa-duotone fa-regular fa-check" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-ban" />
-                        )}
-                    </button>
-                )}
-
-                {/* Proposal actions */}
-                {isProposal && (
-                    <>
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                        <button
-                            className={`btn btn-success ${getSizeClass()}`}
-                            style={{ borderRadius: 0 }}
-                            disabled={isJobClosed || isLoading}
-                            onClick={handleAcceptProposal}
-                            title={
-                                isJobClosed
-                                    ? "Position closed"
-                                    : "Accept & Apply"
-                            }
-                        >
-                            <i className="fa-duotone fa-regular fa-handshake" />
-                            Accept
-                        </button>
-                        <button
-                            className={`btn btn-error btn-square ${getSizeClass()}`}
-                            style={{ borderRadius: 0 }}
-                            disabled={isJobClosed || isLoading}
-                            onClick={() => setShowDeclineModal(true)}
-                            title="Decline proposal"
-                        >
-                            <i className="fa-duotone fa-regular fa-times" />
-                        </button>
-                    </>
-                )}
-
-                {/* Divider */}
-                {(canEdit ||
-                    canBackToDraft ||
-                    canSubmit ||
-                    canWithdraw ||
-                    isProposal) && (
-                    <div className="w-px h-4 bg-base-300 mx-0.5" />
-                )}
-
-                {/* Message */}
-                <span title={chatDisabledReason || undefined}>
-                    <button
-                        className={`btn btn-ghost btn-square relative ${getSizeClass()}`}
-                        style={{ borderRadius: 0 }}
-                        disabled={!recruiterUserId || startingChat}
-                        onClick={handleMessageRecruiter}
-                        title="Message recruiter"
-                    >
-                        <Presence
-                            status={presenceStatus}
-                            className="absolute -top-1 -right-1"
-                        />
-                        {startingChat ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-messages" />
-                        )}
-                    </button>
-                </span>
-
-                {/* View Details */}
-                {onViewDetails && (
-                    <>
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                        <button
-                            className={`btn btn-primary btn-square ${getSizeClass()}`}
-                            style={{ borderRadius: 0 }}
-                            onClick={() => onViewDetails(item.id)}
-                            title="View details"
-                        >
-                            <i className="fa-duotone fa-regular fa-eye" />
-                        </button>
-                    </>
-                )}
-            </div>
-
+            <SpeedDial
+                actions={speedDialActions}
+                size={size}
+            />
             {modals}
         </>
     );

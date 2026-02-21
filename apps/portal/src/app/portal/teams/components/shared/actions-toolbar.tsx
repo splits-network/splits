@@ -9,7 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { InviteMemberModal } from "../modals/invite-member-modal";
 import type { Team } from "../../types";
-import { Button } from "@splits-network/basel-ui";
+import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -242,50 +242,61 @@ export function TeamActionsToolbar({
         </ModalPortal>
     );
 
-    /* ── Icon-Only Variant ── */
+    /* ── Icon-Only Variant (SpeedDial) ── */
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.inviteMember) {
+            speedDialActions.push({
+                key: "invite",
+                icon: "fa-duotone fa-regular fa-user-plus",
+                label: "Invite Member",
+                variant: "btn-primary",
+                onClick: () => setShowInviteModal(true),
+            });
+        }
+        if (actions.statusActions) {
+            if (team.status === "active") {
+                speedDialActions.push({
+                    key: "status",
+                    icon: "fa-duotone fa-regular fa-ban",
+                    label: "Suspend Team",
+                    variant: "btn-error",
+                    loading: updatingStatus && statusAction === "suspended",
+                    disabled: updatingStatus,
+                    onClick: () => handleStatusChange("suspended"),
+                });
+            } else if (team.status === "suspended") {
+                speedDialActions.push({
+                    key: "status",
+                    icon: "fa-duotone fa-regular fa-play",
+                    label: "Activate Team",
+                    variant: "btn-success",
+                    loading: updatingStatus && statusAction === "active",
+                    disabled: updatingStatus,
+                    onClick: () => handleStatusChange("active"),
+                });
+            }
+        }
+        if (actions.viewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: onViewDetails ? handleViewDetails : undefined,
+                href: !onViewDetails ? `/portal/teams/${team.id}` : undefined,
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {actions.inviteMember && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-user-plus"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={() => setShowInviteModal(true)}
-                            title="Invite Member"
-                        />
-                    )}
-                    {renderQuickStatusButton()}
-                    {actions.viewDetails &&
-                        (actions.inviteMember || actions.statusActions) && (
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                        )}
-                    {actions.viewDetails && (
-                        <>
-                            {onViewDetails ? (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    onClick={handleViewDetails}
-                                    title="View Details"
-                                />
-                            ) : (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    href={`/portal/teams/${team.id}`}
-                                    title="View Details"
-                                />
-                            )}
-                        </>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {modals}
             </>
         );

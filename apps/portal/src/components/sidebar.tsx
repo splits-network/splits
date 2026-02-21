@@ -50,6 +50,14 @@ const navItems: NavItemData[] = [
         shortcut: "H",
     },
     {
+        href: "/portal/search",
+        label: "Search",
+        icon: "fa-duotone fa-regular fa-magnifying-glass",
+        roles: ["all"],
+        section: "main",
+        shortcut: "S",
+    },
+    {
         href: "/portal/roles",
         label: "Roles",
         icon: "fa-duotone fa-regular fa-briefcase",

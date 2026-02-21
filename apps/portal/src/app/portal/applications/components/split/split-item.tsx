@@ -10,15 +10,18 @@ import {
     isNew,
 } from "../shared/helpers";
 import { getStageDisplay, getAIScoreBadge } from "../shared/status-color";
+import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
     application,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     application: Application;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     const stage = getStageDisplay(application.stage);
     const score = aiScore(application);
@@ -26,7 +29,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer p-4 border-b border-base-200 transition-colors border-l-4 ${
+            className={`relative cursor-pointer p-4 border-b border-base-200 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "border-transparent hover:bg-base-200/50"
@@ -73,6 +76,17 @@ export function SplitItem({
                         {score}%
                     </span>
                 )}
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <ActionsToolbar
+                    application={application}
+                    variant="icon-only"
+                    size="xs"
+                    showActions={{ viewDetails: false }}
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

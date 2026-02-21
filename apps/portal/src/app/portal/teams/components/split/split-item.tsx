@@ -8,20 +8,23 @@ import {
     createdAgo,
     memberCountDisplay,
 } from "../shared/helpers";
+import { TeamActionsToolbar } from "../shared/actions-toolbar";
 
 export function SplitItem({
     team,
     isSelected,
     onSelect,
+    onRefresh,
 }: {
     team: Team;
     isSelected: boolean;
     onSelect: () => void;
+    onRefresh?: () => void;
 }) {
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -61,6 +64,17 @@ export function SplitItem({
                     {team.total_placements} placement
                     {team.total_placements !== 1 ? "s" : ""}
                 </span>
+            </div>
+
+            {/* Actions */}
+            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <TeamActionsToolbar
+                    team={team}
+                    variant="icon-only"
+                    size="xs"
+                    showActions={{ viewDetails: false }}
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

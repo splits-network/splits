@@ -33,7 +33,10 @@ export interface ChatSidebarState {
 
 export interface ChatSidebarActions {
     openToList: () => void;
-    openToThread: (conversationId: string, meta?: { otherUserName?: string }) => void;
+    openToThread: (
+        conversationId: string,
+        meta?: { otherUserName?: string },
+    ) => void;
     close: () => void;
     minimize: () => void;
     restore: () => void;
@@ -50,7 +53,9 @@ const ChatSidebarContext = createContext<ChatSidebarContextValue | null>(null);
 export function useChatSidebar(): ChatSidebarContextValue {
     const ctx = useContext(ChatSidebarContext);
     if (!ctx) {
-        throw new Error("useChatSidebar must be used within ChatSidebarProvider");
+        throw new Error(
+            "useChatSidebar must be used within ChatSidebarProvider",
+        );
     }
     return ctx;
 }
@@ -129,32 +134,69 @@ export function ChatSidebarProvider({
     onIncomingMessage,
     messagesPagePath = "/portal/messages",
 }: ChatSidebarProviderProps) {
-    // ── Sidebar state (restored from localStorage) ────────────────────
-    const [persisted] = useState(() => loadPersistedState());
-    const [isOpen, setIsOpen] = useState(persisted?.isOpen ?? false);
-    const [isMinimized, setIsMinimized] = useState(persisted?.isMinimized ?? false);
-    const [view, setView] = useState<"list" | "thread">(persisted?.view ?? "list");
-    const [activeConversationId, setActiveConversationId] = useState<string | null>(persisted?.activeConversationId ?? null);
-    const [activeConversationMeta, setActiveConversationMeta] = useState<{ otherUserName: string | null } | null>(persisted?.activeConversationMeta ?? null);
+    // ── Sidebar state ────────────────────────────────────────────────────
+    // Initialize with defaults so server and client render identically (avoids hydration mismatch).
+    // localStorage state is restored after mount in the effect below.
+    const [isOpen, setIsOpen] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [view, setView] = useState<"list" | "thread">("list");
+    const [activeConversationId, setActiveConversationId] = useState<
+        string | null
+    >(null);
+    const [activeConversationMeta, setActiveConversationMeta] = useState<{
+        otherUserName: string | null;
+    } | null>(null);
+
+    // Restore persisted state after mount (post-hydration) to avoid SSR/client mismatch
+    useEffect(() => {
+        const persisted = loadPersistedState();
+        if (persisted) {
+            setIsOpen(persisted.isOpen);
+            setIsMinimized(persisted.isMinimized);
+            setView(persisted.view);
+            setActiveConversationId(persisted.activeConversationId);
+            setActiveConversationMeta(persisted.activeConversationMeta);
+        }
+    }, []);
 
     // Persist UI state to localStorage on change
     useEffect(() => {
-        persistState({ isOpen, isMinimized, view, activeConversationId, activeConversationMeta });
-    }, [isOpen, isMinimized, view, activeConversationId, activeConversationMeta]);
+        persistState({
+            isOpen,
+            isMinimized,
+            view,
+            activeConversationId,
+            activeConversationMeta,
+        });
+    }, [
+        isOpen,
+        isMinimized,
+        view,
+        activeConversationId,
+        activeConversationMeta,
+    ]);
 
     // ── Conversations state ──────────────────────────────────────────────
     const [conversations, setConversations] = useState<ConversationRow[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(false);
 
     const fetchConversationsRef = useRef(fetchConversations);
-    useEffect(() => { fetchConversationsRef.current = fetchConversations; }, [fetchConversations]);
+    useEffect(() => {
+        fetchConversationsRef.current = fetchConversations;
+    }, [fetchConversations]);
 
     const onIncomingMessageRef = useRef(onIncomingMessage);
-    useEffect(() => { onIncomingMessageRef.current = onIncomingMessage; }, [onIncomingMessage]);
+    useEffect(() => {
+        onIncomingMessageRef.current = onIncomingMessage;
+    }, [onIncomingMessage]);
 
     // ── Derived state ────────────────────────────────────────────────────
     const unreadTotalCount = useMemo(
-        () => conversations.reduce((sum, row) => sum + (row.participant?.unread_count || 0), 0),
+        () =>
+            conversations.reduce(
+                (sum, row) => sum + (row.participant?.unread_count || 0),
+                0,
+            ),
         [conversations],
     );
 
@@ -167,13 +209,18 @@ export function ChatSidebarProvider({
         setIsOpen(true);
     }, []);
 
-    const openToThread = useCallback((conversationId: string, meta?: { otherUserName?: string }) => {
-        setActiveConversationId(conversationId);
-        setActiveConversationMeta(meta ? { otherUserName: meta.otherUserName ?? null } : null);
-        setView("thread");
-        setIsMinimized(false);
-        setIsOpen(true);
-    }, []);
+    const openToThread = useCallback(
+        (conversationId: string, meta?: { otherUserName?: string }) => {
+            setActiveConversationId(conversationId);
+            setActiveConversationMeta(
+                meta ? { otherUserName: meta.otherUserName ?? null } : null,
+            );
+            setView("thread");
+            setIsMinimized(false);
+            setIsOpen(true);
+        },
+        [],
+    );
 
     const close = useCallback(() => {
         setIsOpen(false);
@@ -237,20 +284,28 @@ export function ChatSidebarProvider({
 
         // Show toast for new messages when sidebar is closed or viewing different conversation
         if (event.type === "message.created" && event.data) {
-            const eventConvId = event.data.conversationId || event.data.conversation_id;
-            const senderName = event.data.senderName || event.data.sender_name || "Someone";
+            const eventConvId =
+                event.data.conversationId || event.data.conversation_id;
+            const senderName =
+                event.data.senderName || event.data.sender_name || "Someone";
             const preview = event.data.preview || event.data.body || "";
 
             // Don't toast if sidebar is open and viewing this conversation
             // We check via refs to avoid stale closure
-            if (isOpenRef.current && activeConversationIdRef.current === eventConvId) {
+            if (
+                isOpenRef.current &&
+                activeConversationIdRef.current === eventConvId
+            ) {
                 return;
             }
 
             onIncomingMessageRef.current?.({
                 conversationId: eventConvId,
                 senderName,
-                preview: preview.length > 80 ? preview.slice(0, 80) + "..." : preview,
+                preview:
+                    preview.length > 80
+                        ? preview.slice(0, 80) + "..."
+                        : preview,
             });
         }
     }, []);
@@ -258,8 +313,12 @@ export function ChatSidebarProvider({
     // Refs for checking state inside event handler without stale closure
     const isOpenRef = useRef(isOpen);
     const activeConversationIdRef = useRef(activeConversationId);
-    useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
-    useEffect(() => { activeConversationIdRef.current = activeConversationId; }, [activeConversationId]);
+    useEffect(() => {
+        isOpenRef.current = isOpen;
+    }, [isOpen]);
+    useEffect(() => {
+        activeConversationIdRef.current = activeConversationId;
+    }, [activeConversationId]);
 
     useChatGateway({
         enabled: !!userId,
@@ -273,27 +332,42 @@ export function ChatSidebarProvider({
     });
 
     // ── Context value ────────────────────────────────────────────────────
-    const value = useMemo<ChatSidebarContextValue>(() => ({
-        isOpen,
-        isMinimized,
-        view,
-        activeConversationId,
-        activeConversationMeta,
-        unreadTotalCount,
-        conversations,
-        conversationsLoading,
-        openToList,
-        openToThread,
-        close,
-        minimize,
-        restore,
-        goBackToList,
-        refreshConversations: loadConversations,
-    }), [
-        isOpen, isMinimized, view, activeConversationId, activeConversationMeta,
-        unreadTotalCount, conversations, conversationsLoading,
-        openToList, openToThread, close, minimize, restore, goBackToList, loadConversations,
-    ]);
+    const value = useMemo<ChatSidebarContextValue>(
+        () => ({
+            isOpen,
+            isMinimized,
+            view,
+            activeConversationId,
+            activeConversationMeta,
+            unreadTotalCount,
+            conversations,
+            conversationsLoading,
+            openToList,
+            openToThread,
+            close,
+            minimize,
+            restore,
+            goBackToList,
+            refreshConversations: loadConversations,
+        }),
+        [
+            isOpen,
+            isMinimized,
+            view,
+            activeConversationId,
+            activeConversationMeta,
+            unreadTotalCount,
+            conversations,
+            conversationsLoading,
+            openToList,
+            openToThread,
+            close,
+            minimize,
+            restore,
+            goBackToList,
+            loadConversations,
+        ],
+    );
 
     return (
         <ChatSidebarContext.Provider value={value}>

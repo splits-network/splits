@@ -9,7 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
-import { Button, ExpandableButton } from "@splits-network/basel-ui";
+import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
@@ -95,8 +95,6 @@ export default function ActionsToolbar({
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
-    const [showOverflowMenu, setShowOverflowMenu] = useState(false);
-
     const candidateUserId = application.candidate?.user_id;
     const canChat = Boolean(candidateUserId);
     const chatDisabledReason = canChat
@@ -426,280 +424,210 @@ export default function ActionsToolbar({
     );
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.addNote) {
+            speedDialActions.push({
+                key: "add-note",
+                icon: "fa-duotone fa-regular fa-note-sticky",
+                label: "Add Note",
+                variant: "btn-ghost",
+                disabled: actionLoading,
+                onClick: () => setShowNoteModal(true),
+            });
+        }
+        if (actions.requestPrescreen) {
+            speedDialActions.push({
+                key: "prescreen",
+                icon: "fa-duotone fa-regular fa-user-check",
+                label: "Request Pre-Screen",
+                variant: "btn-warning",
+                disabled: actionLoading,
+                onClick: () => setShowPreScreenModal(true),
+            });
+        }
+        if (actions.requestChanges) {
+            speedDialActions.push({
+                key: "request-changes",
+                icon: "fa-duotone fa-regular fa-question",
+                label: "Request Changes",
+                variant: "btn-accent",
+                disabled: actionLoading,
+                onClick: () => setShowRequestChangesModal(true),
+            });
+        }
+        if (actions.advanceStage) {
+            speedDialActions.push({
+                key: "advance",
+                icon: "fa-duotone fa-regular fa-check",
+                label: permissions.approveButtonText,
+                variant: "btn-success",
+                disabled: actionLoading,
+                loading: actionLoading,
+                onClick: () => handleApprove(false),
+            });
+        }
+        if (actions.reject) {
+            speedDialActions.push({
+                key: "reject",
+                icon: "fa-duotone fa-regular fa-xmark",
+                label: permissions.rejectButtonText,
+                variant: "btn-error",
+                disabled: actionLoading,
+                onClick: () => setShowDenyModal(true),
+            });
+        }
+        if (actions.message) {
+            speedDialActions.push({
+                key: "message",
+                icon: "fa-duotone fa-regular fa-messages",
+                label: "Message",
+                variant: "btn-neutral btn-outline",
+                disabled: !canChat || startingChat,
+                loading: startingChat,
+                title: chatDisabledReason || undefined,
+                renderButton: (
+                    <div
+                        className="relative inline-block"
+                        title={chatDisabledReason || undefined}
+                    >
+                        <Presence
+                            status={presenceStatus}
+                            className="absolute -top-1 -right-1 z-10"
+                        />
+                        <Button
+                            icon="fa-duotone fa-regular fa-messages"
+                            variant="btn-neutral btn-circle btn-outline"
+                            size={size}
+                            disabled={!canChat || startingChat}
+                            loading={startingChat}
+                            onClick={handleStartChat}
+                        />
+                    </div>
+                ),
+            });
+        }
+        if (actions.viewDetails && onViewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: () => onViewDetails(application.id),
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${layoutClass} ${className}`}
-                >
-                    {actions.addNote && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-note-sticky"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            disabled={actionLoading}
-                            onClick={() => setShowNoteModal(true)}
-                        />
-                    )}
-                    {actions.requestPrescreen && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-user-check"
-                            variant="btn-warning btn-square"
-                            size={size}
-                            disabled={actionLoading}
-                            onClick={() => setShowPreScreenModal(true)}
-                        />
-                    )}
-                    {actions.requestChanges && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-question"
-                            variant="btn-accent btn-square"
-                            size={size}
-                            disabled={actionLoading}
-                            onClick={() => setShowRequestChangesModal(true)}
-                        />
-                    )}
-                    {actions.advanceStage && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-check"
-                            title={permissions.approveButtonText}
-                            variant="btn-success"
-                            size={size}
-                            disabled={actionLoading}
-                            loading={actionLoading}
-                            onClick={() => handleApprove(false)}
-                        >
-                            Approve
-                        </Button>
-                    )}
-                    {actions.reject && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-xmark"
-                            title={permissions.rejectButtonText}
-                            variant="btn-error"
-                            size={size}
-                            disabled={actionLoading}
-                            onClick={() => setShowDenyModal(true)}
-                        ></Button>
-                    )}
-
-                    {/* Divider — only if there are action buttons before message */}
-                    {(actions.addNote ||
-                        actions.requestPrescreen ||
-                        actions.requestChanges ||
-                        actions.advanceStage ||
-                        actions.reject) && (
-                        <div className="w-px h-4 bg-base-300 mx-0.5" />
-                    )}
-
-                    {actions.message && (
-                        <div
-                            className="relative inline-block"
-                            title={chatDisabledReason || undefined}
-                        >
-                            <Presence
-                                status={presenceStatus}
-                                className="absolute -top-1 -right-1 z-10"
-                            />
-                            <Button
-                                icon="fa-duotone fa-regular fa-messages"
-                                variant="btn-nuetral btn-square btn-outline"
-                                size={size}
-                                disabled={!canChat || startingChat}
-                                loading={startingChat}
-                                onClick={handleStartChat}
-                            />
-                        </div>
-                    )}
-                    {actions.viewDetails && onViewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                            <Button
-                                icon="fa-duotone fa-regular fa-eye"
-                                variant="btn-primary"
-                                size={size}
-                                onClick={() => onViewDetails(application.id)}
-                            />
-                        </>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {modals}
             </>
         );
     }
 
-    // Priority variant - shows critical actions + overflow menu for secondary
+    // Priority variant (SpeedDial)
     if (variant === "priority") {
-        // Count overflow items
-        const hasOverflowItems =
-            actions.addNote ||
-            actions.requestPrescreen ||
-            actions.requestChanges ||
-            (actions.viewDetails && onViewDetails);
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.advanceStage) {
+            speedDialActions.push({
+                key: "advance",
+                icon: "fa-duotone fa-regular fa-check",
+                label: permissions.approveButtonText,
+                variant: "btn-success",
+                disabled: actionLoading,
+                loading: actionLoading,
+                onClick: () => handleApprove(false),
+            });
+        }
+        if (actions.reject) {
+            speedDialActions.push({
+                key: "reject",
+                icon: "fa-duotone fa-regular fa-xmark",
+                label: permissions.rejectButtonText,
+                variant: "btn-error",
+                disabled: actionLoading,
+                onClick: () => setShowDenyModal(true),
+            });
+        }
+        if (actions.message) {
+            speedDialActions.push({
+                key: "message",
+                icon: "fa-duotone fa-regular fa-messages",
+                label: "Message",
+                variant: "btn-neutral btn-outline",
+                disabled: !canChat || startingChat,
+                loading: startingChat,
+                title: chatDisabledReason || undefined,
+                renderButton: (
+                    <span title={chatDisabledReason || undefined} className="relative inline-block">
+                        <Presence
+                            status={presenceStatus}
+                            className="absolute -top-0.5 -right-0.5 z-10"
+                        />
+                        <Button
+                            icon="fa-duotone fa-regular fa-messages"
+                            variant="btn-neutral btn-circle btn-outline"
+                            size={size}
+                            disabled={!canChat || startingChat}
+                            loading={startingChat}
+                            onClick={handleStartChat}
+                        />
+                    </span>
+                ),
+            });
+        }
+        if (actions.addNote) {
+            speedDialActions.push({
+                key: "add-note",
+                icon: "fa-duotone fa-regular fa-note-sticky",
+                label: "Add Note",
+                variant: "btn-ghost",
+                disabled: actionLoading,
+                onClick: () => setShowNoteModal(true),
+            });
+        }
+        if (actions.requestPrescreen) {
+            speedDialActions.push({
+                key: "prescreen",
+                icon: "fa-duotone fa-regular fa-user-check",
+                label: "Request Pre-Screen",
+                variant: "btn-warning",
+                disabled: actionLoading,
+                onClick: () => setShowPreScreenModal(true),
+            });
+        }
+        if (actions.requestChanges) {
+            speedDialActions.push({
+                key: "request-changes",
+                icon: "fa-duotone fa-regular fa-question",
+                label: "Request Changes",
+                variant: "btn-accent",
+                disabled: actionLoading,
+                onClick: () => setShowRequestChangesModal(true),
+            });
+        }
+        if (actions.viewDetails && onViewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: () => onViewDetails(application.id),
+            });
+        }
 
         return (
             <>
-                <div className={`flex items-center gap-2 ${className}`}>
-                    {/* Primary Actions - Always Visible */}
-                    {actions.advanceStage && (
-                        <button
-                            onClick={() => handleApprove(false)}
-                            className={`btn ${sizeClass} btn-success gap-1.5`}
-                            disabled={actionLoading}
-                        >
-                            {actionLoading ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
-                            )}
-                            <span className="truncate text-xs">
-                                {size === "xs"
-                                    ? "Accept"
-                                    : permissions.approveButtonText}
-                            </span>
-                        </button>
-                    )}
-                    {actions.reject && (
-                        <button
-                            onClick={() => setShowDenyModal(true)}
-                            className={`btn ${sizeClass} btn-error gap-1.5`}
-                            disabled={actionLoading}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark" />
-                            <span className="truncate text-xs">
-                                {size === "xs"
-                                    ? "Reject"
-                                    : permissions.rejectButtonText}
-                            </span>
-                        </button>
-                    )}
-                    {actions.message && (
-                        <span title={chatDisabledReason || undefined}>
-                            <button
-                                onClick={handleStartChat}
-                                className={`btn ${sizeClass} btn-neutral btn-outline gap-1.5 relative`}
-                                disabled={!canChat || startingChat}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-0.5 -right-0.5"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages" />
-                                )}
-                                <span className="truncate text-xs">
-                                    Message
-                                </span>
-                            </button>
-                        </span>
-                    )}
-
-                    {/* Overflow Menu - Secondary Actions */}
-                    {hasOverflowItems && (
-                        <div className="relative">
-                            <button
-                                onClick={() =>
-                                    setShowOverflowMenu(!showOverflowMenu)
-                                }
-                                className={`btn ${sizeClass} btn-ghost gap-1`}
-                            >
-                                <i className="fa-duotone fa-regular fa-ellipsis" />
-                                <span className="truncate text-xs">More</span>
-                            </button>
-                            {showOverflowMenu && (
-                                <>
-                                    {/* Backdrop */}
-                                    <div
-                                        className="fixed inset-0 z-10"
-                                        onClick={() =>
-                                            setShowOverflowMenu(false)
-                                        }
-                                    />
-                                    {/* Dropdown Menu */}
-                                    <div className="absolute right-0 top-full mt-1 z-20 bg-base-100 border-2 border-base-300 shadow-md min-w-[200px]">
-                                        <div className="flex flex-col">
-                                            {actions.addNote && (
-                                                <button
-                                                    onClick={() => {
-                                                        setShowNoteModal(true);
-                                                        setShowOverflowMenu(
-                                                            false,
-                                                        );
-                                                    }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
-                                                    disabled={actionLoading}
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-note-sticky" />
-                                                    <span className="text-xs">
-                                                        Add Note
-                                                    </span>
-                                                </button>
-                                            )}
-                                            {actions.requestPrescreen && (
-                                                <button
-                                                    onClick={() => {
-                                                        setShowPreScreenModal(
-                                                            true,
-                                                        );
-                                                        setShowOverflowMenu(
-                                                            false,
-                                                        );
-                                                    }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
-                                                    disabled={actionLoading}
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-user-check" />
-                                                    <span className="text-xs">
-                                                        Request Pre-Screen
-                                                    </span>
-                                                </button>
-                                            )}
-                                            {actions.requestChanges && (
-                                                <button
-                                                    onClick={() => {
-                                                        setShowRequestChangesModal(
-                                                            true,
-                                                        );
-                                                        setShowOverflowMenu(
-                                                            false,
-                                                        );
-                                                    }}
-                                                    className="btn btn-ghost justify-start gap-2 rounded-none border-b border-base-200"
-                                                    disabled={actionLoading}
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-comment-edit" />
-                                                    <span className="text-xs">
-                                                        Request Changes
-                                                    </span>
-                                                </button>
-                                            )}
-                                            {actions.viewDetails &&
-                                                onViewDetails && (
-                                                    <button
-                                                        onClick={() => {
-                                                            onViewDetails(
-                                                                application.id,
-                                                            );
-                                                            setShowOverflowMenu(
-                                                                false,
-                                                            );
-                                                        }}
-                                                        className="btn btn-ghost justify-start gap-2 rounded-none"
-                                                    >
-                                                        <i className="fa-duotone fa-regular fa-eye" />
-                                                        <span className="text-xs">
-                                                            View Details
-                                                        </span>
-                                                    </button>
-                                                )}
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
                 {modals}
             </>
         );

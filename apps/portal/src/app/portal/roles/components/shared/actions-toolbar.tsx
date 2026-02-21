@@ -11,7 +11,7 @@ import RoleWizardModal from "../modals/role-wizard-modal";
 import SubmitCandidateModal from "../modals/submit-candidate-modal";
 import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
-import { Button, ExpandableButton } from "@splits-network/basel-ui";
+import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -362,83 +362,89 @@ export default function RoleActionsToolbar({
         </>
     );
 
-    /* ── Icon-Only Variant ── */
+    /* ── Icon-Only Variant (SpeedDial) ── */
 
     if (variant === "icon-only") {
+        const speedDialActions: SpeedDialAction[] = [];
+
+        if (actions.submitCandidate) {
+            speedDialActions.push({
+                key: "submit",
+                icon: "fa-duotone fa-regular fa-user-plus",
+                label: "Submit Candidate",
+                variant: "btn-primary",
+                onClick: () => setShowSubmitModal(true),
+            });
+        }
+        if (actions.edit) {
+            speedDialActions.push({
+                key: "edit",
+                icon: "fa-duotone fa-regular fa-pen-to-square",
+                label: "Edit Role",
+                variant: "btn-ghost",
+                onClick: () => setShowEditModal(true),
+            });
+        }
+        if (actions.share) {
+            speedDialActions.push({
+                key: "share",
+                icon: "fa-duotone fa-regular fa-share-nodes",
+                label: "Share Job",
+                variant: "btn-ghost",
+                loading: isSharing,
+                onClick: handleShare,
+            });
+        }
+        if (actions.statusActions) {
+            if (job.status === "active") {
+                speedDialActions.push({
+                    key: "status",
+                    icon: "fa-duotone fa-regular fa-pause",
+                    label: "Pause Role",
+                    variant: "btn-secondary",
+                    loading: updatingStatus && statusAction === "paused",
+                    disabled: updatingStatus,
+                    onClick: () => handleStatusChange("paused"),
+                });
+            } else if (job.status === "paused") {
+                speedDialActions.push({
+                    key: "status",
+                    icon: "fa-duotone fa-regular fa-play",
+                    label: "Activate Role",
+                    variant: "btn-success",
+                    loading: updatingStatus && statusAction === "active",
+                    disabled: updatingStatus,
+                    onClick: () => handleStatusChange("active"),
+                });
+            }
+        }
+        if (actions.viewPipeline) {
+            speedDialActions.push({
+                key: "pipeline",
+                icon: "fa-duotone fa-regular fa-users-line",
+                label: "View Pipeline",
+                variant: "btn-accent btn-soft",
+                onClick: handleViewPipeline,
+            });
+        }
+        if (actions.viewDetails) {
+            speedDialActions.push({
+                key: "details",
+                icon: "fa-duotone fa-regular fa-eye",
+                label: "View Details",
+                variant: "btn-primary",
+                onClick: onViewDetails ? handleViewDetails : undefined,
+                href: !onViewDetails ? `/portal/roles/${job.id}` : undefined,
+            });
+        }
+
         return (
             <>
-                <div
-                    className={`flex items-center ${getLayoutClass()} ${className}`}
-                >
-                    {actions.submitCandidate && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-user-plus"
-                            variant="btn-primary btn-square"
-                            size={size}
-                            onClick={() => setShowSubmitModal(true)}
-                            title="Submit Candidate"
-                        ></Button>
-                    )}
-                    {actions.edit && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-pen-to-square"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={() => setShowEditModal(true)}
-                            title="Edit Role"
-                        ></Button>
-                    )}
-                    {actions.share && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-share-nodes"
-                            variant="btn-ghost btn-square"
-                            size={size}
-                            onClick={handleShare}
-                            disabled={isSharing}
-                            loading={isSharing}
-                            title="Share Job"
-                        ></Button>
-                    )}
-                    {renderQuickStatusButton()}
-                    {actions.viewPipeline &&
-                        (actions.submitCandidate ||
-                            actions.edit ||
-                            actions.share ||
-                            actions.statusActions) && (
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                        )}
-                    {actions.viewPipeline && (
-                        <Button
-                            icon="fa-duotone fa-regular fa-users-line"
-                            variant="btn-accent btn-soft btn-square"
-                            size={size}
-                            onClick={handleViewPipeline}
-                            title="View Pipeline"
-                        ></Button>
-                    )}
-                    {actions.viewDetails && (
-                        <>
-                            <div className="w-px h-4 bg-base-300 mx-0.5" />
-                            {onViewDetails ? (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    onClick={handleViewDetails}
-                                    title="View Details"
-                                ></Button>
-                            ) : (
-                                <Button
-                                    icon="fa-duotone fa-regular fa-eye"
-                                    variant="btn-primary btn-square"
-                                    size={size}
-                                    href={`/portal/roles/${job.id}`}
-                                    title="View Details"
-                                />
-                            )}
-                        </>
-                    )}
-                </div>
+                <SpeedDial
+                    actions={speedDialActions}
+                    size={size === "lg" ? "md" : (size ?? "sm")}
+                    className={className}
+                />
                 {modals}
             </>
         );
