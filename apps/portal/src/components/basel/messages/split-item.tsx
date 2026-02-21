@@ -120,9 +120,6 @@ export default function SplitItem({
                     >
                         {initials}
                     </div>
-                    {isOnline && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success border-2 border-base-200 rounded-full" />
-                    )}
                 </div>
 
                 {/* Content */}
@@ -138,6 +135,19 @@ export default function SplitItem({
                             >
                                 {name}
                             </span>
+                            {presenceStatus === "online" ? (
+                                <span className="badge badge-xs badge-success badge-soft badge-outline">
+                                    Online
+                                </span>
+                            ) : presenceStatus === "offline" ? (
+                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                    Offline
+                                </span>
+                            ) : (
+                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                    Unknown
+                                </span>
+                            )}
                         </div>
                         <span className="text-[11px] text-base-content/40 flex-shrink-0 ml-2">
                             {formatMessageDate(convo.last_message_at)}
@@ -196,18 +206,6 @@ export default function SplitItem({
                         )}
                     </div>
                 </div>
-            </div>
-
-            {/* Actions */}
-            <div
-                className="absolute bottom-2 right-2"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <ActionsToolbar
-                    conversation={row}
-                    variant="icon-only"
-                    size="xs"
-                />
             </div>
         </div>
     );

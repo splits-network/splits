@@ -48,7 +48,7 @@ const labelSizeClass: Record<NonNullable<SpeedDialProps["size"]>, string> = {
 export function SpeedDial({
     actions,
     triggerIcon = "fa-duotone fa-regular fa-plus",
-    triggerVariant = "btn-accent",
+    triggerVariant = "btn-secondary",
     size = "sm",
     className = "",
 }: SpeedDialProps) {

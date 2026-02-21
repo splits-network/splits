@@ -133,19 +133,9 @@ export function GridCard({
                     )}
                 </div>
             )}
-            <div className="flex items-center gap-2 min-w-0">
-                <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60 rounded-full">
-                    {candidateInitials(name)}
-                </div>
-                <div className="min-w-0">
-                    <div className="text-sm font-semibold text-base-content truncate">
-                        {name}
-                    </div>
-                </div>
-            </div>
 
             {/* Footer: candidate avatar / initials left, actions right */}
-            <div className="mt-auto flex items-center justify-end gap-3 pt-4 border-t border-base-200">
+            <div className="mt-auto flex items-center justify-end gap-3 pt-2 border-t border-base-200">
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <CandidateActionsToolbar
                         candidate={candidate}

@@ -81,7 +81,9 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
             ? item.conversation.participant_b_id
             : item.conversation.participant_a_id;
     }, [item, currentUserId]);
-    const isOnline = otherId ? presenceMap[otherId]?.status === "online" : false;
+    const isOnline = otherId
+        ? presenceMap[otherId]?.status === "online"
+        : false;
 
     const handleAccept = async () => {
         if (!item) return;
@@ -132,16 +134,32 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                     <div className="flex items-center gap-1.5">
                         {meta && (
                             <>
-                                <i className={`${meta.icon} text-[10px] ${meta.textClass}`} />
-                                <span className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}>
+                                <i
+                                    className={`${meta.icon} text-[10px] ${meta.textClass}`}
+                                />
+                                <span
+                                    className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}
+                                >
                                     {meta.label}
                                 </span>
-                                <span className="text-base-content/30 mx-1">|</span>
+                                <span className="text-base-content/30 mx-1">
+                                    |
+                                </span>
                             </>
                         )}
-                        <span className="text-[10px] text-base-content/50">
-                            {isOnline ? "Online" : "Offline"}
-                        </span>
+                        {presenceMap[otherId]?.status === "online" ? (
+                            <span className="badge badge-sm badge-success badge-soft badge-outline">
+                                Online
+                            </span>
+                        ) : presenceMap[otherId]?.status === "offline" ? (
+                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                                Offline
+                            </span>
+                        ) : (
+                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                                Unknown
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -168,7 +186,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                 {item && (
                     <ActionsToolbar
                         conversation={item}
-                        variant="icon-only"
+                        variant="descriptive"
                         size="sm"
                     />
                 )}
