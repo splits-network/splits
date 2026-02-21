@@ -33,6 +33,8 @@ import {
     candidateAIReviewedEmail,
     candidateRecruiterReviewEmail,
     candidateApplicationExpiredEmail,
+    jobProposalToCandidateEmail,
+    recruiterRequestChangesEmail,
 } from '../../templates/applications/candidate-emails';
 
 export class ApplicationsEmailService {
@@ -504,8 +506,8 @@ export class ApplicationsEmailService {
             applicationId: string;
         }
     ): Promise<void> {
-        const subject = `Your application for ${data.jobTitle} has been reviewed`;
-        const portalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
+        const subject = `AI Review Complete - ${data.jobTitle}`;
+        const candidateUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications/${data.applicationId}`;
 
         const html = aiReviewCompletedCandidateEmail({
             candidateName: data.candidateName,
@@ -514,7 +516,8 @@ export class ApplicationsEmailService {
             recommendation: data.recommendation,
             strengths: data.strengths,
             concerns: data.concerns,
-            applicationUrl: portalUrl,
+            applicationUrl: candidateUrl,
+            source: 'candidate',
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -545,7 +548,7 @@ export class ApplicationsEmailService {
             applicationId: string;
         }
     ): Promise<void> {
-        const subject = `AI Review Complete: ${data.candidateName} for ${data.jobTitle}`;
+        const subject = `AI Review: ${data.candidateName}'s ${data.jobTitle} Application`;
         const portalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = aiReviewCompletedRecruiterEmail({
@@ -589,70 +592,14 @@ export class ApplicationsEmailService {
         const candidatePortalUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
         const applicationUrl = `${candidatePortalUrl}/portal/applications/${data.applicationId}`;
 
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">📝 Updates Requested</h1>
-    </div>
-    
-    <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hi ${data.candidateName},</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Your recruiter, <strong>${data.recruiterName}</strong>, has reviewed your application for 
-            <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> and has requested some updates or additional information.
-        </p>
-        
-        ${data.recruiterNotes ? `
-        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;">
-            <h3 style="color: #856404; margin-top: 0; font-size: 16px;">📋 Recruiter Notes:</h3>
-            <p style="font-size: 15px; color: #856404; margin: 0; white-space: pre-wrap;">${data.recruiterNotes}</p>
-        </div>
-        ` : ''}
-        
-        <p style="font-size: 16px; margin: 20px 0;">
-            Please review your application and make the requested updates so your recruiter can submit it to the company.
-        </p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="${applicationUrl}" 
-               style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                      color: white; 
-                      padding: 15px 40px; 
-                      text-decoration: none; 
-                      border-radius: 25px; 
-                      font-weight: bold; 
-                      font-size: 16px;
-                      display: inline-block;
-                      box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                Update My Application
-            </a>
-        </div>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-            <p style="font-size: 14px; color: #666; margin: 5px 0;">
-                <strong>What happens next?</strong>
-            </p>
-            <ul style="font-size: 14px; color: #666;">
-                <li>Review your recruiter's feedback</li>
-                <li>Update your application with the requested changes</li>
-                <li>Once complete, your recruiter will continue the submission process</li>
-            </ul>
-        </div>
-        
-        <p style="font-size: 14px; color: #999; margin-top: 30px; text-align: center;">
-            Questions? Reply to this email or contact ${data.recruiterName} directly.
-        </p>
-    </div>
-</body>
-</html>
-        `.trim();
+        const html = recruiterRequestChangesEmail({
+            candidateName: data.candidateName,
+            recruiterName: data.recruiterName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterNotes: data.recruiterNotes,
+            applicationUrl,
+        });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.recruiter_request',
@@ -680,71 +627,13 @@ export class ApplicationsEmailService {
         const candidatePortalUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
         const applicationUrl = `${candidatePortalUrl}/portal/applications/${data.applicationId}`;
 
-        // Simple HTML email for job proposal
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f5;">
-    <div style="background: #233876; padding: 30px; text-align: center; border: 4px solid #18181b; border-bottom: none; border-radius: 4px 4px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800;">New Job Opportunity</h1>
-    </div>
-
-    <div style="background: #ffffff; padding: 30px; border: 4px solid #18181b; border-top: none; border-radius: 0 0 4px 4px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hi ${data.candidateName},</p>
-
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            ${data.recruiterName} has proposed an exciting opportunity for you:
-        </p>
-
-        <div style="background: #f4f4f5; padding: 20px; border-radius: 4px; border-left: 4px solid #233876; margin: 20px 0;">
-            <h2 style="color: #18181b; margin-top: 0; font-size: 22px; font-weight: 700;">${data.jobTitle}</h2>
-            <p style="font-size: 16px; color: #18181b; margin: 5px 0;">
-                <strong>Company:</strong> ${data.companyName}
-            </p>
-        </div>
-
-        <p style="font-size: 16px; margin: 20px 0;">
-            Your recruiter believes this role could be a great fit for your background and career goals.
-            Review the full job details and take the next step in your application.
-        </p>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="${applicationUrl}"
-               style="background: #233876;
-                      color: white;
-                      padding: 15px 40px;
-                      text-decoration: none;
-                      border-radius: 4px;
-                      font-weight: 700;
-                      font-size: 16px;
-                      display: inline-block;
-                      border: 2px solid #18181b;">
-                View Job Details
-            </a>
-        </div>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #18181b;">
-            <p style="font-size: 14px; color: #18181b; margin: 5px 0;">
-                <strong>Next Steps:</strong>
-            </p>
-            <ul style="font-size: 14px; color: #18181b;">
-                <li>Review the job description and requirements</li>
-                <li>If interested, proceed with your application</li>
-                <li>Your recruiter will guide you through the process</li>
-            </ul>
-        </div>
-
-        <p style="font-size: 14px; color: #18181b; margin-top: 30px; text-align: center;">
-            Questions? Reply to this email or contact your recruiter directly.
-        </p>
-    </div>
-</body>
-</html>
-        `.trim();
+        const html = jobProposalToCandidateEmail({
+            candidateName: data.candidateName,
+            recruiterName: data.recruiterName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+        });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.job_proposed',
@@ -1359,10 +1248,14 @@ export class ApplicationsEmailService {
             addedByRole: string;
             applicationId: string;
             userId?: string;
+            source?: 'portal' | 'candidate' | 'corporate';
         }
     ): Promise<void> {
         const subject = `New Note: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const baseUrl = data.source === 'candidate'
+            ? (process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network')
+            : (process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network');
+        const applicationUrl = `${baseUrl}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationNoteCreatedEmail({
             recipientName: data.recipientName,
@@ -1373,6 +1266,7 @@ export class ApplicationsEmailService {
             addedByName: data.addedByName,
             addedByRole: data.addedByRole,
             applicationUrl,
+            source: data.source,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {

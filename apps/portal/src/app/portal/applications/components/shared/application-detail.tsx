@@ -75,7 +75,7 @@ export function DetailLoader({
                     <div className="flex-1 min-w-0">
                         <ActionsToolbar
                             application={application as any}
-                            variant="priority"
+                            variant="descriptive"
                             size="sm"
                             showActions={{ viewDetails: false }}
                             onRefresh={onRefresh}

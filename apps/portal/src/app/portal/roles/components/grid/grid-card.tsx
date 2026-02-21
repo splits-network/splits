@@ -10,6 +10,7 @@ import {
     isNew,
     companyName,
     companyInitials,
+    estimatedPayoutRange,
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 
@@ -29,6 +30,7 @@ export function GridCard({
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
+    const payout = estimatedPayoutRange(job);
 
     return (
         <div
@@ -77,16 +79,18 @@ export function GridCard({
                 {salary || "Competitive"}
             </div>
 
-            {/* Fee + Apps row */}
+            {/* Fee + Estimated Payout row */}
             <div className="flex items-center gap-3 mb-4">
                 <span className="text-sm font-bold text-accent">
                     <i className="fa-duotone fa-regular fa-percent mr-1" />
-                    {job.fee_percentage}% fee
+                    {job.fee_percentage} fee
                 </span>
-                <span className="text-sm font-bold text-base-content/60">
-                    <i className="fa-duotone fa-regular fa-users mr-1" />
-                    {job.application_count ?? 0} apps
-                </span>
+                {payout && (
+                    <span className="text-sm font-bold text-base-content/60">
+                        <i className="fa-duotone fa-regular fa-coins mr-1" />
+                        {payout} est.
+                    </span>
+                )}
             </div>
 
             {/* Tags: employment type + job level */}

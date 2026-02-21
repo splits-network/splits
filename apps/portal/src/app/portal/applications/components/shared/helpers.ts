@@ -60,3 +60,56 @@ export function isNew(application: Application): boolean {
     const diffMs = Date.now() - created;
     return diffMs < 1000 * 60 * 60 * 24 * 7;
 }
+
+export function candidateHeadline(application: Application): string | null {
+    const title = application.candidate?.current_title;
+    const company = application.candidate?.current_company;
+    if (title && company) return `${title} at ${company}`;
+    if (title) return title;
+    if (company) return `at ${company}`;
+    return null;
+}
+
+export function jobLocation(application: Application): string | null {
+    return application.job?.location || null;
+}
+
+export function jobSalaryRange(application: Application): string | null {
+    const min = application.job?.salary_min;
+    const max = application.job?.salary_max;
+    if (min == null && max == null) return null;
+
+    const fmt = (n: number) => {
+        if (n >= 1000) return `$${Math.round(n / 1000)}K`;
+        return `$${n}`;
+    };
+
+    if (min != null && max != null) return `${fmt(min)} - ${fmt(max)}`;
+    if (min != null) return `${fmt(min)}+`;
+    return `Up to ${fmt(max!)}`;
+}
+
+export function jobEmploymentType(application: Application): string | null {
+    const t = application.job?.employment_type;
+    if (!t) return null;
+    return t
+        .replace(/_/g, "-")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function recruiterName(application: Application): string | null {
+    return (
+        application.recruiter?.name ||
+        application.recruiter?.user?.name ||
+        null
+    );
+}
+
+export function companyInitials(name: string): string {
+    return name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w) => w[0]?.toUpperCase() ?? "")
+        .join("");
+}

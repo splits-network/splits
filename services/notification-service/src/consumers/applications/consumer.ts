@@ -70,6 +70,18 @@ export class ApplicationsEventConsumer {
 
             this.logger.info({ application_id, old_stage, new_stage }, 'Processing stage changed notification');
 
+            // Skip stages that are already handled by dedicated event handlers to avoid
+            // duplicate notifications. The ai_review.completed event sends its own
+            // candidate + recruiter emails via handleAIReviewCompleted(), and the ats-service
+            // also publishes application.stage_changed for ai_reviewed — skip it here.
+            if (new_stage === 'ai_reviewed') {
+                this.logger.info(
+                    { application_id, new_stage },
+                    'Skipping stage change notification — handled by ai_review.completed handler'
+                );
+                return;
+            }
+
             const context = await this.dataLookup.getApplicationContext(application_id);
             if (!context) {
                 this.logger.error({ application_id }, 'Could not load application context');
@@ -765,6 +777,9 @@ export class ApplicationsEventConsumer {
             }
 
             // Scenario 4: Recruiter proposes job to candidate
+            // This handles the generic createApplication() path where stage='recruiter_proposed'.
+            // The dedicated proposeJobToCandidate() path publishes application.recruiter_proposed
+            // instead and is handled by RecruiterSubmissionEventConsumer.
             if (has_recruiter && stage === 'recruiter_proposed') {
 
                 if (candidateEmail) {
@@ -1290,7 +1305,7 @@ export class ApplicationsEventConsumer {
             };
 
             // Collect recipients based on visibility
-            const recipients: Array<{ email: string; name: string; userId?: string }> = [];
+            const recipients: Array<{ email: string; name: string; userId?: string; source: 'portal' | 'candidate' }> = [];
 
             // Candidate-side recipients (candidate + their recruiter)
             const shouldNotifyCandidateSide = visibility === 'shared' || visibility === 'candidate_only';
@@ -1304,6 +1319,7 @@ export class ApplicationsEventConsumer {
                     email: candidate.email,
                     name: candidate.full_name,
                     userId: candidate.user_id || undefined,
+                    source: 'candidate',
                 });
             }
 
@@ -1315,6 +1331,7 @@ export class ApplicationsEventConsumer {
                         email: recruiterContact.email,
                         name: recruiterContact.name,
                         userId: recruiterContact.user_id || undefined,
+                        source: 'portal',
                     });
                 }
             }
@@ -1331,6 +1348,7 @@ export class ApplicationsEventConsumer {
                                 email: admin.email,
                                 name: admin.name,
                                 userId: admin.user_id || undefined,
+                                source: 'portal',
                             });
                         }
                     }
@@ -1343,6 +1361,7 @@ export class ApplicationsEventConsumer {
                     recipientName: recipient.name,
                     ...notificationData,
                     userId: recipient.userId,
+                    source: recipient.source,
                 });
             }
 

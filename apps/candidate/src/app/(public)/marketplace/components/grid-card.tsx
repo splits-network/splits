@@ -22,7 +22,7 @@ export default function GridCard({
     return (
         <div
             onClick={() => onSelect?.(recruiter)}
-            className={`recruiter-card group cursor-pointer bg-base-100 border-2 p-6 transition-all hover:shadow-md ${
+            className={`recruiter-card group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all hover:shadow-md ${
                 isSelected
                     ? "border-primary border-l-4"
                     : "border-base-300 hover:border-primary/30"
@@ -116,7 +116,7 @@ export default function GridCard({
             )}
 
             {/* Footer: reputation + view profile */}
-            <div className="flex items-center justify-between pt-4 border-t border-base-200">
+            <div className="mt-auto flex items-center justify-between pt-4 border-t border-base-200">
                 <ReputationDisplay
                     score={recruiter.reputation_score}
                     placements={recruiter.total_placements}

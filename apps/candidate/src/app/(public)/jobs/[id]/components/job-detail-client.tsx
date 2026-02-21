@@ -71,11 +71,9 @@ export default function JobDetailClient({
         () => {
             if (!mainRef.current) return;
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
+                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
+                    (el as HTMLElement).style.opacity = "1";
+                });
                 return;
             }
 
@@ -295,9 +293,9 @@ export default function JobDetailClient({
                         {/* Meta tags */}
                         {metaTags.length > 0 && (
                             <div className="flex flex-wrap gap-3 mb-8">
-                                {metaTags.map((tag) => (
+                                {metaTags.map((tag, i) => (
                                     <span
-                                        key={tag.text}
+                                        key={`${i}-${tag.text}`}
                                         className="detail-meta opacity-0 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
                                     >
                                         <i
@@ -364,7 +362,8 @@ export default function JobDetailClient({
                                 <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                 Posted{" "}
                                 {formatRelativeTime(
-                                    job.updated_at || (job.created_at as string),
+                                    job.updated_at ||
+                                        (job.created_at as string),
                                 )}
                             </div>
                         )}

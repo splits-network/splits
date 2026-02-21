@@ -40,3 +40,14 @@ export function companyInitials(name: string): string {
         ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
         : (words[0]?.[0] || "").toUpperCase();
 }
+
+export function estimatedPayoutRange(job: Job): string | null {
+    const salary = job.salary_min || job.salary_max;
+    if (!salary || !job.fee_percentage) return null;
+    const salaryHigh = job.salary_max || job.salary_min!;
+    const low = Math.round(salary * (job.fee_percentage / 100) * 0.06);
+    const high = Math.round(salaryHigh * (job.fee_percentage / 100) * 0.5);
+    const fmt = (n: number) =>
+        n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `$${n}`;
+    return `${fmt(low)} – ${fmt(high)}`;
+}

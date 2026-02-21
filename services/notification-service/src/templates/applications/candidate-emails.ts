@@ -4,7 +4,7 @@
  */
 
 import { baseEmailTemplate, defaultTheme } from '../base';
-import { heading, paragraph, button, infoCard, alert } from '../components';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components';
 
 // When candidate submits application with recruiter
 export interface CandidateApplicationWithRecruiterData {
@@ -811,6 +811,106 @@ ${paragraph(`Your recruiter will submit your enhanced application once the revie
 
     return baseEmailTemplate({
         preheader: `${data.recruiterName} is reviewing your ${data.jobTitle} application`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When recruiter proposes a job directly to candidate (via application flow)
+export interface JobProposalToCandidateData {
+    candidateName: string;
+    recruiterName: string;
+    jobTitle: string;
+    companyName: string;
+    applicationUrl: string;
+}
+
+export function jobProposalToCandidateEmail(data: JobProposalToCandidateData): string {
+    const content = `
+${heading({ level: 1, text: 'New Job Opportunity' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(`<strong>${data.recruiterName}</strong> has proposed an exciting opportunity for you:`)}
+
+${infoCard({
+        title: 'Role Details',
+        items: [
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph('Your recruiter believes this role could be a great fit for your background and career goals. Review the full job details and take the next step in your application.')}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View Job Details →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${divider()}
+
+${heading({ level: 3, text: 'Next Steps' })}
+${paragraph('1. Review the job description and requirements<br>2. If interested, proceed with your application<br>3. Your recruiter will guide you through the process')}
+
+${paragraph('Questions? Reply to this email or contact your recruiter directly.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.recruiterName} proposed ${data.jobTitle} at ${data.companyName} for you`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When recruiter requests changes to a candidate's application
+export interface RecruiterRequestChangesData {
+    candidateName: string;
+    recruiterName: string;
+    jobTitle: string;
+    companyName: string;
+    recruiterNotes?: string;
+    applicationUrl: string;
+}
+
+export function recruiterRequestChangesEmail(data: RecruiterRequestChangesData): string {
+    const content = `
+${heading({ level: 1, text: 'Updates Requested' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(`Your recruiter, <strong>${data.recruiterName}</strong>, has reviewed your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> and has requested some updates or additional information.`)}
+
+${data.recruiterNotes ? alert({
+        type: 'warning',
+        title: 'Recruiter Notes',
+        message: data.recruiterNotes,
+    }) : ''}
+
+${paragraph('Please review your application and make the requested updates so your recruiter can submit it to the company.')}
+
+${button({
+        href: data.applicationUrl,
+        text: 'Update My Application →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${divider()}
+
+${heading({ level: 3, text: 'What happens next?' })}
+${paragraph('1. Review your recruiter\'s feedback<br>2. Update your application with the requested changes<br>3. Once complete, your recruiter will continue the submission process')}
+
+${paragraph(`Questions? Reply to this email or contact <strong>${data.recruiterName}</strong> directly.`)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.recruiterName} requested updates to your ${data.jobTitle} application`,
         content,
         source: 'candidate',
         theme: defaultTheme,
