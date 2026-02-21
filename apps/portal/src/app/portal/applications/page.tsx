@@ -37,9 +37,7 @@ export default function ApplicationsBaselPage() {
     searchParamsRef.current = searchParams;
 
     useEffect(() => {
-        const params = new URLSearchParams(
-            searchParamsRef.current.toString(),
-        );
+        const params = new URLSearchParams(searchParamsRef.current.toString());
 
         if (selectedApplicationId) {
             params.set("applicationId", selectedApplicationId);
@@ -141,7 +139,7 @@ export default function ApplicationsBaselPage() {
             />
 
             {/* Results count */}
-            <div className="container mx-auto px-6 lg:px-12 pt-6">
+            <div className="mx-auto px-6 lg:px-12 py-2">
                 <p className="text-sm uppercase tracking-wider text-base-content/40 font-bold">
                     {applications.length} of{" "}
                     {pagination?.total ?? applications.length} applications
@@ -150,7 +148,7 @@ export default function ApplicationsBaselPage() {
 
             {/* Content area */}
             <section className="content-area opacity-0">
-                <div className="container mx-auto px-6 lg:px-12 py-6">
+                <div className="mx-auto">
                     {loading && applications.length === 0 ? (
                         <LoadingState message="Loading pipeline..." />
                     ) : applications.length === 0 ? (
@@ -160,7 +158,8 @@ export default function ApplicationsBaselPage() {
                                 No matching applications
                             </h3>
                             <p className="text-base-content/50 mb-6">
-                                Adjust your filters or clear the search to see results.
+                                Adjust your filters or clear the search to see
+                                results.
                             </p>
                             <button
                                 onClick={() => {

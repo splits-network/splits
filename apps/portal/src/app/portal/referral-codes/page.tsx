@@ -67,8 +67,11 @@ export default function ReferralCodesBaselPage() {
                     const batch: StatsCode[] = response.data || [];
                     allCodes.push(...batch);
 
-                    const totalFromServer = response.pagination?.total ?? batch.length;
-                    hasMore = allCodes.length < totalFromServer && batch.length === 100;
+                    const totalFromServer =
+                        response.pagination?.total ?? batch.length;
+                    hasMore =
+                        allCodes.length < totalFromServer &&
+                        batch.length === 100;
                     statsPage++;
                 }
 
@@ -164,14 +167,14 @@ export default function ReferralCodesBaselPage() {
                 const batch: StatsCode[] = response.data || [];
                 allCodes.push(...batch);
 
-                const totalFromServer = response.pagination?.total ?? batch.length;
-                hasMore = allCodes.length < totalFromServer && batch.length === 100;
+                const totalFromServer =
+                    response.pagination?.total ?? batch.length;
+                hasMore =
+                    allCodes.length < totalFromServer && batch.length === 100;
                 statsPage++;
             }
 
-            const active = allCodes.filter(
-                (c) => c.status === "active",
-            ).length;
+            const active = allCodes.filter((c) => c.status === "active").length;
             const inactive = allCodes.filter(
                 (c) => c.status === "inactive",
             ).length;
@@ -217,7 +220,7 @@ export default function ReferralCodesBaselPage() {
 
                 {/* Content Area */}
                 <section className="content-area opacity-0">
-                    <div ref={contentRef} className="container mx-auto px-6 lg:px-12 py-8">
+                    <div ref={contentRef} className="mx-auto">
                         {loading && codes.length === 0 ? (
                             <div className="py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
@@ -232,9 +235,10 @@ export default function ReferralCodesBaselPage() {
                                     No referral codes yet
                                 </h3>
                                 <p className="text-base-content/50 mb-6 max-w-md mx-auto">
-                                    Create your first referral code and start sharing it
-                                    with potential candidates and companies. When they sign
-                                    up using your code, you&apos;ll be attributed as the
+                                    Create your first referral code and start
+                                    sharing it with potential candidates and
+                                    companies. When they sign up using your
+                                    code, you&apos;ll be attributed as the
                                     sourcer.
                                 </p>
                                 <div className="flex gap-3 justify-center">
@@ -270,7 +274,7 @@ export default function ReferralCodesBaselPage() {
                 </section>
 
                 {/* Pagination */}
-                <div className="container mx-auto px-6 lg:px-12 py-6">
+                <div className="mx-auto">
                     <PaginationControls
                         page={page}
                         totalPages={totalPages}

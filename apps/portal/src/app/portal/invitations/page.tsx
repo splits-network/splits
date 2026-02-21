@@ -211,10 +211,7 @@ export default function InvitationsBaselPage() {
 
                 {/* Content Area */}
                 <section className="content-area opacity-0">
-                    <div
-                        ref={contentRef}
-                        className="mx-auto px-6 lg:px-12 py-8"
-                    >
+                    <div ref={contentRef} className="mx-auto">
                         {loading && invitations.length === 0 ? (
                             <div className="py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />

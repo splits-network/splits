@@ -47,9 +47,7 @@ function RecruitersContent() {
     searchParamsRef.current = searchParams;
 
     useEffect(() => {
-        const params = new URLSearchParams(
-            searchParamsRef.current.toString(),
-        );
+        const params = new URLSearchParams(searchParamsRef.current.toString());
 
         if (selectedRecruiterId) {
             params.set("recruiterId", selectedRecruiterId);
@@ -129,8 +127,7 @@ function RecruitersContent() {
                 recruiters.length > 0
                     ? Math.round(
                           recruiters.reduce(
-                              (sum, r) =>
-                                  sum + (r.total_placements || 0),
+                              (sum, r) => sum + (r.total_placements || 0),
                               0,
                           ) / recruiters.length,
                       )
@@ -168,8 +165,8 @@ function RecruitersContent() {
                 totalCount={pagination?.total ?? recruiters.length}
             />
 
-            <section className="min-h-screen bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12 py-8">
+            <section className="min-h-screen">
+                <div className="mx-auto">
                     {/* Content Area */}
                     <div ref={contentRef} className="content-area opacity-0">
                         {loading && recruiters.length === 0 ? (

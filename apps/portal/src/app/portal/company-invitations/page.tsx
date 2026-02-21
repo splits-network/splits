@@ -55,10 +55,18 @@ export default function CompanyInvitationsBaselPage() {
                 const client = createAuthenticatedClient(token);
                 const [totalRes, pendingRes, activeRes, declinedRes]: any[] =
                     await Promise.all([
-                        client.get("/recruiter-companies", { params: { limit: 1 } }),
-                        client.get("/recruiter-companies", { params: { status: "pending", limit: 1 } }),
-                        client.get("/recruiter-companies", { params: { status: "active", limit: 1 } }),
-                        client.get("/recruiter-companies", { params: { status: "declined", limit: 1 } }),
+                        client.get("/recruiter-companies", {
+                            params: { limit: 1 },
+                        }),
+                        client.get("/recruiter-companies", {
+                            params: { status: "pending", limit: 1 },
+                        }),
+                        client.get("/recruiter-companies", {
+                            params: { status: "active", limit: 1 },
+                        }),
+                        client.get("/recruiter-companies", {
+                            params: { status: "declined", limit: 1 },
+                        }),
                     ]);
 
                 if (!cancelled) {
@@ -169,7 +177,7 @@ export default function CompanyInvitationsBaselPage() {
 
             {/* Content Area */}
             <section className="content-area opacity-0">
-                <div ref={contentRef} className="container mx-auto px-6 lg:px-12 py-8">
+                <div ref={contentRef} className="mx-auto">
                     {loading && invitations.length === 0 ? (
                         <div className="py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
@@ -184,7 +192,8 @@ export default function CompanyInvitationsBaselPage() {
                                 No connections found
                             </h3>
                             <p className="text-base-content/50 mb-6">
-                                When recruiters request to connect, they&apos;ll appear here. Try adjusting your filters.
+                                When recruiters request to connect, they&apos;ll
+                                appear here. Try adjusting your filters.
                             </p>
                             <button
                                 onClick={() => {

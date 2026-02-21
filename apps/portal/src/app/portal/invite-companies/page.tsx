@@ -102,9 +102,12 @@ export default function InviteCompaniesBaselPage() {
     const stats = useMemo(
         () => ({
             total: pagination?.total || invitations.length,
-            pending: invitations.filter((inv) => inv.status === "pending").length,
-            accepted: invitations.filter((inv) => inv.status === "accepted").length,
-            expired: invitations.filter((inv) => inv.status === "expired").length,
+            pending: invitations.filter((inv) => inv.status === "pending")
+                .length,
+            accepted: invitations.filter((inv) => inv.status === "accepted")
+                .length,
+            expired: invitations.filter((inv) => inv.status === "expired")
+                .length,
         }),
         [invitations, pagination],
     );
@@ -132,7 +135,7 @@ export default function InviteCompaniesBaselPage() {
 
                 {/* Content Area */}
                 <section className="content-area opacity-0">
-                    <div ref={contentRef} className="container mx-auto px-6 lg:px-12 py-8">
+                    <div ref={contentRef} className="mx-auto">
                         {loading && invitations.length === 0 ? (
                             <div className="py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
@@ -147,7 +150,8 @@ export default function InviteCompaniesBaselPage() {
                                     No invitations found
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    Invite companies to grow your network, or try adjusting your filters.
+                                    Invite companies to grow your network, or
+                                    try adjusting your filters.
                                 </p>
                                 <button
                                     onClick={() => {

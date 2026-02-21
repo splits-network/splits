@@ -88,7 +88,7 @@ export function SpeedDial({
                     className="group flex items-center gap-2 z-100"
                 >
                     <span
-                        className={`truncate max-w-32 ${labelSizeClass[size]} font-medium text-base-content/80 select-none`}
+                        className={`truncate max-w-32 ${labelSizeClass[size]} font-medium text-base-content/80 select-none badge badge-sm badge-neutral badge-soft group-hover:badge-primary group-hover:text-primary transition-colors`}
                     >
                         {action.label}
                     </span>

@@ -16,9 +16,7 @@ export function GridView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedInvitation = invitations.find(
-        (inv) => inv.id === selectedId,
-    );
+    const selectedInvitation = invitations.find((inv) => inv.id === selectedId);
 
     return (
         <div className="flex gap-6">
@@ -30,7 +28,7 @@ export function GridView({
                     className={`grid gap-4 w-full ${
                         selectedInvitation
                             ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
+                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
                     }`}
                 >
                     {invitations.map((invitation) => (
