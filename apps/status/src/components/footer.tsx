@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import Image from "next/image";
 import { BaselFooter } from "@splits-network/basel-ui";
 
 if (typeof window !== "undefined") {
@@ -156,10 +157,13 @@ export function Footer() {
             brand={
                 <>
                     <div className="mb-4">
-                        <span className="text-xl font-black tracking-tight">
-                            <i className="fa-duotone fa-regular fa-signal-bars text-primary mr-2" />
-                            Splits Network Status
-                        </span>
+                        <Image
+                            src="/logo.png"
+                            alt="Splits Network"
+                            width={160}
+                            height={54}
+                            className="h-12 w-auto brightness-0 invert"
+                        />
                     </div>
                     <p className="text-sm opacity-50 leading-relaxed mb-4">
                         Real-time health monitoring for the Splits Network

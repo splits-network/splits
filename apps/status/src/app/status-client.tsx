@@ -76,7 +76,7 @@ export default function StatusClient({
             return {
                 headline: "Checking system status",
                 subtext:
-                    "Validating the API gateway, auth, ATS, network, billing, docs, AI, and automation stacks.",
+                    "Running health checks across all platform services. Results in a moment.",
                 badgeClass: "badge badge-info",
             };
         }
@@ -84,7 +84,7 @@ export default function StatusClient({
             return {
                 headline: "All systems operational",
                 subtext:
-                    "Recruiter dashboards, pipelines, automations, and AI review signals are green. Everything's running smooth.",
+                    "All platform services are responding normally. Dashboards, pipelines, automations, and AI review are fully operational.",
                 badgeClass: "badge badge-success",
             };
         }
@@ -92,14 +92,14 @@ export default function StatusClient({
             return {
                 headline: "Investigating service degradation",
                 subtext:
-                    "We detected a hiccup. Core features still work — you can browse, apply, and message.",
+                    "One or more services are not responding as expected. Core platform features remain available.",
                 badgeClass: "badge badge-error",
             };
         }
         return {
             headline: "Monitoring system anomalies",
             subtext:
-                "Unusual patterns detected. No confirmed impact yet. This is precautionary.",
+                "Unusual activity patterns detected across one or more services. No confirmed user impact. Monitoring as a precaution.",
             badgeClass: "badge badge-warning",
         };
     }, [isLoading, allHealthy, someUnhealthy]);
@@ -167,14 +167,14 @@ export default function StatusClient({
             if (!response.ok) {
                 throw new Error(
                     responseBody.error ||
-                        "We could not capture that note. Please try again shortly.",
+                        "Submission failed. Check your connection and try again.",
                 );
             }
 
             setFormFeedback({
                 type: "success",
                 message:
-                    "Thanks for the context — Splits Network support will reply shortly.",
+                    "Report received. Our support team will follow up within one business day.",
             });
             setFormData(formDefaults);
         } catch (error) {
@@ -183,7 +183,7 @@ export default function StatusClient({
                 message:
                     error instanceof Error
                         ? error.message
-                        : "We could not capture that note. Email help@splits.network and mention the status page.",
+                        : "Submission failed. Email help@splits.network directly and reference the status page.",
             });
         } finally {
             setSubmitting(false);
@@ -201,7 +201,7 @@ export default function StatusClient({
                         <div className="bs-hero-badge mb-6 opacity-0">
                             <span className={`${heroState.badgeClass} gap-2`}>
                                 <i className="fa-duotone fa-regular fa-signal-bars" />
-                                Live System Status
+                                System Status
                             </span>
                         </div>
 
@@ -236,17 +236,17 @@ export default function StatusClient({
                         {[
                             {
                                 value: `${healthyCount}/${totalCount}`,
-                                label: "Services Healthy",
+                                label: "Healthy Services",
                             },
                             {
                                 value: `${avgResponseTime}ms`,
-                                label: "Avg Response",
+                                label: "Avg Response Time",
                             },
                             {
                                 value: `${uptimePercent}%`,
                                 label: "Uptime",
                             },
-                            { value: "30s", label: "Auto-Refresh" },
+                            { value: "30s", label: "Refresh Interval" },
                         ].map((m, i) => (
                             <div key={i} className="bs-metric-item opacity-0">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
@@ -262,171 +262,436 @@ export default function StatusClient({
             </section>
 
             {/* ══════════════════════════════════════════════════════════
-                SERVICE GRID
+                EDITORIAL SPLIT — SERVICES (2/3) + INCIDENTS (1/3)
                ══════════════════════════════════════════════════════════ */}
-            <section className="bs-services py-20 bg-base-100">
+            <section
+                id="incidents"
+                className="bs-editorial py-20 bg-base-100"
+            >
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="bs-services-heading mb-12 opacity-0">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Section kicker + heading spans full width */}
+                        <div className="bs-editorial-heading mb-12 opacity-0">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                                Services
+                                Infrastructure
                             </p>
                             <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight">
-                                Service breakdown
+                                Live service health
                             </h2>
-                            <p className="text-base text-base-content/60 mt-2">
-                                Real-time health across all infrastructure
-                                layers
+                            <p className="text-base text-base-content/60 mt-2 max-w-2xl">
+                                Real-time health for every service in the
+                                platform, updated every 30 seconds.
                             </p>
                         </div>
 
-                        <div className="bs-services-grid grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {serviceStatuses.map((service) => {
-                                const borderColor =
-                                    service.status === "healthy"
-                                        ? "border-success"
-                                        : service.status === "unhealthy"
-                                          ? "border-error"
-                                          : "border-warning";
-                                const textColor =
-                                    service.status === "healthy"
-                                        ? "text-success"
-                                        : service.status === "unhealthy"
-                                          ? "text-error"
-                                          : "text-warning";
+                        {/* 2/3 + 1/3 editorial split */}
+                        <div className="grid lg:grid-cols-3 gap-8">
+                            {/* LEFT — Service breakdown (2/3) */}
+                            <div className="lg:col-span-2">
+                                <div className="bs-services">
+                                    <h3 className="bs-services-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 opacity-0">
+                                        Service health
+                                    </h3>
 
-                                return (
-                                    <div
-                                        key={service.name}
-                                        className={`bs-service-card border-l-4 ${borderColor} bg-base-200 p-5 shadow-sm opacity-0`}
-                                    >
-                                        <div className="flex items-start justify-between gap-3 mb-3">
-                                            <h3 className="font-bold text-sm">
-                                                {service.name}
-                                            </h3>
-                                            <span
-                                                className={statusBadgeClass(
-                                                    service.status,
-                                                )}
-                                            >
-                                                {statusLabel(service.status)}
-                                            </span>
-                                        </div>
+                                    <div className="bs-services-grid grid md:grid-cols-2 gap-3">
+                                        {serviceStatuses.map((service) => {
+                                            const borderColor =
+                                                service.status === "healthy"
+                                                    ? "border-success"
+                                                    : service.status ===
+                                                        "unhealthy"
+                                                      ? "border-error"
+                                                      : "border-warning";
+                                            const textColor =
+                                                service.status === "healthy"
+                                                    ? "text-success"
+                                                    : service.status ===
+                                                        "unhealthy"
+                                                      ? "text-error"
+                                                      : "text-warning";
 
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
-                                                    Response
-                                                </p>
-                                                <p
-                                                    className={`text-lg font-black ${textColor}`}
+                                            return (
+                                                <div
+                                                    key={service.name}
+                                                    className={`bs-service-card border-l-4 ${borderColor} bg-base-200 p-5 shadow-sm opacity-0`}
                                                 >
-                                                    {service.responseTime
-                                                        ? `${service.responseTime}ms`
-                                                        : "---"}
-                                                </p>
-                                            </div>
-                                            {service.timestamp && (
-                                                <div className="text-right">
-                                                    <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
-                                                        Last Check
-                                                    </p>
-                                                    <p
-                                                        className="text-xs font-bold text-base-content/60"
-                                                        suppressHydrationWarning
-                                                    >
-                                                        {new Date(
-                                                            service.timestamp,
-                                                        ).toLocaleTimeString()}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                                        <h4 className="font-bold text-sm">
+                                                            {service.name}
+                                                        </h4>
+                                                        <span
+                                                            className={statusBadgeClass(
+                                                                service.status,
+                                                            )}
+                                                        >
+                                                            {statusLabel(
+                                                                service.status,
+                                                            )}
+                                                        </span>
+                                                    </div>
 
-                                        {service.error && (
-                                            <div className="mt-3 border-l-2 border-error bg-error/5 p-2">
-                                                <p className="text-xs text-error">
-                                                    <i className="fa-duotone fa-regular fa-circle-exclamation mr-1" />
-                                                    {service.error}
-                                                </p>
-                                            </div>
-                                        )}
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
+                                                                Response
+                                                            </p>
+                                                            <p
+                                                                className={`text-lg font-black ${textColor}`}
+                                                            >
+                                                                {service.responseTime
+                                                                    ? `${service.responseTime}ms`
+                                                                    : "---"}
+                                                            </p>
+                                                        </div>
+                                                        {service.timestamp && (
+                                                            <div className="text-right">
+                                                                <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
+                                                                    Last Check
+                                                                </p>
+                                                                <p
+                                                                    className="text-xs font-bold text-base-content/60"
+                                                                    suppressHydrationWarning
+                                                                >
+                                                                    {new Date(
+                                                                        service.timestamp,
+                                                                    ).toLocaleTimeString()}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {service.error && (
+                                                        <div className="mt-3 border-l-2 border-error bg-error/5 p-2">
+                                                            <p className="text-xs text-error">
+                                                                <i className="fa-duotone fa-regular fa-circle-exclamation mr-1" />
+                                                                {service.error}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                );
-                            })}
+                                </div>
+                            </div>
+
+                            {/* RIGHT — Active incidents (1/3) */}
+                            <div className="bs-incidents">
+                                <h3 className="bs-incidents-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 opacity-0">
+                                    Active incidents
+                                </h3>
+
+                                {unhealthyServices.length > 0 && (
+                                    <div className="space-y-4">
+                                        {unhealthyServices.map((service) => (
+                                            <div
+                                                key={service.name}
+                                                className="bs-incident-card border-l-4 border-error bg-base-200 p-5 shadow-sm opacity-0"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 bg-error/10">
+                                                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-error" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-bold text-sm">
+                                                            {service.name}
+                                                        </h4>
+                                                        <p className="text-xs text-base-content/70 mt-1 leading-relaxed">
+                                                            {service.error ||
+                                                                "Investigating. This page updates automatically as status changes."}
+                                                        </p>
+                                                        <span className="badge badge-error badge-xs mt-2">
+                                                            Active
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {unhealthyServices.length === 0 && (
+                                    <div className="bs-no-incidents border-l-4 border-success bg-base-200 p-6 shadow-sm opacity-0">
+                                        <div className="flex items-center gap-4 mb-3">
+                                            <i className="fa-duotone fa-regular fa-circle-check text-2xl text-success" />
+                                            <p className="font-bold text-base">
+                                                All clear
+                                            </p>
+                                        </div>
+                                        <p className="text-sm text-base-content/60 leading-relaxed">
+                                            All services are operating normally.
+                                            This page updates automatically if
+                                            conditions change.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Sidebar info cards */}
+                                <div className="mt-6 space-y-4">
+                                    <div className="bs-sidebar-card border-l-4 border-secondary bg-base-200 p-5 shadow-sm opacity-0">
+                                        <h4 className="font-bold text-sm mb-2">
+                                            <i className="fa-duotone fa-regular fa-clock text-secondary mr-2" />
+                                            Support hours
+                                        </h4>
+                                        <ul className="text-xs text-base-content/70 space-y-1">
+                                            <li>Weekdays: 8am - 8pm ET</li>
+                                            <li>
+                                                Weekends: On-call for critical
+                                                incidents
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="bs-sidebar-card border-l-4 border-accent bg-base-200 p-5 shadow-sm opacity-0">
+                                        <h4 className="font-bold text-sm mb-2">
+                                            <i className="fa-duotone fa-regular fa-circle-info text-accent mr-2" />
+                                            Quick links
+                                        </h4>
+                                        <ul className="text-xs text-base-content/70 space-y-1.5">
+                                            <li>
+                                                <a
+                                                    href="https://splits.network"
+                                                    className="link link-primary"
+                                                >
+                                                    Splits Network
+                                                </a>{" "}
+                                                — platform
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="mailto:help@splits.network"
+                                                    className="link link-primary"
+                                                >
+                                                    help@splits.network
+                                                </a>{" "}
+                                                — email
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* ══════════════════════════════════════════════════════════
-                INCIDENTS
+                CONTACT — PING SUPPORT
                ══════════════════════════════════════════════════════════ */}
-            <section
-                id="incidents"
-                className="bs-incidents py-20 bg-base-200"
-            >
+            <section id="contact" className="bs-contact py-20 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
-                        <div className="bs-incidents-heading mb-12 opacity-0">
+                        <div className="mb-10 opacity-0 bs-contact-heading">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                                Incidents
+                                Report an Issue
                             </p>
                             <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight">
-                                Active incidents
+                                Report an issue
                             </h2>
+                            <p className="text-base text-base-content/60 mt-2">
+                                Describe what you are experiencing and our
+                                support team will follow up directly.
+                            </p>
                         </div>
 
-                        {/* Active incidents */}
-                        {unhealthyServices.length > 0 && (
-                            <div className="space-y-4 mb-8">
-                                {unhealthyServices.map((service) => (
-                                    <div
-                                        key={service.name}
-                                        className="bs-incident-card border-l-4 border-error bg-base-100 p-6 shadow-sm opacity-0"
-                                    >
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0 bg-error/10">
-                                                <i className="fa-duotone fa-regular fa-triangle-exclamation text-lg text-error" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg">
-                                                    {service.name}
-                                                </h3>
-                                                <p className="text-base-content/70 mt-1">
-                                                    {service.error ||
-                                                        "We're mitigating the issue. Updates every 10 minutes."}
-                                                </p>
-                                                <span className="badge badge-error badge-sm mt-2">
-                                                    Active
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <div className="bs-contact-form border-l-4 border-primary bg-base-100 p-8 shadow-md opacity-0">
+                            {formFeedback && (
+                                <div
+                                    className={`alert mb-6 ${
+                                        formFeedback.type === "success"
+                                            ? "alert-success"
+                                            : "alert-error"
+                                    }`}
+                                >
+                                    <span>{formFeedback.message}</span>
+                                </div>
+                            )}
 
-                        {unhealthyServices.length === 0 && (
-                            <div className="bs-no-incidents border-l-4 border-success bg-base-100 p-8 text-center mb-8 shadow-sm opacity-0">
-                                <i className="fa-duotone fa-regular fa-circle-check text-5xl text-success mb-3" />
-                                <p className="font-bold text-xl">
-                                    No Active Incidents
-                                </p>
-                                <p className="text-base-content/60 mt-2">
-                                    All services running smooth. We&apos;ll
-                                    update here if anything changes.
-                                </p>
-                            </div>
-                        )}
+                            <form
+                                className="space-y-5"
+                                onSubmit={handleSubmit}
+                            >
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Full name
+                                        </legend>
+                                        <input
+                                            className="input w-full"
+                                            required
+                                            value={formData.name}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    name: e.target.value,
+                                                })
+                                            }
+                                            placeholder="Your full name"
+                                        />
+                                    </fieldset>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Email
+                                        </legend>
+                                        <input
+                                            className="input w-full"
+                                            type="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    email: e.target.value,
+                                                })
+                                            }
+                                            placeholder="you@company.com"
+                                        />
+                                    </fieldset>
+                                </div>
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Topic
+                                        </legend>
+                                        <select
+                                            className="select w-full"
+                                            value={formData.topic}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    topic: e.target.value,
+                                                })
+                                            }
+                                        >
+                                            <option value="support">
+                                                General Support
+                                            </option>
+                                            <option value="automation">
+                                                Automation
+                                            </option>
+                                            <option value="ai">
+                                                AI review
+                                            </option>
+                                            <option value="documents">
+                                                Document workflows
+                                            </option>
+                                            <option value="billing">
+                                                Billing/reporting
+                                            </option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Urgency
+                                        </legend>
+                                        <select
+                                            className="select w-full"
+                                            value={formData.urgency}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    urgency: e.target.value,
+                                                })
+                                            }
+                                        >
+                                            <option value="normal">
+                                                Normal
+                                            </option>
+                                            <option value="high">
+                                                High — Blocking Issue
+                                            </option>
+                                            <option value="low">
+                                                Low — Informational
+                                            </option>
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">
+                                        Message
+                                    </legend>
+                                    <textarea
+                                        className="textarea h-28 w-full"
+                                        required
+                                        value={formData.message}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                message: e.target.value,
+                                            })
+                                        }
+                                        placeholder="What are you experiencing? Include affected workflows, error messages, and timing."
+                                    />
+                                </fieldset>
+                                <button
+                                    className="btn btn-primary"
+                                    disabled={submitting}
+                                    type="submit"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-paper-plane" />
+                                            Submit Report
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                        {/* Past incidents grouped by day */}
-                        {groupedIncidents.length > 0 && (
-                            <details className="mt-12 group">
-                                <summary className="font-bold text-xl cursor-pointer list-none flex items-center gap-2 select-none">
+            {/* ══════════════════════════════════════════════════════════
+                NEED HELP CTA
+               ══════════════════════════════════════════════════════════ */}
+            <section className="bs-cta py-24 bg-primary text-primary-content">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="bs-cta-content text-center max-w-3xl mx-auto opacity-0">
+                        <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-6">
+                            Something not right?
+                        </h2>
+                        <p className="text-lg opacity-80 mb-10">
+                            If you are experiencing an issue not shown above,
+                            reach out. Our support team responds within the hour
+                            during business hours.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a
+                                href="#contact"
+                                className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
+                            >
+                                <i className="fa-duotone fa-regular fa-message" />
+                                Report Issue
+                            </a>
+                            <a
+                                href="mailto:help@splits.network"
+                                className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                            >
+                                <i className="fa-duotone fa-regular fa-envelope" />
+                                help@splits.network
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════
+                PAST INCIDENTS (collapsible archive)
+               ══════════════════════════════════════════════════════════ */}
+            {groupedIncidents.length > 0 && (
+                <section className="bs-past-incidents py-16 bg-base-100">
+                    <div className="container mx-auto px-6 lg:px-12">
+                        <div className="max-w-4xl mx-auto">
+                            <details className="group">
+                                <summary className="bs-past-incidents-toggle font-bold text-xl cursor-pointer list-none flex items-center gap-2 select-none opacity-0">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-sm text-secondary transition-transform duration-200 group-open:rotate-90" />
                                     <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1 text-secondary" />
-                                    Past Incidents
+                                    Incident History
                                     <span className="text-sm font-normal text-base-content/50 ml-2">
                                         ({incidents.filter((i) => i.resolved_at).length})
                                     </span>
@@ -442,8 +707,10 @@ export default function StatusClient({
                                                     {dayIncidents.map(
                                                         (incident) => (
                                                             <div
-                                                                key={incident.id}
-                                                                className="border-l-4 border-secondary bg-base-100 p-5 shadow-sm"
+                                                                key={
+                                                                    incident.id
+                                                                }
+                                                                className="border-l-4 border-secondary bg-base-200 p-5 shadow-sm"
                                                             >
                                                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                                                                     <div>
@@ -494,275 +761,10 @@ export default function StatusClient({
                                     )}
                                 </div>
                             </details>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* ══════════════════════════════════════════════════════════
-                CONTACT
-               ══════════════════════════════════════════════════════════ */}
-            <section id="contact" className="bs-contact py-20 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="mb-12 opacity-0 bs-contact-card">
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-                                Report
-                            </p>
-                            <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight">
-                                Ping support
-                            </h2>
-                            <p className="text-base text-base-content/60 mt-2">
-                                Share how the status impacts your teams and
-                                we&apos;ll loop you into the incident channel.
-                            </p>
-                        </div>
-
-                        <div className="grid lg:grid-cols-3 gap-8">
-                            {/* Contact form */}
-                            <div className="lg:col-span-2 bs-contact-card opacity-0">
-                                <div className="border-l-4 border-primary bg-base-200 p-8 shadow-sm">
-                                    {formFeedback && (
-                                        <div
-                                            className={`alert mb-6 ${
-                                                formFeedback.type === "success"
-                                                    ? "alert-success"
-                                                    : "alert-error"
-                                            }`}
-                                        >
-                                            <span>
-                                                {formFeedback.message}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <form
-                                        className="space-y-5"
-                                        onSubmit={handleSubmit}
-                                    >
-                                        <div className="grid gap-5 md:grid-cols-2">
-                                            <fieldset className="fieldset">
-                                                <legend className="fieldset-legend">
-                                                    Full name
-                                                </legend>
-                                                <input
-                                                    className="input w-full"
-                                                    required
-                                                    value={formData.name}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            name: e.target
-                                                                .value,
-                                                        })
-                                                    }
-                                                    placeholder="Casey Operations"
-                                                />
-                                            </fieldset>
-                                            <fieldset className="fieldset">
-                                                <legend className="fieldset-legend">
-                                                    Email
-                                                </legend>
-                                                <input
-                                                    className="input w-full"
-                                                    type="email"
-                                                    required
-                                                    value={formData.email}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            email: e.target
-                                                                .value,
-                                                        })
-                                                    }
-                                                    placeholder="you@company.com"
-                                                />
-                                            </fieldset>
-                                        </div>
-                                        <div className="grid gap-5 md:grid-cols-2">
-                                            <fieldset className="fieldset">
-                                                <legend className="fieldset-legend">
-                                                    Topic
-                                                </legend>
-                                                <select
-                                                    className="select w-full"
-                                                    value={formData.topic}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            topic: e.target
-                                                                .value,
-                                                        })
-                                                    }
-                                                >
-                                                    <option value="support">
-                                                        Support
-                                                    </option>
-                                                    <option value="automation">
-                                                        Automation
-                                                    </option>
-                                                    <option value="ai">
-                                                        AI review
-                                                    </option>
-                                                    <option value="documents">
-                                                        Document workflows
-                                                    </option>
-                                                    <option value="billing">
-                                                        Billing/reporting
-                                                    </option>
-                                                </select>
-                                            </fieldset>
-                                            <fieldset className="fieldset">
-                                                <legend className="fieldset-legend">
-                                                    Urgency
-                                                </legend>
-                                                <select
-                                                    className="select w-full"
-                                                    value={formData.urgency}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            urgency:
-                                                                e.target.value,
-                                                        })
-                                                    }
-                                                >
-                                                    <option value="normal">
-                                                        Normal
-                                                    </option>
-                                                    <option value="high">
-                                                        High - blocker
-                                                    </option>
-                                                    <option value="low">
-                                                        Low - FYI
-                                                    </option>
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                        <fieldset className="fieldset">
-                                            <legend className="fieldset-legend">
-                                                Message
-                                            </legend>
-                                            <textarea
-                                                className="textarea h-28 w-full"
-                                                required
-                                                value={formData.message}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        message:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                placeholder="Include affected teams, timelines, and links."
-                                            />
-                                        </fieldset>
-                                        <button
-                                            className="btn btn-primary"
-                                            disabled={submitting}
-                                            type="submit"
-                                        >
-                                            {submitting ? (
-                                                <>
-                                                    <span className="loading loading-spinner loading-sm" />
-                                                    Sending...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fa-duotone fa-regular fa-paper-plane" />
-                                                    Send update
-                                                </>
-                                            )}
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            {/* Sidebar */}
-                            <div className="space-y-6">
-                                <div className="bs-contact-card border-l-4 border-secondary bg-base-200 p-6 shadow-sm opacity-0">
-                                    <h3 className="font-bold text-lg mb-3">
-                                        <i className="fa-duotone fa-regular fa-clock text-secondary mr-2" />
-                                        Support hours
-                                    </h3>
-                                    <ul className="text-sm text-base-content/70 space-y-1">
-                                        <li>Weekdays: 8am - 8pm ET</li>
-                                        <li>
-                                            Weekends: On-call escalation for
-                                            Sev 1 incidents
-                                        </li>
-                                    </ul>
-                                    <p className="text-xs text-base-content/60 mt-3">
-                                        Mention the incident ID (if any) and we
-                                        will tie your note to the active
-                                        thread.
-                                    </p>
-                                </div>
-
-                                <div className="bs-contact-card border-l-4 border-accent bg-base-200 p-6 shadow-sm opacity-0">
-                                    <h3 className="font-bold text-lg mb-3">
-                                        <i className="fa-duotone fa-regular fa-circle-info text-accent mr-2" />
-                                        Quick links
-                                    </h3>
-                                    <ul className="text-sm text-base-content/70 space-y-2">
-                                        <li>
-                                            <a
-                                                href="https://splits.network"
-                                                className="link link-primary"
-                                            >
-                                                Splits Network
-                                            </a>{" "}
-                                            — main platform
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="mailto:help@splits.network"
-                                                className="link link-primary"
-                                            >
-                                                help@splits.network
-                                            </a>{" "}
-                                            — email support
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            {/* ══════════════════════════════════════════════════════════
-                FOOTER CTA
-               ══════════════════════════════════════════════════════════ */}
-            <section className="bs-cta py-24 bg-primary text-primary-content">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="bs-cta-content text-center max-w-3xl mx-auto opacity-0">
-                        <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                            Need help?
-                        </h2>
-                        <p className="text-lg opacity-80 mb-10">
-                            If you&apos;re experiencing issues not reflected
-                            here, our support team is ready to assist.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a
-                                href="#contact"
-                                className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
-                            >
-                                <i className="fa-duotone fa-regular fa-message" />
-                                Contact Us
-                            </a>
-                            <a
-                                href="mailto:help@splits.network"
-                                className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-                            >
-                                <i className="fa-duotone fa-regular fa-envelope" />
-                                help@splits.network
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
         </StatusAnimator>
     );
 }

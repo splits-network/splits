@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 
 const NAV_LINKS = [
@@ -14,15 +15,22 @@ export function Header() {
         <BaselHeader
             position="sticky"
             frosted
+            className="px-4"
             logo={
                 <Link
                     href="/"
-                    className="flex-shrink-0 flex items-center gap-2"
+                    className="flex-shrink-0 flex items-center gap-3 mx-4"
                 >
-                    <i className="fa-duotone fa-regular fa-signal-bars text-primary text-lg" />
-                    <span className="text-lg font-black tracking-tight">
-                        Splits Network{" "}
-                        <span className="text-primary">Status</span>
+                    <Image
+                        src="/logo.png"
+                        alt="Splits Network"
+                        width={160}
+                        height={54}
+                        className="h-10 w-auto py-0.5"
+                        priority
+                    />
+                    <span className="text-lg font-black tracking-tight text-primary">
+                        Status
                     </span>
                 </Link>
             }
@@ -46,31 +54,8 @@ export function Header() {
                         href="https://splits.network"
                         className="hidden md:inline-flex btn btn-ghost text-md font-semibold uppercase tracking-wider"
                     >
-                        Go to App
+                        Splits Network
                     </a>
-                </div>
-            }
-            mobileMenu={
-                <div className="space-y-4">
-                    <nav className="space-y-1">
-                        {NAV_LINKS.map((link) => (
-                            <a
-                                key={link.href}
-                                href={link.href}
-                                className="block px-4 py-2.5 text-sm font-semibold text-base-content/70 hover:text-primary hover:bg-base-200 transition-colors"
-                            >
-                                {link.label}
-                            </a>
-                        ))}
-                    </nav>
-                    <div className="border-t border-base-300 pt-4">
-                        <a
-                            href="https://splits.network"
-                            className="btn btn-primary w-full"
-                        >
-                            Go to App
-                        </a>
-                    </div>
                 </div>
             }
         />

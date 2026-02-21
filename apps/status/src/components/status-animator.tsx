@@ -92,11 +92,11 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
                 );
             }
 
-            // Service grid
-            const servicesHeading = $1(".bs-services-heading");
-            if (servicesHeading) {
+            // Editorial section — shared heading
+            const editorialHeading = $1(".bs-editorial-heading");
+            if (editorialHeading) {
                 gsap.fromTo(
-                    servicesHeading,
+                    editorialHeading,
                     { opacity: 0, y: 30 },
                     {
                         opacity: 1,
@@ -104,8 +104,27 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
                         duration: D.normal,
                         ease: E.smooth,
                         scrollTrigger: {
-                            trigger: $1(".bs-services"),
+                            trigger: $1(".bs-editorial"),
                             start: "top 80%",
+                        },
+                    },
+                );
+            }
+
+            // Service grid (left column)
+            const servicesHeading = $1(".bs-services-heading");
+            if (servicesHeading) {
+                gsap.fromTo(
+                    servicesHeading,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.fast,
+                        ease: E.smooth,
+                        scrollTrigger: {
+                            trigger: $1(".bs-services"),
+                            start: "top 85%",
                         },
                     },
                 );
@@ -131,20 +150,20 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
                 );
             }
 
-            // Incidents
+            // Incidents (right column)
             const incidentsHeading = $1(".bs-incidents-heading");
             if (incidentsHeading) {
                 gsap.fromTo(
                     incidentsHeading,
-                    { opacity: 0, y: 30 },
+                    { opacity: 0, y: 20 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: D.normal,
+                        duration: D.fast,
                         ease: E.smooth,
                         scrollTrigger: {
                             trigger: $1(".bs-incidents"),
-                            start: "top 80%",
+                            start: "top 85%",
                         },
                     },
                 );
@@ -172,7 +191,7 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
             if (incidentCards.length > 0) {
                 gsap.fromTo(
                     incidentCards,
-                    { opacity: 0, x: -30 },
+                    { opacity: 0, x: -20 },
                     {
                         opacity: 1,
                         x: 0,
@@ -181,27 +200,64 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
                         ease: E.smooth,
                         scrollTrigger: {
                             trigger: $1(".bs-incidents"),
+                            start: "top 85%",
+                        },
+                    },
+                );
+            }
+
+            // Sidebar info cards (right column, below incidents)
+            const sidebarCards = $$(".bs-sidebar-card");
+            if (sidebarCards.length > 0) {
+                gsap.fromTo(
+                    sidebarCards,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        stagger: 0.1,
+                        ease: E.soft,
+                        scrollTrigger: {
+                            trigger: sidebarCards[0],
+                            start: "top 90%",
+                        },
+                    },
+                );
+            }
+
+            // Contact section
+            const contactHeading = $1(".bs-contact-heading");
+            if (contactHeading) {
+                gsap.fromTo(
+                    contactHeading,
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        ease: E.smooth,
+                        scrollTrigger: {
+                            trigger: $1(".bs-contact"),
                             start: "top 80%",
                         },
                     },
                 );
             }
 
-            // Contact
-            const contactSection = $1(".bs-contact");
-            if (contactSection) {
+            const contactForm = $1(".bs-contact-form");
+            if (contactForm) {
                 gsap.fromTo(
-                    $$(".bs-contact-card"),
+                    contactForm,
                     { opacity: 0, y: 30 },
                     {
                         opacity: 1,
                         y: 0,
                         duration: D.normal,
-                        stagger: 0.1,
                         ease: E.smooth,
                         scrollTrigger: {
-                            trigger: contactSection,
-                            start: "top 80%",
+                            trigger: contactForm,
+                            start: "top 85%",
                         },
                     },
                 );
@@ -221,6 +277,25 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
                         scrollTrigger: {
                             trigger: $1(".bs-cta"),
                             start: "top 80%",
+                        },
+                    },
+                );
+            }
+
+            // Past incidents toggle
+            const pastIncidentsToggle = $1(".bs-past-incidents-toggle");
+            if (pastIncidentsToggle) {
+                gsap.fromTo(
+                    pastIncidentsToggle,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        ease: E.soft,
+                        scrollTrigger: {
+                            trigger: $1(".bs-past-incidents"),
+                            start: "top 85%",
                         },
                     },
                 );
