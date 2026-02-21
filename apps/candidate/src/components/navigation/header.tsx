@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useState, useRef, useEffect } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
+import { useChatSidebarOptional } from "@splits-network/chat-ui";
 import type { NavItem, NavSubItem } from "@splits-network/shared-types";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
@@ -153,6 +154,31 @@ function NavDropdown({
     );
 }
 
+// ─── Chat Trigger ────────────────────────────────────────────────────────────
+
+function ChatTrigger() {
+    const sidebar = useChatSidebarOptional();
+    if (!sidebar) return null;
+
+    return (
+        <button
+            type="button"
+            onClick={sidebar.openToList}
+            className="btn btn-ghost btn-sm relative"
+            aria-label="Open messages"
+        >
+            <i className="fa-duotone fa-regular fa-messages text-lg" />
+            {sidebar.unreadTotalCount > 0 && (
+                <span className="badge badge-primary badge-sm absolute -top-1 -right-1 rounded-full">
+                    {sidebar.unreadTotalCount > 99
+                        ? "99+"
+                        : sidebar.unreadTotalCount}
+                </span>
+            )}
+        </button>
+    );
+}
+
 // ─── Header Component ───────────────────────────────────────────────────────
 
 export default function Header({ navItems }: { navItems?: NavItem[] }) {
@@ -238,6 +264,7 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                 <i className="fa-duotone fa-regular fa-gauge-high" />
                                 Dashboard
                             </Link>
+                            <ChatTrigger />
                             <NotificationBell />
                             <UserDropdown />
                         </>

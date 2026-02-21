@@ -13,6 +13,7 @@ import {
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
+import { CandidateChatSidebar } from "@/components/candidate-chat-sidebar";
 import { JsonLd } from "@splits-network/shared-ui";
 import { UserProfileProvider } from "@/contexts";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
@@ -174,11 +175,13 @@ export default async function RootLayout({
                     <ThemeProvider>
                         <UserProfileProvider initialProfile={initialProfile}>
                             <ToastProvider>
-                                <Header navItems={headerNav?.items} />
-                                <main className="flex-1">
-                                    {children}
-                                </main>
-                                <Footer footerNav={footerNav} />
+                                <CandidateChatSidebar>
+                                    <Header navItems={headerNav?.items} />
+                                    <main className="flex-1">
+                                        {children}
+                                    </main>
+                                    <Footer footerNav={footerNav} />
+                                </CandidateChatSidebar>
                                 {/* <CookieConsent /> */}
                             </ToastProvider>
                         </UserProfileProvider>

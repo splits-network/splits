@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
@@ -264,35 +265,31 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
             {/* Scrollable content */}
             <div className="p-6 space-y-8">
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-[2px] bg-base-100">
-                    <div className="bg-base-100 p-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="border-l-4 border-primary pl-4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Compensation
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {salary || "Competitive"}
+                            {salary || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
                         </p>
                     </div>
-                    {commute && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Work Style
-                            </p>
-                            <p className="text-lg font-black tracking-tight">
-                                {commute}
-                            </p>
-                        </div>
-                    )}
-                    {job.department && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Department
-                            </p>
-                            <p className="text-lg font-black tracking-tight">
-                                {job.department}
-                            </p>
-                        </div>
-                    )}
+                    <div className="border-l-4 border-secondary pl-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Work Style
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {commute || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
+                        </p>
+                    </div>
+                    <div className="border-l-4 border-accent pl-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Department
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {job.department || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Description */}
@@ -443,16 +440,18 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 )}
             </div>
 
-            {/* Application Wizard Modal */}
-            {showWizard && (
-                <ApplicationWizardModal
-                    jobId={job.id}
-                    jobTitle={job.title}
-                    companyName={name}
-                    onClose={() => setShowWizard(false)}
-                    onSuccess={() => setShowWizard(false)}
-                />
-            )}
+            {/* Application Wizard Modal — portaled to body so it escapes overflow containers */}
+            {showWizard &&
+                createPortal(
+                    <ApplicationWizardModal
+                        jobId={job.id}
+                        jobTitle={job.title}
+                        companyName={name}
+                        onClose={() => setShowWizard(false)}
+                        onSuccess={() => setShowWizard(false)}
+                    />,
+                    document.body,
+                )}
         </div>
     );
 }

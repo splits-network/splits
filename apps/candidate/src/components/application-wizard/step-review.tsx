@@ -47,6 +47,9 @@ export default function StepReview({
     const selectedResume = selectedDocs.find(
         (d) => d.document_type === "resume",
     );
+    const coverLetterDocs = selectedDocs.filter(
+        (d) => d.document_type === "cover_letter",
+    );
 
     const getQuestionText = (questionId: string) => {
         return (
@@ -56,26 +59,20 @@ export default function StepReview({
     };
 
     const formatAnswer = (answer: string | string[] | boolean) => {
-        if (typeof answer === "boolean") {
-            return answer ? "Yes" : "No";
-        }
-        if (Array.isArray(answer)) {
-            return answer.join(", ");
-        }
+        if (typeof answer === "boolean") return answer ? "Yes" : "No";
+        if (Array.isArray(answer)) return answer.join(", ");
         return answer;
     };
 
     const handleSubmit = async () => {
         setSubmitting(true);
         setError(null);
-
         try {
             await onSubmit();
-            // Success - parent modal will handle navigation
         } catch (err: any) {
             setError(
                 err.message ||
-                    "Failed to submit application. Please try again.",
+                    "Something went wrong. Please try again.",
             );
             setSubmitting(false);
         }
@@ -84,12 +81,10 @@ export default function StepReview({
     const handleSaveAsDraft = async () => {
         setSubmitting(true);
         setError(null);
-
         try {
             await onSaveAsDraft();
-            // Success - parent modal will handle navigation
         } catch (err: any) {
-            setError(err.message || "Failed to save draft. Please try again.");
+            setError(err.message || "Unable to save draft. Please try again.");
             setSubmitting(false);
         }
     };
@@ -97,191 +92,195 @@ export default function StepReview({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold mb-2">
-                    Review Your Application
-                </h2>
-                <p className="text-base-content/70">
-                    Please review your application before submitting.
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Final Step
+                </p>
+                <h3 className="text-xl font-black tracking-tight mb-2">
+                    Review and submit
+                </h3>
+                <p className="text-sm text-base-content/60 leading-relaxed">
+                    Take a moment to make sure everything looks right before
+                    sending your application.
                 </p>
             </div>
 
             {error && (
-                <div className="alert alert-error">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
+                <div className="bg-error/5 border-l-4 border-error p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                        <span className="text-sm">{error}</span>
+                    </div>
                 </div>
             )}
 
-            {/* Job Info */}
-            <div className="card bg-base-200">
-                <div className="card-body">
-                    <h3 className="card-title text-lg">Position</h3>
-                    <div>
-                        <div className="font-semibold">{job.title}</div>
-                        <div className="text-sm text-base-content/70">
-                            {job.company?.name || "Unknown Company"}
+            {/* Review Sections */}
+            <div className="bg-base-200 p-6 space-y-5">
+                {/* Position */}
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                        Position
+                    </p>
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-briefcase text-primary mt-0.5" />
+                        <div>
+                            <p className="font-bold text-sm">{job.title}</p>
+                            <p className="text-xs text-base-content/50">
+                                {job.company?.name || "Company"}
+                                {job.location && ` · ${job.location}`}
+                            </p>
                         </div>
-                        {job.location && (
-                            <div className="text-sm text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-location-dot"></i>{" "}
-                                {job.location}
-                            </div>
-                        )}
                     </div>
                 </div>
-            </div>
 
-            {/* Documents */}
-            <div className="card bg-base-200">
-                <div className="card-body">
-                    <h3 className="card-title text-lg">Documents</h3>
-                    <div className="space-y-2">
-                        {selectedDocs.map((doc) => (
-                            <div
-                                key={doc.id}
-                                className="flex items-center gap-2"
-                            >
-                                <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
-                                <span>{doc.file_name}</span>
-                                {doc.document_type === "resume" && (
-                                    <span className="badge badge-primary badge-sm">
-                                        <i className="fa-duotone fa-regular fa-file-text"></i>
-                                        Resume
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                <div className="border-t border-base-300" />
 
-            {/* Cover Letter */}
-            <div className="card bg-base-200">
-                <div className="card-body">
-                    <h3 className="card-title text-lg">Cover Letter</h3>
-
-                    {/* Show uploaded cover letter files */}
-                    {selectedDocs.filter(
-                        (doc) => doc.document_type === "cover_letter",
-                    ).length > 0 && (
-                        <div className="mb-4">
-                            <div className="text-sm font-medium mb-2">
-                                Uploaded Cover Letter Files:
-                            </div>
-                            <div className="space-y-2">
-                                {selectedDocs
-                                    .filter(
-                                        (doc) =>
-                                            doc.document_type ===
-                                            "cover_letter",
-                                    )
-                                    .map((doc) => (
-                                        <div
-                                            key={doc.id}
-                                            className="flex items-center gap-2 p-2 rounded bg-base-100"
-                                        >
-                                            <i className="fa-duotone fa-regular fa-file-lines text-primary"></i>
-                                            <span className="font-medium">
-                                                {doc.file_name}
-                                            </span>
-                                            <span className="text-sm text-base-content/60">
-                                                (
-                                                {(doc.file_size / 1024).toFixed(
-                                                    1,
-                                                )}{" "}
-                                                KB)
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Show cover letter text */}
-                    {coverLetter ? (
-                        <div className="bg-base-100 p-3 rounded-lg">
-                            <div className="text-sm font-medium mb-2">
-                                Cover Letter Text:
-                            </div>
-                            <div className="text-base-content/70 whitespace-pre-wrap">
-                                {coverLetter}
-                            </div>
+                {/* Resume */}
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                        Resume
+                    </p>
+                    {selectedResume ? (
+                        <div className="flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-file-pdf text-primary" />
+                            <span className="text-sm font-semibold">
+                                {selectedResume.file_name}
+                            </span>
                         </div>
                     ) : (
-                        <div className="text-base-content/50 p-3 rounded-lg bg-base-100 text-center italic">
-                            {selectedDocs.filter(
-                                (doc) => doc.document_type === "cover_letter",
-                            ).length > 0
-                                ? "Using uploaded cover letter file only"
-                                : "No cover letter provided"}
+                        <p className="text-sm text-base-content/40 italic">
+                            No resume selected
+                        </p>
+                    )}
+                    {selectedDocs.filter(
+                        (d) =>
+                            d.document_type !== "resume" &&
+                            d.document_type !== "cover_letter",
+                    ).length > 0 && (
+                        <div className="mt-2 space-y-1">
+                            {selectedDocs
+                                .filter(
+                                    (d) =>
+                                        d.document_type !== "resume" &&
+                                        d.document_type !== "cover_letter",
+                                )
+                                .map((doc) => (
+                                    <div
+                                        key={doc.id}
+                                        className="flex items-center gap-2 text-xs text-base-content/50"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-file" />
+                                        <span>{doc.file_name}</span>
+                                    </div>
+                                ))}
                         </div>
                     )}
                 </div>
-            </div>
 
-            {/* Pre-Screen Answers */}
-            {answers.length > 0 && (
-                <div className="card bg-base-200">
-                    <div className="card-body">
-                        <h3 className="card-title text-lg">
-                            Pre-Screening Answers
-                        </h3>
-                        <div className="space-y-3">
-                            {answers.map((answer, index) => (
-                                <div key={answer.question_id}>
-                                    <div className="font-medium text-sm mb-1">
-                                        {index + 1}.{" "}
-                                        {getQuestionText(answer.question_id)}
-                                    </div>
-                                    <div className="text-base-content/70">
-                                        {formatAnswer(answer.answer)}
-                                    </div>
+                <div className="border-t border-base-300" />
+
+                {/* Cover Letter */}
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                        Cover Letter
+                    </p>
+                    {coverLetterDocs.length > 0 && (
+                        <div className="space-y-1 mb-2">
+                            {coverLetterDocs.map((doc) => (
+                                <div
+                                    key={doc.id}
+                                    className="flex items-center gap-2 text-sm"
+                                >
+                                    <i className="fa-duotone fa-regular fa-file-lines text-info" />
+                                    <span className="font-semibold">
+                                        {doc.file_name}
+                                    </span>
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    )}
+                    {coverLetter ? (
+                        <div className="bg-base-100 p-4 text-sm text-base-content/70 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto">
+                            {coverLetter}
+                        </div>
+                    ) : coverLetterDocs.length === 0 ? (
+                        <p className="text-sm text-base-content/30 italic">
+                            None provided
+                        </p>
+                    ) : null}
                 </div>
-            )}
 
-            {/* Additional Notes */}
-            {additionalNotes && (
-                <div className="card bg-base-200">
-                    <div className="card-body">
-                        <h3 className="card-title text-lg">Additional Notes</h3>
-                        <p className="text-base-content/70 whitespace-pre-wrap">
-                            {additionalNotes}
+                {/* Pre-Screen Answers */}
+                {answers.length > 0 && (
+                    <>
+                        <div className="border-t border-base-300" />
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
+                                Screening Answers
+                            </p>
+                            <div className="space-y-3">
+                                {answers.map((answer, index) => (
+                                    <div key={answer.question_id}>
+                                        <p className="text-xs text-base-content/50 mb-0.5">
+                                            {index + 1}.{" "}
+                                            {getQuestionText(
+                                                answer.question_id,
+                                            )}
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {formatAnswer(answer.answer)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* Additional Notes */}
+                {additionalNotes && (
+                    <>
+                        <div className="border-t border-base-300" />
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                                Additional Notes
+                            </p>
+                            <p className="text-sm text-base-content/70 whitespace-pre-wrap">
+                                {additionalNotes}
+                            </p>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* What happens next */}
+            <div className="bg-primary/5 border-l-4 border-primary p-5">
+                <div className="flex items-start gap-3">
+                    <i className="fa-duotone fa-regular fa-circle-info text-primary mt-0.5" />
+                    <div className="text-sm text-base-content/60">
+                        <p className="font-bold text-base-content/80 mb-1">
+                            What happens next?
+                        </p>
+                        <p>
+                            Your application will be reviewed by our system and
+                            then forwarded to the hiring team. You can track its
+                            status anytime from your dashboard.
                         </p>
                     </div>
-                </div>
-            )}
-
-            {/* Important Notice */}
-            <div className="alert">
-                <i className="fa-duotone fa-regular fa-circle-info"></i>
-                <div>
-                    <div className="font-semibold">Before you submit:</div>
-                    <ul className="list-disc list-inside text-sm mt-1">
-                        <li>Review all information for accuracy</li>
-                        <li>Ensure you've attached the correct documents</li>
-                        <li>
-                            Double-check your answers to pre-screening questions
-                        </li>
-                    </ul>
                 </div>
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center border-t border-base-200 pt-6">
                 <button
                     type="button"
-                    className="btn"
+                    className="btn btn-ghost"
                     onClick={onBack}
                     disabled={submitting}
                 >
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
                     Back
                 </button>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button
                         type="button"
                         className="btn btn-ghost"
@@ -290,13 +289,13 @@ export default function StepReview({
                     >
                         {submitting ? (
                             <>
-                                <span className="loading loading-spinner loading-sm"></span>
+                                <span className="loading loading-spinner loading-sm" />
                                 Saving...
                             </>
                         ) : (
                             <>
-                                <i className="fa-duotone fa-regular fa-floppy-disk"></i>
-                                Save as Draft
+                                <i className="fa-duotone fa-regular fa-floppy-disk" />
+                                Save Draft
                             </>
                         )}
                     </button>
@@ -308,12 +307,12 @@ export default function StepReview({
                     >
                         {submitting ? (
                             <>
-                                <span className="loading loading-spinner loading-sm"></span>
+                                <span className="loading loading-spinner loading-sm" />
                                 Submitting...
                             </>
                         ) : (
                             <>
-                                <i className="fa-duotone fa-regular fa-paper-plane"></i>
+                                <i className="fa-duotone fa-regular fa-paper-plane" />
                                 Submit Application
                             </>
                         )}

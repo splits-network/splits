@@ -374,6 +374,34 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/chat-ui:
+    dependencies:
+      '@gsap/react':
+        specifier: ^2.1.0
+        version: 2.1.2(gsap@3.14.2)(react@19.2.1)
+      gsap:
+        specifier: ^3.12.0
+        version: 3.14.2
+      next:
+        specifier: ^16.0.0
+        version: 16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.1
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.1(react@19.2.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.1
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.2
+        version: 19.2.3(@types/react@19.2.7)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/memphis-ui:
     dependencies:
       react:

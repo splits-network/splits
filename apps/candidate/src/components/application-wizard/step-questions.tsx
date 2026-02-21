@@ -47,7 +47,6 @@ export default function StepQuestions({
     };
 
     const handleNext = () => {
-        // Validate required questions
         const missingRequired = questions
             .filter((q) => q.is_required)
             .filter((q) => {
@@ -60,7 +59,7 @@ export default function StepQuestions({
 
         if (missingRequired.length > 0) {
             setError(
-                `Please answer all required questions (${missingRequired.length} remaining)`,
+                `${missingRequired.length} required ${missingRequired.length === 1 ? "question needs" : "questions need"} an answer before you can continue.`,
             );
             return;
         }
@@ -71,14 +70,23 @@ export default function StepQuestions({
     if (questions.length === 0) {
         return (
             <div className="space-y-6">
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-circle-info"></i>
-                    <span>No pre-screening questions for this position.</span>
+                <div className="bg-info/5 border-l-4 border-info p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
+                        <p className="text-sm text-base-content/70">
+                            No screening questions for this role — you're almost
+                            done.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex justify-between">
-                    <button type="button" className="btn" onClick={onBack}>
-                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                <div className="flex justify-between border-t border-base-200 pt-6">
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={onBack}
+                    >
+                        <i className="fa-duotone fa-regular fa-arrow-left" />
                         Back
                     </button>
                     <button
@@ -86,8 +94,8 @@ export default function StepQuestions({
                         className="btn btn-primary"
                         onClick={onNext}
                     >
-                        Next: Review
-                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                        Continue to Review
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
                     </button>
                 </div>
             </div>
@@ -97,177 +105,175 @@ export default function StepQuestions({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold mb-2">
-                    Pre-Screening Questions
-                </h2>
-                <p className="text-base-content/70">
-                    Please answer the following questions about your
-                    qualifications.
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Step 3
+                </p>
+                <h3 className="text-xl font-black tracking-tight mb-2">
+                    A few questions from the team
+                </h3>
+                <p className="text-sm text-base-content/60 leading-relaxed">
+                    The hiring team would like to learn a bit more about you.
+                    {questions.filter((q) => q.is_required).length > 0 && (
+                        <span>
+                            {" "}
+                            Fields marked with{" "}
+                            <span className="text-error font-bold">*</span> are
+                            required.
+                        </span>
+                    )}
                 </p>
             </div>
 
             {error && (
-                <div className="alert alert-error">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
+                <div className="bg-error/5 border-l-4 border-error p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                        <span className="text-sm">{error}</span>
+                    </div>
                 </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {questions.map((question, index) => (
-                    <div key={question.id} className="card bg-base-200">
-                        <div className="card-body">
-                            <div>
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">
-                                        {index + 1}. {question.question_text}
-                                        {question.is_required && (
-                                            <span className="text-error ml-1">
-                                                *
-                                            </span>
-                                        )}
-                                    </legend>
+                    <div
+                        key={question.id}
+                        className="border-l-4 border-base-300 bg-base-200 p-5"
+                    >
+                        <fieldset>
+                            <legend className="text-sm font-bold mb-3">
+                                <span className="text-base-content/40 mr-2">
+                                    {index + 1}.
+                                </span>
+                                {question.question_text}
+                                {question.is_required && (
+                                    <span className="text-error ml-1">*</span>
+                                )}
+                            </legend>
 
-                                    {/* Text Input */}
-                                    {question.question_type === "text" && (
-                                        <textarea
-                                            className="textarea w-full"
-                                            value={
-                                                (getAnswer(
-                                                    question.id,
-                                                ) as string) || ""
-                                            }
-                                            onChange={(e) =>
+                            {/* Text */}
+                            {question.question_type === "text" && (
+                                <textarea
+                                    className="textarea w-full bg-base-100"
+                                    value={
+                                        (getAnswer(question.id) as string) || ""
+                                    }
+                                    onChange={(e) =>
+                                        setAnswer(question.id, e.target.value)
+                                    }
+                                    placeholder="Type your answer..."
+                                    rows={3}
+                                />
+                            )}
+
+                            {/* Yes/No */}
+                            {question.question_type === "yes_no" && (
+                                <div className="flex gap-3">
+                                    {[
+                                        { value: true, label: "Yes" },
+                                        { value: false, label: "No" },
+                                    ].map((opt) => (
+                                        <button
+                                            key={String(opt.value)}
+                                            type="button"
+                                            className={`btn btn-sm ${
+                                                getAnswer(question.id) ===
+                                                opt.value
+                                                    ? "btn-primary"
+                                                    : "btn-ghost border-base-300"
+                                            }`}
+                                            onClick={() =>
                                                 setAnswer(
                                                     question.id,
-                                                    e.target.value,
+                                                    opt.value,
                                                 )
                                             }
-                                            placeholder="Enter your answer..."
-                                            rows={4}
-                                        />
-                                    )}
-                                </fieldset>
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
 
-                                {/* Yes/No */}
-                                {question.question_type === "yes_no" && (
-                                    <div className="flex gap-4">
-                                        <label className="label cursor-pointer gap-2">
-                                            <input
-                                                type="radio"
-                                                className="radio radio-primary"
-                                                checked={
-                                                    getAnswer(question.id) ===
-                                                    true
-                                                }
-                                                onChange={() =>
-                                                    setAnswer(question.id, true)
-                                                }
-                                            />
-                                            <span>Yes</span>
-                                        </label>
-                                        <label className="label cursor-pointer gap-2">
-                                            <input
-                                                type="radio"
-                                                className="radio radio-primary"
-                                                checked={
-                                                    getAnswer(question.id) ===
-                                                    false
-                                                }
-                                                onChange={() =>
+                            {/* Select */}
+                            {question.question_type === "select" && (
+                                <select
+                                    className="select bg-base-100 w-full"
+                                    value={
+                                        (getAnswer(question.id) as string) || ""
+                                    }
+                                    onChange={(e) =>
+                                        setAnswer(question.id, e.target.value)
+                                    }
+                                >
+                                    <option value="">
+                                        Choose one...
+                                    </option>
+                                    {question.options?.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+
+                            {/* Multi-Select */}
+                            {question.question_type === "multi_select" && (
+                                <div className="flex flex-wrap gap-2">
+                                    {question.options?.map((option) => {
+                                        const currentAnswers =
+                                            (getAnswer(question.id) as
+                                                | string[]
+                                                | undefined) || [];
+                                        const isChecked =
+                                            currentAnswers.includes(option);
+
+                                        return (
+                                            <button
+                                                key={option}
+                                                type="button"
+                                                className={`btn btn-sm ${
+                                                    isChecked
+                                                        ? "btn-primary"
+                                                        : "btn-ghost border-base-300"
+                                                }`}
+                                                onClick={() => {
+                                                    const newAnswers = isChecked
+                                                        ? currentAnswers.filter(
+                                                              (a) =>
+                                                                  a !== option,
+                                                          )
+                                                        : [
+                                                              ...currentAnswers,
+                                                              option,
+                                                          ];
                                                     setAnswer(
                                                         question.id,
-                                                        false,
-                                                    )
-                                                }
-                                            />
-                                            <span>No</span>
-                                        </label>
-                                    </div>
-                                )}
-
-                                {/* Select (Single) */}
-                                {question.question_type === "select" && (
-                                    <select
-                                        className="select"
-                                        value={
-                                            (getAnswer(
-                                                question.id,
-                                            ) as string) || ""
-                                        }
-                                        onChange={(e) =>
-                                            setAnswer(
-                                                question.id,
-                                                e.target.value,
-                                            )
-                                        }
-                                        required={question.is_required}
-                                    >
-                                        <option value="">
-                                            Select an option...
-                                        </option>
-                                        {question.options?.map((option) => (
-                                            <option key={option} value={option}>
+                                                        newAnswers,
+                                                    );
+                                                }}
+                                            >
+                                                {isChecked && (
+                                                    <i className="fa-duotone fa-regular fa-check text-xs" />
+                                                )}
                                                 {option}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-
-                                {/* Multi-Select */}
-                                {question.question_type === "multi_select" && (
-                                    <div className="space-y-2">
-                                        {question.options?.map((option) => {
-                                            const currentAnswers =
-                                                (getAnswer(
-                                                    question.id,
-                                                ) as string[]) || [];
-                                            const isChecked =
-                                                currentAnswers.includes(option);
-
-                                            return (
-                                                <label
-                                                    key={option}
-                                                    className="label cursor-pointer justify-start gap-3"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="checkbox checkbox-primary"
-                                                        checked={isChecked}
-                                                        onChange={(e) => {
-                                                            const newAnswers = e
-                                                                .target.checked
-                                                                ? [
-                                                                      ...currentAnswers,
-                                                                      option,
-                                                                  ]
-                                                                : currentAnswers.filter(
-                                                                      (a) =>
-                                                                          a !==
-                                                                          option,
-                                                                  );
-                                                            setAnswer(
-                                                                question.id,
-                                                                newAnswers,
-                                                            );
-                                                        }}
-                                                    />
-                                                    <span>{option}</span>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </fieldset>
                     </div>
                 ))}
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between">
-                <button type="button" className="btn" onClick={onBack}>
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
+            <div className="flex justify-between border-t border-base-200 pt-6">
+                <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={onBack}
+                >
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
                     Back
                 </button>
                 <button
@@ -275,8 +281,8 @@ export default function StepQuestions({
                     className="btn btn-primary"
                     onClick={handleNext}
                 >
-                    Next: Review
-                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                    Continue to Review
+                    <i className="fa-duotone fa-regular fa-arrow-right" />
                 </button>
             </div>
         </div>

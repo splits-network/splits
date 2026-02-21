@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
+import { useChatSidebarOptional } from "@splits-network/chat-ui";
 import type { NavItem } from "@splits-network/shared-types";
 import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
@@ -440,6 +441,34 @@ function MobileMenuContent({
     );
 }
 
+/* ─── Chat Trigger ──────────────────────────────────────────────────────── */
+
+function ChatTrigger() {
+    const sidebar = useChatSidebarOptional();
+    if (!sidebar) return null;
+
+    return (
+        <button
+            type="button"
+            onClick={sidebar.openToList}
+            className="btn btn-ghost btn-md btn-square"
+            aria-label="Open messages"
+            title="Messages"
+        >
+            <span className="relative">
+                <i className="fa-duotone fa-regular fa-messages text-base-content/60" />
+                {sidebar.unreadTotalCount > 0 && (
+                    <span className="badge badge-primary badge-xs absolute -top-2 -right-2.5 rounded-full">
+                        {sidebar.unreadTotalCount > 99
+                            ? "99+"
+                            : sidebar.unreadTotalCount}
+                    </span>
+                )}
+            </span>
+        </button>
+    );
+}
+
 /* ─── Main Header Component ──────────────────────────────────────────────── */
 
 export function Header({ navItems }: { navItems?: NavItem[] }) {
@@ -599,6 +628,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                                 >
                                     <i className="fa-duotone fa-regular fa-gauge text-base-content/60" />
                                 </Link>
+                                <ChatTrigger />
                                 <div>
                                     <NotificationBell />
                                 </div>

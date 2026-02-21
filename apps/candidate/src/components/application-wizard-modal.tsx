@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import StepIndicator from "@/components/application-wizard/step-indicator";
 import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
@@ -16,8 +16,11 @@ interface ApplicationWizardModalProps {
     companyName: string;
     onClose: () => void;
     onSuccess?: (applicationId: string) => void;
-    existingApplication?: any; // Pre-populate wizard with existing draft application
+    existingApplication?: any;
 }
+
+const STEP_LABELS = ["Documents", "Cover Letter", "Questions", "Review"];
+const STEP_LABELS_NO_QUESTIONS = ["Documents", "Cover Letter", "Review"];
 
 export default function ApplicationWizardModal({
     jobId,
@@ -29,6 +32,10 @@ export default function ApplicationWizardModal({
 }: ApplicationWizardModalProps) {
     const router = useRouter();
     const { getToken } = useAuth();
+    const backdropRef = useRef<HTMLDivElement>(null);
+    const boxRef = useRef<HTMLDivElement>(null);
+    const stepContentRef = useRef<HTMLDivElement>(null);
+
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(true);
     const [job, setJob] = useState<any>(null);
@@ -58,31 +65,78 @@ export default function ApplicationWizardModal({
 
     const hasQuestions = questions.length > 0;
     const totalSteps = hasQuestions ? 4 : 3;
+    const stepLabels = hasQuestions ? STEP_LABELS : STEP_LABELS_NO_QUESTIONS;
 
-    const steps = [
-        { number: 1, title: "Documents", description: "Select your resume" },
-        {
-            number: 2,
-            title: "Cover Letter",
-            description: "Add cover letter (optional)",
-        },
-        ...(hasQuestions
-            ? [
-                  {
-                      number: 3,
-                      title: "Questions",
-                      description: "Answer pre-screening questions",
-                  },
-              ]
-            : []),
-        {
-            number: totalSteps,
-            title: "Review",
-            description: "Review and submit",
-        },
-    ];
+    const currentStepLabel = stepLabels[currentStep - 1] || "";
 
-    // Load initial data
+    /* ─── GSAP Animations ─────────────────────────────────────────────── */
+
+    useEffect(() => {
+        if (!backdropRef.current || !boxRef.current) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+            return;
+
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        tl.fromTo(
+            backdropRef.current,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.3 },
+        );
+        tl.fromTo(
+            boxRef.current,
+            { opacity: 0, y: 40, scale: 0.96 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.4 },
+            "-=0.15",
+        );
+    }, []);
+
+    useEffect(() => {
+        if (!stepContentRef.current) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+            return;
+
+        gsap.fromTo(
+            stepContentRef.current,
+            { opacity: 0, x: 20 },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+        );
+    }, [currentStep, loading]);
+
+    const animateClose = useCallback(
+        (onComplete: () => void) => {
+            if (
+                !backdropRef.current ||
+                !boxRef.current ||
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ) {
+                onComplete();
+                return;
+            }
+            const tl = gsap.timeline({
+                defaults: { ease: "power2.in" },
+                onComplete,
+            });
+            tl.to(boxRef.current, {
+                opacity: 0,
+                y: 30,
+                scale: 0.97,
+                duration: 0.25,
+            });
+            tl.to(
+                backdropRef.current,
+                { opacity: 0, duration: 0.2 },
+                "-=0.1",
+            );
+        },
+        [],
+    );
+
+    const handleClose = useCallback(() => {
+        animateClose(onClose);
+    }, [animateClose, onClose]);
+
+    /* ─── Data Loading ────────────────────────────────────────────────── */
+
     useEffect(() => {
         async function loadData() {
             setLoading(true);
@@ -108,14 +162,12 @@ export default function ApplicationWizardModal({
                 const questionsData = questionsResponse.data || [];
                 let documentsData = documentsResponse.data || [];
 
-                // If editing an existing application, merge its documents and remove duplicates by original_document_id
                 if (existingApplication?.documents?.length > 0) {
-                    // Create a set of document IDs that are already attached to the application
                     const appDocIds = new Set(
-                        existingApplication.documents.map((doc: any) => doc.id),
+                        existingApplication.documents.map(
+                            (doc: any) => doc.id,
+                        ),
                     );
-
-                    // Create a set of original_document_id values from application documents
                     const appOriginalDocIds = new Set(
                         existingApplication.documents
                             .map(
@@ -125,16 +177,12 @@ export default function ApplicationWizardModal({
                             .filter(Boolean),
                     );
 
-                    // Filter out library documents that are already attached (by ID or original_document_id match)
                     documentsData = documentsData.filter(
                         (doc: any) =>
-                            // Keep if not already attached by direct ID match
                             !appDocIds.has(doc.id) &&
-                            // Keep if this library doc isn't referenced by an app doc's original_document_id
                             !appOriginalDocIds.has(doc.id),
                     );
 
-                    // Add all application documents to the list
                     documentsData = [
                         ...documentsData,
                         ...existingApplication.documents,
@@ -154,7 +202,10 @@ export default function ApplicationWizardModal({
         }
 
         loadData();
-    }, [jobId, getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [jobId]);
+
+    /* ─── Step Navigation ─────────────────────────────────────────────── */
 
     const handleNext = () => {
         setError(null);
@@ -166,22 +217,21 @@ export default function ApplicationWizardModal({
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
+    /* ─── Submission ──────────────────────────────────────────────────── */
+
     const handleSubmit = async () => {
         setSubmitting(true);
         setError(null);
 
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error("Authentication required");
-            }
+            if (!token) throw new Error("Authentication required");
 
             let applicationId;
             const authClient = createAuthenticatedClient(token);
 
             if (existingApplication) {
-                // Update existing draft application and move to ai_review
-                const result = await authClient.patch<{ data: any }>(
+                await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
@@ -191,7 +241,6 @@ export default function ApplicationWizardModal({
                 );
                 applicationId = existingApplication.id;
             } else {
-                // Create new application
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
                     {
@@ -202,11 +251,9 @@ export default function ApplicationWizardModal({
                         stage: "ai_review",
                     },
                 );
-                // V2 API returns { data: <application> } directly
                 applicationId = result.data.id;
             }
 
-            // Create application note if candidate added notes
             if (formData.notes && formData.notes.trim()) {
                 try {
                     await authClient.post(
@@ -219,15 +266,17 @@ export default function ApplicationWizardModal({
                         },
                     );
                 } catch (noteError) {
-                    console.warn("Failed to create candidate note:", noteError);
+                    console.warn(
+                        "Failed to create candidate note:",
+                        noteError,
+                    );
                 }
             }
 
-            // Close modal and navigate
-            // Note: onSuccess callback is NOT called here to avoid double toasts
-            // The applications page will show a success toast based on URL param
             onClose();
-            router.push(`/portal/applications?applicationId=${applicationId}`);
+            router.push(
+                `/portal/applications?applicationId=${applicationId}`,
+            );
         } catch (err: any) {
             console.error("Failed to submit application:", err);
             setError(err.message || "Failed to submit application");
@@ -241,16 +290,13 @@ export default function ApplicationWizardModal({
 
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error("Authentication required");
-            }
+            if (!token) throw new Error("Authentication required");
 
             let applicationId;
             const authClient = createAuthenticatedClient(token);
 
             if (existingApplication) {
-                // Update existing draft application (keep as draft)
-                const result = await authClient.patch<{ data: any }>(
+                await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
@@ -260,7 +306,6 @@ export default function ApplicationWizardModal({
                 );
                 applicationId = existingApplication.id;
             } else {
-                // Create new application as draft
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
                     {
@@ -271,11 +316,9 @@ export default function ApplicationWizardModal({
                         stage: "draft",
                     },
                 );
-                // V2 API returns { data: <application> } directly
                 applicationId = result.data.id;
             }
 
-            // Create application note if candidate added notes
             if (formData.notes && formData.notes.trim()) {
                 try {
                     await authClient.post(
@@ -288,13 +331,13 @@ export default function ApplicationWizardModal({
                         },
                     );
                 } catch (noteError) {
-                    console.warn("Failed to create candidate note:", noteError);
+                    console.warn(
+                        "Failed to create candidate note:",
+                        noteError,
+                    );
                 }
             }
 
-            // Close modal and navigate
-            // Note: onSuccess callback is NOT called here to avoid double toasts
-            // The applications page will show an info toast based on URL param
             onClose();
             router.push(
                 `/portal/applications?draft=true&application=${applicationId}`,
@@ -305,6 +348,8 @@ export default function ApplicationWizardModal({
             setSubmitting(false);
         }
     };
+
+    /* ─── Step Rendering ──────────────────────────────────────────────── */
 
     const renderStep = () => {
         if (!job) return null;
@@ -322,8 +367,7 @@ export default function ApplicationWizardModal({
                         onDocumentsUpdated={setLocalDocuments}
                     />
                 );
-            case 2:
-                // Cover Letter step
+            case 2: {
                 const uploadedCoverLetterDocs = localDocuments.filter(
                     (doc: any) =>
                         doc.document_type === "cover_letter" &&
@@ -344,6 +388,7 @@ export default function ApplicationWizardModal({
                         uploadedCoverLetterDocs={uploadedCoverLetterDocs}
                     />
                 );
+            }
             case 3:
                 if (hasQuestions) {
                     return (
@@ -397,75 +442,119 @@ export default function ApplicationWizardModal({
     };
 
     return (
-        <dialog className="modal modal-open" open>
-            <div className="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-                {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-base-300">
-                    <div>
-                        <h2 className="text-2xl font-bold">
-                            {existingApplication
-                                ? "Edit Application"
-                                : "Apply to"}{" "}
-                            {existingApplication ? "for" : ""} {jobTitle}
-                        </h2>
-                        <p className="text-base-content/70 mt-1">
-                            at {companyName}
-                        </p>
+        <div className="modal modal-open" role="dialog">
+            {/* Backdrop */}
+            <div
+                ref={backdropRef}
+                className="modal-backdrop bg-neutral/60"
+                onClick={handleClose}
+            />
+
+            {/* Modal Box */}
+            <div
+                ref={boxRef}
+                className="modal-box max-w-3xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col"
+            >
+                {/* ── Header ──────────────────────────────────── */}
+                <div className="bg-neutral text-neutral-content px-8 py-6 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center flex-shrink-0">
+                                <i className="fa-duotone fa-regular fa-paper-plane text-primary-content" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-black">
+                                    {existingApplication
+                                        ? "Edit Your Application"
+                                        : "Apply to This Role"}
+                                </h3>
+                                <p className="text-xs text-neutral-content/60 uppercase tracking-wider">
+                                    {loading
+                                        ? "Loading..."
+                                        : `Step ${currentStep} of ${totalSteps} — ${currentStepLabel}`}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={handleClose}
+                            className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                            disabled={submitting}
+                        >
+                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
+                        </button>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="btn btn-sm btn-square btn-ghost"
-                        disabled={submitting}
-                    >
-                        <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
-                    </button>
+
+                    {/* Progress bar */}
+                    {!loading && (
+                        <div className="flex gap-2 mt-5">
+                            {Array.from({ length: totalSteps }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`h-1 flex-1 transition-colors duration-300 ${
+                                        i < currentStep
+                                            ? "bg-primary"
+                                            : "bg-neutral-content/20"
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                {/* ── Subheader Context ────────────────────────── */}
+                <div className="bg-base-200 border-b border-base-300 px-8 py-3 flex-shrink-0">
+                    <div className="flex items-center gap-3 text-sm">
+                        <i className="fa-duotone fa-regular fa-briefcase text-primary" />
+                        <span className="font-bold">{jobTitle}</span>
+                        <span className="text-base-content/40">at</span>
+                        <span className="text-base-content/60">
+                            {companyName}
+                        </span>
+                    </div>
+                </div>
+
+                {/* ── Content ─────────────────────────────────── */}
+                <div className="flex-1 overflow-y-auto p-8">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <span className="loading loading-spinner loading-lg"></span>
-                            <p className="mt-4 text-base-content/70">
-                                Loading application form...
+                        <div className="flex flex-col items-center justify-center py-16">
+                            <span className="loading loading-spinner loading-lg text-primary mb-4" />
+                            <p className="text-sm font-semibold text-base-content/40 uppercase tracking-wider">
+                                Preparing your application...
                             </p>
                         </div>
                     ) : error && !job ? (
-                        <div className="alert alert-error">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <div>
-                                <p className="font-bold">
-                                    Failed to load application
-                                </p>
-                                <p>{error}</p>
+                        <div className="py-12">
+                            <div className="bg-error/5 border-l-4 border-error p-6">
+                                <div className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                                    <div>
+                                        <p className="font-bold text-sm mb-1">
+                                            Something went wrong
+                                        </p>
+                                        <p className="text-sm text-base-content/60">
+                                            {error}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            {/* Error Alert */}
+                        <div ref={stepContentRef}>
                             {error && (
-                                <div className="alert alert-error">
-                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                                    <span>{error}</span>
+                                <div className="bg-error/5 border-l-4 border-error p-4 mb-6">
+                                    <div className="flex items-start gap-3">
+                                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                                        <span className="text-sm">
+                                            {error}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
-
-                            {/* Step Indicator */}
-                            <StepIndicator
-                                steps={steps}
-                                currentStep={currentStep}
-                            />
-
-                            {/* Step Content */}
-                            <div className="bg-base-100">{renderStep()}</div>
+                            {renderStep()}
                         </div>
                     )}
                 </div>
             </div>
-            {/* Backdrop */}
-            <form method="dialog" className="modal-backdrop" onClick={onClose}>
-                <button type="button">close</button>
-            </form>
-        </dialog>
+        </div>
     );
 }

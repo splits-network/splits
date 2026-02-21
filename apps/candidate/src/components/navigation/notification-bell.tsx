@@ -152,9 +152,9 @@ export default function NotificationBell() {
                 aria-label="Notifications"
                 title="Notifications"
             >
-                <i className="fa-duotone fa-regular fa-bell text-xl"></i>
+                <i className="fa-duotone fa-regular fa-bell text-lg"></i>
                 {unreadCount > 0 && (
-                    <span className="badge badge-error badge-sm absolute top-1 right-1">
+                    <span className="badge badge-accent badge-sm absolute -top-1 -right-1 rounded-full">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}

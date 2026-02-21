@@ -23,162 +23,149 @@ export default function StepCoverLetter({
     onBack,
     uploadedCoverLetterDocs = [],
 }: StepCoverLetterProps) {
-    const [error, setError] = useState<string | null>(null);
+    const [showSkipWarning, setShowSkipWarning] = useState(false);
 
     const handleNext = () => {
-        // Cover letter is optional but provide guidance
         if (!coverLetter?.trim() && uploadedCoverLetterDocs.length === 0) {
-            setError(
-                "Consider adding a cover letter to make your application more compelling, either as text below or by uploading a file in the Documents step.",
-            );
+            setShowSkipWarning(true);
             return;
         }
-
-        setError(null);
+        setShowSkipWarning(false);
         onNext();
     };
 
     const handleTextChange = (value: string) => {
         onChange(value);
-        setError(null);
+        setShowSkipWarning(false);
     };
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h3 className="text-xl font-semibold mb-2">Cover Letter</h3>
-                <p className="text-base-content/70">
-                    Add a personal message to accompany your application. This
-                    is optional but highly recommended.
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                    Step 2 · Optional
+                </p>
+                <h3 className="text-xl font-black tracking-tight mb-2">
+                    Add a cover letter
+                </h3>
+                <p className="text-sm text-base-content/60 leading-relaxed">
+                    A short note about why you're interested goes a long way.
+                    Keep it personal and specific to this role.
                 </p>
             </div>
 
-            {/* Show uploaded cover letter files if any */}
+            {/* Uploaded cover letter files */}
             {uploadedCoverLetterDocs.length > 0 && (
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-circle-info"></i>
-                    <div className="flex flex-col gap-2">
-                        <span className="font-medium">
-                            Cover letter files uploaded:
-                        </span>
-                        <div className="space-y-1">
+                <div className="bg-info/5 border-l-4 border-info p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-file-lines text-info mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold mb-1">
+                                Cover letter file attached
+                            </p>
                             {uploadedCoverLetterDocs.map((doc) => (
-                                <div
+                                <p
                                     key={doc.id}
-                                    className="flex items-center gap-2 text-sm"
+                                    className="text-xs text-base-content/50"
                                 >
-                                    <i className="fa-duotone fa-regular fa-file-lines"></i>
-                                    <span>{doc.file_name}</span>
-                                    <span className="text-base-content/60">
-                                        ({(doc.file_size / 1024).toFixed(1)} KB)
-                                    </span>
-                                </div>
+                                    {doc.file_name} (
+                                    {(doc.file_size / 1024).toFixed(0)} KB)
+                                </p>
                             ))}
+                            <p className="text-xs text-base-content/40 mt-1">
+                                You can add extra context below if you'd like.
+                            </p>
                         </div>
-                        <span className="text-sm">
-                            You can add additional text below to supplement your
-                            uploaded cover letter.
-                        </span>
                     </div>
                 </div>
             )}
 
-            {/* Cover Letter Text Editor */}
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <label className="label">
-                        <span className="label-text font-medium">
-                            {uploadedCoverLetterDocs.length > 0
-                                ? "Additional Cover Letter Text (Optional)"
-                                : "Cover Letter Text"}
-                        </span>
-                    </label>
-
-                    <div className="min-h-[240px] border border-base-300 rounded-lg overflow-hidden">
-                        <MarkdownEditor
-                            value={coverLetter}
-                            onChange={handleTextChange}
-                            placeholder={
-                                uploadedCoverLetterDocs.length > 0
-                                    ? "Add any additional thoughts or context to your uploaded cover letter..."
-                                    : "Dear Hiring Manager,\n\nI am writing to express my interest in this position...\n\nThank you for your consideration.\n\nBest regards,\n[Your Name]"
-                            }
-                            className="min-h-[240px]"
-                        />
-                    </div>
+            {/* Editor */}
+            <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2 block">
+                    {uploadedCoverLetterDocs.length > 0
+                        ? "Additional Notes"
+                        : "Your Message"}
+                </label>
+                <div className="min-h-[240px] border border-base-300 overflow-hidden">
+                    <MarkdownEditor
+                        value={coverLetter}
+                        onChange={handleTextChange}
+                        placeholder={
+                            uploadedCoverLetterDocs.length > 0
+                                ? "Anything else you'd like the hiring team to know..."
+                                : "What excites you about this role? What relevant experience do you bring?"
+                        }
+                        className="min-h-[240px]"
+                    />
                 </div>
+            </div>
 
-                {/* Tips */}
-                <div className="bg-base-200 p-4 rounded-lg">
-                    <div className="flex items-start gap-3">
-                        <i className="fa-duotone fa-regular fa-lightbulb text-primary mt-1"></i>
-                        <div className="text-sm text-base-content/80">
-                            <p className="font-medium mb-1">
-                                Cover Letter Tips:
-                            </p>
-                            <ul className="space-y-1 ml-4">
-                                <li>
-                                    • Research the company and mention specific
-                                    reasons for your interest
-                                </li>
-                                <li>
-                                    • Highlight relevant experience that matches
-                                    the job requirements
-                                </li>
-                                <li>
-                                    • Keep it concise (2-3 paragraphs maximum)
-                                </li>
-                                <li>
-                                    • Show enthusiasm and personality while
-                                    remaining professional
-                                </li>
-                                {uploadedCoverLetterDocs.length === 0 && (
-                                    <li>
-                                        • Alternatively, you can upload a cover
-                                        letter file in the Documents step
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
+            {/* Writing tips */}
+            <div className="bg-base-200 p-5">
+                <div className="flex items-start gap-3">
+                    <i className="fa-duotone fa-regular fa-lightbulb text-primary mt-0.5" />
+                    <div className="text-sm text-base-content/60">
+                        <p className="font-bold text-base-content/80 mb-1">
+                            Quick tips
+                        </p>
+                        <ul className="space-y-1">
+                            <li>
+                                Mention something specific about the company or
+                                role
+                            </li>
+                            <li>
+                                Connect your experience directly to what they
+                                need
+                            </li>
+                            <li>
+                                Keep it to 2-3 short paragraphs — brevity shows
+                                respect for their time
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            {/* Error Display */}
-            {error && (
-                <div className="alert alert-warning">
-                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                    <span>{error}</span>
-                    <div className="flex gap-2">
+            {/* Skip warning */}
+            {showSkipWarning && (
+                <div className="bg-warning/5 border-l-4 border-warning p-4">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                            <i className="fa-duotone fa-regular fa-lightbulb text-warning mt-0.5" />
+                            <p className="text-sm text-base-content/70">
+                                Applications with a cover letter tend to get
+                                more attention. Sure you want to skip?
+                            </p>
+                        </div>
                         <button
                             type="button"
-                            className="btn btn-warning btn-sm"
+                            className="btn btn-warning btn-sm flex-shrink-0"
                             onClick={() => {
-                                setError(null);
+                                setShowSkipWarning(false);
                                 onNext();
                             }}
                         >
-                            Continue Anyway
+                            Skip
                         </button>
                     </div>
                 </div>
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between">
-                <button type="button" className="btn" onClick={onBack}>
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
+            <div className="flex justify-between border-t border-base-200 pt-6">
+                <button type="button" className="btn btn-ghost" onClick={onBack}>
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
                     Back
                 </button>
-
                 <button
                     type="button"
                     className="btn btn-primary"
                     onClick={handleNext}
                 >
-                    Next
-                    <i className="fa-duotone fa-regular fa-arrow-right ml-2"></i>
+                    Continue
+                    <i className="fa-duotone fa-regular fa-arrow-right" />
                 </button>
             </div>
         </div>

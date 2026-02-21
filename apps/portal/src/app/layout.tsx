@@ -20,6 +20,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import { QueryProvider } from "@/providers/query-provider";
+import { PortalChatSidebar } from "@/components/portal-chat-sidebar";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -173,9 +174,11 @@ export default async function RootLayout({
                                 initialProfile={initialProfile}
                             >
                                 <ToastProvider>
-                                    <Header navItems={headerNav?.items} />
-                                    <main className="grow">{children}</main>
-                                    <Footer footerNav={footerNav} />
+                                    <PortalChatSidebar>
+                                        <Header navItems={headerNav?.items} />
+                                        <main className="grow">{children}</main>
+                                        <Footer footerNav={footerNav} />
+                                    </PortalChatSidebar>
                                     <CookieConsent />
                                 </ToastProvider>
                                 <DevDebugPanel />

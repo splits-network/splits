@@ -5,13 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUserProfile } from "@/contexts";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { useChatGateway } from "@/hooks/use-chat-gateway";
-import { useActivityStatus } from "@/hooks/use-activity-status";
-import {
-    registerChatRefresh,
-    requestChatRefresh,
-} from "@/lib/chat-refresh-queue";
-import { getCachedCurrentUserId } from "@/lib/current-user-profile";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
@@ -203,63 +197,10 @@ export function Sidebar() {
     const router = useRouter();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
     const { getToken } = useAuth();
+    const { unreadTotalCount } = useChatSidebar();
 
     const [badges, setBadges] = useState<Record<string, number>>({});
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-    const activityStatus = useActivityStatus({
-        enabled: Boolean(currentUserId),
-    });
-
-    // ── Fetch unread message count ──────────────────────────────────────
-
-    const fetchUnreadCount = useCallback(async () => {
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-
-        try {
-            const inboxResponse: any = await client.get("/chat/conversations", {
-                params: { filter: "inbox", limit: 100 },
-            });
-            const inboxRows = (inboxResponse?.data || []) as Array<{
-                unread_count?: number;
-                participant?: { unread_count?: number };
-            }>;
-            const unreadCount = inboxRows.reduce((sum, row) => {
-                const count =
-                    row.participant?.unread_count || row.unread_count || 0;
-                return sum + count;
-            }, 0);
-
-            let requestCount = 0;
-            try {
-                const requestsResponse: any = await client.get(
-                    "/chat/conversations",
-                    { params: { filter: "requests", limit: 100 } },
-                );
-                const requestRows = (requestsResponse?.data || []) as Array<{
-                    participant?: { request_state?: string };
-                    request_state?: string;
-                }>;
-                requestCount = requestRows.filter((row) => {
-                    const state =
-                        row.participant?.request_state || row.request_state;
-                    return state === "pending";
-                }).length;
-            } catch {
-                // Silently fall back
-            }
-
-            setBadges((prev) => ({
-                ...prev,
-                "/portal/messages": unreadCount + requestCount,
-            }));
-        } catch {
-            setBadges((prev) => ({ ...prev, "/portal/messages": 0 }));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     // ── Fetch notification counts ───────────────────────────────────────
 
@@ -291,55 +232,18 @@ export function Sidebar() {
     // ── Initialize data + polling ───────────────────────────────────────
 
     useEffect(() => {
-        let mounted = true;
-        const load = async () => {
-            const userId = await getCachedCurrentUserId(getToken);
-            if (!mounted) return;
-            setCurrentUserId(userId);
-            await fetchUnreadCount();
-            await fetchNotificationCounts();
-        };
-        load();
+        fetchNotificationCounts();
         const interval = setInterval(fetchNotificationCounts, 30000);
-        return () => {
-            mounted = false;
-            clearInterval(interval);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchUnreadCount, fetchNotificationCounts]);
+        return () => clearInterval(interval);
+    }, [fetchNotificationCounts]);
 
+    // Messages badge is now driven by ChatSidebarProvider's unreadTotalCount
     useEffect(() => {
-        const unregister = registerChatRefresh(() => fetchUnreadCount());
-        return () => {
-            unregister();
-        };
-    }, [fetchUnreadCount]);
-
-    // ── Chat gateway for real-time badge updates ────────────────────────
-
-    useChatGateway({
-        enabled: Boolean(currentUserId),
-        channels: currentUserId ? [`user:${currentUserId}`] : [],
-        getToken,
-        presenceStatus: activityStatus,
-        onReconnect: () => {
-            requestChatRefresh();
-        },
-        onEvent: (event) => {
-            if (
-                [
-                    "message.created",
-                    "message.updated",
-                    "conversation.updated",
-                    "conversation.requested",
-                    "conversation.accepted",
-                    "conversation.declined",
-                ].includes(event.type)
-            ) {
-                requestChatRefresh();
-            }
-        },
-    });
+        setBadges((prev) => ({
+            ...prev,
+            "/portal/messages": unreadTotalCount,
+        }));
+    }, [unreadTotalCount]);
 
     // ── Role-based filtering ────────────────────────────────────────────
 
