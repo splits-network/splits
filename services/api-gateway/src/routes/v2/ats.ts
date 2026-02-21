@@ -356,7 +356,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
         }
     );
 
-    // CREATE candidate (with orchestration)
+    // CREATE candidate (with orchestration: create → link recruiter → send invitation)
     app.post(
         serviceBase,
         { preHandler: requireAuth() },
@@ -369,20 +369,49 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
             }
 
             const clerkUserId = request.auth.clerkUserId;
+            const body = request.body as { email?: string; full_name?: string };
 
             try {
-                // Step 1: Create candidate in ATS service
-                const candidateResponse = await atsService().post(
-                    serviceBase,
-                    request.body,
-                    correlationId,
-                    authHeaders
-                ) as { data?: any };
+                // Step 1: Create candidate in ATS service.
+                // On 409 (duplicate email), fall back to fetching the existing candidate
+                // so we can still link them to the recruiter below.
+                let candidate: any;
+                let existingCandidate = false;
 
-                const candidate = candidateResponse.data || candidateResponse;
+                try {
+                    const candidateResponse = await atsService().post(
+                        serviceBase,
+                        body,
+                        correlationId,
+                        authHeaders
+                    ) as { data?: any };
+                    candidate = candidateResponse.data || candidateResponse;
+                } catch (createError: any) {
+                    const status = createError.statusCode ?? createError.status;
+                    if (status === 409 && body.email) {
+                        // Candidate already exists — look them up by email
+                        request.log.info({ email: body.email, clerkUserId }, 'Candidate already exists, fetching by email');
+                        const existingResponse = await atsService().get(
+                            serviceBase,
+                            { email: body.email, limit: 1 },
+                            correlationId,
+                            authHeaders
+                        ) as { data?: any[] };
+                        const existing = existingResponse.data?.[0] ?? (existingResponse as any)[0];
+                        if (!existing) {
+                            throw createError; // Cannot recover — re-throw original error
+                        }
+                        candidate = existing;
+                        existingCandidate = true;
+                    } else {
+                        throw createError;
+                    }
+                }
 
-                // Step 2: Get the recruiter's internal ID from network service
-                let recruiterId = null;
+                // Step 2: Get the recruiter's internal ID from network service.
+                // Only suppress 404 (user is not a recruiter). Any other error means
+                // something went wrong — log a warning so we know the invite was skipped.
+                let recruiterId: string | null = null;
                 try {
                     const recruiterResponse = await networkService().get(
                         `/api/v2/recruiters/me`,
@@ -390,41 +419,66 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                         correlationId,
                         authHeaders
                     ) as { data?: any };
-                    recruiterId = recruiterResponse.data.id;
-                } catch (recruiterError) {
-                    // User might not be a recruiter, that's okay
-                    request.log.info({ clerkUserId }, 'User is not a recruiter, skipping recruiter-candidate relationship');
+                    recruiterId = recruiterResponse.data?.id ?? null;
+                } catch (recruiterError: any) {
+                    const status = recruiterError.statusCode ?? recruiterError.status;
+                    if (status === 404) {
+                        request.log.info({ clerkUserId }, 'User is not a recruiter — skipping invitation');
+                    } else {
+                        request.log.warn({
+                            error: recruiterError,
+                            clerkUserId,
+                            status,
+                        }, 'Recruiter lookup failed — invitation will not be sent');
+                    }
                 }
 
-                // Step 3: Create recruiter-candidate relationship if user is a recruiter
+                // Step 3: Create recruiter-candidate relationship (triggers invitation email via event).
+                // Track whether the invitation was actually sent so the response is honest.
+                let invitationSent = false;
                 if (recruiterId && candidate.id) {
                     try {
                         await networkService().post(
                             `/api/v2/recruiter-candidates`,
-                            {
-                                recruiter_id: recruiterId,
-                                candidate_id: candidate.id
-                            },
+                            { recruiter_id: recruiterId, candidate_id: candidate.id },
                             correlationId,
                             authHeaders
                         );
+                        invitationSent = true;
                         request.log.info({
                             candidateId: candidate.id,
                             recruiterId,
-                            clerkUserId
-                        }, 'Created recruiter-candidate relationship');
+                            clerkUserId,
+                        }, 'Created recruiter-candidate relationship — invitation queued');
                     } catch (relationshipError: any) {
-                        // Log but don't fail the candidate creation
-                        request.log.error({
-                            error: relationshipError,
-                            candidateId: candidate.id,
-                            recruiterId,
-                            clerkUserId
-                        }, 'Failed to create recruiter-candidate relationship');
+                        // A 409 here means the relationship already exists — that is fine,
+                        // the invitation was already sent previously.
+                        const status = relationshipError.statusCode ?? relationshipError.status;
+                        if (status === 409) {
+                            invitationSent = true; // already linked
+                            request.log.info({
+                                candidateId: candidate.id,
+                                recruiterId,
+                            }, 'Recruiter-candidate relationship already exists');
+                        } else {
+                            request.log.error({
+                                error: relationshipError,
+                                candidateId: candidate.id,
+                                recruiterId,
+                                clerkUserId,
+                            }, 'Failed to create recruiter-candidate relationship — invitation not sent');
+                        }
                     }
                 }
 
-                return reply.code(201).send(candidateResponse);
+                const statusCode = existingCandidate ? 200 : 201;
+                return reply.code(statusCode).send({
+                    data: candidate,
+                    meta: {
+                        existing: existingCandidate,
+                        invitation_sent: invitationSent,
+                    },
+                });
             } catch (error: any) {
                 request.log.error({ error, correlationId }, 'Failed to create candidate');
                 return reply
