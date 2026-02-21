@@ -9,7 +9,11 @@ import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
-import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import {
+    Button,
+    SpeedDial,
+    type SpeedDialAction,
+} from "@splits-network/basel-ui";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import AddNoteModal from "../modals/add-note-modal";
@@ -564,7 +568,10 @@ export default function ActionsToolbar({
                 loading: startingChat,
                 title: chatDisabledReason || undefined,
                 renderButton: (
-                    <span title={chatDisabledReason || undefined} className="relative inline-block">
+                    <span
+                        title={chatDisabledReason || undefined}
+                        className="relative inline-block"
+                    >
                         <Presence
                             status={presenceStatus}
                             className="absolute -top-0.5 -right-0.5 z-10"
@@ -726,7 +733,7 @@ export default function ActionsToolbar({
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn ${sizeClass} btn-ghost gap-2`}
+                            className={`btn ${sizeClass} btn-ghost rounded-full gap-2`}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
@@ -735,7 +742,6 @@ export default function ActionsToolbar({
                             ) : (
                                 <i className="fa-duotone fa-regular fa-messages" />
                             )}
-                            Message
                         </button>
                     </span>
                 )}

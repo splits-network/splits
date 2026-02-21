@@ -219,6 +219,7 @@ export class CandidatesEventConsumer {
                 candidate_name: candidateContact.name,
                 candidate_email: candidateContact.email,
                 consent_given_at: consent_given_at,
+                candidateId: candidate_id,
                 userId: recruiterContact.user_id || undefined,
             });
 

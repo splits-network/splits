@@ -56,7 +56,8 @@ export function SplitItem({
                     {roleTitle(application)}
                 </span>
                 <span className="text-base-content/50">
-                    {" "}at {companyName(application)}
+                    {" "}
+                    at {companyName(application)}
                 </span>
             </div>
 
@@ -65,7 +66,9 @@ export function SplitItem({
                 <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold ${stage.badge}`}
                 >
-                    <i className={`fa-duotone fa-regular ${stage.icon} text-[10px]`} />
+                    <i
+                        className={`fa-duotone fa-regular ${stage.icon} text-[10px]`}
+                    />
                     {stage.label}
                 </span>
                 {score != null && (
@@ -76,17 +79,6 @@ export function SplitItem({
                         {score}%
                     </span>
                 )}
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <ActionsToolbar
-                    application={application}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{ viewDetails: false }}
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

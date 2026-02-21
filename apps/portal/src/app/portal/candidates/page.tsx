@@ -34,9 +34,9 @@ export default function CandidatesPage() {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
-        () => searchParams.get("candidateId"),
-    );
+    const [selectedCandidateId, setSelectedCandidateId] = useState<
+        string | null
+    >(() => searchParams.get("candidateId"));
     const [showAddModal, setShowAddModal] = useState(false);
 
     // Scope management (persisted to localStorage)
@@ -45,7 +45,9 @@ export default function CandidatesPage() {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const savedScope = localStorage.getItem(SCOPE_KEY) as CandidateScope | null;
+            const savedScope = localStorage.getItem(
+                SCOPE_KEY,
+            ) as CandidateScope | null;
             if (savedScope === "mine" || savedScope === "all") {
                 setScopeState(savedScope);
             }
@@ -79,7 +81,9 @@ export default function CandidatesPage() {
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
         const currentQuery = searchParamsRef.current.toString();
-        const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+        const currentUrl = currentQuery
+            ? `${pathname}?${currentQuery}`
+            : pathname;
         if (newUrl !== currentUrl) {
             router.replace(newUrl, { scroll: false });
         }
@@ -124,7 +128,9 @@ export default function CandidatesPage() {
     }, [scope, scopeLoaded]);
 
     const handleSelect = useCallback((candidate: Candidate) => {
-        setSelectedCandidateId((prev) => (prev === candidate.id ? null : candidate.id));
+        setSelectedCandidateId((prev) =>
+            prev === candidate.id ? null : candidate.id,
+        );
     }, []);
 
     const handleViewModeChange = useCallback((mode: ViewMode) => {
@@ -142,8 +148,12 @@ export default function CandidatesPage() {
         () => ({
             total: pagination?.total || candidates.length,
             mine: candidates.filter((c) => c.has_active_relationship).length,
-            verified: candidates.filter((c) => c.verification_status === "verified").length,
-            pending: candidates.filter((c) => c.verification_status === "pending").length,
+            verified: candidates.filter(
+                (c) => c.verification_status === "verified",
+            ).length,
+            pending: candidates.filter(
+                (c) => c.verification_status === "pending",
+            ).length,
         }),
         [candidates, pagination],
     );
@@ -188,7 +198,8 @@ export default function CandidatesPage() {
                                     No candidates found
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    No candidates match your current filters. Clear them to see your full pipeline.
+                                    No candidates match your current filters.
+                                    Clear them to see your full pipeline.
                                 </p>
                                 <button
                                     onClick={() => {
@@ -233,7 +244,7 @@ export default function CandidatesPage() {
                 </section>
 
                 {/* Pagination */}
-                <div className="container mx-auto px-6 lg:px-12 py-6">
+                <div className="mx-auto px-6 lg:px-12 py-6">
                     <PaginationControls
                         page={page}
                         totalPages={totalPages}

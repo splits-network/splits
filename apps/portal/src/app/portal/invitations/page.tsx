@@ -60,7 +60,12 @@ export default function InvitationsBaselPage() {
             const token = await getToken();
             if (!token) {
                 if (!cancelled) {
-                    setStats({ total: 0, pending: 0, accepted: 0, declined: 0 });
+                    setStats({
+                        total: 0,
+                        pending: 0,
+                        accepted: 0,
+                        declined: 0,
+                    });
                 }
                 return;
             }
@@ -84,8 +89,7 @@ export default function InvitationsBaselPage() {
 
                 if (!cancelled) {
                     setStats({
-                        total:
-                            response.pagination?.total || invitations.length,
+                        total: response.pagination?.total || invitations.length,
                         pending,
                         accepted,
                         declined,
@@ -94,7 +98,12 @@ export default function InvitationsBaselPage() {
             } catch (error) {
                 console.error("Failed to fetch invitation stats:", error);
                 if (!cancelled) {
-                    setStats({ total: 0, pending: 0, accepted: 0, declined: 0 });
+                    setStats({
+                        total: 0,
+                        pending: 0,
+                        accepted: 0,
+                        declined: 0,
+                    });
                 }
             }
         };
@@ -202,7 +211,10 @@ export default function InvitationsBaselPage() {
 
                 {/* Content Area */}
                 <section className="content-area opacity-0">
-                    <div ref={contentRef} className="container mx-auto px-6 lg:px-12 py-8">
+                    <div
+                        ref={contentRef}
+                        className="mx-auto px-6 lg:px-12 py-8"
+                    >
                         {loading && invitations.length === 0 ? (
                             <div className="py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
@@ -217,8 +229,9 @@ export default function InvitationsBaselPage() {
                                     No invitations found
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    When you invite candidates, they&apos;ll appear here.
-                                    Try adjusting your filters or invite a new candidate.
+                                    When you invite candidates, they&apos;ll
+                                    appear here. Try adjusting your filters or
+                                    invite a new candidate.
                                 </p>
                                 <button
                                     onClick={() => {

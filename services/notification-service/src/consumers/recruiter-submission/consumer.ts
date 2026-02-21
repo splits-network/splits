@@ -52,7 +52,7 @@ export class RecruiterSubmissionEventConsumer {
             }
 
             // Build opportunity URL
-            const opportunityUrl = `${this.portalUrl}/opportunities/${application_id}`;
+            const opportunityUrl = `${this.portalUrl}/portal/applications?applicationId=${application_id}`;
 
             // Calculate expiry date (7 days from now)
             const expiryDate = new Date();
@@ -122,7 +122,7 @@ export class RecruiterSubmissionEventConsumer {
             }
 
             // Build application URL
-            const applicationUrl = `${this.portalUrl}/applications/${application_id}`;
+            const applicationUrl = `${this.portalUrl}/portal/applications?applicationId=${application_id}`;
 
             // Send notification to recruiter
             await this.emailService.sendCandidateApprovedNotification(recruiterContact.email, {

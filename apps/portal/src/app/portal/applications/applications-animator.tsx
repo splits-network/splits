@@ -127,7 +127,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
     );
 
     return (
-        <div ref={containerRef} className="overflow-hidden min-h-screen bg-base-100">
+        <div ref={containerRef} className="overflow-hidden min-h-screen">
             {children}
         </div>
     );

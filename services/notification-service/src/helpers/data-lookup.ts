@@ -12,7 +12,7 @@ export interface ApplicationData {
     id: string;
     job_id: string;
     candidate_id: string;
-    recruiter_id: string | null;
+    candidate_recruiter_id: string | null;
     stage: string;
     notes: string | null;
     recruiter_notes: string | null;
@@ -298,8 +298,8 @@ export class DataLookupHelper {
         }
 
         let recruiter: RecruiterData | null = null;
-        if (application.recruiter_id) {
-            recruiter = await this.getRecruiter(application.recruiter_id);
+        if (application.candidate_recruiter_id) {
+            recruiter = await this.getRecruiter(application.candidate_recruiter_id);
         }
 
         return { application, job, candidate, recruiter };

@@ -306,16 +306,15 @@ function DocumentsContent() {
             ).matches;
 
             if (prefersReducedMotion) {
-                const hidden =
-                    mainRef.current.querySelectorAll("[class*='opacity-0']");
+                const hidden = mainRef.current.querySelectorAll(
+                    "[class*='opacity-0']",
+                );
                 gsap.set(hidden, { opacity: 1 });
                 return;
             }
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             const tl = gsap.timeline({
                 defaults: { ease: "power3.out" },
@@ -397,7 +396,8 @@ function DocumentsContent() {
 
     // Animate document cards when they load or filter changes
     useEffect(() => {
-        if (!mainRef.current || loading || filteredDocuments.length === 0) return;
+        if (!mainRef.current || loading || filteredDocuments.length === 0)
+            return;
 
         const prefersReducedMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)",
@@ -410,14 +410,20 @@ function DocumentsContent() {
         gsap.fromTo(
             cards,
             { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: "power3.out" },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 0.4,
+                stagger: 0.06,
+                ease: "power3.out",
+            },
         );
     }, [loading, filteredDocuments]);
 
     // ===== RENDER =====
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen bg-base-100">
+        <main ref={mainRef} className="overflow-hidden min-h-screen">
             {/* ── EDITORIAL HERO ── */}
             <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
                 <div className="container mx-auto px-6 lg:px-12">
@@ -440,9 +446,10 @@ function DocumentsContent() {
 
                         <p className="hero-body text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4 opacity-0">
                             {/* COPY: hero body paragraph */}
-                            Your resumes, cover letters, and portfolios in one place.
-                            Upload once, attach to any application, and keep everything
-                            current so recruiters always see your best work.
+                            Your resumes, cover letters, and portfolios in one
+                            place. Upload once, attach to any application, and
+                            keep everything current so recruiters always see
+                            your best work.
                         </p>
                     </div>
                 </div>
@@ -484,8 +491,9 @@ function DocumentsContent() {
                                     </h2>
                                     <p className="text-sm text-base-content/60 leading-relaxed">
                                         {/* COPY: upload card body text */}
-                                        Resumes, cover letters, portfolios, and supporting files.
-                                        Accepts PDF, DOC, DOCX, TXT, and RTF up to 10MB.
+                                        Resumes, cover letters, portfolios, and
+                                        supporting files. Accepts PDF, DOC,
+                                        DOCX, TXT, and RTF up to 10MB.
                                     </p>
                                 </div>
                                 <button
@@ -581,7 +589,8 @@ function DocumentsContent() {
 
                                             {/* Actions */}
                                             <div className="flex items-center gap-2 shrink-0">
-                                                {doc.document_type === "resume" &&
+                                                {doc.document_type ===
+                                                    "resume" &&
                                                     !isPrimaryResume(doc) && (
                                                         <button
                                                             className="btn btn-secondary btn-sm"
@@ -692,27 +701,33 @@ function DocumentsContent() {
                                 <li className="flex items-start gap-2 text-sm text-base-content/60 leading-relaxed">
                                     <i className="fa-duotone fa-regular fa-check text-info mt-0.5 shrink-0" />
                                     {/* COPY: tip item 1 */}
-                                    Update your resume after every role change, promotion, or major project
+                                    Update your resume after every role change,
+                                    promotion, or major project
                                 </li>
                                 <li className="flex items-start gap-2 text-sm text-base-content/60 leading-relaxed">
                                     <i className="fa-duotone fa-regular fa-check text-info mt-0.5 shrink-0" />
                                     {/* COPY: tip item 2 */}
-                                    Tailor cover letters to the specific role rather than using a generic template
+                                    Tailor cover letters to the specific role
+                                    rather than using a generic template
                                 </li>
                                 <li className="flex items-start gap-2 text-sm text-base-content/60 leading-relaxed">
                                     <i className="fa-duotone fa-regular fa-check text-info mt-0.5 shrink-0" />
                                     {/* COPY: tip item 3 */}
-                                    Name files clearly: FirstName_LastName_Resume.pdf reads better than Document_Final_v3
+                                    Name files clearly:
+                                    FirstName_LastName_Resume.pdf reads better
+                                    than Document_Final_v3
                                 </li>
                                 <li className="flex items-start gap-2 text-sm text-base-content/60 leading-relaxed">
                                     <i className="fa-duotone fa-regular fa-check text-info mt-0.5 shrink-0" />
                                     {/* COPY: tip item 4 */}
-                                    PDF preserves formatting across devices. Use it whenever possible
+                                    PDF preserves formatting across devices. Use
+                                    it whenever possible
                                 </li>
                                 <li className="flex items-start gap-2 text-sm text-base-content/60 leading-relaxed">
                                     <i className="fa-duotone fa-regular fa-check text-info mt-0.5 shrink-0" />
                                     {/* COPY: tip item 5 */}
-                                    Set your strongest resume as primary so it auto-attaches to new applications
+                                    Set your strongest resume as primary so it
+                                    auto-attaches to new applications
                                 </li>
                             </ul>
                         </div>
@@ -728,11 +743,15 @@ function DocumentsContent() {
                 title={/* COPY: delete modal title */ "Delete this document?"}
                 subtitle={/* COPY: delete modal subtitle */ "Permanent Action"}
                 icon="fa-trash"
-                confirmLabel={/* COPY: delete confirm button */ "Delete Document"}
+                confirmLabel={
+                    /* COPY: delete confirm button */ "Delete Document"
+                }
                 cancelLabel={/* COPY: delete cancel button */ "Keep Document"}
                 confirmColor="btn-error"
                 confirming={!!deleting}
-                confirmingLabel={/* COPY: delete confirming button */ "Deleting..."}
+                confirmingLabel={
+                    /* COPY: delete confirming button */ "Deleting..."
+                }
             >
                 <p className="text-sm text-base-content/70 leading-relaxed">
                     {/* COPY: delete confirmation body */}
@@ -740,8 +759,8 @@ function DocumentsContent() {
                     <span className="font-bold text-base-content">
                         {docForDelete?.file_name ?? "this document"}
                     </span>{" "}
-                    will remove it permanently. Any applications already submitted
-                    with this file will not be affected.
+                    will remove it permanently. Any applications already
+                    submitted with this file will not be affected.
                 </p>
             </BaselConfirmModal>
 

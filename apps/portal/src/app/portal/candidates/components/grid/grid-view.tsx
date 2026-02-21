@@ -16,7 +16,8 @@ export function GridView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedCandidate = candidates.find((c) => c.id === selectedId) ?? null;
+    const selectedCandidate =
+        candidates.find((c) => c.id === selectedId) ?? null;
 
     return (
         <div className="flex gap-6">
@@ -28,7 +29,7 @@ export function GridView({
                     className={`grid gap-4 w-full ${
                         selectedCandidate
                             ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
+                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
                     }`}
                 >
                     {candidates.map((candidate) => (
@@ -47,7 +48,7 @@ export function GridView({
             {selectedCandidate && (
                 <MobileDetailOverlay
                     isOpen
-                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
+                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start"
                 >
                     <DetailLoader
                         candidateId={selectedCandidate.id}

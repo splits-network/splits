@@ -22,8 +22,8 @@ import { categorizeDocuments } from "../../lib/permission-utils";
 import type { Application } from "../../types";
 import { formatApplicationDate } from "../../types";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
-import { CandidateDetail } from "@/app/portal/candidates/components/shared/candidate-detail";
-import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
+import { ApplicationCandidateDetail } from "./application-candidate-detail";
+import { ApplicationRoleDetail } from "./application-role-detail";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -45,18 +45,6 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "notes", label: "Notes", icon: "fa-comments" },
     { key: "timeline", label: "Timeline", icon: "fa-timeline" },
 ];
-
-// ─── Basel accent object for child components ───────────────────────────────
-
-// Basel accent bridge — CandidateDetail/JobDetail expect Memphis AccentClasses
-// but we use DaisyUI semantic tokens. Runtime works since they're all CSS classes.
-const BASEL_ACCENT = {
-    bg: "bg-primary",
-    text: "text-primary",
-    border: "border-primary",
-    bgLight: "bg-primary/5",
-    textOnBg: "text-primary-content",
-} as any;
 
 // ─── Props ──────────────────────────────────────────────────────────────────
 
@@ -462,13 +450,7 @@ function CandidateTab({ application }: { application: Application }) {
         );
     }
 
-    return (
-        <CandidateDetail
-            candidate={candidate as any}
-            accent={BASEL_ACCENT}
-            onRefresh={undefined}
-        />
-    );
+    return <ApplicationCandidateDetail candidate={candidate as any} />;
 }
 
 // ─── Job Tab ────────────────────────────────────────────────────────────────
@@ -485,13 +467,7 @@ function JobTab({ application }: { application: Application }) {
         );
     }
 
-    return (
-        <JobDetail
-            job={job as any}
-            accent={BASEL_ACCENT}
-            onRefresh={undefined}
-        />
-    );
+    return <ApplicationRoleDetail job={job as any} />;
 }
 
 // ─── Documents Tab ──────────────────────────────────────────────────────────

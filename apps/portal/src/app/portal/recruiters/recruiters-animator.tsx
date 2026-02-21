@@ -63,16 +63,15 @@ export function RecruitersAnimator({
             ).matches;
 
             if (prefersReducedMotion) {
-                const hidden =
-                    mainRef.current.querySelectorAll("[class*='opacity-0']");
+                const hidden = mainRef.current.querySelectorAll(
+                    "[class*='opacity-0']",
+                );
                 gsap.set(hidden, { opacity: 1 });
                 return;
             }
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             /* Hero timeline */
             const heroTl = gsap.timeline({
@@ -160,10 +159,7 @@ export function RecruitersAnimator({
     );
 
     return (
-        <main
-            ref={mainRef}
-            className="overflow-hidden min-h-screen bg-base-100"
-        >
+        <main ref={mainRef} className="overflow-hidden min-h-screen">
             {children}
         </main>
     );

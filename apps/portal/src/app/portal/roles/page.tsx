@@ -209,7 +209,7 @@ export default function RolesPage() {
                 </section>
 
                 {/* Pagination */}
-                <div className="container mx-auto px-6 lg:px-12 py-6">
+                <div className="mx-auto px-6 lg:px-12 py-6">
                     <PaginationControls
                         page={page}
                         totalPages={totalPages}

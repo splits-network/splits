@@ -13,7 +13,7 @@ export default function AuthenticatedLayout({
         <AuthenticatedLayoutClient>
             <Sidebar />
             <div className="lg:ml-64 min-h-screen flex">
-                <main className="p-2 flex-1 min-w-0 transition-all duration-300">
+                <main className="flex-1 min-w-0 transition-all duration-300">
                     <Suspense fallback={<LoadingState message="Loading..." />}>
                         {children}
                     </Suspense>

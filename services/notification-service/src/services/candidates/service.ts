@@ -389,6 +389,7 @@ export class CandidatesEmailService {
             candidate_name: string;
             candidate_email: string;
             consent_given_at: string;
+            candidateId?: string;
             userId?: string;
         }
     ): Promise<void> {
@@ -402,7 +403,9 @@ export class CandidatesEmailService {
             minute: '2-digit',
         });
 
-        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = data.candidateId
+            ? `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates?candidateId=${data.candidateId}`
+            : `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
         const html = consentGivenEmail({
             recruiterName: data.recruiter_name,
@@ -416,7 +419,7 @@ export class CandidatesEmailService {
             eventType: 'candidate.consent_given',
             userId: data.userId,
             payload: data,
-            actionUrl: '/portal/candidates',
+            actionUrl: data.candidateId ? `/portal/candidates?candidateId=${data.candidateId}` : '/portal/candidates',
             actionLabel: 'View Candidate',
             priority: 'high',
             category: 'candidate',
