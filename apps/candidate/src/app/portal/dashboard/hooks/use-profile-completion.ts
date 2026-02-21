@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import type { ApiResponse } from '@splits-network/shared-api-client';
 import {
     calculateProfileCompleteness,
     type ProfileCompleteness,
@@ -21,13 +20,11 @@ export function useProfileCompletion() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get<ApiResponse<any[]>>('/candidates', {
-                params: { limit: 1 },
-            });
+            // Use /candidates/me for direct current-user lookup instead of a filtered list query
+            const response = await client.getCurrentCandidate();
 
-            const candidates = response.data || [];
-            if (candidates.length > 0) {
-                const profile = candidates[0];
+            const profile = response?.data;
+            if (profile) {
                 setProfileCompletion(calculateProfileCompleteness(profile));
 
                 const resumeExists = profile.documents?.some(
@@ -37,8 +34,9 @@ export function useProfileCompletion() {
                 ) || false;
                 setHasResume(resumeExists);
             }
-        } catch (err) {
-            console.error('[ProfileCompletion] Failed to load:', err);
+        } catch {
+            // Profile completion is non-critical — silently fail so the dashboard
+            // still renders even when the ATS service is unavailable.
         } finally {
             setLoading(false);
         }

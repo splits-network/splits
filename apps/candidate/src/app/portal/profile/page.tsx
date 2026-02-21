@@ -46,13 +46,20 @@ interface CandidateSettings {
     };
 }
 
-const JOB_TYPE_OPTIONS = ["Full-time", "Part-time", "Contract", "Freelance"];
+const JOB_TYPE_OPTIONS = [
+    { value: "full_time", label: "Full-time" },
+    { value: "part_time", label: "Part-time" },
+    { value: "contract", label: "Contract" },
+    { value: "freelance", label: "Freelance" },
+    { value: "internship", label: "Internship" },
+];
 const AVAILABILITY_OPTIONS = [
-    "Immediate",
-    "2 weeks",
-    "1 month",
-    "2+ months",
-    "Not actively looking",
+    { value: "immediately", label: "Immediately" },
+    { value: "2_weeks", label: "Within 2 weeks" },
+    { value: "1_month", label: "Within 1 month" },
+    { value: "2_months", label: "Within 2 months" },
+    { value: "3_months", label: "Within 3 months" },
+    { value: "not_looking", label: "Not actively looking" },
 ];
 
 const INDUSTRY_OPTIONS = [
@@ -926,14 +933,14 @@ export default function ProfilePage() {
                                     value={settings?.desired_job_type || ""}
                                     onChange={(e) =>
                                         updateSettings({
-                                            desired_job_type: e.target.value,
+                                            desired_job_type: e.target.value || undefined,
                                         })
                                     }
                                 >
                                     <option value="">Select...</option>
-                                    {JOB_TYPE_OPTIONS.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
+                                    {JOB_TYPE_OPTIONS.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
                                         </option>
                                     ))}
                                 </select>
@@ -948,14 +955,14 @@ export default function ProfilePage() {
                                     value={settings?.availability || ""}
                                     onChange={(e) =>
                                         updateSettings({
-                                            availability: e.target.value,
+                                            availability: e.target.value || undefined,
                                         })
                                     }
                                 >
                                     <option value="">Select...</option>
                                     {AVAILABILITY_OPTIONS.map((option) => (
-                                        <option key={option} value={option}>
-                                            {option}
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
                                         </option>
                                     ))}
                                 </select>

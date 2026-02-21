@@ -453,6 +453,32 @@ function OverviewTab({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Representation
+                        </p>
+                        {candidate.has_active_relationship ? (
+                            <p className="font-bold text-sm text-success flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-user-check" />
+                                Your Candidate
+                            </p>
+                        ) : candidate.has_other_active_recruiters ? (
+                            <p className="font-bold text-sm text-warning flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-user-shield" />
+                                Has Recruiter
+                            </p>
+                        ) : candidate.has_pending_invitation ? (
+                            <p className="font-bold text-sm text-info flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-clock" />
+                                Invitation Pending
+                            </p>
+                        ) : (
+                            <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-user-xmark" />
+                                Unrepresented
+                            </p>
+                        )}
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Verification
                         </p>
                         <p className="font-bold text-sm">

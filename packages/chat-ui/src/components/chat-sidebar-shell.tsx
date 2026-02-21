@@ -163,7 +163,7 @@ export function ChatSidebarShell({
         <div
             ref={sidebarRef}
             className={`fixed bottom-0 right-0 z-[998] overflow-hidden shadow-md hidden md:block ${
-                isMinimized ? "" : "h-screen"
+                isMinimized ? "" : "h-[80vh]"
             }`}
             style={{
                 width: isOpen ? SIDEBAR_WIDTH : 0,
