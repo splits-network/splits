@@ -319,6 +319,13 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                     Dashboard
                                 </Link>
                                 <Link
+                                    href="/portal/search"
+                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
+                                >
+                                    <i className="fa-duotone fa-regular fa-magnifying-glass text-xs text-primary" />
+                                    Search
+                                </Link>
+                                <Link
                                     href="/portal/applications"
                                     className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
                                 >

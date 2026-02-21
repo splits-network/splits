@@ -26,6 +26,12 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
+                            <Link href="/portal/search">
+                                <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
+                                Search
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/portal/applications">
                                 <i className="fa-duotone fa-regular fa-file-lines"></i>
                                 Applications

@@ -3,5 +3,5 @@ export default function JobsBaselLayout({
 }: {
     children: React.ReactNode;
 }) {
-    return <div data-theme="basel">{children}</div>;
+    return <div>{children}</div>;
 }

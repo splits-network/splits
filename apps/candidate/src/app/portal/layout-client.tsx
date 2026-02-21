@@ -45,7 +45,7 @@ export function PortalLayoutClient({
         <PageTitleProvider>
             <OnboardingRedirectGuard>
                 <PortalToolbar />
-                <div className="bg-base-300 p-6 flex">
+                <div className="bg-base-300 flex">
                     <div className="flex-1 min-w-0 transition-all duration-300">
                         {children}
                     </div>

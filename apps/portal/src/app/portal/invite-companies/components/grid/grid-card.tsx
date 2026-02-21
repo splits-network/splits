@@ -32,7 +32,7 @@ export function GridCard({
         <div
             onClick={onSelect}
             className={[
-                "group cursor-pointer bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
+                "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
                 isSelected ? "border-primary border-l-4" : "border-base-200",
             ].join(" ")}
         >
@@ -95,7 +95,7 @@ export function GridCard({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between gap-3 pt-4 border-t border-base-200">
+            <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
                         {recruiterInitials(name)}
