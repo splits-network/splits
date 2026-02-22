@@ -43,46 +43,36 @@ spec:
                                 key: supabase-service-role-key
                       - name: RABBITMQ_URL
                         value: "amqp://splits:splits_production@rabbitmq:5672"
-                      - name: GOOGLE_CALENDAR_CLIENT_ID
+                      - name: GOOGLE_CLIENT_ID
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: google-calendar-client-id
-                      - name: GOOGLE_CALENDAR_CLIENT_SECRET
+                                key: google-client-id
+                      - name: GOOGLE_CLIENT_SECRET
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: google-calendar-client-secret
-                      - name: MICROSOFT_CALENDAR_CLIENT_ID
+                                key: google-client-secret
+                      - name: MICROSOFT_CLIENT_ID
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: microsoft-calendar-client-id
-                      - name: MICROSOFT_CALENDAR_CLIENT_SECRET
+                                key: microsoft-client-id
+                      - name: MICROSOFT_CLIENT_SECRET
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: microsoft-calendar-client-secret
-                      - name: GOOGLE_EMAIL_CLIENT_ID
+                                key: microsoft-client-secret
+                      - name: LINKEDIN_CLIENT_ID
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: google-email-client-id
-                      - name: GOOGLE_EMAIL_CLIENT_SECRET
+                                key: linkedin-client-id
+                      - name: LINKEDIN_CLIENT_SECRET
                         valueFrom:
                             secretKeyRef:
                                 name: integration-secrets
-                                key: google-email-client-secret
-                      - name: MICROSOFT_EMAIL_CLIENT_ID
-                        valueFrom:
-                            secretKeyRef:
-                                name: integration-secrets
-                                key: microsoft-email-client-id
-                      - name: MICROSOFT_EMAIL_CLIENT_SECRET
-                        valueFrom:
-                            secretKeyRef:
-                                name: integration-secrets
-                                key: microsoft-email-client-secret
+                                key: linkedin-client-secret
                   resources:
                       requests:
                           cpu: 100m

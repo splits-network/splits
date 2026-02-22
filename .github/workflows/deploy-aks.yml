@@ -294,14 +294,12 @@ jobs:
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic integration-secrets \
-                    --from-literal=google-calendar-client-id="${{ secrets.GOOGLE_CALENDAR_CLIENT_ID }}" \
-                    --from-literal=google-calendar-client-secret="${{ secrets.GOOGLE_CALENDAR_CLIENT_SECRET }}" \
-                    --from-literal=microsoft-calendar-client-id="${{ secrets.MICROSOFT_CALENDAR_CLIENT_ID }}" \
-                    --from-literal=microsoft-calendar-client-secret="${{ secrets.MICROSOFT_CALENDAR_CLIENT_SECRET }}" \
-                    --from-literal=google-email-client-id="${{ secrets.GOOGLE_EMAIL_CLIENT_ID }}" \
-                    --from-literal=google-email-client-secret="${{ secrets.GOOGLE_EMAIL_CLIENT_SECRET }}" \
-                    --from-literal=microsoft-email-client-id="${{ secrets.MICROSOFT_EMAIL_CLIENT_ID }}" \
-                    --from-literal=microsoft-email-client-secret="${{ secrets.MICROSOFT_EMAIL_CLIENT_SECRET }}" \
+                    --from-literal=google-client-id="${{ secrets.GOOGLE_CLIENT_ID }}" \
+                    --from-literal=google-client-secret="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+                    --from-literal=microsoft-client-id="${{ secrets.MICROSOFT_CLIENT_ID }}" \
+                    --from-literal=microsoft-client-secret="${{ secrets.MICROSOFT_CLIENT_SECRET }}" \
+                    --from-literal=linkedin-client-id="${{ secrets.LINKEDIN_CLIENT_ID }}" \
+                    --from-literal=linkedin-client-secret="${{ secrets.LINKEDIN_CLIENT_SECRET }}" \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 
