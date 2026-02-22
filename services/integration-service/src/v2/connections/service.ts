@@ -3,6 +3,7 @@ import { Logger } from '@splits-network/shared-logging';
 import { IEventPublisher } from '../shared/events';
 import { ConnectionRepository } from './repository';
 import { ProviderRepository } from '../providers/repository';
+import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers';
 import {
     OAuthConnectionPublic,
     InitiateOAuthResponse,
@@ -76,7 +77,7 @@ export class ConnectionService {
 
         // Build authorization URL — provider-specific params
         const params = new URLSearchParams({
-            client_id: this.getClientId(providerSlug),
+            client_id: getOAuthClientId(providerSlug),
             redirect_uri: redirectUri,
             response_type: 'code',
             scope: (provider.oauth_scopes ?? []).join(' '),
@@ -188,20 +189,6 @@ export class ConnectionService {
 
     /* ── Private helpers ─────────────────────────────────────────────────── */
 
-    private getClientId(providerSlug: string): string {
-        const envKey = `${providerSlug.toUpperCase()}_CLIENT_ID`;
-        const value = process.env[envKey];
-        if (!value) throw new Error(`Missing env var: ${envKey}`);
-        return value;
-    }
-
-    private getClientSecret(providerSlug: string): string {
-        const envKey = `${providerSlug.toUpperCase()}_CLIENT_SECRET`;
-        const value = process.env[envKey];
-        if (!value) throw new Error(`Missing env var: ${envKey}`);
-        return value;
-    }
-
     private async exchangeCodeForTokens(
         tokenUrl: string,
         code: string,
@@ -215,8 +202,8 @@ export class ConnectionService {
                 grant_type: 'authorization_code',
                 code,
                 redirect_uri: redirectUri,
-                client_id: this.getClientId(providerSlug),
-                client_secret: this.getClientSecret(providerSlug),
+                client_id: getOAuthClientId(providerSlug),
+                client_secret: getOAuthClientSecret(providerSlug),
             }),
         });
 

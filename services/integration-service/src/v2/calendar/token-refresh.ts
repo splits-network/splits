@@ -1,6 +1,7 @@
 import { Logger } from '@splits-network/shared-logging';
 import { ConnectionRepository } from '../connections/repository';
 import { IEventPublisher } from '../shared/events';
+import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers';
 
 interface TokenResponse {
     access_token: string;
@@ -55,8 +56,8 @@ export class TokenRefreshService {
         refreshToken: string,
     ): Promise<string> {
         const tokenUrl = this.getTokenUrl(providerSlug);
-        const clientId = this.getEnv(`${providerSlug.toUpperCase()}_CLIENT_ID`);
-        const clientSecret = this.getEnv(`${providerSlug.toUpperCase()}_CLIENT_SECRET`);
+        const clientId = getOAuthClientId(providerSlug);
+        const clientSecret = getOAuthClientSecret(providerSlug);
 
         const res = await fetch(tokenUrl, {
             method: 'POST',
@@ -104,12 +105,6 @@ export class TokenRefreshService {
         if (providerSlug.startsWith('microsoft_')) return 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
         if (providerSlug === 'linkedin') return 'https://www.linkedin.com/oauth/v2/accessToken';
         throw new Error(`Unknown provider family for: ${providerSlug}`);
-    }
-
-    private getEnv(key: string): string {
-        const value = process.env[key];
-        if (!value) throw new Error(`Missing env var: ${key}`);
-        return value;
     }
 
     private async publishEvent(type: string, connection: any): Promise<void> {
