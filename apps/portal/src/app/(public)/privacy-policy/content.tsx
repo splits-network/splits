@@ -1,14 +1,4 @@
-"use client";
-
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import Link from "next/link";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 /* ─── Metadata ──────────────────────────────────────────────────────────── */
 const meta = {
@@ -104,248 +94,15 @@ const thirdPartyServices = [
 /* ─── Component ─────────────────────────────────────────────────────────── */
 
 export default function PrivacyPolicyContent() {
-    const mainRef = useRef<HTMLElement>(null);
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-
-            if (prefersReducedMotion) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
-                return;
-            }
-
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
-
-            /* ── HERO ─────────────────────────────────────────── */
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
-            });
-
-            const heroKicker = $1(".hero-kicker");
-            if (heroKicker) {
-                heroTl.fromTo(
-                    heroKicker,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                );
-            }
-
-            const heroWords = $(".hero-headline-word");
-            if (heroWords.length) {
-                heroTl.fromTo(
-                    heroWords,
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                );
-            }
-
-            const heroSubtitle = $1(".hero-subtitle");
-            if (heroSubtitle) {
-                heroTl.fromTo(
-                    heroSubtitle,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                );
-            }
-
-            const heroMetaItems = $(".hero-meta-item");
-            if (heroMetaItems.length) {
-                heroTl.fromTo(
-                    heroMetaItems,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                );
-            }
-
-            /* Hero image */
-            const heroImgWrap = $1(".hero-img-wrap");
-            if (heroImgWrap) {
-                gsap.fromTo(
-                    heroImgWrap,
-                    { opacity: 0, scale: 1.08 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 1.4,
-                        ease: "power2.out",
-                        delay: 0.2,
-                    },
-                );
-
-                const heroImg = heroImgWrap.querySelector("img");
-                const heroSection = $1(".hero-section");
-                if (heroImg && heroSection) {
-                    gsap.to(heroImg, {
-                        yPercent: 12,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: heroSection,
-                            start: "top top",
-                            end: "bottom top",
-                            scrub: true,
-                        },
-                    });
-                }
-            }
-
-            /* ── ARTICLE BLOCKS ───────────────────────────────── */
-            $(".article-block").forEach((block) => {
-                gsap.fromTo(
-                    block,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: block,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            /* ── SPLIT-SCREEN SECTIONS ────────────────────────── */
-            $(".split-text-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-text-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            /* ── PULL QUOTES ──────────────────────────────────── */
-            $(".pull-quote-block").forEach((quote) => {
-                gsap.fromTo(
-                    quote,
-                    { opacity: 0, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.9,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: quote,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            /* ── CTA ──────────────────────────────────────────── */
-            const ctaContent = $1(".final-cta-content");
-            const ctaSection = $1(".final-cta");
-            if (ctaContent && ctaSection) {
-                gsap.fromTo(
-                    ctaContent,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 1,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: ctaSection,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: mainRef },
-    );
-
     return (
-        <main ref={mainRef} className="overflow-hidden">
+        <main className="overflow-hidden">
             {/* ═══════════════════════════════════════════════════════
                 HERO -- Split-screen 60/40 with diagonal clip
                ═══════════════════════════════════════════════════════ */}
             <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                 {/* Right image panel -- 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    className="hero-img-wrap absolute inset-0 lg:left-[58%]"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -361,30 +118,30 @@ export default function PrivacyPolicyContent() {
                 {/* Content panel -- 60% on desktop */}
                 <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             <i className="fa-duotone fa-regular fa-shield-check mr-2"></i>
                             Legal
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block text-base-content lg:text-base-content">
                                 Privacy
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="hero-headline-word inline-block text-primary">
                                 Policy.
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 opacity-0">
+                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8">
                             {meta.subtitle}
                         </p>
 
                         <div className="flex flex-wrap items-center gap-6">
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-building mr-1"></i>
                                 {meta.entity}
                             </span>
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                 Last Updated: {meta.lastUpdated}
                             </span>
@@ -398,7 +155,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-20 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <div className="border-l-4 border-primary pl-8 lg:pl-12">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 <i className="fa-duotone fa-regular fa-list mr-2"></i>
@@ -433,7 +190,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="overview" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             01 -- Overview
                         </p>
@@ -481,7 +238,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 02 -- Information We Collect
                             </p>
@@ -566,7 +323,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -592,7 +349,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="how-we-use-information" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             03 -- How We Use Information
                         </p>
@@ -637,7 +394,7 @@ export default function PrivacyPolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+            <section className="pull-quote-block py-20 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -661,7 +418,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-left lg:col-span-2 opacity-0">
+                        <div className="split-img-left lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -678,7 +435,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-right lg:col-span-3 opacity-0">
+                        <div className="split-text-right lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 04 -- Information Sharing
                             </p>
@@ -734,7 +491,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="data-security" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             05 -- Data Security
                         </p>
@@ -802,7 +559,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 06 -- Data Retention
                             </p>
@@ -839,7 +596,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -865,7 +622,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="your-rights" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             07 -- Your Privacy Rights
                         </p>
@@ -942,7 +699,7 @@ export default function PrivacyPolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 2
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-primary text-primary-content opacity-0">
+            <section className="pull-quote-block py-20 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto text-center">
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
@@ -964,7 +721,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-left lg:col-span-2 opacity-0">
+                        <div className="split-img-left lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -981,7 +738,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-right lg:col-span-3 opacity-0">
+                        <div className="split-text-right lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 08 -- Cookies & Tracking
                             </p>
@@ -1039,7 +796,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="third-party" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             09 -- Third-Party Services
                         </p>
@@ -1096,7 +853,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 10 -- AI & Automated Processing
                             </p>
@@ -1165,7 +922,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -1188,7 +945,7 @@ export default function PrivacyPolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+            <section className="pull-quote-block py-20 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -1210,7 +967,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="international" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             11 -- International Data Transfers
                         </p>
@@ -1260,7 +1017,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="children" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
                             12 -- Children&apos;s Privacy
                         </p>
@@ -1291,7 +1048,7 @@ export default function PrivacyPolicyContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Text -- 3 of 5 columns */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 13 -- California Privacy Rights
                             </p>
@@ -1361,7 +1118,7 @@ export default function PrivacyPolicyContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -1387,7 +1144,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="gdpr" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             14 -- GDPR Rights (EU Users)
                         </p>
@@ -1463,7 +1220,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="changes" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             15 -- Changes to This Policy
                         </p>
@@ -1505,7 +1262,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-20 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-4">
                             Related Policies
                         </p>
@@ -1557,7 +1314,7 @@ export default function PrivacyPolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section className="final-cta py-28 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                    <div className="final-cta-content max-w-4xl mx-auto text-center">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-content/50 mb-6">
                             <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                             Contact Us
