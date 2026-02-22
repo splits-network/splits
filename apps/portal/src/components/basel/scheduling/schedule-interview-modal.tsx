@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type {
     OAuthConnectionPublic,
@@ -63,15 +62,15 @@ export default function ScheduleInterviewModal({
     const [addMeet, setAddMeet] = useState(true);
     const [attendeeEmails, setAttendeeEmails] = useState(candidateEmail || "");
 
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (!panelRef.current || !backdropRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(panelRef.current, { x: 0, opacity: 1 });
-                gsap.set(backdropRef.current, { opacity: 1 });
-                return;
-            }
+    /* ── GSAP entrance (runs after portal mounts into DOM) ── */
+    useEffect(() => {
+        if (!panelRef.current || !backdropRef.current) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            gsap.set(panelRef.current, { x: 0, opacity: 1 });
+            gsap.set(backdropRef.current, { opacity: 1 });
+            return;
+        }
+        const ctx = gsap.context(() => {
             gsap.fromTo(
                 backdropRef.current,
                 { opacity: 0 },
@@ -82,9 +81,9 @@ export default function ScheduleInterviewModal({
                 { x: "100%", opacity: 0 },
                 { x: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.1 },
             );
-        },
-        { dependencies: [] },
-    );
+        });
+        return () => ctx.revert();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     /* ── Fetch calendar connections ── */
     const fetchConnections = useCallback(async () => {

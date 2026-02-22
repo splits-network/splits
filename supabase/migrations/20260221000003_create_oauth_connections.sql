@@ -76,7 +76,7 @@ INSERT INTO integration_providers (slug, name, category, icon, description, oaut
     'Sync interviews and meetings with Google Calendar',
     'https://accounts.google.com/o/oauth2/v2/auth',
     'https://oauth2.googleapis.com/token',
-    ARRAY['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'],
+    ARRAY['https://www.googleapis.com/auth/calendar.events.owned', 'https://www.googleapis.com/auth/calendar.events.freebusy', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'],
     1
 ),
 (
@@ -98,7 +98,7 @@ INSERT INTO integration_providers (slug, name, category, icon, description, oaut
     'Track email conversations with candidates and recruiters',
     'https://accounts.google.com/o/oauth2/v2/auth',
     'https://oauth2.googleapis.com/token',
-    ARRAY['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send'],
+    ARRAY['https://www.googleapis.com/auth/gmail.modify'],
     3
 ),
 (
