@@ -205,7 +205,7 @@ export function OnboardingPage() {
 
                 {/* Step content */}
                 <div className="ob-panel ob-anim opacity-0 flex-1 flex items-start justify-center p-6 lg:p-12">
-                    <div className="w-full max-w-lg">
+                    <div className={`w-full ${state.currentStep === 2 ? "max-w-4xl" : "max-w-lg"}`}>
                         {/* Persisting indicator */}
                         {persisting && (
                             <div className="flex items-center gap-2 text-xs text-base-content/30 mb-4">
