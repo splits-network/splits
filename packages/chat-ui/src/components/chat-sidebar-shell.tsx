@@ -39,7 +39,8 @@ export function ChatSidebarShell({
     messagesPagePath = "/portal/messages",
     currentUserId,
 }: ChatSidebarShellProps) {
-    const { isOpen, isMinimized, view, activeConversationId, close } = useChatSidebar();
+    const { isOpen, isMinimized, view, activeConversationId, close } =
+        useChatSidebar();
 
     const isMobile = useIsMobile();
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -124,10 +125,10 @@ export function ChatSidebarShell({
     );
 
     const sidebarContent = (
-        <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary">
+        <div className="flex flex-col bg-base-100 border-l-4 border-primary">
             <ChatSidebarHeader messagesPagePath={messagesPagePath} />
             {!isMinimized && (
-                <div className="flex-1 min-h-0 overflow-hidden">
+                <>
                     {view === "list" && (
                         <ChatSidebarList currentUserId={currentUserId} />
                     )}
@@ -139,7 +140,7 @@ export function ChatSidebarShell({
                             {threadRenderer(activeConversationId)}
                         </ChatSidebarThread>
                     )}
-                </div>
+                </>
             )}
         </div>
     );
@@ -149,7 +150,7 @@ export function ChatSidebarShell({
         return createPortal(
             <div
                 ref={overlayRef}
-                className="fixed inset-0 z-[999] bg-base-100"
+                className="fixed inset-0 z-[999] bg-base-100 max-h-[80vh]"
                 style={{ transform: isOpen ? undefined : "translateX(100%)" }}
             >
                 {sidebarContent}
@@ -162,17 +163,15 @@ export function ChatSidebarShell({
     return (
         <div
             ref={sidebarRef}
-            className={`fixed bottom-0 right-0 z-[998] overflow-hidden shadow-md hidden md:block ${
-                isMinimized ? "" : "h-[80vh]"
-            }`}
+            className={`fixed bottom-0 right-0 z-[998] shadow-md hidden md:block overflow-y-auto
+                max-h-[80vh] ${isMinimized ? "h-12" : "h-[80vh]"} transition-[width,opacity] duration-300 ease-in-out
+                `}
             style={{
                 width: isOpen ? SIDEBAR_WIDTH : 0,
                 opacity: isOpen ? 1 : 0,
             }}
         >
-            <div className={isMinimized ? "" : "h-full"} style={{ width: SIDEBAR_WIDTH }}>
-                {isOpen && sidebarContent}
-            </div>
+            {isOpen && sidebarContent}
         </div>
     );
 }

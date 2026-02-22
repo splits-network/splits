@@ -458,7 +458,7 @@ export default function ThreadPanel({
           : "Chat thread";
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col max-h-[80vh]">
             {showHeader && (
                 <div className="border-b border-base-300 bg-base-100/80 backdrop-blur-sm p-4 sticky top-0 z-10">
                     <div className="flex items-start justify-between gap-3">
