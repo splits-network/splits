@@ -57,3 +57,9 @@ export type {
 
 // Content CMS block types and page structure
 export * from './content';
+
+// Integration & OAuth connection types
+export * from './integrations';
+
+// ATS integration types
+export * from './ats-integrations';

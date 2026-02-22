@@ -22,7 +22,7 @@ export function StatsBarBlockComponent({ block }: { block: StatsBarBlock; index:
                     {block.stats.map((stat, i) => (
                         <div
                             key={i}
-                            className={`stat-item opacity-0 ${
+                            className={`stat-item ${
                                 stat.borderColor ? `border-l-4 border-${stat.borderColor} p-6` : ''
                             }`}
                         >

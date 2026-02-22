@@ -21,20 +21,20 @@ export type IntegrationInsert = DbTableInsert<'integrations'>;
 export type IntegrationUpdate = DbTableUpdate<'integrations'>;
 
 // ============================================================================
-// SYNC LOGS
+// SYNC LOGS (prefixed to avoid collision with ats-integrations.ts SyncLog)
 // ============================================================================
 
-export type SyncLog = DbTable<'sync_logs'>;
-export type SyncLogInsert = DbTableInsert<'sync_logs'>;
-export type SyncLogUpdate = DbTableUpdate<'sync_logs'>;
+export type DbSyncLog = DbTable<'sync_logs'>;
+export type DbSyncLogInsert = DbTableInsert<'sync_logs'>;
+export type DbSyncLogUpdate = DbTableUpdate<'sync_logs'>;
 
 // ============================================================================
-// EXTERNAL ENTITY MAP
+// EXTERNAL ENTITY MAP (prefixed to avoid collision with ats-integrations.ts)
 // ============================================================================
 
-export type ExternalEntityMap = DbTable<'external_entity_map'>;
-export type ExternalEntityMapInsert = DbTableInsert<'external_entity_map'>;
-export type ExternalEntityMapUpdate = DbTableUpdate<'external_entity_map'>;
+export type DbExternalEntityMap = DbTable<'external_entity_map'>;
+export type DbExternalEntityMapInsert = DbTableInsert<'external_entity_map'>;
+export type DbExternalEntityMapUpdate = DbTableUpdate<'external_entity_map'>;
 
 // ============================================================================
 // SYNC QUEUE

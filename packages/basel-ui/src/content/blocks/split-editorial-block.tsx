@@ -12,7 +12,7 @@ export function SplitEditorialBlockComponent({ block }: { block: SplitEditorialB
 
     const textContent = (
         <div
-            className={`${isTextLeft ? 'split-text-left' : 'split-text-right'} lg:col-span-3 opacity-0`}
+            className={`${isTextLeft ? 'split-text-left' : 'split-text-right'} lg:col-span-3`}
         >
             {block.kicker && (
                 <p
@@ -65,7 +65,7 @@ export function SplitEditorialBlockComponent({ block }: { block: SplitEditorialB
 
     const imageContent = (
         <div
-            className={`${isTextLeft ? 'split-img-right' : 'split-img-left'} lg:col-span-2 opacity-0`}
+            className={`${isTextLeft ? 'split-img-right' : 'split-img-left'} lg:col-span-2`}
         >
             <div className="relative overflow-hidden" style={{ clipPath: imageClip }}>
                 <img

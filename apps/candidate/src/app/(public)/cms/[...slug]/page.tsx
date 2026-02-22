@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getContentPage } from "@/lib/content";
 import { buildCanonical, CANDIDATE_BASE_URL } from "@/lib/seo";
 import { JsonLd } from "@splits-network/shared-ui";
-import { BaselArticleAnimated } from "@splits-network/basel-ui";
+import { BaselArticleRenderer, BaselArticleAnimationWrapper } from "@splits-network/basel-ui";
 
 export const revalidate = 300;
 
@@ -74,7 +74,9 @@ export default async function CmsPage({ params }: PageProps) {
     return (
         <>
             <JsonLd data={jsonLd} id={`cms-${slugPath}-jsonld`} />
-            <BaselArticleAnimated blocks={page.blocks} />
+            <BaselArticleAnimationWrapper>
+                <BaselArticleRenderer blocks={page.blocks} />
+            </BaselArticleAnimationWrapper>
         </>
     );
 }

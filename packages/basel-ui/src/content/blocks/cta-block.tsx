@@ -13,7 +13,7 @@ export function CtaBlockComponent({ block }: { block: CtaBlock; index: number })
     return (
         <section className={`final-cta py-16 lg:py-28 ${theme.bg} ${theme.text}`}>
             <div className="container mx-auto px-6 lg:px-12">
-                <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                <div className="final-cta-content max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                         {block.heading}
                     </h2>

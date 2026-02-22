@@ -17,7 +17,7 @@ export function FaqBlockComponent({ block }: { block: FaqBlock; index: number })
         <section className={`py-20 overflow-hidden ${theme.bg} ${theme.text}`}>
             <div className="container mx-auto px-6 lg:px-12">
                 {(block.heading || block.kicker) && (
-                    <div className="article-block text-center mb-12 opacity-0">
+                    <div className="article-block text-center mb-12">
                         {block.kicker && (
                             <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 bg-secondary text-secondary-content">
                                 {block.kicker}
@@ -40,7 +40,7 @@ export function FaqBlockComponent({ block }: { block: FaqBlock; index: number })
                     {block.items.map((item, i) => (
                         <div
                             key={i}
-                            className="faq-card border border-base-300 opacity-0"
+                            className="faq-card border border-base-300"
                         >
                             <button
                                 onClick={() => setOpenIndex(openIndex === i ? null : i)}

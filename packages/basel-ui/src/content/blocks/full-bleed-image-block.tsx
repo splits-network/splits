@@ -5,7 +5,7 @@ export function FullBleedImageBlockComponent({ block }: { block: FullBleedImageB
 
     return (
         <section
-            className="inline-image relative overflow-hidden opacity-0 max-h-[60vh] sm:max-h-none"
+            className="inline-image relative overflow-hidden max-h-[60vh] sm:max-h-none"
             style={{ minHeight: height }}
         >
             <img

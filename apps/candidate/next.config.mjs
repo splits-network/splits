@@ -25,6 +25,21 @@ const nextConfig = {
                 destination: "/terms-of-service",
                 permanent: true,
             },
+            {
+                source: "/privacy",
+                destination: "/privacy-policy",
+                permanent: true,
+            },
+            {
+                source: "/cookies",
+                destination: "/cookie-policy",
+                permanent: true,
+            },
+            {
+                source: "/terms",
+                destination: "/terms-of-service",
+                permanent: true,
+            },
         ];
     },
 };

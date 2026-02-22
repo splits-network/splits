@@ -140,6 +140,8 @@ export {
     type BaselArticleRendererProps,
     BaselArticleAnimated,
     type BaselArticleAnimatedProps,
+    BaselArticleAnimationWrapper,
+    type BaselArticleAnimationWrapperProps,
     useArticleAnimations,
 } from './content';
 

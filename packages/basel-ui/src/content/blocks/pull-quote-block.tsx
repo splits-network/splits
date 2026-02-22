@@ -13,7 +13,7 @@ export function PullQuoteBlockComponent({ block }: { block: PullQuoteBlock; inde
     const isCentered = block.style === 'centered';
 
     return (
-        <section className={`pull-quote-block py-20 ${theme.bg} ${theme.text} opacity-0`}>
+        <section className={`pull-quote-block py-20 ${theme.bg} ${theme.text}`}>
             <div className="container mx-auto px-6 lg:px-12">
                 <div
                     className={`max-w-4xl mx-auto ${

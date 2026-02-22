@@ -23,6 +23,8 @@ export interface BaselSidebarNavItem {
     expanded?: boolean;
     /** Called when expand/collapse is toggled */
     onToggle?: () => void;
+    /** Show a "NEW" indicator pill next to the label */
+    isNew?: boolean;
 }
 
 export interface BaselSidebarSection {
@@ -110,6 +112,11 @@ function SidebarNavItem({
                         }`}
                     />
                     <span className="flex-1">{item.label}</span>
+                    {item.isNew && (
+                        <span className="px-1.5 py-0.5 bg-accent text-accent-content text-[8px] font-black uppercase tracking-wider leading-none">
+                            New
+                        </span>
+                    )}
                     {item.badge !== undefined && item.badge > 0 && (
                         <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-[10px] font-bold px-1">
                             {item.badge > 99 ? "99+" : item.badge}
@@ -139,6 +146,13 @@ function SidebarNavItem({
                         }`}
                     />
                     <span className="flex-1 text-left">{item.label}</span>
+
+                    {/* New indicator */}
+                    {item.isNew && (
+                        <span className="px-1.5 py-0.5 bg-accent text-accent-content text-[8px] font-black uppercase tracking-wider leading-none">
+                            New
+                        </span>
+                    )}
 
                     {/* Aggregate badge */}
                     {item.badge !== undefined && item.badge > 0 && (
@@ -195,6 +209,13 @@ function SidebarNavItem({
                     className={`${item.icon} w-5 text-center ${item.active ? "" : "opacity-60"}`}
                 />
                 <span className="flex-1">{item.label}</span>
+
+                {/* New indicator */}
+                {item.isNew && (
+                    <span className="px-1.5 py-0.5 bg-accent text-accent-content text-[8px] font-black uppercase tracking-wider leading-none">
+                        New
+                    </span>
+                )}
 
                 {/* Badge */}
                 {item.badge !== undefined && item.badge > 0 && (

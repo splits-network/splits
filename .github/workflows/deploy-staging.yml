@@ -51,6 +51,8 @@ jobs:
                       path: services/gpt-service
                     - name: content-service
                       path: services/content-service
+                    - name: integration-service
+                      path: services/integration-service
                     - name: health-monitor
                       path: services/health-monitor
                     - name: portal
@@ -291,6 +293,18 @@ jobs:
                     --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
+                  kubectl create secret generic integration-secrets \
+                    --from-literal=google-calendar-client-id="${{ secrets.GOOGLE_CALENDAR_CLIENT_ID }}" \
+                    --from-literal=google-calendar-client-secret="${{ secrets.GOOGLE_CALENDAR_CLIENT_SECRET }}" \
+                    --from-literal=microsoft-calendar-client-id="${{ secrets.MICROSOFT_CALENDAR_CLIENT_ID }}" \
+                    --from-literal=microsoft-calendar-client-secret="${{ secrets.MICROSOFT_CALENDAR_CLIENT_SECRET }}" \
+                    --from-literal=google-email-client-id="${{ secrets.GOOGLE_EMAIL_CLIENT_ID }}" \
+                    --from-literal=google-email-client-secret="${{ secrets.GOOGLE_EMAIL_CLIENT_SECRET }}" \
+                    --from-literal=microsoft-email-client-id="${{ secrets.MICROSOFT_EMAIL_CLIENT_ID }}" \
+                    --from-literal=microsoft-email-client-secret="${{ secrets.MICROSOFT_EMAIL_CLIENT_SECRET }}" \
+                    --namespace=${{ env.NAMESPACE }} \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
             - name: Update image tags in manifests
               run: |
                   export IMAGE_TAG=${{ github.sha }}
@@ -336,7 +350,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway analytics-gateway chat-service gpt-service content-service health-monitor"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway analytics-gateway chat-service gpt-service content-service integration-service health-monitor"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
@@ -367,6 +381,7 @@ jobs:
                   kubectl rollout status deployment/health-monitor --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/gpt-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/content-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/integration-service --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
               run: |
