@@ -16,7 +16,7 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
-import UniversalSubmitCandidateWizard from "@/app/portal/applications/components/wizards/universal-submit-candidate-wizard";
+import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 
 export default function ApplicationsBaselPage() {
     const searchParams = useSearchParams();
@@ -214,8 +214,8 @@ export default function ApplicationsBaselPage() {
                 </div>
             </section>
 
-            {/* Submit Candidate Wizard (reuse original) */}
-            <UniversalSubmitCandidateWizard
+            {/* Submit Candidate Wizard */}
+            <BaselSubmitCandidateWizard
                 isOpen={showSubmitWizard}
                 onClose={() => setShowSubmitWizard(false)}
                 onSuccess={() => {

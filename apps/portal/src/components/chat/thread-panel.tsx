@@ -400,8 +400,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
               : "Type your message...";
 
     return (
-        <div className="flex h-full flex-col">
-            <div className="flex-1 min-h-0 flex flex-col gap-4 p-4">
+        <div className="flex h-full flex-col max-h-[80vh]">
+            <div className="flex-1 min-h-0 flex flex-col gap-4 p-4 overflow-auto">
                 {/* Context Links */}
                 {(data.conversation.application_id ||
                     data.conversation.job_id ||

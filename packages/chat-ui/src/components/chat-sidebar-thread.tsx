@@ -8,14 +8,6 @@ export interface ChatSidebarThreadProps {
     children: ReactNode;
 }
 
-export function ChatSidebarThread({
-    children,
-}: ChatSidebarThreadProps) {
-    return (
-        <div className="flex flex-col h-full">
-            <div className="flex-1 min-h-0 overflow-hidden">
-                {children}
-            </div>
-        </div>
-    );
+export function ChatSidebarThread({ children }: ChatSidebarThreadProps) {
+    return <>{children}</>;
 }

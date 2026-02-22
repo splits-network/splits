@@ -16,7 +16,7 @@ import {
 } from "@splits-network/basel-ui";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
-import AddNoteModal from "../modals/add-note-modal";
+import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
 import HireModal from "../modals/hire-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
@@ -386,8 +386,9 @@ export default function ActionsToolbar({
                 jobTitle={application.job?.title || "Unknown"}
                 gateName={permissions.stageLabel}
             />
-            {showNoteModal && profile?.clerk_user_id && (
-                <AddNoteModal
+            {profile?.clerk_user_id && (
+                <BaselAddNoteModal
+                    isOpen={showNoteModal}
                     applicationId={application.id}
                     currentUserId={profile.clerk_user_id}
                     creatorType={getCreatorType()}
