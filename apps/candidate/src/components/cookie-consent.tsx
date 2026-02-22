@@ -173,14 +173,14 @@ export default function CookieConsent() {
                                     All", you consent to our use of cookies.
                                     Learn more in our{" "}
                                     <Link
-                                        href="/cookies"
+                                        href="/cookie-policy"
                                         className="link link-primary"
                                     >
                                         Cookie Policy
                                     </Link>{" "}
                                     and{" "}
                                     <Link
-                                        href="/privacy"
+                                        href="/privacy-policy"
                                         className="link link-primary"
                                     >
                                         Privacy Policy
@@ -394,7 +394,7 @@ function CookiePreferences({
                     <p className="text-xs text-base-content/60 mt-4">
                         For more information, read our{" "}
                         <Link
-                            href="/cookies"
+                            href="/cookie-policy"
                             className="link link-primary"
                             onClick={onClose}
                         >
@@ -402,7 +402,7 @@ function CookiePreferences({
                         </Link>{" "}
                         and{" "}
                         <Link
-                            href="/privacy"
+                            href="/privacy-policy"
                             className="link link-primary"
                             onClick={onClose}
                         >

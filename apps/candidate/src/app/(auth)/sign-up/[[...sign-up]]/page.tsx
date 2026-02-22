@@ -440,11 +440,11 @@ export default function SignUpPage() {
             {/* Terms */}
             <p className="text-center text-xs text-base-content/40 mt-4">
                 By signing up, you agree to our{" "}
-                <Link href="/terms" className="text-primary hover:underline">
+                <Link href="/terms-of-service" className="text-primary hover:underline">
                     Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
+                <Link href="/privacy-policy" className="text-primary hover:underline">
                     Privacy Policy
                 </Link>
             </p>

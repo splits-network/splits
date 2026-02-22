@@ -12,7 +12,7 @@ export function TimelineBlockComponent({ block }: { block: TimelineBlock; index:
         <section className={`py-20 overflow-hidden ${bg}`}>
             <div className="container mx-auto px-6 lg:px-12">
                 {(block.heading || block.kicker) && (
-                    <div className="article-block text-center mb-16 opacity-0">
+                    <div className="article-block text-center mb-16">
                         {block.kicker && (
                             <span className="inline-block px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] mb-4 bg-secondary text-secondary-content">
                                 {block.kicker}
@@ -35,7 +35,7 @@ export function TimelineBlockComponent({ block }: { block: TimelineBlock; index:
                     {block.steps.map((step, i) => (
                         <div
                             key={i}
-                            className="article-block relative flex gap-6 pb-12 last:pb-0 opacity-0"
+                            className="article-block relative flex gap-6 pb-12 last:pb-0"
                         >
                             {/* Timeline line */}
                             {i < block.steps.length - 1 && (

@@ -28,6 +28,7 @@ interface NavItemData {
     children?: NavItemData[];
     expandable?: boolean;
     shortcut?: string;
+    isNew?: boolean;
 }
 
 // ─── Navigation Items ───────────────────────────────────────────────────────
@@ -194,6 +195,13 @@ const navItems: NavItemData[] = [
         label: "Company",
         icon: "fa-duotone fa-regular fa-building",
         roles: ["company_admin", "hiring_manager"],
+        section: "settings",
+    },
+    {
+        href: "/portal/teams",
+        label: "Teams",
+        icon: "fa-duotone fa-regular fa-users",
+        roles: ["recruiter", "platform_admin"],
         section: "settings",
     },
 ];
@@ -387,7 +395,10 @@ export function Sidebar() {
                 icon: item.icon,
                 active: isActive,
                 badge: childBadge ?? badges[item.href],
-                shortcutHint: item.shortcut ? `Alt+${item.shortcut}` : undefined,
+                shortcutHint: item.shortcut
+                    ? `Alt+${item.shortcut}`
+                    : undefined,
+                isNew: item.isNew,
                 children: item.children?.map(mapItem),
                 expanded: expandedItems.has(item.href),
                 onToggle: item.expandable

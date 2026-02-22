@@ -37,6 +37,33 @@ export function ControlsBar({
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                     {/* Search + Filters */}
                     <div className="flex flex-wrap gap-3 items-center flex-1">
+                        {/* My Roles / All Roles toggle */}
+                        <div className="flex bg-base-200 p-0.5">
+                            {(
+                                [
+                                    { value: "assigned", label: "My Roles" },
+                                    { value: "all", label: "All Roles" },
+                                ] as const
+                            ).map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    onClick={() =>
+                                        onFilterChange(
+                                            "job_owner_filter",
+                                            value,
+                                        )
+                                    }
+                                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                                        filters.job_owner_filter === value
+                                            ? "bg-primary text-primary-content"
+                                            : "text-base-content/50 hover:text-base-content"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+
                         {/* Search */}
                         <div className="relative flex-1 min-w-[200px] max-w-md">
                             <i className="fa-duotone fa-regular fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 text-sm" />

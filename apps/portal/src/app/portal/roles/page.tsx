@@ -95,7 +95,7 @@ export default function RolesPage() {
         updateItem,
     } = useStandardList<Job, UnifiedJobFilters>({
         endpoint: "/jobs",
-        defaultFilters: { status: undefined, job_owner_filter: "all" },
+        defaultFilters: { status: undefined, job_owner_filter: "assigned" },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
         defaultLimit: 24,

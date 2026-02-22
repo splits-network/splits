@@ -651,6 +651,39 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  integration-service:
+    build:
+      context: .
+      dockerfile: services/integration-service/Dockerfile
+      target: development
+    container_name: splits-integration-service
+    ports:
+      - "3016:3016"
+    environment:
+      NODE_ENV: development
+      PORT: 3016
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      GOOGLE_CALENDAR_CLIENT_ID: ${GOOGLE_CALENDAR_CLIENT_ID}
+      GOOGLE_CALENDAR_CLIENT_SECRET: ${GOOGLE_CALENDAR_CLIENT_SECRET}
+      MICROSOFT_CALENDAR_CLIENT_ID: ${MICROSOFT_CALENDAR_CLIENT_ID}
+      MICROSOFT_CALENDAR_CLIENT_SECRET: ${MICROSOFT_CALENDAR_CLIENT_SECRET}
+      GOOGLE_EMAIL_CLIENT_ID: ${GOOGLE_EMAIL_CLIENT_ID}
+      GOOGLE_EMAIL_CLIENT_SECRET: ${GOOGLE_EMAIL_CLIENT_SECRET}
+      MICROSOFT_EMAIL_CLIENT_ID: ${MICROSOFT_EMAIL_CLIENT_ID}
+      MICROSOFT_EMAIL_CLIENT_SECRET: ${MICROSOFT_EMAIL_CLIENT_SECRET}
+    volumes:
+      - ./services/integration-service/src:/app/services/integration-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   api-gateway:
     build:
       context: .
@@ -681,6 +714,7 @@ services:
       SEARCH_SERVICE_URL: http://search-service:3013
       GPT_SERVICE_URL: http://gpt-service:3014
       CONTENT_SERVICE_URL: http://content-service:3015
+      INTEGRATION_SERVICE_URL: http://integration-service:3016
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

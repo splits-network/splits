@@ -111,6 +111,8 @@ spec:
                         value: "http://gpt-service:80"
                       - name: CONTENT_SERVICE_URL
                         value: "http://content-service:3015"
+                      - name: INTEGRATION_SERVICE_URL
+                        value: "http://integration-service:80"
                   resources:
                       requests:
                           cpu: 200m

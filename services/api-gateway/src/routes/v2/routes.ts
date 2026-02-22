@@ -19,6 +19,7 @@ import { registerSiteNotificationRoutes } from './site-notifications';
 import { registerGptRoutes } from './gpt';
 import { registerContentRoutes } from './content';
 import { registerOnboardingRoutes } from './onboarding';
+import { registerIntegrationRoutes } from './integrations';
 import { EventPublisher } from '../../events/event-publisher';
 
 export function registerV2GatewayRoutes(
@@ -44,6 +45,7 @@ export function registerV2GatewayRoutes(
     registerPresenceRoutes(app, services);
     registerSearchRoutes(app, services);
     registerContentRoutes(app, services);
+    registerIntegrationRoutes(app, services);
     registerStatusRoutes(app, options?.eventPublisher || null);
 
     if (options?.redis && options?.supabase) {

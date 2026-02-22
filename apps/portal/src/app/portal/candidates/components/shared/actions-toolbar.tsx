@@ -16,6 +16,7 @@ import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-u
 import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
+import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -28,6 +29,7 @@ export interface CandidateActionsToolbarProps {
         viewDetails?: boolean;
         message?: boolean;
         sendJobOpportunity?: boolean;
+        scheduleInterview?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
     };
@@ -67,6 +69,7 @@ export default function CandidateActionsToolbar({
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
 
     /* ── Loading states ── */
     const [startingChat, setStartingChat] = useState(false);
@@ -163,6 +166,8 @@ export default function CandidateActionsToolbar({
         message: showActions.message !== false,
         sendJobOpportunity:
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
+        scheduleInterview:
+            showActions.scheduleInterview !== false && (isRecruiter || isAdmin),
         verify: showActions.verify !== false && canVerifyCandidate,
         endRepresentation:
             showActions.endRepresentation !== false &&
@@ -209,6 +214,17 @@ export default function CandidateActionsToolbar({
                     }}
                 />
             )}
+            {showScheduleModal && (
+                <ScheduleInterviewModal
+                    candidateName={candidate.full_name || "Unknown"}
+                    candidateEmail={candidate.email || undefined}
+                    onClose={() => setShowScheduleModal(false)}
+                    onSuccess={() => {
+                        setShowScheduleModal(false);
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
 
@@ -224,6 +240,15 @@ export default function CandidateActionsToolbar({
                 label: "Send Job Opportunity",
                 variant: "btn-primary",
                 onClick: () => setShowSubmitWizard(true),
+            });
+        }
+        if (actions.scheduleInterview) {
+            speedDialActions.push({
+                key: "schedule-interview",
+                icon: "fa-duotone fa-regular fa-calendar-plus",
+                label: "Schedule Interview",
+                variant: "btn-info",
+                onClick: () => setShowScheduleModal(true),
             });
         }
         if (actions.verify && candidate.verification_status !== "verified") {
@@ -312,6 +337,19 @@ export default function CandidateActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
                         <span className="hidden md:inline">Send Job</span>
+                    </button>
+                )}
+
+                {/* Schedule Interview */}
+                {actions.scheduleInterview && (
+                    <button
+                        onClick={() => setShowScheduleModal(true)}
+                        className={`btn ${getSizeClass()} btn-info gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Schedule Interview"
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-plus" />
+                        <span className="hidden md:inline">Schedule</span>
                     </button>
                 )}
 

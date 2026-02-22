@@ -5,7 +5,7 @@ export function InlineImageBlockComponent({ block }: { block: InlineImageBlock; 
 
     return (
         <section
-            className="inline-image relative overflow-hidden opacity-0 max-h-[60vh] sm:max-h-none"
+            className="inline-image relative overflow-hidden max-h-[60vh] sm:max-h-none"
             style={{ minHeight: height }}
         >
             <img

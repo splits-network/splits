@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useUserProfile } from "@/contexts";
@@ -43,6 +44,7 @@ interface NavItem {
     key: Section;
     label: string;
     icon: string;
+    href?: string; // External link instead of inline section
 }
 
 interface NavGroup {
@@ -50,7 +52,7 @@ interface NavGroup {
     items: NavItem[];
 }
 
-const COMING_SOON: Section[] = ["notifications", "integrations", "admin"];
+const COMING_SOON: Section[] = ["notifications", "admin"];
 
 const MARKETPLACE_SECTIONS: Section[] = [
     "marketplace",
@@ -166,6 +168,7 @@ export default function ProfileBaselPage() {
                 key: "integrations",
                 label: "Integrations",
                 icon: "fa-duotone fa-regular fa-plug",
+                href: "/portal/integrations-basel",
             });
         }
 
@@ -302,34 +305,48 @@ export default function ProfileBaselPage() {
 
                             {/* Group items */}
                             <div className="space-y-1">
-                                {group.items.map((item) => (
-                                    <button
-                                        key={item.key}
-                                        onClick={() =>
-                                            setActive(item.key)
-                                        }
-                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
-                                            active === item.key
-                                                ? "bg-primary text-primary-content"
-                                                : "text-base-content/60 hover:bg-base-200"
-                                        }`}
-                                    >
-                                        <i
-                                            className={`${item.icon} w-4 text-center`}
-                                        />
-                                        {item.label}
-                                        {COMING_SOON.includes(
-                                            item.key,
-                                        ) && (
-                                            <BaselStatusPill
-                                                color="warning"
-                                                className="ml-auto"
-                                            >
-                                                Soon
-                                            </BaselStatusPill>
-                                        )}
-                                    </button>
-                                ))}
+                                {group.items.map((item) =>
+                                    item.href ? (
+                                        <Link
+                                            key={item.key}
+                                            href={item.href}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left text-base-content/60 hover:bg-base-200"
+                                        >
+                                            <i
+                                                className={`${item.icon} w-4 text-center`}
+                                            />
+                                            {item.label}
+                                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-[10px] ml-auto text-base-content/30" />
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            key={item.key}
+                                            onClick={() =>
+                                                setActive(item.key)
+                                            }
+                                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
+                                                active === item.key
+                                                    ? "bg-primary text-primary-content"
+                                                    : "text-base-content/60 hover:bg-base-200"
+                                            }`}
+                                        >
+                                            <i
+                                                className={`${item.icon} w-4 text-center`}
+                                            />
+                                            {item.label}
+                                            {COMING_SOON.includes(
+                                                item.key,
+                                            ) && (
+                                                <BaselStatusPill
+                                                    color="warning"
+                                                    className="ml-auto"
+                                                >
+                                                    Soon
+                                                </BaselStatusPill>
+                                            )}
+                                        </button>
+                                    ),
+                                )}
                             </div>
                         </div>
                     ))}

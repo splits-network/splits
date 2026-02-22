@@ -25,14 +25,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                 '(prefers-reduced-motion: reduce)'
             ).matches;
 
-            if (prefersReducedMotion) {
-                containerRef.current
-                    .querySelectorAll('.opacity-0')
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = '1';
-                    });
-                return;
-            }
+            if (prefersReducedMotion) return;
 
             const $ = (sel: string) =>
                 containerRef.current!.querySelectorAll(sel);

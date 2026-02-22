@@ -12,7 +12,7 @@ export function ArticleBodyBlockComponent({ block }: { block: ArticleBodyBlock; 
     return (
         <section className={`py-16 lg:py-28 ${bg}`}>
             <div className="container mx-auto px-6 lg:px-12">
-                <div className="article-block max-w-3xl mx-auto opacity-0">
+                <div className="article-block max-w-3xl mx-auto">
                     {block.kicker && (
                         <p
                             className={`text-sm font-semibold uppercase tracking-[0.2em] ${kickerColor} mb-4`}

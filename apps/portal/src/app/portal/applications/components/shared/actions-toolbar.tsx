@@ -20,6 +20,7 @@ import AddNoteModal from "../modals/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
 import HireModal from "../modals/hire-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
+import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -96,6 +97,7 @@ export default function ActionsToolbar({
     const [showPreScreenModal, setShowPreScreenModal] = useState(false);
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -355,6 +357,9 @@ export default function ActionsToolbar({
         requestChanges:
             showActions.requestChanges !== false &&
             permissions.canRequestChanges,
+        scheduleInterview:
+            (isRecruiter || isAdmin) &&
+            ["screen", "company_review", "interview", "offer"].includes(application.stage ?? ""),
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -424,6 +429,18 @@ export default function ActionsToolbar({
                 candidateName={application.candidate?.full_name || "Unknown"}
                 jobTitle={application.job?.title || "Unknown"}
             />
+            {showScheduleModal && (
+                <ScheduleInterviewModal
+                    candidateName={application.candidate?.full_name || "Unknown"}
+                    candidateEmail={application.candidate?.email || undefined}
+                    jobTitle={application.job?.title || undefined}
+                    onClose={() => setShowScheduleModal(false)}
+                    onSuccess={() => {
+                        setShowScheduleModal(false);
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
 
@@ -448,6 +465,15 @@ export default function ActionsToolbar({
                 variant: "btn-warning",
                 disabled: actionLoading,
                 onClick: () => setShowPreScreenModal(true),
+            });
+        }
+        if (actions.scheduleInterview) {
+            speedDialActions.push({
+                key: "schedule-interview",
+                icon: "fa-duotone fa-regular fa-calendar-plus",
+                label: "Schedule Interview",
+                variant: "btn-info",
+                onClick: () => setShowScheduleModal(true),
             });
         }
         if (actions.requestChanges) {
@@ -598,6 +624,15 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
+        if (actions.scheduleInterview) {
+            speedDialActions.push({
+                key: "schedule-interview",
+                icon: "fa-duotone fa-regular fa-calendar-plus",
+                label: "Schedule Interview",
+                variant: "btn-info",
+                onClick: () => setShowScheduleModal(true),
+            });
+        }
         if (actions.requestPrescreen) {
             speedDialActions.push({
                 key: "prescreen",
@@ -662,6 +697,16 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-user-check" />
                         Request Pre-Screen
+                    </button>
+                )}
+                {actions.scheduleInterview && (
+                    <button
+                        onClick={() => setShowScheduleModal(true)}
+                        className={`btn ${sizeClass} btn-info gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-plus" />
+                        Schedule
                     </button>
                 )}
                 {actions.requestChanges && (
