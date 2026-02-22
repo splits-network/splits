@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { buildCanonical } from "@/lib/seo";
+import LegalPageAnimations from "../legal-page-animations";
 import PrivacyPolicyContent from "./content";
 
 export const metadata: Metadata = {
@@ -16,5 +17,9 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-    return <PrivacyPolicyContent />;
+    return (
+        <LegalPageAnimations>
+            <PrivacyPolicyContent />
+        </LegalPageAnimations>
+    );
 }
