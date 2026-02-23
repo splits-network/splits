@@ -103,18 +103,15 @@ const partnershipOpportunities = [
         features: [
             {
                 title: "API Access",
-                description:
-                    "Full API documentation and integration support",
+                description: "Full API documentation and integration support",
             },
             {
                 title: "Marketplace Listing",
-                description:
-                    "Featured placement in our integrations directory",
+                description: "Featured placement in our integrations directory",
             },
             {
                 title: "Technical Support",
-                description:
-                    "Dedicated support for integration development",
+                description: "Dedicated support for integration development",
             },
         ],
     },
@@ -131,13 +128,11 @@ const partnershipOpportunities = [
             },
             {
                 title: "Co-Branded Experience",
-                description:
-                    "Association branding and customized onboarding",
+                description: "Association branding and customized onboarding",
             },
             {
                 title: "Education Programs",
-                description:
-                    "Joint training and certification opportunities",
+                description: "Joint training and certification opportunities",
             },
         ],
     },
@@ -189,18 +184,14 @@ export function PartnersBaselContent() {
                 "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
+                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
+                    (el as HTMLElement).style.opacity = "1";
+                });
                 return;
             }
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             /* ── HERO ──────────────────────────────────────────── */
             const heroTl = gsap.timeline({
@@ -448,8 +439,7 @@ export function PartnersBaselContent() {
                 <div
                     className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
                     style={{
-                        clipPath:
-                            "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                 >
                     <img
@@ -461,7 +451,7 @@ export function PartnersBaselContent() {
                 </div>
 
                 {/* Content panel -- 60% on desktop */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
                             <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
@@ -486,14 +476,16 @@ export function PartnersBaselContent() {
 
                         <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 opacity-0">
                             {/* COPY: Hero subtitle describing the partner program */}
-                            Splits Network is building its founding partner cohort. Recruiting firms, technology providers, and industry associations that join now shape the platform from the inside.
+                            Splits Network is building its founding partner
+                            cohort. Recruiting firms, technology providers, and
+                            industry associations that join now shape the
+                            platform from the inside.
                         </p>
 
                         <div className="flex flex-wrap items-center gap-6">
                             <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
                                 <i className="fa-duotone fa-regular fa-users mr-1"></i>
-                                {/* COPY: Meta item 1 */}
-                                3 Partnership Tiers
+                                {/* COPY: Meta item 1 */}3 Partnership Tiers
                             </span>
                             <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
                                 <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
@@ -523,7 +515,8 @@ export function PartnersBaselContent() {
                 <div className="absolute bottom-6 left-6 lg:left-12">
                     <span className="text-sm uppercase tracking-[0.2em] text-white/70">
                         {/* COPY: Caption for first full-bleed image */}
-                        Partnerships built on shared infrastructure, not handshake deals
+                        Partnerships built on shared infrastructure, not
+                        handshake deals
                     </span>
                 </div>
             </section>
@@ -549,11 +542,22 @@ export function PartnersBaselContent() {
                             <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                                 <p>
                                     {/* COPY: Section 1 body paragraph 1 -- describe the partner ecosystem vision */}
-                                    Split-fee recruiting runs on trust, speed, and reach. No single firm has all three at scale. The Splits Network partner program connects recruiting organizations, technology providers, and industry associations into a shared infrastructure where each partner strengthens the others.
+                                    Split-fee recruiting runs on trust, speed,
+                                    and reach. No single firm has all three at
+                                    scale. The Splits Network partner program
+                                    connects recruiting organizations,
+                                    technology providers, and industry
+                                    associations into a shared infrastructure
+                                    where each partner strengthens the others.
                                 </p>
                                 <p>
                                     {/* COPY: Section 1 body paragraph 2 -- describe partnership value proposition */}
-                                    This is a founding cohort, not an open marketplace. Partners who join now get direct input on product direction, priority API access, and revenue share terms that reward early commitment. The window is intentionally small. The impact is not.
+                                    This is a founding cohort, not an open
+                                    marketplace. Partners who join now get
+                                    direct input on product direction, priority
+                                    API access, and revenue share terms that
+                                    reward early commitment. The window is
+                                    intentionally small. The impact is not.
                                 </p>
                             </div>
                         </div>
@@ -613,11 +617,14 @@ export function PartnersBaselContent() {
                             <i className="fa-duotone fa-regular fa-quote-left text-4xl text-secondary/30 mb-6 block"></i>
                             <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
                                 {/* COPY: Pull quote 1 -- about the value of partnership in recruiting */}
-                                &ldquo;Every recruiter has a network. The ones who win are the ones who connect their network to a bigger one.&rdquo;
+                                &ldquo;Every recruiter has a network. The ones
+                                who win are the ones who connect their network
+                                to a bigger one.&rdquo;
                             </blockquote>
                             <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
                                 {/* COPY: Pull quote 1 attribution */}
-                                -- The case for structured split-fee partnerships
+                                -- The case for structured split-fee
+                                partnerships
                             </cite>
                         </div>
                     </div>
@@ -662,7 +669,10 @@ export function PartnersBaselContent() {
 
                             <div className="space-y-8">
                                 {benefitCategories.map((benefit, i) => (
-                                    <div key={i} className="flex items-start gap-4">
+                                    <div
+                                        key={i}
+                                        className="flex items-start gap-4"
+                                    >
                                         <div className="w-10 h-10 flex-shrink-0 bg-secondary/10 flex items-center justify-center rounded-none">
                                             <i
                                                 className={`${benefit.icon} text-secondary`}
@@ -680,9 +690,7 @@ export function PartnersBaselContent() {
                                                             className="text-sm text-base-content/60 leading-relaxed flex items-start gap-2"
                                                         >
                                                             <i className="fa-duotone fa-regular fa-check text-secondary mt-0.5 text-xs"></i>
-                                                            <span>
-                                                                {item}
-                                                            </span>
+                                                            <span>{item}</span>
                                                         </li>
                                                     ),
                                                 )}
@@ -783,7 +791,9 @@ export function PartnersBaselContent() {
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
                         <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
                             {/* COPY: Pull quote 2 -- about partnership impact on recruiting */}
-                            &ldquo;One platform. Shared infrastructure. Every partner makes the network more valuable for every other partner.&rdquo;
+                            &ldquo;One platform. Shared infrastructure. Every
+                            partner makes the network more valuable for every
+                            other partner.&rdquo;
                         </blockquote>
                         <cite className="text-sm uppercase tracking-[0.2em] text-primary-content/50 not-italic">
                             {/* COPY: Pull quote 2 attribution */}
@@ -893,7 +903,11 @@ export function PartnersBaselContent() {
                         </h2>
                         <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
                             {/* COPY: CTA subtitle */}
-                            The partner program is accepting applications from recruiting firms, technology providers, and industry associations. Early partners get priority terms, direct product input, and founding-tier revenue share.
+                            The partner program is accepting applications from
+                            recruiting firms, technology providers, and industry
+                            associations. Early partners get priority terms,
+                            direct product input, and founding-tier revenue
+                            share.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">

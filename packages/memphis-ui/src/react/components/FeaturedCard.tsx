@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface FeaturedCardProps {
     /** Main title */
@@ -36,26 +36,26 @@ export function FeaturedCard({
     subtitle,
     description,
     tags = [],
-    accent = 'coral',
-    bannerLabel = 'Featured',
+    accent = "coral",
+    bannerLabel = "Featured",
     primaryAction,
     secondaryAction,
     metadata,
-    className = '',
+    className = "",
 }: FeaturedCardProps) {
     return (
         <div
             className={[
-                'border-4 p-0 relative overflow-hidden bg-white',
+                "border-4 p-0 relative overflow-hidden bg-white",
                 `accent-${accent}`,
-                'border-accent',
+                "border-accent",
                 className,
-            ].filter(Boolean).join(' ')}
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             {bannerLabel && (
-                <div
-                    className="absolute top-0 right-0 px-4 py-1.5 text-xs font-black uppercase tracking-wider z-10 bg-accent text-on-accent"
-                >
+                <div className="absolute top-0 right-0 px-4 py-1.5 text-xs font-black uppercase tracking-wider  bg-accent text-on-accent">
                     <i className="fa-duotone fa-regular fa-star mr-1" />
                     {bannerLabel}
                 </div>
@@ -64,14 +64,10 @@ export function FeaturedCard({
             <div className="grid md:grid-cols-3">
                 {/* Left accent panel */}
                 <div className="p-8 flex flex-col justify-center bg-accent">
-                    <h3
-                        className="text-3xl font-black uppercase tracking-tight leading-[1.1] mb-3 text-on-accent"
-                    >
+                    <h3 className="text-3xl font-black uppercase tracking-tight leading-[1.1] mb-3 text-on-accent">
                         {title}
                     </h3>
-                    <p
-                        className="text-sm font-semibold mb-4 text-on-accent opacity-80"
-                    >
+                    <p className="text-sm font-semibold mb-4 text-on-accent opacity-80">
                         {subtitle}
                     </p>
                     {tags.length > 0 && (
@@ -90,9 +86,7 @@ export function FeaturedCard({
 
                 {/* Right content */}
                 <div className="md:col-span-2 p-8">
-                    <p
-                        className="text-sm leading-relaxed mb-6 text-dark opacity-70"
-                    >
+                    <p className="text-sm leading-relaxed mb-6 text-dark opacity-70">
                         {description}
                     </p>
                     {metadata && <div className="mb-6">{metadata}</div>}

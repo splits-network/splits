@@ -44,7 +44,8 @@ export function HeroSection() {
             );
 
             // Platform badges stagger in
-            const platforms = platformsRef.current?.querySelectorAll(".platform-badge");
+            const platforms =
+                platformsRef.current?.querySelectorAll(".platform-badge");
             if (platforms) {
                 tl.fromTo(
                     platforms,
@@ -107,7 +108,7 @@ export function HeroSection() {
             <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
             <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
 
-            <div className="container mx-auto px-4 relative z-10 py-20">
+            <div className="container mx-auto px-4 relative  py-20">
                 <div className="max-w-5xl mx-auto text-center">
                     <h1
                         ref={headlineRef}
@@ -139,7 +140,9 @@ export function HeroSection() {
                                 className="h-8"
                             />
                             <div className="text-left">
-                                <div className="font-semibold">Splits Network</div>
+                                <div className="font-semibold">
+                                    Splits Network
+                                </div>
                                 <div className="text-sm text-base-content/60">
                                     For Recruiters & Companies
                                 </div>
@@ -152,7 +155,9 @@ export function HeroSection() {
                                 className="h-8"
                             />
                             <div className="text-left">
-                                <div className="font-semibold">Applicant Network</div>
+                                <div className="font-semibold">
+                                    Applicant Network
+                                </div>
                                 <div className="text-sm text-base-content/60">
                                     For Job Seekers
                                 </div>
@@ -166,7 +171,9 @@ export function HeroSection() {
                     >
                         <a
                             href="#for-recruiters"
-                            onClick={(e) => handleSmoothScroll(e, "#for-recruiters")}
+                            onClick={(e) =>
+                                handleSmoothScroll(e, "#for-recruiters")
+                            }
                             className="btn btn-primary btn-lg gap-2 shadow-lg opacity-0"
                         >
                             <i className="fa-duotone fa-regular fa-user-tie"></i>
@@ -174,7 +181,9 @@ export function HeroSection() {
                         </a>
                         <a
                             href="#for-candidates"
-                            onClick={(e) => handleSmoothScroll(e, "#for-candidates")}
+                            onClick={(e) =>
+                                handleSmoothScroll(e, "#for-candidates")
+                            }
                             className="btn btn-secondary btn-lg gap-2 shadow-lg opacity-0"
                         >
                             <i className="fa-duotone fa-regular fa-user"></i>
@@ -182,7 +191,9 @@ export function HeroSection() {
                         </a>
                         <a
                             href="#for-companies"
-                            onClick={(e) => handleSmoothScroll(e, "#for-companies")}
+                            onClick={(e) =>
+                                handleSmoothScroll(e, "#for-companies")
+                            }
                             className="btn btn-outline btn-lg gap-2 opacity-0"
                         >
                             <i className="fa-duotone fa-regular fa-building"></i>

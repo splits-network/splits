@@ -123,7 +123,7 @@ export default function OnboardingOne() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10">
+                <div className="relative ">
                     <div className="onboard-logo opacity-0 mb-16">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
@@ -144,7 +144,7 @@ export default function OnboardingOne() {
                 </div>
 
                 {/* Progress Steps */}
-                <div className="relative z-10 space-y-3">
+                <div className="relative  space-y-3">
                     {steps.map((step) => (
                         <div
                             key={step.id}

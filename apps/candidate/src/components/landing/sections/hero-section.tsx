@@ -114,7 +114,7 @@ export function HeroSection() {
             </video>
 
             {/* Content */}
-            <div className="hero-content text-center max-w-6xl relative z-10 py-20">
+            <div className="hero-content text-center max-w-6xl relative  py-20">
                 <div className="space-y-8">
                     <h1
                         ref={headlineRef}

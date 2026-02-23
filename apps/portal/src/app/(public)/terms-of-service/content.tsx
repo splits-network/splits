@@ -42,8 +42,7 @@ export default function TermsOfServiceContent() {
                 <div
                     className="hero-img-wrap absolute inset-0 lg:left-[58%]"
                     style={{
-                        clipPath:
-                            "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                 >
                     <img
@@ -55,7 +54,7 @@ export default function TermsOfServiceContent() {
                 </div>
 
                 {/* Content panel -- 60% on desktop */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6">
                             <i className="fa-duotone fa-regular fa-file-contract mr-2"></i>
@@ -145,30 +144,37 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                By accessing, browsing, or using the Splits Network platform
-                                (the &ldquo;Platform&rdquo;), operated by Employment Networks, Inc.
-                                (&ldquo;Splits Network,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo;
-                                or &ldquo;our&rdquo;), you acknowledge that you have read,
-                                understood, and agree to be bound by these Terms of Service
-                                (&ldquo;Terms&rdquo;). If you do not agree to these Terms, you must
-                                not access or use the Platform.
+                                By accessing, browsing, or using the Splits
+                                Network platform (the &ldquo;Platform&rdquo;),
+                                operated by Employment Networks, Inc.
+                                (&ldquo;Splits Network,&rdquo; &ldquo;we,&rdquo;
+                                &ldquo;us,&rdquo; or &ldquo;our&rdquo;), you
+                                acknowledge that you have read, understood, and
+                                agree to be bound by these Terms of Service
+                                (&ldquo;Terms&rdquo;). If you do not agree to
+                                these Terms, you must not access or use the
+                                Platform.
                             </p>
                             <p>
-                                These Terms constitute a legally binding agreement between you and
-                                Employment Networks, Inc. They apply to all users of the Platform,
-                                including but not limited to recruiters, candidates, company
-                                representatives, and visitors. By creating an account, submitting
-                                content, or using any feature of the Platform, you affirm your
-                                acceptance of these Terms and any additional policies referenced
-                                herein.
+                                These Terms constitute a legally binding
+                                agreement between you and Employment Networks,
+                                Inc. They apply to all users of the Platform,
+                                including but not limited to recruiters,
+                                candidates, company representatives, and
+                                visitors. By creating an account, submitting
+                                content, or using any feature of the Platform,
+                                you affirm your acceptance of these Terms and
+                                any additional policies referenced herein.
                             </p>
                             <p>
-                                We may update these Terms from time to time. Your continued use of
-                                the Platform after such changes constitutes acceptance of the revised
-                                Terms. We encourage you to review these Terms periodically. If you
-                                are using the Platform on behalf of an organization, you represent
-                                and warrant that you have the authority to bind that organization to
-                                these Terms.
+                                We may update these Terms from time to time.
+                                Your continued use of the Platform after such
+                                changes constitutes acceptance of the revised
+                                Terms. We encourage you to review these Terms
+                                periodically. If you are using the Platform on
+                                behalf of an organization, you represent and
+                                warrant that you have the authority to bind that
+                                organization to these Terms.
                             </p>
                         </div>
                     </div>
@@ -194,33 +200,42 @@ export default function TermsOfServiceContent() {
                             </h2>
                             <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                                 <p>
-                                    Splits Network is a split-fee recruiting marketplace that
-                                    connects recruiters, companies seeking talent, and candidates.
-                                    The Platform provides the infrastructure for collaborative hiring
-                                    through split-fee placement arrangements, where two or more
-                                    recruiting professionals partner on a single placement and share
-                                    the resulting fee.
+                                    Splits Network is a split-fee recruiting
+                                    marketplace that connects recruiters,
+                                    companies seeking talent, and candidates.
+                                    The Platform provides the infrastructure for
+                                    collaborative hiring through split-fee
+                                    placement arrangements, where two or more
+                                    recruiting professionals partner on a single
+                                    placement and share the resulting fee.
                                 </p>
                                 <p>
-                                    The Platform includes AI-powered features driven by OpenAI
-                                    technology, including intelligent candidate matching, job
-                                    recommendations, and an AI chat assistant. These features analyze
-                                    user-provided data to surface optimal matches between candidates,
+                                    The Platform includes AI-powered features
+                                    driven by OpenAI technology, including
+                                    intelligent candidate matching, job
+                                    recommendations, and an AI chat assistant.
+                                    These features analyze user-provided data to
+                                    surface optimal matches between candidates,
                                     job opportunities, and recruiting partners.
                                 </p>
                                 <p>
-                                    Our services include but are not limited to: job posting and
-                                    management, candidate profile creation and discovery, split-fee
-                                    agreement facilitation, pipeline tracking and visibility,
-                                    automated payment processing through Stripe, AI-driven matching
-                                    and recommendations, real-time messaging and collaboration tools,
-                                    and analytics dashboards for performance tracking.
+                                    Our services include but are not limited to:
+                                    job posting and management, candidate
+                                    profile creation and discovery, split-fee
+                                    agreement facilitation, pipeline tracking
+                                    and visibility, automated payment processing
+                                    through Stripe, AI-driven matching and
+                                    recommendations, real-time messaging and
+                                    collaboration tools, and analytics
+                                    dashboards for performance tracking.
                                 </p>
                                 <p>
-                                    Splits Network acts as a marketplace platform and is not itself a
-                                    recruiting agency, employer, or staffing firm. We do not
-                                    guarantee placements, employment outcomes, or the quality of any
-                                    candidate, job opportunity, or recruiting partner.
+                                    Splits Network acts as a marketplace
+                                    platform and is not itself a recruiting
+                                    agency, employer, or staffing firm. We do
+                                    not guarantee placements, employment
+                                    outcomes, or the quality of any candidate,
+                                    job opportunity, or recruiting partner.
                                 </p>
                             </div>
                         </div>
@@ -261,44 +276,51 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                To access and use the Platform, you must meet all of the following
-                                eligibility requirements. By using the Platform, you represent and
-                                warrant that you satisfy each condition.
+                                To access and use the Platform, you must meet
+                                all of the following eligibility requirements.
+                                By using the Platform, you represent and warrant
+                                that you satisfy each condition.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Age Requirement.
                                 </strong>{" "}
-                                You must be at least eighteen (18) years of age. The Platform is not
-                                intended for individuals under the age of 18, and we do not
-                                knowingly collect information from minors.
+                                You must be at least eighteen (18) years of age.
+                                The Platform is not intended for individuals
+                                under the age of 18, and we do not knowingly
+                                collect information from minors.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Legal Capacity.
                                 </strong>{" "}
-                                You must have the legal capacity and authority to enter into a
-                                binding contract. If you are accepting these Terms on behalf of a
-                                company, organization, or other legal entity, you represent and
-                                warrant that you have the authority to bind that entity.
+                                You must have the legal capacity and authority
+                                to enter into a binding contract. If you are
+                                accepting these Terms on behalf of a company,
+                                organization, or other legal entity, you
+                                represent and warrant that you have the
+                                authority to bind that entity.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Work Authorization.
                                 </strong>{" "}
-                                If you are using the Platform as a recruiter or candidate, you must
-                                be legally authorized to work or provide recruiting services in your
-                                jurisdiction. It is your responsibility to comply with all applicable
-                                employment laws and regulations.
+                                If you are using the Platform as a recruiter or
+                                candidate, you must be legally authorized to
+                                work or provide recruiting services in your
+                                jurisdiction. It is your responsibility to
+                                comply with all applicable employment laws and
+                                regulations.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     No Restrictions.
                                 </strong>{" "}
-                                You are not subject to any sanctions, embargoes, or legal
-                                restrictions that would prohibit you from using the Platform. You
-                                have not been previously banned or removed from the Platform for
-                                violations of these Terms.
+                                You are not subject to any sanctions, embargoes,
+                                or legal restrictions that would prohibit you
+                                from using the Platform. You have not been
+                                previously banned or removed from the Platform
+                                for violations of these Terms.
                             </p>
                         </div>
                     </div>
@@ -324,58 +346,69 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Account Creation.
                                 </strong>{" "}
-                                To access most features of the Platform, you must create an account.
-                                Account creation and authentication are managed through Clerk, our
-                                third-party identity and authentication provider. You may register
-                                using email, single sign-on (SSO), or supported social login
-                                providers as made available through Clerk. By creating an account,
-                                you consent to the processing of your authentication data by Clerk
+                                To access most features of the Platform, you
+                                must create an account. Account creation and
+                                authentication are managed through Clerk, our
+                                third-party identity and authentication
+                                provider. You may register using email, single
+                                sign-on (SSO), or supported social login
+                                providers as made available through Clerk. By
+                                creating an account, you consent to the
+                                processing of your authentication data by Clerk
                                 in accordance with their privacy policy.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Accurate Information.
                                 </strong>{" "}
-                                You agree to provide accurate, current, and complete information
-                                during registration and to keep your account information updated at
-                                all times. Providing false, misleading, or outdated information is a
-                                violation of these Terms and may result in immediate account
-                                suspension or termination.
+                                You agree to provide accurate, current, and
+                                complete information during registration and to
+                                keep your account information updated at all
+                                times. Providing false, misleading, or outdated
+                                information is a violation of these Terms and
+                                may result in immediate account suspension or
+                                termination.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Account Security.
                                 </strong>{" "}
-                                You are solely responsible for maintaining the confidentiality of
-                                your account credentials, including any passwords or authentication
-                                tokens. You agree to accept full responsibility for all activities
-                                that occur under your account. You must notify us immediately at{" "}
+                                You are solely responsible for maintaining the
+                                confidentiality of your account credentials,
+                                including any passwords or authentication
+                                tokens. You agree to accept full responsibility
+                                for all activities that occur under your
+                                account. You must notify us immediately at{" "}
                                 <a
                                     href="mailto:security@splits.network"
                                     className="text-secondary underline"
                                 >
                                     security@splits.network
                                 </a>{" "}
-                                if you suspect any unauthorized access to or use of your account.
+                                if you suspect any unauthorized access to or use
+                                of your account.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     One Account Per Person.
                                 </strong>{" "}
-                                Each individual may maintain only one account on the Platform.
-                                Creating multiple accounts to circumvent restrictions, manipulate
-                                platform features, or evade enforcement actions is strictly
-                                prohibited.
+                                Each individual may maintain only one account on
+                                the Platform. Creating multiple accounts to
+                                circumvent restrictions, manipulate platform
+                                features, or evade enforcement actions is
+                                strictly prohibited.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Account Types.
                                 </strong>{" "}
-                                The Platform supports multiple account types, including Recruiter,
-                                Company, and Candidate accounts. Each account type has specific
-                                features, permissions, and obligations as described in these Terms
-                                and on the Platform. You agree to use your account only in
-                                accordance with its designated type and purpose.
+                                The Platform supports multiple account types,
+                                including Recruiter, Company, and Candidate
+                                accounts. Each account type has specific
+                                features, permissions, and obligations as
+                                described in these Terms and on the Platform.
+                                You agree to use your account only in accordance
+                                with its designated type and purpose.
                             </p>
                         </div>
                     </div>
@@ -418,10 +451,12 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                You agree to use the Platform in a manner consistent with all
-                                applicable laws, regulations, and these Terms. You are responsible
-                                for all content you submit, communications you make, and actions
-                                you take on the Platform.
+                                You agree to use the Platform in a manner
+                                consistent with all applicable laws,
+                                regulations, and these Terms. You are
+                                responsible for all content you submit,
+                                communications you make, and actions you take on
+                                the Platform.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
@@ -441,7 +476,10 @@ export default function TermsOfServiceContent() {
                                     "Use automated tools, bots, or scripts to access or interact with the Platform except as expressly authorized by us",
                                     "Engage in any activity that could disable, overburden, or impair the proper functioning of the Platform",
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-4">
+                                    <div
+                                        key={i}
+                                        className="flex items-start gap-4"
+                                    >
                                         <div className="w-8 h-8 flex-shrink-0 bg-secondary/10 flex items-center justify-center">
                                             <i className="fa-duotone fa-regular fa-ban text-secondary text-xs"></i>
                                         </div>
@@ -452,10 +490,12 @@ export default function TermsOfServiceContent() {
                                 ))}
                             </div>
                             <p>
-                                We reserve the right to investigate and take appropriate action
-                                against any user who violates this section, including removing
-                                content, suspending or terminating accounts, and reporting
-                                violations to law enforcement authorities.
+                                We reserve the right to investigate and take
+                                appropriate action against any user who violates
+                                this section, including removing content,
+                                suspending or terminating accounts, and
+                                reporting violations to law enforcement
+                                authorities.
                             </p>
                         </div>
                     </div>
@@ -505,14 +545,19 @@ export default function TermsOfServiceContent() {
                                     </h3>
                                     <div className="space-y-2 text-base-content/70 leading-relaxed">
                                         <p>
-                                            You must conduct all split-fee placements exclusively
-                                            through the Platform. Circumventing the Platform to
-                                            complete placements off-platform with contacts made
-                                            through the Platform is a material breach of these Terms.
-                                            You must honor all split-fee agreements entered into on
-                                            the Platform. You agree to maintain professional conduct
-                                            in all interactions, report placements accurately and
-                                            promptly, and provide truthful information about
+                                            You must conduct all split-fee
+                                            placements exclusively through the
+                                            Platform. Circumventing the Platform
+                                            to complete placements off-platform
+                                            with contacts made through the
+                                            Platform is a material breach of
+                                            these Terms. You must honor all
+                                            split-fee agreements entered into on
+                                            the Platform. You agree to maintain
+                                            professional conduct in all
+                                            interactions, report placements
+                                            accurately and promptly, and provide
+                                            truthful information about
                                             candidates and job opportunities.
                                         </p>
                                     </div>
@@ -525,14 +570,19 @@ export default function TermsOfServiceContent() {
                                     </h3>
                                     <div className="space-y-2 text-base-content/70 leading-relaxed">
                                         <p>
-                                            You must provide accurate and complete job descriptions,
-                                            compensation details, and hiring requirements. You agree
-                                            to pay all agreed placement fees promptly and in
-                                            accordance with the fee schedule. You must honor placement
-                                            agreements and treat all candidates referred through the
-                                            Platform professionally and in compliance with applicable
-                                            employment laws. You may not contact candidates directly
-                                            to circumvent placement fees.
+                                            You must provide accurate and
+                                            complete job descriptions,
+                                            compensation details, and hiring
+                                            requirements. You agree to pay all
+                                            agreed placement fees promptly and
+                                            in accordance with the fee schedule.
+                                            You must honor placement agreements
+                                            and treat all candidates referred
+                                            through the Platform professionally
+                                            and in compliance with applicable
+                                            employment laws. You may not contact
+                                            candidates directly to circumvent
+                                            placement fees.
                                         </p>
                                     </div>
                                 </div>
@@ -544,14 +594,19 @@ export default function TermsOfServiceContent() {
                                     </h3>
                                     <div className="space-y-2 text-base-content/70 leading-relaxed">
                                         <p>
-                                            You must provide accurate information about your
-                                            qualifications, experience, work history, and
-                                            authorization to work. You agree to communicate promptly
-                                            and professionally with recruiters and companies. You
-                                            understand that your profile information may be shared
-                                            with recruiters and potential employers in the course of
-                                            the placement process. You must not misrepresent your
-                                            skills, credentials, or employment history.
+                                            You must provide accurate
+                                            information about your
+                                            qualifications, experience, work
+                                            history, and authorization to work.
+                                            You agree to communicate promptly
+                                            and professionally with recruiters
+                                            and companies. You understand that
+                                            your profile information may be
+                                            shared with recruiters and potential
+                                            employers in the course of the
+                                            placement process. You must not
+                                            misrepresent your skills,
+                                            credentials, or employment history.
                                         </p>
                                     </div>
                                 </div>
@@ -579,56 +634,66 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Fee Structure.
                                 </strong>{" "}
-                                Placement fees are calculated as a percentage of the placed
-                                candidate&apos;s agreed first-year compensation. Fee percentages vary
-                                based on role type, seniority level, and market conditions. Detailed
-                                fee information is provided at the time each split-fee agreement is
-                                created on the Platform. Splits Network may charge platform fees,
-                                subscription fees, or transaction fees as described on the Platform
-                                and in your account agreement.
+                                Placement fees are calculated as a percentage of
+                                the placed candidate&apos;s agreed first-year
+                                compensation. Fee percentages vary based on role
+                                type, seniority level, and market conditions.
+                                Detailed fee information is provided at the time
+                                each split-fee agreement is created on the
+                                Platform. Splits Network may charge platform
+                                fees, subscription fees, or transaction fees as
+                                described on the Platform and in your account
+                                agreement.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Payment Processing.
                                 </strong>{" "}
-                                All payments on the Platform are processed through Stripe, our
-                                third-party payment processor. By using the Platform&apos;s payment
-                                features, you agree to Stripe&apos;s terms of service and privacy
-                                policy. You authorize Splits Network and Stripe to charge your
-                                designated payment method for all fees and charges incurred. Payment
-                                information is transmitted securely and is never stored on our
-                                servers.
+                                All payments on the Platform are processed
+                                through Stripe, our third-party payment
+                                processor. By using the Platform&apos;s payment
+                                features, you agree to Stripe&apos;s terms of
+                                service and privacy policy. You authorize Splits
+                                Network and Stripe to charge your designated
+                                payment method for all fees and charges
+                                incurred. Payment information is transmitted
+                                securely and is never stored on our servers.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Payment Terms.
                                 </strong>{" "}
-                                Placement fees are due within thirty (30) days of a confirmed
-                                placement start date. Split-fee payments to recruiting partners are
-                                processed after the placement fee has been received and the
-                                guarantee period has been satisfied. The standard guarantee period
-                                is ninety (90) days from the candidate&apos;s start date, unless
+                                Placement fees are due within thirty (30) days
+                                of a confirmed placement start date. Split-fee
+                                payments to recruiting partners are processed
+                                after the placement fee has been received and
+                                the guarantee period has been satisfied. The
+                                standard guarantee period is ninety (90) days
+                                from the candidate&apos;s start date, unless
                                 otherwise specified in the placement agreement.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Refunds and Guarantees.
                                 </strong>{" "}
-                                If a placed candidate does not complete the guarantee period, a
-                                pro-rated refund or replacement search will be offered in accordance
-                                with the terms of the specific placement agreement. Disputes
-                                regarding fees or payments must be raised within thirty (30) days
-                                of the transaction date.
+                                If a placed candidate does not complete the
+                                guarantee period, a pro-rated refund or
+                                replacement search will be offered in accordance
+                                with the terms of the specific placement
+                                agreement. Disputes regarding fees or payments
+                                must be raised within thirty (30) days of the
+                                transaction date.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Taxes.
                                 </strong>{" "}
-                                You are responsible for all applicable taxes associated with your
-                                use of the Platform and any fees or payments received through the
-                                Platform. Splits Network does not provide tax advice, and you should
-                                consult with a qualified tax professional regarding your tax
-                                obligations.
+                                You are responsible for all applicable taxes
+                                associated with your use of the Platform and any
+                                fees or payments received through the Platform.
+                                Splits Network does not provide tax advice, and
+                                you should consult with a qualified tax
+                                professional regarding your tax obligations.
                             </p>
                         </div>
                     </div>
@@ -653,46 +718,57 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Platform Ownership.
                                 </strong>{" "}
-                                All content, features, functionality, design, code, trademarks,
-                                logos, and other intellectual property comprising the Splits Network
-                                platform are owned by Employment Networks, Inc. or our licensors and
-                                are protected by United States and international copyright,
-                                trademark, patent, trade secret, and other intellectual property
+                                All content, features, functionality, design,
+                                code, trademarks, logos, and other intellectual
+                                property comprising the Splits Network platform
+                                are owned by Employment Networks, Inc. or our
+                                licensors and are protected by United States and
+                                international copyright, trademark, patent,
+                                trade secret, and other intellectual property
                                 laws.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Limited License.
                                 </strong>{" "}
-                                We grant you a limited, non-exclusive, non-transferable, revocable
-                                license to access and use the Platform for its intended purpose,
-                                subject to these Terms. This license does not include the right to
-                                reproduce, distribute, modify, create derivative works from,
-                                publicly display, publicly perform, reverse engineer, or otherwise
-                                exploit any part of the Platform without our prior written consent.
+                                We grant you a limited, non-exclusive,
+                                non-transferable, revocable license to access
+                                and use the Platform for its intended purpose,
+                                subject to these Terms. This license does not
+                                include the right to reproduce, distribute,
+                                modify, create derivative works from, publicly
+                                display, publicly perform, reverse engineer, or
+                                otherwise exploit any part of the Platform
+                                without our prior written consent.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Your Content.
                                 </strong>{" "}
-                                You retain ownership of any content you submit to the Platform,
-                                including profile information, job descriptions, candidate
-                                summaries, and communications (&ldquo;User Content&rdquo;). By
-                                submitting User Content, you grant Splits Network a worldwide,
-                                non-exclusive, royalty-free license to use, reproduce, modify,
-                                display, and distribute your User Content solely for the purpose of
-                                operating and improving the Platform. This license terminates when
-                                you delete your content or account, except where your content has
-                                been shared with others who have not deleted it.
+                                You retain ownership of any content you submit
+                                to the Platform, including profile information,
+                                job descriptions, candidate summaries, and
+                                communications (&ldquo;User Content&rdquo;). By
+                                submitting User Content, you grant Splits
+                                Network a worldwide, non-exclusive, royalty-free
+                                license to use, reproduce, modify, display, and
+                                distribute your User Content solely for the
+                                purpose of operating and improving the Platform.
+                                This license terminates when you delete your
+                                content or account, except where your content
+                                has been shared with others who have not deleted
+                                it.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Restrictions.
                                 </strong>{" "}
-                                You may not: sell, trade, or transfer your Platform access to any
-                                third party; use any automated tools to scrape, extract, or harvest
-                                data from the Platform; remove, alter, or obscure any copyright,
-                                trademark, or other proprietary notices; or use Platform trademarks
+                                You may not: sell, trade, or transfer your
+                                Platform access to any third party; use any
+                                automated tools to scrape, extract, or harvest
+                                data from the Platform; remove, alter, or
+                                obscure any copyright, trademark, or other
+                                proprietary notices; or use Platform trademarks
                                 or branding without express written permission.
                             </p>
                         </div>
@@ -737,73 +813,90 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     AI Features Overview.
                                 </strong>{" "}
-                                The Platform incorporates artificial intelligence and machine
-                                learning features powered by OpenAI (ChatGPT) technology. These
-                                features include, but are not limited to: intelligent candidate-to-job
-                                matching, personalized job recommendations, an AI-powered chat
-                                assistant for platform guidance, automated candidate profile analysis,
-                                and skill-based matching algorithms.
+                                The Platform incorporates artificial
+                                intelligence and machine learning features
+                                powered by OpenAI (ChatGPT) technology. These
+                                features include, but are not limited to:
+                                intelligent candidate-to-job matching,
+                                personalized job recommendations, an AI-powered
+                                chat assistant for platform guidance, automated
+                                candidate profile analysis, and skill-based
+                                matching algorithms.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Data Processing for AI.
                                 </strong>{" "}
-                                By using the Platform, you consent to the processing of your data by
-                                AI systems. This includes the analysis of your profile information,
-                                job preferences, search history, and interactions on the Platform to
-                                generate matches, recommendations, and insights. Your data may be
-                                transmitted to OpenAI&apos;s servers for processing in accordance
-                                with their data processing agreements. We implement appropriate
-                                safeguards to protect your data during AI processing.
+                                By using the Platform, you consent to the
+                                processing of your data by AI systems. This
+                                includes the analysis of your profile
+                                information, job preferences, search history,
+                                and interactions on the Platform to generate
+                                matches, recommendations, and insights. Your
+                                data may be transmitted to OpenAI&apos;s servers
+                                for processing in accordance with their data
+                                processing agreements. We implement appropriate
+                                safeguards to protect your data during AI
+                                processing.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     AI Limitations.
                                 </strong>{" "}
-                                AI-generated matches, recommendations, and responses are provided for
-                                informational purposes and as decision-support tools. They do not
-                                constitute professional advice, guarantees of employment, or
-                                assurances of candidate quality. AI outputs may contain
-                                inaccuracies, biases, or errors. You should exercise your own
-                                judgment and conduct your own due diligence before making hiring,
-                                career, or business decisions based on AI-generated information.
+                                AI-generated matches, recommendations, and
+                                responses are provided for informational
+                                purposes and as decision-support tools. They do
+                                not constitute professional advice, guarantees
+                                of employment, or assurances of candidate
+                                quality. AI outputs may contain inaccuracies,
+                                biases, or errors. You should exercise your own
+                                judgment and conduct your own due diligence
+                                before making hiring, career, or business
+                                decisions based on AI-generated information.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Automated Decision-Making.
                                 </strong>{" "}
-                                Certain Platform features involve automated processing that may
-                                influence which candidates, jobs, or partners are displayed to you.
-                                No fully automated decisions are made regarding employment or
-                                contractual outcomes without human review. All final placement
-                                decisions are made by human users of the Platform.
+                                Certain Platform features involve automated
+                                processing that may influence which candidates,
+                                jobs, or partners are displayed to you. No fully
+                                automated decisions are made regarding
+                                employment or contractual outcomes without human
+                                review. All final placement decisions are made
+                                by human users of the Platform.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Opt-Out Rights.
                                 </strong>{" "}
-                                You have the right to opt out of AI-powered features and automated
-                                data processing. To exercise this right, contact us at{" "}
+                                You have the right to opt out of AI-powered
+                                features and automated data processing. To
+                                exercise this right, contact us at{" "}
                                 <a
                                     href="mailto:privacy@splits.network"
                                     className="text-secondary underline"
                                 >
                                     privacy@splits.network
                                 </a>
-                                . Please note that opting out may limit the availability of certain
-                                Platform features, including personalized matching and
-                                recommendations. You may also request a human review of any
-                                decision that was significantly influenced by automated processing.
+                                . Please note that opting out may limit the
+                                availability of certain Platform features,
+                                including personalized matching and
+                                recommendations. You may also request a human
+                                review of any decision that was significantly
+                                influenced by automated processing.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     AI Content.
                                 </strong>{" "}
-                                Content generated by AI features on the Platform (including match
-                                summaries, recommendations, and chat responses) is provided &ldquo;as
-                                is&rdquo; without warranty of accuracy, completeness, or fitness for
-                                any purpose. You are responsible for reviewing and verifying any
-                                AI-generated content before relying on it.
+                                Content generated by AI features on the Platform
+                                (including match summaries, recommendations, and
+                                chat responses) is provided &ldquo;as is&rdquo;
+                                without warranty of accuracy, completeness, or
+                                fitness for any purpose. You are responsible for
+                                reviewing and verifying any AI-generated content
+                                before relying on it.
                             </p>
                         </div>
                     </div>
@@ -825,29 +918,33 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Your privacy is critically important to us. Our collection, use, and
-                                protection of your personal information is governed by our{" "}
+                                Your privacy is critically important to us. Our
+                                collection, use, and protection of your personal
+                                information is governed by our{" "}
                                 <Link
                                     href="/privacy-policy"
                                     className="text-secondary underline"
                                 >
                                     Privacy Policy
                                 </Link>
-                                , which is incorporated into these Terms by reference. By using the
-                                Platform, you consent to the practices described in our Privacy
-                                Policy.
+                                , which is incorporated into these Terms by
+                                reference. By using the Platform, you consent to
+                                the practices described in our Privacy Policy.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Analytics and Tracking.
                                 </strong>{" "}
-                                The Platform uses Google Analytics (GA4) for platform analytics and
-                                usage measurement, and Microsoft Clarity for user experience analysis
-                                including session recordings and heatmaps. These tools collect
-                                anonymized and aggregated data about how users interact with the
-                                Platform to help us identify issues, improve features, and enhance
-                                the overall user experience. For detailed information about cookies
-                                and tracking technologies, please review our{" "}
+                                The Platform uses Google Analytics (GA4) for
+                                platform analytics and usage measurement, and
+                                Microsoft Clarity for user experience analysis
+                                including session recordings and heatmaps. These
+                                tools collect anonymized and aggregated data
+                                about how users interact with the Platform to
+                                help us identify issues, improve features, and
+                                enhance the overall user experience. For
+                                detailed information about cookies and tracking
+                                technologies, please review our{" "}
                                 <Link
                                     href="/cookie-policy"
                                     className="text-secondary underline"
@@ -860,24 +957,28 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Third-Party Data Processors.
                                 </strong>{" "}
-                                In the course of providing our services, your data may be processed
-                                by the following third-party service providers: Clerk (authentication
-                                and account management), Stripe (payment processing), Supabase
-                                (database infrastructure), OpenAI (AI-powered features), Google
-                                (analytics), and Microsoft (UX analytics). Each of these providers
-                                operates under their own privacy policies and data processing
-                                agreements.
+                                In the course of providing our services, your
+                                data may be processed by the following
+                                third-party service providers: Clerk
+                                (authentication and account management), Stripe
+                                (payment processing), Supabase (database
+                                infrastructure), OpenAI (AI-powered features),
+                                Google (analytics), and Microsoft (UX
+                                analytics). Each of these providers operates
+                                under their own privacy policies and data
+                                processing agreements.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Data Security.
                                 </strong>{" "}
-                                We implement industry-standard security measures including
-                                encryption in transit (TLS 1.3) and at rest (AES-256), role-based
-                                access controls, multi-factor authentication, continuous security
-                                monitoring, and regular security audits. While we take reasonable
-                                measures to protect your data, no system can guarantee absolute
-                                security.
+                                We implement industry-standard security measures
+                                including encryption in transit (TLS 1.3) and at
+                                rest (AES-256), role-based access controls,
+                                multi-factor authentication, continuous security
+                                monitoring, and regular security audits. While
+                                we take reasonable measures to protect your
+                                data, no system can guarantee absolute security.
                             </p>
                         </div>
                     </div>
@@ -924,59 +1025,71 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     AS-IS Service.
                                 </strong>{" "}
-                                THE PLATFORM AND ALL CONTENT, FEATURES, AND SERVICES ARE PROVIDED
-                                &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT
-                                WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR
-                                OTHERWISE. WE DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO
-                                IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-                                PURPOSE, NON-INFRINGEMENT, AND ANY WARRANTIES ARISING FROM COURSE
-                                OF DEALING OR USAGE OF TRADE.
+                                THE PLATFORM AND ALL CONTENT, FEATURES, AND
+                                SERVICES ARE PROVIDED &ldquo;AS IS&rdquo; AND
+                                &ldquo;AS AVAILABLE&rdquo; WITHOUT WARRANTIES OF
+                                ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY,
+                                OR OTHERWISE. WE DISCLAIM ALL WARRANTIES,
+                                INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES
+                                OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+                                PURPOSE, NON-INFRINGEMENT, AND ANY WARRANTIES
+                                ARISING FROM COURSE OF DEALING OR USAGE OF
+                                TRADE.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     No Guarantees.
                                 </strong>{" "}
-                                We do not warrant that the Platform will be uninterrupted, secure,
-                                or error-free, that defects will be corrected, that the Platform is
-                                free of viruses or other harmful components, or that any content or
-                                information on the Platform is accurate, reliable, or complete. We
-                                make no guarantees regarding the success of placements, the quality
-                                of candidates or job opportunities, or the reliability of any user
-                                on the Platform.
+                                We do not warrant that the Platform will be
+                                uninterrupted, secure, or error-free, that
+                                defects will be corrected, that the Platform is
+                                free of viruses or other harmful components, or
+                                that any content or information on the Platform
+                                is accurate, reliable, or complete. We make no
+                                guarantees regarding the success of placements,
+                                the quality of candidates or job opportunities,
+                                or the reliability of any user on the Platform.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Independent Relationship.
                                 </strong>{" "}
-                                Splits Network is a platform provider, not an employer, recruiter,
-                                or staffing agency. All users are independent parties. We are not
-                                responsible for the actions, omissions, or conduct of any user. We
-                                do not verify the accuracy of user-provided information except as
+                                Splits Network is a platform provider, not an
+                                employer, recruiter, or staffing agency. All
+                                users are independent parties. We are not
+                                responsible for the actions, omissions, or
+                                conduct of any user. We do not verify the
+                                accuracy of user-provided information except as
                                 expressly stated.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Limitation of Liability.
                                 </strong>{" "}
-                                TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EMPLOYMENT
-                                NETWORKS, INC. AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS,
-                                AFFILIATES, AND LICENSORS SHALL NOT BE LIABLE FOR ANY INDIRECT,
-                                INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING
-                                BUT NOT LIMITED TO LOSS OF PROFITS, DATA, BUSINESS OPPORTUNITIES,
-                                OR GOODWILL, ARISING OUT OF OR RELATED TO YOUR USE OF THE PLATFORM,
-                                REGARDLESS OF THE THEORY OF LIABILITY. OUR TOTAL AGGREGATE LIABILITY
-                                SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID TO US IN
-                                THE TWELVE (12) MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED
-                                DOLLARS ($100).
+                                TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE
+                                LAW, EMPLOYMENT NETWORKS, INC. AND ITS OFFICERS,
+                                DIRECTORS, EMPLOYEES, AGENTS, AFFILIATES, AND
+                                LICENSORS SHALL NOT BE LIABLE FOR ANY INDIRECT,
+                                INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+                                DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF
+                                PROFITS, DATA, BUSINESS OPPORTUNITIES, OR
+                                GOODWILL, ARISING OUT OF OR RELATED TO YOUR USE
+                                OF THE PLATFORM, REGARDLESS OF THE THEORY OF
+                                LIABILITY. OUR TOTAL AGGREGATE LIABILITY SHALL
+                                NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU
+                                PAID TO US IN THE TWELVE (12) MONTHS PRECEDING
+                                THE CLAIM, OR (B) ONE HUNDRED DOLLARS ($100).
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     AI Disclaimer.
                                 </strong>{" "}
-                                We specifically disclaim all liability for AI-generated content,
-                                recommendations, and matching results. AI features are provided as
-                                decision-support tools and should not be the sole basis for any
-                                hiring, employment, or business decision.
+                                We specifically disclaim all liability for
+                                AI-generated content, recommendations, and
+                                matching results. AI features are provided as
+                                decision-support tools and should not be the
+                                sole basis for any hiring, employment, or
+                                business decision.
                             </p>
                         </div>
                     </div>
@@ -998,12 +1111,15 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                You agree to indemnify, defend, and hold harmless Employment
-                                Networks, Inc. and its officers, directors, employees, agents,
-                                affiliates, successors, and assigns (&ldquo;Indemnified
-                                Parties&rdquo;) from and against any and all claims, damages,
-                                losses, liabilities, costs, and expenses (including reasonable
-                                attorneys&apos; fees and court costs) arising out of or related to:
+                                You agree to indemnify, defend, and hold
+                                harmless Employment Networks, Inc. and its
+                                officers, directors, employees, agents,
+                                affiliates, successors, and assigns
+                                (&ldquo;Indemnified Parties&rdquo;) from and
+                                against any and all claims, damages, losses,
+                                liabilities, costs, and expenses (including
+                                reasonable attorneys&apos; fees and court costs)
+                                arising out of or related to:
                             </p>
                             <div className="space-y-4">
                                 {[
@@ -1014,7 +1130,10 @@ export default function TermsOfServiceContent() {
                                     "Your negligence or willful misconduct in connection with your use of the Platform",
                                     "Any misrepresentation made by you regarding your qualifications, authority, or eligibility",
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-4">
+                                    <div
+                                        key={i}
+                                        className="flex items-start gap-4"
+                                    >
                                         <span className="text-sm font-bold text-secondary/60 w-6 flex-shrink-0 mt-1">
                                             {String.fromCharCode(97 + i)}.
                                         </span>
@@ -1025,11 +1144,12 @@ export default function TermsOfServiceContent() {
                                 ))}
                             </div>
                             <p>
-                                We reserve the right, at your expense, to assume the exclusive
-                                defense and control of any matter for which you are required to
-                                indemnify us, and you agree to cooperate with our defense of such
-                                claims. You agree not to settle any such matter without our prior
-                                written consent.
+                                We reserve the right, at your expense, to assume
+                                the exclusive defense and control of any matter
+                                for which you are required to indemnify us, and
+                                you agree to cooperate with our defense of such
+                                claims. You agree not to settle any such matter
+                                without our prior written consent.
                             </p>
                         </div>
                     </div>
@@ -1054,58 +1174,68 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Termination by You.
                                 </strong>{" "}
-                                You may terminate your account at any time by contacting our support
-                                team at{" "}
+                                You may terminate your account at any time by
+                                contacting our support team at{" "}
                                 <a
                                     href="mailto:support@splits.network"
                                     className="text-secondary underline"
                                 >
                                     support@splits.network
                                 </a>{" "}
-                                or through the account settings within the Platform. Upon
-                                termination, your right to use the Platform will cease immediately.
-                                Any outstanding obligations, including unpaid fees or pending
-                                placements, will survive termination.
+                                or through the account settings within the
+                                Platform. Upon termination, your right to use
+                                the Platform will cease immediately. Any
+                                outstanding obligations, including unpaid fees
+                                or pending placements, will survive termination.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Termination by Splits Network.
                                 </strong>{" "}
-                                We reserve the right to suspend or terminate your account, with or
-                                without notice, for any reason, including but not limited to:
-                                violation of these Terms; fraudulent, abusive, or illegal activity;
-                                repeated misconduct or professional violations; non-payment of fees
-                                or outstanding balances; extended inactivity (accounts inactive for
-                                more than twelve consecutive months); or at our sole discretion if
-                                we believe your continued use poses a risk to the Platform, its
-                                users, or our business.
+                                We reserve the right to suspend or terminate
+                                your account, with or without notice, for any
+                                reason, including but not limited to: violation
+                                of these Terms; fraudulent, abusive, or illegal
+                                activity; repeated misconduct or professional
+                                violations; non-payment of fees or outstanding
+                                balances; extended inactivity (accounts inactive
+                                for more than twelve consecutive months); or at
+                                our sole discretion if we believe your continued
+                                use poses a risk to the Platform, its users, or
+                                our business.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Effect of Termination.
                                 </strong>{" "}
-                                Upon termination, your license to use the Platform is immediately
-                                revoked. We may delete your account data in accordance with our
-                                Privacy Policy and data retention schedule. The following provisions
-                                survive termination: Intellectual Property, Disclaimers, Limitation
-                                of Liability, Indemnification, Dispute Resolution, and Governing
-                                Law. Any accrued rights or obligations, including payment
-                                obligations, will not be affected by termination.
+                                Upon termination, your license to use the
+                                Platform is immediately revoked. We may delete
+                                your account data in accordance with our Privacy
+                                Policy and data retention schedule. The
+                                following provisions survive termination:
+                                Intellectual Property, Disclaimers, Limitation
+                                of Liability, Indemnification, Dispute
+                                Resolution, and Governing Law. Any accrued
+                                rights or obligations, including payment
+                                obligations, will not be affected by
+                                termination.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Data After Termination.
                                 </strong>{" "}
-                                Upon account termination, you may request a copy of your data in a
-                                machine-readable format by contacting{" "}
+                                Upon account termination, you may request a copy
+                                of your data in a machine-readable format by
+                                contacting{" "}
                                 <a
                                     href="mailto:privacy@splits.network"
                                     className="text-secondary underline"
                                 >
                                     privacy@splits.network
                                 </a>{" "}
-                                within thirty (30) days. After this period, we may delete your data
-                                in accordance with our retention policies, except where retention is
+                                within thirty (30) days. After this period, we
+                                may delete your data in accordance with our
+                                retention policies, except where retention is
                                 required by law.
                             </p>
                         </div>
@@ -1131,59 +1261,72 @@ export default function TermsOfServiceContent() {
                                 <strong className="text-base-content font-bold">
                                     Informal Resolution.
                                 </strong>{" "}
-                                Before initiating any formal dispute resolution proceeding, you
-                                agree to first attempt to resolve any dispute, claim, or controversy
-                                arising out of or relating to these Terms or the Platform
-                                (&ldquo;Dispute&rdquo;) informally by contacting us at{" "}
+                                Before initiating any formal dispute resolution
+                                proceeding, you agree to first attempt to
+                                resolve any dispute, claim, or controversy
+                                arising out of or relating to these Terms or the
+                                Platform (&ldquo;Dispute&rdquo;) informally by
+                                contacting us at{" "}
                                 <a
                                     href="mailto:legal@splits.network"
                                     className="text-secondary underline"
                                 >
                                     legal@splits.network
                                 </a>
-                                . The parties will attempt in good faith to resolve the Dispute
-                                within thirty (30) days of written notice.
+                                . The parties will attempt in good faith to
+                                resolve the Dispute within thirty (30) days of
+                                written notice.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Mediation.
                                 </strong>{" "}
-                                If the Dispute cannot be resolved informally, the parties agree to
-                                submit the Dispute to non-binding mediation administered by a
-                                mutually agreed-upon mediator before resorting to arbitration or
-                                litigation. Mediation shall take place within sixty (60) days of the
-                                end of the informal resolution period. The costs of mediation shall
-                                be shared equally between the parties.
+                                If the Dispute cannot be resolved informally,
+                                the parties agree to submit the Dispute to
+                                non-binding mediation administered by a mutually
+                                agreed-upon mediator before resorting to
+                                arbitration or litigation. Mediation shall take
+                                place within sixty (60) days of the end of the
+                                informal resolution period. The costs of
+                                mediation shall be shared equally between the
+                                parties.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Binding Arbitration.
                                 </strong>{" "}
-                                If the Dispute is not resolved through mediation, it shall be
-                                resolved by binding arbitration administered by the American
-                                Arbitration Association (&ldquo;AAA&rdquo;) in accordance with its
-                                Commercial Arbitration Rules. The arbitration shall be conducted by a
-                                single arbitrator in the State of Delaware. The arbitrator&apos;s
-                                decision shall be final and binding, and judgment on the award may be
+                                If the Dispute is not resolved through
+                                mediation, it shall be resolved by binding
+                                arbitration administered by the American
+                                Arbitration Association (&ldquo;AAA&rdquo;) in
+                                accordance with its Commercial Arbitration
+                                Rules. The arbitration shall be conducted by a
+                                single arbitrator in the State of Delaware. The
+                                arbitrator&apos;s decision shall be final and
+                                binding, and judgment on the award may be
                                 entered in any court of competent jurisdiction.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Class Action Waiver.
                                 </strong>{" "}
-                                YOU AGREE THAT ANY DISPUTE RESOLUTION PROCEEDINGS WILL BE CONDUCTED
-                                ONLY ON AN INDIVIDUAL BASIS AND NOT IN A CLASS, CONSOLIDATED, OR
-                                REPRESENTATIVE ACTION. You expressly waive any right to participate
-                                in a class action lawsuit or class-wide arbitration.
+                                YOU AGREE THAT ANY DISPUTE RESOLUTION
+                                PROCEEDINGS WILL BE CONDUCTED ONLY ON AN
+                                INDIVIDUAL BASIS AND NOT IN A CLASS,
+                                CONSOLIDATED, OR REPRESENTATIVE ACTION. You
+                                expressly waive any right to participate in a
+                                class action lawsuit or class-wide arbitration.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Exceptions.
                                 </strong>{" "}
-                                Notwithstanding the above, either party may seek injunctive or
-                                other equitable relief in any court of competent jurisdiction to
-                                prevent the actual or threatened infringement of intellectual
-                                property rights, breach of confidentiality obligations, or other
+                                Notwithstanding the above, either party may seek
+                                injunctive or other equitable relief in any
+                                court of competent jurisdiction to prevent the
+                                actual or threatened infringement of
+                                intellectual property rights, breach of
+                                confidentiality obligations, or other
                                 irreparable harm.
                             </p>
                         </div>
@@ -1206,24 +1349,30 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                These Terms of Service and any Dispute arising out of or related to
-                                them or the Platform shall be governed by and construed in
-                                accordance with the laws of the State of Delaware, United States of
-                                America, without regard to its conflict of law principles.
+                                These Terms of Service and any Dispute arising
+                                out of or related to them or the Platform shall
+                                be governed by and construed in accordance with
+                                the laws of the State of Delaware, United States
+                                of America, without regard to its conflict of
+                                law principles.
                             </p>
                             <p>
-                                For any matters not subject to arbitration under these Terms, you
-                                agree to submit to the personal and exclusive jurisdiction of the
-                                state and federal courts located in the State of Delaware. You waive
-                                any objection to the exercise of jurisdiction over you by such
-                                courts and to venue in such courts.
+                                For any matters not subject to arbitration under
+                                these Terms, you agree to submit to the personal
+                                and exclusive jurisdiction of the state and
+                                federal courts located in the State of Delaware.
+                                You waive any objection to the exercise of
+                                jurisdiction over you by such courts and to
+                                venue in such courts.
                             </p>
                             <p>
-                                If you are accessing the Platform from outside the United States,
-                                you are responsible for compliance with all applicable local laws.
-                                Nothing in these Terms shall be construed to limit any rights or
-                                remedies available to you under the mandatory consumer protection
-                                laws of your jurisdiction of residence.
+                                If you are accessing the Platform from outside
+                                the United States, you are responsible for
+                                compliance with all applicable local laws.
+                                Nothing in these Terms shall be construed to
+                                limit any rights or remedies available to you
+                                under the mandatory consumer protection laws of
+                                your jurisdiction of residence.
                             </p>
                         </div>
                     </div>
@@ -1245,37 +1394,45 @@ export default function TermsOfServiceContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                We reserve the right to modify, update, or replace these Terms at
-                                any time at our sole discretion. When we make changes, we will
-                                update the &ldquo;Last Updated&rdquo; date at the top of these
-                                Terms and post the revised version on the Platform.
+                                We reserve the right to modify, update, or
+                                replace these Terms at any time at our sole
+                                discretion. When we make changes, we will update
+                                the &ldquo;Last Updated&rdquo; date at the top
+                                of these Terms and post the revised version on
+                                the Platform.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Material Changes.
                                 </strong>{" "}
-                                For material changes that significantly affect your rights or
-                                obligations, we will provide at least thirty (30) days&apos; advance
-                                notice before the changes take effect. Notice will be provided
-                                through one or more of the following methods: email notification to
-                                the address associated with your account, prominent notice within the
-                                Platform, or announcement on our website.
+                                For material changes that significantly affect
+                                your rights or obligations, we will provide at
+                                least thirty (30) days&apos; advance notice
+                                before the changes take effect. Notice will be
+                                provided through one or more of the following
+                                methods: email notification to the address
+                                associated with your account, prominent notice
+                                within the Platform, or announcement on our
+                                website.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Acceptance of Changes.
                                 </strong>{" "}
-                                Your continued use of the Platform after the effective date of any
-                                changes constitutes your acceptance of the revised Terms. If you do
-                                not agree to the revised Terms, you must stop using the Platform and
-                                may terminate your account in accordance with Section 13.
+                                Your continued use of the Platform after the
+                                effective date of any changes constitutes your
+                                acceptance of the revised Terms. If you do not
+                                agree to the revised Terms, you must stop using
+                                the Platform and may terminate your account in
+                                accordance with Section 13.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     Version History.
                                 </strong>{" "}
-                                We maintain previous versions of these Terms for reference. You may
-                                request a copy of any prior version by contacting{" "}
+                                We maintain previous versions of these Terms for
+                                reference. You may request a copy of any prior
+                                version by contacting{" "}
                                 <a
                                     href="mailto:legal@splits.network"
                                     className="text-secondary underline"
@@ -1314,8 +1471,8 @@ export default function TermsOfServiceContent() {
                                         Privacy Policy
                                     </h3>
                                     <p className="text-sm text-base-content/60">
-                                        How we collect, use, and protect your personal
-                                        information
+                                        How we collect, use, and protect your
+                                        personal information
                                     </p>
                                 </div>
                                 <i className="fa-duotone fa-regular fa-arrow-right text-secondary opacity-0 group-hover:opacity-100 transition-opacity"></i>
@@ -1333,7 +1490,8 @@ export default function TermsOfServiceContent() {
                                         Cookie Policy
                                     </h3>
                                     <p className="text-sm text-base-content/60">
-                                        How we use cookies and tracking technologies
+                                        How we use cookies and tracking
+                                        technologies
                                     </p>
                                 </div>
                                 <i className="fa-duotone fa-regular fa-arrow-right text-secondary opacity-0 group-hover:opacity-100 transition-opacity"></i>
@@ -1359,9 +1517,9 @@ export default function TermsOfServiceContent() {
                             these terms?
                         </h2>
                         <p className="text-xl text-secondary-content/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                            Employment Networks, Inc. is here to help. Reach out to our
-                            legal team for any questions, concerns, or requests related to
-                            these Terms of Service.
+                            Employment Networks, Inc. is here to help. Reach out
+                            to our legal team for any questions, concerns, or
+                            requests related to these Terms of Service.
                         </p>
 
                         <div className="grid sm:grid-cols-2 gap-6 max-w-xl mx-auto mb-12">
@@ -1397,9 +1555,7 @@ export default function TermsOfServiceContent() {
 
                         <div className="text-sm text-secondary-content/50">
                             <p>Employment Networks, Inc.</p>
-                            <p>
-                                Last updated: February 20, 2026
-                            </p>
+                            <p>Last updated: February 20, 2026</p>
                         </div>
                     </div>
                 </div>

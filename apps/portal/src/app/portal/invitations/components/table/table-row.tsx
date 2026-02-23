@@ -67,9 +67,7 @@ export function TableRow({
                                     {getInitials(name)}
                                 </div>
                             )}
-                            <span className="font-bold text-sm">
-                                {name}
-                            </span>
+                            <span className="font-bold text-sm">{name}</span>
                         </div>
                     </div>
                 </td>
@@ -99,7 +97,7 @@ export function TableRow({
                     className="px-4 py-3 relative"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <ActionsToolbar
                             invitation={invitation}
                             variant="icon-only"

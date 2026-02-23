@@ -384,7 +384,7 @@ export default function ApplicationsTrendsChart({
                     </div>
                     <ul
                         tabIndex={0}
-                        className="dropdown-content menu bg-base-100 rounded-box z-10 w-20 p-1 shadow-lg border border-base-300 mt-1"
+                        className="dropdown-content menu bg-base-100 rounded-box  w-20 p-1 shadow-lg border border-base-300 mt-1"
                     >
                         {TIME_PERIODS.map((period) => (
                             <li key={period.value}>

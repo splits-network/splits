@@ -319,7 +319,7 @@ export default function <Feature>DetailSidebar({ <feature>Id, onClose }: <Featur
 
                 <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
                     {/* Header */}
-                    <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4 flex items-center justify-between">
+                    <div className="sticky top-0 bg-base-100 border-b border-base-300 p-4 flex items-center justify-between">
                         <h2 className="text-lg font-bold"><Feature> Details</h2>
                         <button
                             onClick={onClose}
@@ -1110,7 +1110,7 @@ export default function <Feature>DetailSidebar({
 
                 <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
                     {/* Header */}
-                    <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4 flex items-center justify-between">
+                    <div className="sticky top-0 bg-base-100 border-b border-base-300 p-4 flex items-center justify-between">
                         <h2 className="text-lg font-bold"><Feature> Details</h2>
                         <button
                             onClick={onClose}

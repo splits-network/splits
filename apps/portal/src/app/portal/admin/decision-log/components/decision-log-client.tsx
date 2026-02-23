@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useAuth } from '@clerk/nextjs';
-import Link from 'next/link';
-import { useToast } from '@/lib/toast-context';
+import { useState, useEffect } from "react";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
+import { useToast } from "@/lib/toast-context";
 
 interface DecisionLog {
     id: string;
@@ -25,7 +25,7 @@ export default function DecisionAuditLogClient() {
     const toast = useToast();
     const [logs, setLogs] = useState<DecisionLog[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<string>('all');
+    const [filter, setFilter] = useState<string>("all");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 50;
@@ -38,7 +38,7 @@ export default function DecisionAuditLogClient() {
         setLoading(true);
         try {
             const token = await getToken();
-            if (!token) throw new Error('Not authenticated');
+            if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
             const queryParams = new URLSearchParams({
@@ -46,19 +46,21 @@ export default function DecisionAuditLogClient() {
                 offset: ((page - 1) * limit).toString(),
             });
 
-            if (filter !== 'all') {
-                queryParams.append('decision_type', filter);
+            if (filter !== "all") {
+                queryParams.append("decision_type", filter);
             }
 
-            const response = await client.get<{ data: DecisionLog[]; total: number }>(
-                '/admin/decision-log',
-                { params: Object.fromEntries(queryParams) }
-            );
+            const response = await client.get<{
+                data: DecisionLog[];
+                total: number;
+            }>("/admin/decision-log", {
+                params: Object.fromEntries(queryParams),
+            });
 
             setLogs(response.data || []);
             setTotalPages(Math.ceil((response.total || 0) / limit));
         } catch (error) {
-            console.error('Failed to load decision logs:', error);
+            console.error("Failed to load decision logs:", error);
         } finally {
             setLoading(false);
         }
@@ -66,14 +68,20 @@ export default function DecisionAuditLogClient() {
 
     const getDecisionTypeBadge = (type: string) => {
         const badges: Record<string, { color: string; icon: string }> = {
-            ai_suggestion_accepted: { color: 'badge-success', icon: 'fa-robot' },
-            ai_suggestion_rejected: { color: 'badge-error', icon: 'fa-robot' },
-            automation_triggered: { color: 'badge-info', icon: 'fa-bolt' },
-            fraud_flag_raised: { color: 'badge-warning', icon: 'fa-shield-halved' },
-            payout_approved: { color: 'badge-success', icon: 'fa-money-bill' },
-            payout_rejected: { color: 'badge-error', icon: 'fa-money-bill' },
+            ai_suggestion_accepted: {
+                color: "badge-success",
+                icon: "fa-robot",
+            },
+            ai_suggestion_rejected: { color: "badge-error", icon: "fa-robot" },
+            automation_triggered: { color: "badge-info", icon: "fa-bolt" },
+            fraud_flag_raised: {
+                color: "badge-warning",
+                icon: "fa-shield-halved",
+            },
+            payout_approved: { color: "badge-success", icon: "fa-money-bill" },
+            payout_rejected: { color: "badge-error", icon: "fa-money-bill" },
         };
-        return badges[type] || { color: 'badge-ghost', icon: 'fa-circle-info' };
+        return badges[type] || { color: "badge-ghost", icon: "fa-circle-info" };
     };
 
     return (
@@ -100,7 +108,10 @@ export default function DecisionAuditLogClient() {
                     </div>
                     <div className="stat-title">AI Decisions</div>
                     <div className="stat-value text-primary">
-                        {logs.filter(l => l.ai_confidence_score !== null).length}
+                        {
+                            logs.filter((l) => l.ai_confidence_score !== null)
+                                .length
+                        }
                     </div>
                     <div className="stat-desc">With AI involvement</div>
                 </div>
@@ -111,7 +122,7 @@ export default function DecisionAuditLogClient() {
                     </div>
                     <div className="stat-title">Human Overrides</div>
                     <div className="stat-value text-secondary">
-                        {logs.filter(l => l.human_override).length}
+                        {logs.filter((l) => l.human_override).length}
                     </div>
                     <div className="stat-desc">AI suggestions overridden</div>
                 </div>
@@ -131,31 +142,33 @@ export default function DecisionAuditLogClient() {
                 <div className="card-body">
                     <div className="flex flex-wrap gap-2">
                         <button
-                            className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+                            className={`btn btn-sm ${filter === "all" ? "btn-primary" : "btn-ghost"}`}
                             onClick={() => {
-                                setFilter('all');
+                                setFilter("all");
                                 setPage(1);
                             }}
                         >
                             All Decisions
                         </button>
                         {[
-                            'ai_suggestion_accepted',
-                            'ai_suggestion_rejected',
-                            'automation_triggered',
-                            'fraud_flag_raised',
-                            'payout_approved',
-                            'payout_rejected',
+                            "ai_suggestion_accepted",
+                            "ai_suggestion_rejected",
+                            "automation_triggered",
+                            "fraud_flag_raised",
+                            "payout_approved",
+                            "payout_rejected",
                         ].map((type) => (
                             <button
                                 key={type}
-                                className={`btn btn-sm ${filter === type ? 'btn-primary' : 'btn-ghost'}`}
+                                className={`btn btn-sm ${filter === type ? "btn-primary" : "btn-ghost"}`}
                                 onClick={() => {
                                     setFilter(type);
                                     setPage(1);
                                 }}
                             >
-                                {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                {type
+                                    .replace(/_/g, " ")
+                                    .replace(/\b\w/g, (l) => l.toUpperCase())}
                             </button>
                         ))}
                     </div>
@@ -190,37 +203,63 @@ export default function DecisionAuditLogClient() {
                                 </thead>
                                 <tbody>
                                     {logs.map((log) => {
-                                        const badge = getDecisionTypeBadge(log.decision_type);
+                                        const badge = getDecisionTypeBadge(
+                                            log.decision_type,
+                                        );
                                         return (
                                             <tr key={log.id}>
                                                 <td>
-                                                    <span className={`badge ${badge.color} gap-2`}>
-                                                        <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
-                                                        {log.decision_type.replace(/_/g, ' ')}
+                                                    <span
+                                                        className={`badge ${badge.color} gap-2`}
+                                                    >
+                                                        <i
+                                                            className={`fa-duotone fa-regular ${badge.icon}`}
+                                                        ></i>
+                                                        {log.decision_type.replace(
+                                                            /_/g,
+                                                            " ",
+                                                        )}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <div>
-                                                        <div className="font-semibold">{log.entity_type}</div>
+                                                        <div className="font-semibold">
+                                                            {log.entity_type}
+                                                        </div>
                                                         <div className="text-sm text-base-content/70 font-mono">
-                                                            {log.entity_id.substring(0, 8)}...
+                                                            {log.entity_id.substring(
+                                                                0,
+                                                                8,
+                                                            )}
+                                                            ...
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    {log.ai_confidence_score !== null ? (
+                                                    {log.ai_confidence_score !==
+                                                    null ? (
                                                         <div>
                                                             <div className="text-sm font-semibold">
-                                                                {log.ai_confidence_score}% confident
+                                                                {
+                                                                    log.ai_confidence_score
+                                                                }
+                                                                % confident
                                                             </div>
                                                             {log.ai_reasoning && (
                                                                 <div className="text-xs text-base-content/70">
-                                                                    {log.ai_reasoning.length} reason(s)
+                                                                    {
+                                                                        log
+                                                                            .ai_reasoning
+                                                                            .length
+                                                                    }{" "}
+                                                                    reason(s)
                                                                 </div>
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-base-content/50">—</span>
+                                                        <span className="text-base-content/50">
+                                                            —
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td>
@@ -230,21 +269,34 @@ export default function DecisionAuditLogClient() {
                                                             Override
                                                         </span>
                                                     ) : (
-                                                        <span className="text-base-content/50">—</span>
+                                                        <span className="text-base-content/50">
+                                                            —
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td>
                                                     <span className="text-sm">
-                                                        {log.created_by === 'system' ? (
-                                                            <span className="badge badge-ghost badge-sm">System</span>
+                                                        {log.created_by ===
+                                                        "system" ? (
+                                                            <span className="badge badge-ghost badge-sm">
+                                                                System
+                                                            </span>
                                                         ) : (
-                                                            <span className="font-mono">{log.created_by.substring(0, 8)}...</span>
+                                                            <span className="font-mono">
+                                                                {log.created_by.substring(
+                                                                    0,
+                                                                    8,
+                                                                )}
+                                                                ...
+                                                            </span>
                                                         )}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <div className="text-sm">
-                                                        {new Date(log.created_at).toLocaleString()}
+                                                        {new Date(
+                                                            log.created_at,
+                                                        ).toLocaleString()}
                                                     </div>
                                                 </td>
                                                 <td>
@@ -252,11 +304,17 @@ export default function DecisionAuditLogClient() {
                                                         <summary className="btn btn-ghost btn-sm">
                                                             <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                                         </summary>
-                                                        <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
+                                                        <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 ">
                                                             <li>
                                                                 <button
                                                                     onClick={() => {
-                                                                        toast.info(JSON.stringify(log.decision_data, null, 2));
+                                                                        toast.info(
+                                                                            JSON.stringify(
+                                                                                log.decision_data,
+                                                                                null,
+                                                                                2,
+                                                                            ),
+                                                                        );
                                                                     }}
                                                                 >
                                                                     <i className="fa-duotone fa-regular fa-eye"></i>
@@ -267,11 +325,17 @@ export default function DecisionAuditLogClient() {
                                                                 <li>
                                                                     <button
                                                                         onClick={() => {
-                                                                            toast.info(log.ai_reasoning?.join('\n') || '');
+                                                                            toast.info(
+                                                                                log.ai_reasoning?.join(
+                                                                                    "\n",
+                                                                                ) ||
+                                                                                    "",
+                                                                            );
                                                                         }}
                                                                     >
                                                                         <i className="fa-duotone fa-regular fa-brain"></i>
-                                                                        View AI Reasoning
+                                                                        View AI
+                                                                        Reasoning
                                                                     </button>
                                                                 </li>
                                                             )}
@@ -292,7 +356,9 @@ export default function DecisionAuditLogClient() {
                             <div className="join">
                                 <button
                                     className="join-item btn"
-                                    onClick={() => setPage(Math.max(1, page - 1))}
+                                    onClick={() =>
+                                        setPage(Math.max(1, page - 1))
+                                    }
                                     disabled={page === 1}
                                 >
                                     «
@@ -302,7 +368,9 @@ export default function DecisionAuditLogClient() {
                                 </button>
                                 <button
                                     className="join-item btn"
-                                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                                    onClick={() =>
+                                        setPage(Math.min(totalPages, page + 1))
+                                    }
                                     disabled={page === totalPages}
                                 >
                                     »

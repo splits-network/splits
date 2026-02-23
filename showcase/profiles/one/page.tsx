@@ -191,7 +191,7 @@ export default function ProfilesOne() {
                         clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                         <div className="flex items-start gap-6 flex-1">
                             <div className="profile-avatar opacity-0 relative">
@@ -389,7 +389,7 @@ export default function ProfilesOne() {
                                                     1 && (
                                                 <div className="absolute left-[18px] top-10 bottom-0 w-px bg-base-300" />
                                             )}
-                                            <div className="w-9 h-9 bg-primary text-primary-content flex items-center justify-center flex-shrink-0 z-10">
+                                            <div className="w-9 h-9 bg-primary text-primary-content flex items-center justify-center flex-shrink-0 ">
                                                 <i className="fa-duotone fa-regular fa-briefcase text-xs" />
                                             </div>
                                             <div className="flex-1">

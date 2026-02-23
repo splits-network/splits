@@ -128,7 +128,8 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                 } else {
                     setState({
                         kind: "error",
-                        message: "We could not load this invitation. Try again, or contact support if the problem continues.",
+                        message:
+                            "We could not load this invitation. Try again, or contact support if the problem continues.",
                     });
                 }
             });
@@ -138,9 +139,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
     useGSAP(
         () => {
             if (state.kind !== "ready" || !mainRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 mainRef.current
                     .querySelectorAll(".opacity-0")
                     .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
@@ -234,7 +233,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="landing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
                             Your Invitation
@@ -374,11 +373,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                                 <p className="text-sm text-base-content/60">
                                     This invitation expires on {expiryDate}. If
                                     you don&apos;t respond by then,{" "}
-                                    {
-                                        invitation.recruiter_name?.split(
-                                            " ",
-                                        )[0]
-                                    }{" "}
+                                    {invitation.recruiter_name?.split(" ")[0]}{" "}
                                     will need to send a new invitation.
                                 </p>
                             </div>
@@ -481,14 +476,19 @@ function ErrorState({
 }) {
     const configs: Record<
         string,
-        { icon: string; accent: string; heading: string; description: string; cta?: { label: string; href: string } }
+        {
+            icon: string;
+            accent: string;
+            heading: string;
+            description: string;
+            cta?: { label: string; href: string };
+        }
     > = {
         expired: {
             icon: "fa-duotone fa-regular fa-clock",
             accent: "border-warning",
             heading: "This invitation has expired",
-            description:
-                "Contact your recruiter to request a new one.",
+            description: "Contact your recruiter to request a new one.",
             cta: {
                 label: "Go to Homepage",
                 href: "/",

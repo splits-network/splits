@@ -155,7 +155,8 @@ export default function ActionsToolbar({
                 );
             } else {
                 chatSidebar.openToThread(conversationId, {
-                    otherUserName: application.candidate?.full_name || "Unknown",
+                    otherUserName:
+                        application.candidate?.full_name || "Unknown",
                 });
             }
         } catch (err: any) {
@@ -587,7 +588,7 @@ export default function ActionsToolbar({
                     >
                         <Presence
                             status={presenceStatus}
-                            className="absolute -top-0.5 -right-0.5 z-10"
+                            className="absolute -top-0.5 -right-0.5 "
                         />
                         <Button
                             icon="fa-duotone fa-regular fa-messages"

@@ -205,7 +205,7 @@ export default function RoleListItem({
                 transition-all duration-200 hover:bg-base-100
                 ${
                     isSelected
-                        ? "bg-base-100 border-l-4 border-l-primary shadow-sm z-10"
+                        ? "bg-base-100 border-l-4 border-l-primary shadow-sm "
                         : "border-l-4 border-l-transparent"
                 }
             `}

@@ -68,11 +68,7 @@ const VALUE_PROPS = [
 
 /* ─── Component ───────────────────────────────────────────────────────────── */
 
-export default function InvitationWizardClient({
-    token,
-}: {
-    token: string;
-}) {
+export default function InvitationWizardClient({ token }: { token: string }) {
     const router = useRouter();
     const { getToken, isSignedIn, isLoaded } = useAuth();
     const mainRef = useRef<HTMLElement>(null);
@@ -129,7 +125,9 @@ export default function InvitationWizardClient({
                                 data.error?.message || "Conflict occurred.",
                             );
                         } catch {
-                            setError("This invitation has already been responded to.");
+                            setError(
+                                "This invitation has already been responded to.",
+                            );
                         }
                     } else {
                         setError("Failed to load invitation details.");
@@ -222,9 +220,7 @@ export default function InvitationWizardClient({
     useGSAP(
         () => {
             if (loading || !mainRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 mainRef.current
                     .querySelectorAll(".opacity-0")
                     .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
@@ -345,7 +341,7 @@ export default function InvitationWizardClient({
                         clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="wizard-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
                             Invitation
@@ -494,7 +490,10 @@ export default function InvitationWizardClient({
                                 </p>
 
                                 <div className="bg-base-200 p-6 space-y-4 text-sm">
-                                    <AgreementClause num={1} title="Authorization to Represent">
+                                    <AgreementClause
+                                        num={1}
+                                        title="Authorization to Represent"
+                                    >
                                         By accepting this invitation, I hereby
                                         authorize {invitation.recruiter_name}{" "}
                                         (&quot;Recruiter&quot;) to represent me
@@ -504,7 +503,10 @@ export default function InvitationWizardClient({
                                         employers.
                                     </AgreementClause>
 
-                                    <AgreementClause num={2} title="Exclusive Representation Period">
+                                    <AgreementClause
+                                        num={2}
+                                        title="Exclusive Representation Period"
+                                    >
                                         I acknowledge that for any position to
                                         which the Recruiter submits my profile,
                                         the Recruiter shall have the exclusive
@@ -515,18 +517,24 @@ export default function InvitationWizardClient({
                                         whichever occurs first.
                                     </AgreementClause>
 
-                                    <AgreementClause num={3} title="No Duplicate Submissions">
+                                    <AgreementClause
+                                        num={3}
+                                        title="No Duplicate Submissions"
+                                    >
                                         I agree not to apply directly to any
                                         company or through any other recruiter
                                         for positions to which the Recruiter has
                                         already submitted my profile during the
-                                        exclusive representation period, unless I
-                                        have notified the Recruiter in writing
+                                        exclusive representation period, unless
+                                        I have notified the Recruiter in writing
                                         and received acknowledgment of
                                         withdrawal.
                                     </AgreementClause>
 
-                                    <AgreementClause num={4} title="Recruiter's Commission">
+                                    <AgreementClause
+                                        num={4}
+                                        title="Recruiter's Commission"
+                                    >
                                         I understand that the Recruiter&apos;s
                                         compensation is paid directly by the
                                         hiring employer upon successful
@@ -535,7 +543,10 @@ export default function InvitationWizardClient({
                                         the Recruiter&apos;s services.
                                     </AgreementClause>
 
-                                    <AgreementClause num={5} title="Accuracy of Information">
+                                    <AgreementClause
+                                        num={5}
+                                        title="Accuracy of Information"
+                                    >
                                         I confirm that all information provided
                                         in my profile, resume, and
                                         communications with the Recruiter is
@@ -545,24 +556,33 @@ export default function InvitationWizardClient({
                                         employment status or availability.
                                     </AgreementClause>
 
-                                    <AgreementClause num={6} title="Communication and Updates">
+                                    <AgreementClause
+                                        num={6}
+                                        title="Communication and Updates"
+                                    >
                                         I agree to maintain reasonable
                                         communication with the Recruiter
-                                        throughout the recruitment process and to
-                                        provide timely updates regarding
+                                        throughout the recruitment process and
+                                        to provide timely updates regarding
                                         interviews, offers, and my continued
                                         interest in opportunities presented.
                                     </AgreementClause>
 
-                                    <AgreementClause num={7} title="Confidentiality">
-                                        I understand that the Recruiter may share
-                                        my information with potential employers
-                                        in confidence, and I authorize such
-                                        disclosure for the purpose of securing
-                                        employment opportunities.
+                                    <AgreementClause
+                                        num={7}
+                                        title="Confidentiality"
+                                    >
+                                        I understand that the Recruiter may
+                                        share my information with potential
+                                        employers in confidence, and I authorize
+                                        such disclosure for the purpose of
+                                        securing employment opportunities.
                                     </AgreementClause>
 
-                                    <AgreementClause num={8} title="Right to Decline">
+                                    <AgreementClause
+                                        num={8}
+                                        title="Right to Decline"
+                                    >
                                         I retain the right to decline any
                                         opportunity presented by the Recruiter
                                         without penalty. This agreement does not
@@ -571,31 +591,38 @@ export default function InvitationWizardClient({
                                         efforts.
                                     </AgreementClause>
 
-                                    <AgreementClause num={9} title="Termination">
-                                        Either party may terminate this agreement
-                                        at any time by providing written notice
-                                        through the Applicant Network platform.
-                                        Termination will not affect the
-                                        Recruiter&apos;s rights regarding
-                                        positions to which my profile was
-                                        submitted prior to termination.
+                                    <AgreementClause
+                                        num={9}
+                                        title="Termination"
+                                    >
+                                        Either party may terminate this
+                                        agreement at any time by providing
+                                        written notice through the Applicant
+                                        Network platform. Termination will not
+                                        affect the Recruiter&apos;s rights
+                                        regarding positions to which my profile
+                                        was submitted prior to termination.
                                     </AgreementClause>
 
-                                    <AgreementClause num={10} title="Governing Terms">
+                                    <AgreementClause
+                                        num={10}
+                                        title="Governing Terms"
+                                    >
                                         This agreement is governed by the terms
                                         of service of Applicant Network and
                                         applicable employment laws. By accepting
                                         this invitation, I acknowledge that I
-                                        have read, understood, and agree to these
-                                        terms.
+                                        have read, understood, and agree to
+                                        these terms.
                                     </AgreementClause>
 
                                     <div className="bg-base-100 p-4 border-l-4 border-primary mt-4">
                                         <p className="text-xs text-base-content/70">
-                                            <strong>Effective Date:</strong> This
-                                            agreement takes effect immediately
-                                            upon acceptance and remains in effect
-                                            as outlined in the terms above.
+                                            <strong>Effective Date:</strong>{" "}
+                                            This agreement takes effect
+                                            immediately upon acceptance and
+                                            remains in effect as outlined in the
+                                            terms above.
                                         </p>
                                     </div>
                                 </div>
@@ -651,9 +678,7 @@ export default function InvitationWizardClient({
                                                 <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5"></i>
                                                 <p className="text-sm text-base-content/70">
                                                     By accepting, you authorize{" "}
-                                                    {
-                                                        invitation.recruiter_name
-                                                    }{" "}
+                                                    {invitation.recruiter_name}{" "}
                                                     to represent you as a
                                                     candidate and submit your
                                                     profile to prospective
@@ -778,9 +803,7 @@ export default function InvitationWizardClient({
                                 {error && (
                                     <div className="mt-4 border-l-4 border-error bg-error/5 p-4 flex items-start gap-3">
                                         <i className="fa-duotone fa-regular fa-circle-exclamation text-error"></i>
-                                        <span className="text-sm">
-                                            {error}
-                                        </span>
+                                        <span className="text-sm">{error}</span>
                                     </div>
                                 )}
                             </div>

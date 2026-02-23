@@ -14,10 +14,22 @@ const heroImage =
 
 /* ─── TOC Items ─────────────────────────────────────────────────────────── */
 const tocItems = [
-    { id: "what-are-cookies", label: "What Are Cookies", icon: "fa-cookie-bite" },
+    {
+        id: "what-are-cookies",
+        label: "What Are Cookies",
+        icon: "fa-cookie-bite",
+    },
     { id: "how-we-use-cookies", label: "How We Use Cookies", icon: "fa-gear" },
-    { id: "types-of-cookies", label: "Types of Cookies", icon: "fa-layer-group" },
-    { id: "third-party-cookies", label: "Third-Party Cookies", icon: "fa-share-nodes" },
+    {
+        id: "types-of-cookies",
+        label: "Types of Cookies",
+        icon: "fa-layer-group",
+    },
+    {
+        id: "third-party-cookies",
+        label: "Third-Party Cookies",
+        icon: "fa-share-nodes",
+    },
     { id: "cookie-management", label: "Cookie Management", icon: "fa-sliders" },
     { id: "your-consent", label: "Your Consent", icon: "fa-hand" },
     { id: "do-not-track", label: "Do Not Track", icon: "fa-eye-slash" },
@@ -72,7 +84,7 @@ export default function CookiePolicyContent() {
                 </div>
 
                 {/* Content panel -- 60% on desktop */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             <i className="fa-duotone fa-regular fa-cookie-bite mr-2"></i>
@@ -130,8 +142,12 @@ export default function CookiePolicyContent() {
                                         <span className="text-xs font-bold text-primary w-6">
                                             {String(i + 1).padStart(2, "0")}
                                         </span>
-                                        <i className={`fa-duotone fa-regular ${item.icon} text-sm text-primary/50 w-5`}></i>
-                                        <span className="text-sm">{item.label}</span>
+                                        <i
+                                            className={`fa-duotone fa-regular ${item.icon} text-sm text-primary/50 w-5`}
+                                        ></i>
+                                        <span className="text-sm">
+                                            {item.label}
+                                        </span>
                                     </a>
                                 ))}
                             </div>
@@ -154,36 +170,47 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Cookies are small text files that are placed on your
-                                device (computer, tablet, or mobile phone) when you
-                                visit a website. They help the website remember your
-                                actions and preferences over time, so you don&rsquo;t have to
-                                re-enter information when you return to the site or
-                                browse from one page to another.
+                                Cookies are small text files that are placed on
+                                your device (computer, tablet, or mobile phone)
+                                when you visit a website. They help the website
+                                remember your actions and preferences over time,
+                                so you don&rsquo;t have to re-enter information
+                                when you return to the site or browse from one
+                                page to another.
                             </p>
                             <p>
-                                Cookies are widely used across the internet to make websites
-                                work more efficiently and to provide information to website
-                                owners. They can be &ldquo;first-party&rdquo; cookies (set by the website
-                                you&rsquo;re visiting) or &ldquo;third-party&rdquo; cookies (set by a service
-                                used by the website, such as an analytics or advertising provider).
+                                Cookies are widely used across the internet to
+                                make websites work more efficiently and to
+                                provide information to website owners. They can
+                                be &ldquo;first-party&rdquo; cookies (set by the
+                                website you&rsquo;re visiting) or
+                                &ldquo;third-party&rdquo; cookies (set by a
+                                service used by the website, such as an
+                                analytics or advertising provider).
                             </p>
                             <p>
-                                Cookies can also be classified by how long they remain on your device:
+                                Cookies can also be classified by how long they
+                                remain on your device:
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Session cookies</strong> are
-                                        temporary and are deleted when you close your browser.
+                                        <strong className="text-base-content font-bold">
+                                            Session cookies
+                                        </strong>{" "}
+                                        are temporary and are deleted when you
+                                        close your browser.
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Persistent cookies</strong> remain
-                                        on your device for a set period or until you manually delete them.
+                                        <strong className="text-base-content font-bold">
+                                            Persistent cookies
+                                        </strong>{" "}
+                                        remain on your device for a set period
+                                        or until you manually delete them.
                                     </span>
                                 </li>
                             </ul>
@@ -206,50 +233,69 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Applicant Network uses cookies and similar technologies to provide,
-                                secure, and improve our platform. Specifically, we use cookies to:
+                                Applicant Network uses cookies and similar
+                                technologies to provide, secure, and improve our
+                                platform. Specifically, we use cookies to:
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Enable Essential Features:</strong>{" "}
-                                        Allow you to log in, navigate the site, and use core functionality
+                                        <strong className="text-base-content font-bold">
+                                            Enable Essential Features:
+                                        </strong>{" "}
+                                        Allow you to log in, navigate the site,
+                                        and use core functionality
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Remember Your Preferences:</strong>{" "}
-                                        Store settings like language, theme, and display preferences
+                                        <strong className="text-base-content font-bold">
+                                            Remember Your Preferences:
+                                        </strong>{" "}
+                                        Store settings like language, theme, and
+                                        display preferences
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Improve Performance:</strong>{" "}
-                                        Help us understand how you use the site so we can make it better
+                                        <strong className="text-base-content font-bold">
+                                            Improve Performance:
+                                        </strong>{" "}
+                                        Help us understand how you use the site
+                                        so we can make it better
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Analyze Usage:</strong>{" "}
-                                        Collect data about site traffic and user behavior
+                                        <strong className="text-base-content font-bold">
+                                            Analyze Usage:
+                                        </strong>{" "}
+                                        Collect data about site traffic and user
+                                        behavior
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Enhance Security:</strong>{" "}
-                                        Detect and prevent fraudulent activity and security threats
+                                        <strong className="text-base-content font-bold">
+                                            Enhance Security:
+                                        </strong>{" "}
+                                        Detect and prevent fraudulent activity
+                                        and security threats
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Personalize Content:</strong>{" "}
-                                        Show you relevant job recommendations and content
+                                        <strong className="text-base-content font-bold">
+                                            Personalize Content:
+                                        </strong>{" "}
+                                        Show you relevant job recommendations
+                                        and content
                                     </span>
                                 </li>
                             </ul>
@@ -267,7 +313,8 @@ export default function CookiePolicyContent() {
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
                             <i className="fa-duotone fa-regular fa-quote-left text-4xl text-secondary/30 mb-6 block"></i>
                             <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                                &ldquo;We use cookies to make your experience better, not to track you across the web.&rdquo;
+                                &ldquo;We use cookies to make your experience
+                                better, not to track you across the web.&rdquo;
                             </blockquote>
                             <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
                                 -- Applicant Network Privacy Principles
@@ -297,15 +344,18 @@ export default function CookiePolicyContent() {
                         </h3>
                         <div className="space-y-4 text-base-content/70 leading-relaxed text-lg mb-8">
                             <p>
-                                These cookies are essential for the website to function properly.
-                                Without them, you won&rsquo;t be able to use basic features like
-                                logging in or submitting applications. These cookies cannot be
+                                These cookies are essential for the website to
+                                function properly. Without them, you won&rsquo;t
+                                be able to use basic features like logging in or
+                                submitting applications. These cookies cannot be
                                 disabled.
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Authentication and session management</span>
+                                    <span>
+                                        Authentication and session management
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -325,14 +375,18 @@ export default function CookiePolicyContent() {
                         </h3>
                         <div className="space-y-4 text-base-content/70 leading-relaxed text-lg mb-8">
                             <p>
-                                These cookies remember your preferences and choices to provide
-                                a more personalized experience. They are optional and can be
+                                These cookies remember your preferences and
+                                choices to provide a more personalized
+                                experience. They are optional and can be
                                 disabled through your browser settings.
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Theme and display preferences (dark/light mode)</span>
+                                    <span>
+                                        Theme and display preferences
+                                        (dark/light mode)
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -340,7 +394,9 @@ export default function CookiePolicyContent() {
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Search filters and job preferences</span>
+                                    <span>
+                                        Search filters and job preferences
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -356,14 +412,17 @@ export default function CookiePolicyContent() {
                         </h3>
                         <div className="space-y-4 text-base-content/70 leading-relaxed text-lg mb-8">
                             <p>
-                                These cookies help us understand how visitors interact with our
-                                website by collecting anonymous information. They are optional
-                                and can be disabled.
+                                These cookies help us understand how visitors
+                                interact with our website by collecting
+                                anonymous information. They are optional and can
+                                be disabled.
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Page views and navigation patterns</span>
+                                    <span>
+                                        Page views and navigation patterns
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -379,7 +438,9 @@ export default function CookiePolicyContent() {
                                 </li>
                             </ul>
                             <p className="text-sm text-base-content/50">
-                                <strong className="text-base-content/60">Services we use:</strong>{" "}
+                                <strong className="text-base-content/60">
+                                    Services we use:
+                                </strong>{" "}
                                 Google Analytics (anonymized IP)
                             </p>
                         </div>
@@ -391,9 +452,10 @@ export default function CookiePolicyContent() {
                         </h3>
                         <div className="space-y-4 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                These cookies track your activity across websites to deliver
-                                relevant advertising and measure campaign effectiveness. They
-                                are optional and can be disabled.
+                                These cookies track your activity across
+                                websites to deliver relevant advertising and
+                                measure campaign effectiveness. They are
+                                optional and can be disabled.
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
@@ -432,10 +494,11 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                We use services from trusted third-party providers that may set
-                                their own cookies on your device. We do not control these
-                                third-party cookies. Please review the privacy policies of these
-                                services to learn how they use cookies.
+                                We use services from trusted third-party
+                                providers that may set their own cookies on your
+                                device. We do not control these third-party
+                                cookies. Please review the privacy policies of
+                                these services to learn how they use cookies.
                             </p>
 
                             <div className="space-y-4 mt-8">
@@ -444,7 +507,9 @@ export default function CookiePolicyContent() {
                                         key={service.name}
                                         className="flex items-start gap-4 p-6 bg-base-100 border-l-4 border-primary"
                                     >
-                                        <i className={`fa-duotone fa-regular ${service.icon} text-primary text-xl mt-0.5 flex-shrink-0`}></i>
+                                        <i
+                                            className={`fa-duotone fa-regular ${service.icon} text-primary text-xl mt-0.5 flex-shrink-0`}
+                                        ></i>
                                         <div>
                                             <h3 className="font-bold text-base-content text-lg mb-1">
                                                 {service.name}
@@ -478,7 +543,8 @@ export default function CookiePolicyContent() {
                     <div className="max-w-4xl mx-auto text-center">
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
                         <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                            &ldquo;You are always in control of your cookie preferences.&rdquo;
+                            &ldquo;You are always in control of your cookie
+                            preferences.&rdquo;
                         </blockquote>
                         <cite className="text-sm uppercase tracking-[0.2em] text-primary-content/50 not-italic">
                             -- Applicant Network Cookie Principles
@@ -501,22 +567,27 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                When you first visit Applicant Network, you&rsquo;ll see a cookie
-                                banner where you can choose to accept or decline non-essential
-                                cookies. You can change your preferences at any time.
+                                When you first visit Applicant Network,
+                                you&rsquo;ll see a cookie banner where you can
+                                choose to accept or decline non-essential
+                                cookies. You can change your preferences at any
+                                time.
                             </p>
 
                             <h3 className="text-2xl font-black tracking-tight mb-4 mt-8 text-base-content">
                                 Browser Settings
                             </h3>
                             <p>
-                                Most web browsers allow you to control cookies through their
-                                settings. You can:
+                                Most web browsers allow you to control cookies
+                                through their settings. You can:
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>View what cookies are stored on your device</span>
+                                    <span>
+                                        View what cookies are stored on your
+                                        device
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -524,7 +595,9 @@ export default function CookiePolicyContent() {
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Block cookies from specific websites</span>
+                                    <span>
+                                        Block cookies from specific websites
+                                    </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
@@ -532,14 +605,19 @@ export default function CookiePolicyContent() {
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
-                                    <span>Clear all cookies when you close your browser</span>
+                                    <span>
+                                        Clear all cookies when you close your
+                                        browser
+                                    </span>
                                 </li>
                             </ul>
                             <p className="text-base-content/50 text-base mt-4">
                                 <i className="fa-duotone fa-regular fa-circle-info text-primary mr-2"></i>
-                                <strong className="text-base-content/60">Note:</strong>{" "}
-                                Disabling cookies may affect your ability to use certain
-                                features of our website.
+                                <strong className="text-base-content/60">
+                                    Note:
+                                </strong>{" "}
+                                Disabling cookies may affect your ability to use
+                                certain features of our website.
                             </p>
 
                             <h3 className="text-2xl font-black tracking-tight mb-4 mt-8 text-base-content">
@@ -549,36 +627,50 @@ export default function CookiePolicyContent() {
                                 <div className="flex items-start gap-4 p-6 bg-base-200 border-l-4 border-primary">
                                     <i className="fa-brands fa-chrome text-xl text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
-                                        <h4 className="font-bold text-base-content mb-1">Google Chrome</h4>
+                                        <h4 className="font-bold text-base-content mb-1">
+                                            Google Chrome
+                                        </h4>
                                         <p className="text-sm text-base-content/60">
-                                            Settings &rarr; Privacy and security &rarr; Cookies and other site data
+                                            Settings &rarr; Privacy and security
+                                            &rarr; Cookies and other site data
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-6 bg-base-200 border-l-4 border-primary">
                                     <i className="fa-brands fa-firefox text-xl text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
-                                        <h4 className="font-bold text-base-content mb-1">Mozilla Firefox</h4>
+                                        <h4 className="font-bold text-base-content mb-1">
+                                            Mozilla Firefox
+                                        </h4>
                                         <p className="text-sm text-base-content/60">
-                                            Settings &rarr; Privacy &amp; Security &rarr; Cookies and Site Data
+                                            Settings &rarr; Privacy &amp;
+                                            Security &rarr; Cookies and Site
+                                            Data
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-6 bg-base-200 border-l-4 border-primary">
                                     <i className="fa-brands fa-safari text-xl text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
-                                        <h4 className="font-bold text-base-content mb-1">Safari</h4>
+                                        <h4 className="font-bold text-base-content mb-1">
+                                            Safari
+                                        </h4>
                                         <p className="text-sm text-base-content/60">
-                                            Preferences &rarr; Privacy &rarr; Manage Website Data
+                                            Preferences &rarr; Privacy &rarr;
+                                            Manage Website Data
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-6 bg-base-200 border-l-4 border-primary">
                                     <i className="fa-brands fa-edge text-xl text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
-                                        <h4 className="font-bold text-base-content mb-1">Microsoft Edge</h4>
+                                        <h4 className="font-bold text-base-content mb-1">
+                                            Microsoft Edge
+                                        </h4>
                                         <p className="text-sm text-base-content/60">
-                                            Settings &rarr; Cookies and site permissions &rarr; Manage and delete cookies
+                                            Settings &rarr; Cookies and site
+                                            permissions &rarr; Manage and delete
+                                            cookies
                                         </p>
                                     </div>
                                 </div>
@@ -602,22 +694,25 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                When you first visit Applicant Network, we present you with
-                                a clear cookie consent banner that explains our use of cookies.
-                                You can choose to accept all cookies, reject non-essential
+                                When you first visit Applicant Network, we
+                                present you with a clear cookie consent banner
+                                that explains our use of cookies. You can choose
+                                to accept all cookies, reject non-essential
                                 cookies, or customize your preferences.
                             </p>
                             <p>
-                                Strictly necessary cookies do not require your consent as they
-                                are essential for the website to function. For all other
-                                categories of cookies (functionality, analytics, and marketing),
-                                we will only set them on your device after you have provided
-                                your explicit consent.
+                                Strictly necessary cookies do not require your
+                                consent as they are essential for the website to
+                                function. For all other categories of cookies
+                                (functionality, analytics, and marketing), we
+                                will only set them on your device after you have
+                                provided your explicit consent.
                             </p>
                             <p>
-                                You can withdraw your consent at any time by adjusting your
-                                cookie preferences through the cookie settings option available
-                                in the footer of our website, or by clearing cookies from your
+                                You can withdraw your consent at any time by
+                                adjusting your cookie preferences through the
+                                cookie settings option available in the footer
+                                of our website, or by clearing cookies from your
                                 browser settings.
                             </p>
                         </div>
@@ -639,16 +734,20 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Some browsers have a &ldquo;Do Not Track&rdquo; (DNT) feature that sends
-                                a signal to websites indicating that you don&rsquo;t want your online
-                                activity tracked. Currently, there is no universal standard for
-                                how websites should respond to Do Not Track signals.
+                                Some browsers have a &ldquo;Do Not Track&rdquo;
+                                (DNT) feature that sends a signal to websites
+                                indicating that you don&rsquo;t want your online
+                                activity tracked. Currently, there is no
+                                universal standard for how websites should
+                                respond to Do Not Track signals.
                             </p>
                             <p>
-                                We do not currently respond to Do Not Track signals, but you
-                                can manage cookies as described in the Cookie Management section
-                                above. We continue to monitor developments in this area and will
-                                update our practices as industry standards evolve.
+                                We do not currently respond to Do Not Track
+                                signals, but you can manage cookies as described
+                                in the Cookie Management section above. We
+                                continue to monitor developments in this area
+                                and will update our practices as industry
+                                standards evolve.
                             </p>
                         </div>
                     </div>
@@ -664,7 +763,8 @@ export default function CookiePolicyContent() {
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
                             <i className="fa-duotone fa-regular fa-quote-left text-4xl text-secondary/30 mb-6 block"></i>
                             <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                                &ldquo;Transparency builds trust. We believe you should always know how your data is used.&rdquo;
+                                &ldquo;Transparency builds trust. We believe you
+                                should always know how your data is used.&rdquo;
                             </blockquote>
                             <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
                                 -- Applicant Network Data Principles
@@ -688,27 +788,34 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Our website uses cookies on mobile devices just as it does on
-                                desktop computers. You can manage cookies on mobile devices
-                                through your browser settings, similar to desktop browsers.
+                                Our website uses cookies on mobile devices just
+                                as it does on desktop computers. You can manage
+                                cookies on mobile devices through your browser
+                                settings, similar to desktop browsers.
                             </p>
                             <p>
-                                On mobile apps (if applicable), you can manage tracking
-                                preferences through your device settings:
+                                On mobile apps (if applicable), you can manage
+                                tracking preferences through your device
+                                settings:
                             </p>
                             <ul className="space-y-3 pl-4">
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">iOS:</strong>{" "}
+                                        <strong className="text-base-content font-bold">
+                                            iOS:
+                                        </strong>{" "}
                                         Settings &rarr; Privacy &rarr; Tracking
                                     </span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
                                     <span>
-                                        <strong className="text-base-content font-bold">Android:</strong>{" "}
-                                        Settings &rarr; Google &rarr; Ads &rarr; Opt out of Ads Personalization
+                                        <strong className="text-base-content font-bold">
+                                            Android:
+                                        </strong>{" "}
+                                        Settings &rarr; Google &rarr; Ads &rarr;
+                                        Opt out of Ads Personalization
                                     </span>
                                 </li>
                             </ul>
@@ -731,17 +838,19 @@ export default function CookiePolicyContent() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                We may update this Cookie Policy from time to time to reflect
-                                changes in our practices, technologies, or legal requirements.
-                                We will notify you of any material changes by posting the new
-                                policy on this page and updating the &ldquo;Last Updated&rdquo; date at the
-                                top.
+                                We may update this Cookie Policy from time to
+                                time to reflect changes in our practices,
+                                technologies, or legal requirements. We will
+                                notify you of any material changes by posting
+                                the new policy on this page and updating the
+                                &ldquo;Last Updated&rdquo; date at the top.
                             </p>
                             <p>
-                                We encourage you to review this Cookie Policy periodically
-                                to stay informed about how we use cookies. Your continued use
-                                of Applicant Network after any changes to this policy
-                                constitutes your acceptance of the updated terms.
+                                We encourage you to review this Cookie Policy
+                                periodically to stay informed about how we use
+                                cookies. Your continued use of Applicant Network
+                                after any changes to this policy constitutes
+                                your acceptance of the updated terms.
                             </p>
                         </div>
                     </div>
@@ -764,13 +873,16 @@ export default function CookiePolicyContent() {
                             cookies?
                         </h2>
                         <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                            If you have any questions about how we use cookies or want to
-                            learn more about your options, our privacy team is here to help.
+                            If you have any questions about how we use cookies
+                            or want to learn more about your options, our
+                            privacy team is here to help.
                         </p>
 
                         <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mb-12 text-left">
                             <div className="border-l-4 border-primary-content/30 pl-6">
-                                <h3 className="font-bold text-lg mb-1">Privacy Questions</h3>
+                                <h3 className="font-bold text-lg mb-1">
+                                    Privacy Questions
+                                </h3>
                                 <a
                                     href="mailto:privacy@applicant.network"
                                     className="underline opacity-80 hover:opacity-100 transition-opacity"
@@ -782,7 +894,9 @@ export default function CookiePolicyContent() {
                                 </p>
                             </div>
                             <div className="border-l-4 border-primary-content/30 pl-6">
-                                <h3 className="font-bold text-lg mb-1">General Support</h3>
+                                <h3 className="font-bold text-lg mb-1">
+                                    General Support
+                                </h3>
                                 <a
                                     href="mailto:support@applicant.network"
                                     className="underline opacity-80 hover:opacity-100 transition-opacity"

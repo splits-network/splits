@@ -78,7 +78,7 @@ This document provides a comprehensive UI/UX evaluation of the Candidate Portal 
         <source src="/hero-video.mp4" type="video/mp4" />
     </video>
     {/* Improved content overlay */}
-    <div className="hero-content relative z-10 text-center">
+    <div className="hero-content relative  text-center">
         <div className="backdrop-blur-sm bg-base-100/10 rounded-2xl p-8">
             {/* Hero content with better readability */}
         </div>

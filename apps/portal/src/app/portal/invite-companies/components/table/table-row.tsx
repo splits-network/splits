@@ -67,7 +67,9 @@ export function TableRow({
                     <span
                         className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                     >
-                        <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
+                        <i
+                            className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`}
+                        />
                         {formatStatus(invitation.status)}
                     </span>
                 </td>
@@ -76,15 +78,20 @@ export function TableRow({
                 </td>
                 <td className="px-4 py-3 text-sm">
                     {daysLeft !== null ? (
-                        <span className={`font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/50"}`}>
+                        <span
+                            className={`font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/50"}`}
+                        >
                             {daysLeft > 0 ? `${daysLeft}d` : "Expired"}
                         </span>
                     ) : (
                         <span className="text-base-content/30">{"\u2014"}</span>
                     )}
                 </td>
-                <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
+                <td
+                    className="px-4 py-3 relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <InvitationActionsToolbar
                             invitation={invitation}
                             variant="icon-only"

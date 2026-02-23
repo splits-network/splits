@@ -1,12 +1,17 @@
-import type { TimelineBlock } from '@splits-network/shared-types';
+import type { TimelineBlock } from "@splits-network/shared-types";
 
 const bgMap: Record<string, string> = {
-    'base-100': 'bg-base-100',
-    'base-200': 'bg-base-200',
+    "base-100": "bg-base-100",
+    "base-200": "bg-base-200",
 };
 
-export function TimelineBlockComponent({ block }: { block: TimelineBlock; index: number }) {
-    const bg = block.bg ? bgMap[block.bg] || 'bg-base-100' : 'bg-base-100';
+export function TimelineBlockComponent({
+    block,
+}: {
+    block: TimelineBlock;
+    index: number;
+}) {
+    const bg = block.bg ? bgMap[block.bg] || "bg-base-100" : "bg-base-100";
 
     return (
         <section className={`py-20 overflow-hidden ${bg}`}>
@@ -43,11 +48,11 @@ export function TimelineBlockComponent({ block }: { block: TimelineBlock; index:
                             )}
 
                             {/* Step number / icon */}
-                            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-primary text-primary-content font-black text-sm relative z-10">
+                            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-primary text-primary-content font-black text-sm relative ">
                                 {step.icon ? (
                                     <i className={step.icon} />
                                 ) : (
-                                    step.number ?? i + 1
+                                    (step.number ?? i + 1)
                                 )}
                             </div>
 

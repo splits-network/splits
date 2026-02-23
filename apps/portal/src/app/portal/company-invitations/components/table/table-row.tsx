@@ -30,7 +30,10 @@ export function TableRow({
 }) {
     const { isCompanyUser } = useUserProfile();
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
-    const counterpartySubtext = getCounterpartySubtext(invitation, isCompanyUser);
+    const counterpartySubtext = getCounterpartySubtext(
+        invitation,
+        isCompanyUser,
+    );
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
@@ -53,12 +56,13 @@ export function TableRow({
                 {/* Name */}
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                        {isNew(invitation) && invitation.status === "pending" && (
-                            <i
-                                className="fa-duotone fa-regular fa-sparkles text-sm text-warning"
-                                title="New in the last 7 days"
-                            />
-                        )}
+                        {isNew(invitation) &&
+                            invitation.status === "pending" && (
+                                <i
+                                    className="fa-duotone fa-regular fa-sparkles text-sm text-warning"
+                                    title="New in the last 7 days"
+                                />
+                            )}
                         <span className="font-bold text-sm text-base-content">
                             {counterpartyName}
                         </span>
@@ -103,7 +107,7 @@ export function TableRow({
                     className="px-4 py-3 relative"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <ConnectionActionsToolbar
                             invitation={invitation}
                             variant="icon-only"

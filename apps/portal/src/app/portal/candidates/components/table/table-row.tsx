@@ -77,7 +77,9 @@ export function TableRow({
                     <span
                         className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(candidate.verification_status)}`}
                     >
-                        {formatVerificationStatus(candidate.verification_status)}
+                        {formatVerificationStatus(
+                            candidate.verification_status,
+                        )}
                     </span>
                 </td>
 
@@ -101,7 +103,7 @@ export function TableRow({
                     className="px-4 py-3 relative"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <CandidateActionsToolbar
                             candidate={candidate}
                             variant="icon-only"

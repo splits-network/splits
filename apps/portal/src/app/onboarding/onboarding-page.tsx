@@ -31,14 +31,22 @@ const RECRUITER_STEPS = [
     { id: 1, label: "Who You Are", icon: "fa-duotone fa-regular fa-hand-wave" },
     { id: 2, label: "Your Plan", icon: "fa-duotone fa-regular fa-credit-card" },
     { id: 3, label: "Your Profile", icon: "fa-duotone fa-regular fa-user" },
-    { id: 4, label: "Review", icon: "fa-duotone fa-regular fa-clipboard-check" },
+    {
+        id: 4,
+        label: "Review",
+        icon: "fa-duotone fa-regular fa-clipboard-check",
+    },
     { id: 5, label: "Go Live", icon: "fa-duotone fa-regular fa-rocket" },
 ];
 
 const COMPANY_STEPS = [
     { id: 1, label: "Who You Are", icon: "fa-duotone fa-regular fa-hand-wave" },
     { id: 3, label: "Your Company", icon: "fa-duotone fa-regular fa-building" },
-    { id: 4, label: "Review", icon: "fa-duotone fa-regular fa-clipboard-check" },
+    {
+        id: 4,
+        label: "Review",
+        icon: "fa-duotone fa-regular fa-clipboard-check",
+    },
     { id: 5, label: "Go Live", icon: "fa-duotone fa-regular fa-rocket" },
 ];
 
@@ -58,7 +66,9 @@ export function OnboardingPage() {
 
     // Determine step list based on role
     const steps =
-        state.selectedRole === "company_admin" ? COMPANY_STEPS : RECRUITER_STEPS;
+        state.selectedRole === "company_admin"
+            ? COMPANY_STEPS
+            : RECRUITER_STEPS;
 
     // Map currentStep to index in the visible step list
     const activeStepIndex = steps.findIndex((s) => s.id === state.currentStep);
@@ -69,11 +79,9 @@ export function OnboardingPage() {
             if (!mainRef.current) return;
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 // Make everything visible
-                mainRef.current
-                    .querySelectorAll(".ob-anim")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
+                mainRef.current.querySelectorAll(".ob-anim").forEach((el) => {
+                    (el as HTMLElement).style.opacity = "1";
+                });
                 return;
             }
 
@@ -87,7 +95,12 @@ export function OnboardingPage() {
                 tl.fromTo(
                     logo,
                     { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                 );
 
             const heading = $1(".ob-heading");
@@ -95,7 +108,12 @@ export function OnboardingPage() {
                 tl.fromTo(
                     heading,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
 
@@ -104,7 +122,13 @@ export function OnboardingPage() {
                 tl.fromTo(
                     stepItems,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        stagger: 0.06,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
 
@@ -113,7 +137,12 @@ export function OnboardingPage() {
                 tl.fromTo(
                     panel,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
 
@@ -122,7 +151,12 @@ export function OnboardingPage() {
                 tl.fromTo(
                     testimonial,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        clearProps: "transform",
+                    },
                     "-=0.1",
                 );
         },
@@ -180,10 +214,7 @@ export function OnboardingPage() {
 
     // ── Main layout ──
     return (
-        <div
-            ref={mainRef}
-            className="fixed inset-0 z-50 flex bg-base-100"
-        >
+        <div ref={mainRef} className="fixed inset-0 z-50 flex bg-base-100">
             {/* ── Content Panel (Left on desktop) ── */}
             <div className="flex-1 flex flex-col overflow-y-auto">
                 {/* Mobile step indicator */}
@@ -205,7 +236,9 @@ export function OnboardingPage() {
 
                 {/* Step content */}
                 <div className="ob-panel ob-anim opacity-0 flex-1 flex items-start justify-center p-6 lg:p-12">
-                    <div className={`w-full ${state.currentStep === 2 ? "max-w-4xl" : "max-w-lg"}`}>
+                    <div
+                        className={`w-full ${state.currentStep === 2 ? "max-w-4xl" : "max-w-lg"}`}
+                    >
                         {/* Persisting indicator */}
                         {persisting && (
                             <div className="flex items-center gap-2 text-xs text-base-content/30 mb-4">
@@ -249,8 +282,7 @@ export function OnboardingPage() {
                 {/* Footer */}
                 <div className="p-4 border-t border-base-300 text-center lg:text-left">
                     <p className="text-xs text-base-content/30">
-                        Your progress is saved automatically.
-                        Need help?{" "}
+                        Your progress is saved automatically. Need help?{" "}
                         <a
                             href="mailto:help@splits.network"
                             className="text-primary hover:underline"
@@ -272,7 +304,7 @@ export function OnboardingPage() {
                 />
 
                 {/* Top: Logo + Heading */}
-                <div className="relative z-10">
+                <div className="relative ">
                     <div className="ob-logo ob-anim opacity-0 mb-16">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
@@ -295,7 +327,7 @@ export function OnboardingPage() {
                 </div>
 
                 {/* Middle: Step progress */}
-                <div className="relative z-10 space-y-3">
+                <div className="relative  space-y-3">
                     {steps.map((step, i) => {
                         const isActive = activeStepIndex === i;
                         const isCompleted = activeStepIndex > i;
@@ -338,7 +370,7 @@ export function OnboardingPage() {
                 </div>
 
                 {/* Bottom: Testimonial */}
-                <div className="ob-testimonial ob-anim opacity-0 relative z-10">
+                <div className="ob-testimonial ob-anim opacity-0 relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;We filled three senior engineering roles in

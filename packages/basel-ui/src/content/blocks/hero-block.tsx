@@ -1,25 +1,30 @@
-import type { HeroBlock } from '@splits-network/shared-types';
+import type { HeroBlock } from "@splits-network/shared-types";
 
-export function HeroBlockComponent({ block }: { block: HeroBlock; index: number }) {
+export function HeroBlockComponent({
+    block,
+}: {
+    block: HeroBlock;
+    index: number;
+}) {
     return (
         <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
             {block.image && (
                 <div
                     className="hero-img-wrap absolute inset-0 lg:left-[58%]"
                     style={{
-                        clipPath: 'polygon(8% 0, 100% 0, 100% 100%, 0% 100%)',
+                        clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                 >
                     <img
                         src={block.image}
-                        alt={block.imageAlt || ''}
+                        alt={block.imageAlt || ""}
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-neutral/60 lg:bg-neutral/20" />
                 </div>
             )}
 
-            <div className="relative z-10 container mx-auto px-6 lg:px-12 py-16 lg:py-28">
+            <div className="relative  container mx-auto px-6 lg:px-12 py-16 lg:py-28">
                 <div className="max-w-2xl">
                     {block.kicker && (
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
@@ -35,12 +40,14 @@ export function HeroBlockComponent({ block }: { block: HeroBlock; index: number 
                             <span key={i}>
                                 <span
                                     className={`hero-headline-word inline-block ${
-                                        word.accent ? 'text-primary' : 'text-base-content'
+                                        word.accent
+                                            ? "text-primary"
+                                            : "text-base-content"
                                     }`}
                                 >
                                     {word.text}
                                 </span>
-                                {i < block.headlineWords.length - 1 && ' '}
+                                {i < block.headlineWords.length - 1 && " "}
                             </span>
                         ))}
                     </h1>
@@ -74,8 +81,8 @@ export function HeroBlockComponent({ block }: { block: HeroBlock; index: number 
                                     key={i}
                                     href={btn.href}
                                     className={`btn btn-md sm:btn-lg uppercase tracking-wider text-sm ${
-                                        btn.variant === 'outline'
-                                            ? 'btn-outline'
+                                        btn.variant === "outline"
+                                            ? "btn-outline"
                                             : `btn-${btn.variant}`
                                     }`}
                                 >

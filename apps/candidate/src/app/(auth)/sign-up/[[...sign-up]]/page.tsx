@@ -377,7 +377,7 @@ export default function SignUpPage() {
                         Email Address
                     </label>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
                         <input
                             type="email"
                             value={email}
@@ -395,7 +395,7 @@ export default function SignUpPage() {
                         Password
                     </label>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
                         <input
                             type={showPassword ? "text" : "password"}
                             value={password}

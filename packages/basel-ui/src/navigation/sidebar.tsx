@@ -346,7 +346,7 @@ export function BaselSidebar({
                         className={`absolute left-0 top-0 h-full ${width} animate-[slideInLeft_0.3s_ease-out]`}
                     >
                         {/* Close button */}
-                        <div className="absolute top-3 right-3 z-10">
+                        <div className="absolute top-3 right-3 ">
                             <button
                                 onClick={onMobileClose}
                                 className="w-8 h-8 flex items-center justify-center bg-neutral-content/10 text-neutral-content hover:bg-neutral-content/20 transition-colors"
@@ -359,7 +359,6 @@ export function BaselSidebar({
                     </div>
                 </div>
             )}
-
         </>
     );
 }

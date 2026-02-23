@@ -595,7 +595,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
 
                 <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
                     {/* Header - Actions toolbar here for always-visible access */}
-                    <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4">
+                    <div className="sticky top-0 bg-base-100 border-b border-base-300 p-4">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-bold">
                                 <i className="fa-duotone fa-regular fa-[icon] mr-2" />
@@ -630,7 +630,7 @@ export default function Sidebar({ item, onClose }: SidebarProps) {
 - Actions toolbar in the header, next to the close button (always visible)
 - Receives full entity object, not just an ID
 - Responsive sizing: `w-full md:w-2/3 lg:w-1/2 xl:w-2/5`
-- Sticky header with `z-10` so it stays visible while scrolling
+- Sticky header with `` so it stays visible while scrolling
 
 ### Details Component
 

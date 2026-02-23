@@ -238,7 +238,7 @@ export default function JobDetailClient({
                         clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
                         <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 opacity-0">

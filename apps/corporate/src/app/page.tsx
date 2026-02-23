@@ -15,8 +15,10 @@ export const metadata: Metadata = {
 const img = {
     hero: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80",
     office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
-    teamwork: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
-    skyline: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+    teamwork:
+        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
+    skyline:
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
 };
 
 /* ─── Data ────────────────────────────────────────────────────────────────── */
@@ -158,7 +160,10 @@ export default function HomeBaselPage() {
                     {/* Right image panel — 40% on desktop */}
                     <div
                         className="bh-hero-img absolute inset-0 lg:left-[58%] opacity-0"
-                        style={{ clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                        style={{
+                            clipPath:
+                                "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
+                        }}
                     >
                         <img
                             src={img.hero}
@@ -169,7 +174,7 @@ export default function HomeBaselPage() {
                     </div>
 
                     {/* Content panel — 60% on desktop */}
-                    <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                    <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                         <div className="max-w-2xl">
                             <p className="bh-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
                                 Employment Networks
@@ -193,7 +198,8 @@ export default function HomeBaselPage() {
                             <p className="bh-hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
                                 Splits Network for recruiters and companies.
                                 Applicant Network for candidates. A connected
-                                ecosystem built for transparent, modern recruiting.
+                                ecosystem built for transparent, modern
+                                recruiting.
                             </p>
 
                             <div className="flex flex-wrap gap-4">
@@ -261,8 +267,8 @@ export default function HomeBaselPage() {
                                 </h2>
                                 <p className="text-lg text-base-content/70 leading-relaxed mb-10 max-w-lg">
                                     Fragmented tools, opaque fees, and zero
-                                    communication. The old model fails recruiters,
-                                    companies, and candidates alike.
+                                    communication. The old model fails
+                                    recruiters, companies, and candidates alike.
                                 </p>
 
                                 <div className="space-y-4">
@@ -288,7 +294,9 @@ export default function HomeBaselPage() {
                                             className="bh-problem-pain flex items-start gap-4 opacity-0"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-error/10 flex items-center justify-center">
-                                                <i className={`${pain.icon} text-error`} />
+                                                <i
+                                                    className={`${pain.icon} text-error`}
+                                                />
                                             </div>
                                             <div className="pt-2">
                                                 <span className="font-bold text-base-content">
@@ -397,9 +405,10 @@ export default function HomeBaselPage() {
                                         </span>
                                     </h2>
                                     <p className="text-lg text-base-content/70 leading-relaxed mb-10">
-                                        Splits Network gives you the tools to find
-                                        better roles, manage candidates efficiently,
-                                        and track every placement in one place.
+                                        Splits Network gives you the tools to
+                                        find better roles, manage candidates
+                                        efficiently, and track every placement
+                                        in one place.
                                     </p>
                                 </div>
 
@@ -564,8 +573,9 @@ export default function HomeBaselPage() {
                                         </span>
                                     </h2>
                                     <p className="text-lg text-base-content/70 leading-relaxed mb-10">
-                                        Applicant Network connects you with specialized
-                                        recruiters who actually care about your success.
+                                        Applicant Network connects you with
+                                        specialized recruiters who actually care
+                                        about your success.
                                     </p>
                                 </div>
 
@@ -630,8 +640,9 @@ export default function HomeBaselPage() {
                                         </span>
                                     </h2>
                                     <p className="text-lg text-base-content/70 leading-relaxed mb-10">
-                                        Access a network of specialized recruiters with
-                                        one platform. Full transparency, consistent terms.
+                                        Access a network of specialized
+                                        recruiters with one platform. Full
+                                        transparency, consistent terms.
                                     </p>
                                 </div>
 
@@ -712,11 +723,15 @@ export default function HomeBaselPage() {
                                                     {item.location}
                                                 </p>
                                                 <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-accent">
-                                                    <span>{item.candidates}</span>
+                                                    <span>
+                                                        {item.candidates}
+                                                    </span>
                                                     <span className="text-base-content/20">
                                                         &bull;
                                                     </span>
-                                                    <span>{item.recruiters}</span>
+                                                    <span>
+                                                        {item.recruiters}
+                                                    </span>
                                                 </div>
                                             </div>
                                         ))}
@@ -761,8 +776,9 @@ export default function HomeBaselPage() {
                                 <p className="text-lg text-base-content/70 leading-relaxed mb-8 max-w-lg">
                                     Employment Networks connects companies,
                                     recruiters, and candidates through a single,
-                                    transparent ecosystem. Visible pipelines, clear
-                                    terms, and real communication at every step.
+                                    transparent ecosystem. Visible pipelines,
+                                    clear terms, and real communication at every
+                                    step.
                                 </p>
 
                                 <div className="grid sm:grid-cols-3 gap-6">
@@ -878,8 +894,8 @@ export default function HomeBaselPage() {
                                 how you recruit?
                             </h2>
                             <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                                Join the ecosystem that is making recruiting work
-                                for everyone. Get started in minutes.
+                                Join the ecosystem that is making recruiting
+                                work for everyone. Get started in minutes.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">

@@ -4,7 +4,11 @@ import { useRef, useState, Suspense } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { BaselEmptyState } from "@splits-network/basel-ui";
-import { useFullSearch, SORT_OPTIONS, PER_PAGE_OPTIONS } from "@/hooks/use-full-search";
+import {
+    useFullSearch,
+    SORT_OPTIONS,
+    PER_PAGE_OPTIONS,
+} from "@/hooks/use-full-search";
 import type { SortOption, PerPage } from "@/hooks/use-full-search";
 import { ENTITY_TYPE_CONFIG, FILTER_LABELS } from "@/types/search";
 import type { SearchableEntityType, SearchFilters } from "@/types/search";
@@ -20,8 +24,16 @@ const ENTITY_FILTERS: {
     icon: string;
 }[] = [
     { type: "job", label: "Roles", icon: ENTITY_TYPE_CONFIG.job.icon },
-    { type: "company", label: "Companies", icon: ENTITY_TYPE_CONFIG.company.icon },
-    { type: "recruiter", label: "Recruiters", icon: ENTITY_TYPE_CONFIG.recruiter.icon },
+    {
+        type: "company",
+        label: "Companies",
+        icon: ENTITY_TYPE_CONFIG.company.icon,
+    },
+    {
+        type: "recruiter",
+        label: "Recruiters",
+        icon: ENTITY_TYPE_CONFIG.recruiter.icon,
+    },
 ];
 
 /* ─── Animation constants ────────────────────────────────────────────────── */
@@ -88,14 +100,30 @@ function SearchPageInner() {
 
             const kicker = $1(".search-kicker");
             if (kicker)
-                tl.fromTo(kicker, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: D.fast, clearProps: "transform" });
+                tl.fromTo(
+                    kicker,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.fast,
+                        clearProps: "transform",
+                    },
+                );
 
             const words = $(".search-title-word");
             if (words.length)
                 tl.fromTo(
                     words,
                     { opacity: 0, y: 60, rotateX: 30 },
-                    { opacity: 1, y: 0, rotateX: 0, duration: D.slow, stagger: 0.1, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        duration: D.slow,
+                        stagger: 0.1,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
 
@@ -104,7 +132,12 @@ function SearchPageInner() {
                 tl.fromTo(
                     searchBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.fast, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.fast,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
 
@@ -113,7 +146,12 @@ function SearchPageInner() {
                 tl.fromTo(
                     content,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
         },
@@ -141,7 +179,8 @@ function SearchPageInner() {
 
     const hasResults = results.length > 0;
     const showInitial = !query || query.trim().length < 2;
-    const hasActiveFilters = selectedEntityTypes.length > 0 || activeFilterCount > 0;
+    const hasActiveFilters =
+        selectedEntityTypes.length > 0 || activeFilterCount > 0;
 
     /* ─── Active filter pills ──────────────────────────────────────── */
 
@@ -185,9 +224,11 @@ function SearchPageInner() {
             <section className="relative bg-neutral text-neutral-content py-14 lg:py-18">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
-                    style={{ clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
+                    }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <p className="search-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
                         Discover Opportunities
                     </p>
@@ -243,7 +284,9 @@ function SearchPageInner() {
                                     onClick={pill.onRemove}
                                     className="flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-content text-sm font-semibold"
                                 >
-                                    <span className="opacity-70">{pill.label}:</span>{" "}
+                                    <span className="opacity-70">
+                                        {pill.label}:
+                                    </span>{" "}
                                     {pill.value}
                                     <i className="fa-solid fa-xmark text-[9px] ml-1 hover:opacity-70" />
                                 </button>
@@ -282,15 +325,21 @@ function SearchPageInner() {
                                         <label
                                             key={f.type}
                                             className={`flex items-center gap-2 p-2 cursor-pointer transition-all text-sm ${
-                                                selectedEntityTypes.includes(f.type)
+                                                selectedEntityTypes.includes(
+                                                    f.type,
+                                                )
                                                     ? "bg-primary/5 text-base-content font-semibold"
                                                     : "text-base-content/60 hover:bg-base-200"
                                             }`}
                                         >
                                             <input
                                                 type="checkbox"
-                                                checked={selectedEntityTypes.includes(f.type)}
-                                                onChange={() => toggleEntityType(f.type)}
+                                                checked={selectedEntityTypes.includes(
+                                                    f.type,
+                                                )}
+                                                onChange={() =>
+                                                    toggleEntityType(f.type)
+                                                }
                                                 className="checkbox checkbox-primary checkbox-xs"
                                             />
                                             <i
@@ -309,7 +358,9 @@ function SearchPageInner() {
                                 </h3>
                                 <select
                                     value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                    onChange={(e) =>
+                                        setSortBy(e.target.value as SortOption)
+                                    }
                                     className="select select-sm w-full bg-base-200 border-base-300 text-sm"
                                 >
                                     {SORT_OPTIONS.map((o) => (
@@ -329,9 +380,13 @@ function SearchPageInner() {
                                     {PER_PAGE_OPTIONS.map((n) => (
                                         <button
                                             key={n}
-                                            onClick={() => setPerPage(n as PerPage)}
+                                            onClick={() =>
+                                                setPerPage(n as PerPage)
+                                            }
                                             className={`btn btn-xs ${
-                                                perPage === n ? "btn-primary" : "btn-ghost"
+                                                perPage === n
+                                                    ? "btn-primary"
+                                                    : "btn-ghost"
                                             }`}
                                         >
                                             {n}
@@ -348,56 +403,82 @@ function SearchPageInner() {
                                     </h3>
                                     {savedSearches.length > 0 && (
                                         <button
-                                            onClick={() => setShowSavedPanel(!showSavedPanel)}
+                                            onClick={() =>
+                                                setShowSavedPanel(
+                                                    !showSavedPanel,
+                                                )
+                                            }
                                             className="text-sm text-primary font-semibold"
                                         >
-                                            {showSavedPanel ? "Hide" : `Show (${savedSearches.length})`}
+                                            {showSavedPanel
+                                                ? "Hide"
+                                                : `Show (${savedSearches.length})`}
                                         </button>
                                     )}
                                 </div>
 
                                 {/* Save current */}
-                                {query.trim().length >= 2 && !isCurrentSearchSaved && (
-                                    <>
-                                        {!saveDialogOpen ? (
-                                            <button
-                                                onClick={() => setSaveDialogOpen(true)}
-                                                className="btn btn-sm btn-ghost w-full justify-start gap-2 text-sm"
-                                            >
-                                                <i className="fa-regular fa-bookmark text-sm" />
-                                                Save current search
-                                            </button>
-                                        ) : (
-                                            <div className="flex gap-1.5">
-                                                <input
-                                                    type="text"
-                                                    value={saveName}
-                                                    onChange={(e) => setSaveName(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === "Enter") handleSaveSearch();
-                                                        if (e.key === "Escape") setSaveDialogOpen(false);
-                                                    }}
-                                                    placeholder="Name this search..."
-                                                    className="input input-sm flex-1 bg-base-200 border-base-300"
-                                                    autoFocus
-                                                />
+                                {query.trim().length >= 2 &&
+                                    !isCurrentSearchSaved && (
+                                        <>
+                                            {!saveDialogOpen ? (
                                                 <button
-                                                    onClick={handleSaveSearch}
-                                                    className="btn btn-sm btn-primary"
+                                                    onClick={() =>
+                                                        setSaveDialogOpen(true)
+                                                    }
+                                                    className="btn btn-sm btn-ghost w-full justify-start gap-2 text-sm"
                                                 >
-                                                    <i className="fa-solid fa-check text-sm" />
+                                                    <i className="fa-regular fa-bookmark text-sm" />
+                                                    Save current search
                                                 </button>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                            ) : (
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        value={saveName}
+                                                        onChange={(e) =>
+                                                            setSaveName(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key ===
+                                                                "Enter"
+                                                            )
+                                                                handleSaveSearch();
+                                                            if (
+                                                                e.key ===
+                                                                "Escape"
+                                                            )
+                                                                setSaveDialogOpen(
+                                                                    false,
+                                                                );
+                                                        }}
+                                                        placeholder="Name this search..."
+                                                        className="input input-sm flex-1 bg-base-200 border-base-300"
+                                                        autoFocus
+                                                    />
+                                                    <button
+                                                        onClick={
+                                                            handleSaveSearch
+                                                        }
+                                                        className="btn btn-sm btn-primary"
+                                                    >
+                                                        <i className="fa-solid fa-check text-sm" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
 
-                                {isCurrentSearchSaved && query.trim().length >= 2 && (
-                                    <div className="flex items-center gap-2 text-sm text-success font-semibold p-2">
-                                        <i className="fa-solid fa-bookmark text-sm" />
-                                        Search saved
-                                    </div>
-                                )}
+                                {isCurrentSearchSaved &&
+                                    query.trim().length >= 2 && (
+                                        <div className="flex items-center gap-2 text-sm text-success font-semibold p-2">
+                                            <i className="fa-solid fa-bookmark text-sm" />
+                                            Search saved
+                                        </div>
+                                    )}
 
                                 {/* Saved list */}
                                 {showSavedPanel && savedSearches.length > 0 && (
@@ -408,19 +489,36 @@ function SearchPageInner() {
                                                 className="flex items-center justify-between p-2 bg-base-200 group"
                                             >
                                                 <button
-                                                    onClick={() => loadSavedSearch(s)}
+                                                    onClick={() =>
+                                                        loadSavedSearch(s)
+                                                    }
                                                     className="flex-1 text-left text-sm font-semibold truncate hover:text-primary transition-colors"
                                                 >
                                                     {s.name}
                                                     <span className="block text-sm text-base-content/40 font-normal truncate">
                                                         &quot;{s.query}&quot;
-                                                        {s.entityTypes.length > 0 && (
-                                                            <> &middot; {s.entityTypes.length} filter{s.entityTypes.length !== 1 && "s"}</>
+                                                        {s.entityTypes.length >
+                                                            0 && (
+                                                            <>
+                                                                {" "}
+                                                                &middot;{" "}
+                                                                {
+                                                                    s
+                                                                        .entityTypes
+                                                                        .length
+                                                                }{" "}
+                                                                filter
+                                                                {s.entityTypes
+                                                                    .length !==
+                                                                    1 && "s"}
+                                                            </>
                                                         )}
                                                     </span>
                                                 </button>
                                                 <button
-                                                    onClick={() => removeSavedSearch(s.id)}
+                                                    onClick={() =>
+                                                        removeSavedSearch(s.id)
+                                                    }
                                                     className="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
                                                     <i className="fa-solid fa-xmark text-sm" />
@@ -471,7 +569,9 @@ function SearchPageInner() {
                                                 className="flex items-center gap-2 w-full text-left p-1.5 text-sm text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
                                             >
                                                 <i className="fa-duotone fa-regular fa-clock-rotate-left text-sm" />
-                                                <span className="truncate">{search}</span>
+                                                <span className="truncate">
+                                                    {search}
+                                                </span>
                                             </button>
                                         ))}
                                     </div>
@@ -502,13 +602,19 @@ function SearchPageInner() {
                                             <strong className="text-base-content">
                                                 {pagination.total}
                                             </strong>{" "}
-                                            {pagination.total === 1 ? "result" : "results"}
+                                            {pagination.total === 1
+                                                ? "result"
+                                                : "results"}
                                             {selectedEntityTypes.length > 0 && (
                                                 <span className="text-base-content/30">
                                                     {" "}
                                                     in{" "}
                                                     {selectedEntityTypes
-                                                        .map((t) => ENTITY_TYPE_CONFIG[t].label.toLowerCase())
+                                                        .map((t) =>
+                                                            ENTITY_TYPE_CONFIG[
+                                                                t
+                                                            ].label.toLowerCase(),
+                                                        )
                                                         .join(", ")}
                                                 </span>
                                             )}
@@ -520,11 +626,18 @@ function SearchPageInner() {
                                 <div className="lg:hidden">
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                        onChange={(e) =>
+                                            setSortBy(
+                                                e.target.value as SortOption,
+                                            )
+                                        }
                                         className="select select-sm bg-base-200 border-base-300 text-sm"
                                     >
                                         {SORT_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>
+                                            <option
+                                                key={o.value}
+                                                value={o.value}
+                                            >
                                                 {o.label}
                                             </option>
                                         ))}
@@ -568,7 +681,9 @@ function SearchPageInner() {
                                             key={`${result.entity_type}-${result.entity_id}`}
                                             result={result}
                                             query={query}
-                                            isTopResult={idx === 0 && page === 1}
+                                            isTopResult={
+                                                idx === 0 && page === 1
+                                            }
                                         />
                                     ))}
                                 </div>

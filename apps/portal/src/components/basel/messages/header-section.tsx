@@ -26,7 +26,7 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                 }}
             />
 
-            <div className="relative z-10 container mx-auto px-6 lg:px-12">
+            <div className="relative  container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
                     <p className="header-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
                         Communications Hub

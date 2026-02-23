@@ -570,7 +570,7 @@ export function PricingContent() {
                 />
 
                 {/* Content panel — left-aligned, 60% */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
                             Pricing
@@ -838,7 +838,7 @@ export function PricingContent() {
                 />
                 <div className="absolute inset-0 bg-neutral/75" />
 
-                <div className="relative z-10 flex items-center h-full px-6 lg:px-12">
+                <div className="relative  flex items-center h-full px-6 lg:px-12">
                     <div className="image-caption container mx-auto opacity-0">
                         <p className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content max-w-3xl">
                             Invest in your tier.{" "}
@@ -1073,7 +1073,7 @@ export function PricingContent() {
                     }}
                 />
 
-                <div className="container mx-auto px-6 lg:px-12 relative z-10">
+                <div className="container mx-auto px-6 lg:px-12 relative ">
                     {/* Editorial heading — left-aligned */}
                     <div className="cta-content max-w-3xl mb-16 opacity-0">
                         <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-6 bg-primary text-primary-content">

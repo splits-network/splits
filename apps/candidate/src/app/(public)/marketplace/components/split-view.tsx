@@ -59,7 +59,7 @@ export default function SplitView({
             {/* Mobile detail overlay */}
             {selectedRecruiter && (
                 <div className="fixed inset-0 z-50 bg-base-100 overflow-y-auto lg:hidden">
-                    <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-4 py-3 flex items-center justify-between">
+                    <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-4 py-3 flex items-center justify-between">
                         <button
                             onClick={() => onSelect(selectedRecruiter)}
                             className="btn btn-sm btn-ghost"
@@ -90,7 +90,7 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
     return (
         <div>
             {/* Sticky header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         {/* Specialty kicker */}

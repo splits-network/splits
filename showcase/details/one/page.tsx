@@ -230,7 +230,7 @@ export default function DetailsOne() {
                         clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
                         <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 opacity-0">
@@ -506,7 +506,7 @@ export default function DetailsOne() {
                                                     <div className="absolute left-[18px] top-10 bottom-0 w-px bg-base-300" />
                                                 )}
                                                 <div
-                                                    className={`w-9 h-9 ${rc.bg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0 z-10`}
+                                                    className={`w-9 h-9 ${rc.bg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0 `}
                                                 >
                                                     {item.initials}
                                                 </div>

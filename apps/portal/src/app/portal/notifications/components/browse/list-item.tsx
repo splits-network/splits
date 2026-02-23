@@ -23,7 +23,7 @@ export default function NotificationListItem({
                 hover:bg-base-100
                 ${
                     isSelected
-                        ? "bg-base-100 border-l-4 border-l-primary shadow-sm z-10"
+                        ? "bg-base-100 border-l-4 border-l-primary shadow-sm "
                         : !item.read
                           ? "bg-primary/5 border-l-4 border-l-primary/40"
                           : "border-l-4 border-l-transparent"

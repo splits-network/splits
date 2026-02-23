@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import {
     useStandardList,
     PaginationControls,
@@ -12,12 +12,12 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
+} from "@/hooks/use-standard-list";
 
 interface AuditLogEntry {
     id: string;
     action: string;
-    entity_type: 'payout_schedule' | 'escrow_hold';
+    entity_type: "payout_schedule" | "escrow_hold";
     entity_id: string;
     changed_by?: string;
     changed_by_role?: string;
@@ -29,21 +29,60 @@ interface AuditLogEntry {
 
 interface AuditFilters {
     action?: string;
-    entity_type?: AuditLogEntry['entity_type'];
+    entity_type?: AuditLogEntry["entity_type"];
     date_from?: string;
     date_to?: string;
 }
 
-const ACTION_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-    create_schedule: { label: 'Schedule Created', color: 'badge-success', icon: 'fa-plus' },
-    update_schedule: { label: 'Schedule Updated', color: 'badge-info', icon: 'fa-pen' },
-    trigger_processing: { label: 'Processing Triggered', color: 'badge-warning', icon: 'fa-play' },
-    retry_schedule: { label: 'Schedule Retried', color: 'badge-warning', icon: 'fa-rotate' },
-    cancel_schedule: { label: 'Schedule Cancelled', color: 'badge-error', icon: 'fa-xmark' },
-    create_hold: { label: 'Hold Created', color: 'badge-success', icon: 'fa-lock' },
-    release_hold: { label: 'Hold Released', color: 'badge-success', icon: 'fa-lock-open' },
-    cancel_hold: { label: 'Hold Cancelled', color: 'badge-error', icon: 'fa-xmark' },
-    process_batch: { label: 'Batch Processed', color: 'badge-info', icon: 'fa-list' },
+const ACTION_LABELS: Record<
+    string,
+    { label: string; color: string; icon: string }
+> = {
+    create_schedule: {
+        label: "Schedule Created",
+        color: "badge-success",
+        icon: "fa-plus",
+    },
+    update_schedule: {
+        label: "Schedule Updated",
+        color: "badge-info",
+        icon: "fa-pen",
+    },
+    trigger_processing: {
+        label: "Processing Triggered",
+        color: "badge-warning",
+        icon: "fa-play",
+    },
+    retry_schedule: {
+        label: "Schedule Retried",
+        color: "badge-warning",
+        icon: "fa-rotate",
+    },
+    cancel_schedule: {
+        label: "Schedule Cancelled",
+        color: "badge-error",
+        icon: "fa-xmark",
+    },
+    create_hold: {
+        label: "Hold Created",
+        color: "badge-success",
+        icon: "fa-lock",
+    },
+    release_hold: {
+        label: "Hold Released",
+        color: "badge-success",
+        icon: "fa-lock-open",
+    },
+    cancel_hold: {
+        label: "Hold Cancelled",
+        color: "badge-error",
+        icon: "fa-xmark",
+    },
+    process_batch: {
+        label: "Batch Processed",
+        color: "badge-info",
+        icon: "fa-list",
+    },
 };
 
 export default function AuditLogPage() {
@@ -65,21 +104,27 @@ export default function AuditLogPage() {
     } = useStandardList<AuditLogEntry, AuditFilters>({
         fetchFn: async (params) => {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
-            queryParams.set('page', String(params.page));
-            queryParams.set('limit', String(params.limit));
-            if (params.search) queryParams.set('search', params.search);
-            if (params.filters?.action) queryParams.set('action', params.filters.action);
-            if (params.filters?.entity_type) queryParams.set('entity_type', params.filters.entity_type);
-            if (params.filters?.date_from) queryParams.set('date_from', params.filters.date_from);
-            if (params.filters?.date_to) queryParams.set('date_to', params.filters.date_to);
-            queryParams.set('sort_by', 'created_at');
-            queryParams.set('sort_order', 'desc');
+            queryParams.set("page", String(params.page));
+            queryParams.set("limit", String(params.limit));
+            if (params.search) queryParams.set("search", params.search);
+            if (params.filters?.action)
+                queryParams.set("action", params.filters.action);
+            if (params.filters?.entity_type)
+                queryParams.set("entity_type", params.filters.entity_type);
+            if (params.filters?.date_from)
+                queryParams.set("date_from", params.filters.date_from);
+            if (params.filters?.date_to)
+                queryParams.set("date_to", params.filters.date_to);
+            queryParams.set("sort_by", "created_at");
+            queryParams.set("sort_order", "desc");
 
-            const response = await apiClient.get(`/payout-audit-log?${queryParams.toString()}`);
+            const response = await apiClient.get(
+                `/payout-audit-log?${queryParams.toString()}`,
+            );
             return response;
         },
         defaultFilters: {},
@@ -89,8 +134,8 @@ export default function AuditLogPage() {
     function ActionBadge({ action }: { action: string }) {
         const config = ACTION_LABELS[action] || {
             label: action,
-            color: 'badge-ghost',
-            icon: 'fa-circle',
+            color: "badge-ghost",
+            icon: "fa-circle",
         };
 
         return (
@@ -103,18 +148,18 @@ export default function AuditLogPage() {
 
     function formatDateTime(dateString: string): string {
         const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+        return date.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
         });
     }
 
     function getActionDescription(entry: AuditLogEntry): string {
         const config = ACTION_LABELS[entry.action];
-        if (!config) return 'Action performed';
+        if (!config) return "Action performed";
 
         // Build description from metadata
         let desc = config.label;
@@ -136,63 +181,81 @@ export default function AuditLogPage() {
         try {
             // Fetch all entries (without pagination) for export
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
-            queryParams.set('page', '1');
-            queryParams.set('limit', '10000'); // Get all entries
-            if (search) queryParams.set('search', search);
-            if (filters.action) queryParams.set('action', filters.action);
-            if (filters.entity_type) queryParams.set('entity_type', filters.entity_type);
-            if (filters.date_from) queryParams.set('date_from', filters.date_from);
-            if (filters.date_to) queryParams.set('date_to', filters.date_to);
-            queryParams.set('sort_by', 'created_at');
-            queryParams.set('sort_order', 'desc');
+            queryParams.set("page", "1");
+            queryParams.set("limit", "10000"); // Get all entries
+            if (search) queryParams.set("search", search);
+            if (filters.action) queryParams.set("action", filters.action);
+            if (filters.entity_type)
+                queryParams.set("entity_type", filters.entity_type);
+            if (filters.date_from)
+                queryParams.set("date_from", filters.date_from);
+            if (filters.date_to) queryParams.set("date_to", filters.date_to);
+            queryParams.set("sort_by", "created_at");
+            queryParams.set("sort_order", "desc");
 
-            const response = await apiClient.get(`/payout-audit-log?${queryParams.toString()}`);
+            const response = await apiClient.get(
+                `/payout-audit-log?${queryParams.toString()}`,
+            );
             const allEntries = response.data;
 
             // Create CSV content
-            const headers = ['Timestamp', 'Action', 'Entity Type', 'Entity ID', 'Actor', 'Role', 'Changes', 'Metadata'];
+            const headers = [
+                "Timestamp",
+                "Action",
+                "Entity Type",
+                "Entity ID",
+                "Actor",
+                "Role",
+                "Changes",
+                "Metadata",
+            ];
             const rows = allEntries.map((entry: AuditLogEntry) => {
-                const changes = entry.before_state || entry.after_state
-                    ? `"${JSON.stringify({ before: entry.before_state, after: entry.after_state }).replace(/"/g, '""')}"`
-                    : '';
+                const changes =
+                    entry.before_state || entry.after_state
+                        ? `"${JSON.stringify({ before: entry.before_state, after: entry.after_state }).replace(/"/g, '""')}"`
+                        : "";
                 const metadata = entry.metadata
                     ? `"${JSON.stringify(entry.metadata).replace(/"/g, '""')}"`
-                    : '';
+                    : "";
 
                 return [
                     formatDateTime(entry.created_at),
                     ACTION_LABELS[entry.action]?.label || entry.action,
                     entry.entity_type,
                     entry.entity_id,
-                    entry.changed_by || 'System',
-                    entry.changed_by_role || 'N/A',
+                    entry.changed_by || "System",
+                    entry.changed_by_role || "N/A",
                     changes,
                     metadata,
-                ].join(',');
+                ].join(",");
             });
 
-            const csvContent = [headers.join(','), ...rows].join('\n');
+            const csvContent = [headers.join(","), ...rows].join("\n");
 
             // Download CSV file
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
+            const blob = new Blob([csvContent], {
+                type: "text/csv;charset=utf-8;",
+            });
+            const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            const timestamp = new Date().toISOString().split('T')[0];
-            link.setAttribute('download', `payout-audit-log-${timestamp}.csv`);
-            link.style.visibility = 'hidden';
+            link.setAttribute("href", url);
+            const timestamp = new Date().toISOString().split("T")[0];
+            link.setAttribute("download", `payout-audit-log-${timestamp}.csv`);
+            link.style.visibility = "hidden";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            toast.success(`Exported ${allEntries.length} audit log entries to CSV`);
+            toast.success(
+                `Exported ${allEntries.length} audit log entries to CSV`,
+            );
         } catch (error) {
-            console.error('Failed to export audit log:', error);
-            toast.error('Failed to export audit log');
+            console.error("Failed to export audit log:", error);
+            toast.error("Failed to export audit log");
         }
     }
 
@@ -203,7 +266,8 @@ export default function AuditLogPage() {
                 <div>
                     <h1 className="text-3xl font-bold">Payout Audit Log</h1>
                     <p className="text-base-content/60 mt-1">
-                        Track all changes and actions in the payout automation system
+                        Track all changes and actions in the payout automation
+                        system
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -211,11 +275,17 @@ export default function AuditLogPage() {
                         <i className="fa-duotone fa-regular fa-download"></i>
                         Export CSV
                     </button>
-                    <Link href="/portal/admin/payouts/schedules" className="btn btn-ghost">
+                    <Link
+                        href="/portal/admin/payouts/schedules"
+                        className="btn btn-ghost"
+                    >
                         <i className="fa-duotone fa-regular fa-calendar"></i>
                         Schedules
                     </Link>
-                    <Link href="/portal/admin/payouts/escrow" className="btn btn-ghost">
+                    <Link
+                        href="/portal/admin/payouts/escrow"
+                        className="btn btn-ghost"
+                    >
                         <i className="fa-duotone fa-regular fa-lock"></i>
                         Escrow Holds
                     </Link>
@@ -226,48 +296,91 @@ export default function AuditLogPage() {
             <div className="card bg-base-200">
                 <div className="card-body">
                     <div className="flex flex-col md:flex-row gap-4">
-                        <SearchInput value={search} onChange={setSearch} placeholder="Search by entity ID..." />
+                        <SearchInput
+                            value={search}
+                            onChange={setSearch}
+                            placeholder="Search by entity ID..."
+                        />
 
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Action</legend>
                             <select
                                 className="select w-full md:w-48"
-                                value={filters.action || ''}
-                                onChange={(e) => setFilters({ ...filters, action: e.target.value })}
+                                value={filters.action || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        action: e.target.value,
+                                    })
+                                }
                             >
                                 <option value="">All Actions</option>
-                                <option value="create_schedule">Schedule Created</option>
-                                <option value="update_schedule">Schedule Updated</option>
-                                <option value="trigger_processing">Processing Triggered</option>
-                                <option value="retry_schedule">Schedule Retried</option>
-                                <option value="cancel_schedule">Schedule Cancelled</option>
-                                <option value="create_hold">Hold Created</option>
-                                <option value="release_hold">Hold Released</option>
-                                <option value="cancel_hold">Hold Cancelled</option>
-                                <option value="process_batch">Batch Processed</option>
+                                <option value="create_schedule">
+                                    Schedule Created
+                                </option>
+                                <option value="update_schedule">
+                                    Schedule Updated
+                                </option>
+                                <option value="trigger_processing">
+                                    Processing Triggered
+                                </option>
+                                <option value="retry_schedule">
+                                    Schedule Retried
+                                </option>
+                                <option value="cancel_schedule">
+                                    Schedule Cancelled
+                                </option>
+                                <option value="create_hold">
+                                    Hold Created
+                                </option>
+                                <option value="release_hold">
+                                    Hold Released
+                                </option>
+                                <option value="cancel_hold">
+                                    Hold Cancelled
+                                </option>
+                                <option value="process_batch">
+                                    Batch Processed
+                                </option>
                             </select>
                         </fieldset>
 
                         <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Entity Type</legend>
+                            <legend className="fieldset-legend">
+                                Entity Type
+                            </legend>
                             <select
                                 className="select w-full md:w-48"
-                                value={filters.entity_type || ''}
-                                onChange={(e) => setFilters({ ...filters, entity_type: e.target.value as any })}
+                                value={filters.entity_type || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        entity_type: e.target.value as any,
+                                    })
+                                }
                             >
                                 <option value="">All Types</option>
-                                <option value="payout_schedule">Payout Schedule</option>
+                                <option value="payout_schedule">
+                                    Payout Schedule
+                                </option>
                                 <option value="escrow_hold">Escrow Hold</option>
                             </select>
                         </fieldset>
 
                         <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Date From</legend>
+                            <legend className="fieldset-legend">
+                                Date From
+                            </legend>
                             <input
                                 type="date"
                                 className="input w-full md:w-48"
-                                value={filters.date_from || ''}
-                                onChange={(e) => setFilters({ ...filters, date_from: e.target.value })}
+                                value={filters.date_from || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        date_from: e.target.value,
+                                    })
+                                }
                             />
                         </fieldset>
 
@@ -276,16 +389,25 @@ export default function AuditLogPage() {
                             <input
                                 type="date"
                                 className="input w-full md:w-48"
-                                value={filters.date_to || ''}
-                                onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
+                                value={filters.date_to || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        date_to: e.target.value,
+                                    })
+                                }
                             />
                         </fieldset>
 
-                        {(filters.action || filters.entity_type || filters.date_from || filters.date_to || search) && (
+                        {(filters.action ||
+                            filters.entity_type ||
+                            filters.date_from ||
+                            filters.date_to ||
+                            search) && (
                             <button
                                 onClick={() => {
                                     setFilters({});
-                                    setSearch('');
+                                    setSearch("");
                                 }}
                                 className="btn btn-ghost"
                             >
@@ -310,8 +432,8 @@ export default function AuditLogPage() {
                             title="No audit entries found"
                             description={
                                 filters.action || search
-                                    ? 'Try adjusting your filters'
-                                    : 'Audit entries will appear here as actions are performed'
+                                    ? "Try adjusting your filters"
+                                    : "Audit entries will appear here as actions are performed"
                             }
                         />
                     ) : (
@@ -327,10 +449,13 @@ export default function AuditLogPage() {
                                         {/* Timeline entry */}
                                         <div className="flex gap-4">
                                             {/* Timeline dot */}
-                                            <div className="shrink-0 w-8 h-8 rounded-full bg-base-200 flex items-center justify-center z-10">
+                                            <div className="shrink-0 w-8 h-8 rounded-full bg-base-200 flex items-center justify-center ">
                                                 <i
-                                                    className={`fa-duotone fa-regular ${ACTION_LABELS[entry.action]?.icon || 'fa-circle'
-                                                        } text-sm`}
+                                                    className={`fa-duotone fa-regular ${
+                                                        ACTION_LABELS[
+                                                            entry.action
+                                                        ]?.icon || "fa-circle"
+                                                    } text-sm`}
                                                 ></i>
                                             </div>
 
@@ -341,45 +466,67 @@ export default function AuditLogPage() {
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex-1">
                                                                 <div className="flex items-center gap-2 mb-2">
-                                                                    <ActionBadge action={entry.action} />
+                                                                    <ActionBadge
+                                                                        action={
+                                                                            entry.action
+                                                                        }
+                                                                    />
                                                                     <span className="badge badge-ghost">
-                                                                        {entry.entity_type}
+                                                                        {
+                                                                            entry.entity_type
+                                                                        }
                                                                     </span>
                                                                     <span className="text-sm text-base-content/60">
-                                                                        {formatDateTime(entry.created_at)}
+                                                                        {formatDateTime(
+                                                                            entry.created_at,
+                                                                        )}
                                                                     </span>
                                                                 </div>
                                                                 <p className="text-sm mb-2">
-                                                                    {getActionDescription(entry)}
+                                                                    {getActionDescription(
+                                                                        entry,
+                                                                    )}
                                                                 </p>
-                                                                {(entry.changed_by || entry.changed_by_role) && (
+                                                                {(entry.changed_by ||
+                                                                    entry.changed_by_role) && (
                                                                     <div className="text-xs text-base-content/60">
-                                                                        By:{' '}
-                                                                        {entry.changed_by || 'System'} (
-                                                                        {entry.changed_by_role || 'automated'})
+                                                                        By:{" "}
+                                                                        {entry.changed_by ||
+                                                                            "System"}{" "}
+                                                                        (
+                                                                        {entry.changed_by_role ||
+                                                                            "automated"}
+                                                                        )
                                                                     </div>
                                                                 )}
                                                             </div>
                                                             {(entry.before_state ||
                                                                 entry.after_state ||
                                                                 entry.metadata) && (
-                                                                    <button
-                                                                        onClick={() => toggleExpanded(entry.id)}
-                                                                        className="btn btn-sm btn-ghost"
-                                                                    >
-                                                                        <i
-                                                                            className={`fa-duotone fa-regular fa-chevron-${expandedEntry === entry.id
-                                                                                ? 'up'
-                                                                                : 'down'
-                                                                                }`}
-                                                                        ></i>
-                                                                        Details
-                                                                    </button>
-                                                                )}
+                                                                <button
+                                                                    onClick={() =>
+                                                                        toggleExpanded(
+                                                                            entry.id,
+                                                                        )
+                                                                    }
+                                                                    className="btn btn-sm btn-ghost"
+                                                                >
+                                                                    <i
+                                                                        className={`fa-duotone fa-regular fa-chevron-${
+                                                                            expandedEntry ===
+                                                                            entry.id
+                                                                                ? "up"
+                                                                                : "down"
+                                                                        }`}
+                                                                    ></i>
+                                                                    Details
+                                                                </button>
+                                                            )}
                                                         </div>
 
                                                         {/* Expanded details */}
-                                                        {expandedEntry === entry.id && (
+                                                        {expandedEntry ===
+                                                            entry.id && (
                                                             <div className="mt-4 pt-4 border-t border-base-300 space-y-3">
                                                                 {entry.before_state && (
                                                                     <div>
@@ -390,7 +537,7 @@ export default function AuditLogPage() {
                                                                             {JSON.stringify(
                                                                                 entry.before_state,
                                                                                 null,
-                                                                                2
+                                                                                2,
                                                                             )}
                                                                         </pre>
                                                                     </div>
@@ -404,7 +551,7 @@ export default function AuditLogPage() {
                                                                             {JSON.stringify(
                                                                                 entry.after_state,
                                                                                 null,
-                                                                                2
+                                                                                2,
                                                                             )}
                                                                         </pre>
                                                                     </div>
@@ -418,13 +565,14 @@ export default function AuditLogPage() {
                                                                             {JSON.stringify(
                                                                                 entry.metadata,
                                                                                 null,
-                                                                                2
+                                                                                2,
                                                                             )}
                                                                         </pre>
                                                                     </div>
                                                                 )}
                                                                 <div className="text-xs text-base-content/60">
-                                                                    Entry ID: {entry.id}
+                                                                    Entry ID:{" "}
+                                                                    {entry.id}
                                                                 </div>
                                                             </div>
                                                         )}

@@ -112,12 +112,15 @@ export default function CreateInvitationModal({
 
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box max-w-lg border-2 border-base-300 p-0" style={{ borderRadius: 0 }}>
+            <div
+                className="modal-box max-w-lg border-2 border-base-300 p-0"
+                style={{ borderRadius: 0 }}
+            >
                 {/* Basel header */}
                 <div className="bg-neutral text-neutral-content px-6 py-5 relative">
                     <button
                         type="button"
-                        className="btn btn-sm btn-square btn-ghost text-neutral-content absolute right-3 top-3 z-10"
+                        className="btn btn-sm btn-square btn-ghost text-neutral-content absolute right-3 top-3 "
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >
@@ -186,7 +189,8 @@ export default function CreateInvitationModal({
                                         }
                                     />
                                     <p className="fieldset-label text-base-content/40">
-                                        We&apos;ll send them an invitation email (optional)
+                                        We&apos;ll send them an invitation email
+                                        (optional)
                                     </p>
                                 </fieldset>
 
@@ -205,7 +209,8 @@ export default function CreateInvitationModal({
                                         maxLength={1000}
                                     />
                                     <p className="fieldset-label text-base-content/40">
-                                        {personalMessage.length}/1000 characters (optional)
+                                        {personalMessage.length}/1000 characters
+                                        (optional)
                                     </p>
                                 </fieldset>
 
@@ -287,7 +292,9 @@ export default function CreateInvitationModal({
                                         type="text"
                                         className="input input-sm flex-1 font-mono text-xs bg-base-100 border-base-300"
                                         style={{ borderRadius: 0 }}
-                                        value={createdInvitation.invite_url || ""}
+                                        value={
+                                            createdInvitation.invite_url || ""
+                                        }
                                         readOnly
                                     />
                                     <button

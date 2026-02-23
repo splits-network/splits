@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from "react";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -10,9 +10,9 @@ import {
     Tooltip,
     Legend,
     Filler,
-} from 'chart.js';
-import { dataset, registerChart } from './chart-options';
-import { Line } from 'react-chartjs-2';
+} from "chart.js";
+import { dataset, registerChart } from "./chart-options";
+import { Line } from "react-chartjs-2";
 
 // Register Chart.js components
 ChartJS.register(
@@ -22,7 +22,7 @@ ChartJS.register(
     LineElement,
     Tooltip,
     Legend,
-    Filler
+    Filler,
 );
 
 interface JobAnalyticsChartProps {
@@ -32,10 +32,10 @@ interface JobAnalyticsChartProps {
 
 // Time period options
 const TIME_PERIODS = [
-    { value: 3, label: '3M' },
-    { value: 6, label: '6M' },
-    { value: 12, label: '1Y' },
-    { value: 24, label: '2Y' },
+    { value: 3, label: "3M" },
+    { value: 6, label: "6M" },
+    { value: 12, label: "1Y" },
+    { value: 24, label: "2Y" },
 ] as const;
 
 // Generate last N months labels
@@ -44,7 +44,9 @@ function getLastNMonths(n: number): string[] {
     const now = new Date();
     for (let i = n - 1; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        months.push(date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase());
+        months.push(
+            date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+        );
     }
     return months;
 }
@@ -70,8 +72,12 @@ function generateMockData(months: number): {
         const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
 
         views.push(Math.round(baseViews * (1 + trend * 0.3) * randomFactor));
-        applications.push(Math.round(baseApplications * (1 + trend * 0.2) * randomFactor));
-        interviews.push(Math.round(baseInterviews * (1 + trend * 0.15) * randomFactor));
+        applications.push(
+            Math.round(baseApplications * (1 + trend * 0.2) * randomFactor),
+        );
+        interviews.push(
+            Math.round(baseInterviews * (1 + trend * 0.15) * randomFactor),
+        );
     }
 
     return { views, applications, interviews };
@@ -79,7 +85,10 @@ function generateMockData(months: number): {
 
 export function JobAnalyticsChart({ jobId, loading }: JobAnalyticsChartProps) {
     const chartRef = useRef<any>(null);
-    const [trendPeriod, setTrendPeriod] = useMemo(() => [6, (p: number) => { }], []); // Default to 6 months
+    const [trendPeriod, setTrendPeriod] = useMemo(
+        () => [6, (p: number) => {}],
+        [],
+    ); // Default to 6 months
 
     // Register chart when it's created
     useEffect(() => {
@@ -102,113 +111,119 @@ export function JobAnalyticsChart({ jobId, loading }: JobAnalyticsChartProps) {
     }, [trendPeriod]);
 
     // Chart data configuration
-    const chartData = useMemo(() => ({
-        labels: trendData.labels,
-        datasets: [
-            {
-                label: 'Job Views',
-                data: trendData.views,
-                borderColor: dataset.primaryBorderColor,
-                backgroundColor: dataset.primaryBackgroundColor,
-                borderWidth: 2,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: dataset.primaryBorderColor,
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2,
-                fill: false,
-            },
-            {
-                label: 'Applications',
-                data: trendData.applications,
-                borderColor: dataset.successBorderColor,
-                backgroundColor: dataset.successBackgroundColor,
-                borderWidth: 2,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: dataset.successBorderColor,
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2,
-                fill: false,
-            },
-            {
-                label: 'Interviews',
-                data: trendData.interviews,
-                borderColor: dataset.infoBorderColor,
-                backgroundColor: dataset.infoBackgroundColor,
-                borderWidth: 2,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: dataset.infoBorderColor,
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2,
-                fill: false,
-            },
-        ],
-    }), [trendData]);
+    const chartData = useMemo(
+        () => ({
+            labels: trendData.labels,
+            datasets: [
+                {
+                    label: "Job Views",
+                    data: trendData.views,
+                    borderColor: dataset.primaryBorderColor,
+                    backgroundColor: dataset.primaryBackgroundColor,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: dataset.primaryBorderColor,
+                    pointHoverBorderColor: "#fff",
+                    pointHoverBorderWidth: 2,
+                    fill: false,
+                },
+                {
+                    label: "Applications",
+                    data: trendData.applications,
+                    borderColor: dataset.successBorderColor,
+                    backgroundColor: dataset.successBackgroundColor,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: dataset.successBorderColor,
+                    pointHoverBorderColor: "#fff",
+                    pointHoverBorderWidth: 2,
+                    fill: false,
+                },
+                {
+                    label: "Interviews",
+                    data: trendData.interviews,
+                    borderColor: dataset.infoBorderColor,
+                    backgroundColor: dataset.infoBackgroundColor,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: dataset.infoBorderColor,
+                    pointHoverBorderColor: "#fff",
+                    pointHoverBorderWidth: 2,
+                    fill: false,
+                },
+            ],
+        }),
+        [trendData],
+    );
 
     // Chart options - minimal clean style
-    const chartOptions = useMemo(() => ({
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            mode: 'index' as const,
-            intersect: false,
-        },
-        plugins: {
-            legend: {
-                display: false,
+    const chartOptions = useMemo(
+        () => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: "index" as const,
+                intersect: false,
             },
-            tooltip: {
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                titleColor: '#374151',
-                bodyColor: '#374151',
-                borderColor: '#e5e7eb',
-                borderWidth: 1,
-                padding: 12,
-                cornerRadius: 8,
-                displayColors: true,
-                boxPadding: 4,
-                usePointStyle: true,
-                callbacks: {
-                    title: function (context: { label?: string }[]) {
-                        return context[0]?.label || '';
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    titleColor: "#374151",
+                    bodyColor: "#374151",
+                    borderColor: "#e5e7eb",
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    boxPadding: 4,
+                    usePointStyle: true,
+                    callbacks: {
+                        title: function (context: { label?: string }[]) {
+                            return context[0]?.label || "";
+                        },
                     },
                 },
             },
-        },
-        scales: {
-            x: {
-                grid: {
-                    display: false,
-                },
-                border: {
-                    display: false,
-                },
-                ticks: {
-                    color: dataset.baseContentBorderColor,
-                    font: {
-                        size: 11,
+            scales: {
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    border: {
+                        display: false,
+                    },
+                    ticks: {
+                        color: dataset.baseContentBorderColor,
+                        font: {
+                            size: 11,
+                        },
                     },
                 },
+                y: {
+                    grid: {
+                        display: false,
+                    },
+                    border: {
+                        display: false,
+                    },
+                    ticks: {
+                        display: false,
+                    },
+                    beginAtZero: true,
+                },
             },
-            y: {
-                grid: {
-                    display: false,
-                },
-                border: {
-                    display: false,
-                },
-                ticks: {
-                    display: false,
-                },
-                beginAtZero: true,
-            },
-        },
-    }), []);
+        }),
+        [],
+    );
 
     // Loading state
     if (loading) {
@@ -222,7 +237,7 @@ export function JobAnalyticsChart({ jobId, loading }: JobAnalyticsChartProps) {
     return (
         <div className="space-y-3 relative">
             {/* Coming Soon Badge Overlay */}
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute top-2 right-2 ">
                 <div className="badge badge-warning badge-lg gap-2 shadow-lg">
                     <i className="fa-duotone fa-regular fa-clock"></i>
                     Analytics Coming Soon
@@ -233,22 +248,33 @@ export function JobAnalyticsChart({ jobId, loading }: JobAnalyticsChartProps) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <i className="fa-duotone fa-regular fa-chart-line text-base-content/70"></i>
-                    <h3 className="text-sm font-medium text-base-content/80">Job Performance Trends</h3>
+                    <h3 className="text-sm font-medium text-base-content/80">
+                        Job Performance Trends
+                    </h3>
                 </div>
             </div>
 
             {/* Custom Legend */}
             <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.primaryBorderColor }}></span>
+                    <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: dataset.primaryBorderColor }}
+                    ></span>
                     <span className="text-base-content/70">Views</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.successBorderColor }}></span>
+                    <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: dataset.successBorderColor }}
+                    ></span>
                     <span className="text-base-content/70">Applications</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dataset.infoBorderColor }}></span>
+                    <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: dataset.infoBorderColor }}
+                    ></span>
                     <span className="text-base-content/70">Interviews</span>
                 </div>
             </div>
@@ -262,7 +288,8 @@ export function JobAnalyticsChart({ jobId, loading }: JobAnalyticsChartProps) {
             <div className="pt-2 border-t border-base-300">
                 <p className="text-xs text-base-content/60 text-center">
                     <i className="fa-duotone fa-regular fa-circle-info mr-1"></i>
-                    Sample data shown - Real-time analytics will track job views, applications, and interview activity
+                    Sample data shown - Real-time analytics will track job
+                    views, applications, and interview activity
                 </p>
             </div>
         </div>

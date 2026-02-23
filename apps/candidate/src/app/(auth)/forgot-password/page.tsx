@@ -133,8 +133,8 @@ export default function ForgotPasswordPage() {
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-envelope text-info mt-0.5" />
                         <span className="text-sm">
-                            We sent a reset code to <strong>{email}</strong>.
-                            It expires in 10 minutes.
+                            We sent a reset code to <strong>{email}</strong>. It
+                            expires in 10 minutes.
                         </span>
                     </div>
                 </div>
@@ -168,7 +168,7 @@ export default function ForgotPasswordPage() {
                             New Password
                         </label>
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                            <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
@@ -244,7 +244,7 @@ export default function ForgotPasswordPage() {
                         Email Address
                     </label>
                     <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 z-10 pointer-events-none" />
+                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
                         <input
                             type="email"
                             value={email}
