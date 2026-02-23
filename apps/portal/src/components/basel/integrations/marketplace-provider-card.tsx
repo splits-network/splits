@@ -1,7 +1,10 @@
 "use client";
 
 import { BaselStatusPill } from "@splits-network/basel-ui";
-import type { IntegrationProvider, OAuthConnectionPublic } from "@splits-network/shared-types";
+import type {
+    IntegrationProvider,
+    OAuthConnectionPublic,
+} from "@splits-network/shared-types";
 
 interface MarketplaceProviderCardProps {
     provider: IntegrationProvider;
@@ -29,34 +32,51 @@ export function MarketplaceProviderCard({
     const isActive = provider.is_active;
 
     return (
-        <div className={`group border border-base-300 bg-base-100 shadow-sm transition-all ${isActive ? "hover:shadow-md" : "opacity-60"}`}>
+        <div
+            className={`group border border-base-300 bg-base-100 shadow-sm transition-all ${isActive ? "hover:shadow-md" : "opacity-60"}`}
+        >
             {/* Top accent bar */}
-            <div className={`h-1 ${isConnected ? "bg-success" : isActive ? "bg-base-300 group-hover:bg-primary" : "bg-base-300"} transition-colors`} />
+            <div
+                className={`h-1 ${isConnected ? "bg-success" : isActive ? "bg-base-300 group-hover:bg-primary" : "bg-base-300"} transition-colors`}
+            />
 
             <div className="p-5">
                 {/* Header */}
                 <div className="flex items-start gap-4 mb-4">
-                    <div className={`w-12 h-12 flex items-center justify-center shrink-0 ${
-                        isConnected
-                            ? "bg-success/10 border border-success/20"
-                            : "bg-base-200 border border-base-300 group-hover:bg-primary/10 group-hover:border-primary/20"
-                    } transition-colors`}>
-                        <i className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-xl ${
-                            isConnected ? "text-success" : "text-base-content/50 group-hover:text-primary"
-                        } transition-colors`} />
+                    <div
+                        className={`w-12 h-12 flex items-center justify-center shrink-0 ${
+                            isConnected
+                                ? "bg-success/10 border border-success/20"
+                                : "bg-base-200 border border-base-300 group-hover:bg-primary/10 group-hover:border-primary/20"
+                        } transition-colors`}
+                    >
+                        <i
+                            className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-xl ${
+                                isConnected
+                                    ? "text-success"
+                                    : "text-base-content/50 group-hover:text-primary"
+                            } transition-colors`}
+                        />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-sm font-black tracking-tight">{provider.name}</h3>
+                            <h3 className="text-sm font-black tracking-tight">
+                                {provider.name}
+                            </h3>
                             {isConnected && (
-                                <BaselStatusPill color="success">Connected</BaselStatusPill>
+                                <BaselStatusPill color="success">
+                                    Connected
+                                </BaselStatusPill>
                             )}
                             {!isActive && (
-                                <BaselStatusPill color="neutral">Coming Soon</BaselStatusPill>
+                                <BaselStatusPill color="neutral">
+                                    Coming Soon
+                                </BaselStatusPill>
                             )}
                         </div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-base-content/40 mt-0.5">
-                            {CATEGORY_LABELS[provider.category] ?? provider.category}
+                            {CATEGORY_LABELS[provider.category] ??
+                                provider.category}
                         </p>
                     </div>
                 </div>
