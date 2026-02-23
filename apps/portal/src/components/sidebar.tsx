@@ -191,6 +191,13 @@ const navItems: NavItemData[] = [
         shortcut: "U",
     },
     {
+        href: "/portal/integrations",
+        label: "Integrations",
+        icon: "fa-duotone fa-regular fa-plug",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "settings",
+    },
+    {
         href: "/portal/company/settings",
         label: "Company",
         icon: "fa-duotone fa-regular fa-building",

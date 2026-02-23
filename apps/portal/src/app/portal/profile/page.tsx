@@ -34,7 +34,6 @@ type Section =
     | "subscription"
     | "payouts"
     | "notifications"
-    | "integrations"
     | "admin";
 
 interface NavItem {
@@ -60,7 +59,6 @@ const MARKETPLACE_SECTIONS: Section[] = [
 
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
     notifications: "Configure email and in-app notification preferences",
-    integrations: "Connect to external services and ATS platforms",
     admin: "Platform-wide settings, user management, and analytics",
 };
 
@@ -85,7 +83,6 @@ export default function ProfileBaselPage() {
         "subscription",
         "payouts",
         "notifications",
-        "integrations",
         "admin",
     ];
     const urlSection = searchParams.get("section") as Section | null;
@@ -176,14 +173,7 @@ export default function ProfileBaselPage() {
             },
         ];
 
-        if (isRecruiter || isCompanyAdmin || isPlatformAdmin) {
-            systemItems.push({
-                key: "integrations",
-                label: "Integrations",
-                icon: "fa-duotone fa-regular fa-plug",
-                href: "/portal/integrations",
-            });
-        }
+
 
         if (isPlatformAdmin) {
             systemItems.push({
