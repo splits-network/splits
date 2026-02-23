@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Company, CompanyRelationship } from "../../types";
 import RequestConnectionModal from "../modals/request-connection-modal";
 import TerminateModal from "../modals/terminate-company-modal";
@@ -113,7 +113,7 @@ export default function CompanyActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size === "lg" ? "md" : (size ?? "sm")}
                     className={className}

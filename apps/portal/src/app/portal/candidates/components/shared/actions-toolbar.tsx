@@ -12,7 +12,7 @@ import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
-import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { Button, SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
@@ -298,7 +298,7 @@ export default function CandidateActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

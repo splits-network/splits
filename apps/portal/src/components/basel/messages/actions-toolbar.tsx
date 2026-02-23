@@ -10,7 +10,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import ConfirmDialog from "@/components/confirm-dialog";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* Inline portal — avoids shared-ui CJS/ESM issue */
 import { useEffect, useState as usePortalState, type ReactNode } from "react";
@@ -328,7 +328,7 @@ export function ActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

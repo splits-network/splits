@@ -9,7 +9,7 @@ import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName } from "../../types";
 import { useCompanyContext } from "../../contexts/company-context";
@@ -196,7 +196,7 @@ export default function RecruiterActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

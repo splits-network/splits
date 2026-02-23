@@ -38,6 +38,8 @@ Design standards: in the root /showcase directory
 1. **Frontend calls `api-gateway` only** — never individual domain services
 1. **Server-side pagination/filtering** — client-side filtering does NOT scale
 1. **Nano-service philosophy** — small, focused services; new purpose = new service
+1. **Technical Debt Paydown** — if you see something wrong, fix it immediately; no "I'll do it later"
+1. **Don't leave unused code** — if something is no longer needed, delete it; don't comment it out or leave it in limbo
 
 ## Decision-Making Rules
 
@@ -46,6 +48,7 @@ Design standards: in the root /showcase directory
 3. **Understand the full data flow first** — Before making changes, trace the path: frontend → gateway → service → repository → database. Identify where data actually lives and how it gets there. Don't guess.
 4. **Extend enums/types properly** — When a new concept needs a new type value (e.g., a new note type, status, or role), add it to the database constraint via migration AND the TypeScript type. Never repurpose an existing value.
 5. **Follow existing patterns** — Look at how similar features were built. If notes use `application_notes`, new note-like data goes there too. If events use RabbitMQ, new events do too. Don't invent a new pattern when one exists.
+6. **Use the framework before writing custom code** — DaisyUI and TailwindCSS provide components, classes, and patterns for nearly every UI need. NEVER build custom implementations (click-outside listeners, open/close state, dropdowns, modals, tooltips, etc.) when the framework already handles it. Check the DaisyUI docs first. If a DaisyUI component exists for the pattern, use it. When modifying a component that uses a custom implementation where DaisyUI provides the pattern, refactor it to use DaisyUI as part of the change.
 
 ## Tech Stack
 

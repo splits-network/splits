@@ -13,7 +13,7 @@ import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
 import {
     Button,
-    SpeedDial,
+    SpeedMenu,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
 
@@ -449,7 +449,7 @@ export default function RoleActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size === "lg" ? "md" : (size ?? "sm")}
                     className={className}

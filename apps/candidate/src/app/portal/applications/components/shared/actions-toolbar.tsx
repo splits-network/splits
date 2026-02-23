@@ -17,7 +17,7 @@ import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { ProposalResponseWizard } from "../modals/proposal-response-wizard";
 import { DeclineModal } from "../modals/decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
@@ -557,7 +557,7 @@ export default function ActionsToolbar({
 
     return (
         <>
-            <SpeedDial
+            <SpeedMenu
                 actions={speedDialActions}
                 size={size}
             />

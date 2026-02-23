@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { BaselConfirmModal, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { BaselConfirmModal, SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Invitation } from "../../types";
 import { canResendInvitation } from "../../types";
 
@@ -159,7 +159,7 @@ export default function ActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

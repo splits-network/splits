@@ -9,7 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { InviteMemberModal } from "../modals/invite-member-modal";
 import type { Team } from "../../types";
-import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { Button, SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -292,7 +292,7 @@ export function TeamActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

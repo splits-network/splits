@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { CompanyInvitation } from "../../types";
 import { getInviteLink } from "./helpers";
 
@@ -199,7 +199,7 @@ export default function InvitationActionsToolbar({
         }
 
         return (
-            <SpeedDial
+            <SpeedMenu
                 actions={speedDialActions}
                 size={size ?? "sm"}
                 className={className}
