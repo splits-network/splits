@@ -37,31 +37,43 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: stats.total.toString(), label: "Placements" },
-                            {
-                                value: formatCurrencyShort(stats.totalEarnings),
-                                label: "Total Earnings",
-                            },
-                            {
-                                value: formatCurrencyShort(stats.thisYearEarnings),
-                                label: `${new Date().getFullYear()} Earnings`,
-                            },
-                            {
-                                value: formatCurrencyShort(stats.avgCommission),
-                                label: "Avg. Commission",
-                            },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-handshake text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Placements</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-dollar-sign text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{formatCurrencyShort(stats.totalEarnings)}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Total Earnings</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-calendar-check text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{formatCurrencyShort(stats.thisYearEarnings)}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">{new Date().getFullYear()} Earnings</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-chart-line text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{formatCurrencyShort(stats.avgCommission)}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Avg. Commission</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

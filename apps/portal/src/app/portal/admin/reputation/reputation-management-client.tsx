@@ -32,9 +32,6 @@ interface RecruiterReputation {
     failed_placements?: number;
     total_collaborations?: number;
     collaboration_rate?: number;
-    proposals_accepted?: number;
-    proposals_declined?: number;
-    proposals_timed_out?: number;
     reputation_score?: number;
     last_calculated_at?: string;
     created_at?: string;
@@ -70,9 +67,6 @@ const defaultReputation: RecruiterReputation = {
     completed_placements: 0,
     failed_placements: 0,
     total_collaborations: 0,
-    proposals_accepted: 0,
-    proposals_declined: 0,
-    proposals_timed_out: 0,
     reputation_score: 50.0,
 };
 

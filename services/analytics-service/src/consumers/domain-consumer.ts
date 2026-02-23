@@ -63,7 +63,6 @@ export class DomainEventConsumer {
                 'job.*',
                 'candidate.*',
                 'recruiter.*',
-                'proposal.*',
             ];
 
             for (const pattern of eventPatterns) {

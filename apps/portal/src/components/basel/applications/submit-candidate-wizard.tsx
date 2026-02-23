@@ -384,7 +384,7 @@ export default function BaselSubmitCandidateWizard({
                     "/documents",
                     formData as any,
                 );
-                resumeDocumentId = uploadResponse.data.data.id;
+                resumeDocumentId = uploadResponse.data.id;
             }
 
             const documentIds = resumeDocumentId
@@ -398,7 +398,7 @@ export default function BaselSubmitCandidateWizard({
             });
 
             // Create the recruiter pitch as an application note
-            const applicationId = appResponse.data.data.id;
+            const applicationId = appResponse.data.id;
             if (pitch.trim()) {
                 await client.post(
                     `/applications/${applicationId}/notes`,

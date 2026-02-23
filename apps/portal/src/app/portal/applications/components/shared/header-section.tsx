@@ -37,22 +37,43 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                         — visible at every step.
                     </p>
 
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: stats.total.toString(), label: "Total" },
-                            { value: stats.submitted.toString(), label: "Submitted" },
-                            { value: stats.interview.toString(), label: "Interviewing" },
-                            { value: stats.offer.toString(), label: "Offers" },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-file-lines text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Total</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-paper-plane text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.submitted}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Submitted</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-comments text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.interview}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Interview</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-handshake text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.offer}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Offers</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

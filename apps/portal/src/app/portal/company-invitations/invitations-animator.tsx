@@ -113,12 +113,12 @@ export function InvitationsAnimator({
                 );
             }
 
-            const stats = $(".hero-stat");
-            if (stats.length) {
+            const statBar = $1(".header-stat-bar");
+            if (statBar) {
                 heroTl.fromTo(
-                    stats,
+                    statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+                    { opacity: 1, y: 0, duration: 0.5 },
                     "-=0.3",
                 );
             }

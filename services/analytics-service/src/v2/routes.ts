@@ -10,9 +10,6 @@ import { registerMarketplaceMetricsRoutes } from './marketplace-metrics/routes';
 import { ChartRepository } from './charts/repository';
 import { ChartServiceV2 } from './charts/service';
 import { registerChartRoutes } from './charts/routes';
-import { ProposalStatsRepository } from './proposal-stats/repository';
-import { ProposalStatsService } from './proposal-stats/service';
-import { registerProposalStatsRoutes } from './proposal-stats/routes';
 import { ActivityService } from './activity/service';
 import { registerActivityRoutes } from './activity/routes';
 
@@ -65,14 +62,10 @@ export async function registerV2Routes(
     const chartRepository = new ChartRepository(supabase);
     const chartService = new ChartServiceV2(chartRepository, supabase);
 
-    const proposalStatsRepository = new ProposalStatsRepository(supabase);
-    const proposalStatsService = new ProposalStatsService(proposalStatsRepository, cache, supabase);
-
     // Register domain routes
     registerStatsRoutes(app, { statsService });
     registerMarketplaceMetricsRoutes(app, { marketplaceMetricsService });
     registerChartRoutes(app, { chartService });
-    registerProposalStatsRoutes(app, proposalStatsService);
     if (activityService) {
         registerActivityRoutes(app, { activityService });
     }

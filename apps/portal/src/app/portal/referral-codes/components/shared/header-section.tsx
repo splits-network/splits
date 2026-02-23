@@ -40,22 +40,43 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: stats.total.toString(), label: "Total Codes" },
-                            { value: stats.active.toString(), label: "Active" },
-                            { value: stats.signups.toString(), label: "Signups" },
-                            { value: stats.inactive.toString(), label: "Inactive" },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-link text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Total Codes</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-bolt text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.active}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Active</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-user-plus text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.signups}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Signups</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-circle-pause text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.inactive}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Inactive</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

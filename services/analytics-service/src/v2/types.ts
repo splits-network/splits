@@ -16,8 +16,6 @@ export const EventTypeSchema = z.enum([
     'candidate.created',
     'candidate.verified',
     'recruiter.activated',
-    'proposal.created',
-    'proposal.accepted',
 ]);
 
 export type EventType = z.infer<typeof EventTypeSchema>;
@@ -29,7 +27,6 @@ export const EntityTypeSchema = z.enum([
     'candidate',
     'recruiter',
     'company',
-    'proposal',
 ]);
 
 export type EntityType = z.infer<typeof EntityTypeSchema>;

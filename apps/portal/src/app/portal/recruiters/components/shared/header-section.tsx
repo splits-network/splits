@@ -39,34 +39,43 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            {
-                                value: stats.total.toString(),
-                                label: "Recruiters",
-                            },
-                            {
-                                value: stats.active.toString(),
-                                label: "Active",
-                            },
-                            {
-                                value: stats.avgPlacements.toString(),
-                                label: "Avg. Placements",
-                            },
-                            {
-                                value: stats.topRated.toString(),
-                                label: "Top Rated",
-                            },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-users text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Recruiters</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-circle-check text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.active}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Active</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-chart-bar text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.avgPlacements}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Avg. Placements</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-star text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.topRated}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Top Rated</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
