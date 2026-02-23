@@ -30,7 +30,7 @@ interface BillingTabProps {
 export function BillingTab({ company }: BillingTabProps) {
     const { getToken } = useAuth();
     const [billingLoaded, setBillingLoaded] = useState(false);
-    const [setupDrawerOpen, setSetupDrawerOpen] = useState(false);
+    const [setupModalOpen, setSetupModalOpen] = useState(false);
 
     const {
         loading: billingLoading,
@@ -110,7 +110,7 @@ export function BillingTab({ company }: BillingTabProps) {
     };
 
     const handleSetupComplete = () => {
-        setSetupDrawerOpen(false);
+        setSetupModalOpen(false);
         refreshBilling();
     };
 
@@ -221,7 +221,7 @@ export function BillingTab({ company }: BillingTabProps) {
                     actions={[
                         {
                             label: "Set Up Billing",
-                            onClick: () => setSetupDrawerOpen(true),
+                            onClick: () => setSetupModalOpen(true),
                             style: "btn-primary",
                         },
                     ]}
@@ -285,7 +285,7 @@ export function BillingTab({ company }: BillingTabProps) {
                                     <button
                                         className="btn btn-sm btn-warning"
                                         onClick={() =>
-                                            setSetupDrawerOpen(true)
+                                            setSetupModalOpen(true)
                                         }
                                     >
                                         Complete Setup
@@ -491,11 +491,11 @@ export function BillingTab({ company }: BillingTabProps) {
 
             {/* Setup Wizard */}
             <BaselBillingSetupWizard
-                open={setupDrawerOpen}
+                open={setupModalOpen}
                 companyId={company.id}
                 existingProfile={billingProfile}
                 onComplete={handleSetupComplete}
-                onClose={() => setSetupDrawerOpen(false)}
+                onClose={() => setSetupModalOpen(false)}
             />
         </div>
     );

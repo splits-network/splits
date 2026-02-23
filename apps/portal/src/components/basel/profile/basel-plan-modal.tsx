@@ -196,6 +196,10 @@ export function BaselPlanModal({
                     plan_id: selectedPlanId,
                     billing_period: billingPeriod,
                 };
+                if (isPaidPlan && paymentMethodId && setupIntent?.customer_id) {
+                    updateData.payment_method_id = paymentMethodId;
+                    updateData.customer_id = setupIntent.customer_id;
+                }
                 if (appliedDiscount?.code) {
                     updateData.promotion_code = appliedDiscount.code;
                 }

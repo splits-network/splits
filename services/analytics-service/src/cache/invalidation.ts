@@ -43,11 +43,6 @@ export class CacheInvalidator {
                 await this.handleRecruiterEvent(eventData);
                 break;
 
-            case 'proposal.created':
-            case 'proposal.accepted':
-                await this.handleProposalEvent(eventData);
-                break;
-
             default:
                 logger.warn(`No cache invalidation handler for event type: ${eventType}`);
         }
@@ -121,13 +116,4 @@ export class CacheInvalidator {
         await this.cache.invalidateCharts('recruiter-activity');
     }
 
-    private async handleProposalEvent(data: any): Promise<void> {
-        // Invalidate recruiter stats
-        if (data.recruiterId) {
-            await this.cache.invalidateStats('recruiter', data.recruiterId);
-        }
-
-        // Invalidate proposal-related charts (if we add them)
-        await this.cache.invalidateCharts('recruiter-activity');
-    }
 }

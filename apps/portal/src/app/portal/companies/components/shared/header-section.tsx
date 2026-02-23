@@ -37,21 +37,34 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: stats.total.toString(), label: "Marketplace" },
-                            { value: stats.myCompanies.toString(), label: "My Companies" },
-                            { value: stats.pending.toString(), label: "Pending" },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-building text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Marketplace</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-building-user text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.myCompanies}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">My Companies</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-hourglass-half text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.pending}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Pending</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

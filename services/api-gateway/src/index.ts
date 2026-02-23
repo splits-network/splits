@@ -185,7 +185,6 @@ async function main() {
                 { name: 'placements', description: 'Placement management' },
                 { name: 'recruiters', description: 'Recruiter profiles and stats' },
                 { name: 'assignments', description: 'Recruiter-to-job assignments' },
-                { name: 'proposals', description: 'Job proposals (Phase 2)' },
                 { name: 'reputation', description: 'Recruiter reputation (Phase 2)' },
                 { name: 'billing', description: 'Subscription plans and billing' },
                 { name: 'documents', description: 'Document storage and retrieval' },

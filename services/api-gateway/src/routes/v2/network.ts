@@ -33,12 +33,6 @@ const NETWORK_RESOURCES: ResourceDefinition[] = [
         basePath: '/reputation',
         tag: 'reputation',
     },
-    {
-        name: 'proposals',
-        service: 'network',
-        basePath: '/proposals',
-        tag: 'proposals',
-    },
 ];
 
 function registerRecruiterMeRoute(app: FastifyInstance, services: ServiceRegistry) {

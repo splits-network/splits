@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { createAuthenticatedClient } from "@/lib/api-client";
+
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
@@ -13,7 +13,7 @@ import { Presence } from "@/components/presense";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
 import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
-import SubmitToJobWizard from "../wizards/submit-to-job-wizard";
+import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
@@ -135,25 +135,6 @@ export default function CandidateActionsToolbar({
         }
     };
 
-    const handleSubmitToJob = async (
-        jobId: string,
-        notes: string,
-        documentIds: string[],
-    ) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const client = createAuthenticatedClient(token);
-        await client.post("/proposals", {
-            candidate_id: candidate.id,
-            job_id: jobId,
-            recruiter_pitch: notes,
-            document_ids: documentIds,
-        });
-
-        setShowSubmitWizard(false);
-        refresh();
-    };
 
     const handleViewDetails = () => {
         if (onViewDetails) onViewDetails(candidate.id);
@@ -184,11 +165,18 @@ export default function CandidateActionsToolbar({
     const modals = (
         <ModalPortal>
             {showSubmitWizard && (
-                <SubmitToJobWizard
-                    candidateId={candidate.id}
-                    candidateName={candidate.full_name || "Unknown"}
+                <BaselSubmitCandidateWizard
+                    isOpen={showSubmitWizard}
                     onClose={() => setShowSubmitWizard(false)}
-                    onSubmit={handleSubmitToJob}
+                    onSuccess={refresh}
+                    preSelectedCandidate={{
+                        id: candidate.id,
+                        full_name: candidate.full_name || "Unknown",
+                        email: candidate.email || "",
+                        current_title: candidate.current_title ?? undefined,
+                        current_company: candidate.current_company ?? undefined,
+                        location: candidate.location ?? undefined,
+                    }}
                 />
             )}
             {showTerminateModal && (

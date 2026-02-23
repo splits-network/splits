@@ -6,7 +6,6 @@ import { NotificationService } from './service';
 import { NotificationRepository } from './repository';
 import { ApplicationsEventConsumer } from './consumers/applications/consumer';
 import { PlacementsEventConsumer } from './consumers/placements/consumer';
-import { ProposalsEventConsumer } from './consumers/proposals/consumer';
 import { CandidatesEventConsumer } from './consumers/candidates/consumer';
 import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
@@ -34,7 +33,6 @@ export class DomainEventConsumer {
 
     private applicationsConsumer: ApplicationsEventConsumer;
     private placementsConsumer: PlacementsEventConsumer;
-    private proposalsConsumer: ProposalsEventConsumer;
     private candidatesConsumer: CandidatesEventConsumer;
     private collaborationConsumer: CollaborationEventConsumer;
     private invitationsConsumer: InvitationsConsumer;
@@ -70,13 +68,6 @@ export class DomainEventConsumer {
         );
         this.placementsConsumer = new PlacementsEventConsumer(
             notificationService.placements,
-            services,
-            logger,
-            dataLookup,
-            contactLookup
-        );
-        this.proposalsConsumer = new ProposalsEventConsumer(
-            notificationService.proposals,
             services,
             logger,
             dataLookup,
@@ -217,12 +208,6 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.invited');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_given');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_declined');
-
-            // Phase 2 events - Proposals
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.created');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.accepted');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.declined');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.timeout');
 
             // Phase 2 events - Recruiter Submission (new opportunity proposals)
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_proposed');
@@ -434,20 +419,6 @@ export class DomainEventConsumer {
                 break;
             case 'guarantee.expiring':
                 await this.placementsConsumer.handleGuaranteeExpiring(event);
-                break;
-
-            // Proposals domain
-            case 'proposal.created':
-                await this.proposalsConsumer.handleProposalCreated(event);
-                break;
-            case 'proposal.accepted':
-                await this.proposalsConsumer.handleProposalAccepted(event);
-                break;
-            case 'proposal.declined':
-                await this.proposalsConsumer.handleProposalDeclined(event);
-                break;
-            case 'proposal.timeout':
-                await this.proposalsConsumer.handleProposalTimeout(event);
                 break;
 
             // Recruiter Submission domain (opportunity proposals)

@@ -38,22 +38,43 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: stats.total.toString(), label: "Total" },
-                            { value: stats.pending.toString(), label: "Pending" },
-                            { value: stats.accepted.toString(), label: "Accepted" },
-                            { value: stats.expired.toString(), label: "Expired" },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-building-user text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{stats.total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Total</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-hourglass-half text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.pending}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Pending</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-circle-check text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.accepted}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Accepted</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-clock-rotate-left text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{stats.expired}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Expired</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

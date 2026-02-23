@@ -8,7 +8,6 @@ import { NotificationRepository } from './repository';
 import { Logger } from '@splits-network/shared-logging';
 import { ApplicationsEmailService } from './services/applications/service';
 import { PlacementsEmailService } from './services/placements/service';
-import { ProposalsEmailService } from './services/proposals/service';
 import { CandidatesEmailService } from './services/candidates/service';
 import { CollaborationEmailService } from './services/collaboration/service';
 import { InvitationsEmailService } from './services/invitations/service';
@@ -23,7 +22,6 @@ import { HealthEmailService } from './services/health/service';
 export class NotificationService {
     public readonly applications: ApplicationsEmailService;
     public readonly placements: PlacementsEmailService;
-    public readonly proposals: ProposalsEmailService;
     public readonly candidates: CandidatesEmailService;
     public readonly collaboration: CollaborationEmailService;
     public readonly invitations: InvitationsEmailService;
@@ -45,7 +43,6 @@ export class NotificationService {
 
         this.applications = new ApplicationsEmailService(resend, repository, fromEmail, logger);
         this.placements = new PlacementsEmailService(resend, repository, fromEmail, logger);
-        this.proposals = new ProposalsEmailService(resend, repository, fromEmail, logger);
         this.candidates = new CandidatesEmailService(resend, repository, fromEmail, logger);
         this.collaboration = new CollaborationEmailService(resend, repository, fromEmail, logger);
         this.invitations = new InvitationsEmailService(resend, repository, fromEmail, logger);
@@ -89,18 +86,6 @@ export class NotificationService {
 
     async sendGuaranteeExpiring(...args: Parameters<PlacementsEmailService['sendGuaranteeExpiring']>) {
         return this.placements.sendGuaranteeExpiring(...args);
-    }
-
-    async sendProposalAccepted(...args: Parameters<ProposalsEmailService['sendProposalAccepted']>) {
-        return this.proposals.sendProposalAccepted(...args);
-    }
-
-    async sendProposalDeclined(...args: Parameters<ProposalsEmailService['sendProposalDeclined']>) {
-        return this.proposals.sendProposalDeclined(...args);
-    }
-
-    async sendProposalTimeout(...args: Parameters<ProposalsEmailService['sendProposalTimeout']>) {
-        return this.proposals.sendProposalTimeout(...args);
     }
 
     async sendCandidateSourced(...args: Parameters<CandidatesEmailService['sendCandidateSourced']>) {

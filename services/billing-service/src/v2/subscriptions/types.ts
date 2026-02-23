@@ -52,7 +52,10 @@ export type SubscriptionCreateInput = Partial<Omit<Subscription, 'id' | 'created
     recruiter_id?: string | null;
     promotion_code?: string;
 };
-export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>;
+export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>> & {
+    payment_method_id?: string;
+    customer_id?: string;
+};
 
 /**
  * Setup Intent Types - For collecting payment method before subscription

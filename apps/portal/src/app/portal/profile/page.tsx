@@ -2,6 +2,7 @@
 
 import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useUserProfile } from "@/contexts";
@@ -14,10 +15,8 @@ import { MarketplaceSection } from "@/components/basel/profile/marketplace-secti
 import { SpecializationsSection } from "@/components/basel/profile/specializations-section";
 import { BioSection } from "@/components/basel/profile/bio-section";
 import { PrivacySection } from "@/components/basel/profile/privacy-section";
-import { PayoutsSection } from "@/components/basel/profile/payouts-section";
-import { SubscriptionSection } from "@/components/basel/profile/subscription-section";
-import { PaymentSection } from "@/components/basel/profile/payment-section";
-import { HistorySection } from "@/components/basel/profile/history-section";
+import { SubscriptionTab } from "@/components/basel/profile/subscription-tab";
+import { PayoutsTab } from "@/components/basel/profile/payouts-tab";
 import {
     MarketplaceSettingsProvider,
     useMarketplaceSettings,
@@ -33,8 +32,6 @@ type Section =
     | "bio"
     | "privacy"
     | "subscription"
-    | "payment"
-    | "history"
     | "payouts"
     | "notifications"
     | "integrations"
@@ -76,9 +73,25 @@ export default function ProfileBaselPage() {
     const isCompanyAdmin = hasRole("company_admin");
     const isPlatformAdmin = isAdmin;
 
-    const [active, setActive] = useState<Section>("account");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const ALL_SECTIONS: Section[] = [
+        "account", "security", "marketplace", "specializations",
+        "bio", "privacy", "subscription", "payouts",
+        "notifications", "integrations", "admin",
+    ];
+    const urlSection = searchParams.get("section") as Section | null;
+    const initialSection: Section = urlSection && ALL_SECTIONS.includes(urlSection) ? urlSection : "account";
+
+    const [active, setActive] = useState<Section>(initialSection);
     const mainRef = useRef<HTMLElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+
+    const handleSectionChange = (section: Section) => {
+        setActive(section);
+        router.replace(`/portal/profile?section=${section}`, { scroll: false });
+    };
 
     /* ── Build grouped nav based on user roles ────────────────────────────── */
 
@@ -135,16 +148,6 @@ export default function ProfileBaselPage() {
                         key: "subscription",
                         label: "Subscription",
                         icon: "fa-duotone fa-regular fa-box",
-                    },
-                    {
-                        key: "payment",
-                        label: "Payment Methods",
-                        icon: "fa-duotone fa-regular fa-wallet",
-                    },
-                    {
-                        key: "history",
-                        label: "Invoice History",
-                        icon: "fa-duotone fa-regular fa-receipt",
                     },
                     {
                         key: "payouts",
@@ -322,7 +325,7 @@ export default function ProfileBaselPage() {
                                         <button
                                             key={item.key}
                                             onClick={() =>
-                                                setActive(item.key)
+                                                handleSectionChange(item.key)
                                             }
                                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
                                                 active === item.key
@@ -378,16 +381,10 @@ export default function ProfileBaselPage() {
 
                 {/* Billing sections (recruiter only) */}
                 {isRecruiter && active === "subscription" && (
-                    <SubscriptionSection />
-                )}
-                {isRecruiter && active === "payment" && (
-                    <PaymentSection />
-                )}
-                {isRecruiter && active === "history" && (
-                    <HistorySection />
+                    <SubscriptionTab />
                 )}
                 {isRecruiter && active === "payouts" && (
-                    <PayoutsSection />
+                    <PayoutsTab />
                 )}
 
                 {/* Coming soon sections */}

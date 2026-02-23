@@ -150,9 +150,37 @@ export class SubscriptionServiceV2 {
             }
         }
 
+        // Handle new payment method if provided during plan change
+        if (updates.payment_method_id) {
+            const customerId = updates.customer_id || subscription.stripe_customer_id;
+            if (customerId) {
+                await this.stripe.paymentMethods.attach(updates.payment_method_id, {
+                    customer: customerId,
+                });
+                await this.stripe.customers.update(customerId, {
+                    invoice_settings: {
+                        default_payment_method: updates.payment_method_id,
+                    },
+                });
+                // Persist the Stripe customer ID if not already on the subscription
+                if (!subscription.stripe_customer_id) {
+                    updates.stripe_customer_id = customerId;
+                }
+            }
+            // Remove non-DB fields before persisting
+            delete updates.payment_method_id;
+            delete updates.customer_id;
+        }
+
         // Handle Stripe plan/billing period changes
-        if ((updates.plan_id || updates.billing_period) && subscription.stripe_subscription_id) {
-            await this.handleStripePlanChange(subscription, updates);
+        if (updates.plan_id || updates.billing_period) {
+            if (subscription.stripe_subscription_id) {
+                // Existing Stripe subscription — update it (proration)
+                await this.handleStripePlanChange(subscription, updates);
+            } else {
+                // No Stripe subscription yet (e.g., free→paid upgrade) — create one
+                await this.handleStripeSubscriptionCreate(subscription, updates, clerkUserId);
+            }
         }
 
         const updated = await this.repository.updateSubscription(id, updates);
@@ -216,11 +244,91 @@ export class SubscriptionServiceV2 {
             },
         });
 
-        // Update the period end from Stripe response
+        // Sync period end and billing period from Stripe response
         const periodEndTimestamp = (updatedStripeSub as any).current_period_end;
         if (periodEndTimestamp) {
             updates.current_period_end = new Date(periodEndTimestamp * 1000).toISOString();
         }
+        const periodStartTimestamp = (updatedStripeSub as any).current_period_start;
+        if (periodStartTimestamp) {
+            updates.current_period_start = new Date(periodStartTimestamp * 1000).toISOString();
+        }
+        updates.billing_period = newBillingPeriod as any;
+    }
+
+    /**
+     * Create a new Stripe subscription for an existing local subscription
+     * that doesn't have one yet (e.g., free→paid upgrade via PATCH).
+     */
+    private async handleStripeSubscriptionCreate(
+        subscription: any,
+        updates: SubscriptionUpdateInput,
+        clerkUserId: string
+    ): Promise<void> {
+        const newPlanId = updates.plan_id || subscription.plan_id;
+        const newBillingPeriod = updates.billing_period || subscription.billing_period || 'monthly';
+
+        const newPlan = await this.planRepository.findPlan(newPlanId);
+        if (!newPlan) {
+            throw new Error('Plan not found');
+        }
+
+        // Free tier doesn't need a Stripe subscription
+        if (newPlan.tier === 'starter' || newPlan.price_monthly === 0) {
+            return;
+        }
+
+        // Must have a Stripe customer to create a subscription
+        const customerId = updates.stripe_customer_id || subscription.stripe_customer_id;
+        if (!customerId) {
+            throw new Error('Stripe customer ID required to create a paid subscription');
+        }
+
+        const priceId = newBillingPeriod === 'annual'
+            ? newPlan.stripe_price_id_annual
+            : newPlan.stripe_price_id_monthly;
+
+        if (!priceId) {
+            throw new Error(`Plan does not have Stripe pricing configured for ${newBillingPeriod} billing`);
+        }
+
+        const subscriptionCreateParams: any = {
+            customer: customerId,
+            items: [{ price: priceId }],
+            payment_settings: {
+                payment_method_types: ['card'],
+                save_default_payment_method: 'on_subscription',
+            },
+            metadata: {
+                user_id: subscription.user_id,
+                clerk_user_id: clerkUserId,
+                plan_id: newPlanId,
+                billing_period: newBillingPeriod,
+            },
+        };
+
+        if ((updates as any).promotion_code) {
+            subscriptionCreateParams.promotion_code = (updates as any).promotion_code;
+            delete (updates as any).promotion_code;
+        }
+
+        const stripeSubscription = await this.stripe.subscriptions.create(subscriptionCreateParams);
+
+        // Persist Stripe IDs and synced dates
+        updates.stripe_subscription_id = stripeSubscription.id;
+        if (!subscription.stripe_customer_id) {
+            updates.stripe_customer_id = customerId;
+        }
+
+        const periodEndTimestamp = (stripeSubscription as any).current_period_end;
+        if (periodEndTimestamp) {
+            updates.current_period_end = new Date(periodEndTimestamp * 1000).toISOString();
+        }
+        const periodStartTimestamp = (stripeSubscription as any).current_period_start;
+        if (periodStartTimestamp) {
+            updates.current_period_start = new Date(periodStartTimestamp * 1000).toISOString();
+        }
+        updates.billing_period = newBillingPeriod as any;
     }
 
     async cancelSubscription(id: string, clerkUserId: string): Promise<any> {
@@ -238,14 +346,28 @@ export class SubscriptionServiceV2 {
             }
         }
 
+        // Cancel the Stripe subscription at period end (user keeps access until then)
+        let cancelAt: string | null = null;
+        if (subscription.stripe_subscription_id) {
+            const stripeSub = await this.stripe.subscriptions.update(
+                subscription.stripe_subscription_id,
+                { cancel_at_period_end: true }
+            );
+            const cancelAtTimestamp = (stripeSub as any).current_period_end;
+            if (cancelAtTimestamp) {
+                cancelAt = new Date(cancelAtTimestamp * 1000).toISOString();
+            }
+        }
+
         const updated = await this.repository.updateSubscription(id, {
             status: 'canceled',
-            cancel_at: new Date().toISOString(),
+            cancel_at: cancelAt || new Date().toISOString(),
             canceled_at: new Date().toISOString(),
         } as SubscriptionUpdateInput);
 
         await this.publishEvent('subscription.canceled', {
             id: updated.id,
+            cancel_at: updated.cancel_at,
         });
 
         return updated;
@@ -428,6 +550,7 @@ export class SubscriptionServiceV2 {
             recruiter_id: access.recruiterId || null,
             plan_id: request.plan_id,
             status: 'active',
+            billing_period: billingPeriod,
             stripe_subscription_id: stripeSubscription.id,
             stripe_customer_id: request.customer_id,
             current_period_start: new Date().toISOString(),

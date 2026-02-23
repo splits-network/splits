@@ -211,9 +211,6 @@ importers:
       '@splits-network/shared-ui':
         specifier: workspace:*
         version: link:../../packages/shared-ui
-      '@stripe/connect-js':
-        specifier: ^3.3.33
-        version: 3.3.33
       '@stripe/react-stripe-js':
         specifier: ^5.5.0
         version: 5.5.0(@stripe/stripe-js@8.6.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -3018,9 +3015,6 @@ packages:
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
-
-  '@stripe/connect-js@3.3.33':
-    resolution: {integrity: sha512-zI+efV1RFYw/wKHW5uaKzXnmK7j3AYaMRL4S7Tb48BegB/ouRArkxwONxbO8t46+D9NDF7BJ0GarJQwvMVjXCg==}
 
   '@stripe/react-stripe-js@5.5.0':
     resolution: {integrity: sha512-/6S79jeTtQm6QiC7E6UWPAUYFgEnj2Mk8Iw5K2TTs3iRyVPTtC+2sfnWQJ3Hs7rtnwBL/JIYqYhJBAFj0G2WzQ==}
@@ -7622,8 +7616,6 @@ snapshots:
   '@standard-schema/spec@1.1.0': {}
 
   '@standard-schema/utils@0.3.0': {}
-
-  '@stripe/connect-js@3.3.33': {}
 
   '@stripe/react-stripe-js@5.5.0(@stripe/stripe-js@8.6.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
