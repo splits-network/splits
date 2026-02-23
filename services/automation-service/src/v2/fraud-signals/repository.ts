@@ -2,13 +2,15 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { FraudSignal, FraudSignalFilters, FraudSignalUpdate } from './types';
 
 export interface CreateFraudSignalInput {
-    event_id: string;
-    event_type: string;
-    entity_type: FraudSignal['entity_type'];
-    entity_id: string;
     signal_type: string;
     severity: FraudSignal['severity'];
-    details: Record<string, any>;
+    signal_data: Record<string, any>;
+    confidence_score: number;
+    recruiter_id?: string | null;
+    job_id?: string | null;
+    candidate_id?: string | null;
+    application_id?: string | null;
+    placement_id?: string | null;
     status?: FraudSignal['status'];
 }
 
@@ -22,16 +24,20 @@ export class FraudSignalRepository {
     private mapRow(row: any): FraudSignal {
         return {
             id: row.id,
-            event_id: row.event_id,
-            event_type: row.event_type,
-            entity_type: row.entity_type,
-            entity_id: row.entity_id,
             signal_type: row.signal_type,
             severity: row.severity,
-            details: row.details || {},
             status: row.status,
+            recruiter_id: row.recruiter_id,
+            job_id: row.job_id,
+            candidate_id: row.candidate_id,
+            application_id: row.application_id,
+            placement_id: row.placement_id,
+            signal_data: row.signal_data || {},
+            confidence_score: Number(row.confidence_score),
             reviewed_by: row.reviewed_by,
             reviewed_at: row.reviewed_at,
+            resolution_notes: row.resolution_notes,
+            action_taken: row.action_taken,
             created_at: row.created_at,
             updated_at: row.updated_at,
         };
@@ -46,15 +52,17 @@ export class FraudSignalRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
             .from('fraud_signals')
             .select('*', { count: 'exact' });
 
-        if (filters.entity_type) {
-            query = query.eq('entity_type', filters.entity_type);
+        if (filters.recruiter_id) {
+            query = query.eq('recruiter_id', filters.recruiter_id);
         }
-        if (filters.entity_id) {
-            query = query.eq('entity_id', filters.entity_id);
+        if (filters.candidate_id) {
+            query = query.eq('candidate_id', filters.candidate_id);
+        }
+        if (filters.application_id) {
+            query = query.eq('application_id', filters.application_id);
         }
         if (filters.severity) {
             query = query.eq('severity', filters.severity);
@@ -82,7 +90,6 @@ export class FraudSignalRepository {
 
     async findSignal(id: string): Promise<FraudSignal | null> {
         const { data, error } = await this.supabase
-            
             .from('fraud_signals')
             .select('*')
             .eq('id', id)
@@ -100,17 +107,18 @@ export class FraudSignalRepository {
 
     async createSignal(input: CreateFraudSignalInput): Promise<FraudSignal> {
         const { data, error } = await this.supabase
-            
             .from('fraud_signals')
             .insert({
-                event_id: input.event_id,
-                event_type: input.event_type,
-                entity_type: input.entity_type,
-                entity_id: input.entity_id,
                 signal_type: input.signal_type,
                 severity: input.severity,
-                details: input.details,
-                status: input.status || 'open',
+                signal_data: input.signal_data,
+                confidence_score: input.confidence_score,
+                recruiter_id: input.recruiter_id ?? null,
+                job_id: input.job_id ?? null,
+                candidate_id: input.candidate_id ?? null,
+                application_id: input.application_id ?? null,
+                placement_id: input.placement_id ?? null,
+                status: input.status || 'active',
             })
             .select()
             .single();
@@ -127,22 +135,18 @@ export class FraudSignalRepository {
             updated_at: new Date().toISOString(),
         };
 
-        if (typeof updates.status !== 'undefined') {
-            payload.status = updates.status;
-        }
-        if (typeof updates.severity !== 'undefined') {
-            payload.severity = updates.severity;
-        }
-        if (typeof updates.details !== 'undefined') {
-            payload.details = updates.details;
-        }
+        if (typeof updates.status !== 'undefined') payload.status = updates.status;
+        if (typeof updates.severity !== 'undefined') payload.severity = updates.severity;
+        if (typeof updates.signal_data !== 'undefined') payload.signal_data = updates.signal_data;
+        if (typeof updates.confidence_score !== 'undefined') payload.confidence_score = updates.confidence_score;
+        if (typeof updates.resolution_notes !== 'undefined') payload.resolution_notes = updates.resolution_notes;
+        if (typeof updates.action_taken !== 'undefined') payload.action_taken = updates.action_taken;
         if (typeof updates.reviewed_by !== 'undefined') {
             payload.reviewed_by = updates.reviewed_by;
             payload.reviewed_at = updates.reviewed_by ? new Date().toISOString() : null;
         }
 
         const { data, error } = await this.supabase
-            
             .from('fraud_signals')
             .update(payload)
             .eq('id', id)
@@ -158,7 +162,6 @@ export class FraudSignalRepository {
 
     async deleteSignal(id: string): Promise<void> {
         const { error } = await this.supabase
-            
             .from('fraud_signals')
             .delete()
             .eq('id', id);

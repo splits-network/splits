@@ -1,26 +1,32 @@
 /**
  * Fraud Signal Domain Types
+ * Matches the fraud_signals table schema
  */
 
 export interface FraudSignal {
     id: string;
-    event_id: string;
-    event_type: string;
-    entity_type: 'recruiter' | 'candidate' | 'application' | 'placement';
-    entity_id: string;
     signal_type: string;
     severity: 'low' | 'medium' | 'high' | 'critical';
-    details: Record<string, any>;
-    status: 'open' | 'reviewing' | 'resolved' | 'false_positive';
+    status: 'active' | 'resolved' | 'false_positive';
+    recruiter_id: string | null;
+    job_id: string | null;
+    candidate_id: string | null;
+    application_id: string | null;
+    placement_id: string | null;
+    signal_data: Record<string, any>;
+    confidence_score: number;
     reviewed_by: string | null;
     reviewed_at: string | null;
+    resolution_notes: string | null;
+    action_taken: string | null;
     created_at: string;
     updated_at: string;
 }
 
 export interface FraudSignalFilters {
-    entity_type?: string;
-    entity_id?: string;
+    recruiter_id?: string;
+    candidate_id?: string;
+    application_id?: string;
     severity?: string;
     status?: string;
     signal_type?: string;

@@ -47,8 +47,7 @@ export class FraudSignalServiceV2 {
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.fraud.created', {
                 signal_id: signal.id,
-                entity_type: signal.entity_type,
-                entity_id: signal.entity_id,
+                signal_type: signal.signal_type,
                 severity: signal.severity,
             });
         }

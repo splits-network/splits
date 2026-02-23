@@ -1,19 +1,25 @@
 /**
- * Metrics Domain Types
+ * Marketplace Metrics Domain Types
+ * Matches the marketplace_metrics_daily table schema
  */
 
 export interface MarketplaceMetric {
     id: string;
-    date: string;
-    total_placements: number;
-    total_applications: number;
-    total_earnings_cents: number;
-    avg_placement_duration_days: number | null;
+    metric_date: string;
     active_recruiters: number;
+    active_companies: number;
     active_jobs: number;
-    health_score: number;
+    total_applications: number;
+    total_placements: number;
+    avg_time_to_hire_days: number | null;
+    hire_rate: number | null;
+    placement_completion_rate: number | null;
+    avg_recruiter_response_time_hours: number | null;
+    total_fees_generated: number | null;
+    total_payouts_processed: number | null;
+    fraud_signals_raised: number;
+    disputes_opened: number;
     created_at: string;
-    updated_at: string;
 }
 
 export interface MetricFilters {
@@ -23,4 +29,4 @@ export interface MetricFilters {
     limit?: number;
 }
 
-export type MetricUpdate = Partial<Omit<MarketplaceMetric, 'id' | 'created_at' | 'updated_at'>>;
+export type MetricUpdate = Partial<Omit<MarketplaceMetric, 'id' | 'created_at'>>;

@@ -3,6 +3,7 @@ import { registerMatchRoutes } from './matches/routes';
 import { registerFraudRoutes } from './fraud-signals/routes';
 import { registerRuleRoutes } from './rules/routes';
 import { registerMetricRoutes } from './metrics/routes';
+import { registerExecutionRoutes } from './executions/routes';
 import { IEventPublisher } from './shared/events';
 
 interface RegisterConfig {
@@ -31,6 +32,12 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
     });
 
     await registerMetricRoutes(app, {
+        supabaseUrl: config.supabaseUrl,
+        supabaseKey: config.supabaseKey,
+        eventPublisher: config.eventPublisher,
+    });
+
+    await registerExecutionRoutes(app, {
         supabaseUrl: config.supabaseUrl,
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,

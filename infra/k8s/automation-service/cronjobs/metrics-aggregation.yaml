@@ -2,26 +2,24 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: application-timeout-checker
+  name: metrics-aggregation
   namespace: splits-network
   labels:
     app: automation-service
     component: cron
-    feature: application-timeout
+    feature: metrics
     managed-by: splits-network
 spec:
-  # Run every 6 hours at minute 0
-  # Checks 4 times per day to catch stalled applications shortly after they expire
-  schedule: "0 */6 * * *"
+  # Run daily at 3 AM UTC (before reputation recalculation at 4 AM)
+  schedule: "0 3 * * *"
 
   # Keep history of successful/failed jobs for debugging
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 5
 
-  # Prevent overlapping runs - if previous job is still running, skip this execution
+  # Prevent overlapping runs
   concurrencyPolicy: Forbid
 
-  # Suspend can be set to true to temporarily disable the cron job
   suspend: false
 
   jobTemplate:
@@ -29,12 +27,9 @@ spec:
       labels:
         app: automation-service
         component: cron-job
-        feature: application-timeout
+        feature: metrics
     spec:
-      # Retry failed jobs up to 2 times with exponential backoff
       backoffLimit: 2
-
-      # Job must complete within 10 minutes or it will be terminated
       activeDeadlineSeconds: 600
 
       template:
@@ -42,36 +37,31 @@ spec:
           labels:
             app: automation-service
             component: cron-job
-            feature: application-timeout
+            feature: metrics
           annotations:
             prometheus.io/scrape: "true"
             prometheus.io/port: "9090"
             prometheus.io/path: "/metrics"
         spec:
           restartPolicy: OnFailure
-
-          # Service account with permissions to access secrets
           serviceAccountName: automation-service
 
           containers:
-          - name: timeout-checker
+          - name: metrics-aggregator
             image: splits-network/automation-service:latest
             imagePullPolicy: Always
 
-            # Execute the application timeout job
             command: ["node"]
-            args: ["dist/jobs/application-timeout.js"]
+            args: ["dist/jobs/metrics-aggregation.js"]
 
-            # Resource allocation
             resources:
               requests:
-                cpu: "50m"
-                memory: "128Mi"
-              limits:
-                cpu: "200m"
+                cpu: "100m"
                 memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
 
-            # Environment variables
             env:
               - name: NODE_ENV
                 value: "production"
@@ -88,19 +78,12 @@ spec:
                     name: supabase-credentials
                     key: service-role-key
 
-              - name: RABBITMQ_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: rabbitmq-credentials
-                    key: url
-
               - name: SERVICE_NAME
                 value: "automation-service"
 
               - name: SERVICE_VERSION
                 value: "1.0.0"
 
-            # Security context
             securityContext:
               runAsNonRoot: true
               runAsUser: 1000

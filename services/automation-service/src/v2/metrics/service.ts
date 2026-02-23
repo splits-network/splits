@@ -47,7 +47,7 @@ export class MarketplaceMetricsServiceV2 {
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.metrics.created', {
                 metric_id: metric.id,
-                date: metric.date,
+                metric_date: metric.metric_date,
             });
         }
         return metric;
