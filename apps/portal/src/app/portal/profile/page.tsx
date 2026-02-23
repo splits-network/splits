@@ -14,10 +14,8 @@ import { MarketplaceSection } from "@/components/basel/profile/marketplace-secti
 import { SpecializationsSection } from "@/components/basel/profile/specializations-section";
 import { BioSection } from "@/components/basel/profile/bio-section";
 import { PrivacySection } from "@/components/basel/profile/privacy-section";
-import { PayoutsSection } from "@/components/basel/profile/payouts-section";
-import { SubscriptionSection } from "@/components/basel/profile/subscription-section";
-import { PaymentSection } from "@/components/basel/profile/payment-section";
-import { HistorySection } from "@/components/basel/profile/history-section";
+import { SubscriptionTab } from "@/components/basel/profile/subscription-tab";
+import { PayoutsTab } from "@/components/basel/profile/payouts-tab";
 import {
     MarketplaceSettingsProvider,
     useMarketplaceSettings,
@@ -33,8 +31,6 @@ type Section =
     | "bio"
     | "privacy"
     | "subscription"
-    | "payment"
-    | "history"
     | "payouts"
     | "notifications"
     | "integrations"
@@ -135,16 +131,6 @@ export default function ProfileBaselPage() {
                         key: "subscription",
                         label: "Subscription",
                         icon: "fa-duotone fa-regular fa-box",
-                    },
-                    {
-                        key: "payment",
-                        label: "Payment Methods",
-                        icon: "fa-duotone fa-regular fa-wallet",
-                    },
-                    {
-                        key: "history",
-                        label: "Invoice History",
-                        icon: "fa-duotone fa-regular fa-receipt",
                     },
                     {
                         key: "payouts",
@@ -378,16 +364,10 @@ export default function ProfileBaselPage() {
 
                 {/* Billing sections (recruiter only) */}
                 {isRecruiter && active === "subscription" && (
-                    <SubscriptionSection />
-                )}
-                {isRecruiter && active === "payment" && (
-                    <PaymentSection />
-                )}
-                {isRecruiter && active === "history" && (
-                    <HistorySection />
+                    <SubscriptionTab />
                 )}
                 {isRecruiter && active === "payouts" && (
-                    <PayoutsSection />
+                    <PayoutsTab />
                 )}
 
                 {/* Coming soon sections */}

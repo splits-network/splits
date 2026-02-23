@@ -23,14 +23,29 @@ services/             # Backend APIs (Fastify + TypeScript)
 packages/             # Shared code (NOT directly deployable)
 ```
 
+## Design Principles
+
+```
+Design standards: in the root /showcase directory
+```
+
 ## Architecture Rules
 
+1. **Small files** — max ~200 lines; split into multiple files/components if larger
 1. **No backend logic in `apps/`** — all APIs go in `services/*`
-2. **No HTTP calls between services** — use direct DB queries or RabbitMQ events
-3. **Single Supabase Postgres database** — only `public` and `analytics` schemas
-4. **Frontend calls `api-gateway` only** — never individual domain services
-5. **Server-side pagination/filtering** — client-side filtering does NOT scale
-6. **Nano-service philosophy** — small, focused services; new purpose = new service
+1. **No HTTP calls between services** — use direct DB queries or RabbitMQ events
+1. **Single Supabase Postgres database** — only `public`, `search`, and `analytics` schemas
+1. **Frontend calls `api-gateway` only** — never individual domain services
+1. **Server-side pagination/filtering** — client-side filtering does NOT scale
+1. **Nano-service philosophy** — small, focused services; new purpose = new service
+
+## Decision-Making Rules
+
+1. **Architectural correctness over quick fixes** — When something doesn't fit (wrong column, missing type, no endpoint), fix the architecture: add the migration, extend the type, create the route. Never shove data into the wrong place to save time.
+2. **Check the database before assuming** — Before writing code that touches the DB, verify the actual schema (check migrations, Docker logs, or Supabase). Column names, constraints, and table structure are the source of truth — not service code that may be stale.
+3. **Understand the full data flow first** — Before making changes, trace the path: frontend → gateway → service → repository → database. Identify where data actually lives and how it gets there. Don't guess.
+4. **Extend enums/types properly** — When a new concept needs a new type value (e.g., a new note type, status, or role), add it to the database constraint via migration AND the TypeScript type. Never repurpose an existing value.
+5. **Follow existing patterns** — Look at how similar features were built. If notes use `application_notes`, new note-like data goes there too. If events use RabbitMQ, new events do too. Don't invent a new pattern when one exists.
 
 ## Tech Stack
 
@@ -47,23 +62,24 @@ packages/             # Shared code (NOT directly deployable)
 
 ## Skills (On-Demand Patterns)
 
-| Skill | Purpose |
-|-------|---------|
-| `/api:scaffold` | Scaffold V2 backend resource |
-| `/api:audit` | Audit service V2 compliance |
-| `/migration` | Create database migration |
-| `/test:scaffold` | Scaffold Vitest tests |
-| `/event:scaffold` | Scaffold RabbitMQ event flow |
-| `/auth` | Clerk auth patterns & gotchas |
-| `/ui` | DaisyUI component patterns |
-| `/email:scaffold` | Create email template |
-| `/basel` | Basel design system migration |
-| `/seo` | SEO audit & optimization |
-| `/aio` | AI optimization audit |
+| Skill             | Purpose                       |
+| ----------------- | ----------------------------- |
+| `/api:scaffold`   | Scaffold V2 backend resource  |
+| `/api:audit`      | Audit service V2 compliance   |
+| `/migration`      | Create database migration     |
+| `/test:scaffold`  | Scaffold Vitest tests         |
+| `/event:scaffold` | Scaffold RabbitMQ event flow  |
+| `/auth`           | Clerk auth patterns & gotchas |
+| `/ui`             | DaisyUI component patterns    |
+| `/email:scaffold` | Create email template         |
+| `/basel`          | Basel design system migration |
+| `/seo`            | SEO audit & optimization      |
+| `/aio`            | AI optimization audit         |
 
 ## Guidance Documents
 
 Key standards in `docs/guidance/`:
+
 - `api-response-format.md` — `{ data: <payload> }` envelope
 - `form-controls.md` — `fieldset` wrapper, no `-bordered` suffixes
 - `pagination.md` — StandardListParams/StandardListResponse

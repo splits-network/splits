@@ -50,8 +50,8 @@ export function ConnectPromptBanner({ onSetUp }: ConnectPromptBannerProps) {
     }
 
     return (
-        <div className="alert alert-info shadow-sm mb-4">
-            <i className="fa-duotone fa-regular fa-building-columns"></i>
+        <div className="bg-info/5 border-l-4 border-info p-4 mb-4 flex items-center gap-3">
+            <i className="fa-duotone fa-regular fa-building-columns text-info"></i>
             <div className="flex-1">
                 <span className="text-sm">
                     Set up your payouts to receive commissions from

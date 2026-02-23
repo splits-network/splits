@@ -381,7 +381,8 @@ export type ApplicationNoteType =
     | 'improvement_request' // Specific change requested
     | 'stage_transition'   // Notes during stage changes
     | 'interview_feedback' // Company interview notes
-    | 'general';           // Catch-all type
+    | 'general'            // Catch-all type
+    | 'pitch';             // Recruiter pitch when submitting candidate
 
 export type ApplicationNoteCreatorType =
     | 'candidate'

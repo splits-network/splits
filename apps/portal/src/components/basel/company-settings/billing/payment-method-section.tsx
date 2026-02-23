@@ -3,6 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    BaselAlertBox,
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+} from "@splits-network/basel-ui";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { BaselPaymentForm } from "./payment-form";
 
 interface PaymentMethodDetails {
@@ -77,7 +84,7 @@ export function BaselPaymentMethodSection({
         useState<PaymentMethodResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const fetchPaymentMethod = useCallback(async () => {
@@ -110,7 +117,7 @@ export function BaselPaymentMethodSection({
     }, [fetchPaymentMethod]);
 
     const handlePaymentSuccess = async () => {
-        setDrawerOpen(false);
+        setModalOpen(false);
         setSuccessMessage("Payment method updated successfully");
 
         await fetchPaymentMethod();
@@ -119,8 +126,8 @@ export function BaselPaymentMethodSection({
         setTimeout(() => setSuccessMessage(null), 5000);
     };
 
-    const handleCloseDrawer = () => {
-        setDrawerOpen(false);
+    const handleCloseModal = () => {
+        setModalOpen(false);
     };
 
     if (loading) {
@@ -140,119 +147,102 @@ export function BaselPaymentMethodSection({
     const pm = paymentMethod?.default_payment_method;
 
     return (
-        <div className="drawer drawer-end">
-            <input
-                id="payment-method-drawer"
-                type="checkbox"
-                className="drawer-toggle"
-                checked={drawerOpen}
-                readOnly
-            />
-            <div className="drawer-content">
-                {successMessage && (
-                    <div className="bg-success/5 border border-success/20 p-4 mb-4">
-                        <p className="text-sm font-semibold text-success">
-                            {successMessage}
-                        </p>
-                    </div>
-                )}
+        <div>
+            {successMessage && (
+                <BaselAlertBox variant="success" className="mb-4">
+                    {successMessage}
+                </BaselAlertBox>
+            )}
 
-                {error && (
-                    <div className="bg-error/5 border border-error/20 p-4 mb-4">
-                        <p className="text-sm font-semibold text-error">
-                            {error}
-                        </p>
-                        <button
-                            className="text-xs text-error underline mt-1"
-                            onClick={() => setError(null)}
-                        >
-                            Dismiss
-                        </button>
-                    </div>
-                )}
+            {error && (
+                <BaselAlertBox variant="error" className="mb-4">
+                    {error}
+                    <button
+                        className="text-xs underline ml-2"
+                        onClick={() => setError(null)}
+                    >
+                        Dismiss
+                    </button>
+                </BaselAlertBox>
+            )}
 
-                {hasPaymentMethod && pm ? (
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-7 bg-neutral text-neutral-content flex items-center justify-center text-xs font-bold">
-                                <i className={getPaymentMethodIcon(pm)} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold">
-                                    {pm.display_label}
+            {hasPaymentMethod && pm ? (
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-7 bg-neutral text-neutral-content flex items-center justify-center text-xs font-bold">
+                            <i className={getPaymentMethodIcon(pm)} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold">
+                                {pm.display_label}
+                            </p>
+                            {getPaymentMethodSubtext(pm) && (
+                                <p className="text-xs text-base-content/40">
+                                    {getPaymentMethodSubtext(pm)}
                                 </p>
-                                {getPaymentMethodSubtext(pm) && (
-                                    <p className="text-xs text-base-content/40">
-                                        {getPaymentMethodSubtext(pm)}
-                                    </p>
-                                )}
-                            </div>
+                            )}
                         </div>
-                        <button
-                            className="btn btn-sm btn-ghost"
-                            onClick={() => setDrawerOpen(true)}
-                        >
-                            Update
-                        </button>
                     </div>
-                ) : (
-                    <>
-                        <div className="bg-warning/5 border border-warning/20 p-4 mb-4">
-                            <p className="font-semibold text-sm">
-                                No Payment Method on File
-                            </p>
-                            <p className="text-xs text-base-content/50 mt-1">
-                                {billingTerms === "immediate"
-                                    ? "Placement fees cannot be charged until a payment method is added."
-                                    : "A payment method ensures invoices are paid on time."}
-                            </p>
-                        </div>
-                        <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => setDrawerOpen(true)}
-                        >
-                            <i className="fa-duotone fa-regular fa-plus mr-1" />
-                            Add Payment Method
-                        </button>
-                    </>
-                )}
-            </div>
-            <div className="drawer-side z-50">
-                <label
-                    className="drawer-overlay"
-                    onClick={handleCloseDrawer}
-                />
-                <div className="bg-base-100 min-h-full w-full max-w-md flex flex-col">
-                    <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center justify-between z-10">
-                        <h3 className="font-black text-lg tracking-tight flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-wallet" />
-                            {hasPaymentMethod
-                                ? "Update Payment"
-                                : "Add Payment"}
-                        </h3>
-                        <button
-                            className="btn btn-sm btn-ghost"
-                            onClick={handleCloseDrawer}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark" />
-                        </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-6">
-                        {drawerOpen && (
-                            <BaselPaymentForm
-                                companyId={companyId}
-                                onSuccess={handlePaymentSuccess}
-                                onCancel={handleCloseDrawer}
-                                submitButtonText={
-                                    hasPaymentMethod
-                                        ? "Update Payment Method"
-                                        : "Add Payment Method"
-                                }
-                            />
-                        )}
-                    </div>
+                    <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={() => setModalOpen(true)}
+                    >
+                        Update
+                    </button>
                 </div>
-            </div>
+            ) : (
+                <>
+                    <BaselAlertBox variant="warning" className="mb-4">
+                        <span className="font-semibold text-sm">
+                            No Payment Method on File
+                        </span>
+                        <p className="text-xs text-base-content/50 mt-1">
+                            {billingTerms === "immediate"
+                                ? "Placement fees cannot be charged until a payment method is added."
+                                : "A payment method ensures invoices are paid on time."}
+                        </p>
+                    </BaselAlertBox>
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setModalOpen(true)}
+                    >
+                        <i className="fa-duotone fa-regular fa-plus mr-1" />
+                        Add Payment Method
+                    </button>
+                </>
+            )}
+
+            <ModalPortal>
+            <BaselModal
+                isOpen={modalOpen}
+                onClose={handleCloseModal}
+                maxWidth="max-w-md"
+            >
+                <BaselModalHeader
+                    title={
+                        hasPaymentMethod
+                            ? "Update Payment"
+                            : "Add Payment"
+                    }
+                    icon="fa-duotone fa-regular fa-wallet"
+                    onClose={handleCloseModal}
+                />
+                <BaselModalBody>
+                    {modalOpen && (
+                        <BaselPaymentForm
+                            companyId={companyId}
+                            onSuccess={handlePaymentSuccess}
+                            onCancel={handleCloseModal}
+                            submitButtonText={
+                                hasPaymentMethod
+                                    ? "Update Payment Method"
+                                    : "Add Payment Method"
+                            }
+                        />
+                    )}
+                </BaselModalBody>
+            </BaselModal>
+            </ModalPortal>
         </div>
     );
 }

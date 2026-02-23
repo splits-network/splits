@@ -330,8 +330,8 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
         }
     );
 
-    app.post(
-        '/api/v2/stripe/connect/account-session',
+    app.patch(
+        '/api/v2/stripe/connect/account',
         {
             preHandler: requireAuth(),
         },
@@ -340,24 +340,24 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                const data = await billingService().post(
-                    '/api/v2/stripe/connect/account-session',
+                const data = await billingService().patch(
+                    '/api/v2/stripe/connect/account',
                     request.body,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect account session');
+                request.log.error({ error, correlationId }, 'Failed to update Stripe Connect account details');
                 return reply
                     .status(error.statusCode || 400)
-                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect account session' } });
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update Stripe Connect account details' } });
             }
         }
     );
 
     app.post(
-        '/api/v2/stripe/connect/dashboard-link',
+        '/api/v2/stripe/connect/bank-account',
         {
             preHandler: requireAuth(),
         },
@@ -367,17 +367,97 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
 
             try {
                 const data = await billingService().post(
-                    '/api/v2/stripe/connect/dashboard-link',
+                    '/api/v2/stripe/connect/bank-account',
                     request.body,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect dashboard link');
+                request.log.error({ error, correlationId }, 'Failed to add bank account');
                 return reply
                     .status(error.statusCode || 400)
-                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect dashboard link' } });
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to add bank account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/stripe/connect/accept-tos',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/accept-tos',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to accept Terms of Service');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to accept Terms of Service' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/stripe/connect/verification-session',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/verification-session',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create verification session');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create verification session' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/stripe/connect/payouts',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const query = request.query as { limit?: string };
+
+            try {
+                const params = query.limit ? { limit: query.limit } : undefined;
+                const data = await billingService().get(
+                    '/api/v2/stripe/connect/payouts',
+                    params,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch Stripe Connect payouts');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch payouts' } });
             }
         }
     );

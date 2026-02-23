@@ -785,8 +785,6 @@ export class ApplicationServiceV2 {
             job_id: data.job_id,
             candidate_recruiter_id: data.candidate_recruiter_id,
             stage: 'recruiter_proposed',
-            pitch: data.pitch || null,
-            notes: data.notes || null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }, clerkUserId);

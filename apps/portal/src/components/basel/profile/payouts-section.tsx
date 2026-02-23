@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { ConnectStatusCard } from "@/components/stripe/connect-status-card";
-import { ConnectDrawer } from "@/components/stripe/connect-drawer";
+import { ConnectModal } from "@/components/basel/profile/connect-modal";
 
 export function PayoutsSection() {
-    const [connectDrawerOpen, setConnectDrawerOpen] = useState(false);
+    const [connectModalOpen, setConnectModalOpen] = useState(false);
+    const [connectOpenCount, setConnectOpenCount] = useState(0);
 
     return (
         <div>
@@ -15,11 +16,15 @@ export function PayoutsSection() {
             </p>
             <ConnectStatusCard
                 variant="full"
-                onAction={() => setConnectDrawerOpen(true)}
+                onAction={() => {
+                    setConnectOpenCount((c) => c + 1);
+                    setConnectModalOpen(true);
+                }}
             />
-            <ConnectDrawer
-                open={connectDrawerOpen}
-                onClose={() => setConnectDrawerOpen(false)}
+            <ConnectModal
+                key={connectOpenCount}
+                isOpen={connectModalOpen}
+                onClose={() => setConnectModalOpen(false)}
             />
         </div>
     );

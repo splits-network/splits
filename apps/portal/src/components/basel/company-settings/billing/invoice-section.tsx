@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { BaselStatusPill, BaselEmptyState } from "@splits-network/basel-ui";
+import { BaselStatusPill, BaselEmptyState, BaselAlertBox } from "@splits-network/basel-ui";
 import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
 interface PlacementInvoice {
@@ -108,9 +108,9 @@ export function BaselInvoiceSection({
 
     if (error) {
         return (
-            <div className="bg-error/5 border border-error/20 p-4">
-                <p className="text-sm font-semibold text-error">{error}</p>
-            </div>
+            <BaselAlertBox variant="error">
+                {error}
+            </BaselAlertBox>
         );
     }
 

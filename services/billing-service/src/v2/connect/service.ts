@@ -5,8 +5,11 @@ import {
     StripeConnectAccountStatus,
     StripeConnectLinkRequest,
     StripeConnectLinkResponse,
-    StripeAccountSessionResponse,
-    StripeDashboardLinkResponse,
+    UpdateAccountDetailsRequest,
+    AddBankAccountRequest,
+    AcceptTosResponse,
+    VerificationSessionResponse,
+    StripePayout,
 } from './types';
 
 export class StripeConnectService {
@@ -35,7 +38,19 @@ export class StripeConnectService {
 
         if (!recruiter.stripe_connect_account_id) {
             const account = await this.stripe.accounts.create({
-                type: 'express',
+                type: 'custom',
+                country: 'US',
+                business_type: 'individual',
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+                controller: {
+                    stripe_dashboard: { type: 'none' },
+                    fees: { payer: 'application' },
+                    losses: { payments: 'application' },
+                    requirement_collection: 'application',
+                },
                 metadata: {
                     recruiter_id: access.recruiterId,
                     user_id: access.identityUserId || '',
@@ -73,44 +88,192 @@ export class StripeConnectService {
             );
         }
 
+        // Extract bank account summary from external accounts
+        const externalAccounts = (account.external_accounts?.data || []) as any[];
+        const bankAccount = externalAccounts.find((ea: any) => ea.object === 'bank_account');
+        const bankAccountSummary = bankAccount ? {
+            bank_name: bankAccount.bank_name || 'Bank Account',
+            last4: bankAccount.last4,
+            account_type: bankAccount.account_holder_type || 'individual',
+        } : null;
+
+        // Extract payout schedule
+        const payoutSettings = (account.settings as any)?.payouts;
+        const payoutSchedule = payoutSettings?.schedule ? {
+            interval: payoutSettings.schedule.interval,
+            weekly_anchor: payoutSettings.schedule.weekly_anchor,
+            monthly_anchor: payoutSettings.schedule.monthly_anchor,
+            delay_days: payoutSettings.schedule.delay_days,
+        } : null;
+
+        // Fetch pending balance
+        let pendingBalance = 0;
+        try {
+            const balance = await this.stripe.balance.retrieve({
+                stripeAccount: recruiter.stripe_connect_account_id,
+            });
+            pendingBalance = balance.pending?.reduce((sum, b) => sum + b.amount, 0) || 0;
+        } catch {
+            // Balance may not be available for all account states
+        }
+
         return {
             account_id: account.id,
+            account_type: (account.type as 'express' | 'custom') || 'custom',
             charges_enabled: chargesEnabled,
             payouts_enabled: payoutsEnabled,
             details_submitted: detailsSubmitted,
             requirements: account.requirements as any,
             onboarded,
             recruiter_id: access.recruiterId,
+            bank_account: bankAccountSummary,
+            payout_schedule: payoutSchedule,
+            pending_balance: pendingBalance,
         };
     }
 
-    async createAccountSession(clerkUserId: string): Promise<StripeAccountSessionResponse> {
-        const status = await this.getOrCreateAccount(clerkUserId);
+    async updateAccountDetails(
+        clerkUserId: string,
+        details: UpdateAccountDetailsRequest
+    ): Promise<StripeConnectAccountStatus> {
+        const status = await this.getAccountStatus(clerkUserId);
 
-        const accountSession = await this.stripe.accountSessions.create({
-            account: status.account_id,
-            components: {
-                account_onboarding: { enabled: true },
-                account_management: {
-                    enabled: true,
-                    features: {
-                        external_account_collection: true,
-                    },
+        if (status.account_type === 'express') {
+            throw new Error('Cannot update details on Express accounts. Use the onboarding link instead.');
+        }
+
+        await this.stripe.accounts.update(status.account_id, {
+            individual: {
+                first_name: details.first_name,
+                last_name: details.last_name,
+                email: details.email,
+                phone: details.phone,
+                dob: details.dob,
+                ssn_last_4: details.ssn_last_4,
+                address: {
+                    line1: details.address.line1,
+                    city: details.address.city,
+                    state: details.address.state,
+                    postal_code: details.address.postal_code,
+                    country: 'US',
                 },
             },
         });
 
-        return { client_secret: accountSession.client_secret };
+        return this.getAccountStatus(clerkUserId);
     }
 
-    async createDashboardLink(clerkUserId: string): Promise<StripeDashboardLinkResponse> {
+    async addExternalAccount(
+        clerkUserId: string,
+        bankDetails: AddBankAccountRequest
+    ): Promise<StripeConnectAccountStatus> {
         const status = await this.getAccountStatus(clerkUserId);
-        if (!status.onboarded) {
-            throw new Error('Account must be fully onboarded to access dashboard');
+
+        if (status.account_type === 'express') {
+            throw new Error('Cannot add bank accounts on Express accounts. Use the onboarding link instead.');
         }
 
-        const loginLink = await this.stripe.accounts.createLoginLink(status.account_id);
-        return { url: loginLink.url };
+        await this.stripe.accounts.createExternalAccount(status.account_id, {
+            external_account: bankDetails.token,
+        });
+
+        return this.getAccountStatus(clerkUserId);
+    }
+
+    async acceptTermsOfService(
+        clerkUserId: string,
+        ip: string
+    ): Promise<AcceptTosResponse> {
+        const status = await this.getAccountStatus(clerkUserId);
+
+        if (status.account_type === 'express') {
+            throw new Error('Cannot accept TOS on Express accounts. Use the onboarding link instead.');
+        }
+
+        await this.stripe.accounts.update(status.account_id, {
+            tos_acceptance: {
+                date: Math.floor(Date.now() / 1000),
+                ip,
+            },
+        });
+
+        const updatedStatus = await this.getAccountStatus(clerkUserId);
+
+        // Check if identity verification is still needed
+        const requirements = updatedStatus.requirements || {};
+        const currentlyDue: string[] = requirements.currently_due || [];
+        const eventuallyDue: string[] = requirements.eventually_due || [];
+        const needsVerification =
+            currentlyDue.some((r: string) => r.includes('verification.document')) ||
+            eventuallyDue.some((r: string) => r.includes('verification.document'));
+
+        return {
+            ...updatedStatus,
+            needs_identity_verification: needsVerification,
+        };
+    }
+
+    async createVerificationSession(
+        clerkUserId: string
+    ): Promise<VerificationSessionResponse> {
+        const status = await this.getAccountStatus(clerkUserId);
+
+        if (status.account_type === 'express') {
+            throw new Error('Identity verification for Express accounts is handled by Stripe.');
+        }
+
+        // For individual accounts, retrieve the person (representative) to link verification
+        const persons = await this.stripe.accounts.listPersons(status.account_id, { limit: 1 });
+        const person = persons.data[0];
+        if (!person) {
+            throw new Error('No person found on account. Submit personal details first.');
+        }
+
+        const session = await this.stripe.identity.verificationSessions.create({
+            type: 'document',
+            metadata: {
+                recruiter_id: status.recruiter_id,
+            },
+            options: {
+                document: {
+                    require_matching_selfie: true,
+                },
+            },
+            related_person: {
+                account: status.account_id,
+                person: person.id,
+            },
+        } as any);
+
+        return {
+            client_secret: session.client_secret!,
+            session_id: session.id,
+            status: session.status,
+        };
+    }
+
+    async listPayouts(
+        clerkUserId: string,
+        limit: number = 10
+    ): Promise<{ payouts: StripePayout[]; has_more: boolean }> {
+        const status = await this.getAccountStatus(clerkUserId);
+
+        const result = await this.stripe.payouts.list(
+            { limit },
+            { stripeAccount: status.account_id }
+        );
+
+        return {
+            payouts: result.data.map(p => ({
+                id: p.id,
+                amount: p.amount,
+                currency: p.currency,
+                status: p.status,
+                arrival_date: new Date(p.arrival_date * 1000).toISOString(),
+                created: new Date(p.created * 1000).toISOString(),
+            })),
+            has_more: result.has_more,
+        };
     }
 
     async createOnboardingLink(

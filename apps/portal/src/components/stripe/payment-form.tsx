@@ -13,7 +13,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { ButtonLoading } from "@splits-network/shared-ui";
+
 
 interface DiscountInfo {
     id: string;
@@ -36,6 +36,7 @@ export interface PaymentFormProps {
     planId?: string;
     billingPeriod?: "monthly" | "annual";
     onDiscountApplied?: (discount: DiscountInfo) => void;
+    returnUrl?: string;
 }
 
 export function PaymentForm({
@@ -47,6 +48,7 @@ export function PaymentForm({
     planId,
     billingPeriod = "monthly",
     onDiscountApplied,
+    returnUrl,
 }: PaymentFormProps) {
     const stripe = useStripe();
     const elements = useElements();
@@ -145,7 +147,7 @@ export function PaymentForm({
                 await stripe.confirmSetup({
                     elements,
                     confirmParams: {
-                        return_url: `${window.location.origin}/onboarding/callback`,
+                        return_url: returnUrl || window.location.href,
                     },
                     redirect: "if_required",
                 });
@@ -177,7 +179,7 @@ export function PaymentForm({
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             {/* Payment Element */}
-            <div className="p-4 bg-base-100 rounded-lg border border-base-300">
+            <div className="p-4 bg-base-100 border border-base-300 border-l-4 border-l-primary">
                 <PaymentElement
                     onReady={() => setReady(true)}
                     options={{
@@ -225,7 +227,7 @@ export function PaymentForm({
                             )}
                         </fieldset>
                     ) : (
-                        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+                        <div className="bg-success/10 border border-success/20 p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <i className="fa-duotone fa-regular fa-badge-percent text-success text-lg"></i>
@@ -293,12 +295,17 @@ export function PaymentForm({
                     className={`btn btn-primary ${onCancel ? "" : "btn-block"}`}
                     disabled={!stripe || !elements || !ready || isSubmitting}
                 >
-                    <ButtonLoading
-                        loading={isSubmitting}
-                        text={submitButtonText}
-                        loadingText="Processing..."
-                        icon="fa-duotone fa-regular fa-credit-card"
-                    />
+                    {isSubmitting ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />
+                            Processing...
+                        </>
+                    ) : (
+                        <>
+                            <i className="fa-duotone fa-regular fa-credit-card" />
+                            {submitButtonText}
+                        </>
+                    )}
                 </button>
             </div>
         </form>

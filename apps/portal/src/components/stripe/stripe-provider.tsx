@@ -44,7 +44,7 @@ export function StripeProvider({
             colorText: "oklch(var(--bc))",
             colorDanger: "oklch(var(--er))",
             fontFamily: "inherit",
-            borderRadius: "0.5rem",
+            borderRadius: "0px",
             spacingUnit: "4px",
         },
         rules: {

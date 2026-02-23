@@ -8,10 +8,14 @@ import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "../modals/role-wizard-modal";
-import SubmitCandidateModal from "../modals/submit-candidate-modal";
+import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
-import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import {
+    Button,
+    SpeedDial,
+    type SpeedDialAction,
+} from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -340,14 +344,19 @@ export default function RoleActionsToolbar({
                     />
                 )}
                 {showSubmitModal && (
-                    <SubmitCandidateModal
-                        roleId={job.id}
-                        roleTitle={job.title || "Untitled Role"}
-                        companyName={
-                            job.company?.name || job.company_id || undefined
-                        }
+                    <BaselSubmitCandidateWizard
+                        isOpen={showSubmitModal}
                         onClose={() => setShowSubmitModal(false)}
                         onSuccess={refresh}
+                        preSelectedJob={{
+                            id: job.id,
+                            title: job.title,
+                            company_id: job.company_id,
+                            company_name: job.company?.name,
+                            location: job.location,
+                            fee_percentage: job.fee_percentage,
+                            status: job.status,
+                        }}
                     />
                 )}
             </ModalPortal>

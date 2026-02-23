@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { BaselFormField, BaselStepIndicator } from "@splits-network/basel-ui";
-import { ButtonLoading } from "@splits-network/shared-ui";
+import {
+    BaselFormField,
+    BaselAlertBox,
+    BaselWizardModal,
+} from "@splits-network/basel-ui";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { BaselPaymentForm } from "./payment-form";
 
 interface BillingProfile {
@@ -24,6 +28,14 @@ interface BaselBillingSetupWizardProps {
     onClose: () => void;
 }
 
+type Step = 0 | 1 | 2;
+
+const WIZARD_STEPS = [
+    { label: "Details" },
+    { label: "Payment" },
+    { label: "Done" },
+];
+
 export function BaselBillingSetupWizard({
     open,
     companyId,
@@ -31,75 +43,8 @@ export function BaselBillingSetupWizard({
     onComplete,
     onClose,
 }: BaselBillingSetupWizardProps) {
-    return (
-        <div className="drawer drawer-end">
-            <input
-                id="billing-setup-drawer"
-                type="checkbox"
-                className="drawer-toggle"
-                checked={open}
-                readOnly
-            />
-
-            <div className="drawer-side z-50">
-                <label
-                    className="drawer-overlay"
-                    onClick={onClose}
-                    aria-label="Close drawer"
-                />
-
-                <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-2/5 flex flex-col">
-                    {/* Header */}
-                    <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-black text-lg tracking-tight flex items-center gap-2">
-                                <i className="fa-duotone fa-regular fa-credit-card" />
-                                Set Up Company Billing
-                            </h2>
-                            <button
-                                className="btn btn-sm btn-ghost"
-                                onClick={onClose}
-                            >
-                                <i className="fa-duotone fa-regular fa-xmark" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto p-4">
-                        {open && (
-                            <WizardContent
-                                companyId={companyId}
-                                existingProfile={existingProfile}
-                                onComplete={onComplete}
-                            />
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-type Step = 1 | 2 | 3;
-
-const STEP_DEFS = [
-    { num: "01", label: "Details" },
-    { num: "02", label: "Payment" },
-    { num: "03", label: "Done" },
-];
-
-function WizardContent({
-    companyId,
-    existingProfile,
-    onComplete,
-}: {
-    companyId: string;
-    existingProfile?: BillingProfile | null;
-    onComplete: () => void;
-}) {
     const { getToken } = useAuth();
-    const [step, setStep] = useState<Step>(1);
+    const [step, setStep] = useState<Step>(0);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -168,7 +113,7 @@ function WizardContent({
                 invoice_delivery_method: "email",
             });
 
-            setStep(2);
+            setStep(1);
         } catch (err: any) {
             console.error("Failed to save billing details:", err);
             setError(err.message || "Failed to save billing details");
@@ -179,41 +124,93 @@ function WizardContent({
 
     const handlePaymentSuccess = () => {
         setPaymentMethodSaved(true);
-        setStep(3);
+        setStep(2);
     };
 
     const handleSkipPayment = () => {
         setSkippedPayment(true);
-        setStep(3);
+        setStep(2);
     };
 
-    return (
-        <div className="space-y-4">
-            {/* Step indicator */}
-            <BaselStepIndicator
-                steps={STEP_DEFS}
-                currentStep={step - 1}
-                onStepClick={(i) => {
-                    if (i < step - 1) setStep((i + 1) as Step);
-                }}
-            />
+    const handleNext = () => {
+        if (step === 0) {
+            handleSaveBillingDetails();
+        }
+    };
 
+    const handleBack = () => {
+        if (step > 0) {
+            setStep((step - 1) as Step);
+        }
+    };
+
+    /* ─── Step-specific footer for Step 2 (Payment has its own submit) ───── */
+    const paymentFooter = step === 1 ? (
+        <div className="flex justify-between w-full">
+            <button
+                className="btn btn-ghost"
+                onClick={handleBack}
+            >
+                <i className="fa-duotone fa-regular fa-arrow-left" />
+                Back
+            </button>
+            {!isImmediateBilling && (
+                <button
+                    className="btn btn-ghost"
+                    onClick={handleSkipPayment}
+                >
+                    Skip for now
+                </button>
+            )}
+        </div>
+    ) : undefined;
+
+    /* ─── Step-specific footer for Step 3 (Done) ─────────────────────────── */
+    const doneFooter = step === 2 ? (
+        <div className="flex justify-end w-full">
+            <button
+                className="btn btn-primary"
+                onClick={onComplete}
+            >
+                Done
+                <i className="fa-duotone fa-regular fa-check ml-1" />
+            </button>
+        </div>
+    ) : undefined;
+
+    return (
+        <ModalPortal>
+        <BaselWizardModal
+            isOpen={open}
+            onClose={onClose}
+            title="Set Up Company Billing"
+            icon="fa-duotone fa-regular fa-credit-card"
+            steps={WIZARD_STEPS}
+            currentStep={step}
+            onNext={handleNext}
+            onBack={handleBack}
+            onSubmit={onComplete}
+            submitting={saving}
+            nextDisabled={!billingEmail.trim()}
+            nextLabel="Continue"
+            submitLabel="Done"
+            footer={paymentFooter || doneFooter}
+            maxWidth="max-w-2xl"
+        >
             {error && (
-                <div className="bg-error/5 border border-error/20 p-4">
-                    <p className="text-sm font-semibold text-error">
-                        {error}
-                    </p>
+                <BaselAlertBox variant="error" className="mb-4">
+                    {error}
                     <button
-                        className="text-xs text-error underline mt-1"
+                        className="text-xs underline ml-2"
                         onClick={() => setError(null)}
                     >
                         Dismiss
                     </button>
-                </div>
+                </BaselAlertBox>
             )}
 
             {/* Step 1: Billing Details */}
-            {step === 1 && (
+            {step === 0 && (
                 <div className="space-y-4">
                     <p className="text-sm text-base-content/50">
                         Enter your company&apos;s billing information.
@@ -321,26 +318,11 @@ function WizardContent({
                             placeholder="12-3456789"
                         />
                     </BaselFormField>
-
-                    <div className="flex justify-end mt-6">
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleSaveBillingDetails}
-                            disabled={saving || !billingEmail.trim()}
-                        >
-                            <ButtonLoading
-                                loading={saving}
-                                text="Continue"
-                                loadingText="Saving..."
-                                icon="fa-duotone fa-regular fa-arrow-right"
-                            />
-                        </button>
-                    </div>
                 </div>
             )}
 
             {/* Step 2: Payment Method */}
-            {step === 2 && (
+            {step === 1 && (
                 <div className="space-y-4">
                     <p className="text-sm text-base-content/50">
                         {isImmediateBilling
@@ -351,7 +333,7 @@ function WizardContent({
                     <BaselPaymentForm
                         companyId={companyId}
                         onSuccess={handlePaymentSuccess}
-                        onCancel={() => setStep(1)}
+                        onCancel={() => setStep(0)}
                         allowSkip={!isImmediateBilling}
                         onSkip={handleSkipPayment}
                         submitButtonText="Save Payment Method"
@@ -360,7 +342,7 @@ function WizardContent({
             )}
 
             {/* Step 3: Confirmation */}
-            {step === 3 && (
+            {step === 2 && (
                 <div className="space-y-4">
                     <div className="text-center py-4">
                         <div className="text-5xl text-success mb-4">
@@ -443,18 +425,9 @@ function WizardContent({
                             </li>
                         </ul>
                     </div>
-
-                    <div className="flex justify-end mt-6">
-                        <button
-                            className="btn btn-primary"
-                            onClick={onComplete}
-                        >
-                            Done
-                            <i className="fa-duotone fa-regular fa-check ml-1" />
-                        </button>
-                    </div>
                 </div>
             )}
-        </div>
+        </BaselWizardModal>
+        </ModalPortal>
     );
 }
