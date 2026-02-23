@@ -125,7 +125,7 @@ export function ChatSidebarShell({
     );
 
     const sidebarContent = (
-        <div className="flex flex-col bg-base-100 border-l-4 border-primary">
+        <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary">
             <ChatSidebarHeader messagesPagePath={messagesPagePath} />
             {!isMinimized && (
                 <>
@@ -164,7 +164,7 @@ export function ChatSidebarShell({
         <div
             ref={sidebarRef}
             className={`fixed bottom-0 right-0 z-[998] shadow-md hidden md:block overflow-y-auto
-                max-h-[80vh] ${isMinimized ? "h-12" : "h-[80vh]"} transition-[width,opacity] duration-300 ease-in-out
+                max-h-[80vh] ${isMinimized ? "h-12" : "h-12"} transition-[width,opacity] duration-300 ease-in-out
                 `}
             style={{
                 width: isOpen ? SIDEBAR_WIDTH : 0,

@@ -133,7 +133,6 @@ export function GridCard({
                     onRefresh={onRefresh}
                     showActions={{
                         viewDetails: false,
-                        message: false,
                     }}
                 />
             </div>
