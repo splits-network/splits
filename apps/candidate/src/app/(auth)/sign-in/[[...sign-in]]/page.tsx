@@ -259,7 +259,7 @@ export default function SignInPage() {
                         Continue with Google
                     </span>
                 </button>
-                <button
+                {/* <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signInWithOAuth("oauth_microsoft")}
@@ -268,7 +268,7 @@ export default function SignInPage() {
                     <span className="text-sm font-semibold">
                         Continue with Microsoft
                     </span>
-                </button>
+                </button> */}
             </div>
 
             {/* Divider */}

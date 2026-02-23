@@ -316,7 +316,7 @@ export default function SignUpPage() {
                         Continue with Google
                     </span>
                 </button>
-                <button
+                {/* <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signUpWithOAuth("oauth_microsoft")}
@@ -325,7 +325,7 @@ export default function SignUpPage() {
                     <span className="text-sm font-semibold">
                         Continue with Microsoft
                     </span>
-                </button>
+                </button> */}
             </div>
 
             {/* Divider */}
@@ -440,11 +440,17 @@ export default function SignUpPage() {
             {/* Terms */}
             <p className="text-center text-xs text-base-content/40 mt-4">
                 By signing up, you agree to our{" "}
-                <Link href="/terms-of-service" className="text-primary hover:underline">
+                <Link
+                    href="/terms-of-service"
+                    className="text-primary hover:underline"
+                >
                     Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy-policy" className="text-primary hover:underline">
+                <Link
+                    href="/privacy-policy"
+                    className="text-primary hover:underline"
+                >
                     Privacy Policy
                 </Link>
             </p>
