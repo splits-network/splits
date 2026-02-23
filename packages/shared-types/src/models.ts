@@ -225,6 +225,7 @@ export interface JobPreScreenQuestion {
     question_type: PreScreenQuestionType;
     options?: string[]; // For select/multi_select types - stored as JSON
     is_required: boolean;
+    disclaimer?: string;
     sort_order: number;
     created_at: Date;
     updated_at: Date;

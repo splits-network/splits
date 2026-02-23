@@ -101,7 +101,7 @@ export class JobPreScreenQuestionRepository {
         const { data, error } = await this.supabase
             .rpc('bulk_replace_job_pre_screen_questions', {
                 p_job_id: jobId,
-                p_questions: JSON.stringify(questions)
+                p_questions: questions
             });
 
         if (error) {

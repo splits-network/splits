@@ -93,7 +93,7 @@ export class JobRequirementRepository {
         const { data, error } = await this.supabase
             .rpc('bulk_replace_job_requirements', {
                 p_job_id: jobId,
-                p_requirements: JSON.stringify(requirements)
+                p_requirements: requirements
             });
 
         if (error) {

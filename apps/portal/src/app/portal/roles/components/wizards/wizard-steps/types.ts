@@ -9,6 +9,7 @@ export interface PreScreenQuestion {
     question_type: 'text' | 'yes_no' | 'select' | 'multi_select';
     is_required: boolean;
     options?: string[];
+    disclaimer?: string;
 }
 
 export interface FormData {

@@ -168,18 +168,54 @@ function PreScreenQuestionCard({
                         <option value="multi_select">Multi-Select</option>
                     </select>
                 </fieldset>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-sm"
-                        checked={question.is_required}
-                        onChange={(e) =>
-                            onUpdate(index, "is_required", e.target.checked)
-                        }
-                    />
-                    <span className="text-sm font-semibold">Required</span>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            className="checkbox checkbox-primary checkbox-sm"
+                            checked={question.is_required}
+                            onChange={(e) =>
+                                onUpdate(index, "is_required", e.target.checked)
+                            }
+                        />
+                        <span className="text-sm font-semibold">Required</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            className="checkbox checkbox-warning checkbox-sm"
+                            checked={!!question.disclaimer}
+                            onChange={(e) =>
+                                onUpdate(
+                                    index,
+                                    "disclaimer",
+                                    e.target.checked ? " " : "",
+                                )
+                            }
+                        />
+                        <span className="text-sm font-semibold">Disclaimer</span>
+                    </div>
                 </div>
             </div>
+
+            {!!question.disclaimer && (
+                <div className="space-y-1 pl-4 border-l-4 border-warning">
+                    <span className="text-xs font-bold uppercase tracking-wider text-base-content/70">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation mr-1" />
+                        Disclaimer Text
+                    </span>
+                    <textarea
+                        className="textarea textarea-bordered w-full"
+                        style={{ borderRadius: 0 }}
+                        rows={3}
+                        value={question.disclaimer.trim() ? question.disclaimer : ""}
+                        onChange={(e) =>
+                            onUpdate(index, "disclaimer", e.target.value || " ")
+                        }
+                        placeholder="e.g., This information is collected for EEO reporting purposes only and will not affect your candidacy..."
+                    />
+                </div>
+            )}
 
             {requiresOptions && (
                 <div className="space-y-2 pl-4 border-l-4 border-primary">
@@ -342,6 +378,7 @@ export default function RoleWizardModal({
                             question_type: q.question_type,
                             is_required: q.is_required,
                             options: q.options,
+                            disclaimer: q.disclaimer || "",
                         })) || [],
                 });
             } catch (err: any) {
@@ -545,6 +582,7 @@ export default function RoleWizardModal({
                     question_type: "text",
                     is_required: true,
                     options: [],
+                    disclaimer: "",
                 },
             ],
         }));
@@ -704,6 +742,7 @@ export default function RoleWizardModal({
                                     question_type: q.question_type,
                                     is_required: q.is_required,
                                     options: q.options || null,
+                                    disclaimer: q.disclaimer?.trim() || null,
                                     sort_order: i,
                                 })),
                         },
@@ -735,6 +774,7 @@ export default function RoleWizardModal({
                                     question_type: q.question_type,
                                     is_required: q.is_required,
                                     options: q.options || null,
+                                    disclaimer: q.disclaimer?.trim() || null,
                                     sort_order: i,
                                 }),
                             ),

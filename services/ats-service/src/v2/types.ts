@@ -126,6 +126,7 @@ export interface JobPreScreenQuestionBulkItem {
     is_required: boolean;
     sort_order: number;
     options?: any; // JSONB field for multiple choice options
+    disclaimer?: string;
 }
 
 export interface BulkReplaceRequirementsRequest {
