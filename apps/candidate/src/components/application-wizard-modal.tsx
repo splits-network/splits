@@ -85,7 +85,7 @@ export default function ApplicationWizardModal({
         tl.fromTo(
             boxRef.current,
             { opacity: 0, y: 40, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" },
             "-=0.15",
         );
     }, []);
@@ -98,7 +98,7 @@ export default function ApplicationWizardModal({
         gsap.fromTo(
             stepContentRef.current,
             { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
         );
     }, [currentStep, loading]);
 

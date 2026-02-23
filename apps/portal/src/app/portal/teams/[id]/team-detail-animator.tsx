@@ -35,7 +35,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                 tl.fromTo(
                     badge,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4 },
+                    { opacity: 1, y: 0, duration: 0.4, clearProps: "transform" },
                 );
 
             const title = $1(".detail-title");
@@ -43,7 +43,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                 tl.fromTo(
                     title,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -52,7 +52,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                 tl.fromTo(
                     subtitle,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.3",
                 );
 
@@ -61,7 +61,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                 tl.fromTo(
                     stats,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -77,6 +77,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                         duration: 0.5,
                         ease: "power3.out",
                         delay: 0.6,
+                        clearProps: "transform",
                     },
                 );
 
@@ -91,6 +92,7 @@ export function TeamDetailAnimator({ children }: { children: ReactNode }) {
                         duration: 0.6,
                         ease: "power3.out",
                         delay: 0.8,
+                        clearProps: "transform",
                     },
                 );
         },

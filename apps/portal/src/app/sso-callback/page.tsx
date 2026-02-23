@@ -203,7 +203,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     logo,
                     { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5 },
+                    { opacity: 1, scale: 1, duration: 0.5, clearProps: "transform" },
                 );
 
             const heading = $1(".sso-heading");
@@ -211,7 +211,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     heading,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.3",
                 );
 
@@ -220,7 +220,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     statusCard,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -229,7 +229,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     steps,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -238,7 +238,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     stats,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -247,7 +247,7 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     testimonial,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4 },
+                    { opacity: 1, y: 0, duration: 0.4, clearProps: "transform" },
                     "-=0.1",
                 );
         },

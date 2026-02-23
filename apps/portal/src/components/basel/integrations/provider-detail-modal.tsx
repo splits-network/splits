@@ -76,7 +76,7 @@ export function ProviderDetailModal({
             gsap.fromTo(
                 panelRef.current,
                 { opacity: 0, x: 40 },
-                { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" },
+                { opacity: 1, x: 0, duration: 0.35, ease: "power3.out", clearProps: "transform" },
             );
         },
         { scope: overlayRef },

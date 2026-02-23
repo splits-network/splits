@@ -70,7 +70,7 @@ export default function ComposeEmailModal({
             gsap.fromTo(
                 panelRef.current,
                 { x: "100%", opacity: 0 },
-                { x: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.1 },
+                { x: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.1, clearProps: "transform" },
             );
         },
         { dependencies: [] },

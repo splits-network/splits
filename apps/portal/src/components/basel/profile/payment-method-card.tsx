@@ -32,7 +32,7 @@ interface PaymentMethodCardProps {
 interface SetupIntentResponse {
     client_secret: string;
     customer_id: string;
-    plan_id: string;
+    plan_id?: string;
 }
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
@@ -61,7 +61,7 @@ export function PaymentMethodCard({
             const client = createAuthenticatedClient(token);
             const response = await client.post<{ data: SetupIntentResponse }>(
                 "/subscriptions/setup-intent",
-                { plan_id: "update-payment-method" },
+                {},
             );
 
             setSetupIntent(response.data);

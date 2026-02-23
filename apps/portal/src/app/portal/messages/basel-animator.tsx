@@ -43,7 +43,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                 gsap.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.fast, ease: E.editorial },
+                    { opacity: 1, y: 0, duration: D.fast, ease: E.editorial, clearProps: "transform" },
                 );
             }
 
@@ -61,6 +61,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         stagger: 0.1,
                         ease: E.editorial,
                         delay: 0.15,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -77,6 +78,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         duration: D.normal,
                         ease: E.editorial,
                         delay: 0.4,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -93,6 +95,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         duration: D.normal,
                         ease: E.editorial,
                         delay: 0.6,
+                        clearProps: "transform",
                     },
                 );
             }

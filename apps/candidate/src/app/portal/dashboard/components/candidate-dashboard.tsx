@@ -87,6 +87,7 @@ export default function CandidateDashboard({
                         duration: 0.6,
                         stagger: 0.1,
                         ease: "power3.out",
+                        clearProps: "transform",
                     },
                 );
             }
@@ -97,7 +98,7 @@ export default function CandidateDashboard({
                 gsap.fromTo(
                     urgency,
                     { opacity: 0, y: -20 },
-                    { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+                    { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", clearProps: "transform" },
                 );
             }
 
@@ -114,6 +115,7 @@ export default function CandidateDashboard({
                         stagger: 0.12,
                         ease: "power3.out",
                         delay: 0.2,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -130,6 +132,7 @@ export default function CandidateDashboard({
                         duration: 0.8,
                         ease: "power3.out",
                         delay: 0.3,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -145,6 +148,7 @@ export default function CandidateDashboard({
                         duration: 0.8,
                         ease: "power3.out",
                         delay: 0.3,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -162,6 +166,7 @@ export default function CandidateDashboard({
                         stagger: 0.08,
                         ease: "power3.out",
                         delay: 0.5,
+                        clearProps: "transform",
                     },
                 );
             }

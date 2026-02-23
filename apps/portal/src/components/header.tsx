@@ -542,6 +542,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                         duration: 0.5,
                         ease: "power2.out",
                         delay: 0.2,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -559,6 +560,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                     stagger: 0.06,
                     ease: "power2.out",
                     delay: 0.3,
+                    clearProps: "transform",
                 },
             );
 
@@ -575,6 +577,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                     stagger: 0.08,
                     ease: "power2.out",
                     delay: 0.4,
+                    clearProps: "transform",
                 },
             );
         },

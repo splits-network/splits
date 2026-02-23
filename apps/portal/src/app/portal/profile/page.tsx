@@ -214,7 +214,7 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                 );
             }
 
@@ -229,6 +229,7 @@ export default function ProfileBaselPage() {
                         rotateX: 0,
                         duration: 0.8,
                         stagger: 0.1,
+                        clearProps: "transform",
                     },
                     "-=0.3",
                 );
@@ -239,7 +240,7 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     desc,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.4",
                 );
             }
@@ -249,7 +250,7 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     content,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.2",
                 );
             }
@@ -269,7 +270,7 @@ export default function ProfileBaselPage() {
             gsap.fromTo(
                 contentRef.current,
                 { opacity: 0, x: 20 },
-                { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
+                { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
             );
         },
         { dependencies: [active], scope: mainRef },

@@ -91,14 +91,14 @@ function SearchPageInner() {
 
             const kicker = $1(".search-kicker");
             if (kicker)
-                tl.fromTo(kicker, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: D.fast });
+                tl.fromTo(kicker, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: D.fast, clearProps: "transform" });
 
             const words = $(".search-title-word");
             if (words.length)
                 tl.fromTo(
                     words,
                     { opacity: 0, y: 60, rotateX: 30 },
-                    { opacity: 1, y: 0, rotateX: 0, duration: D.slow, stagger: 0.1 },
+                    { opacity: 1, y: 0, rotateX: 0, duration: D.slow, stagger: 0.1, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -107,7 +107,7 @@ function SearchPageInner() {
                 tl.fromTo(
                     searchBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.fast },
+                    { opacity: 1, y: 0, duration: D.fast, clearProps: "transform" },
                     "-=0.3",
                 );
 
@@ -116,7 +116,7 @@ function SearchPageInner() {
                 tl.fromTo(
                     content,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: D.normal },
+                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
                     "-=0.2",
                 );
         },

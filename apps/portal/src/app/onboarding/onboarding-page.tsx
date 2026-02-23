@@ -87,7 +87,7 @@ export function OnboardingPage() {
                 tl.fromTo(
                     logo,
                     { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5 },
+                    { opacity: 1, scale: 1, duration: 0.5, clearProps: "transform" },
                 );
 
             const heading = $1(".ob-heading");
@@ -95,7 +95,7 @@ export function OnboardingPage() {
                 tl.fromTo(
                     heading,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.3",
                 );
 
@@ -104,7 +104,7 @@ export function OnboardingPage() {
                 tl.fromTo(
                     stepItems,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
                     "-=0.2",
                 );
 
@@ -113,7 +113,7 @@ export function OnboardingPage() {
                 tl.fromTo(
                     panel,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.3",
                 );
 
@@ -122,7 +122,7 @@ export function OnboardingPage() {
                 tl.fromTo(
                     testimonial,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4 },
+                    { opacity: 1, y: 0, duration: 0.4, clearProps: "transform" },
                     "-=0.1",
                 );
         },

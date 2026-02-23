@@ -44,7 +44,7 @@ export function DashboardAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                 );
             }
 
@@ -59,6 +59,7 @@ export function DashboardAnimator({ children }: { children: ReactNode }) {
                         rotateX: 0,
                         duration: 1,
                         stagger: 0.12,
+                        clearProps: "transform",
                     },
                     "-=0.3",
                 );
@@ -69,7 +70,7 @@ export function DashboardAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
+                    { opacity: 1, y: 0, duration: 0.7, clearProps: "transform" },
                     "-=0.5",
                 );
             }
@@ -79,7 +80,7 @@ export function DashboardAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     heroActions,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.3",
                 );
             }

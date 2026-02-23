@@ -61,14 +61,14 @@ export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created
  * Setup Intent Types - For collecting payment method before subscription
  */
 export interface SetupIntentRequest {
-    plan_id: string;
+    plan_id?: string;
     promotion_code?: string; // Optional Stripe promotion code
 }
 
 export interface SetupIntentResponse {
     client_secret: string;
     customer_id: string;
-    plan_id: string;
+    plan_id?: string;
 }
 
 /**

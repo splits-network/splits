@@ -21,9 +21,12 @@ export function PortalChatSidebar({
     const toast = useToast();
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-    // Only resolve user ID when signed in
+    // Resolve user ID when signed in, clear on sign-out
     useEffect(() => {
-        if (!isSignedIn) return;
+        if (!isSignedIn) {
+            setCurrentUserId(null);
+            return;
+        }
         let mounted = true;
         getCachedCurrentUserId(getToken).then((id) => {
             if (mounted) setCurrentUserId(id);

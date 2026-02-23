@@ -30,7 +30,7 @@ interface PaymentMethodResponse {
 interface SetupIntentResponse {
     client_secret: string;
     customer_id: string;
-    plan_id: string;
+    plan_id?: string;
 }
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
@@ -94,9 +94,7 @@ export function PaymentSection() {
             const client = createAuthenticatedClient(token);
             const response = await client.post<{
                 data: SetupIntentResponse;
-            }>("/subscriptions/setup-intent", {
-                plan_id: "update-payment-method",
-            });
+            }>("/subscriptions/setup-intent", {});
 
             setSetupIntent(response.data);
             setShowUpdateModal(true);

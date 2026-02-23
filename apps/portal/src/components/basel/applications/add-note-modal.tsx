@@ -110,14 +110,14 @@ export default function BaselAddNoteModal({
         tl.fromTo(
             box,
             { opacity: 0, y: 40, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" },
             "-=0.15",
         );
         if (body) {
             tl.fromTo(
                 body,
                 { opacity: 0, y: 10 },
-                { opacity: 1, y: 0, duration: 0.3 },
+                { opacity: 1, y: 0, duration: 0.3, clearProps: "transform" },
                 "-=0.2",
             );
         }
