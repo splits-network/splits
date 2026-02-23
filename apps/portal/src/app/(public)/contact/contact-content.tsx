@@ -102,7 +102,9 @@ export function ContactContent() {
     };
 
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >,
     ) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -113,7 +115,7 @@ export function ContactContent() {
                 HERO — Clean editorial header
                ══════════════════════════════════════════════════════════ */}
             <section className="bc-hero relative py-28 bg-neutral text-neutral-content overflow-hidden">
-                <div className="container mx-auto px-6 lg:px-12 relative z-10">
+                <div className="container mx-auto px-6 lg:px-12 relative ">
                     <div className="max-w-3xl">
                         <p className="bc-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
                             <i className="fa-duotone fa-regular fa-headset mr-2" />
@@ -126,9 +128,9 @@ export function ContactContent() {
                         </h1>
 
                         <p className="bc-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 max-w-xl opacity-0">
-                            Account questions, billing issues, technical problems,
-                            or ideas for the platform. Reach the team that builds
-                            and runs Splits Network directly.
+                            Account questions, billing issues, technical
+                            problems, or ideas for the platform. Reach the team
+                            that builds and runs Splits Network directly.
                         </p>
 
                         <div className="bc-hero-stat inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 opacity-0">
@@ -173,37 +175,51 @@ export function ContactContent() {
                                             </p>
                                         </div>
                                     ) : (
-                                        <form onSubmit={handleSubmit} className="space-y-6">
+                                        <form
+                                            onSubmit={handleSubmit}
+                                            className="space-y-6"
+                                        >
                                             {/* Topic selector */}
                                             <fieldset>
                                                 <legend className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/50 mb-2">
                                                     How Can We Help? *
                                                 </legend>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                                    {CONTACT_TOPICS.map((topic) => (
-                                                        <button
-                                                            key={topic.value}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setFormData((prev) => ({
-                                                                    ...prev,
-                                                                    topic: topic.value,
-                                                                }))
-                                                            }
-                                                            className={`p-3 text-left transition-colors ${
-                                                                formData.topic === topic.value
-                                                                    ? "bg-primary text-primary-content"
-                                                                    : "bg-base-100 text-base-content/50 hover:bg-base-300"
-                                                            }`}
-                                                        >
-                                                            <i
-                                                                className={`fa-duotone fa-regular ${topic.icon} text-sm mr-2`}
-                                                            />
-                                                            <span className="text-xs font-bold uppercase tracking-wide">
-                                                                {topic.label}
-                                                            </span>
-                                                        </button>
-                                                    ))}
+                                                    {CONTACT_TOPICS.map(
+                                                        (topic) => (
+                                                            <button
+                                                                key={
+                                                                    topic.value
+                                                                }
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setFormData(
+                                                                        (
+                                                                            prev,
+                                                                        ) => ({
+                                                                            ...prev,
+                                                                            topic: topic.value,
+                                                                        }),
+                                                                    )
+                                                                }
+                                                                className={`p-3 text-left transition-colors ${
+                                                                    formData.topic ===
+                                                                    topic.value
+                                                                        ? "bg-primary text-primary-content"
+                                                                        : "bg-base-100 text-base-content/50 hover:bg-base-300"
+                                                                }`}
+                                                            >
+                                                                <i
+                                                                    className={`fa-duotone fa-regular ${topic.icon} text-sm mr-2`}
+                                                                />
+                                                                <span className="text-xs font-bold uppercase tracking-wide">
+                                                                    {
+                                                                        topic.label
+                                                                    }
+                                                                </span>
+                                                            </button>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </fieldset>
 
@@ -290,7 +306,9 @@ export function ContactContent() {
                                             {/* Submit */}
                                             <button
                                                 type="submit"
-                                                disabled={formStatus === "submitting"}
+                                                disabled={
+                                                    formStatus === "submitting"
+                                                }
                                                 className="btn btn-primary btn-lg w-full"
                                             >
                                                 {formStatus === "submitting" ? (
@@ -323,7 +341,11 @@ export function ContactContent() {
                             {/* CONTACT INFO CARDS */}
                             <div className="space-y-6">
                                 {CONTACT_METHODS.map((method, idx) => {
-                                    const colors = ["primary", "secondary", "accent"] as const;
+                                    const colors = [
+                                        "primary",
+                                        "secondary",
+                                        "accent",
+                                    ] as const;
                                     const color = colors[idx % 3];
 
                                     return (
@@ -344,7 +366,8 @@ export function ContactContent() {
                                                         <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
                                                             {item.label}
                                                         </p>
-                                                        {"href" in item && item.href ? (
+                                                        {"href" in item &&
+                                                        item.href ? (
                                                             <a
                                                                 href={item.href}
                                                                 className={`text-base font-bold text-${color} hover:opacity-80 transition-opacity`}
@@ -399,8 +422,9 @@ export function ContactContent() {
                             <span className="text-primary">else?</span>
                         </h2>
                         <p className="text-lg text-base-content/60 mb-10">
-                            Head back to your dashboard or browse our documentation
-                            for guides on roles, candidates, splits, and billing.
+                            Head back to your dashboard or browse our
+                            documentation for guides on roles, candidates,
+                            splits, and billing.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a
@@ -410,10 +434,7 @@ export function ContactContent() {
                                 <i className="fa-duotone fa-regular fa-grid-2" />
                                 Go to Dashboard
                             </a>
-                            <a
-                                href="/docs"
-                                className="btn btn-outline btn-lg"
-                            >
+                            <a href="/docs" className="btn btn-outline btn-lg">
                                 <i className="fa-duotone fa-regular fa-book" />
                                 Documentation
                             </a>

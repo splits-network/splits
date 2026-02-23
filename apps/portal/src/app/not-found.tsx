@@ -17,19 +17,15 @@ export default function NotFound() {
     useGSAP(
         () => {
             if (!mainRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 mainRef.current
                     .querySelectorAll(".opacity-0")
                     .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
                 return;
             }
 
-            const $ = (s: string) =>
-                mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) =>
-                mainRef.current!.querySelector(s);
+            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
+            const $1 = (s: string) => mainRef.current!.querySelector(s);
 
             const tl = gsap.timeline({
                 defaults: { ease: "power3.out" },
@@ -106,8 +102,7 @@ export default function NotFound() {
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
-                        clipPath:
-                            "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                     aria-hidden="true"
                 />
@@ -118,7 +113,7 @@ export default function NotFound() {
                     aria-hidden="true"
                 />
 
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-2xl">
                         {/* Kicker */}
                         <p className="nf-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4 opacity-0">
@@ -132,20 +127,17 @@ export default function NotFound() {
                             </span>{" "}
                             <span className="nf-headline-word inline-block opacity-0">
                                 in your{" "}
-                                <span className="text-primary">
-                                    pipeline
-                                </span>
-                                .
+                                <span className="text-primary">pipeline</span>.
                             </span>
                         </h1>
 
                         {/* Body */}
                         <p className="nf-body text-lg leading-relaxed text-neutral-content/70 max-w-xl mb-8 opacity-0">
-                            The URL you followed doesn&apos;t match any page
-                            in Splits Network. This usually means the link is
-                            outdated, the resource was moved, or the address
-                            was entered incorrectly. Your dashboard and active
-                            roles are exactly where you left them.
+                            The URL you followed doesn&apos;t match any page in
+                            Splits Network. This usually means the link is
+                            outdated, the resource was moved, or the address was
+                            entered incorrectly. Your dashboard and active roles
+                            are exactly where you left them.
                         </p>
 
                         {/* CTAs */}

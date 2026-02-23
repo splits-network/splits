@@ -439,7 +439,7 @@ export default function LandingOne() {
                 </div>
 
                 {/* Content panel — 60% on desktop */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
                             Employment Networks

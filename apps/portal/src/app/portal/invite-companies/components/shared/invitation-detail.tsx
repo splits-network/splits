@@ -31,14 +31,16 @@ export function InvitationDetail({
     return (
         <div>
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <span
                                 className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                             >
-                                <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
+                                <i
+                                    className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`}
+                                />
                                 {formatStatus(invitation.status)}
                             </span>
                             {invitation.email_sent_at && (
@@ -55,7 +57,8 @@ export function InvitationDetail({
                             )}
                         </div>
                         <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
-                            {invitation.company_name_hint || "Company Invitation"}
+                            {invitation.company_name_hint ||
+                                "Company Invitation"}
                         </h2>
                         <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
                             {invitation.invited_email && (
@@ -108,7 +111,11 @@ export function InvitationDetail({
                             Days Left
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {daysLeft !== null ? (daysLeft > 0 ? `${daysLeft}d` : "Expired") : "\u2014"}
+                            {daysLeft !== null
+                                ? daysLeft > 0
+                                    ? `${daysLeft}d`
+                                    : "Expired"
+                                : "\u2014"}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">

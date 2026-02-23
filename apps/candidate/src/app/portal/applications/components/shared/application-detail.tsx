@@ -132,7 +132,7 @@ export function ApplicationDetail({
     return (
         <div>
             {/* ── Sticky Header ── */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         {/* Stage pill */}
@@ -369,11 +369,17 @@ export function ApplicationDetail({
                                                     `Question ${index + 1}`}
                                             </p>
                                             <p className="text-sm text-base-content/70">
-                                                {typeof answer.answer === "boolean"
-                                                    ? answer.answer ? "Yes" : "No"
-                                                    : Array.isArray(answer.answer)
-                                                        ? answer.answer.join(", ")
-                                                        : answer.answer || "No answer"}
+                                                {typeof answer.answer ===
+                                                "boolean"
+                                                    ? answer.answer
+                                                        ? "Yes"
+                                                        : "No"
+                                                    : Array.isArray(
+                                                            answer.answer,
+                                                        )
+                                                      ? answer.answer.join(", ")
+                                                      : answer.answer ||
+                                                        "No answer"}
                                             </p>
                                         </div>
                                     ),
@@ -556,26 +562,29 @@ export function DetailLoader({
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
-        try {
-            const token = await getToken();
-            if (!token || signal?.cancelled) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get<{ data: Application }>(
-                `/applications/${id}`,
-                {
-                    params: {
-                        include:
-                            "job,company,recruiter,ai_review,documents,audit_log,job_requirements",
+    const fetchDetail = useCallback(
+        async (id: string, signal?: { cancelled: boolean }) => {
+            try {
+                const token = await getToken();
+                if (!token || signal?.cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Application }>(
+                    `/applications/${id}`,
+                    {
+                        params: {
+                            include:
+                                "job,company,recruiter,ai_review,documents,audit_log,job_requirements",
+                        },
                     },
-                },
-            );
-            if (!signal?.cancelled) setApplication(res.data);
-        } catch (err) {
-            console.error("Failed to fetch application detail:", err);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+                );
+                if (!signal?.cancelled) setApplication(res.data);
+            } catch (err) {
+                console.error("Failed to fetch application detail:", err);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [],
+    );
 
     useEffect(() => {
         const signal = { cancelled: false };

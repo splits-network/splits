@@ -89,7 +89,7 @@ Basel pages use split-screen editorial compositions inspired by magazine design:
         className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
         style={{ clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)" }}
     />
-    <div className="relative z-10 container mx-auto px-6 lg:px-12">
+    <div className="relative  container mx-auto px-6 lg:px-12">
         {/* Content */}
     </div>
 </section>

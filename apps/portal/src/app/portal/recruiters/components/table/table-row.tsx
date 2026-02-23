@@ -67,9 +67,7 @@ export function TableRow({
                             {isNew(recruiter) && (
                                 <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
                             )}
-                            <span className="font-bold text-sm">
-                                {name}
-                            </span>
+                            <span className="font-bold text-sm">{name}</span>
                         </div>
                     </div>
                 </td>
@@ -90,8 +88,7 @@ export function TableRow({
                             ))}
                         {(recruiter.specialties || []).length > 2 && (
                             <span className="text-sm text-base-content/40">
-                                +
-                                {(recruiter.specialties || []).length - 2}
+                                +{(recruiter.specialties || []).length - 2}
                             </span>
                         )}
                     </div>
@@ -119,7 +116,7 @@ export function TableRow({
                     className="px-4 py-3 relative"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap z-10">
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <RecruiterActionsToolbar
                             recruiter={recruiter}
                             variant="icon-only"

@@ -101,7 +101,9 @@ export default function ContactBaselClient() {
     };
 
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >,
     ) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -112,7 +114,7 @@ export default function ContactBaselClient() {
                 HERO — Clean editorial header
                ══════════════════════════════════════════════════════════ */}
             <section className="bc-hero relative py-28 bg-neutral text-neutral-content overflow-hidden">
-                <div className="container mx-auto px-6 lg:px-12 relative z-10">
+                <div className="container mx-auto px-6 lg:px-12 relative ">
                     <div className="max-w-3xl">
                         <p className="bc-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
                             <i className="fa-duotone fa-regular fa-message mr-2" />
@@ -127,8 +129,8 @@ export default function ContactBaselClient() {
 
                         <p className="bc-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 max-w-xl opacity-0">
                             Want to see the platform in action? Exploring a
-                            partnership? Need enterprise pricing? We&apos;re here to
-                            help.
+                            partnership? Need enterprise pricing? We&apos;re
+                            here to help.
                         </p>
 
                         <div className="bc-hero-stat inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 opacity-0">
@@ -173,37 +175,51 @@ export default function ContactBaselClient() {
                                             </p>
                                         </div>
                                     ) : (
-                                        <form onSubmit={handleSubmit} className="space-y-6">
+                                        <form
+                                            onSubmit={handleSubmit}
+                                            className="space-y-6"
+                                        >
                                             {/* Topic selector */}
                                             <fieldset>
                                                 <legend className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/50 mb-2">
                                                     What Brings You Here? *
                                                 </legend>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                                    {CONTACT_TOPICS.map((topic) => (
-                                                        <button
-                                                            key={topic.value}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setFormData((prev) => ({
-                                                                    ...prev,
-                                                                    topic: topic.value,
-                                                                }))
-                                                            }
-                                                            className={`p-3 text-left transition-colors ${
-                                                                formData.topic === topic.value
-                                                                    ? "bg-primary text-primary-content"
-                                                                    : "bg-base-100 text-base-content/50 hover:bg-base-300"
-                                                            }`}
-                                                        >
-                                                            <i
-                                                                className={`fa-duotone fa-regular ${topic.icon} text-sm mr-2`}
-                                                            />
-                                                            <span className="text-xs font-bold uppercase tracking-wide">
-                                                                {topic.label}
-                                                            </span>
-                                                        </button>
-                                                    ))}
+                                                    {CONTACT_TOPICS.map(
+                                                        (topic) => (
+                                                            <button
+                                                                key={
+                                                                    topic.value
+                                                                }
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setFormData(
+                                                                        (
+                                                                            prev,
+                                                                        ) => ({
+                                                                            ...prev,
+                                                                            topic: topic.value,
+                                                                        }),
+                                                                    )
+                                                                }
+                                                                className={`p-3 text-left transition-colors ${
+                                                                    formData.topic ===
+                                                                    topic.value
+                                                                        ? "bg-primary text-primary-content"
+                                                                        : "bg-base-100 text-base-content/50 hover:bg-base-300"
+                                                                }`}
+                                                            >
+                                                                <i
+                                                                    className={`fa-duotone fa-regular ${topic.icon} text-sm mr-2`}
+                                                                />
+                                                                <span className="text-xs font-bold uppercase tracking-wide">
+                                                                    {
+                                                                        topic.label
+                                                                    }
+                                                                </span>
+                                                            </button>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </fieldset>
 
@@ -290,7 +306,9 @@ export default function ContactBaselClient() {
                                             {/* Submit */}
                                             <button
                                                 type="submit"
-                                                disabled={formStatus === "submitting"}
+                                                disabled={
+                                                    formStatus === "submitting"
+                                                }
                                                 className="btn btn-primary btn-lg w-full"
                                             >
                                                 {formStatus === "submitting" ? (
@@ -307,7 +325,8 @@ export default function ContactBaselClient() {
                                             </button>
 
                                             <p className="text-xs text-base-content/40 text-center">
-                                                For urgent sales inquiries, email{" "}
+                                                For urgent sales inquiries,
+                                                email{" "}
                                                 <a
                                                     href="mailto:sales@splits.network"
                                                     className="text-primary font-bold"
@@ -323,7 +342,11 @@ export default function ContactBaselClient() {
                             {/* CONTACT INFO CARDS */}
                             <div className="space-y-6">
                                 {CONTACT_METHODS.map((method, idx) => {
-                                    const colors = ["primary", "secondary", "accent"] as const;
+                                    const colors = [
+                                        "primary",
+                                        "secondary",
+                                        "accent",
+                                    ] as const;
                                     const color = colors[idx % 3];
 
                                     return (
@@ -344,7 +367,8 @@ export default function ContactBaselClient() {
                                                         <p className="text-xs font-bold uppercase tracking-wider text-base-content/40">
                                                             {item.label}
                                                         </p>
-                                                        {"href" in item && item.href ? (
+                                                        {"href" in item &&
+                                                        item.href ? (
                                                             <a
                                                                 href={item.href}
                                                                 className={`text-base font-bold text-${color} hover:opacity-80 transition-opacity`}
@@ -399,9 +423,9 @@ export default function ContactBaselClient() {
                             <span className="text-primary">get started?</span>
                         </h2>
                         <p className="text-lg text-base-content/60 mb-10">
-                            Explore our platform, check system status, or dive into
-                            our documentation to learn how we&apos;re changing
-                            recruiting.
+                            Explore our platform, check system status, or dive
+                            into our documentation to learn how we&apos;re
+                            changing recruiting.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a

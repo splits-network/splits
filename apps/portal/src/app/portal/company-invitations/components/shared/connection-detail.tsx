@@ -24,20 +24,27 @@ export function ConnectionDetail({
 }) {
     const { isCompanyUser } = useUserProfile();
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
-    const counterpartySubtext = getCounterpartySubtext(invitation, isCompanyUser);
-    const counterpartyLogo = isCompanyUser ? undefined : invitation.company?.logo_url;
+    const counterpartySubtext = getCounterpartySubtext(
+        invitation,
+        isCompanyUser,
+    );
+    const counterpartyLogo = isCompanyUser
+        ? undefined
+        : invitation.company?.logo_url;
 
     return (
         <div>
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span
                                 className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                             >
-                                <i className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"} mr-1`} />
+                                <i
+                                    className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"} mr-1`}
+                                />
                                 {getStatusLabel(invitation.status)}
                             </span>
                         </div>
@@ -126,21 +133,26 @@ export function ConnectionDetail({
                         )}
                         <div>
                             <p className="font-bold">{counterpartyName}</p>
-                            {isCompanyUser && invitation.recruiter?.user?.email && (
-                                <p className="text-sm text-base-content/50">
-                                    {invitation.recruiter.user.email}
-                                </p>
-                            )}
+                            {isCompanyUser &&
+                                invitation.recruiter?.user?.email && (
+                                    <p className="text-sm text-base-content/50">
+                                        {invitation.recruiter.user.email}
+                                    </p>
+                                )}
                             {!isCompanyUser && invitation.company?.industry && (
                                 <p className="text-sm text-base-content/50">
                                     {invitation.company.industry}
                                 </p>
                             )}
-                            {!isCompanyUser && invitation.company?.headquarters_location && (
-                                <p className="text-sm text-base-content/50">
-                                    {invitation.company.headquarters_location}
-                                </p>
-                            )}
+                            {!isCompanyUser &&
+                                invitation.company?.headquarters_location && (
+                                    <p className="text-sm text-base-content/50">
+                                        {
+                                            invitation.company
+                                                .headquarters_location
+                                        }
+                                    </p>
+                                )}
                         </div>
                     </div>
                 </div>
@@ -178,7 +190,9 @@ export function ConnectionDetail({
                         <i
                             className={`fa-duotone fa-regular ${invitation.can_manage_company_jobs ? "fa-check-circle text-success" : "fa-times-circle text-base-content/30"}`}
                         />
-                        <span className="text-base-content/75">Can manage company jobs</span>
+                        <span className="text-base-content/75">
+                            Can manage company jobs
+                        </span>
                     </div>
                     {invitation.can_manage_company_jobs && (
                         <div className="p-3 border-2 border-success/20 mt-3">
@@ -193,16 +207,17 @@ export function ConnectionDetail({
                 </div>
 
                 {/* Termination Reason */}
-                {invitation.status === "terminated" && invitation.termination_reason && (
-                    <div>
-                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                            Termination Reason
-                        </h3>
-                        <div className="p-3 border-2 border-error/20 text-sm text-base-content/70">
-                            {invitation.termination_reason}
+                {invitation.status === "terminated" &&
+                    invitation.termination_reason && (
+                        <div>
+                            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                                Termination Reason
+                            </h3>
+                            <div className="p-3 border-2 border-error/20 text-sm text-base-content/70">
+                                {invitation.termination_reason}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
         </div>
     );

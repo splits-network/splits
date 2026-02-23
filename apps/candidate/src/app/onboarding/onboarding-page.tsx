@@ -68,11 +68,9 @@ export function OnboardingPage() {
         () => {
             if (!mainRef.current) return;
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".ob-anim")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
+                mainRef.current.querySelectorAll(".ob-anim").forEach((el) => {
+                    (el as HTMLElement).style.opacity = "1";
+                });
                 return;
             }
 
@@ -246,7 +244,9 @@ export function OnboardingPage() {
                             <ReviewStep state={state} actions={actions} />
                         )}
                         {state.currentStep === 6 && (
-                            <SuccessStep redirectUrl={redirectUrl || undefined} />
+                            <SuccessStep
+                                redirectUrl={redirectUrl || undefined}
+                            />
                         )}
                     </div>
                 </div>
@@ -276,7 +276,7 @@ export function OnboardingPage() {
                 />
 
                 {/* Top: Logo + Heading */}
-                <div className="relative z-10">
+                <div className="relative ">
                     <div className="ob-logo ob-anim opacity-0 mb-16">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             A
@@ -296,13 +296,14 @@ export function OnboardingPage() {
                         <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
                             Multiple recruiters compete to place you in the
                             right role. You stay informed at every stage, and
-                            your profile works for you across the entire network.
+                            your profile works for you across the entire
+                            network.
                         </p>
                     </div>
                 </div>
 
                 {/* Middle: Step progress */}
-                <div className="relative z-10 space-y-3">
+                <div className="relative  space-y-3">
                     {CANDIDATE_STEPS.map((step, i) => {
                         const isActive = activeStepIndex === i;
                         const isCompleted = activeStepIndex > i;
@@ -345,13 +346,12 @@ export function OnboardingPage() {
                 </div>
 
                 {/* Bottom: Testimonial */}
-                <div className="ob-testimonial ob-anim opacity-0 relative z-10">
+                <div className="ob-testimonial ob-anim opacity-0 relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;I had three recruiters presenting me to
                             different companies within a week. I knew exactly
-                            where I stood with each one the entire
-                            time.&rdquo;
+                            where I stood with each one the entire time.&rdquo;
                         </p>
                         <p className="text-sm font-bold">David Chen</p>
                         <p className="text-sm text-neutral-content/40">

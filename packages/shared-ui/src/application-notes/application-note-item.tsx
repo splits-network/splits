@@ -117,7 +117,7 @@ export function ApplicationNoteItem({
                             </button>
                             <ul
                                 tabIndex={0}
-                                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-10"
+                                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 "
                             >
                                 {onReply && (
                                     <li>

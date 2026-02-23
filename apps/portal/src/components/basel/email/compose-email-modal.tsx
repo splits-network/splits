@@ -203,7 +203,7 @@ export default function ComposeEmailModal({
                                 Connect Gmail or Outlook to send emails from Splits.
                             </p>
                             <a
-                                href="/portal/integrations-basel"
+                                href="/portal/integrations"
                                 className="btn btn-primary btn-sm"
                                 style={{ borderRadius: 0 }}
                             >

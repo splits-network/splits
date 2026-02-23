@@ -181,7 +181,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {canScrollLeft && (
                     <button
                         onClick={() => scrollTabs("left")}
-                        className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
+                        className="absolute left-0 top-0 bottom-0  flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
                         aria-label="Scroll tabs left"
                     >
                         <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content/60" />
@@ -222,7 +222,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                 {canScrollRight && (
                     <button
                         onClick={() => scrollTabs("right")}
-                        className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
+                        className="absolute right-0 top-0 bottom-0  flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
                         aria-label="Scroll tabs right"
                     >
                         <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/60" />

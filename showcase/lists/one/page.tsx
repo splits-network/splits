@@ -74,7 +74,7 @@ function DetailPanel({
             }`}
         >
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <span
                         className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
@@ -539,7 +539,7 @@ export default function ListsOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 CONTROLS BAR — Search, Filters, View Toggle
                ═══════════════════════════════════════════════════════ */}
-            <section className="controls-bar sticky top-0 z-30 bg-base-100 border-b-2 border-base-300 opacity-0">
+            <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
                 <div className="container mx-auto px-6 lg:px-12 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                         {/* Search + Filters */}

@@ -469,7 +469,7 @@ export function JobDetail({
     return (
         <div>
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -616,20 +616,23 @@ export function DetailLoader({
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
-        try {
-            const token = await getToken();
-            if (!token || signal?.cancelled) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
-                params: { include: "company,requirements" },
-            });
-            if (!signal?.cancelled) setJob(res.data);
-        } catch (err) {
-            console.error("Failed to fetch job detail:", err);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const fetchDetail = useCallback(
+        async (id: string, signal?: { cancelled: boolean }) => {
+            try {
+                const token = await getToken();
+                if (!token || signal?.cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
+                    params: { include: "company,requirements" },
+                });
+                if (!signal?.cancelled) setJob(res.data);
+            } catch (err) {
+                console.error("Failed to fetch job detail:", err);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [],
+    );
 
     useEffect(() => {
         const signal = { cancelled: false };

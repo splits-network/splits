@@ -25,7 +25,7 @@ export function ChatSidebarHeader({
     // Minimized: compact bar with title, restore, and close
     if (isMinimized) {
         return (
-            <div className="sticky top-0 z-10 backdrop-blur-md bg-base-100/90 border-b border-base-300">
+            <div className="sticky top-0  backdrop-blur-md bg-base-100/90 border-b border-base-300">
                 <div className="h-0.5 bg-primary w-full" />
                 <div className="px-3 py-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
@@ -63,7 +63,7 @@ export function ChatSidebarHeader({
     }
 
     return (
-        <div className="sticky top-0 z-10 backdrop-blur-md bg-base-100/90 border-b border-base-300">
+        <div className="sticky top-0  backdrop-blur-md bg-base-100/90 border-b border-base-300">
             {/* Top accent line */}
             <div className="h-0.5 bg-primary w-full" />
 

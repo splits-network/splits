@@ -111,7 +111,7 @@ export function CTASection() {
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="container mx-auto px-4 relative ">
                 <div
                     ref={contentRef}
                     className="text-center mb-12 opacity-0 max-w-3xl mx-auto"
@@ -214,10 +214,7 @@ export function CTASection() {
                     </div>
                 </div>
 
-                <div
-                    ref={footerRef}
-                    className="text-center opacity-0"
-                >
+                <div ref={footerRef} className="text-center opacity-0">
                     <p className="text-sm opacity-70 mb-4">
                         Questions? Reach out to us directly.
                     </p>

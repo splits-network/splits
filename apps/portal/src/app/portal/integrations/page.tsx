@@ -1,339 +1,312 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getPlatformIcon } from "@/lib/utils/icon-styles";
-import { getPlatformBadge } from "@/lib/utils/badge-styles";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import { useToast } from "@/lib/toast-context";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { LoadingState } from "@splits-network/shared-ui";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
+import type {
+    IntegrationProvider,
+    IntegrationCategory,
+    OAuthConnectionPublic,
+} from "@splits-network/shared-types";
+import { MarketplaceHero } from "@/components/basel/integrations/marketplace-hero";
+import { CategoryFilter } from "@/components/basel/integrations/category-filter";
+import { MarketplaceProviderCard } from "@/components/basel/integrations/marketplace-provider-card";
+import { InstalledIntegrations } from "@/components/basel/integrations/installed-integrations";
+import { ProviderDetailModal } from "@/components/basel/integrations/provider-detail-modal";
+import ATSConfigPanel from "@/components/basel/ats/ats-config-panel";
 
-interface ATSIntegration {
-    id: string;
-    platform: string;
-    sync_enabled: boolean;
-    sync_roles: boolean;
-    sync_candidates: boolean;
-    sync_applications: boolean;
-    last_sync_at: string | null;
-    created_at: string;
-    // Stats (if available)
-    total_syncs?: number;
-    successful_syncs?: number;
-    failed_syncs?: number;
-    last_24h_syncs?: number;
-    pending_queue_items?: number;
-}
+type Tab = "browse" | "installed";
 
-export default function IntegrationsPage() {
-    const [integrations, setIntegrations] = useState<ATSIntegration[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
-    const toast = useToast();
+export default function IntegrationsMarketplacePage() {
     const { getToken } = useAuth();
+    const { profile, isLoading: profileLoading } = useUserProfile();
+    const containerRef = useRef<HTMLElement>(null);
 
-    // Load integrations
-    useEffect(() => {
-        loadIntegrations();
-    }, []);
+    const [tab, setTab] = useState<Tab>("browse");
+    const [category, setCategory] = useState<IntegrationCategory | "all">("all");
+    const [providers, setProviders] = useState<IntegrationProvider[]>([]);
+    const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [connecting, setConnecting] = useState<string | null>(null);
+    const [disconnecting, setDisconnecting] = useState<string | null>(null);
+    const [selectedProvider, setSelectedProvider] = useState<IntegrationProvider | null>(null);
+    const [showATSPanel, setShowATSPanel] = useState(false);
 
-    const loadIntegrations = async () => {
+    /* ── Fetch data ──────────────────────────────────────────────────── */
+
+    const fetchData = useCallback(async () => {
         try {
-            setLoading(true);
-            setError(null);
-
-            // Get company ID (from context/session in real app)
-            const companyId = localStorage.getItem("selected_company_id");
-
-            if (!companyId) {
-                throw new Error("No company selected");
-            }
-
             const token = await getToken();
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const data = await client.get(
-                `/api/companies/${companyId}/integrations`,
-            );
-            setIntegrations(data.integrations || []);
+            const [providersRes, connectionsRes] = await Promise.all([
+                client.get("/integrations/providers") as Promise<{ data: IntegrationProvider[] }>,
+                client.get("/integrations/connections") as Promise<{ data: OAuthConnectionPublic[] }>,
+            ]);
+
+            setProviders(providersRes.data ?? []);
+            setConnections(connectionsRes.data ?? []);
         } catch (err: any) {
-            console.error("Failed to load integrations:", err);
-            setError(err.message);
+            setError(err.message || "Failed to load integrations");
         } finally {
             setLoading(false);
         }
-    };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const toggleSync = async (integration: ATSIntegration) => {
+    useEffect(() => {
+        if (!profileLoading) fetchData();
+    }, [profileLoading, fetchData]);
+
+    /* ── GSAP page entrance ──────────────────────────────────────────── */
+
+    useGSAP(
+        () => {
+            if (loading || !containerRef.current) return;
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                containerRef.current
+                    .querySelectorAll("[class*='opacity-0']")
+                    .forEach((el) => gsap.set(el, { opacity: 1 }));
+                return;
+            }
+
+            const $ = (s: string) => containerRef.current!.querySelectorAll(s);
+            const $1 = (s: string) => containerRef.current!.querySelector(s);
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+            const kicker = $1(".mkt-kicker");
+            if (kicker) tl.fromTo(kicker, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
+
+            const titleWords = $(".mkt-title-word");
+            if (titleWords.length) {
+                tl.fromTo(
+                    titleWords,
+                    { opacity: 0, y: 60, rotateX: 30 },
+                    { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.1 },
+                    "-=0.3",
+                );
+            }
+
+            const desc = $1(".mkt-desc");
+            if (desc) tl.fromTo(desc, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.4");
+
+            const content = $1(".mkt-content");
+            if (content) tl.fromTo(content, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.2");
+        },
+        { scope: containerRef, dependencies: [loading] },
+    );
+
+    /* ── Connect handler ─────────────────────────────────────────────── */
+
+    const handleConnect = async (providerSlug: string) => {
+        // ATS providers use API keys, not OAuth — open config panel
+        const provider = providers.find((p) => p.slug === providerSlug);
+        if (provider?.category === "ats") {
+            setShowATSPanel(true);
+            return;
+        }
+
+        setConnecting(providerSlug);
+        setError("");
+
         try {
             const token = await getToken();
-            if (!token) return;
+            if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/api/integrations/${integration.id}`, {
-                sync_enabled: !integration.sync_enabled,
-            });
+            const redirectUri = `${window.location.origin}/portal/integrations/callback`;
 
-            await loadIntegrations();
+            const res = await client.post("/integrations/connections/initiate", {
+                provider_slug: providerSlug,
+                redirect_uri: redirectUri,
+            }) as { data: { authorization_url: string; state: string } };
+
+            sessionStorage.setItem("oauth_state", res.data.state);
+            window.location.href = res.data.authorization_url;
         } catch (err: any) {
-            console.error("Failed to toggle sync:", err);
-            setError(err.message);
+            setError(err.message || "Failed to initiate connection");
+            setConnecting(null);
         }
     };
 
-    const triggerSync = async (integrationId: string) => {
+    /* ── Disconnect handler ──────────────────────────────────────────── */
+
+    const handleDisconnect = async (connectionId: string) => {
+        setDisconnecting(connectionId);
+        setError("");
+
         try {
             const token = await getToken();
-            if (!token) return;
+            if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/api/integrations/${integrationId}/sync`, {
-                direction: "inbound",
-            });
-
-            toast.success("Sync triggered successfully");
-            await loadIntegrations();
+            await client.delete(`/integrations/connections/${connectionId}`);
+            await fetchData();
         } catch (err: any) {
-            console.error("Failed to trigger sync:", err);
-            toast.error(`Error: ${err.message}`);
+            setError(err.message || "Failed to disconnect");
+        } finally {
+            setDisconnecting(null);
         }
     };
 
-    if (loading) {
-        return <LoadingState message="Loading integrations..." />;
+    /* ── Derived data ────────────────────────────────────────────────── */
+
+    const filteredProviders = providers.filter(
+        (p) => category === "all" || p.category === category,
+    );
+
+    const getConnectionForProvider = (slug: string) =>
+        connections.find((c) => c.provider_slug === slug);
+
+    const activeConnections = connections.filter((c) => c.status === "active");
+
+    type CategoryItem = { value: IntegrationCategory | "all"; label: string; icon: string; count: number };
+    const allCategories: CategoryItem[] = [
+        { value: "all", label: "All", icon: "fa-duotone fa-regular fa-grid-2", count: providers.length },
+        { value: "calendar", label: "Calendar", icon: "fa-duotone fa-regular fa-calendar", count: providers.filter((p) => p.category === "calendar").length },
+        { value: "email", label: "Email", icon: "fa-duotone fa-regular fa-envelope", count: providers.filter((p) => p.category === "email").length },
+        { value: "ats", label: "ATS", icon: "fa-duotone fa-regular fa-briefcase", count: providers.filter((p) => p.category === "ats").length },
+        { value: "linkedin", label: "LinkedIn", icon: "fa-brands fa-linkedin", count: providers.filter((p) => p.category === "linkedin").length },
+    ];
+    const categories = allCategories.filter((c) => c.count > 0 || c.value === "all");
+
+    /* ── Loading ─────────────────────────────────────────────────────── */
+
+    if (loading || profileLoading) {
+        return (
+            <main className="min-h-screen bg-base-100 flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                    <span className="loading loading-spinner loading-lg" />
+                    <span className="text-base-content/50 font-semibold text-lg">Loading integrations...</span>
+                </div>
+            </main>
+        );
     }
 
+    /* ── Render ───────────────────────────────────────────────────────── */
+
     return (
-        <div className="container mx-auto p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold">ATS Integrations</h1>
-                    <p className="text-base-content/70 mt-1">
-                        Connect your ATS platforms to automatically sync jobs,
-                        candidates, and applications
-                    </p>
-                </div>
-                <Link href="/integrations/new" className="btn btn-primary">
-                    <i className="fa-duotone fa-regular fa-plus"></i>
-                    Add Integration
-                </Link>
-            </div>
+        <main ref={containerRef} className="min-h-screen bg-base-100">
+            {/* ── Hero ────────────────────────────────────────────────── */}
+            <MarketplaceHero activeCount={activeConnections.length} />
 
-            {/* Error Alert */}
-            {error && (
-                <div className="alert alert-error mb-6">
-                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                    <span>{error}</span>
-                </div>
-            )}
-
-            {/* Integrations List */}
-            {integrations.length === 0 ? (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body text-center">
-                        <i className="fa-duotone fa-regular fa-plug text-6xl text-base-content/20 mb-4"></i>
-                        <h2 className="card-title justify-center">
-                            No integrations yet
-                        </h2>
-                        <p className="text-base-content/70">
-                            Connect your first ATS platform to start syncing
-                            data
-                        </p>
-                        <div className="card-actions justify-center mt-4">
-                            <Link
-                                href="/integrations/new"
-                                className="btn btn-primary"
-                            >
-                                <i className="fa-duotone fa-regular fa-plus"></i>
-                                Add Integration
-                            </Link>
-                        </div>
+            {/* ── Content ─────────────────────────────────────────────── */}
+            <section className="mkt-content opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+                {/* Error banner */}
+                {error && (
+                    <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-6">
+                        <p className="text-sm font-semibold text-error">{error}</p>
                     </div>
+                )}
+
+                {/* Tab bar */}
+                <div className="flex items-center gap-1 border-b border-base-300 mb-8">
+                    <button
+                        onClick={() => setTab("browse")}
+                        className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 -mb-px ${
+                            tab === "browse"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-base-content/40 hover:text-base-content/60"
+                        }`}
+                    >
+                        <i className="fa-duotone fa-regular fa-grid-2 mr-2" />
+                        Browse
+                    </button>
+                    <button
+                        onClick={() => setTab("installed")}
+                        className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 -mb-px ${
+                            tab === "installed"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-base-content/40 hover:text-base-content/60"
+                        }`}
+                    >
+                        <i className="fa-duotone fa-regular fa-plug mr-2" />
+                        Installed
+                        {activeConnections.length > 0 && (
+                            <span className="ml-2 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 min-w-[20px] inline-block text-center">
+                                {activeConnections.length}
+                            </span>
+                        )}
+                    </button>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {integrations.map((integration) => (
-                        <div
-                            key={integration.id}
-                            className="card bg-base-100 shadow hover:shadow transition-shadow"
-                        >
-                            <div className="card-body">
-                                {/* Platform Header */}
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="avatar avatar-placeholder">
-                                            <div className="bg-primary text-primary-content rounded-full w-12">
-                                                <i
-                                                    className={`fa-duotone fa-regular ${getPlatformIcon(integration.platform)} text-xl`}
-                                                ></i>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h3 className="card-title capitalize">
-                                                {integration.platform}
-                                            </h3>
-                                            <span
-                                                className={`badge ${getPlatformBadge(integration.platform)} badge-sm`}
-                                            >
-                                                {integration.sync_enabled
-                                                    ? "Active"
-                                                    : "Paused"}
-                                            </span>
-                                        </div>
-                                    </div>
 
-                                    {/* Actions */}
-                                    <div className="dropdown dropdown-end">
-                                        <label
-                                            tabIndex={0}
-                                            className="btn btn-sm btn-ghost btn-square"
-                                        >
-                                            <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
-                                        </label>
-                                        <ul
-                                            tabIndex={0}
-                                            className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-52"
-                                        >
-                                            <li>
-                                                <Link
-                                                    href={`/integrations/${integration.id}`}
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-gear"></i>
-                                                    Settings
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <button
-                                                    onClick={() =>
-                                                        triggerSync(
-                                                            integration.id,
-                                                        )
-                                                    }
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-rotate"></i>
-                                                    Trigger Sync
-                                                </button>
-                                            </li>
-                                            <li>
-                                                <button
-                                                    onClick={() =>
-                                                        toggleSync(integration)
-                                                    }
-                                                >
-                                                    <i
-                                                        className={`fa-duotone fa-regular ${integration.sync_enabled ? "fa-pause" : "fa-play"}`}
-                                                    ></i>
-                                                    {integration.sync_enabled
-                                                        ? "Pause"
-                                                        : "Resume"}
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                {/* Browse tab */}
+                {tab === "browse" && (
+                    <>
+                        <CategoryFilter
+                            categories={categories}
+                            active={category}
+                            onChange={setCategory}
+                        />
 
-                                {/* Sync Options */}
-                                <div className="space-y-2 mb-4">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-base-content/70">
-                                            Sync Jobs
-                                        </span>
-                                        <span
-                                            className={
-                                                integration.sync_roles
-                                                    ? "text-success"
-                                                    : "text-base-content/40"
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
+                            {filteredProviders.map((provider) => {
+                                const conn = getConnectionForProvider(provider.slug);
+                                return (
+                                    <MarketplaceProviderCard
+                                        key={provider.slug}
+                                        provider={provider}
+                                        connection={conn}
+                                        connecting={connecting === provider.slug}
+                                        onConnect={() => handleConnect(provider.slug)}
+                                        onDetails={() => {
+                                            if (provider.category === "ats") {
+                                                setShowATSPanel(true);
+                                            } else {
+                                                setSelectedProvider(provider);
                                             }
-                                        >
-                                            <i
-                                                className={`fa-duotone fa-regular fa-circle-check ${integration.sync_roles ? "" : "opacity-30"}`}
-                                            ></i>
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-base-content/70">
-                                            Sync Candidates
-                                        </span>
-                                        <span
-                                            className={
-                                                integration.sync_candidates
-                                                    ? "text-success"
-                                                    : "text-base-content/40"
-                                            }
-                                        >
-                                            <i
-                                                className={`fa-duotone fa-regular fa-circle-check ${integration.sync_candidates ? "" : "opacity-30"}`}
-                                            ></i>
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-base-content/70">
-                                            Sync Applications
-                                        </span>
-                                        <span
-                                            className={
-                                                integration.sync_applications
-                                                    ? "text-success"
-                                                    : "text-base-content/40"
-                                            }
-                                        >
-                                            <i
-                                                className={`fa-duotone fa-regular fa-circle-check ${integration.sync_applications ? "" : "opacity-30"}`}
-                                            ></i>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Stats */}
-                                {integration.total_syncs !== undefined && (
-                                    <div className="stats stats-horizontal bg-base-200 text-center">
-                                        <div className="stat p-4">
-                                            <div className="stat-value text-lg">
-                                                {integration.total_syncs || 0}
-                                            </div>
-                                            <div className="stat-desc text-xs">
-                                                Total Syncs
-                                            </div>
-                                        </div>
-                                        <div className="stat p-4">
-                                            <div className="stat-value text-lg text-success">
-                                                {integration.successful_syncs ||
-                                                    0}
-                                            </div>
-                                            <div className="stat-desc text-xs">
-                                                Success
-                                            </div>
-                                        </div>
-                                        <div className="stat p-4">
-                                            <div className="stat-value text-lg text-error">
-                                                {integration.failed_syncs || 0}
-                                            </div>
-                                            <div className="stat-desc text-xs">
-                                                Failed
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Last Sync */}
-                                <div className="text-xs text-base-content/60 mt-2">
-                                    Last sync:{" "}
-                                    {integration.last_sync_at
-                                        ? new Date(
-                                              integration.last_sync_at,
-                                          ).toLocaleString()
-                                        : "Never"}
-                                </div>
-                            </div>
+                                        }}
+                                    />
+                                );
+                            })}
                         </div>
-                    ))}
-                </div>
+
+                        {filteredProviders.length === 0 && (
+                            <div className="text-center py-16">
+                                <div className="w-16 h-16 bg-base-200 border border-base-300 flex items-center justify-center mx-auto mb-4">
+                                    <i className="fa-duotone fa-regular fa-search text-2xl text-base-content/30" />
+                                </div>
+                                <p className="text-sm font-semibold text-base-content/40">
+                                    No integrations found in this category.
+                                </p>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* Installed tab */}
+                {tab === "installed" && (
+                    <InstalledIntegrations
+                        providers={providers}
+                        connections={connections}
+                        disconnecting={disconnecting}
+                        onDisconnect={handleDisconnect}
+                    />
+                )}
+            </section>
+
+            {/* Provider detail modal */}
+            {selectedProvider && (
+                <ProviderDetailModal
+                    provider={selectedProvider}
+                    connection={getConnectionForProvider(selectedProvider.slug)}
+                    connecting={connecting === selectedProvider.slug}
+                    onConnect={() => handleConnect(selectedProvider.slug)}
+                    onClose={() => setSelectedProvider(null)}
+                />
             )}
-        </div>
+
+            {/* ATS config panel */}
+            {showATSPanel && profile?.organization_ids?.[0] && (
+                <ATSConfigPanel
+                    companyId={profile.organization_ids[0]}
+                    onClose={() => setShowATSPanel(false)}
+                />
+            )}
+        </main>
     );
 }

@@ -158,7 +158,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     return (
         <div>
             {/* Sticky header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         {/* Badges */}
@@ -271,7 +271,11 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             Compensation
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {salary || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
+                            {salary || (
+                                <span className="text-base-content/30 font-semibold text-sm">
+                                    Not listed
+                                </span>
+                            )}
                         </p>
                     </div>
                     <div className="border-l-4 border-secondary pl-4">
@@ -279,7 +283,11 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             Work Style
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {commute || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
+                            {commute || (
+                                <span className="text-base-content/30 font-semibold text-sm">
+                                    Not listed
+                                </span>
+                            )}
                         </p>
                     </div>
                     <div className="border-l-4 border-accent pl-4">
@@ -287,7 +295,11 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             Department
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {job.department || <span className="text-base-content/30 font-semibold text-sm">Not listed</span>}
+                            {job.department || (
+                                <span className="text-base-content/30 font-semibold text-sm">
+                                    Not listed
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>

@@ -9,11 +9,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-type SSOStatus =
-    | "authenticating"
-    | "setting_up"
-    | "redirecting"
-    | "error";
+type SSOStatus = "authenticating" | "setting_up" | "redirecting" | "error";
 
 const STEPS = [
     {
@@ -230,8 +226,7 @@ function SSOCallbackInner() {
             case "setting_up":
                 return {
                     title: "Setting up your account",
-                    message:
-                        "Creating your account and candidate profile.",
+                    message: "Creating your account and candidate profile.",
                     showSpinner: true,
                 };
             case "redirecting":
@@ -304,8 +299,7 @@ function SSOCallbackInner() {
                                     </div>
                                 </div>
                                 <p className="text-sm text-base-content/40 mt-3">
-                                    Redirecting automatically in a few
-                                    seconds.
+                                    Redirecting automatically in a few seconds.
                                 </p>
                             </div>
                         ) : (
@@ -385,7 +379,7 @@ function SSOCallbackInner() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10">
+                <div className="relative ">
                     <h2 className="text-3xl font-black leading-tight tracking-tight mb-4">
                         Your career, represented
                         <br />
@@ -393,21 +387,19 @@ function SSOCallbackInner() {
                     </h2>
                     <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
                         Multiple recruiters compete to place you in the right
-                        role. You stay informed at every stage, and your
-                        profile works for you across the entire network.
+                        role. You stay informed at every stage, and your profile
+                        works for you across the entire network.
                     </p>
                 </div>
 
-                <div className="relative z-10 space-y-4">
+                <div className="relative  space-y-4">
                     {STATS.map((stat) => (
                         <div
                             key={stat.label}
                             className="sso-stat opacity-0 flex items-center gap-4 p-4 bg-neutral-content/5"
                         >
                             <div className="w-10 h-10 bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                <i
-                                    className={`${stat.icon} text-primary`}
-                                />
+                                <i className={`${stat.icon} text-primary`} />
                             </div>
                             <div>
                                 <div className="text-lg font-black">
@@ -421,13 +413,12 @@ function SSOCallbackInner() {
                     ))}
                 </div>
 
-                <div className="sso-testimonial opacity-0 relative z-10">
+                <div className="sso-testimonial opacity-0 relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;I had three recruiters presenting me to
                             different companies within a week. I knew exactly
-                            where I stood with each one the entire
-                            time.&rdquo;
+                            where I stood with each one the entire time.&rdquo;
                         </p>
                         <p className="text-sm font-bold">David Chen</p>
                         <p className="text-sm text-neutral-content/40">
@@ -488,7 +479,7 @@ function LoadingFallback() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10 text-center">
+                <div className="relative  text-center">
                     <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center font-black text-2xl mx-auto mb-4">
                         A
                     </div>

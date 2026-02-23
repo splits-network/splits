@@ -232,7 +232,7 @@ export default function EmailThreadPanel({
                         Connect Gmail or Outlook to view email history.
                     </p>
                     <a
-                        href="/portal/integrations-basel"
+                        href="/portal/integrations"
                         className="btn btn-primary btn-xs"
                         style={{ borderRadius: 0 }}
                     >

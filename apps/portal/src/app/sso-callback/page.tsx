@@ -122,17 +122,16 @@ function SSOCallbackInner() {
                         was_existing: { user: boolean };
                     };
                 }>("/onboarding/init", {
-                    email:
-                        currentUser.primaryEmailAddress?.emailAddress || "",
-                    name:
-                        currentUser.fullName || currentUser.firstName || "",
+                    email: currentUser.primaryEmailAddress?.emailAddress || "",
+                    name: currentUser.fullName || currentUser.firstName || "",
                     image_url: currentUser.imageUrl,
                     referred_by_recruiter_id: referredByRecruiterId,
                     source_app: "portal",
                 });
 
                 const userData = initResponse?.data?.user ?? null;
-                const wasExisting = initResponse?.data?.was_existing?.user ?? true;
+                const wasExisting =
+                    initResponse?.data?.was_existing?.user ?? true;
 
                 if (recCode && !wasExisting) {
                     try {
@@ -155,9 +154,7 @@ function SSOCallbackInner() {
                     router.replace(
                         `/portal/accept-invitation?invitation_id=${invitationId}`,
                     );
-                } else if (
-                    userData?.onboarding_status !== "completed"
-                ) {
+                } else if (userData?.onboarding_status !== "completed") {
                     // New or incomplete user → full-page onboarding wizard
                     router.replace("/onboarding");
                 } else {
@@ -203,7 +200,12 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     logo,
                     { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                 );
 
             const heading = $1(".sso-heading");
@@ -211,7 +213,12 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     heading,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
 
@@ -220,7 +227,12 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     statusCard,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
 
@@ -229,7 +241,13 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     steps,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        stagger: 0.06,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
 
@@ -238,7 +256,13 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     stats,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        stagger: 0.08,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
 
@@ -247,7 +271,12 @@ function SSOCallbackInner() {
                 tl.fromTo(
                     testimonial,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.4,
+                        clearProps: "transform",
+                    },
                     "-=0.1",
                 );
         },
@@ -340,8 +369,7 @@ function SSOCallbackInner() {
                                     </div>
                                 </div>
                                 <p className="text-sm text-base-content/40 mt-3">
-                                    Redirecting automatically in a few
-                                    seconds.
+                                    Redirecting automatically in a few seconds.
                                 </p>
                             </div>
                         ) : (
@@ -421,13 +449,11 @@ function SSOCallbackInner() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10">
+                <div className="relative ">
                     <h2 className="text-3xl font-black leading-tight tracking-tight mb-4">
                         The network that makes
                         <br />
-                        <span className="text-primary">
-                            split-fee work.
-                        </span>
+                        <span className="text-primary">split-fee work.</span>
                     </h2>
                     <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
                         Recruiters and companies operating on shared
@@ -436,16 +462,14 @@ function SSOCallbackInner() {
                     </p>
                 </div>
 
-                <div className="relative z-10 space-y-4">
+                <div className="relative  space-y-4">
                     {STATS.map((stat) => (
                         <div
                             key={stat.label}
                             className="sso-stat opacity-0 flex items-center gap-4 p-4 bg-neutral-content/5"
                         >
                             <div className="w-10 h-10 bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                <i
-                                    className={`${stat.icon} text-primary`}
-                                />
+                                <i className={`${stat.icon} text-primary`} />
                             </div>
                             <div>
                                 <div className="text-lg font-black">
@@ -459,17 +483,16 @@ function SSOCallbackInner() {
                     ))}
                 </div>
 
-                <div className="sso-testimonial opacity-0 relative z-10">
+                <div className="sso-testimonial opacity-0 relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
-                            &ldquo;We filled three senior engineering roles
-                            in six weeks. All through splits with recruiters
+                            &ldquo;We filled three senior engineering roles in
+                            six weeks. All through splits with recruiters
                             we&apos;d never worked with before.&rdquo;
                         </p>
                         <p className="text-sm font-bold">Rachel Simmons</p>
                         <p className="text-sm text-neutral-content/40">
-                            Talent Acquisition Director, Meridian
-                            Technologies
+                            Talent Acquisition Director, Meridian Technologies
                         </p>
                     </div>
                 </div>
@@ -526,7 +549,7 @@ function LoadingFallback() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10 text-center">
+                <div className="relative  text-center">
                     <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center font-black text-2xl mx-auto mb-4">
                         S
                     </div>

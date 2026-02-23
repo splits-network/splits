@@ -49,20 +49,23 @@ export function DetailLoader({
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
-        try {
-            const token = await getToken();
-            if (!token || signal?.cancelled) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get<{ data: Candidate }>(
-                `/candidates/${id}`,
-            );
-            if (!signal?.cancelled) setCandidate(res.data);
-        } catch (err) {
-            console.error("Failed to fetch candidate detail:", err);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const fetchDetail = useCallback(
+        async (id: string, signal?: { cancelled: boolean }) => {
+            try {
+                const token = await getToken();
+                if (!token || signal?.cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Candidate }>(
+                    `/candidates/${id}`,
+                );
+                if (!signal?.cancelled) setCandidate(res.data);
+            } catch (err) {
+                console.error("Failed to fetch candidate detail:", err);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [],
+    );
 
     useEffect(() => {
         const signal = { cancelled: false };
@@ -161,9 +164,9 @@ export function CandidateDetail({
         candidate.description;
 
     return (
-        <div className="flex flex-col h-full min-h-0">
+        <div className="flex flex-col h-full min-h-0 bg-base-100">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
                         {/* Initials square */}
@@ -500,7 +503,8 @@ function OverviewTab({
                             Marketplace
                         </p>
                         <p className="font-bold text-sm capitalize">
-                            {candidate.marketplace_visibility || "Not configured"}
+                            {candidate.marketplace_visibility ||
+                                "Not configured"}
                         </p>
                     </div>
                     {candidate.onboarding_status && (
@@ -542,7 +546,8 @@ function ResumeTab() {
                     No Resume on File
                 </h3>
                 <p className="text-sm text-base-content/40">
-                    Resume parsing is not yet available. Upload documents in the Documents tab.
+                    Resume parsing is not yet available. Upload documents in the
+                    Documents tab.
                 </p>
             </div>
         </div>
@@ -575,7 +580,8 @@ function ApplicationsTab({
                         No Active Applications
                     </h3>
                     <p className="text-sm text-base-content/40">
-                        This candidate has not been submitted to any roles. Use Send Opportunity to get started.
+                        This candidate has not been submitted to any roles. Use
+                        Send Opportunity to get started.
                     </p>
                 </div>
             </div>
@@ -616,7 +622,8 @@ function DocumentsTab() {
                     No Documents
                 </h3>
                 <p className="text-sm text-base-content/40">
-                    No files have been uploaded for this candidate. Document management is coming soon.
+                    No files have been uploaded for this candidate. Document
+                    management is coming soon.
                 </p>
             </div>
         </div>

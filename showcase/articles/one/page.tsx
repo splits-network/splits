@@ -43,10 +43,8 @@ export default function ArticleOnePage() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const $ = (sel: string) =>
-                mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                mainRef.current!.querySelector(sel);
+            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
+            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             // ── HERO ────────────────────────────────────────────
             const heroTl = gsap.timeline({
@@ -304,7 +302,7 @@ export default function ArticleOnePage() {
                 </div>
 
                 {/* Content panel -- 60% on desktop */}
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-28">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
                             <i className="fa-duotone fa-regular fa-newspaper mr-2"></i>
@@ -381,27 +379,33 @@ export default function ArticleOnePage() {
                             </h2>
                             <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                                 <p>
-                                    For decades, the recruiting industry has operated on a model
-                                    built for a different era. Individual recruiters work in
-                                    silos, maintaining their own networks and databases.
-                                    Companies engage multiple agencies under separate contracts,
-                                    each with different terms and visibility levels. Candidates
-                                    submit applications into black holes, rarely hearing back.
+                                    For decades, the recruiting industry has
+                                    operated on a model built for a different
+                                    era. Individual recruiters work in silos,
+                                    maintaining their own networks and
+                                    databases. Companies engage multiple
+                                    agencies under separate contracts, each with
+                                    different terms and visibility levels.
+                                    Candidates submit applications into black
+                                    holes, rarely hearing back.
                                 </p>
                                 <p>
-                                    The result is an ecosystem defined by fragmentation.
-                                    Recruiters spend more time on administration than actual
-                                    recruiting. Companies lack visibility into their hiring
-                                    pipelines. And candidates -- the people the entire industry
-                                    is supposed to serve -- are left in the dark.
+                                    The result is an ecosystem defined by
+                                    fragmentation. Recruiters spend more time on
+                                    administration than actual recruiting.
+                                    Companies lack visibility into their hiring
+                                    pipelines. And candidates -- the people the
+                                    entire industry is supposed to serve -- are
+                                    left in the dark.
                                 </p>
                                 <p>
-                                    The numbers paint a clear picture: the average
-                                    time-to-fill for a professional role has grown to 44 days.
-                                    Recruiter burnout rates hover near 50%. And over 60% of
-                                    candidates report being ghosted after at least one
-                                    interview. The system is not just inefficient -- it is
-                                    fundamentally broken.
+                                    The numbers paint a clear picture: the
+                                    average time-to-fill for a professional role
+                                    has grown to 44 days. Recruiter burnout
+                                    rates hover near 50%. And over 60% of
+                                    candidates report being ghosted after at
+                                    least one interview. The system is not just
+                                    inefficient -- it is fundamentally broken.
                                 </p>
                             </div>
                         </div>
@@ -436,8 +440,8 @@ export default function ArticleOnePage() {
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
                             <i className="fa-duotone fa-regular fa-quote-left text-4xl text-secondary/30 mb-6 block"></i>
                             <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                                &ldquo;The recruiting industry is the last
-                                major professional services sector to resist
+                                &ldquo;The recruiting industry is the last major
+                                professional services sector to resist
                                 structural collaboration.&rdquo;
                             </blockquote>
                             <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
@@ -463,27 +467,31 @@ export default function ArticleOnePage() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                Split-fee recruiting is a partnership model where two or more
-                                recruiters collaborate on a single placement and share the
-                                resulting fee. One recruiter typically holds the job order --
-                                the &ldquo;job side&rdquo; -- while another sources and
-                                submits candidates -- the &ldquo;candidate side.&rdquo; When
-                                a placement is made, the fee is divided according to
+                                Split-fee recruiting is a partnership model
+                                where two or more recruiters collaborate on a
+                                single placement and share the resulting fee.
+                                One recruiter typically holds the job order --
+                                the &ldquo;job side&rdquo; -- while another
+                                sources and submits candidates -- the
+                                &ldquo;candidate side.&rdquo; When a placement
+                                is made, the fee is divided according to
                                 pre-agreed terms.
                             </p>
                             <p>
-                                The concept is not new. Split-fee networks have existed since
-                                the 1970s. But historically, they were run through loose
-                                associations, phone calls, and handshake agreements. The lack
-                                of infrastructure meant disputes were common, transparency
-                                was nonexistent, and scaling beyond a handful of trusted
-                                partners was impractical.
+                                The concept is not new. Split-fee networks have
+                                existed since the 1970s. But historically, they
+                                were run through loose associations, phone
+                                calls, and handshake agreements. The lack of
+                                infrastructure meant disputes were common,
+                                transparency was nonexistent, and scaling beyond
+                                a handful of trusted partners was impractical.
                             </p>
                             <p>
-                                What has changed is technology. Modern split-fee platforms
-                                provide the infrastructure that makes collaboration reliable
-                                at scale: clear terms set upfront, automated tracking,
-                                transparent pipelines, and guaranteed payouts. The split-fee
+                                What has changed is technology. Modern split-fee
+                                platforms provide the infrastructure that makes
+                                collaboration reliable at scale: clear terms set
+                                upfront, automated tracking, transparent
+                                pipelines, and guaranteed payouts. The split-fee
                                 model has finally caught up to its potential.
                             </p>
                         </div>
@@ -503,7 +511,8 @@ export default function ArticleOnePage() {
                 <div className="absolute inset-0 bg-neutral/50"></div>
                 <div className="absolute bottom-6 left-6 lg:left-12">
                     <span className="text-xs uppercase tracking-[0.2em] text-white/70">
-                        Platform technology enables transparent collaboration at scale
+                        Platform technology enables transparent collaboration at
+                        scale
                     </span>
                 </div>
             </section>
@@ -543,9 +552,9 @@ export default function ArticleOnePage() {
                                 is growing.
                             </h2>
                             <p className="text-lg text-base-content/70 leading-relaxed mb-10 max-w-lg">
-                                The split-fee model addresses fundamental structural
-                                problems in recruiting. Four forces are driving adoption
-                                across the industry.
+                                The split-fee model addresses fundamental
+                                structural problems in recruiting. Four forces
+                                are driving adoption across the industry.
                             </p>
 
                             <div className="space-y-6">
@@ -571,7 +580,10 @@ export default function ArticleOnePage() {
                                         body: "More eyes on a role means faster candidate flow. Split-fee placements fill 3x faster than traditional solo approaches.",
                                     },
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-4">
+                                    <div
+                                        key={i}
+                                        className="flex items-start gap-4"
+                                    >
                                         <div className="w-10 h-10 flex-shrink-0 bg-primary/10 flex items-center justify-center">
                                             <i
                                                 className={`${item.icon} text-primary`}
@@ -619,7 +631,10 @@ export default function ArticleOnePage() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {[
-                            { value: "73%", label: "Higher Recruiter Earnings" },
+                            {
+                                value: "73%",
+                                label: "Higher Recruiter Earnings",
+                            },
                             { value: "3x", label: "Faster Time-to-Fill" },
                             { value: "40%", label: "Less Admin Overhead" },
                             { value: "92%", label: "Partner Satisfaction" },
@@ -654,33 +669,38 @@ export default function ArticleOnePage() {
                         </h2>
                         <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                             <p>
-                                The split-fee concept existed for decades without gaining
-                                mainstream traction. The missing ingredient was
-                                infrastructure. Without a reliable platform to manage
-                                agreements, track candidates, and process payouts, the
-                                friction cost of collaboration outweighed the benefits.
+                                The split-fee concept existed for decades
+                                without gaining mainstream traction. The missing
+                                ingredient was infrastructure. Without a
+                                reliable platform to manage agreements, track
+                                candidates, and process payouts, the friction
+                                cost of collaboration outweighed the benefits.
                             </p>
                             <p>
-                                Modern platforms like Splits Network have changed this
-                                equation fundamentally. They provide an integrated
-                                environment where terms are set upfront, every candidate
-                                submission is tracked, pipeline visibility is shared in
-                                real time, and payouts are automated upon placement
+                                Modern platforms like Splits Network have
+                                changed this equation fundamentally. They
+                                provide an integrated environment where terms
+                                are set upfront, every candidate submission is
+                                tracked, pipeline visibility is shared in real
+                                time, and payouts are automated upon placement
                                 confirmation.
                             </p>
                             <p>
-                                The technology layer does more than reduce friction -- it
-                                creates trust. When every interaction is logged, every
-                                agreement is documented, and every payout is guaranteed,
-                                recruiters can collaborate with partners they have never
-                                met. The platform becomes the trust layer.
+                                The technology layer does more than reduce
+                                friction -- it creates trust. When every
+                                interaction is logged, every agreement is
+                                documented, and every payout is guaranteed,
+                                recruiters can collaborate with partners they
+                                have never met. The platform becomes the trust
+                                layer.
                             </p>
                             <p>
-                                AI-powered matching further accelerates the model. Instead
-                                of manually searching for the right partner or candidate,
-                                algorithms surface optimal matches based on
-                                specialization, track record, and real-time availability.
-                                The result is faster placements with higher quality
+                                AI-powered matching further accelerates the
+                                model. Instead of manually searching for the
+                                right partner or candidate, algorithms surface
+                                optimal matches based on specialization, track
+                                record, and real-time availability. The result
+                                is faster placements with higher quality
                                 matches.
                             </p>
                         </div>
@@ -700,7 +720,8 @@ export default function ArticleOnePage() {
                 <div className="absolute inset-0 bg-neutral/50"></div>
                 <div className="absolute bottom-6 left-6 lg:left-12">
                     <span className="text-xs uppercase tracking-[0.2em] text-white/70">
-                        Trust is the foundation of every successful split-fee partnership
+                        Trust is the foundation of every successful split-fee
+                        partnership
                     </span>
                 </div>
             </section>
@@ -724,26 +745,31 @@ export default function ArticleOnePage() {
                             </h2>
                             <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
                                 <p>
-                                    The impact of platform-enabled split-fee recruiting is
-                                    measurable across every key metric. Recruiters earn more
-                                    because they access roles beyond their individual network.
-                                    Companies fill faster because they activate an entire
-                                    community of specialists. And candidates get better outcomes
-                                    because multiple recruiters are advocating for them
+                                    The impact of platform-enabled split-fee
+                                    recruiting is measurable across every key
+                                    metric. Recruiters earn more because they
+                                    access roles beyond their individual
+                                    network. Companies fill faster because they
+                                    activate an entire community of specialists.
+                                    And candidates get better outcomes because
+                                    multiple recruiters are advocating for them
                                     simultaneously.
                                 </p>
                                 <p>
-                                    The 92% partner satisfaction rate is particularly
-                                    significant. It suggests that once recruiters experience the
-                                    split-fee model on a modern platform, they do not go back
-                                    to working solo. The collaborative model becomes the default
-                                    operating mode.
+                                    The 92% partner satisfaction rate is
+                                    particularly significant. It suggests that
+                                    once recruiters experience the split-fee
+                                    model on a modern platform, they do not go
+                                    back to working solo. The collaborative
+                                    model becomes the default operating mode.
                                 </p>
                                 <p>
-                                    These numbers represent a structural shift, not a marginal
-                                    improvement. The split-fee market was valued at $4.7 billion
-                                    in 2025 and is projected to more than double by 2030 as
-                                    platform adoption accelerates across every vertical.
+                                    These numbers represent a structural shift,
+                                    not a marginal improvement. The split-fee
+                                    market was valued at $4.7 billion in 2025
+                                    and is projected to more than double by 2030
+                                    as platform adoption accelerates across
+                                    every vertical.
                                 </p>
                             </div>
                         </div>
@@ -810,38 +836,45 @@ export default function ArticleOnePage() {
                                 <strong className="text-base-content font-bold">
                                     If you are a recruiter:
                                 </strong>{" "}
-                                The split-fee model gives you access to roles and markets
-                                that would take years to build on your own. You keep doing
-                                what you do best -- sourcing, screening, advocating -- while
-                                partnering with others who complement your strengths. The
-                                administrative burden disappears when the platform handles
-                                terms, tracking, and payments.
+                                The split-fee model gives you access to roles
+                                and markets that would take years to build on
+                                your own. You keep doing what you do best --
+                                sourcing, screening, advocating -- while
+                                partnering with others who complement your
+                                strengths. The administrative burden disappears
+                                when the platform handles terms, tracking, and
+                                payments.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     If you are a company:
                                 </strong>{" "}
-                                Instead of managing a dozen recruiter contracts with different
-                                terms, you post a role once and activate an entire network.
-                                Every recruiter working your role operates under the same
-                                terms. You see every candidate, every submission, every status
-                                update in one pipeline. And you only pay when someone starts.
+                                Instead of managing a dozen recruiter contracts
+                                with different terms, you post a role once and
+                                activate an entire network. Every recruiter
+                                working your role operates under the same terms.
+                                You see every candidate, every submission, every
+                                status update in one pipeline. And you only pay
+                                when someone starts.
                             </p>
                             <p>
                                 <strong className="text-base-content font-bold">
                                     If you are a candidate:
                                 </strong>{" "}
-                                The split-fee model means more recruiters are aware of your
-                                profile and actively advocating for you. You get matched with
-                                specialists in your field. You receive real communication and
-                                feedback. And because the platform tracks everything, you
-                                never get ghosted again.
+                                The split-fee model means more recruiters are
+                                aware of your profile and actively advocating
+                                for you. You get matched with specialists in
+                                your field. You receive real communication and
+                                feedback. And because the platform tracks
+                                everything, you never get ghosted again.
                             </p>
                             <p>
-                                The future of recruiting is collaborative, transparent, and
-                                platform-enabled. The split-fee model is not a niche strategy
-                                anymore -- it is becoming the industry standard. The only
-                                question is whether you will be part of building it.
+                                The future of recruiting is collaborative,
+                                transparent, and platform-enabled. The split-fee
+                                model is not a niche strategy anymore -- it is
+                                becoming the industry standard. The only
+                                question is whether you will be part of building
+                                it.
                             </p>
                         </div>
                     </div>
@@ -861,7 +894,9 @@ export default function ArticleOnePage() {
                     <p className="text-4xl md:text-5xl lg:text-6xl font-black text-white text-center leading-[0.95] tracking-tight px-6">
                         The future of recruiting
                         <br />
-                        <span className="text-secondary">is collaborative.</span>
+                        <span className="text-secondary">
+                            is collaborative.
+                        </span>
                     </p>
                 </div>
             </section>

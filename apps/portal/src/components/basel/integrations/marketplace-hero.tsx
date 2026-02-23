@@ -10,7 +10,9 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                style={{ clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                style={{
+                    clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                }}
             />
 
             {/* Grid pattern overlay */}
@@ -23,7 +25,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                 }}
             />
 
-            <div className="relative z-10 container mx-auto px-6 lg:px-12">
+            <div className="relative  container mx-auto px-6 lg:px-12">
                 <div className="grid lg:grid-cols-5 gap-10 items-end">
                     {/* Left: Title */}
                     <div className="lg:col-span-3">
@@ -43,21 +45,26 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                         </h1>
                         <p className="mkt-desc text-base text-neutral-content/50 max-w-xl opacity-0">
                             Link your calendar, email, and recruiting tools to
-                            streamline your workflow and keep everything in sync.
+                            streamline your workflow and keep everything in
+                            sync.
                         </p>
                     </div>
 
                     {/* Right: Stats strip */}
                     <div className="lg:col-span-2 flex gap-6 lg:justify-end">
                         <div className="mkt-desc opacity-0">
-                            <p className="text-3xl font-black text-primary">{activeCount}</p>
+                            <p className="text-3xl font-black text-primary">
+                                {activeCount}
+                            </p>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
                                 Connected
                             </p>
                         </div>
                         <div className="w-px bg-neutral-content/10" />
                         <div className="mkt-desc opacity-0">
-                            <p className="text-3xl font-black text-secondary">4</p>
+                            <p className="text-3xl font-black text-secondary">
+                                4
+                            </p>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
                                 Available
                             </p>

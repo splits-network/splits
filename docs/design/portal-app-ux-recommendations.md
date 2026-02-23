@@ -101,7 +101,7 @@ The landing page (`/app/page.tsx`) is comprehensive but very long (~780 lines) w
     </video>
 
     {/* Enhanced content overlay with better contrast */}
-    <div className="hero-content text-center relative z-10">
+    <div className="hero-content text-center relative ">
         <div className="max-w-4xl mx-auto backdrop-blur-sm bg-base-100/10 rounded-2xl p-8">
             <h1 className="text-5xl font-bold mb-6 text-white drop-shadow-lg">
                 Connect. Place. Earn.
@@ -908,7 +908,7 @@ const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(
 }
 {
     selectedCandidates.size > 0 && (
-        <div className="sticky top-0 z-10 bg-primary text-primary-content p-4 rounded-box mb-4 flex items-center justify-between animate-slide-in-down">
+        <div className="sticky top-0  bg-primary text-primary-content p-4 rounded-box mb-4 flex items-center justify-between animate-slide-in-down">
             <div className="flex items-center gap-4">
                 <span className="font-medium">
                     {selectedCandidates.size} selected

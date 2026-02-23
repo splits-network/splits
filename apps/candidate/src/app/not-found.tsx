@@ -113,7 +113,7 @@ export default function NotFound() {
                     aria-hidden="true"
                 />
 
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-2xl">
                         {/* Kicker */}
                         <p className="nf-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">

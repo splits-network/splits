@@ -58,7 +58,6 @@ const MARKETPLACE_SECTIONS: Section[] = [
     "privacy",
 ];
 
-
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
     notifications: "Configure email and in-app notification preferences",
     integrations: "Connect to external services and ATS platforms",
@@ -77,12 +76,23 @@ export default function ProfileBaselPage() {
     const router = useRouter();
 
     const ALL_SECTIONS: Section[] = [
-        "account", "security", "marketplace", "specializations",
-        "bio", "privacy", "subscription", "payouts",
-        "notifications", "integrations", "admin",
+        "account",
+        "security",
+        "marketplace",
+        "specializations",
+        "bio",
+        "privacy",
+        "subscription",
+        "payouts",
+        "notifications",
+        "integrations",
+        "admin",
     ];
     const urlSection = searchParams.get("section") as Section | null;
-    const initialSection: Section = urlSection && ALL_SECTIONS.includes(urlSection) ? urlSection : "account";
+    const initialSection: Section =
+        urlSection && ALL_SECTIONS.includes(urlSection)
+            ? urlSection
+            : "account";
 
     const [active, setActive] = useState<Section>(initialSection);
     const mainRef = useRef<HTMLElement>(null);
@@ -171,7 +181,7 @@ export default function ProfileBaselPage() {
                 key: "integrations",
                 label: "Integrations",
                 icon: "fa-duotone fa-regular fa-plug",
-                href: "/portal/integrations-basel",
+                href: "/portal/integrations",
             });
         }
 
@@ -196,9 +206,7 @@ export default function ProfileBaselPage() {
     useGSAP(
         () => {
             if (!mainRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 mainRef.current
                     .querySelectorAll("[class*='opacity-0']")
                     .forEach((el) => gsap.set(el, { opacity: 1 }));
@@ -214,7 +222,12 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                 );
             }
 
@@ -240,7 +253,12 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     desc,
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                     "-=0.4",
                 );
             }
@@ -250,7 +268,12 @@ export default function ProfileBaselPage() {
                 tl.fromTo(
                     content,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
             }
@@ -263,14 +286,18 @@ export default function ProfileBaselPage() {
     useGSAP(
         () => {
             if (!contentRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            )
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
                 return;
             gsap.fromTo(
                 contentRef.current,
                 { opacity: 0, x: 20 },
-                { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.3,
+                    ease: "power2.out",
+                    clearProps: "transform",
+                },
             );
         },
         { dependencies: [active], scope: mainRef },
@@ -338,9 +365,7 @@ export default function ProfileBaselPage() {
                                                 className={`${item.icon} w-4 text-center`}
                                             />
                                             {item.label}
-                                            {COMING_SOON.includes(
-                                                item.key,
-                                            ) && (
+                                            {COMING_SOON.includes(item.key) && (
                                                 <BaselStatusPill
                                                     color="warning"
                                                     className="ml-auto"
@@ -376,25 +401,20 @@ export default function ProfileBaselPage() {
                     <SpecializationsSection />
                 )}
                 {isRecruiter && active === "bio" && <BioSection />}
-                {isRecruiter && active === "privacy" && (
-                    <PrivacySection />
-                )}
+                {isRecruiter && active === "privacy" && <PrivacySection />}
 
                 {/* Billing sections (recruiter only) */}
                 {isRecruiter && active === "subscription" && (
                     <SubscriptionTab />
                 )}
-                {isRecruiter && active === "payouts" && (
-                    <PayoutsTab />
-                )}
+                {isRecruiter && active === "payouts" && <PayoutsTab />}
 
                 {/* Coming soon sections */}
                 {isComingSoon && (
                     <ComingSoonContent
                         section={active}
                         icon={
-                            allNavItems.find((n) => n.key === active)
-                                ?.icon ||
+                            allNavItems.find((n) => n.key === active)?.icon ||
                             "fa-duotone fa-regular fa-clock"
                         }
                     />
@@ -410,11 +430,10 @@ export default function ProfileBaselPage() {
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
-                        clipPath:
-                            "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="settings-kicker text-sm font-semibold uppercase tracking-widest text-secondary mb-4 opacity-0">
                             Account

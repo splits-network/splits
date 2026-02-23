@@ -55,7 +55,7 @@ export function BaselTimelineItem({
                 <div className="absolute left-[18px] top-10 bottom-0 w-px bg-base-300" />
             )}
             <div
-                className={`w-9 h-9 ${avatarBg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0 z-10`}
+                className={`w-9 h-9 ${avatarBg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0 `}
             >
                 {initials}
             </div>
@@ -63,9 +63,7 @@ export function BaselTimelineItem({
                 <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-sm font-bold">{user}</span>
                     {icon && (
-                        <i
-                            className={`${icon} text-xs ${iconColor || ""}`}
-                        />
+                        <i className={`${icon} text-xs ${iconColor || ""}`} />
                     )}
                 </div>
                 <p className="text-sm text-base-content/60">{action}</p>

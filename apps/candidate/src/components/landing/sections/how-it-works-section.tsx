@@ -161,10 +161,7 @@ export function HowItWorksSection() {
                     </p>
                 </div>
 
-                <div
-                    ref={timelineRef}
-                    className="relative max-w-4xl mx-auto"
-                >
+                <div ref={timelineRef} className="relative max-w-4xl mx-auto">
                     {/* SVG Timeline Line (desktop only) */}
                     <svg
                         className="absolute left-8 top-0 h-full hidden md:block"
@@ -205,7 +202,7 @@ export function HowItWorksSection() {
                             >
                                 {/* Step Badge */}
                                 <div
-                                    className={`step-badge relative z-10 w-16 h-16 rounded-full bg-${step.color} text-${step.color}-content flex items-center justify-center flex-shrink-0 shadow-lg`}
+                                    className={`step-badge relative  w-16 h-16 rounded-full bg-${step.color} text-${step.color}-content flex items-center justify-center flex-shrink-0 shadow-lg`}
                                 >
                                     <span className="text-2xl font-bold">
                                         {step.number}

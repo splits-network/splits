@@ -268,7 +268,7 @@ export default function FootersOne() {
                 {/* Top accent line */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
 
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 py-20">
+                <div className="relative  container mx-auto px-6 lg:px-12 py-20">
                     <div className="max-w-3xl">
                         <p className="showcase-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-5 opacity-0">
                             Footer Component

@@ -36,7 +36,7 @@ export function ControlsBar({
     }, [onFilterChange]);
 
     return (
-        <section className="controls-bar sticky top-0 z-30 bg-base-100 border-b-2 border-base-300 opacity-0">
+        <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                     {/* Search + Filters */}
@@ -84,8 +84,12 @@ export function ControlsBar({
                             <option value="draft">Draft</option>
                             <option value="screen">Screening</option>
                             <option value="submitted">Submitted</option>
-                            <option value="company_review">Company Review</option>
-                            <option value="recruiter_review">Recruiter Review</option>
+                            <option value="company_review">
+                                Company Review
+                            </option>
+                            <option value="recruiter_review">
+                                Recruiter Review
+                            </option>
                             <option value="interview">Interview</option>
                             <option value="offer">Offer</option>
                             <option value="hired">Hired</option>

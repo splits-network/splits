@@ -216,7 +216,7 @@ export default function PricingOne() {
                         clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center">
+                <div className="relative  container mx-auto px-6 lg:px-12 text-center">
                     <p className="pricing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
                         Pricing
                     </p>
@@ -275,7 +275,7 @@ export default function PricingOne() {
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
-                            className={`pricing-card opacity-0 bg-base-100 border border-base-300 p-8 lg:p-10 relative ${plan.popular ? "border-coral border-2 lg:-mt-4 lg:mb-0 lg:pb-14 z-10" : ""}`}
+                            className={`pricing-card opacity-0 bg-base-100 border border-base-300 p-8 lg:p-10 relative ${plan.popular ? "border-coral border-2 lg:-mt-4 lg:mb-0 lg:pb-14 " : ""}`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-content text-[10px] font-bold uppercase tracking-wider">

@@ -137,7 +137,7 @@ export function HeroSection() {
             {/* Content */}
             <div
                 ref={contentRef}
-                className="hero-content text-center max-w-5xl relative z-10 py-20"
+                className="hero-content text-center max-w-5xl relative  py-20"
             >
                 <div className="space-y-8">
                     {/* Headline with emphasis on "everyone wins" */}

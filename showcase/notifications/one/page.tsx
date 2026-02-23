@@ -248,7 +248,7 @@ export default function NotificationsOne() {
                         clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)",
                     }}
                 />
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                         <div className="max-w-3xl">
                             <p className="notif-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">

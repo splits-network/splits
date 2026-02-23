@@ -46,7 +46,7 @@ export function RecruiterDetail({
     return (
         <div>
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 p-6">
+            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1">
                         {recruiter.users?.profile_image_url ? (
@@ -262,23 +262,26 @@ export function DetailLoader({
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
-        try {
-            const token = await getToken();
-            if (!token || signal?.cancelled) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get<{ data: RecruiterWithUser }>(
-                `/recruiters/${id}`,
-                {
-                    params: { include: "user,reputation" },
-                },
-            );
-            if (!signal?.cancelled) setRecruiter(res.data);
-        } catch (err) {
-            console.error("Failed to fetch recruiter detail:", err);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const fetchDetail = useCallback(
+        async (id: string, signal?: { cancelled: boolean }) => {
+            try {
+                const token = await getToken();
+                if (!token || signal?.cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: RecruiterWithUser }>(
+                    `/recruiters/${id}`,
+                    {
+                        params: { include: "user,reputation" },
+                    },
+                );
+                if (!signal?.cancelled) setRecruiter(res.data);
+            } catch (err) {
+                console.error("Failed to fetch recruiter detail:", err);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [],
+    );
 
     useEffect(() => {
         const signal = { cancelled: false };

@@ -300,7 +300,7 @@ export default function AuthOne() {
                         clipPath: "polygon(0 0,100% 0,100% 100%,20% 100%)",
                     }}
                 />
-                <div className="relative z-10">
+                <div className="relative ">
                     <h2 className="text-3xl font-black leading-tight tracking-tight mb-4">
                         The marketplace for
                         <br />
@@ -314,7 +314,7 @@ export default function AuthOne() {
                     </p>
                 </div>
 
-                <div className="relative z-10 space-y-4">
+                <div className="relative  space-y-4">
                     {[
                         {
                             value: "2,400+",
@@ -351,7 +351,7 @@ export default function AuthOne() {
                     ))}
                 </div>
 
-                <div className="relative z-10">
+                <div className="relative ">
                     <div className="border-l-4 border-coral pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;Splits Network transformed my independent

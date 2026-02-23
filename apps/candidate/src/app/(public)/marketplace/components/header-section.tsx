@@ -22,10 +22,12 @@ export default function HeaderSection({
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5"
-                style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
+                style={{
+                    clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
+                }}
             />
 
-            <div className="container mx-auto px-6 lg:px-12 relative z-10">
+            <div className="container mx-auto px-6 lg:px-12 relative ">
                 <div className="max-w-4xl">
                     {/* Kicker */}
                     <p className="hero-kicker opacity-0 text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
@@ -83,8 +85,12 @@ export default function HeaderSection({
                                 <i className="fa-duotone fa-regular fa-users text-primary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{total}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Active Recruiters</div>
+                                <div className="text-2xl font-black">
+                                    {total}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Active Recruiters
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -92,8 +98,12 @@ export default function HeaderSection({
                                 <i className="fa-duotone fa-regular fa-medal text-accent-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{experienced}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Experienced</div>
+                                <div className="text-2xl font-black">
+                                    {experienced}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Experienced
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -101,8 +111,12 @@ export default function HeaderSection({
                                 <i className="fa-duotone fa-regular fa-star text-secondary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{topRated}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Top Rated</div>
+                                <div className="text-2xl font-black">
+                                    {topRated}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Top Rated
+                                </div>
                             </div>
                         </div>
                     </div>

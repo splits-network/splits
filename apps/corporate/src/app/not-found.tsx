@@ -17,19 +17,15 @@ export default function NotFound() {
     useGSAP(
         () => {
             if (!mainRef.current) return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 mainRef.current
                     .querySelectorAll(".opacity-0")
                     .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
                 return;
             }
 
-            const $ = (s: string) =>
-                mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) =>
-                mainRef.current!.querySelector(s);
+            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
+            const $1 = (s: string) => mainRef.current!.querySelector(s);
 
             const tl = gsap.timeline({
                 defaults: { ease: "power3.out" },
@@ -133,8 +129,7 @@ export default function NotFound() {
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
-                        clipPath:
-                            "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
+                        clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
                     aria-hidden="true"
                 />
@@ -145,7 +140,7 @@ export default function NotFound() {
                     aria-hidden="true"
                 />
 
-                <div className="relative z-10 container mx-auto px-6 lg:px-12">
+                <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-2xl">
                         {/* Kicker */}
                         <p className="nf-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4 opacity-0">
@@ -159,21 +154,18 @@ export default function NotFound() {
                             </span>{" "}
                             <span className="nf-headline-word inline-block opacity-0">
                                 The{" "}
-                                <span className="text-primary">
-                                    ecosystem
-                                </span>{" "}
+                                <span className="text-primary">ecosystem</span>{" "}
                                 is still here.
                             </span>
                         </h1>
 
                         {/* Body */}
                         <p className="nf-body text-lg leading-relaxed text-neutral-content/70 max-w-xl mb-8 opacity-0">
-                            This page doesn&apos;t exist, but the networks
-                            that connect recruiters, candidates, and hiring
-                            companies are running at full capacity. Use the
-                            links below to find what you were looking for, or
-                            explore the platforms that make up Employment
-                            Networks.
+                            This page doesn&apos;t exist, but the networks that
+                            connect recruiters, candidates, and hiring companies
+                            are running at full capacity. Use the links below to
+                            find what you were looking for, or explore the
+                            platforms that make up Employment Networks.
                         </p>
 
                         {/* CTAs */}

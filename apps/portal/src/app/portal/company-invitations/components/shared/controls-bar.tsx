@@ -28,7 +28,7 @@ export function ControlsBar({
     totalCount,
 }: ControlsBarProps) {
     return (
-        <section className="controls-bar sticky top-0 z-30 bg-base-100 border-b-2 border-base-300 opacity-0">
+        <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                     {/* Search + Filters */}

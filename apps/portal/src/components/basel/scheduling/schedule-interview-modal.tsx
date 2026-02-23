@@ -258,7 +258,7 @@ export default function ScheduleInterviewModal({
                             interviews directly from Splits.
                         </p>
                         <a
-                            href="/portal/integrations-basel"
+                            href="/portal/integrations"
                             className="btn btn-primary btn-sm rounded-none"
                         >
                             <i className="fa-duotone fa-regular fa-plug" />

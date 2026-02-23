@@ -32,7 +32,7 @@ export function ControlsBar({
     totalCount,
 }: ControlsBarProps) {
     return (
-        <section className="controls-bar sticky top-0 z-30 bg-base-100 border-b-2 border-base-300 opacity-0">
+        <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                     {/* Left: Search + Filters */}
@@ -44,9 +44,7 @@ export function ControlsBar({
                                 type="text"
                                 placeholder="Search jobs, companies, locations..."
                                 value={searchInput}
-                                onChange={(e) =>
-                                    onSearchChange(e.target.value)
-                                }
+                                onChange={(e) => onSearchChange(e.target.value)}
                                 className="input input-bordered w-full pl-9 bg-base-200 border-base-300 text-sm font-medium focus:border-primary focus:outline-none"
                                 style={{ borderRadius: 0 }}
                             />
@@ -93,9 +91,7 @@ export function ControlsBar({
                                 (mode) => (
                                     <button
                                         key={mode}
-                                        onClick={() =>
-                                            onViewModeChange(mode)
-                                        }
+                                        onClick={() => onViewModeChange(mode)}
                                         className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                                             viewMode === mode
                                                 ? "bg-primary text-primary-content"
