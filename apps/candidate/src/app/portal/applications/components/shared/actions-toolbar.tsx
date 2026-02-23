@@ -177,10 +177,9 @@ export default function ActionsToolbar({
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
             const client = createAuthenticatedClient(token);
-            const response = await client.get("/job-pre-screen-questions", {
-                params: { job_id: item.job_id },
-            });
-            const questions = response.data || response;
+            const response = await client.get(`/jobs/${item.job_id}`);
+            const job = response.data;
+            const questions = job?.pre_screen_questions || [];
             setPreScreenQuestions(Array.isArray(questions) ? questions : []);
             setShowProposalWizard(true);
         } catch (err: any) {

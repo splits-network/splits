@@ -359,31 +359,24 @@ export function ApplicationDetail({
                             </h3>
                             <div className="space-y-4">
                                 {application.pre_screen_answers.map(
-                                    (answer, index) => {
-                                        const questionText =
-                                            typeof answer.question === "object"
-                                                ? answer.question?.question
-                                                : answer.question;
-                                        return (
-                                            <div
-                                                key={index}
-                                                className="border-l-4 border-primary pl-4"
-                                            >
-                                                <p className="font-semibold mb-1">
-                                                    {questionText ||
-                                                        `Question ${index + 1}`}
-                                                </p>
-                                                <p className="text-sm text-base-content/70">
-                                                    {typeof answer.answer ===
-                                                    "string"
-                                                        ? answer.answer
-                                                        : JSON.stringify(
-                                                              answer.answer,
-                                                          )}
-                                                </p>
-                                            </div>
-                                        );
-                                    },
+                                    (answer: any, index: number) => (
+                                        <div
+                                            key={index}
+                                            className="border-l-4 border-primary pl-4"
+                                        >
+                                            <p className="font-semibold mb-1">
+                                                {answer.question ||
+                                                    `Question ${index + 1}`}
+                                            </p>
+                                            <p className="text-sm text-base-content/70">
+                                                {typeof answer.answer === "boolean"
+                                                    ? answer.answer ? "Yes" : "No"
+                                                    : Array.isArray(answer.answer)
+                                                        ? answer.answer.join(", ")
+                                                        : answer.answer || "No answer"}
+                                            </p>
+                                        </div>
+                                    ),
                                 )}
                             </div>
                         </div>
@@ -573,7 +566,7 @@ export function DetailLoader({
                 {
                     params: {
                         include:
-                            "job,company,recruiter,ai_review,documents,pre_screen_answers,audit_log,job_requirements",
+                            "job,company,recruiter,ai_review,documents,audit_log,job_requirements",
                     },
                 },
             );

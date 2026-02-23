@@ -229,27 +229,25 @@ export function useApplicationActions(
                     primaryResumeId = allDocumentIds[0];
                 }
 
-                // Step 2: Save pre-screen answers
-                const answersArray = Object.entries(
-                    wizardData.preScreenAnswers,
-                ).map(([question_id, answer]) => ({
-                    application_id: id,
-                    question_id,
-                    answer,
-                }));
-
-                await client.post("/job-pre-screen-answers", {
-                    answers: answersArray,
-                });
-
-                // Step 3: Update application stage
-                await client.patch(`/applications/${id}`, {
+                // Step 2: Update application stage (pre_screen_answers included in payload if present)
+                const patchPayload: any = {
                     stage: "ai_review",
                     document_ids: allDocumentIds,
                     primary_resume_id: primaryResumeId,
-                });
+                };
 
-                // Step 4: Create note if provided
+                if (Object.keys(wizardData.preScreenAnswers).length > 0) {
+                    patchPayload.pre_screen_answers = Object.entries(
+                        wizardData.preScreenAnswers,
+                    ).map(([question, answer]) => ({
+                        question,
+                        answer,
+                    }));
+                }
+
+                await client.patch(`/applications/${id}`, patchPayload);
+
+                // Step 3: Create note if provided
                 if (wizardData.notes && wizardData.notes.trim()) {
                     try {
                         await client.post(`/applications/${id}/notes`, {

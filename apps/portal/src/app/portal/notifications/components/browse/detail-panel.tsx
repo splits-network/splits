@@ -301,7 +301,7 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
             const client = createAuthenticatedClient(token);
             const res = await client.get(`/jobs/${roleId}`, {
                 params: {
-                    include: "company,requirements,pre_screen_questions",
+                    include: "company,requirements",
                 },
             });
             setJob(res.data);

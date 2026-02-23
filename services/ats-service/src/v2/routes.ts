@@ -19,12 +19,7 @@ import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
 import { candidateSourcerRoutes } from './candidate-sourcers/routes';
-import { JobPreScreenQuestionRepository } from './job-pre-screen-questions/repository';
-import { JobPreScreenQuestionService } from './job-pre-screen-questions/service';
-import { registerJobPreScreenQuestionRoutes } from './job-pre-screen-questions/routes';
-import { JobPreScreenAnswerRepository } from './job-pre-screen-answers/repository';
-import { JobPreScreenAnswerService } from './job-pre-screen-answers/service';
-import { registerJobPreScreenAnswerRoutes } from './job-pre-screen-answers/routes';
+
 import { JobRequirementRepository } from './job-requirements/repository';
 import { JobRequirementService } from './job-requirements/service';
 import { registerJobRequirementRoutes } from './job-requirements/routes';
@@ -76,10 +71,6 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
         candidateRepository.getSupabase()
     );
 
-    const preScreenQuestionRepository = new JobPreScreenQuestionRepository(config.supabaseUrl, config.supabaseKey);
-    const preScreenQuestionService = new JobPreScreenQuestionService(preScreenQuestionRepository);
-    const preScreenAnswerRepository = new JobPreScreenAnswerRepository(config.supabaseUrl, config.supabaseKey);
-    const preScreenAnswerService = new JobPreScreenAnswerService(preScreenAnswerRepository, applicationRepository);
     const jobRequirementRepository = new JobRequirementRepository(config.supabaseUrl, config.supabaseKey);
     const jobRequirementService = new JobRequirementService(jobRequirementRepository);
     const noteRepository = new ApplicationNoteRepository(applicationRepository.getSupabase());
@@ -95,8 +86,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerApplicationRoutes(app, { applicationService, placementService, noteService });
     registerPlacementRoutes(app, { placementService });
     candidateSourcerRoutes(app, candidateSourcerService);
-    registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });
-    registerJobPreScreenAnswerRoutes(app, { service: preScreenAnswerService });
+
     registerJobRequirementRoutes(app, { service: jobRequirementService });
     registerApplicationNoteRoutes(app, noteService);
 }

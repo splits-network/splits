@@ -672,6 +672,15 @@ export default function RoleWizardModal({
                 open_to_relocation: formData.open_to_relocation,
                 show_salary_range: formData.show_salary_range,
                 guarantee_days: formData.guarantee_days,
+                pre_screen_questions: formData.pre_screen_questions
+                    .filter((q) => q.question.trim())
+                    .map((q) => ({
+                        question: q.question,
+                        question_type: q.question_type,
+                        is_required: q.is_required,
+                        options: q.options?.length ? q.options : undefined,
+                        disclaimer: q.disclaimer?.trim() || undefined,
+                    })),
             };
 
             if (formData.location) payload.location = formData.location;
@@ -719,37 +728,19 @@ export default function RoleWizardModal({
                     })),
             ];
 
+            // Handle requirements (pre_screen_questions are now part of the job payload above)
             if (mode === "edit") {
-                // Use atomic bulk-replace endpoints — deletes old + inserts new in one transaction
-                await Promise.all([
-                    client.put(
-                        `/job-requirements/job/${targetJobId}/bulk-replace`,
-                        {
-                            requirements: requirements.map((req, i) => ({
-                                requirement_type: req.type,
-                                description: req.description,
-                                sort_order: i,
-                            })),
-                        },
-                    ),
-                    client.put(
-                        `/job-pre-screen-questions/job/${targetJobId}/bulk-replace`,
-                        {
-                            questions: formData.pre_screen_questions
-                                .filter((q) => q.question.trim())
-                                .map((q, i) => ({
-                                    question: q.question,
-                                    question_type: q.question_type,
-                                    is_required: q.is_required,
-                                    options: q.options || null,
-                                    disclaimer: q.disclaimer?.trim() || null,
-                                    sort_order: i,
-                                })),
-                        },
-                    ),
-                ]);
+                await client.put(
+                    `/job-requirements/job/${targetJobId}/bulk-replace`,
+                    {
+                        requirements: requirements.map((req, i) => ({
+                            requirement_type: req.type,
+                            description: req.description,
+                            sort_order: i,
+                        })),
+                    },
+                );
             } else {
-                // Create mode — use individual POST calls
                 if (requirements.length > 0) {
                     await Promise.all(
                         requirements.map((req, i) =>
@@ -760,24 +751,6 @@ export default function RoleWizardModal({
                                 sort_order: i,
                             }),
                         ),
-                    );
-                }
-
-                if (formData.pre_screen_questions.length > 0) {
-                    await Promise.all(
-                        formData.pre_screen_questions
-                            .filter((q) => q.question.trim())
-                            .map((q, i) =>
-                                client.post("/job-pre-screen-questions", {
-                                    job_id: targetJobId,
-                                    question: q.question,
-                                    question_type: q.question_type,
-                                    is_required: q.is_required,
-                                    options: q.options || null,
-                                    disclaimer: q.disclaimer?.trim() || null,
-                                    sort_order: i,
-                                }),
-                            ),
                     );
                 }
             }

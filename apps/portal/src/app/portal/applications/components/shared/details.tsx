@@ -109,7 +109,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             const response = await client.get(`/applications/${itemId}`, {
                 params: {
                     include:
-                        "candidate,job,company,recruiter,ai_review,documents,pre_screen_answers,audit_log",
+                        "candidate,job,company,recruiter,ai_review,documents,audit_log",
                 },
             });
             setApplication(response.data);

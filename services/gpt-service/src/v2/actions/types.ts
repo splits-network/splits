@@ -54,10 +54,11 @@ export interface GptJobDetail extends GptJobSearchResult {
         type: "mandatory" | "preferred";
     }[];
     pre_screen_questions: {
-        id: string;
         question: string;
         type: string;
         is_required: boolean;
+        options?: string[];
+        disclaimer?: string;
     }[];
     company: {
         name: string;
@@ -95,7 +96,7 @@ export interface GptSubmitApplicationRequest {
     confirmed?: boolean;
     confirmation_token?: string;
     pre_screen_answers?: {
-        question_id: string;
+        question: string;
         answer: string;
     }[];
     cover_letter?: string;
@@ -112,7 +113,6 @@ export interface GptConfirmationSummary {
         answer: string;
     }[];
     missing_required_questions: {
-        id: string;
         question: string;
     }[];
     warnings: string[];
@@ -174,7 +174,11 @@ export interface ConfirmationToken {
     jobId: string;
     candidateId: string;
     preScreenAnswers?: {
-        question_id: string;
+        question: string;
+        question_type: string;
+        is_required: boolean;
+        options?: string[];
+        disclaimer?: string;
         answer: string;
     }[];
     coverLetter?: string;

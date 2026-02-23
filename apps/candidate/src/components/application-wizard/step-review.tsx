@@ -3,13 +3,15 @@
 import { useState } from "react";
 
 interface PreScreenQuestion {
-    id: string;
-    question_text: string;
+    question: string;
     question_type: "text" | "yes_no" | "select" | "multi_select";
+    is_required: boolean;
+    options?: string[];
+    disclaimer?: string;
 }
 
 interface Answer {
-    question_id: string;
+    index: number;
     answer: string | string[] | boolean;
 }
 
@@ -51,11 +53,8 @@ export default function StepReview({
         (d) => d.document_type === "cover_letter",
     );
 
-    const getQuestionText = (questionId: string) => {
-        return (
-            questions.find((q) => q.id === questionId)?.question_text ||
-            "Unknown question"
-        );
+    const getQuestionText = (index: number) => {
+        return questions[index]?.question || "Unknown question";
     };
 
     const formatAnswer = (answer: string | string[] | boolean) => {
@@ -218,13 +217,11 @@ export default function StepReview({
                                 Screening Answers
                             </p>
                             <div className="space-y-3">
-                                {answers.map((answer, index) => (
-                                    <div key={answer.question_id}>
+                                {answers.map((answer, idx) => (
+                                    <div key={answer.index}>
                                         <p className="text-xs text-base-content/50 mb-0.5">
-                                            {index + 1}.{" "}
-                                            {getQuestionText(
-                                                answer.question_id,
-                                            )}
+                                            {idx + 1}.{" "}
+                                            {getQuestionText(answer.index)}
                                         </p>
                                         <p className="text-sm font-semibold">
                                             {formatAnswer(answer.answer)}

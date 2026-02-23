@@ -3,15 +3,15 @@
 import { useState } from "react";
 
 interface PreScreenQuestion {
-    id: string;
-    question_text: string;
+    question: string;
     question_type: "text" | "yes_no" | "select" | "multi_select";
     is_required: boolean;
     options?: string[];
+    disclaimer?: string;
 }
 
 interface Answer {
-    question_id: string;
+    index: number;
     answer: string | string[] | boolean;
 }
 
@@ -32,16 +32,16 @@ export default function StepQuestions({
 }: StepQuestionsProps) {
     const [error, setError] = useState<string | null>(null);
 
-    const getAnswer = (questionId: string) => {
-        return answers.find((a) => a.question_id === questionId)?.answer;
+    const getAnswer = (index: number) => {
+        return answers.find((a) => a.index === index)?.answer;
     };
 
     const setAnswer = (
-        questionId: string,
+        index: number,
         answer: string | string[] | boolean,
     ) => {
-        const newAnswers = answers.filter((a) => a.question_id !== questionId);
-        newAnswers.push({ question_id: questionId, answer });
+        const newAnswers = answers.filter((a) => a.index !== index);
+        newAnswers.push({ index, answer });
         onChange(newAnswers);
         setError(null);
     };
@@ -49,8 +49,8 @@ export default function StepQuestions({
     const handleNext = () => {
         const missingRequired = questions
             .filter((q) => q.is_required)
-            .filter((q) => {
-                const ans = getAnswer(q.id);
+            .filter((q, idx) => {
+                const ans = getAnswer(idx);
                 if (ans === undefined || ans === null || ans === "")
                     return true;
                 if (Array.isArray(ans) && ans.length === 0) return true;
@@ -136,7 +136,7 @@ export default function StepQuestions({
             <div className="space-y-4">
                 {questions.map((question, index) => (
                     <div
-                        key={question.id}
+                        key={index}
                         className="border-l-4 border-base-300 bg-base-200 p-5"
                     >
                         <fieldset>
@@ -144,21 +144,29 @@ export default function StepQuestions({
                                 <span className="text-base-content/40 mr-2">
                                     {index + 1}.
                                 </span>
-                                {question.question_text}
+                                {question.question}
                                 {question.is_required && (
                                     <span className="text-error ml-1">*</span>
                                 )}
                             </legend>
+
+                            {question.disclaimer && (
+                                <div className="bg-warning/10 border-l-4 border-warning p-3 mb-3">
+                                    <p className="text-sm text-base-content/70">
+                                        {question.disclaimer}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Text */}
                             {question.question_type === "text" && (
                                 <textarea
                                     className="textarea w-full bg-base-100"
                                     value={
-                                        (getAnswer(question.id) as string) || ""
+                                        (getAnswer(index) as string) || ""
                                     }
                                     onChange={(e) =>
-                                        setAnswer(question.id, e.target.value)
+                                        setAnswer(index, e.target.value)
                                     }
                                     placeholder="Type your answer..."
                                     rows={3}
@@ -176,14 +184,14 @@ export default function StepQuestions({
                                             key={String(opt.value)}
                                             type="button"
                                             className={`btn btn-sm ${
-                                                getAnswer(question.id) ===
+                                                getAnswer(index) ===
                                                 opt.value
                                                     ? "btn-primary"
                                                     : "btn-ghost border-base-300"
                                             }`}
                                             onClick={() =>
                                                 setAnswer(
-                                                    question.id,
+                                                    index,
                                                     opt.value,
                                                 )
                                             }
@@ -199,10 +207,10 @@ export default function StepQuestions({
                                 <select
                                     className="select bg-base-100 w-full"
                                     value={
-                                        (getAnswer(question.id) as string) || ""
+                                        (getAnswer(index) as string) || ""
                                     }
                                     onChange={(e) =>
-                                        setAnswer(question.id, e.target.value)
+                                        setAnswer(index, e.target.value)
                                     }
                                 >
                                     <option value="">
@@ -221,7 +229,7 @@ export default function StepQuestions({
                                 <div className="flex flex-wrap gap-2">
                                     {question.options?.map((option) => {
                                         const currentAnswers =
-                                            (getAnswer(question.id) as
+                                            (getAnswer(index) as
                                                 | string[]
                                                 | undefined) || [];
                                         const isChecked =
@@ -247,7 +255,7 @@ export default function StepQuestions({
                                                               option,
                                                           ];
                                                     setAnswer(
-                                                        question.id,
+                                                        index,
                                                         newAnswers,
                                                     );
                                                 }}

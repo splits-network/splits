@@ -128,21 +128,12 @@ export class GptActionRepository {
             throw reqError;
         }
 
-        // Fetch pre-screen questions
-        const { data: preScreenQuestions, error: psError } = await this.supabase
-            .from('job_pre_screen_questions')
-            .select('*')
-            .eq('job_id', jobId)
-            .order('created_at');
-
-        if (psError) {
-            throw psError;
-        }
+        // pre_screen_questions is now a JSONB column on the jobs table — included in job data above
 
         return {
             ...job,
             requirements: requirements || [],
-            pre_screen_questions: preScreenQuestions || [],
+            pre_screen_questions: job.pre_screen_questions || [],
         };
     }
 
@@ -253,47 +244,37 @@ export class GptActionRepository {
 
     /**
      * Save pre-screen answers for an application
+     * Stores question snapshot + answer as JSONB on the applications row
      */
     async savePreScreenAnswers(
         applicationId: string,
-        answers: { question_id: string; answer: string }[]
+        answers: Array<{ question: string; question_type: string; is_required: boolean; options?: string[]; disclaimer?: string; answer: string }>
     ): Promise<void> {
-        // Upsert each answer
-        for (const answer of answers) {
-            const { error } = await this.supabase
-                .from('job_pre_screen_answers')
-                .upsert(
-                    {
-                        application_id: applicationId,
-                        question_id: answer.question_id,
-                        answer: answer.answer,
-                    },
-                    {
-                        onConflict: 'application_id,question_id',
-                    }
-                );
+        const { error } = await this.supabase
+            .from('applications')
+            .update({ pre_screen_answers: answers })
+            .eq('id', applicationId);
 
-            if (error) {
-                throw error;
-            }
+        if (error) {
+            throw error;
         }
     }
 
     /**
-     * Get pre-screen questions for a job
+     * Get pre-screen questions for a job (from JSONB column)
      */
     async getPreScreenQuestions(jobId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            .from('job_pre_screen_questions')
-            .select('*')
-            .eq('job_id', jobId)
-            .order('created_at');
+            .from('jobs')
+            .select('pre_screen_questions')
+            .eq('id', jobId)
+            .single();
 
         if (error) {
             throw error;
         }
 
-        return data || [];
+        return data?.pre_screen_questions || [];
     }
 
     /**

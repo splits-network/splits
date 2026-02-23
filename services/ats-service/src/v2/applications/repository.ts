@@ -371,8 +371,7 @@ export class ApplicationRepository {
                     break;
                 case 'pre_screen_answers':
                 case 'pre-screen-answers':
-                    // Join with pre-screen answers (one-to-many relationship via application_id)
-                    selectClause += `,pre_screen_answers:job_pre_screen_answers!job_pre_screen_answers_application_id_fkey(id, question_id, answer, created_at, question:job_pre_screen_questions(question, question_type, is_required))`;
+                    // pre_screen_answers is now a JSONB column on the applications table — no join needed
                     break;
                 case 'audit_log':
                 case 'audit':
@@ -464,40 +463,7 @@ export class ApplicationRepository {
         }));
     }
 
-    async getPreScreenAnswersForApplication(applicationId: string): Promise<any[]> {
-        const { data, error } = await this.supabase
-
-            .from('job_pre_screen_answers')
-            .select(
-                `
-                *,
-                question:job_pre_screen_questions(*)
-            `
-            )
-            .eq('application_id', applicationId);
-
-        if (error) throw error;
-        return data || [];
-    }
-
-    async savePreScreenAnswer(answer: {
-        application_id: string;
-        question_id: string;
-        answer: any;
-    }): Promise<any> {
-        // Use UPSERT to handle application updates - update answer if it exists
-        const { data, error } = await this.supabase
-
-            .from('job_pre_screen_answers')
-            .upsert(answer, {
-                onConflict: 'application_id,question_id',
-            })
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
+    // pre_screen_answers is now a JSONB column on the applications table — no separate methods needed
 
     async getJobRequirements(jobId: string): Promise<any[]> {
         if (!jobId) return [];

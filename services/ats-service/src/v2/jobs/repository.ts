@@ -231,15 +231,7 @@ export class JobRepository {
             data.requirements = requirements || [];
         }
 
-        if (include.includes('pre_screen_questions')) {
-            const { data: preScreenQuestions } = await this.supabase
-
-                .from('job_pre_screen_questions')
-                .select('*')
-                .eq('job_id', id)
-                .order('created_at');
-            data.pre_screen_questions = preScreenQuestions || [];
-        }
+        // pre_screen_questions is now a JSONB column on the jobs table — no separate query needed
 
         if (include.includes('applications')) {
             const { data: applications } = await this.supabase

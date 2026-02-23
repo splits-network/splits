@@ -80,22 +80,6 @@ export type JobRequirementInsert = DbTableInsert<'job_requirements'>;
 export type JobRequirementUpdate = DbTableUpdate<'job_requirements'>;
 
 // ============================================================================
-// JOB PRE-SCREEN QUESTIONS
-// ============================================================================
-
-export type JobPreScreenQuestion = DbTable<'job_pre_screen_questions'>;
-export type JobPreScreenQuestionInsert = DbTableInsert<'job_pre_screen_questions'>;
-export type JobPreScreenQuestionUpdate = DbTableUpdate<'job_pre_screen_questions'>;
-
-// ============================================================================
-// JOB PRE-SCREEN ANSWERS
-// ============================================================================
-
-export type JobPreScreenAnswer = DbTable<'job_pre_screen_answers'>;
-export type JobPreScreenAnswerInsert = DbTableInsert<'job_pre_screen_answers'>;
-export type JobPreScreenAnswerUpdate = DbTableUpdate<'job_pre_screen_answers'>;
-
-// ============================================================================
 // CANDIDATE SOURCERS
 // ============================================================================
 

@@ -137,7 +137,7 @@ export class ApplicationServiceV2 {
         }
 
         // Extract document-related fields that shouldn't be persisted to applications table
-        const { document_ids, pre_screen_answers, ...applicationData } = data;
+        const { document_ids, ...applicationData } = data;
 
         // Determine initial stage:
         // - recruiter_proposed: Recruiter submitted on behalf of candidate
@@ -167,18 +167,8 @@ export class ApplicationServiceV2 {
             );
         }
 
-        // Save pre-screen answers if provided
-        if (pre_screen_answers && Array.isArray(pre_screen_answers) && pre_screen_answers.length > 0) {
-            await Promise.all(
-                pre_screen_answers.map((answer: any) =>
-                    this.repository.savePreScreenAnswer({
-                        application_id: application.id,
-                        question_id: answer.question_id,
-                        answer: answer.answer,
-                    })
-                )
-            );
-        }
+        // pre_screen_answers is now a JSONB column — included directly in the application payload above
+
         // Create audit log entry for application creation
         await this.repository.createAuditLog({
             application_id: application.id,
@@ -194,7 +184,7 @@ export class ApplicationServiceV2 {
             metadata: {
                 has_recruiter: hasRecruiter,
                 document_count: document_ids?.length || 0,
-                has_pre_screen_answers: !!(pre_screen_answers?.length),
+                has_pre_screen_answers: !!(data.pre_screen_answers?.length),
             },
         });
 
@@ -254,7 +244,6 @@ export class ApplicationServiceV2 {
         const {
             document_ids,
             primary_resume_id,
-            pre_screen_answers,
             decline_reason,
             decline_details,
             ...persistedUpdates
@@ -294,18 +283,7 @@ export class ApplicationServiceV2 {
             }
         }
 
-        // Update pre-screen answers if provided (using UPSERT)
-        if (pre_screen_answers && Array.isArray(pre_screen_answers) && pre_screen_answers.length > 0) {
-            await Promise.all(
-                pre_screen_answers.map((answer: any) =>
-                    this.repository.savePreScreenAnswer({
-                        application_id: id,
-                        question_id: answer.question_id,
-                        answer: answer.answer,
-                    })
-                )
-            );
-        }
+        // pre_screen_answers is now a JSONB column — included in persistedUpdates above
 
         const updatedApplication = await this.repository.updateApplication(id, persistedUpdates);
 

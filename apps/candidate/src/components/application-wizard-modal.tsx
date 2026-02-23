@@ -50,9 +50,12 @@ export default function ApplicationWizardModal({
         },
         cover_letter: existingApplication?.cover_letter || "",
         pre_screen_answers:
-            existingApplication?.pre_screen_answers ||
+            existingApplication?.pre_screen_answers?.map((a: any, i: number) => ({
+                index: i,
+                answer: a.answer,
+            })) ||
             ([] as Array<{
-                question_id: string;
+                index: number;
                 answer: string | string[] | boolean;
             }>),
         notes:
@@ -149,17 +152,14 @@ export default function ApplicationWizardModal({
                 }
 
                 const authClient = createAuthenticatedClient(token);
-                const [jobResponse, questionsResponse, documentsResponse] =
+                const [jobResponse, documentsResponse] =
                     await Promise.all([
                         authClient.get<{ data: any }>(`/jobs/${jobId}`),
-                        authClient.get<{ data: any[] }>(
-                            `/job-pre-screen-questions?job_id=${jobId}`,
-                        ),
                         authClient.get<{ data: any[] }>("/documents"),
                     ]);
 
                 const jobData = jobResponse.data;
-                const questionsData = questionsResponse.data || [];
+                const questionsData = jobData.pre_screen_questions || [];
                 let documentsData = documentsResponse.data || [];
 
                 if (existingApplication?.documents?.length > 0) {
@@ -230,12 +230,26 @@ export default function ApplicationWizardModal({
             let applicationId;
             const authClient = createAuthenticatedClient(token);
 
+            // Build JSONB snapshot: merge question metadata with answers
+            const preScreenAnswers = questions.map((q: any, i: number) => {
+                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                return {
+                    question: q.question,
+                    question_type: q.question_type,
+                    is_required: q.is_required,
+                    ...(q.options ? { options: q.options } : {}),
+                    ...(q.disclaimer ? { disclaimer: q.disclaimer } : {}),
+                    answer: ans?.answer ?? null,
+                };
+            });
+
             if (existingApplication) {
                 await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
+                        pre_screen_answers: preScreenAnswers,
                         stage: "ai_review",
                     },
                 );
@@ -247,7 +261,7 @@ export default function ApplicationWizardModal({
                         job_id: jobId,
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
-                        pre_screen_answers: formData.pre_screen_answers,
+                        pre_screen_answers: preScreenAnswers,
                         stage: "ai_review",
                     },
                 );
@@ -295,12 +309,26 @@ export default function ApplicationWizardModal({
             let applicationId;
             const authClient = createAuthenticatedClient(token);
 
+            // Build JSONB snapshot for draft too
+            const preScreenAnswers = questions.map((q: any, i: number) => {
+                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                return {
+                    question: q.question,
+                    question_type: q.question_type,
+                    is_required: q.is_required,
+                    ...(q.options ? { options: q.options } : {}),
+                    ...(q.disclaimer ? { disclaimer: q.disclaimer } : {}),
+                    answer: ans?.answer ?? null,
+                };
+            });
+
             if (existingApplication) {
                 await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
+                        pre_screen_answers: preScreenAnswers,
                         stage: "draft",
                     },
                 );
@@ -312,7 +340,7 @@ export default function ApplicationWizardModal({
                         job_id: jobId,
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
-                        pre_screen_answers: formData.pre_screen_answers,
+                        pre_screen_answers: preScreenAnswers,
                         stage: "draft",
                     },
                 );
