@@ -301,10 +301,9 @@ export default function UniversalSubmitCandidateWizard({
                 "application/pdf",
                 "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "text/plain",
             ];
             if (!allowedTypes.includes(file.type)) {
-                setError("Please upload a PDF, DOC, DOCX, or TXT file");
+                setError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
                 return;
             }
             const maxSize = 10 * 1024 * 1024; // 10MB
@@ -1240,7 +1239,7 @@ export default function UniversalSubmitCandidateWizard({
                                     type="file"
                                     ref={fileInputRef}
                                     className="file-input w-full"
-                                    accept=".pdf,.doc,.docx,.txt"
+                                    accept=".pdf,.doc,.docx"
                                     onChange={handleFileChange}
                                 />
                                 {resumeFile && (

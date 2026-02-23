@@ -35,11 +35,9 @@ export default function UploadDocumentModal({
                 "application/pdf",
                 "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "text/plain",
-                "application/rtf",
             ];
             if (!allowedTypes.includes(selectedFile.type)) {
-                setError("Please upload a PDF, DOC, DOCX, TXT, or RTF file");
+                setError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
                 return;
             }
             // Validate file size (10MB)
@@ -157,7 +155,7 @@ export default function UploadDocumentModal({
                             type="file"
                             ref={fileInputRef}
                             className="file-input w-full"
-                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                            accept=".pdf,.doc,.docx"
                             onChange={handleFileChange}
                             required
                         />

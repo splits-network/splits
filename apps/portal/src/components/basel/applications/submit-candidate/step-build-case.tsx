@@ -36,10 +36,9 @@ export default function StepBuildCase({
                 "application/pdf",
                 "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "text/plain",
             ];
             if (!allowedTypes.includes(file.type)) {
-                onFileError("Please upload a PDF, DOC, DOCX, or TXT file");
+                onFileError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
                 return;
             }
             if (file.size > 10 * 1024 * 1024) {
@@ -153,7 +152,7 @@ export default function StepBuildCase({
                     ref={fileInputRef}
                     className="file-input w-full"
                     style={{ borderRadius: 0 }}
-                    accept=".pdf,.doc,.docx,.txt"
+                    accept=".pdf,.doc,.docx"
                     onChange={handleFileChange}
                 />
                 {resumeFile && (

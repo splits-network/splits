@@ -27,8 +27,6 @@ const ALLOWED_TYPES = [
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/plain",
-    "application/rtf",
 ];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -90,7 +88,7 @@ export default function BaselUploadDocumentModal({
         if (!selectedFile) return;
 
         if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-            setError("Please upload a PDF, DOC, DOCX, TXT, or RTF file");
+            setError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
             return;
         }
 
@@ -119,7 +117,7 @@ export default function BaselUploadDocumentModal({
         if (!droppedFile) return;
 
         if (!ALLOWED_TYPES.includes(droppedFile.type)) {
-            setError("Please upload a PDF, DOC, DOCX, TXT, or RTF file");
+            setError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
             return;
         }
 
@@ -269,7 +267,7 @@ export default function BaselUploadDocumentModal({
                             type="file"
                             ref={fileInputRef}
                             className="hidden"
-                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                            accept=".pdf,.doc,.docx"
                             onChange={handleFileChange}
                         />
 
