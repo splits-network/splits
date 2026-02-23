@@ -47,32 +47,40 @@ export function DetailLoader({
     const { getToken } = useAuth();
     const [candidate, setCandidate] = useState<Candidate | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get<{ data: Candidate }>(
+                `/candidates/${id}`,
+            );
+            if (!signal?.cancelled) setCandidate(res.data);
+        } catch (err) {
+            console.error("Failed to fetch candidate detail:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Candidate }>(
-                    `/candidates/${candidateId}`,
-                );
-                if (!cancelled) setCandidate(res.data);
-            } catch (err) {
-                console.error("Failed to fetch candidate detail:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(candidateId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [candidateId]);
+    }, [candidateId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -93,7 +101,7 @@ export function DetailLoader({
         <CandidateDetail
             candidate={candidate}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
         />
     );
 }

@@ -53,6 +53,8 @@ export type {
     ResumeCertification,
     SkillProficiency,
     DegreeLevel,
+    JobPreScreenQuestion,
+    PreScreenQuestionType,
 } from './models';
 
 // Content CMS block types and page structure

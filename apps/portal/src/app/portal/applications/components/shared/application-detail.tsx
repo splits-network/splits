@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Application } from "../../types";
@@ -22,35 +22,43 @@ export function DetailLoader({
     const { getToken } = useAuth();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(
+                `/applications/${id}`,
+                {
+                    params: { include: "candidate,job,company,ai_review" },
+                },
+            );
+            if (!signal?.cancelled) setApplication(response.data || null);
+        } catch (error) {
+            console.error("Failed to fetch application detail:", error);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const response = await client.get(
-                    `/applications/${applicationId}`,
-                    {
-                        params: { include: "candidate,job,company,ai_review" },
-                    },
-                );
-                if (!cancelled) setApplication(response.data || null);
-            } catch (error) {
-                console.error("Failed to fetch application detail:", error);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(applicationId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [applicationId]);
+    }, [applicationId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -78,7 +86,7 @@ export function DetailLoader({
                             variant="descriptive"
                             size="sm"
                             showActions={{ viewDetails: false }}
-                            onRefresh={onRefresh}
+                            onRefresh={handleRefresh}
                         />
                     </div>
                     <button
@@ -91,7 +99,7 @@ export function DetailLoader({
             </div>
             {/* Detail content */}
             <div className="min-h-0 flex-1 overflow-y-auto">
-                <Details itemId={application.id} onRefresh={onRefresh} />
+                <Details itemId={application.id} onRefresh={handleRefresh} />
             </div>
         </div>
     );

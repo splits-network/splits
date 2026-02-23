@@ -22,7 +22,7 @@ export interface ApplicationUpdate {
     accepted_by_company?: boolean;
     accepted_at?: Date | string;
     document_ids?: string[];
-    pre_screen_answers?: Array<{ question_id: string; answer: any }>;
+    pre_screen_answers?: Array<{ question: string; question_type: string; is_required: boolean; options?: string[]; disclaimer?: string; answer: any }>;
     decline_reason?: string;
     decline_details?: string;
     [key: string]: any;

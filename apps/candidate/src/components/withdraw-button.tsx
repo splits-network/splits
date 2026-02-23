@@ -32,16 +32,6 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
         );
     }
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
     const handleWithdraw = async () => {
         setIsWithdrawing(true);
         setError(null);
@@ -53,11 +43,14 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
             }
 
             const client = createAuthenticatedClient(token);
-            const newNote = `\n[${formatDate(new Date().toISOString())}] Candidate: Withdrew application`;
-            // Use standard V2 PATCH endpoint to update application status
             await client.patch(`/applications/${applicationId}`, {
                 stage: 'withdrawn',
-                notes: newNote
+            });
+            await client.post(`/applications/${applicationId}/notes`, {
+                created_by_type: 'candidate',
+                note_type: 'stage_transition',
+                visibility: 'shared',
+                message_text: 'Candidate withdrew application',
             });
 
             // Success - redirect to applications list with success message

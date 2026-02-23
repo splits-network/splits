@@ -128,7 +128,7 @@ export function generateConfirmationToken(
     clerkUserId: string,
     jobId: string,
     candidateId: string,
-    preScreenAnswers?: { question_id: string; answer: string }[],
+    preScreenAnswers?: ConfirmationToken['preScreenAnswers'],
     coverLetter?: string,
 ): ConfirmationToken {
     const tokenId = `gpt_confirm_${randomUUID()}`;

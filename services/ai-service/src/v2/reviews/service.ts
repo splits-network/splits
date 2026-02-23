@@ -156,7 +156,7 @@ export class AIReviewServiceV2 {
                 category: req.category,
             })),
             pre_screen_answers: application.pre_screen_answers?.map((ans: any) => ({
-                question_text: ans.question?.question_text || ans.question_text || '',
+                question_text: ans.question || '',
                 answer_text: typeof ans.answer === 'string' ? ans.answer : JSON.stringify(ans.answer),
             })),
         };

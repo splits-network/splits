@@ -2,14 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName } from "../../types";
 import { useCompanyContext } from "../../contexts/company-context";
@@ -44,9 +44,9 @@ export default function RecruiterActionsToolbar({
     className = "",
 }: RecruiterActionsToolbarProps) {
     const { getToken } = useAuth();
-    const router = useRouter();
     const toast = useToast();
     const { isCompanyUser, isAdmin } = useUserProfile();
+    const chatSidebar = useChatSidebar();
 
     const [startingChat, setStartingChat] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
@@ -81,9 +81,9 @@ export default function RecruiterActionsToolbar({
                 recruiterUserId,
                 {},
             );
-            router.push(
-                `/portal/messages?conversationId=${conversationId}`,
-            );
+            chatSidebar.openToThread(conversationId, {
+                otherUserName: getDisplayName(recruiter),
+            });
         } catch (err: any) {
             console.error("Failed to start chat:", err);
             toast.error(err?.message || "Failed to start chat");
@@ -196,7 +196,7 @@ export default function RecruiterActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

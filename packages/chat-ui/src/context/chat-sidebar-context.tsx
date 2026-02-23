@@ -259,10 +259,18 @@ export function ChatSidebarProvider({
         }
     }, [userId]);
 
-    // Initial load
+    // Initial load when userId appears; full reset when userId disappears (sign-out)
     useEffect(() => {
         if (userId) {
             loadConversations();
+        } else {
+            // User signed out — close sidebar and wipe all session data
+            setIsOpen(false);
+            setIsMinimized(false);
+            setView("list");
+            setActiveConversationId(null);
+            setActiveConversationMeta(null);
+            setConversations([]);
         }
     }, [userId, loadConversations]);
 

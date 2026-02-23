@@ -41,18 +41,7 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         tag: 'placements',
     },
     // Note: candidate-role-assignments removed - table dropped during application flow consolidation
-    {
-        name: 'job-pre-screen-questions',
-        service: 'ats',
-        basePath: '/job-pre-screen-questions',
-        tag: 'job-pre-screen-questions',
-    },
-    {
-        name: 'job-pre-screen-answers',
-        service: 'ats',
-        basePath: '/job-pre-screen-answers',
-        tag: 'job-pre-screen-answers',
-    },
+    // Note: job-pre-screen-questions and job-pre-screen-answers removed - migrated to JSONB columns on jobs and applications tables
     {
         name: 'job-requirements',
         service: 'ats',
@@ -65,6 +54,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     // Register custom sub-resource routes BEFORE generic CRUD to avoid path conflicts
     registerCompanyContactRoutes(app, services);
     registerTerminationRoutes(app, services);
+    registerBulkReplaceRoutes(app, services);
 
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
     ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
@@ -78,6 +68,26 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerAiReviewRoutes(app, services);
     registerApplicationNoteRoutes(app, services);
     registerApplicationProposalRoutes(app, services);
+}
+
+function registerBulkReplaceRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    app.put(
+        '/api/v2/job-requirements/job/:jobId/bulk-replace',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId } = request.params as { jobId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/job-requirements/job/${jobId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
 }
 
 function registerTerminationRoutes(app: FastifyInstance, services: ServiceRegistry) {

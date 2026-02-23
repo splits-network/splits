@@ -40,6 +40,7 @@ export function ApplicationsAnimator({
                             y: 0,
                             duration: 0.35,
                             ease: "power3.out",
+                            clearProps: "transform",
                         },
                     );
                 },
@@ -78,7 +79,7 @@ export function ApplicationsAnimator({
                 heroTl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                 );
             }
 
@@ -93,6 +94,7 @@ export function ApplicationsAnimator({
                         rotateX: 0,
                         duration: 1,
                         stagger: 0.12,
+                        clearProps: "transform",
                     },
                     "-=0.3",
                 );
@@ -103,17 +105,17 @@ export function ApplicationsAnimator({
                 heroTl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
+                    { opacity: 1, y: 0, duration: 0.7, clearProps: "transform" },
                     "-=0.5",
                 );
             }
 
-            const stats = $(".hero-stat");
-            if (stats.length) {
+            const statBar = $1(".header-stat-bar");
+            if (statBar) {
                 heroTl.fromTo(
-                    stats,
+                    statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.3",
                 );
             }
@@ -130,6 +132,7 @@ export function ApplicationsAnimator({
                         duration: 0.6,
                         ease: "power3.out",
                         delay: 0.8,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -146,6 +149,7 @@ export function ApplicationsAnimator({
                         duration: 0.7,
                         ease: "power3.out",
                         delay: 1,
+                        clearProps: "transform",
                     },
                 );
             }

@@ -61,7 +61,7 @@ export default function EmailThreadPanel({
                 gsap.fromTo(
                     items,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: "power3.out" },
+                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: "power3.out", clearProps: "transform" },
                 );
             }
         },

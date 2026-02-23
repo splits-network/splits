@@ -17,7 +17,7 @@ import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { ProposalResponseWizard } from "../modals/proposal-response-wizard";
 import { DeclineModal } from "../modals/decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
@@ -177,10 +177,9 @@ export default function ActionsToolbar({
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
             const client = createAuthenticatedClient(token);
-            const response = await client.get("/job-pre-screen-questions", {
-                params: { job_id: item.job_id },
-            });
-            const questions = response.data || response;
+            const response = await client.get(`/jobs/${item.job_id}`);
+            const job = response.data;
+            const questions = job?.pre_screen_questions || [];
             setPreScreenQuestions(Array.isArray(questions) ? questions : []);
             setShowProposalWizard(true);
         } catch (err: any) {
@@ -457,26 +456,36 @@ export default function ActionsToolbar({
     if (canBackToDraft) {
         speedDialActions.push({
             key: "back-to-draft",
-            icon: confirmAction === "back-to-draft"
-                ? "fa-duotone fa-regular fa-check"
-                : "fa-duotone fa-regular fa-file-pen",
-            label: confirmAction === "back-to-draft" ? "Confirm?" : "Move to Draft",
-            variant: confirmAction === "back-to-draft" ? "btn-success" : "btn-ghost",
-            loading: actions.loading === "back-to-draft" || actions.loading === "return-to-draft",
+            icon:
+                confirmAction === "back-to-draft"
+                    ? "fa-duotone fa-regular fa-check"
+                    : "fa-duotone fa-regular fa-file-pen",
+            label:
+                confirmAction === "back-to-draft"
+                    ? "Confirm?"
+                    : "Move to Draft",
+            variant:
+                confirmAction === "back-to-draft" ? "btn-success" : "btn-ghost",
+            loading:
+                actions.loading === "back-to-draft" ||
+                actions.loading === "return-to-draft",
             disabled: isLoading,
-            onClick: () => handleConfirmClick("back-to-draft", handleBackToDraft),
+            onClick: () =>
+                handleConfirmClick("back-to-draft", handleBackToDraft),
         });
     }
 
     if (canSubmit) {
         speedDialActions.push({
             key: "submit",
-            icon: confirmAction === "submit"
-                ? "fa-duotone fa-regular fa-check"
-                : "fa-duotone fa-regular fa-paper-plane",
+            icon:
+                confirmAction === "submit"
+                    ? "fa-duotone fa-regular fa-check"
+                    : "fa-duotone fa-regular fa-paper-plane",
             label: confirmAction === "submit" ? "Confirm?" : getSubmitLabel(),
             variant: "btn-success",
-            loading: actions.loading === "submit" || actions.loading === "submit-ai",
+            loading:
+                actions.loading === "submit" || actions.loading === "submit-ai",
             disabled: isLoading,
             onClick: () => handleConfirmClick("submit", handleSubmit),
         });
@@ -485,9 +494,10 @@ export default function ActionsToolbar({
     if (canWithdraw) {
         speedDialActions.push({
             key: "withdraw",
-            icon: confirmAction === "withdraw"
-                ? "fa-duotone fa-regular fa-check"
-                : "fa-duotone fa-regular fa-ban",
+            icon:
+                confirmAction === "withdraw"
+                    ? "fa-duotone fa-regular fa-check"
+                    : "fa-duotone fa-regular fa-ban",
             label: confirmAction === "withdraw" ? "Confirm?" : "Withdraw",
             variant: "btn-error",
             loading: actions.loading === "withdraw",
@@ -524,25 +534,7 @@ export default function ActionsToolbar({
         loading: startingChat,
         disabled: !recruiterUserId || startingChat,
         title: chatDisabledReason || "Message recruiter",
-        renderButton: (
-            <button
-                className={`btn btn-circle btn-${size} btn-ghost relative`}
-                disabled={!recruiterUserId || startingChat}
-                onClick={handleMessageRecruiter}
-                title={chatDisabledReason || "Message recruiter"}
-                aria-label="Message"
-            >
-                <Presence
-                    status={presenceStatus}
-                    className="absolute -top-1 -right-1"
-                />
-                {startingChat ? (
-                    <span className="loading loading-spinner loading-xs" />
-                ) : (
-                    <i className="fa-duotone fa-regular fa-messages transition-transform duration-150 group-hover:scale-110" />
-                )}
-            </button>
-        ),
+        onClick: handleMessageRecruiter,
     });
 
     if (onViewDetails) {
@@ -557,10 +549,7 @@ export default function ActionsToolbar({
 
     return (
         <>
-            <SpeedDial
-                actions={speedDialActions}
-                size={size}
-            />
+            <SpeedMenu actions={speedDialActions} size={size} />
             {modals}
         </>
     );

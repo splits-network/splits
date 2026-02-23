@@ -41,7 +41,7 @@ export function BillingSection({ initialTab = "subscription", onTabChange }: Bil
             gsap.fromTo(
                 contentRef.current,
                 { opacity: 0, y: 12 },
-                { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+                { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
             );
         },
         { dependencies: [activeTab], scope: contentRef },

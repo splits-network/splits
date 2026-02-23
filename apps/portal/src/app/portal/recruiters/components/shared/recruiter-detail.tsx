@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -260,35 +260,43 @@ export function DetailLoader({
     const { getToken } = useAuth();
     const [recruiter, setRecruiter] = useState<RecruiterWithUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get<{ data: RecruiterWithUser }>(
+                `/recruiters/${id}`,
+                {
+                    params: { include: "user,reputation" },
+                },
+            );
+            if (!signal?.cancelled) setRecruiter(res.data);
+        } catch (err) {
+            console.error("Failed to fetch recruiter detail:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: RecruiterWithUser }>(
-                    `/recruiters/${recruiterId}`,
-                    {
-                        params: { include: "user,reputation" },
-                    },
-                );
-                if (!cancelled) setRecruiter(res.data);
-            } catch (err) {
-                console.error("Failed to fetch recruiter detail:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(recruiterId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [recruiterId]);
+    }, [recruiterId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -304,7 +312,7 @@ export function DetailLoader({
         <RecruiterDetail
             recruiter={recruiter}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
         />
     );
 }

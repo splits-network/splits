@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
 
@@ -166,7 +166,7 @@ export default function ConnectionActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

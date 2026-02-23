@@ -3,16 +3,20 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate } from "../../types";
-import { Button, SpeedDial, type SpeedDialAction } from "@splits-network/basel-ui";
+import {
+    Button,
+    SpeedMenu,
+    type SpeedDialAction,
+} from "@splits-network/basel-ui";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import VerificationModal from "../modals/verification-modal";
@@ -60,9 +64,9 @@ export default function CandidateActionsToolbar({
     className = "",
 }: CandidateActionsToolbarProps) {
     const { getToken } = useAuth();
-    const router = useRouter();
     const toast = useToast();
     const { isAdmin, isRecruiter } = useUserProfile();
+    const chatSidebar = useChatSidebar();
     const refresh = onRefresh ?? (() => {});
 
     /* ── Modal states ── */
@@ -123,9 +127,9 @@ export default function CandidateActionsToolbar({
                     { company_id: candidate.company_id || null },
                 );
             } else {
-                router.push(
-                    `/portal/messages?conversationId=${conversationId}`,
-                );
+                chatSidebar.openToThread(conversationId, {
+                    otherUserName: candidate.full_name || "Unknown",
+                });
             }
         } catch (err: any) {
             console.error("Failed to start chat:", err);
@@ -134,7 +138,6 @@ export default function CandidateActionsToolbar({
             setStartingChat(false);
         }
     };
-
 
     const handleViewDetails = () => {
         if (onViewDetails) onViewDetails(candidate.id);
@@ -266,23 +269,7 @@ export default function CandidateActionsToolbar({
                 disabled: !canChat || startingChat,
                 loading: startingChat,
                 title: chatDisabledReason || undefined,
-                renderButton: (
-                    <span title={chatDisabledReason || undefined} className="relative inline-block">
-                        <Presence
-                            status={presenceStatus}
-                            className="absolute -top-1 -right-1 z-10"
-                        />
-                        <Button
-                            icon="fa-duotone fa-regular fa-messages"
-                            variant="btn-neutral btn-circle btn-outline"
-                            size={size}
-                            onClick={handleStartChat}
-                            disabled={!canChat || startingChat}
-                            loading={startingChat}
-                            title="Message Candidate"
-                        />
-                    </span>
-                ),
+                onClick: handleStartChat,
             });
         }
         if (actions.viewDetails) {
@@ -292,13 +279,15 @@ export default function CandidateActionsToolbar({
                 label: "View Details",
                 variant: "btn-primary",
                 onClick: onViewDetails ? handleViewDetails : undefined,
-                href: !onViewDetails ? `/portal/candidates?candidateId=${candidate.id}` : undefined,
+                href: !onViewDetails
+                    ? `/portal/candidates?candidateId=${candidate.id}`
+                    : undefined,
             });
         }
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

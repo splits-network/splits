@@ -434,7 +434,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                             {data.conversation.job_id && (
                                 <Link
                                     className="link link-hover"
-                                    href={`/portal/roles/${data.conversation.job_id}`}
+                                    href={`/portal/roles?roleId=${data.conversation.job_id}`}
                                 >
                                     Role: {jobTitle || data.conversation.job_id}
                                 </Link>

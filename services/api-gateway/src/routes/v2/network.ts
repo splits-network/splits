@@ -276,7 +276,7 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
                     correlationId,
                     buildAuthHeaders(request)
                 );
-                return reply.code(201).send({ data: team });
+                return reply.code(201).send(team);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to create team');
             }
@@ -296,7 +296,7 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
                     correlationId,
                     buildAuthHeaders(request)
                 );
-                return reply.send({ data: team });
+                return reply.send(team);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to fetch team');
             }
@@ -336,7 +336,7 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
                     correlationId,
                     buildAuthHeaders(request)
                 );
-                return reply.code(201).send({ data: invitation });
+                return reply.code(201).send(invitation);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to invite member');
             }

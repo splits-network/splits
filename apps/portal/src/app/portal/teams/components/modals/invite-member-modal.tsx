@@ -26,7 +26,6 @@ export function InviteMemberModal({
     onClose,
     onSuccess,
 }: InviteMemberModalProps) {
-    console.log("[InviteMemberModal] mounted — teamId:", teamId);
     const { getToken } = useAuth();
     const toast = useToast();
 
@@ -47,14 +46,6 @@ export function InviteMemberModal({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            console.log(
-                "[InviteMemberModal] teamId:",
-                teamId,
-                "email:",
-                email,
-                "role:",
-                role,
-            );
             await client.post(`/teams/${teamId}/invitations`, { email, role });
 
             toast.success(`Invitation sent to ${email}`);

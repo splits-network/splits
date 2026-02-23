@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -614,32 +614,40 @@ export function DetailLoader({
     const { getToken } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
+                params: { include: "company,requirements" },
+            });
+            if (!signal?.cancelled) setJob(res.data);
+        } catch (err) {
+            console.error("Failed to fetch job detail:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Job }>(`/jobs/${jobId}`, {
-                    params: { include: "company,requirements" },
-                });
-                if (!cancelled) setJob(res.data);
-            } catch (err) {
-                console.error("Failed to fetch job detail:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(jobId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [jobId]);
+    }, [jobId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -660,7 +668,7 @@ export function DetailLoader({
         <JobDetail
             job={job}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
             onUpdateItem={onUpdateItem}
         />
     );

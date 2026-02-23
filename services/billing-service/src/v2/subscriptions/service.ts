@@ -387,10 +387,12 @@ export class SubscriptionServiceV2 {
             throw new Error('Unable to resolve user for setup intent');
         }
 
-        // Validate the plan exists
-        const plan = await this.planRepository.findPlan(request.plan_id);
-        if (!plan) {
-            throw new Error('Plan not found');
+        // Validate the plan exists (only when plan_id is provided — not needed for payment method updates)
+        if (request.plan_id) {
+            const plan = await this.planRepository.findPlan(request.plan_id);
+            if (!plan) {
+                throw new Error('Plan not found');
+            }
         }
 
         // Check if user already has a Stripe customer ID
@@ -418,7 +420,7 @@ export class SubscriptionServiceV2 {
                 metadata: {
                     user_id: access.identityUserId,
                     clerk_user_id: clerkUserId,
-                    plan_id: request.plan_id,
+                    ...(request.plan_id ? { plan_id: request.plan_id } : {}),
                 },
             });
             customerId = customer.id;
@@ -431,7 +433,7 @@ export class SubscriptionServiceV2 {
             metadata: {
                 user_id: access.identityUserId,
                 clerk_user_id: clerkUserId,
-                plan_id: request.plan_id,
+                ...(request.plan_id ? { plan_id: request.plan_id } : {}),
             },
         });
 

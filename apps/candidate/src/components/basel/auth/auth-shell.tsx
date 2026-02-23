@@ -41,7 +41,7 @@ export function AuthShell({ children }: AuthShellProps) {
                 tl.fromTo(
                     logo,
                     { opacity: 0, scale: 0.92 },
-                    { opacity: 1, scale: 1, duration: 0.55 },
+                    { opacity: 1, scale: 1, duration: 0.55, clearProps: "transform" },
                 );
             }
 
@@ -50,7 +50,7 @@ export function AuthShell({ children }: AuthShellProps) {
                 tl.fromTo(
                     rule,
                     { scaleX: 0, transformOrigin: "left" },
-                    { scaleX: 1, duration: 0.4 },
+                    { scaleX: 1, duration: 0.4, clearProps: "transform" },
                     "-=0.25",
                 );
             }
@@ -60,7 +60,7 @@ export function AuthShell({ children }: AuthShellProps) {
                 tl.fromTo(
                     form,
                     { opacity: 0, y: 24 },
-                    { opacity: 1, y: 0, duration: 0.55 },
+                    { opacity: 1, y: 0, duration: 0.55, clearProps: "transform" },
                     "-=0.2",
                 );
             }

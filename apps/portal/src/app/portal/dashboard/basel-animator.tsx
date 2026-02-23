@@ -48,6 +48,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         duration: D.fast,
                         ease: E.editorial,
                         stagger: 0.08,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -65,6 +66,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         ease: E.editorial,
                         stagger: 0.06,
                         delay: 0.1,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -82,6 +84,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         ease: E.editorial,
                         stagger: 0.1,
                         delay: 0.2,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -99,6 +102,7 @@ export function BaselAnimator({ children }: BaselAnimatorProps) {
                         ease: E.editorial,
                         stagger: 0.04,
                         delay: 0.3,
+                        clearProps: "transform",
                     },
                 );
             }

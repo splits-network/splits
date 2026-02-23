@@ -120,18 +120,6 @@ export interface JobRequirementBulkItem {
     sort_order: number;
 }
 
-export interface JobPreScreenQuestionBulkItem {
-    question: string;
-    question_type: string;
-    is_required: boolean;
-    sort_order: number;
-    options?: any; // JSONB field for multiple choice options
-}
-
 export interface BulkReplaceRequirementsRequest {
     requirements: JobRequirementBulkItem[];
-}
-
-export interface BulkReplaceQuestionsRequest {
-    questions: JobPreScreenQuestionBulkItem[];
 }

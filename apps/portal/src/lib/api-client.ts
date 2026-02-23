@@ -55,6 +55,11 @@ export class ApiClient {
         return response as T;
     }
 
+    async put<T = any>(endpoint: string, data?: any): Promise<T> {
+        const response = await this.client.put(endpoint, data);
+        return response as T;
+    }
+
     async delete<T = any>(endpoint: string): Promise<T> {
         const response = await this.client.delete(endpoint);
         return response as T;

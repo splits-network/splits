@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Team, TeamMember } from "../../types";
@@ -216,40 +216,48 @@ export function TeamDetailLoader({
     const [loadedTeam, setLoadedTeam] = useState<Team | null>(team || null);
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, teamProp: Team | undefined, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+
+            // Fetch team if not provided
+            if (!teamProp) {
+                const teamRes = await client.get<{ data: Team }>(
+                    `/teams/${id}`,
+                );
+                if (!signal?.cancelled) setLoadedTeam(teamRes.data);
+            }
+
+            // Fetch members
+            const membersRes = await client.get(`/teams/${id}/members`);
+            if (!signal?.cancelled) setMembers(membersRes.data || []);
+        } catch (err) {
+            console.error("Failed to fetch team details:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-
-                // Fetch team if not provided
-                if (!team) {
-                    const teamRes = await client.get<{ data: Team }>(
-                        `/teams/${teamId}`,
-                    );
-                    if (!cancelled) setLoadedTeam(teamRes.data);
-                }
-
-                // Fetch members
-                const membersRes = await client.get(`/teams/${teamId}/members`);
-                if (!cancelled) setMembers(membersRes.data || []);
-            } catch (err) {
-                console.error("Failed to fetch team details:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(teamId, team, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [teamId]);
+    }, [teamId, refreshKey, fetchDetail, team]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -272,7 +280,7 @@ export function TeamDetailLoader({
             team={resolvedTeam}
             members={members}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
         />
     );
 }

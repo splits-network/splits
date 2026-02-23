@@ -321,19 +321,17 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         );
                     }
 
-                    // Step 5: Fetch pre-screen questions
-                    const preScreenQuestions = await repository.getPreScreenQuestions(job_id);
+                    // Step 5: Get pre-screen questions from job JSONB
+                    const preScreenQuestions: any[] = job.pre_screen_questions || [];
 
-                    // Step 6: Check required pre-screen questions
+                    // Step 6: Check required pre-screen questions (match by question text)
                     const requiredQuestions = preScreenQuestions.filter((q: any) => q.is_required);
-                    const providedAnswerIds = (pre_screen_answers || []).map((a) => a.question_id);
+                    const providedAnswerTexts = (pre_screen_answers || []).map((a) => a.question);
                     const missingRequiredQuestions = requiredQuestions.filter(
-                        (q: any) => !providedAnswerIds.includes(q.id)
+                        (q: any) => !providedAnswerTexts.includes(q.question)
                     );
 
                     if (missingRequiredQuestions.length > 0) {
-                        // If no answers provided at all, return all questions
-                        // If some answers provided, return only missing ones
                         const questionsToReturn =
                             !pre_screen_answers || pre_screen_answers.length === 0
                                 ? requiredQuestions
@@ -345,7 +343,6 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                                 message:
                                     'This job requires answers to pre-screen questions before applying',
                                 questions: questionsToReturn.map((q: any) => ({
-                                    id: q.id,
                                     question: q.question,
                                     type: q.question_type,
                                     is_required: true,
@@ -354,16 +351,29 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         });
                     }
 
-                    // Step 7: Generate confirmation token
+                    // Step 7: Build answers with question snapshots for storage
+                    const answersWithSnapshots = (pre_screen_answers || []).map((ans) => {
+                        const questionDef = preScreenQuestions.find((q: any) => q.question === ans.question);
+                        return {
+                            question: ans.question,
+                            question_type: questionDef?.question_type || 'text',
+                            is_required: questionDef?.is_required || false,
+                            options: questionDef?.options || undefined,
+                            disclaimer: questionDef?.disclaimer || undefined,
+                            answer: ans.answer,
+                        };
+                    });
+
+                    // Step 8: Generate confirmation token
                     const token = generateConfirmationToken(
                         clerkUserId,
                         job_id,
                         candidateId,
-                        pre_screen_answers,
+                        answersWithSnapshots,
                         cover_letter
                     );
 
-                    // Step 8: Build confirmation summary
+                    // Step 9: Build confirmation summary
                     const requirementsSummary: string[] = [];
                     if (job.requirements) {
                         const mandatoryReqs = job.requirements
@@ -374,16 +384,13 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         );
                     }
 
-                    const preScreenAnswersProvided = (pre_screen_answers || []).map((ans) => {
-                        const question = preScreenQuestions.find((q: any) => q.id === ans.question_id);
-                        return {
-                            question: question?.question || 'Unknown question',
-                            answer: ans.answer,
-                        };
-                    });
+                    const preScreenAnswersProvided = (pre_screen_answers || []).map((ans) => ({
+                        question: ans.question,
+                        answer: ans.answer,
+                    }));
 
                     const missingOptionalQuestions = preScreenQuestions.filter(
-                        (q: any) => !q.is_required && !providedAnswerIds.includes(q.id)
+                        (q: any) => !q.is_required && !providedAnswerTexts.includes(q.question)
                     );
 
                     const warnings: string[] = [];

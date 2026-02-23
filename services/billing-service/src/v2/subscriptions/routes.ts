@@ -79,10 +79,6 @@ export function registerSubscriptionRoutes(
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as SetupIntentRequest;
 
-            if (!body.plan_id) {
-                return reply.code(400).send({ error: { message: 'plan_id is required' } });
-            }
-
             const result = await config.subscriptionService.createSetupIntent(body, clerkUserId);
             return reply.send({ data: result });
         } catch (error: any) {

@@ -9,7 +9,10 @@ export {
 } from './expandable-button';
 
 export {
-    SpeedDial,
-    type SpeedDialProps,
     type SpeedDialAction,
 } from './speed-dial';
+
+export {
+    SpeedMenu,
+    type SpeedMenuProps,
+} from './speed-menu';

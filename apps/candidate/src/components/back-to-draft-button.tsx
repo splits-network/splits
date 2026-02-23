@@ -30,7 +30,12 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
             const client = createAuthenticatedClient(token);
             await client.patch(`/applications/${applicationId}`, {
                 stage: 'draft',
-                notes: 'Candidate moved application back to draft for edits',
+            });
+            await client.post(`/applications/${applicationId}/notes`, {
+                created_by_type: 'candidate',
+                note_type: 'stage_transition',
+                visibility: 'shared',
+                message_text: 'Candidate moved application back to draft for edits',
             });
 
             // Success - refresh page to show updated state

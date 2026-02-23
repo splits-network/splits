@@ -2,16 +2,16 @@
 
 import { useState, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import {
     Button,
-    SpeedDial,
+    SpeedMenu,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
 import ApproveGateModal from "../modals/approve-gate-modal";
@@ -72,9 +72,9 @@ export default function ActionsToolbar({
     className = "",
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
-    const router = useRouter();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const chatSidebar = useChatSidebar();
     const filterContext = useFilterOptional();
     const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
 
@@ -154,9 +154,9 @@ export default function ActionsToolbar({
                     },
                 );
             } else {
-                router.push(
-                    `/portal/messages?conversationId=${conversationId}`,
-                );
+                chatSidebar.openToThread(conversationId, {
+                    otherUserName: application.candidate?.full_name || "Unknown",
+                });
             }
         } catch (err: any) {
             console.error("Failed to start chat:", err);
@@ -359,7 +359,9 @@ export default function ActionsToolbar({
             permissions.canRequestChanges,
         scheduleInterview:
             (isRecruiter || isAdmin) &&
-            ["screen", "company_review", "interview", "offer"].includes(application.stage ?? ""),
+            ["screen", "company_review", "interview", "offer"].includes(
+                application.stage ?? "",
+            ),
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -432,7 +434,9 @@ export default function ActionsToolbar({
             />
             {showScheduleModal && (
                 <ScheduleInterviewModal
-                    candidateName={application.candidate?.full_name || "Unknown"}
+                    candidateName={
+                        application.candidate?.full_name || "Unknown"
+                    }
                     candidateEmail={application.candidate?.email || undefined}
                     jobTitle={application.job?.title || undefined}
                     onClose={() => setShowScheduleModal(false)}
@@ -517,25 +521,7 @@ export default function ActionsToolbar({
                 disabled: !canChat || startingChat,
                 loading: startingChat,
                 title: chatDisabledReason || undefined,
-                renderButton: (
-                    <div
-                        className="relative inline-block"
-                        title={chatDisabledReason || undefined}
-                    >
-                        <Presence
-                            status={presenceStatus}
-                            className="absolute -top-1 -right-1 z-10"
-                        />
-                        <Button
-                            icon="fa-duotone fa-regular fa-messages"
-                            variant="btn-neutral btn-circle btn-outline"
-                            size={size}
-                            disabled={!canChat || startingChat}
-                            loading={startingChat}
-                            onClick={handleStartChat}
-                        />
-                    </div>
-                ),
+                onClick: handleStartChat,
             });
         }
         if (actions.viewDetails && onViewDetails) {
@@ -550,7 +536,7 @@ export default function ActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}
@@ -666,7 +652,7 @@ export default function ActionsToolbar({
 
         return (
             <>
-                <SpeedDial
+                <SpeedMenu
                     actions={speedDialActions}
                     size={size ?? "sm"}
                     className={className}

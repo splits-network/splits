@@ -51,7 +51,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
+                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
                 );
             }
 
@@ -66,6 +66,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                         rotateX: 0,
                         duration: D.hero,
                         stagger: S.words,
+                        clearProps: "transform",
                     },
                     "-=0.3",
                 );
@@ -76,7 +77,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: D.slow },
+                    { opacity: 1, y: 0, duration: D.slow, clearProps: "transform" },
                     "-=0.5",
                 );
             }
@@ -86,7 +87,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
+                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
                     "-=0.3",
                 );
             }
@@ -103,6 +104,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                         duration: D.normal,
                         ease: E.smooth,
                         delay: 0.8,
+                        clearProps: "transform",
                     },
                 );
             }
@@ -119,6 +121,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                         duration: D.slow,
                         ease: E.smooth,
                         delay: 1,
+                        clearProps: "transform",
                     },
                 );
             }

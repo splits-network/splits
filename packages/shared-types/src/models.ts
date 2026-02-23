@@ -219,15 +219,11 @@ export interface JobRequirement {
 export type PreScreenQuestionType = 'text' | 'yes_no' | 'select' | 'multi_select';
 
 export interface JobPreScreenQuestion {
-    id: string;
-    job_id: string;
     question: string;
     question_type: PreScreenQuestionType;
-    options?: string[]; // For select/multi_select types - stored as JSON
+    options?: string[];
     is_required: boolean;
-    sort_order: number;
-    created_at: Date;
-    updated_at: Date;
+    disclaimer?: string;
 }
 
 // ============================================================================
