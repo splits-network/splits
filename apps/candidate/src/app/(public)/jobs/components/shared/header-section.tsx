@@ -43,22 +43,43 @@ export function HeaderSection({
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8">
-                        {[
-                            { value: total, label: "Total Roles" },
-                            { value: activeCount, label: "Active" },
-                            { value: newCount, label: "New This Week" },
-                            { value: remoteCount, label: "Remote" },
-                        ].map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-briefcase text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Total Roles</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-bolt text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{activeCount}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Active</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-sparkles text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{newCount}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">New This Week</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-globe text-base-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{remoteCount}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Remote</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

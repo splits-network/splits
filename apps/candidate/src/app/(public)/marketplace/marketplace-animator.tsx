@@ -87,17 +87,16 @@ export default function MarketplaceAnimator({
                 );
             }
 
-            // Hero stat items
-            const stats = $(".hero-stat");
-            if (stats.length) {
+            // Stat bar
+            const statBar = $1(".header-stat-bar");
+            if (statBar) {
                 tl.fromTo(
-                    stats,
+                    statBar,
                     { opacity: 0, y: 20 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: 0.5,
-                        stagger: 0.08,
+                        duration: 0.6,
                     },
                     "-=0.3",
                 );

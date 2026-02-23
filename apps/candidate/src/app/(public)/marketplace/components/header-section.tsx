@@ -17,12 +17,6 @@ export default function HeaderSection({
     onSearchChange,
     onSearchClear,
 }: HeaderSectionProps) {
-    const stats = [
-        { value: total, label: "Active Recruiters" },
-        { value: experienced, label: "Experienced" },
-        { value: topRated, label: "Top Rated" },
-    ];
-
     return (
         <section className="relative bg-neutral text-neutral-content py-16 lg:py-20 overflow-hidden">
             {/* Diagonal accent */}
@@ -83,17 +77,34 @@ export default function HeaderSection({
                     </div>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap gap-8 mt-10">
-                        {stats.map((stat, i) => (
-                            <div key={i} className="hero-stat opacity-0">
-                                <div className="text-2xl font-black tracking-tight text-primary">
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider text-neutral-content/40">
-                                    {stat.label}
-                                </div>
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-10 opacity-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-users text-primary-content" />
                             </div>
-                        ))}
+                            <div>
+                                <div className="text-2xl font-black">{total}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Active Recruiters</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-medal text-accent-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{experienced}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Experienced</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-star text-secondary-content" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-black">{topRated}</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">Top Rated</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
