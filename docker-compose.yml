@@ -1,5 +1,18 @@
 services:
   # Infrastructure Services
+  clamav:
+    image: clamav/clamav:latest
+    container_name: splits-clamav
+    ports:
+      - "3310:3310"
+    networks:
+      - splits-network
+    healthcheck:
+      test: ["CMD", "clamdscan", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   redis:
     image: redis:7-alpine
     container_name: splits-redis

@@ -14,6 +14,7 @@ export interface CreateDocumentRecord {
     uploaded_by?: string;
     metadata?: Record<string, any>;
     processing_status?: ProcessingStatus;
+    scan_status?: string;
 }
 
 type DocumentRow = {
@@ -29,6 +30,7 @@ type DocumentRow = {
     uploaded_by_user_id?: string | null;
     status?: string;
     processing_status?: ProcessingStatus;
+    scan_status?: string;
     metadata?: Record<string, any> | null;
     created_at: string;
     updated_at: string;
@@ -60,6 +62,7 @@ export class DocumentRepositoryV2 {
             uploaded_by: row.uploaded_by_user_id,
             status: row.deleted_at ? 'deleted' : 'active',
             processing_status: row.processing_status,
+            scan_status: row.scan_status as Document['scan_status'],
             metadata: row.metadata,
             created_at: row.created_at,
             updated_at: row.updated_at,
@@ -230,6 +233,7 @@ export class DocumentRepositoryV2 {
                 uploaded_by_user_id: accessContext.identityUserId,
                 metadata: input.metadata || {},
                 processing_status: input.processing_status || 'pending',
+                scan_status: input.scan_status || 'pending',
             })
             .select()
             .single();
@@ -552,7 +556,7 @@ export class DocumentRepositoryV2 {
                     console.error(`[DOCUMENT_AUTH] Application lookup error:`, applicationError);
                     return false;
                 }
-                    
+
                 if (application?.job_id) {
                     // Then get the job's company info
                     const { data: job, error: jobError } = await this.supabase
@@ -565,7 +569,7 @@ export class DocumentRepositoryV2 {
                         console.error(`[DOCUMENT_AUTH] Job lookup error:`, jobError);
                         return false;
                     }
-                        
+
                     if (job?.company_id) {
                         // Finally get the company's organization ID
                         const { data: company, error: companyError } = await this.supabase
@@ -578,8 +582,8 @@ export class DocumentRepositoryV2 {
                             console.error(`[DOCUMENT_AUTH] Company lookup error:`, companyError);
                             return false;
                         }
-                            
-                        if (company?.identity_organization_id && 
+
+                        if (company?.identity_organization_id &&
                             context.organizationIds.includes(company.identity_organization_id)) {
                             return true;
                         } else {
@@ -596,7 +600,7 @@ export class DocumentRepositoryV2 {
                         .select('job_id')
                         .eq('id', entityId)
                         .maybeSingle();
-                       
+
                 }
             } catch (error) {
                 console.error(`[DOCUMENT_AUTH] Unexpected error during application access check:`, error);
