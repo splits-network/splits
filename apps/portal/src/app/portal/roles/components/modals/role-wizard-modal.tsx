@@ -682,71 +682,64 @@ export default function RoleWizardModal({
             ];
 
             if (mode === "edit") {
-                try {
-                    const existingReqs = await client.get<{ data: any[] }>(
-                        `/job-requirements?job_id=${targetJobId}`,
-                    );
-                    if ((existingReqs.data || []).length > 0) {
-                        await Promise.all(
-                            (existingReqs.data || []).map((req) =>
-                                client.delete(`/job-requirements/${req.id}`),
-                            ),
-                        );
-                    }
-                } catch (err) {
-                    console.warn(
-                        "Failed to delete existing requirements:",
-                        err,
-                    );
-                }
-
-                try {
-                    const existingQs = await client.get<{ data: any[] }>(
-                        `/job-pre-screen-questions?job_id=${targetJobId}`,
-                    );
-                    if ((existingQs.data || []).length > 0) {
-                        await Promise.all(
-                            (existingQs.data || []).map((q) =>
-                                client.delete(
-                                    `/job-pre-screen-questions/${q.id}`,
-                                ),
-                            ),
-                        );
-                    }
-                } catch (err) {
-                    console.warn(
-                        "Failed to delete existing pre-screen questions:",
-                        err,
-                    );
-                }
-            }
-
-            if (requirements.length > 0) {
-                await Promise.all(
-                    requirements.map((req) =>
-                        client.post("/job-requirements", {
-                            job_id: targetJobId,
-                            requirement_type: req.type,
-                            description: req.description,
-                        }),
+                // Use atomic bulk-replace endpoints — deletes old + inserts new in one transaction
+                await Promise.all([
+                    client.put(
+                        `/job-requirements/job/${targetJobId}/bulk-replace`,
+                        {
+                            requirements: requirements.map((req, i) => ({
+                                requirement_type: req.type,
+                                description: req.description,
+                                sort_order: i,
+                            })),
+                        },
                     ),
-                );
-            }
-
-            if (formData.pre_screen_questions.length > 0) {
-                await Promise.all(
-                    formData.pre_screen_questions
-                        .filter((q) => q.question.trim())
-                        .map((q) =>
-                            client.post("/job-pre-screen-questions", {
+                    client.put(
+                        `/job-pre-screen-questions/job/${targetJobId}/bulk-replace`,
+                        {
+                            questions: formData.pre_screen_questions
+                                .filter((q) => q.question.trim())
+                                .map((q, i) => ({
+                                    question: q.question,
+                                    question_type: q.question_type,
+                                    is_required: q.is_required,
+                                    options: q.options || null,
+                                    sort_order: i,
+                                })),
+                        },
+                    ),
+                ]);
+            } else {
+                // Create mode — use individual POST calls
+                if (requirements.length > 0) {
+                    await Promise.all(
+                        requirements.map((req, i) =>
+                            client.post("/job-requirements", {
                                 job_id: targetJobId,
-                                question: q.question,
-                                question_type: q.question_type,
-                                is_required: q.is_required,
-                                options: q.options || null,
+                                requirement_type: req.type,
+                                description: req.description,
+                                sort_order: i,
                             }),
                         ),
-                );
+                    );
+                }
+
+                if (formData.pre_screen_questions.length > 0) {
+                    await Promise.all(
+                        formData.pre_screen_questions
+                            .filter((q) => q.question.trim())
+                            .map((q, i) =>
+                                client.post("/job-pre-screen-questions", {
+                                    job_id: targetJobId,
+                                    question: q.question,
+                                    question_type: q.question_type,
+                                    is_required: q.is_required,
+                                    options: q.options || null,
+                                    sort_order: i,
+                                }),
+                            ),
+                    );
+                }
             }
 
             onClose();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship } from "../../types";
@@ -276,41 +276,49 @@ export function CompanyDetailLoader({
     const [relationship, setRelationship] =
         useState<CompanyRelationship | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+
+            const companyRes = await client.get<{ data: Company }>(
+                `/companies/${id}`,
+            );
+            if (!signal?.cancelled) setCompany(companyRes.data);
+
+            // Check for existing relationship
+            const relRes: any = await client.get("/recruiter-companies", {
+                params: { company_id: id, limit: 1 },
+            });
+            if (!signal?.cancelled && relRes.data && relRes.data.length > 0) {
+                setRelationship(relRes.data[0]);
+            }
+        } catch (err) {
+            console.error("Failed to fetch company detail:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-
-                const companyRes = await client.get<{ data: Company }>(
-                    `/companies/${companyId}`,
-                );
-                if (!cancelled) setCompany(companyRes.data);
-
-                // Check for existing relationship
-                const relRes: any = await client.get("/recruiter-companies", {
-                    params: { company_id: companyId, limit: 1 },
-                });
-                if (!cancelled && relRes.data && relRes.data.length > 0) {
-                    setRelationship(relRes.data[0]);
-                }
-            } catch (err) {
-                console.error("Failed to fetch company detail:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(companyId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [companyId]);
+    }, [companyId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -332,7 +340,7 @@ export function CompanyDetailLoader({
             company={company}
             relationship={relationship}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
         />
     );
 }

@@ -272,6 +272,16 @@ export class SplitsApiClient {
     }
 
     /**
+     * HTTP PUT request
+     */
+    async put<T = any>(endpoint: string, data?: any): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'PUT',
+            body: data ? JSON.stringify(data) : undefined,
+        });
+    }
+
+    /**
      * HTTP DELETE request
      */
     async delete<T = any>(endpoint: string): Promise<T> {

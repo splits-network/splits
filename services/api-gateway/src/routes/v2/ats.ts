@@ -65,6 +65,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     // Register custom sub-resource routes BEFORE generic CRUD to avoid path conflicts
     registerCompanyContactRoutes(app, services);
     registerTerminationRoutes(app, services);
+    registerBulkReplaceRoutes(app, services);
 
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
     ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
@@ -78,6 +79,42 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerAiReviewRoutes(app, services);
     registerApplicationNoteRoutes(app, services);
     registerApplicationProposalRoutes(app, services);
+}
+
+function registerBulkReplaceRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    app.put(
+        '/api/v2/job-pre-screen-questions/job/:jobId/bulk-replace',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId } = request.params as { jobId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/job-pre-screen-questions/job/${jobId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/job-requirements/job/:jobId/bulk-replace',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId } = request.params as { jobId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/job-requirements/job/${jobId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
 }
 
 function registerTerminationRoutes(app: FastifyInstance, services: ServiceRegistry) {

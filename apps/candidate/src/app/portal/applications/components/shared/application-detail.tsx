@@ -82,7 +82,8 @@ export function ApplicationDetail({
             case "employment_contract":
                 return "fa-file-contract";
             default:
-                if (companyDocTypes.includes(docType || "")) return "fa-building";
+                if (companyDocTypes.includes(docType || ""))
+                    return "fa-building";
                 return "fa-file";
         }
     };
@@ -466,7 +467,7 @@ export function ApplicationDetail({
                                 <img
                                     src={job.company.logo_url}
                                     alt={name}
-                                    className="w-12 h-12 object-cover"
+                                    className="w-12 h-12 object-contain"
                                 />
                             ) : (
                                 <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
@@ -560,38 +561,46 @@ export function DetailLoader({
     const { getToken } = useAuth();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchDetail = useCallback(async (id: string, signal?: { cancelled: boolean }) => {
+        try {
+            const token = await getToken();
+            if (!token || signal?.cancelled) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get<{ data: Application }>(
+                `/applications/${id}`,
+                {
+                    params: {
+                        include:
+                            "job,company,recruiter,ai_review,documents,pre_screen_answers,audit_log,job_requirements",
+                    },
+                },
+            );
+            if (!signal?.cancelled) setApplication(res.data);
+        } catch (err) {
+            console.error("Failed to fetch application detail:", err);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        let cancelled = false;
+        const signal = { cancelled: false };
         setLoading(true);
 
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Application }>(
-                    `/applications/${applicationId}`,
-                    {
-                        params: {
-                            include:
-                                "job,company,recruiter,ai_review,documents,pre_screen_answers,audit_log,job_requirements",
-                        },
-                    },
-                );
-                if (!cancelled) setApplication(res.data);
-            } catch (err) {
-                console.error("Failed to fetch application detail:", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
+        fetchDetail(applicationId, signal).finally(() => {
+            if (!signal.cancelled) setLoading(false);
+        });
 
         return () => {
-            cancelled = true;
+            signal.cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [applicationId]);
+    }, [applicationId, refreshKey, fetchDetail]);
+
+    const handleRefresh = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+        onRefresh?.();
+    }, [onRefresh]);
 
     if (loading) {
         return (
@@ -612,7 +621,7 @@ export function DetailLoader({
         <ApplicationDetail
             application={application}
             onClose={onClose}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
         />
     );
 }
