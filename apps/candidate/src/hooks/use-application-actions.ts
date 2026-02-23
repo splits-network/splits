@@ -108,7 +108,12 @@ export function useApplicationActions(
             const client = await getClient();
             await client.patch(`/applications/${id}`, {
                 stage: "draft",
-                notes: "Candidate moved application back to draft for edits",
+            });
+            await client.post(`/applications/${id}/notes`, {
+                created_by_type: "candidate",
+                note_type: "stage_transition",
+                visibility: "shared",
+                message_text: "Candidate moved application back to draft for edits",
             });
             toast.success("Application moved to draft");
             options?.onSuccess?.();
@@ -127,16 +132,14 @@ export function useApplicationActions(
         setError(null);
         try {
             const client = await getClient();
-            const timestamp = new Date().toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-            });
             await client.patch(`/applications/${id}`, {
                 stage: "withdrawn",
-                notes: `\n[${timestamp}] Candidate: Withdrew application`,
+            });
+            await client.post(`/applications/${id}/notes`, {
+                created_by_type: "candidate",
+                note_type: "stage_transition",
+                visibility: "shared",
+                message_text: "Candidate withdrew application",
             });
             toast.success("Application withdrawn");
             options?.onSuccess?.();

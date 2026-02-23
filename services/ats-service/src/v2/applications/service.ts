@@ -246,6 +246,7 @@ export class ApplicationServiceV2 {
             primary_resume_id,
             decline_reason,
             decline_details,
+            notes: _notes, // notes column doesn't exist — callers should use /applications/:id/notes
             ...persistedUpdates
         } = updates;
 

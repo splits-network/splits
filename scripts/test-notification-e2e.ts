@@ -202,7 +202,6 @@ async function testPlacementNotification(ctx: TestContext): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             stage: 'hired',
-            notes: 'Candidate accepted offer',
         }),
     }).then(r => r.json());
 

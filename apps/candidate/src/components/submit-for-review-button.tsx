@@ -29,7 +29,12 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
             const client = createAuthenticatedClient(token);
             await client.patch(`/applications/${applicationId}`, {
                 stage: 'ai_review',
-                notes: 'Candidate submitted application for review',
+            });
+            await client.post(`/applications/${applicationId}/notes`, {
+                created_by_type: 'candidate',
+                note_type: 'stage_transition',
+                visibility: 'shared',
+                message_text: 'Candidate submitted application for review',
             });
 
             // Success - refresh page to show updated state
