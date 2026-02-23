@@ -88,6 +88,11 @@ export const NOTE_TYPE_CONFIG: Record<ApplicationNoteType, { label: string; icon
         icon: 'fa-comment',
         color: 'badge-neutral',
     },
+    pitch: {
+        label: 'Pitch',
+        icon: 'fa-bullhorn',
+        color: 'badge-primary',
+    },
 };
 
 // Creator type display configuration
