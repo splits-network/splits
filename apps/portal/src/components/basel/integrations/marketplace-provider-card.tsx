@@ -26,11 +26,12 @@ export function MarketplaceProviderCard({
     onDetails,
 }: MarketplaceProviderCardProps) {
     const isConnected = connection?.status === "active";
+    const isActive = provider.is_active;
 
     return (
-        <div className="group border border-base-300 bg-base-100 shadow-sm hover:shadow-md transition-all">
+        <div className={`group border border-base-300 bg-base-100 shadow-sm transition-all ${isActive ? "hover:shadow-md" : "opacity-60"}`}>
             {/* Top accent bar */}
-            <div className={`h-1 ${isConnected ? "bg-success" : "bg-base-300 group-hover:bg-primary"} transition-colors`} />
+            <div className={`h-1 ${isConnected ? "bg-success" : isActive ? "bg-base-300 group-hover:bg-primary" : "bg-base-300"} transition-colors`} />
 
             <div className="p-5">
                 {/* Header */}
@@ -45,10 +46,13 @@ export function MarketplaceProviderCard({
                         } transition-colors`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-sm font-black tracking-tight">{provider.name}</h3>
                             {isConnected && (
                                 <BaselStatusPill color="success">Connected</BaselStatusPill>
+                            )}
+                            {!isActive && (
+                                <BaselStatusPill color="neutral">Coming Soon</BaselStatusPill>
                             )}
                         </div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-base-content/40 mt-0.5">
@@ -90,7 +94,7 @@ export function MarketplaceProviderCard({
                         <>
                             <button
                                 onClick={onConnect}
-                                disabled={connecting}
+                                disabled={connecting || !isActive}
                                 className="btn btn-primary btn-sm flex-1 rounded-none font-bold uppercase tracking-wider text-[11px]"
                             >
                                 {connecting ? (
