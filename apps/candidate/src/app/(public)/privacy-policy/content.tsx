@@ -5,7 +5,7 @@ const meta = {
     title: "Privacy Policy",
     subtitle:
         "How we collect, use, and protect your personal information across the Applicant Network platform",
-    lastUpdated: "February 20, 2026",
+    lastUpdated: "February 23, 2026",
     entity: "Employment Networks, Inc.",
 };
 
@@ -35,6 +35,11 @@ const tocItems = [
     { id: "your-rights", label: "Your Privacy Rights", icon: "fa-hand" },
     { id: "cookies", label: "Cookies & Tracking", icon: "fa-cookie-bite" },
     { id: "third-party", label: "Third-Party Services", icon: "fa-link" },
+    {
+        id: "google-api-services",
+        label: "Google API Services",
+        icon: "fa-brands fa-google",
+    },
     {
         id: "ai-processing",
         label: "AI & Automated Processing",
@@ -113,6 +118,22 @@ const thirdPartyServices = [
         data: "Professional profile data, work history, connections (with consent)",
         url: "https://www.linkedin.com/legal/privacy-policy",
         icon: "fa-briefcase",
+    },
+    {
+        name: "Google Calendar",
+        purpose:
+            "Interview scheduling and calendar sync (optional recruiter integration)",
+        data: "Calendar event details (title, time, attendees), free/busy availability, calendar list",
+        url: "https://policies.google.com/privacy",
+        icon: "fa-calendar",
+    },
+    {
+        name: "Gmail (Google)",
+        purpose:
+            "Email tracking and communication management (optional recruiter integration)",
+        data: "Email messages read and sent via the platform on behalf of the connected recruiter account",
+        url: "https://policies.google.com/privacy",
+        icon: "fa-envelope",
     },
 ];
 
@@ -1160,6 +1181,223 @@ export default function PrivacyPolicyContent() {
                             laws. We regularly review these agreements and the
                             security practices of our partners.
                         </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════
+                SECTION 9b -- Google API Services
+                Article block — Google Limited Use Policy disclosure
+               ═══════════════════════════════════════════════════════ */}
+            <section id="google-api-services" className="py-28 bg-base-200">
+                <div className="container mx-auto px-6 lg:px-12">
+                    <div className="article-block max-w-3xl mx-auto">
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                            <i className="fa-brands fa-google mr-2"></i>
+                            Google API Services
+                        </p>
+                        <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-10">
+                            Google user data.{"\u00a0"}How we use it.
+                        </h2>
+                        <div className="space-y-6 text-base-content/70 leading-relaxed text-lg">
+                            <p>
+                                Splits Network&apos;s use of information
+                                received from Google APIs adheres to the{" "}
+                                <a
+                                    href="https://developers.google.com/terms/api-services-user-data-policy"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary underline"
+                                >
+                                    Google API Services User Data Policy
+                                </a>
+                                , including the Limited Use requirements.
+                            </p>
+
+                            <h3 className="text-2xl font-black tracking-tight text-base-content">
+                                What Google Data We Access
+                            </h3>
+                            <p>
+                                When a recruiter on the platform chooses to
+                                connect their Google account, we request only
+                                the minimum scopes required for the specific
+                                feature:
+                            </p>
+                            <ul className="space-y-4 pl-4">
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-calendar text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <div>
+                                        <strong className="text-base-content">
+                                            Google Calendar:
+                                        </strong>{" "}
+                                        We read calendar event details (to
+                                        display scheduled interviews), check
+                                        free/busy availability (to suggest
+                                        meeting times), and create/update events
+                                        owned by the recruiter (to schedule
+                                        interviews directly from the platform).
+                                        We request only the{" "}
+                                        <code className="text-sm bg-base-300 px-1">
+                                            calendar.events.owned
+                                        </code>
+                                        ,{" "}
+                                        <code className="text-sm bg-base-300 px-1">
+                                            calendar.events.freebusy
+                                        </code>
+                                        , and{" "}
+                                        <code className="text-sm bg-base-300 px-1">
+                                            calendar.calendarlist.readonly
+                                        </code>{" "}
+                                        scopes &mdash; not broad calendar
+                                        access.
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-envelope text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <div>
+                                        <strong className="text-base-content">
+                                            Gmail:
+                                        </strong>{" "}
+                                        We read and send emails on behalf of the
+                                        recruiter to manage recruiting
+                                        communications within the platform. We
+                                        request the{" "}
+                                        <code className="text-sm bg-base-300 px-1">
+                                            gmail.modify
+                                        </code>{" "}
+                                        scope, which covers reading, composing,
+                                        and sending without granting access to
+                                        account settings or other Google
+                                        services.
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <h3 className="text-2xl font-black tracking-tight text-base-content">
+                                How We Use Google Data
+                            </h3>
+                            <p>
+                                Google user data obtained through these
+                                integrations is used{" "}
+                                <strong className="text-base-content">
+                                    solely
+                                </strong>{" "}
+                                to provide the specific feature the recruiter
+                                connected their account for:
+                            </p>
+                            <ul className="space-y-3 pl-4">
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <span>
+                                        Calendar data is used only to schedule,
+                                        display, and manage interview-related
+                                        calendar events
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <span>
+                                        Gmail data is used only to send and
+                                        track recruiting-related emails
+                                        initiated within the platform
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <span>
+                                        Google data is{" "}
+                                        <strong className="text-base-content">
+                                            never
+                                        </strong>{" "}
+                                        used for advertising, profiling, or any
+                                        purpose beyond the feature for which
+                                        access was granted
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <span>
+                                        Google data is{" "}
+                                        <strong className="text-base-content">
+                                            never
+                                        </strong>{" "}
+                                        transferred or shared with third parties
+                                        except as necessary to operate the
+                                        integration (e.g.,&nbsp;infrastructure
+                                        providers under strict data processing
+                                        agreements)
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <i className="fa-duotone fa-regular fa-chevron-right text-primary text-sm mt-1.5 flex-shrink-0"></i>
+                                    <span>
+                                        We do not allow humans to read your
+                                        Google data unless you have given us
+                                        explicit permission, or it is necessary
+                                        for security purposes, or we are
+                                        required to by law
+                                    </span>
+                                </li>
+                            </ul>
+
+                            <h3 className="text-2xl font-black tracking-tight text-base-content">
+                                Storage &amp; Retention
+                            </h3>
+                            <p>
+                                OAuth access tokens and refresh tokens are
+                                stored encrypted in our database and are
+                                associated only with the recruiter account that
+                                granted access. We retain tokens only for as
+                                long as the integration is active. Calendar
+                                events and email metadata accessed through the
+                                integration are not permanently stored on our
+                                servers &mdash; they are fetched on demand.
+                                Disconnecting the integration immediately
+                                revokes our access and deletes the stored
+                                tokens.
+                            </p>
+
+                            <h3 className="text-2xl font-black tracking-tight text-base-content">
+                                Revoking Access
+                            </h3>
+                            <p>
+                                Recruiters can disconnect their Google account
+                                at any time from{" "}
+                                <strong className="text-base-content">
+                                    Account Settings &rarr; Integrations
+                                </strong>{" "}
+                                in the platform. Access can also be revoked
+                                directly from your{" "}
+                                <a
+                                    href="https://myaccount.google.com/permissions"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary underline"
+                                >
+                                    Google Account permissions page
+                                </a>
+                                . Revoking access does not affect the connected
+                                Splits Network account.
+                            </p>
+
+                            <div className="border-l-4 border-primary bg-primary/5 p-6">
+                                <p className="text-sm font-bold text-base-content mb-2">
+                                    <i className="fa-duotone fa-regular fa-shield-check text-primary mr-2"></i>
+                                    Limited Use Compliance
+                                </p>
+                                <p className="text-sm">
+                                    Splits Network&apos;s use of data received
+                                    from Google APIs is limited to providing or
+                                    improving user-facing features that are
+                                    prominent in the requesting
+                                    application&apos;s user interface. We do not
+                                    use this data for any other purpose,
+                                    including but not limited to: general
+                                    advertising, selling data, or uses unrelated
+                                    to the recruiting features described above.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
