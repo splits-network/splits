@@ -250,6 +250,9 @@ export class ApplicationServiceV2 {
             ...persistedUpdates
         } = updates;
 
+        if (_notes) {
+            console.warn(`[applications] Caller sent "notes" field in PATCH /applications/${id} — this field should be written via POST /applications/:id/notes instead. Value was stripped.`);
+        }
 
         // Validate stage transitions
         if (updates.stage && updates.stage !== currentApplication.stage) {
