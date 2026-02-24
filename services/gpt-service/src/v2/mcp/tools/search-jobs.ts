@@ -61,14 +61,29 @@ export function registerSearchJobsTool(
                 pagination: { page, total_pages: totalPages, total_results: result.total },
             };
 
+            // Build rich text content so ChatGPT can present job cards
+            let text: string;
+            if (jobs.length === 0) {
+                text = 'No jobs found matching your criteria. Try broadening your search.';
+            } else {
+                const lines = [`Found ${result.total} job${result.total !== 1 ? 's' : ''}. Page ${page} of ${totalPages}.\n`];
+                for (const job of jobs) {
+                    const parts = [
+                        `**${job.title}** at ${job.company_name}`,
+                        `${job.location}${job.commute_types?.length ? ' · ' + job.commute_types.join(', ') : ''}`,
+                    ];
+                    if (job.salary_range) parts.push(`Salary: ${job.salary_range}`);
+                    if (job.job_level) parts.push(`Level: ${job.job_level}`);
+                    if (job.summary) parts.push(job.summary);
+                    parts.push(`[View job](${job.view_url})`);
+                    lines.push(parts.join('\n'));
+                }
+                text = lines.join('\n\n---\n\n');
+            }
+
             return {
                 structuredContent: structured as unknown as Record<string, unknown>,
-                content: [{
-                    type: 'text' as const,
-                    text: jobs.length > 0
-                        ? `Found ${result.total} job${result.total !== 1 ? 's' : ''}. Showing page ${page} of ${totalPages}.`
-                        : 'No jobs found matching your criteria. Try broadening your search.',
-                }],
+                content: [{ type: 'text' as const, text }],
             };
         },
     );
