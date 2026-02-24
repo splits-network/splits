@@ -25,7 +25,7 @@ export function recruiterName(app: Application): string {
 }
 
 export function appliedAgo(app: Application): string {
-    const ms = Date.now() - new Date(app.created_at).getTime();
+    const ms = Date.now() - new Date(app.submitted_at || app.created_at).getTime();
     const days = Math.floor(ms / 86_400_000);
     if (days === 0) return "Today";
     if (days === 1) return "1d ago";

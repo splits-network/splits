@@ -495,7 +495,7 @@ export class StatsRepository {
                 if (placementAppIds.length > 0) {
                     const { data: placementApps } = await this.supabase
                         .from('applications')
-                        .select('id, job_id, created_at')
+                        .select('id, job_id, submitted_at, created_at')
                         .in('id', placementAppIds);
 
                     const validAppIds = new Set(
@@ -512,10 +512,10 @@ export class StatsRepository {
                         p => new Date(p.created_at) >= monthStart
                     ).length;
 
-                    // ── Avg time to hire (application created_at -> placement created_at) ──
+                    // ── Avg time to hire (application submitted_at -> placement created_at) ──
                     if (companyPlacements.length > 0) {
                         const appDateMap = new Map(
-                            (placementApps || []).map(a => [a.id, new Date(a.created_at)])
+                            (placementApps || []).map(a => [a.id, new Date(a.submitted_at || a.created_at)])
                         );
                         let totalDays = 0;
                         let count = 0;

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     ApplicationNotesPanel,
@@ -9,6 +11,8 @@ import {
     type CreateNoteData,
 } from "@splits-network/shared-ui";
 import type { ApplicationNote } from "@splits-network/shared-types";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import { formatDate } from "@/lib/utils";
 import type { Application, ApplicationDocument } from "../../types";
 import { stageColor } from "./status-color";
@@ -38,6 +42,9 @@ export function ApplicationDetail({
 }) {
     const { user } = useUser();
     const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
 
     const name = companyName(application);
     const salary = salaryDisplay(application);
@@ -216,22 +223,87 @@ export function ApplicationDetail({
                         <p className="text-lg font-black tracking-tight">
                             {ago}
                         </p>
-                        <p className="text-xs text-base-content/40">
-                            {formatDate(application.created_at)}
+                        <p className="text-sm text-base-content/40">
+                            {formatDate(application.submitted_at || application.created_at)}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Recruiter
+                            Your Recruiter
                         </p>
                         <p className="text-lg font-black tracking-tight">
                             {recName}
                         </p>
                         {application.recruiter?.tagline && (
-                            <p className="text-xs text-base-content/40 italic">
+                            <p className="text-sm text-base-content/40 italic">
                                 {application.recruiter.tagline}
                             </p>
                         )}
+
+                        {/* Contact links */}
+                        <div className="flex flex-col gap-1 mt-2">
+                            {(application.recruiter?.user?.email || application.recruiter?.email) && (
+                                <a
+                                    href={`mailto:${application.recruiter?.user?.email || application.recruiter?.email}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors truncate"
+                                >
+                                    <i className="fa-duotone fa-regular fa-envelope w-3.5 text-center flex-shrink-0" />
+                                    <span className="truncate">{application.recruiter?.user?.email || application.recruiter?.email}</span>
+                                </a>
+                            )}
+                            {application.recruiter?.phone && (
+                                <a
+                                    href={`tel:${application.recruiter.phone}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors"
+                                >
+                                    <i className="fa-duotone fa-regular fa-phone w-3.5 text-center flex-shrink-0" />
+                                    {application.recruiter.phone}
+                                </a>
+                            )}
+                            {application.recruiter?.id && (
+                                <Link
+                                    href={`/marketplace/${application.recruiter.id}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors"
+                                >
+                                    <i className="fa-duotone fa-regular fa-user w-3.5 text-center flex-shrink-0" />
+                                    View Profile
+                                </Link>
+                            )}
+                            {application.recruiter?.user?.id && (
+                                <button
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors disabled:opacity-50"
+                                    disabled={startingChat}
+                                    onClick={async () => {
+                                        const recruiterUserId = application.recruiter?.user?.id;
+                                        if (!recruiterUserId) return;
+                                        try {
+                                            setStartingChat(true);
+                                            const conversationId = await startChatConversation(
+                                                getToken,
+                                                recruiterUserId,
+                                                {
+                                                    application_id: application.id,
+                                                    job_id: application.job?.id ?? application.job_id,
+                                                    company_id: application.job?.company?.id ?? application.company?.id ?? null,
+                                                },
+                                            );
+                                            router.push(`/portal/messages?conversationId=${conversationId}`);
+                                        } catch (err: any) {
+                                            toast.error(err?.message || "Failed to start chat");
+                                        } finally {
+                                            setStartingChat(false);
+                                        }
+                                    }}
+                                >
+                                    {startingChat ? (
+                                        <span className="loading loading-spinner loading-xs w-3.5" />
+                                    ) : (
+                                        <i className="fa-duotone fa-regular fa-comment w-3.5 text-center flex-shrink-0" />
+                                    )}
+                                    Send a Message
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 

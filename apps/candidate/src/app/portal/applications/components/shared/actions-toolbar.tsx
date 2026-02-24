@@ -6,15 +6,10 @@ import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { usePresence } from "@/hooks/use-presence";
-import {
-    useApplicationActions,
-    type WizardData,
-} from "@/hooks/use-application-actions";
+import { useApplicationActions } from "@/hooks/use-application-actions";
 import { Presence } from "@/components/presense";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
-import { ProposalResponseWizard } from "../modals/proposal-response-wizard";
 import { DeclineModal } from "../modals/decline-modal";
 import { type Application, WITHDRAWABLE_STAGES } from "../../types";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
@@ -22,10 +17,11 @@ import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
 const BACK_TO_DRAFT_STAGES = [
-    "ai_reviewed",
     "ai_review",
-    "screen",
+    "ai_reviewed",
     "recruiter_request",
+    "recruiter_review",
+    "screen",
     "rejected",
 ];
 
@@ -64,11 +60,7 @@ export default function ActionsToolbar({
     // Edit wizard state
     const [showEditWizard, setShowEditWizard] = useState(false);
 
-    // Proposal wizard state
-    const [showProposalWizard, setShowProposalWizard] = useState(false);
-    const [preScreenQuestions, setPreScreenQuestions] = useState<any[] | null>(
-        null,
-    );
+    // Decline modal state
     const [showDeclineModal, setShowDeclineModal] = useState(false);
 
     // Application actions hook
@@ -171,36 +163,6 @@ export default function ActionsToolbar({
         await actions.withdraw(item.id);
     };
 
-    // Accept proposal handler
-    const handleAcceptProposal = async () => {
-        try {
-            const token = await getToken();
-            if (!token) throw new Error("Not authenticated");
-            const client = createAuthenticatedClient(token);
-            const response = await client.get(`/jobs/${item.job_id}`);
-            const job = response.data;
-            const questions = job?.pre_screen_questions || [];
-            setPreScreenQuestions(Array.isArray(questions) ? questions : []);
-            setShowProposalWizard(true);
-        } catch (err: any) {
-            toast.error(err?.message || "Failed to load application wizard");
-        }
-    };
-
-    // Complete proposal application handler
-    const handleCompleteProposal = async (wizardData: WizardData) => {
-        const candidateId = (item as any).candidate_id;
-        if (!candidateId) {
-            toast.error("Missing candidate profile");
-            return;
-        }
-        await actions.completeProposalApplication(
-            item.id,
-            candidateId,
-            wizardData,
-        );
-    };
-
     // Decline proposal handler
     const handleDeclineProposal = async (reason: string, details?: string) => {
         await actions.declineProposal(item.id, reason, details);
@@ -242,17 +204,6 @@ export default function ActionsToolbar({
                         onStageChange?.();
                     }}
                     existingApplication={item}
-                />
-            )}
-
-            {showProposalWizard && (
-                <ProposalResponseWizard
-                    isOpen={showProposalWizard}
-                    onClose={() => setShowProposalWizard(false)}
-                    applicationId={item.id}
-                    jobTitle={item.job?.title || "this position"}
-                    preScreenQuestions={preScreenQuestions || []}
-                    onComplete={handleCompleteProposal}
                 />
             )}
 
@@ -404,7 +355,7 @@ export default function ActionsToolbar({
                                 className={`btn btn-primary ${getSizeClass()} gap-2`}
                                 style={{ borderRadius: 0 }}
                                 disabled={isJobClosed || isLoading}
-                                onClick={handleAcceptProposal}
+                                onClick={() => setShowEditWizard(true)}
                                 title={
                                     isJobClosed
                                         ? "Position is no longer available"
@@ -514,7 +465,7 @@ export default function ActionsToolbar({
             variant: "btn-success",
             disabled: isJobClosed || isLoading,
             title: isJobClosed ? "Position closed" : "Accept & Apply",
-            onClick: handleAcceptProposal,
+            onClick: () => setShowEditWizard(true),
         });
         speedDialActions.push({
             key: "decline",

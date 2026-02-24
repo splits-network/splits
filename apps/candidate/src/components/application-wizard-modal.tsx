@@ -8,6 +8,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
+import StepNotes from "@/components/application-wizard/step-notes";
 import StepReview from "@/components/application-wizard/step-review";
 
 interface ApplicationWizardModalProps {
@@ -19,8 +20,8 @@ interface ApplicationWizardModalProps {
     existingApplication?: any;
 }
 
-const STEP_LABELS = ["Documents", "Cover Letter", "Questions", "Review"];
-const STEP_LABELS_NO_QUESTIONS = ["Documents", "Cover Letter", "Review"];
+const STEP_LABELS = ["Documents", "Cover Letter", "Questions", "Notes", "Review"];
+const STEP_LABELS_NO_QUESTIONS = ["Documents", "Cover Letter", "Notes", "Review"];
 
 export default function ApplicationWizardModal({
     jobId,
@@ -67,7 +68,7 @@ export default function ApplicationWizardModal({
     const [error, setError] = useState<string | null>(null);
 
     const hasQuestions = questions.length > 0;
-    const totalSteps = hasQuestions ? 4 : 3;
+    const totalSteps = hasQuestions ? 5 : 4;
     const stepLabels = hasQuestions ? STEP_LABELS : STEP_LABELS_NO_QUESTIONS;
 
     const currentStepLabel = stepLabels[currentStep - 1] || "";
@@ -382,8 +383,11 @@ export default function ApplicationWizardModal({
     const renderStep = () => {
         if (!job) return null;
 
-        switch (currentStep) {
-            case 1:
+        // Resolve the logical step name based on current step number
+        const stepName = stepLabels[currentStep - 1];
+
+        switch (stepName) {
+            case "Documents":
                 return (
                     <StepDocuments
                         documents={localDocuments}
@@ -395,7 +399,7 @@ export default function ApplicationWizardModal({
                         onDocumentsUpdated={setLocalDocuments}
                     />
                 );
-            case 2: {
+            case "Cover Letter": {
                 const uploadedCoverLetterDocs = localDocuments.filter(
                     (doc: any) =>
                         doc.document_type === "cover_letter" &&
@@ -417,39 +421,33 @@ export default function ApplicationWizardModal({
                     />
                 );
             }
-            case 3:
-                if (hasQuestions) {
-                    return (
-                        <StepQuestions
-                            questions={questions}
-                            answers={formData.pre_screen_answers}
-                            onChange={(answers: any) =>
-                                setFormData({
-                                    ...formData,
-                                    pre_screen_answers: answers,
-                                })
-                            }
-                            onNext={handleNext}
-                            onBack={handleBack}
-                        />
-                    );
-                } else {
-                    return (
-                        <StepReview
-                            job={job}
-                            documents={documents}
-                            selectedDocuments={formData.documents.selected}
-                            coverLetter={formData.cover_letter}
-                            questions={questions}
-                            answers={formData.pre_screen_answers}
-                            additionalNotes={formData.notes}
-                            onSubmit={handleSubmit}
-                            onSaveAsDraft={handleSaveAsDraft}
-                            onBack={handleBack}
-                        />
-                    );
-                }
-            case 4:
+            case "Questions":
+                return (
+                    <StepQuestions
+                        questions={questions}
+                        answers={formData.pre_screen_answers}
+                        onChange={(answers: any) =>
+                            setFormData({
+                                ...formData,
+                                pre_screen_answers: answers,
+                            })
+                        }
+                        onNext={handleNext}
+                        onBack={handleBack}
+                    />
+                );
+            case "Notes":
+                return (
+                    <StepNotes
+                        notes={formData.notes}
+                        onChange={(notes: string) =>
+                            setFormData({ ...formData, notes })
+                        }
+                        onNext={handleNext}
+                        onBack={handleBack}
+                    />
+                );
+            case "Review":
                 return (
                     <StepReview
                         job={job}

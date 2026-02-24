@@ -27,6 +27,7 @@ ChartJS.register(
 
 interface Application {
     id: string;
+    submitted_at?: string;
     created_at: string;
 }
 
@@ -78,14 +79,14 @@ export function calculateCompanyTrends(applications: Application[], jobs: Job[],
     const previousPeriodStart = new Date(now.getFullYear(), now.getMonth() - (months * 2), 1);
 
     // Current period counts
-    const currentApplications = applications.filter(app => new Date(app.created_at) >= periodStart).length;
+    const currentApplications = applications.filter(app => new Date(app.submitted_at || app.created_at) >= periodStart).length;
     const currentActiveRoles = jobs.filter(job =>
         new Date(job.created_at) >= periodStart && job.status === 'active'
     ).length;
 
     // Previous period counts
     const previousApplications = applications.filter(app => {
-        const date = new Date(app.created_at);
+        const date = new Date(app.submitted_at || app.created_at);
         return date >= previousPeriodStart && date < periodStart;
     }).length;
     const previousActiveRoles = jobs.filter(job => {
@@ -127,9 +128,9 @@ export default function CompanyTrendsChart({
         const activeRoles = new Array(months).fill(0);
         const newRoles = new Array(months).fill(0);
 
-        // Count applications created in each month
+        // Count applications by submission date (fallback to created_at)
         applications.forEach((app) => {
-            const createdDate = new Date(app.created_at);
+            const createdDate = new Date(app.submitted_at || app.created_at);
             const monthDiff = (now.getFullYear() - createdDate.getFullYear()) * 12 +
                 (now.getMonth() - createdDate.getMonth());
 

@@ -361,7 +361,7 @@ export class ApplicationRepository {
             switch (inc) {
                 case 'recruiter':
                     // Join with network schema recruiters table and identity users for contact info
-                    selectClause += `,recruiter:recruiters(id, bio, phone, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
+                    selectClause += `,recruiter:recruiters(id, bio, phone, tagline, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
                     break;
                 case 'documents':
                 case 'document':

@@ -263,6 +263,12 @@ export class ApplicationServiceV2 {
             );
         }
 
+        // Auto-set submitted_at when transitioning to a submission stage for the first time
+        const SUBMISSION_STAGES = ['submitted', 'recruiter_review', 'recruiter_proposed'];
+        if (updates.stage && SUBMISSION_STAGES.includes(updates.stage) && !currentApplication.submitted_at) {
+            persistedUpdates.submitted_at = new Date().toISOString();
+        }
+
         // Validate rejection has decline reason or details
         if (
             updates.stage === 'rejected' &&
@@ -665,6 +671,7 @@ export class ApplicationServiceV2 {
         // Update to appropriate stage
         const updated = await this.repository.updateApplication(applicationId, {
             stage: nextStage,
+            submitted_at: new Date().toISOString(),
         });
 
         // Resolve user context early (needed for proposed_by UUID)

@@ -39,6 +39,7 @@ export interface Application {
     accepted_by_company: boolean;
     created_at: string;
     updated_at: string;
+    submitted_at?: string | null;
     ai_reviewed?: boolean;
     job_id: string;
     candidate_id?: string;
@@ -91,6 +92,7 @@ export interface Application {
         name: string;
     };
     recruiter?: {
+        id?: string;
         name?: string;
         email?: string;
         tagline?: string;
@@ -143,16 +145,19 @@ export const APPLICATION_STAGES = [
     { value: "expired", label: "Expired" },
 ] as const;
 
+// Every non-terminal stage (terminal = draft, withdrawn, hired, rejected, expired)
 export const WITHDRAWABLE_STAGES = [
-    "submitted",
-    "screen",
-    "interview",
-    "company_review",
-    "company_feedback",
-    "recruiter_proposed",
-    "recruiter_request",
     "ai_review",
     "ai_reviewed",
+    "recruiter_proposed",
+    "recruiter_request",
+    "recruiter_review",
+    "screen",
+    "submitted",
+    "company_review",
+    "company_feedback",
+    "interview",
+    "offer",
 ];
 
 // ===== HELPERS =====

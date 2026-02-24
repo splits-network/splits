@@ -555,6 +555,7 @@ export default function AIReviewPanel({
                     </div>
                     <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Skills Match
+                        {aiReview.skills_match_percentage}
                     </div>
                 </div>
             </div>
