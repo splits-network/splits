@@ -5,12 +5,18 @@
  * Read-only tool — calls ai-service for analysis.
  */
 
-import { z } from 'zod';
+import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { GptActionRepository } from '../../actions/repository';
 import { McpAuthContext, toolError } from '../types';
 import { requireMcpScope } from '../auth';
 import { IEventPublisher } from '../../shared/events';
+
+// Extracted to avoid TS2589 deep type inference in registerTool generics
+const analyzeResumeSchema: Record<string, ZodTypeAny> = {
+    job_id: z.string().describe('UUID of the job to analyze resume against'),
+    resume_text: z.string().optional().describe('Resume text (if not provided, uses stored resume from profile)'),
+};
 
 export function registerAnalyzeResumeTool(
     server: McpServer,
@@ -20,15 +26,13 @@ export function registerAnalyzeResumeTool(
 ) {
     const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://ai-service:3009';
 
+    // @ts-expect-error TS2589: ZodTypeAny schema triggers deep inference in registerTool generics
     server.registerTool(
         'analyze_resume',
         {
             title: 'Analyze Resume',
             description: 'Analyze your resume against a specific job listing. Returns a fit score (0-100), strengths, gaps, and recommendations. Uses your stored resume or provide resume text directly.',
-            inputSchema: {
-                job_id: z.string().describe('UUID of the job to analyze resume against'),
-                resume_text: z.string().optional().describe('Resume text (if not provided, uses stored resume from profile)'),
-            },
+            inputSchema: analyzeResumeSchema,
             annotations: {
                 readOnlyHint: true,
                 openWorldHint: false,
