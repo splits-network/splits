@@ -264,7 +264,8 @@ export class ApplicationServiceV2 {
         }
 
         // Auto-set submitted_at when transitioning to a submission stage for the first time
-        const SUBMISSION_STAGES = ['submitted', 'recruiter_review', 'recruiter_proposed'];
+        // Note: recruiter_proposed is excluded — that's a recruiter suggesting a role TO the candidate, not a submission
+        const SUBMISSION_STAGES = ['submitted', 'recruiter_review'];
         if (updates.stage && SUBMISSION_STAGES.includes(updates.stage) && !currentApplication.submitted_at) {
             persistedUpdates.submitted_at = new Date().toISOString();
         }
