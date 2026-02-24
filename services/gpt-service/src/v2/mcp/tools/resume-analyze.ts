@@ -26,7 +26,7 @@ export function registerAnalyzeResumeTool(
 ) {
     const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://ai-service:3009';
 
-    // @ts-expect-error TS2589: ZodTypeAny schema triggers deep inference in registerTool generics
+    // @ts-ignore TS2589: ZodTypeAny schema may trigger deep inference in registerTool generics
     server.registerTool(
         'analyze_resume',
         {
