@@ -42,7 +42,7 @@ export function HeaderCta({
     if (href) {
         return (
             <a href={href} className={classes} onClick={onClick}>
-                {icon && <i className={`${icon} text-[10px]`} />}
+                {icon && <i className={`${icon} text-sm`} />}
                 {children || label}
             </a>
         );
@@ -50,7 +50,7 @@ export function HeaderCta({
 
     return (
         <button className={classes} onClick={onClick}>
-            {icon && <i className={`${icon} text-[10px]`} />}
+            {icon && <i className={`${icon} text-sm`} />}
             {children || label}
         </button>
     );

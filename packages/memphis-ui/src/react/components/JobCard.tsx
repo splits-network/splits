@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface JobCardProps {
     /** Job title */
@@ -48,22 +48,22 @@ export function JobCard({
     tags = [],
     applicants,
     daysAgo,
-    accent = 'coral',
+    accent = "coral",
     hovered = false,
     onClick,
     onBookmark,
-    className = '',
+    className = "",
 }: JobCardProps) {
     return (
         <div
             className={[
                 `accent-${accent}`,
-                'border-4 p-0 transition-transform cursor-pointer relative overflow-hidden bg-white',
-                hovered ? 'border-accent -translate-y-1' : 'border-dark',
+                "border-4 p-0 transition-transform cursor-pointer relative overflow-hidden bg-white",
+                hovered ? "border-accent -translate-y-1" : "border-dark",
                 className,
             ]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
             onClick={onClick}
         >
             {/* Top color strip */}
@@ -73,14 +73,10 @@ export function JobCard({
                 {/* Header badges */}
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                        <span
-                            className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-accent text-on-accent"
-                        >
+                        <span className="px-2 py-0.5 text-sm font-black uppercase tracking-wider bg-accent text-on-accent">
                             {type}
                         </span>
-                        <span
-                            className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider border-2 border-accent text-accent"
-                        >
+                        <span className="px-2 py-0.5 text-sm font-black uppercase tracking-wider border-2 border-accent text-accent">
                             {remote}
                         </span>
                     </div>
@@ -106,9 +102,7 @@ export function JobCard({
                 </p>
 
                 {/* Salary */}
-                <p className="text-lg font-black mb-3 text-accent">
-                    {salary}
-                </p>
+                <p className="text-lg font-black mb-3 text-accent">{salary}</p>
 
                 {/* Tags */}
                 {tags.length > 0 && (
@@ -116,7 +110,7 @@ export function JobCard({
                         {tags.map((tag) => (
                             <span
                                 key={tag}
-                                className="px-2 py-0.5 text-[10px] font-bold uppercase border-2 border-dark/[0.15] text-dark"
+                                className="px-2 py-0.5 text-sm font-bold uppercase border-2 border-dark/[0.15] text-dark"
                             >
                                 {tag}
                             </span>
@@ -128,13 +122,13 @@ export function JobCard({
                 {(applicants !== undefined || daysAgo !== undefined) && (
                     <div className="flex items-center justify-between pt-3 border-t-2 border-cream">
                         {applicants !== undefined && (
-                            <span className="text-[10px] font-bold uppercase text-dark opacity-40">
+                            <span className="text-sm font-bold uppercase text-dark opacity-40">
                                 <i className="fa-duotone fa-regular fa-users mr-1" />
                                 {applicants} applied
                             </span>
                         )}
                         {daysAgo !== undefined && (
-                            <span className="text-[10px] font-bold uppercase text-dark opacity-40">
+                            <span className="text-sm font-bold uppercase text-dark opacity-40">
                                 {daysAgo}d ago
                             </span>
                         )}

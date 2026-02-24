@@ -55,7 +55,7 @@ export function BaselReviewSection({
             <div className="p-4 grid grid-cols-2 gap-3">
                 {items.map((item) => (
                     <div key={item.label}>
-                        <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                        <span className="text-sm uppercase tracking-widest text-base-content/40">
                             {item.label}
                         </span>
                         <p className="text-sm font-semibold truncate">

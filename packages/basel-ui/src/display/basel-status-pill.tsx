@@ -22,7 +22,7 @@ export interface BaselStatusPillProps {
 /**
  * Basel status pill — square-cornered inline badge with semantic color.
  *
- * `px-2 py-0.5 text-[10px] font-bold uppercase` — the universal Basel
+ * `px-2 py-0.5 text-sm font-bold uppercase` — the universal Basel
  * status/tag/badge pattern used across tables, cards, lists, and headers.
  */
 export function BaselStatusPill({
@@ -32,7 +32,7 @@ export function BaselStatusPill({
 }: BaselStatusPillProps) {
     return (
         <span
-            className={`px-2 py-0.5 text-[10px] font-bold uppercase ${semanticPill[color]} ${className || ""}`}
+            className={`px-2 py-0.5 text-sm font-bold uppercase ${semanticPill[color]} ${className || ""}`}
         >
             {children}
         </span>

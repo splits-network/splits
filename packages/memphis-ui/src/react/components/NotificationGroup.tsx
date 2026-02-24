@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface NotificationGroupProps {
     /** Group label (e.g. "Today", "Yesterday") */
@@ -22,29 +22,29 @@ export interface NotificationGroupProps {
  */
 export function NotificationGroup({
     label,
-    color = 'coral',
+    color = "coral",
     count,
     children,
-    className = '',
+    className = "",
 }: NotificationGroupProps) {
     return (
-        <div className={[`accent-${color}`, 'mb-6', className].filter(Boolean).join(' ')}>
+        <div
+            className={[`accent-${color}`, "mb-6", className]
+                .filter(Boolean)
+                .join(" ")}
+        >
             <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-5 bg-accent" />
                 <span className="text-sm font-black uppercase tracking-[0.15em] text-dark">
                     {label}
                 </span>
                 {count !== undefined && (
-                    <span
-                        className="text-[10px] font-bold px-2 py-0.5 border-2 border-accent text-accent"
-                    >
+                    <span className="text-sm font-bold px-2 py-0.5 border-2 border-accent text-accent">
                         {count}
                     </span>
                 )}
             </div>
-            <div className="space-y-2">
-                {children}
-            </div>
+            <div className="space-y-2">{children}</div>
         </div>
     );
 }

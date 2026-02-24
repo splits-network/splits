@@ -40,7 +40,9 @@ export function BaselProgressSidebar({
     const ref = externalRef || internalRef;
 
     const totalSteps = steps.length;
-    const completionPercent = Math.round(((currentStep + 1) / totalSteps) * 100);
+    const completionPercent = Math.round(
+        ((currentStep + 1) / totalSteps) * 100,
+    );
 
     return (
         <div
@@ -56,7 +58,7 @@ export function BaselProgressSidebar({
                 {steps.map((step, i) => (
                     <div key={step.num} className="flex items-center gap-3">
                         <div
-                            className={`w-6 h-6 flex items-center justify-center text-[10px] font-bold ${
+                            className={`w-6 h-6 flex items-center justify-center text-sm font-bold ${
                                 i < currentStep
                                     ? "bg-success text-success-content"
                                     : i === currentStep

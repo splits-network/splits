@@ -61,7 +61,7 @@ export function BaselTabBar({
                         {tab.label}
                         {tab.count !== undefined && (
                             <span
-                                className={`text-[10px] px-1.5 py-0.5 font-bold ${
+                                className={`text-sm px-1.5 py-0.5 font-bold ${
                                     isActive
                                         ? "bg-primary/10 text-primary"
                                         : "bg-base-300 text-base-content/30"

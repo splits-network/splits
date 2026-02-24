@@ -55,7 +55,7 @@ export function BaselFileUpload({
                 <>
                     <i className="fa-duotone fa-regular fa-cloud-arrow-up text-2xl text-base-content/30 mb-2" />
                     <p className="text-sm text-base-content/50">{prompt}</p>
-                    <p className="text-[10px] text-base-content/30 mt-1">
+                    <p className="text-sm text-base-content/30 mt-1">
                         {acceptHint}
                     </p>
                 </>

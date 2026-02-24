@@ -22,7 +22,7 @@ export function BaselFieldError({ error, className }: BaselFieldErrorProps) {
         <p
             className={`text-error text-xs mt-1 flex items-center gap-1 ${className || ""}`}
         >
-            <i className="fa-duotone fa-regular fa-circle-exclamation text-[10px]" />
+            <i className="fa-duotone fa-regular fa-circle-exclamation text-sm" />
             {error}
         </p>
     );
