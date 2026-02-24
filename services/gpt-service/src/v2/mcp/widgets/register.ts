@@ -15,8 +15,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 /** MCP Apps MIME type for HTML widgets rendered in sandboxed iframes. */
 const RESOURCE_MIME_TYPE = 'text/html;profile=mcp-app';
 
-const WIDGETS_DIR = join(__dirname, '..', '..', '..', 'src', 'v2', 'mcp', 'widgets');
-
 interface WidgetDef {
     name: string;
     uri: string;
@@ -58,17 +56,13 @@ const WIDGET_DEFS: WidgetDef[] = [
 ];
 
 /**
- * Load widget HTML from source directory.
- * Falls back to dist directory if source not found (production builds).
+ * Load widget HTML file.
+ *
+ * In production (compiled): __dirname is dist/v2/mcp/widgets/, HTML files are alongside .js
+ * In development (ts-node): __dirname is src/v2/mcp/widgets/, HTML files are alongside .ts
  */
 function loadWidget(filename: string): string {
-    try {
-        return readFileSync(join(WIDGETS_DIR, filename), 'utf-8');
-    } catch {
-        // Fallback to dist location
-        const distDir = join(__dirname, 'widgets');
-        return readFileSync(join(distDir, filename), 'utf-8');
-    }
+    return readFileSync(join(__dirname, filename), 'utf-8');
 }
 
 /**
