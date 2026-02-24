@@ -5,7 +5,7 @@
  * Read-only tool — reuses GptActionRepository.getJobDetail().
  */
 
-import { z } from 'zod';
+import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { GptActionRepository } from '../../actions/repository';
 import { formatJobForGpt } from '../../actions/helpers';
@@ -15,19 +15,23 @@ import { requireMcpScope } from '../auth';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Extracted to avoid TS2589 deep type inference in registerTool generics
+const getJobDetailSchema: Record<string, ZodTypeAny> = {
+    job_id: z.string().describe('UUID of the job listing'),
+};
+
 export function registerGetJobDetailTool(
     server: McpServer,
     repository: GptActionRepository,
     getAuth: () => McpAuthContext,
 ) {
+    // @ts-ignore TS2589: ZodTypeAny schema may trigger deep inference in registerTool generics
     server.registerTool(
         'get_job_detail',
         {
             title: 'Get Job Details',
             description: 'Get full details for a specific job listing including description, requirements, pre-screen questions, and company info.',
-            inputSchema: {
-                job_id: z.string().describe('UUID of the job listing'),
-            },
+            inputSchema: getJobDetailSchema,
             annotations: {
                 readOnlyHint: true,
                 openWorldHint: false,

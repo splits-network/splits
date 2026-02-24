@@ -472,7 +472,7 @@ export default function AIReviewPanel({
 
     const fitColor = getScoreColor(aiReview.fit_score);
     const confColor = getScoreColor(aiReview.confidence_level);
-    const skillsColor = getScoreColor(aiReview.skills_match_percentage);
+    const skillsColor = getScoreColor(aiReview.skills_match?.match_percentage);
 
     return (
         <div className="space-y-6">
@@ -551,11 +551,11 @@ export default function AIReviewPanel({
                     <div
                         className={`text-3xl font-black ${semanticText[skillsColor]}`}
                     >
-                        {aiReview.skills_match_percentage || "N/A"}%
+                        {aiReview.skills_match?.match_percentage || "N/A"}%
                     </div>
                     <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Skills Match
-                        {aiReview.skills_match_percentage}
+                        {aiReview.skills_match?.match_percentage}
                     </div>
                 </div>
             </div>
@@ -606,20 +606,20 @@ export default function AIReviewPanel({
             )}
 
             {/* Skills Analysis */}
-            {aiReview.skills_match_percentage !== null && (
+            {aiReview.skills_match?.match_percentage !== null && (
                 <div className="bg-base-100 border-l-4 border-primary p-5 shadow-sm">
                     <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-4">
                         Skills Analysis
                     </h4>
 
-                    {aiReview.matched_skills &&
-                        aiReview.matched_skills.length > 0 && (
+                    {aiReview.skills_match?.matched_skills &&
+                        aiReview.skills_match.matched_skills.length > 0 && (
                             <div className="mb-4">
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Matched Skills
                                 </span>
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                    {aiReview.matched_skills.map(
+                                    {aiReview.skills_match.matched_skills.map(
                                         (skill, index) => (
                                             <BaselStatusPill
                                                 key={index}
@@ -633,14 +633,14 @@ export default function AIReviewPanel({
                             </div>
                         )}
 
-                    {aiReview.missing_skills &&
-                        aiReview.missing_skills.length > 0 && (
+                    {aiReview.skills_match?.missing_skills &&
+                        aiReview.skills_match.missing_skills.length > 0 && (
                             <div>
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Missing Skills
                                 </span>
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                    {aiReview.missing_skills.map(
+                                    {aiReview.skills_match.missing_skills.map(
                                         (skill, index) => (
                                             <BaselStatusPill
                                                 key={index}
@@ -658,21 +658,30 @@ export default function AIReviewPanel({
 
             {/* Experience & Location */}
             <div className="grid grid-cols-2 gap-4">
-                {aiReview.candidate_years !== null &&
-                    aiReview.required_years !== null && (
+                {aiReview.experience_analysis?.candidate_years !== null &&
+                    aiReview.experience_analysis?.required_years !== null && (
                         <div className="bg-base-100 border-t-4 border-warning p-5 shadow-sm text-center">
                             <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">
                                 Experience
                             </h4>
                             <div className="flex items-center justify-center gap-2">
-                                {aiReview.meets_experience_requirement ? (
+                                {aiReview.experience_analysis
+                                    ?.meets_requirement ? (
                                     <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-circle-xmark text-warning text-xl" />
                                 )}
                                 <span className="text-sm font-bold text-base-content">
-                                    {aiReview.candidate_years} yrs (Req:{" "}
-                                    {aiReview.required_years})
+                                    {
+                                        aiReview.experience_analysis
+                                            .candidate_years
+                                    }{" "}
+                                    yrs (Req:{" "}
+                                    {
+                                        aiReview.experience_analysis
+                                            .required_years
+                                    }
+                                    )
                                 </span>
                             </div>
                         </div>

@@ -31,6 +31,46 @@ const submitApplicationSchema: Record<string, ZodTypeAny> = {
         .optional()
         .describe('Answers to pre-screen questions'),
     cover_letter: z.string().optional().describe('Optional cover letter text'),
+    resume_data: z.object({
+        raw_text: z.string().describe('Full plain-text content of the resume'),
+        contact: z.object({
+            name: z.string().optional(),
+            email: z.string().optional(),
+            phone: z.string().optional(),
+            location: z.string().optional(),
+            linkedin_url: z.string().optional(),
+            website: z.string().optional(),
+        }).optional().describe('Contact information'),
+        summary: z.string().optional().describe('Professional summary or objective'),
+        experience: z.array(z.object({
+            title: z.string(),
+            company: z.string(),
+            location: z.string().optional(),
+            start_date: z.string().optional(),
+            end_date: z.string().optional(),
+            is_current: z.boolean().optional(),
+            description: z.string().optional(),
+            highlights: z.array(z.string()).optional(),
+        })).optional().describe('Work experience entries'),
+        education: z.array(z.object({
+            institution: z.string(),
+            degree: z.string().optional(),
+            field_of_study: z.string().optional(),
+            start_date: z.string().optional(),
+            end_date: z.string().optional(),
+            gpa: z.string().optional(),
+        })).optional().describe('Education entries'),
+        skills: z.array(z.object({
+            name: z.string(),
+            category: z.string().optional(),
+        })).optional().describe('Skills with optional category grouping'),
+        certifications: z.array(z.object({
+            name: z.string(),
+            issuer: z.string().optional(),
+            date_obtained: z.string().optional(),
+            expiry_date: z.string().optional(),
+        })).optional().describe('Professional certifications'),
+    }).optional().describe('Structured resume data extracted from the candidate\'s resume. If the candidate attaches a resume file, extract and structure its content into this field. Include raw_text with the full text plus structured sections.'),
 };
 
 export function registerSubmitApplicationTool(
@@ -52,7 +92,7 @@ export function registerSubmitApplicationTool(
             },
             _meta: { 'ui/resourceUri': 'ui://career-copilot/application-submit.html' },
         },
-        async ({ job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter }) => {
+        async ({ job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter, resume_data }) => {
             const auth = getAuth();
             requireMcpScope(auth, 'applications:write');
 
@@ -61,6 +101,7 @@ export function registerSubmitApplicationTool(
             const token = confirmation_token as string | undefined;
             const answers = pre_screen_answers as { question: string; answer: string }[] | undefined;
             const letter = cover_letter as string | undefined;
+            const resumeInput = resume_data as Record<string, unknown> | undefined;
 
             // ===============================================================
             // Path A: Confirmation step (confirmed is falsy)
@@ -130,18 +171,26 @@ export function registerSubmitApplicationTool(
                     };
                 });
 
-                // Generate token
+                // Check if candidate has a resume on file
+                const existingResume = await repository.getCandidateResume(candidateId);
+                const hasResumeOnFile = !!existingResume;
+
+                // Generate token (includes resume data if provided)
                 const confirmToken = generateConfirmationToken(
                     auth.clerkUserId,
                     jobId,
                     candidateId,
                     answersWithSnapshots,
                     letter,
+                    resumeInput as any,
                 );
 
                 // Build warnings
                 const warnings: string[] = [];
                 if (!letter?.trim()) warnings.push('No cover letter provided');
+                if (!hasResumeOnFile && !resumeInput) {
+                    warnings.push('No resume provided. Attach a resume file or paste resume text for best results.');
+                }
                 const optionalUnanswered = preScreenQuestions.filter(
                     (q: any) => !q.is_required && !providedTexts.includes(q.question),
                 );
@@ -198,11 +247,13 @@ export function registerSubmitApplicationTool(
                 return toolError('You already applied to this job.');
             }
 
-            // Create application
+            // Create application (with resume data if provided)
             const application = await repository.createApplication(
                 storedToken.candidateId,
                 storedToken.jobId,
                 storedToken.coverLetter,
+                storedToken.resumeData,
+                'mcp_tool',
             );
 
             // Save pre-screen answers

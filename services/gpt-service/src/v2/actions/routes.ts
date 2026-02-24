@@ -270,7 +270,7 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
         },
         async (request, reply) => {
             try {
-                const { job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter } =
+                const { job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter, resume_data } =
                     request.body;
 
                 // Get clerkUserId from validated token
@@ -364,16 +364,21 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         };
                     });
 
-                    // Step 8: Generate confirmation token
+                    // Step 8: Check if candidate has a resume on file
+                    const existingResume = await repository.getCandidateResume(candidateId);
+                    const hasResumeOnFile = !!existingResume;
+
+                    // Step 9: Generate confirmation token (includes resume data if provided)
                     const token = generateConfirmationToken(
                         clerkUserId,
                         job_id,
                         candidateId,
                         answersWithSnapshots,
-                        cover_letter
+                        cover_letter,
+                        resume_data,
                     );
 
-                    // Step 9: Build confirmation summary
+                    // Step 10: Build confirmation summary
                     const requirementsSummary: string[] = [];
                     if (job.requirements) {
                         const mandatoryReqs = job.requirements
@@ -396,6 +401,9 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                     const warnings: string[] = [];
                     if (!cover_letter || cover_letter.trim() === '') {
                         warnings.push('No cover letter provided');
+                    }
+                    if (!hasResumeOnFile && !resume_data) {
+                        warnings.push('No resume provided. Attach a resume or paste resume text for best results.');
                     }
                     if (missingOptionalQuestions.length > 0) {
                         warnings.push(
@@ -476,11 +484,13 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                     );
                 }
 
-                // Step 5: Create the application
+                // Step 5: Create the application (with resume data if provided)
                 const application = await repository.createApplication(
                     token.candidateId,
                     token.jobId,
-                    token.coverLetter
+                    token.coverLetter,
+                    token.resumeData,
+                    'custom_gpt',
                 );
 
                 // Step 6: Save pre-screen answers if present

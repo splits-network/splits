@@ -10,6 +10,7 @@ import {
     GptErrorResponse,
     ConfirmationToken,
     GptJobSearchResult,
+    GptResumeDataInput,
 } from "./types";
 
 // ============================================================================
@@ -150,8 +151,15 @@ export function generateConfirmationToken(
     candidateId: string,
     preScreenAnswers?: ConfirmationToken['preScreenAnswers'],
     coverLetter?: string,
+    resumeData?: GptResumeDataInput,
 ): ConfirmationToken {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Truncate raw_text to prevent oversized tokens
+    const truncatedResumeData = resumeData ? {
+        ...resumeData,
+        raw_text: resumeData.raw_text?.slice(0, 10_000),
+    } : undefined;
 
     const payload = JSON.stringify({
         clerkUserId,
@@ -159,6 +167,7 @@ export function generateConfirmationToken(
         candidateId,
         preScreenAnswers,
         coverLetter,
+        resumeData: truncatedResumeData,
         exp: expiresAt.getTime(),
     });
 
@@ -173,6 +182,7 @@ export function generateConfirmationToken(
         candidateId,
         preScreenAnswers,
         coverLetter,
+        resumeData: truncatedResumeData,
         expiresAt,
     };
 }
@@ -203,6 +213,7 @@ export function getConfirmationToken(
             candidateId: data.candidateId,
             preScreenAnswers: data.preScreenAnswers,
             coverLetter: data.coverLetter,
+            resumeData: data.resumeData,
             expiresAt: new Date(data.exp),
         };
     } catch {

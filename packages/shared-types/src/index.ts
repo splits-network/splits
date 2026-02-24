@@ -27,6 +27,12 @@ export type {
     ApplicationFeedbackType,
     ApplicationFeedbackCreatorType,
     ApplicationFeedback,
+    // Core model types
+    Application,
+    Candidate,
+    Job,
+    Company,
+    AIReview,
     // Other model types
     MarketplaceProfile,
     ApplicationStage,
@@ -55,6 +61,10 @@ export type {
     DegreeLevel,
     JobPreScreenQuestion,
     PreScreenQuestionType,
+    // Application resume data types
+    ApplicationResumeData,
+    ApplicationResumeContact,
+    ApplicationResumeSource,
 } from './models';
 
 // Content CMS block types and page structure

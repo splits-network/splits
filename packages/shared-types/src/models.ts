@@ -286,6 +286,37 @@ export interface ResumeMetadata {
     skills_count?: number;
 }
 
+// ============================================================================
+// Application Resume Data (stored on applications.resume_data jsonb)
+// ============================================================================
+
+export type ApplicationResumeSource = 'mcp_tool' | 'custom_gpt' | 'portal_backfill';
+
+export interface ApplicationResumeContact {
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    linkedin_url?: string;
+    website?: string;
+}
+
+export interface ApplicationResumeData {
+    source: ApplicationResumeSource;
+    created_at: string; // ISO 8601
+
+    // Structured sections — reuses existing Resume* types where possible
+    contact?: ApplicationResumeContact;
+    summary?: string;
+    experience?: ResumeExperience[];
+    education?: ResumeEducation[];
+    skills?: ResumeSkill[];
+    certifications?: ResumeCertification[];
+
+    // Raw text fallback — always populated when available
+    raw_text?: string;
+}
+
 export type CandidateVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 
 export interface Candidate {
@@ -301,7 +332,7 @@ export interface Candidate {
     current_company?: string;
     bio?: string;
     skills?: string;
-    user_id?: string; // If set, candidate is self-managed (has their own account); if null, recruiter-managed
+    user_id?: string | null; // If set, candidate is self-managed (has their own account); if null, recruiter-managed
     recruiter_id?: string; // SOURCER: The recruiter who brought this candidate to the platform (permanent credit for visibility, NOT editing)
     verification_status: CandidateVerificationStatus; // Verification status: unverified (default when recruiter adds), pending, verified, rejected
     verification_metadata?: Record<string, any>; // Additional verification details
@@ -325,6 +356,10 @@ export interface Candidate {
 
     // AI-extracted resume metadata (from primary resume)
     resume_metadata?: ResumeMetadata;
+
+    // Onboarding
+    onboarding_status?: string | null;
+    onboarding_step?: number | null;
 
     created_at: Date;
     updated_at: Date;
@@ -463,8 +498,18 @@ export interface AIReview {
     concerns: string[];
     skills_match: AISkillsMatch;
 
+    // Flat DB columns (present when querying Supabase directly)
+    skills_match_percentage?: number | null;
+    matched_skills?: string[];
+    missing_skills?: string[];
+
     // Experience Analysis
     experience_analysis: AIExperienceAnalysis;
+
+    // Flat DB columns (present when querying Supabase directly)
+    required_years?: number | null;
+    candidate_years?: number | null;
+    meets_experience_requirement?: boolean | null;
 
     // Location
     location_compatibility: LocationCompatibility;
@@ -486,6 +531,7 @@ export interface Application {
     // Application content
     cover_letter?: string;     // Candidate's cover letter
     salary?: number;           // Candidate's requested salary
+    resume_data?: ApplicationResumeData | null; // Structured resume from GPT or backfilled from document upload
 
     // Submission and hire tracking
     submitted_at?: Date | null;
@@ -507,7 +553,7 @@ export interface Application {
 
     // Enriched data from service layer (not stored in DB)
     candidate?: Candidate | MaskedCandidate;
-    recruiter?: { id: string; name: string; email: string };
+    recruiter?: { id: string; name?: string; email?: string };
     job?: Job;
     ai_review?: AIReview;  // AI analysis results (enriched)
 }

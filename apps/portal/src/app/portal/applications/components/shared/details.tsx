@@ -24,6 +24,7 @@ import { formatApplicationDate } from "../../types";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { ApplicationCandidateDetail } from "./application-candidate-detail";
 import { ApplicationRoleDetail } from "./application-role-detail";
+import ResumeTab from "./resume-tab";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -31,6 +32,7 @@ type TabKey =
     | "overview"
     | "candidate"
     | "job"
+    | "resume"
     | "documents"
     | "ai_review"
     | "notes"
@@ -40,6 +42,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "overview", label: "Overview", icon: "fa-clipboard" },
     { key: "candidate", label: "Candidate", icon: "fa-user" },
     { key: "job", label: "Role", icon: "fa-briefcase" },
+    { key: "resume", label: "Resume", icon: "fa-file-user" },
     { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
     { key: "notes", label: "Notes", icon: "fa-comments" },
@@ -248,6 +251,9 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     <CandidateTab application={application} />
                 )}
                 {activeTab === "job" && <JobTab application={application} />}
+                {activeTab === "resume" && (
+                    <ResumeTab resumeData={application.resume_data} />
+                )}
                 {activeTab === "documents" && (
                     <DocumentsTab application={application} />
                 )}

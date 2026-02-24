@@ -7,6 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
+import { GptResumeDataInput } from './types';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -221,17 +222,29 @@ export class GptActionRepository {
     async createApplication(
         candidateId: string,
         jobId: string,
-        coverLetter?: string
+        coverLetter?: string,
+        resumeData?: GptResumeDataInput,
+        resumeSource?: 'mcp_tool' | 'custom_gpt' | 'portal_backfill',
     ): Promise<any> {
+        const insertPayload: Record<string, unknown> = {
+            candidate_id: candidateId,
+            job_id: jobId,
+            cover_letter: coverLetter,
+            stage: 'submitted',
+            submitted_at: new Date().toISOString(),
+        };
+
+        if (resumeData) {
+            insertPayload.resume_data = {
+                ...resumeData,
+                source: resumeSource || 'mcp_tool',
+                created_at: new Date().toISOString(),
+            };
+        }
+
         const { data, error } = await this.supabase
             .from('applications')
-            .insert({
-                candidate_id: candidateId,
-                job_id: jobId,
-                cover_letter: coverLetter,
-                stage: 'submitted',
-                submitted_at: new Date().toISOString(),
-            })
+            .insert(insertPayload)
             .select()
             .single();
 

@@ -63,6 +63,7 @@ export class DomainConsumer {
     private documentServiceV2: DocumentServiceV2;
     private channel: Channel;
     private eventPublisher: EventPublisher;
+    private supabase: ReturnType<typeof createClient>;
 
     constructor(channel: Channel, eventPublisher: EventPublisher) {
         this.channel = channel;
@@ -71,11 +72,11 @@ export class DomainConsumer {
         this.documentService = new DocumentService();
         this.scannerService = new ScannerService();
         // Initialize V2 repository and service with Supabase client
-        const supabase = createClient(
+        this.supabase = createClient(
             process.env.SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
-        this.repository = new DocumentRepositoryV2(supabase);
+        this.repository = new DocumentRepositoryV2(this.supabase);
         this.documentServiceV2 = new DocumentServiceV2(this.repository);
     }
 
@@ -261,9 +262,14 @@ export class DomainConsumer {
                 }
             });
 
+            // 6. Backfill resume_data on applications for candidate documents
+            if (event.entity_type === 'candidate') {
+                await this.backfillApplicationResumeData(event.entity_id, extractionResult.text);
+            }
+
             const processingTime = Date.now() - startTime;
 
-            // 6. Publish document.processed event
+            // 7. Publish document.processed event
             await this.publishDocumentProcessed({
                 document_id: event.document_id,
                 entity_type: event.entity_type,
@@ -303,6 +309,48 @@ export class DomainConsumer {
                 processing_time_ms: processingTime,
                 error: errorMessage
             });
+        }
+    }
+
+    /**
+     * Backfill resume_data on applications for a candidate.
+     * Only fills NULL resume_data — never overwrites GPT-provided structured data.
+     */
+    private async backfillApplicationResumeData(candidateId: string, extractedText: string): Promise<void> {
+        try {
+            const { data: apps, error } = await this.supabase
+                .from('applications')
+                .select('id')
+                .eq('candidate_id', candidateId)
+                .is('resume_data', null);
+
+            if (error) {
+                logger.error(`Failed to query applications for backfill: ${error.message}`);
+                return;
+            }
+
+            if (!apps || apps.length === 0) return;
+
+            const resumeData = {
+                source: 'portal_backfill',
+                created_at: new Date().toISOString(),
+                raw_text: extractedText,
+            };
+
+            const { error: updateError } = await (this.supabase
+                .from('applications') as any)
+                .update({ resume_data: resumeData })
+                .eq('candidate_id', candidateId)
+                .is('resume_data', null);
+
+            if (updateError) {
+                logger.error(`Failed to backfill resume_data: ${updateError.message}`);
+                return;
+            }
+
+            logger.info(`Backfilled resume_data on ${apps.length} application(s) for candidate ${candidateId}`);
+        } catch (error) {
+            logger.error(`Resume data backfill failed: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 

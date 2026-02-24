@@ -362,7 +362,7 @@ export default function AIReviewPanel({
 
     const fitColor = getScoreColor(aiReview.fit_score);
     const confColor = getScoreColor(aiReview.confidence_level);
-    const skillsColor = getScoreColor(aiReview.skills_match_percentage);
+    const skillsColor = getScoreColor(aiReview.skills_match_percentage ?? null);
 
     return (
         <div className="space-y-6">
