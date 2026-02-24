@@ -296,21 +296,27 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         return reply.status(400).send(gptError('INVALID_REQUEST', 'job_id is required'));
                     }
 
-                    // Step 3: Check for duplicate application
+                    // Step 3: Check for existing application
                     const existingApp = await repository.checkDuplicateApplication(candidateId, job_id);
+                    let existingApplicationId: string | undefined;
                     if (existingApp) {
-                        const appliedDate = existingApp.created_at
-                            ? new Date(existingApp.created_at).toISOString().split('T')[0]
-                            : 'unknown date';
-                        return reply.status(409).send(
-                            gptError(
-                                'DUPLICATE_APPLICATION',
-                                `You already applied to this job on ${appliedDate}`,
-                                {
-                                    suggestion: 'Check your application status instead',
-                                }
-                            )
-                        );
+                        if (existingApp.stage === 'recruiter_proposed') {
+                            // Recruiter proposed this candidate — allow them to accept and submit
+                            existingApplicationId = existingApp.id;
+                        } else {
+                            const appliedDate = existingApp.created_at
+                                ? new Date(existingApp.created_at).toISOString().split('T')[0]
+                                : 'unknown date';
+                            return reply.status(409).send(
+                                gptError(
+                                    'DUPLICATE_APPLICATION',
+                                    `You already applied to this job on ${appliedDate}`,
+                                    {
+                                        suggestion: 'Check your application status instead',
+                                    }
+                                )
+                            );
+                        }
                     }
 
                     // Step 4: Fetch job details
@@ -368,7 +374,7 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                     const existingResume = await repository.getCandidateResume(candidateId);
                     const hasResumeOnFile = !!existingResume;
 
-                    // Step 9: Generate confirmation token (includes resume data if provided)
+                    // Step 9: Generate confirmation token (includes resume data and existing app ID if accepting proposal)
                     const token = generateConfirmationToken(
                         clerkUserId,
                         job_id,
@@ -376,6 +382,7 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                         answersWithSnapshots,
                         cover_letter,
                         resume_data,
+                        existingApplicationId,
                     );
 
                     // Step 10: Build confirmation summary
@@ -468,7 +475,7 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                     token.candidateId,
                     token.jobId
                 );
-                if (existingApp) {
+                if (existingApp && existingApp.stage !== 'recruiter_proposed') {
                     deleteConfirmationToken(confirmation_token);
                     const appliedDate = existingApp.created_at
                         ? new Date(existingApp.created_at).toISOString().split('T')[0]
@@ -484,14 +491,29 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                     );
                 }
 
-                // Step 5: Create the application (with resume data if provided)
-                const application = await repository.createApplication(
-                    token.candidateId,
-                    token.jobId,
-                    token.coverLetter,
-                    token.resumeData,
-                    'custom_gpt',
-                );
+                // Step 5: Create or update application
+                let application: any;
+                let isProposalAcceptance = false;
+
+                if (token.existingApplicationId) {
+                    // Accepting a recruiter proposal — update existing application
+                    application = await repository.acceptProposalForReview(
+                        token.existingApplicationId,
+                        token.coverLetter,
+                        token.resumeData,
+                        'custom_gpt',
+                    );
+                    isProposalAcceptance = true;
+                } else {
+                    // New application
+                    application = await repository.createApplication(
+                        token.candidateId,
+                        token.jobId,
+                        token.coverLetter,
+                        token.resumeData,
+                        'custom_gpt',
+                    );
+                }
 
                 // Step 6: Save pre-screen answers if present
                 if (token.preScreenAnswers && token.preScreenAnswers.length > 0) {
@@ -501,20 +523,40 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                 // Step 7: Delete the confirmation token
                 deleteConfirmationToken(confirmation_token);
 
-                // Step 8: Publish audit event
+                // Step 8: Publish events for AI review pipeline
                 if (eventPublisher) {
                     try {
+                        if (isProposalAcceptance) {
+                            // Stage change event — AI service listens for new_stage === 'ai_review'
+                            await eventPublisher.publish('application.stage_changed', {
+                                application_id: application.id,
+                                candidate_id: token.candidateId,
+                                job_id: token.jobId,
+                                old_stage: 'recruiter_proposed',
+                                new_stage: 'ai_review',
+                            });
+                        } else {
+                            // Created event — AI service listens for stage === 'ai_review'
+                            await eventPublisher.publish('application.created', {
+                                application_id: application.id,
+                                candidate_id: token.candidateId,
+                                job_id: token.jobId,
+                                stage: 'ai_review',
+                            });
+                        }
+                        // Audit event
                         await eventPublisher.publish('gpt.action.application_submitted', {
                             application_id: application.id,
                             candidate_id: token.candidateId,
                             job_id: token.jobId,
                             clerk_user_id: token.clerkUserId,
+                            proposal_accepted: isProposalAcceptance,
                         });
                     } catch (eventError: any) {
-                        // Log but don't fail the request
+                        // Log but don't fail the request — application is already persisted
                         app.log.error(
                             { error: eventError, application_id: application.id },
-                            'Failed to publish application_submitted event'
+                            'Failed to publish events'
                         );
                     }
                 }
@@ -525,16 +567,16 @@ export function registerActionRoutes(app: FastifyInstance, config: ActionRoutesC
                 // Return success
                 return reply.status(201).send({
                     data: {
-                        status: 'SUBMITTED',
-                        message: 'Application submitted successfully',
+                        status: 'AI_REVIEW',
+                        message: isProposalAcceptance
+                            ? 'Recruiter proposal accepted! AI review is in progress.'
+                            : 'Application submitted for AI review.',
                         application: {
                             id: application.id,
                             job_title: job?.title || 'Unknown',
                             company_name: job?.company?.name || 'Unknown',
-                            applied_date: application.submitted_at
-                                ? new Date(application.submitted_at).toISOString().split('T')[0]
-                                : new Date(application.created_at).toISOString().split('T')[0],
-                            status_label: 'Submitted',
+                            applied_date: new Date(application.created_at).toISOString().split('T')[0],
+                            status_label: 'AI Review',
                         },
                     },
                 });

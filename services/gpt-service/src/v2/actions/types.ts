@@ -222,5 +222,6 @@ export interface ConfirmationToken {
     }[];
     coverLetter?: string;
     resumeData?: GptResumeDataInput;
+    existingApplicationId?: string;
     expiresAt: Date;
 }

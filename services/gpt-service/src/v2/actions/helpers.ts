@@ -152,6 +152,7 @@ export function generateConfirmationToken(
     preScreenAnswers?: ConfirmationToken['preScreenAnswers'],
     coverLetter?: string,
     resumeData?: GptResumeDataInput,
+    existingApplicationId?: string,
 ): ConfirmationToken {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
@@ -168,6 +169,7 @@ export function generateConfirmationToken(
         preScreenAnswers,
         coverLetter,
         resumeData: truncatedResumeData,
+        existingApplicationId,
         exp: expiresAt.getTime(),
     });
 
@@ -183,6 +185,7 @@ export function generateConfirmationToken(
         preScreenAnswers,
         coverLetter,
         resumeData: truncatedResumeData,
+        existingApplicationId,
         expiresAt,
     };
 }
@@ -214,6 +217,7 @@ export function getConfirmationToken(
             preScreenAnswers: data.preScreenAnswers,
             coverLetter: data.coverLetter,
             resumeData: data.resumeData,
+            existingApplicationId: data.existingApplicationId,
             expiresAt: new Date(data.exp),
         };
     } catch {

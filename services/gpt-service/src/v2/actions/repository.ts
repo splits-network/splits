@@ -230,8 +230,7 @@ export class GptActionRepository {
             candidate_id: candidateId,
             job_id: jobId,
             cover_letter: coverLetter,
-            stage: 'submitted',
-            submitted_at: new Date().toISOString(),
+            stage: 'ai_review',
         };
 
         if (resumeData) {
@@ -245,6 +244,44 @@ export class GptActionRepository {
         const { data, error } = await this.supabase
             .from('applications')
             .insert(insertPayload)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+
+        return data;
+    }
+
+    /**
+     * Accept a recruiter proposal and transition to AI review.
+     * Updates an existing recruiter_proposed application with candidate-provided data.
+     */
+    async acceptProposalForReview(
+        applicationId: string,
+        coverLetter?: string,
+        resumeData?: GptResumeDataInput,
+        resumeSource?: 'mcp_tool' | 'custom_gpt',
+    ): Promise<any> {
+        const updatePayload: Record<string, unknown> = {
+            stage: 'ai_review',
+            cover_letter: coverLetter,
+        };
+
+        if (resumeData) {
+            updatePayload.resume_data = {
+                ...resumeData,
+                source: resumeSource || 'mcp_tool',
+                created_at: new Date().toISOString(),
+            };
+        }
+
+        const { data, error } = await this.supabase
+            .from('applications')
+            .update(updatePayload)
+            .eq('id', applicationId)
+            .eq('stage', 'recruiter_proposed')
             .select()
             .single();
 

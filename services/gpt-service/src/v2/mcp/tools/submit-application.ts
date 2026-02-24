@@ -116,13 +116,19 @@ export function registerSubmitApplicationTool(
                     return toolError('job_id is required');
                 }
 
-                // Check duplicate
+                // Check for existing application
                 const existing = await repository.checkDuplicateApplication(candidateId, jobId);
+                let existingApplicationId: string | undefined;
                 if (existing) {
-                    const date = existing.created_at
-                        ? new Date(existing.created_at).toISOString().split('T')[0]
-                        : 'unknown date';
-                    return toolError(`You already applied to this job on ${date}. Check your application status instead.`);
+                    if (existing.stage === 'recruiter_proposed') {
+                        // Recruiter proposed this candidate — allow them to accept and submit
+                        existingApplicationId = existing.id;
+                    } else {
+                        const date = existing.created_at
+                            ? new Date(existing.created_at).toISOString().split('T')[0]
+                            : 'unknown date';
+                        return toolError(`You already applied to this job on ${date}. Check your application status instead.`);
+                    }
                 }
 
                 // Fetch job
@@ -175,7 +181,7 @@ export function registerSubmitApplicationTool(
                 const existingResume = await repository.getCandidateResume(candidateId);
                 const hasResumeOnFile = !!existingResume;
 
-                // Generate token (includes resume data if provided)
+                // Generate token (includes resume data and existing app ID if accepting proposal)
                 const confirmToken = generateConfirmationToken(
                     auth.clerkUserId,
                     jobId,
@@ -183,6 +189,7 @@ export function registerSubmitApplicationTool(
                     answersWithSnapshots,
                     letter,
                     resumeInput as any,
+                    existingApplicationId,
                 );
 
                 // Build warnings
@@ -240,21 +247,35 @@ export function registerSubmitApplicationTool(
                 return toolError('Confirmation token does not belong to this user.');
             }
 
-            // Race condition guard
-            const existing = await repository.checkDuplicateApplication(storedToken.candidateId, storedToken.jobId);
-            if (existing) {
+            // Race condition guard: re-check for duplicates
+            const existingCheck = await repository.checkDuplicateApplication(storedToken.candidateId, storedToken.jobId);
+            if (existingCheck && existingCheck.stage !== 'recruiter_proposed') {
                 deleteConfirmationToken(token);
                 return toolError('You already applied to this job.');
             }
 
-            // Create application (with resume data if provided)
-            const application = await repository.createApplication(
-                storedToken.candidateId,
-                storedToken.jobId,
-                storedToken.coverLetter,
-                storedToken.resumeData,
-                'mcp_tool',
-            );
+            let application: any;
+            let isProposalAcceptance = false;
+
+            if (storedToken.existingApplicationId) {
+                // Accepting a recruiter proposal — update existing application
+                application = await repository.acceptProposalForReview(
+                    storedToken.existingApplicationId,
+                    storedToken.coverLetter,
+                    storedToken.resumeData,
+                    'mcp_tool',
+                );
+                isProposalAcceptance = true;
+            } else {
+                // New application
+                application = await repository.createApplication(
+                    storedToken.candidateId,
+                    storedToken.jobId,
+                    storedToken.coverLetter,
+                    storedToken.resumeData,
+                    'mcp_tool',
+                );
+            }
 
             // Save pre-screen answers
             if (storedToken.preScreenAnswers?.length) {
@@ -263,18 +284,38 @@ export function registerSubmitApplicationTool(
 
             deleteConfirmationToken(token);
 
-            // Publish audit event
+            // Publish events for AI review pipeline
             if (eventPublisher) {
                 try {
+                    if (isProposalAcceptance) {
+                        // Stage change event — AI service listens for new_stage === 'ai_review'
+                        await eventPublisher.publish('application.stage_changed', {
+                            application_id: application.id,
+                            candidate_id: storedToken.candidateId,
+                            job_id: storedToken.jobId,
+                            old_stage: 'recruiter_proposed',
+                            new_stage: 'ai_review',
+                        });
+                    } else {
+                        // Created event — AI service listens for stage === 'ai_review'
+                        await eventPublisher.publish('application.created', {
+                            application_id: application.id,
+                            candidate_id: storedToken.candidateId,
+                            job_id: storedToken.jobId,
+                            stage: 'ai_review',
+                        });
+                    }
+                    // Audit event
                     await eventPublisher.publish('gpt.action.application_submitted', {
                         application_id: application.id,
                         candidate_id: storedToken.candidateId,
                         job_id: storedToken.jobId,
                         clerk_user_id: storedToken.clerkUserId,
                         source: 'mcp_app',
+                        proposal_accepted: isProposalAcceptance,
                     });
                 } catch {
-                    // Log but don't fail
+                    // Log but don't fail — application is already persisted
                 }
             }
 
@@ -283,19 +324,20 @@ export function registerSubmitApplicationTool(
 
             return {
                 structuredContent: {
-                    status: 'SUBMITTED',
+                    status: 'AI_REVIEW',
                     application: {
                         id: application.id,
                         job_title: job?.title || 'Unknown',
                         company_name: job?.company?.name || 'Unknown',
-                        applied_date: new Date(application.submitted_at || application.created_at)
-                            .toISOString().split('T')[0],
-                        status_label: 'Submitted',
+                        applied_date: new Date(application.created_at).toISOString().split('T')[0],
+                        status_label: 'AI Review',
                     },
                 } as unknown as Record<string, unknown>,
                 content: [{
                     type: 'text' as const,
-                    text: `Application submitted successfully for ${job?.title || 'the position'} at ${job?.company?.name || 'the company'}.`,
+                    text: isProposalAcceptance
+                        ? `Recruiter proposal accepted! Your application for ${job?.title || 'the position'} at ${job?.company?.name || 'the company'} is now being reviewed by AI. You'll be notified when the review is complete.`
+                        : `Application submitted for ${job?.title || 'the position'} at ${job?.company?.name || 'the company'}. AI review is in progress — you'll be notified when it's complete.`,
                 }],
             };
         },
