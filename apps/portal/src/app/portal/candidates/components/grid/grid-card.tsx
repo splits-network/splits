@@ -46,20 +46,20 @@ export function GridCard({
             {/* Top row: verification status pill + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
                 >
                     {formatVerificationStatus(candidate.verification_status)}
                 </span>
 
                 {isNew(candidate) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>
                 )}
 
                 {candidate.open_to_remote && (
-                    <span className="text-[10px] uppercase tracking-wider bg-info/15 text-info px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-info/15 text-info px-2 py-1">
                         Remote
                     </span>
                 )}
@@ -121,13 +121,13 @@ export function GridCard({
                     {skills.slice(0, 4).map((skill) => (
                         <span
                             key={skill}
-                            className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
+                            className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
                         >
                             {skill}
                         </span>
                     ))}
                     {skills.length > 4 && (
-                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                             +{skills.length - 4}
                         </span>
                     )}

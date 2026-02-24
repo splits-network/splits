@@ -4,14 +4,14 @@ import type { RecruiterCompanyRelationship } from "../../types";
 import { TableRow } from "./table-row";
 
 const COLUMNS = [
-    "",          // chevron
+    "", // chevron
     "Name",
     "Details",
     "Type",
     "Status",
     "Jobs",
     "Received",
-    "",          // actions
+    "", // actions
 ] as const;
 
 export function TableView({
@@ -33,7 +33,7 @@ export function TableView({
                         {COLUMNS.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""} ${i === COLUMNS.length - 1 ? "w-24" : ""}`}
+                                className={`px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""} ${i === COLUMNS.length - 1 ? "w-24" : ""}`}
                             >
                                 {h}
                             </th>

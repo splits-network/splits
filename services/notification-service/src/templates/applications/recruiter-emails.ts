@@ -361,3 +361,156 @@ ${paragraph(
         source: 'portal',
     });
 }
+
+// ============================================================================
+// Application Expired — Stage-Aware
+// ============================================================================
+
+export interface RecruiterApplicationExpiredData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    expiredFromStage?: string;
+    applicationUrl: string;
+}
+
+function getRecruiterExpiredContent(data: RecruiterApplicationExpiredData): {
+    title: string;
+    alertType: 'info' | 'warning';
+    alertTitle: string;
+    message: string;
+    ctaText: string;
+} {
+    const stage = data.expiredFromStage;
+
+    if (stage === 'screen') {
+        return {
+            title: 'Pipeline Stall',
+            alertType: 'warning',
+            alertTitle: 'Pipeline Stall',
+            message: `Your application for <strong>${data.candidateName}</strong> at <strong>${data.jobTitle}</strong> expired during screening.`,
+            ctaText: 'Review Your Pipeline \u2192',
+        };
+    }
+
+    if (stage === 'recruiter_proposed') {
+        return {
+            title: 'Proposal Unresponded',
+            alertType: 'info',
+            alertTitle: 'Proposal Unresponded',
+            message: `<strong>${data.candidateName}</strong> didn't respond to your proposal for <strong>${data.jobTitle}</strong>.`,
+            ctaText: 'Find Another Candidate \u2192',
+        };
+    }
+
+    if (stage === 'submitted' || stage === 'company_review' || stage === 'company_feedback') {
+        const stageLabel = stage === 'submitted' ? 'submission' : stage === 'company_review' ? 'company review' : 'company feedback';
+        return {
+            title: 'Company Inaction',
+            alertType: 'warning',
+            alertTitle: 'Company Inaction',
+            message: `<strong>${data.companyName}</strong> let the application for <strong>${data.candidateName}</strong> at <strong>${data.jobTitle}</strong> expire during ${stageLabel}.`,
+            ctaText: `Follow Up with ${data.companyName} \u2192`,
+        };
+    }
+
+    return {
+        title: 'Application Expired',
+        alertType: 'warning',
+        alertTitle: 'Application Expired',
+        message: `The application for <strong>${data.candidateName}</strong> at <strong>${data.jobTitle}</strong> has expired.`,
+        ctaText: 'View Details \u2192',
+    };
+}
+
+export function recruiterApplicationExpiredEmail(data: RecruiterApplicationExpiredData): string {
+    const cfg = getRecruiterExpiredContent(data);
+
+    const content = `
+${heading({ level: 1, text: cfg.title })}
+
+${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
+
+${alert({ type: cfg.alertType, title: cfg.alertTitle, message: cfg.message })}
+
+${infoCard({
+        title: 'Application Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Status', value: 'Expired', highlight: true },
+        ],
+    })}
+
+${button({
+        href: data.applicationUrl,
+        text: cfg.ctaText,
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph(
+        'Browse other opportunities in your <a href="https://splits.network/portal/roles" style="color: #233876; text-decoration: underline;">roles dashboard</a>.'
+    )}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Application expired: ${data.candidateName} for ${data.jobTitle}`,
+        content,
+        source: 'portal',
+    });
+}
+
+// ============================================================================
+// Expiration Warning for Recruiters
+// ============================================================================
+
+export interface RecruiterExpirationWarningData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    stage: string;
+    daysRemaining: number;
+    applicationUrl: string;
+}
+
+export function recruiterExpirationWarningEmail(data: RecruiterExpirationWarningData): string {
+    const isRecruiterResponsible = data.stage === 'screen';
+    const message = isRecruiterResponsible
+        ? `You have <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong> to advance <strong>${data.candidateName}</strong>'s application for <strong>${data.jobTitle}</strong>.`
+        : `<strong>${data.companyName}</strong> hasn't acted on <strong>${data.candidateName}</strong>'s application for <strong>${data.jobTitle}</strong> \u2014 it expires in <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong>.`;
+
+    const content = `
+${heading({ level: 1, text: 'Application Expiring Soon' })}
+
+${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
+
+${alert({ type: 'warning', title: 'Expiring Soon', message })}
+
+${infoCard({
+        title: 'Application Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Days Remaining', value: String(data.daysRemaining), highlight: true },
+        ],
+    })}
+
+${button({
+        href: data.applicationUrl,
+        text: isRecruiterResponsible ? 'Review Application \u2192' : 'View Application \u2192',
+        variant: 'primary',
+    })}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.candidateName}'s application for ${data.jobTitle} expires in ${data.daysRemaining} days`,
+        content,
+        source: 'portal',
+    });
+}

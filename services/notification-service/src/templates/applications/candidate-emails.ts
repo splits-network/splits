@@ -917,63 +917,160 @@ ${paragraph(`Questions? Reply to this email or contact <strong>${data.recruiterN
     });
 }
 
-// When application expires due to inactivity
+// When application expires — stage-aware version
 export interface CandidateApplicationExpiredData {
     candidateName: string;
     jobTitle: string;
     companyName: string;
     hasRecruiter: boolean;
     recruiterName?: string;
+    expiredFromStage?: string;
     applicationUrl: string;
 }
 
-export function candidateApplicationExpiredEmail(data: CandidateApplicationExpiredData): string {
-    const expiredMessage = data.hasRecruiter
-        ? `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity. Your recruiter <strong>${data.recruiterName}</strong> can help you explore next steps.`
-        : `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity.`;
+function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
+    title: string;
+    alertType: 'info' | 'warning';
+    alertTitle: string;
+    message: string;
+    ctaText: string;
+    ctaVariant: 'primary' | 'secondary';
+} {
+    const stage = data.expiredFromStage;
 
-    const nextStepsMessage = data.hasRecruiter
-        ? `Contact ${data.recruiterName} to discuss reactivating your application or exploring similar opportunities.`
-        : 'You can explore similar opportunities or reach out to our team for assistance finding new roles.';
+    if (stage === 'recruiter_proposed') {
+        return {
+            title: 'Proposal Expired',
+            alertType: 'warning',
+            alertTitle: 'Proposal Expired',
+            message: `You didn't respond to ${data.recruiterName || 'your recruiter'}'s proposal for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> in time.`,
+            ctaText: 'Contact Your Recruiter →',
+            ctaVariant: 'primary',
+        };
+    }
+
+    if (stage === 'recruiter_request') {
+        return {
+            title: 'Information Request Expired',
+            alertType: 'warning',
+            alertTitle: 'Information Request Expired',
+            message: `You didn't provide the information ${data.recruiterName || 'your recruiter'} requested for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong>.`,
+            ctaText: 'Reach Out to Your Recruiter →',
+            ctaVariant: 'primary',
+        };
+    }
+
+    if (stage === 'submitted' || stage === 'company_review' || stage === 'company_feedback') {
+        return {
+            title: 'Application Timed Out',
+            alertType: 'info',
+            alertTitle: 'Application Timed Out',
+            message: `<strong>${data.companyName}</strong> didn't move forward with your application for <strong>${data.jobTitle}</strong> within the required timeframe.`,
+            ctaText: 'Browse Similar Jobs →',
+            ctaVariant: 'primary',
+        };
+    }
+
+    if (stage === 'screen') {
+        return {
+            title: 'Application Expired',
+            alertType: 'info',
+            alertTitle: 'Application Expired',
+            message: `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> wasn't advanced during the screening phase.`,
+            ctaText: 'View Your Applications →',
+            ctaVariant: 'secondary',
+        };
+    }
+
+    // Fallback for unknown stages
+    return {
+        title: 'Application Expired',
+        alertType: 'warning',
+        alertTitle: 'Application Timeout',
+        message: `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity.`,
+        ctaText: 'View Application History →',
+        ctaVariant: 'secondary',
+    };
+}
+
+export function candidateApplicationExpiredEmail(data: CandidateApplicationExpiredData): string {
+    const cfg = getCandidateExpiredContent(data);
 
     const content = `
-${heading({ level: 1, text: 'Application Expired' })}
+${heading({ level: 1, text: cfg.title })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
-${paragraph(expiredMessage)}
+${alert({ type: cfg.alertType, title: cfg.alertTitle, message: cfg.message })}
 
-${alert({
-        type: 'warning',
-        title: 'Application Timeout',
-        message: 'This application has been closed due to extended inactivity from all parties.',
-    })}
-
-${infoCard({
-        title: 'Why applications expire',
-        items: [
-            { label: 'Inactivity Period', value: 'No updates or responses for an extended period' },
-            { label: 'Company Timeline', value: 'Company may have filled the role or changed priorities' },
-            { label: 'Process Efficiency', value: 'Keeps active applications moving forward' },
-            { label: 'New Opportunities', value: 'Frees you up to focus on active prospects' },
-        ],
-        theme: defaultTheme,
-    })}
-
-${paragraph(`<strong>What you can do:</strong> ${nextStepsMessage}`)}
+${paragraph('Expired applications don\'t reflect negatively on your profile, and new opportunities are always available.')}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Application History →',
-        variant: 'secondary',
+        text: cfg.ctaText,
+        variant: cfg.ctaVariant,
         theme: defaultTheme,
     })}
 
-${paragraph('Don\'t worry - expired applications don\'t reflect negatively on your profile, and new opportunities are always available!')}
+${data.hasRecruiter && data.recruiterName
+        ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> can help you explore other opportunities.`)
+        : paragraph('Continue exploring roles that match your skills and experience.')
+    }
     `.trim();
 
     return baseEmailTemplate({
         preheader: `Your ${data.jobTitle} application at ${data.companyName} has expired`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// Pre-expiration warning for candidates
+export interface CandidateExpirationWarningData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    recruiterName?: string;
+    stage: string;
+    daysRemaining: number;
+    applicationUrl: string;
+}
+
+export function candidateExpirationWarningEmail(data: CandidateExpirationWarningData): string {
+    const isActionRequired = data.stage === 'recruiter_proposed' || data.stage === 'recruiter_request';
+
+    const message = isActionRequired
+        ? `You have <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong> to respond before your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> expires.`
+        : `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> will expire in <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong> if no action is taken.`;
+
+    const content = `
+${heading({ level: 1, text: 'Application Expiring Soon' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${alert({ type: 'warning', title: 'Action Required', message })}
+
+${isActionRequired
+        ? button({
+            href: data.applicationUrl,
+            text: 'Respond Now →',
+            variant: 'primary',
+            theme: defaultTheme,
+        })
+        : button({
+            href: data.applicationUrl,
+            text: 'View Application →',
+            variant: 'primary',
+            theme: defaultTheme,
+        })
+    }
+
+${paragraph('Don\'t miss out on this opportunity. Take action now to keep your application active.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Your ${data.jobTitle} application expires in ${data.daysRemaining} days`,
         content,
         source: 'candidate',
         theme: defaultTheme,

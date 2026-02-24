@@ -44,8 +44,10 @@ export default function ScheduleInterviewModal({
     const [step, setStep] = useState<Step>("select-calendar");
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
     const [calendars, setCalendars] = useState<CalendarInfo[]>([]);
-    const [selectedConnection, setSelectedConnection] = useState<OAuthConnectionPublic | null>(null);
-    const [selectedCalendar, setSelectedCalendar] = useState<CalendarInfo | null>(null);
+    const [selectedConnection, setSelectedConnection] =
+        useState<OAuthConnectionPublic | null>(null);
+    const [selectedCalendar, setSelectedCalendar] =
+        useState<CalendarInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -72,9 +74,13 @@ export default function ScheduleInterviewModal({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const res = await client.get("/integrations/connections") as { data: OAuthConnectionPublic[] };
+            const res = (await client.get("/integrations/connections")) as {
+                data: OAuthConnectionPublic[];
+            };
             const calendarConns = (res.data ?? []).filter(
-                (c) => c.provider_slug.includes("calendar") && c.status === "active",
+                (c) =>
+                    c.provider_slug.includes("calendar") &&
+                    c.status === "active",
             );
             setConnections(calendarConns);
 
@@ -95,9 +101,9 @@ export default function ScheduleInterviewModal({
             const t = token || (await getToken());
             if (!t) return;
             const client = createAuthenticatedClient(t);
-            const res = await client.get(
+            const res = (await client.get(
                 `/integrations/calendar/${connectionId}/calendars`,
-            ) as { data: CalendarInfo[] };
+            )) as { data: CalendarInfo[] };
             const cals = res.data ?? [];
             setCalendars(cals);
 
@@ -105,7 +111,9 @@ export default function ScheduleInterviewModal({
             const primary = cals.find((c) => c.primary);
             if (primary) setSelectedCalendar(primary);
         } catch {
-            setError("Failed to load calendars. Your connection may have expired.");
+            setError(
+                "Failed to load calendars. Your connection may have expired.",
+            );
         }
     };
 
@@ -136,7 +144,8 @@ export default function ScheduleInterviewModal({
     };
 
     const handleSubmit = async () => {
-        if (!selectedConnection || !selectedCalendar || !date || !startTime) return;
+        if (!selectedConnection || !selectedCalendar || !date || !startTime)
+            return;
         setSubmitting(true);
         setError("");
 
@@ -147,7 +156,9 @@ export default function ScheduleInterviewModal({
             const client = createAuthenticatedClient(token);
 
             const startDateTime = `${date}T${startTime}:00`;
-            const endMs = new Date(`${date}T${startTime}:00`).getTime() + duration * 60_000;
+            const endMs =
+                new Date(`${date}T${startTime}:00`).getTime() +
+                duration * 60_000;
             const endDate = new Date(endMs);
             const endDateTime = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}T${String(endDate.getHours()).padStart(2, "0")}:${String(endDate.getMinutes()).padStart(2, "0")}:00`;
 
@@ -156,7 +167,7 @@ export default function ScheduleInterviewModal({
                 .map((e) => e.trim())
                 .filter(Boolean);
 
-            const res = await client.post(
+            const res = (await client.post(
                 `/integrations/calendar/${selectedConnection.id}/events`,
                 {
                     calendar_id: selectedCalendar.id,
@@ -168,7 +179,7 @@ export default function ScheduleInterviewModal({
                     attendee_emails: emails,
                     add_video_conference: addMeet,
                 },
-            ) as { data: CalendarEvent };
+            )) as { data: CalendarEvent };
 
             onSuccess?.(res.data);
             onClose();
@@ -189,7 +200,8 @@ export default function ScheduleInterviewModal({
         (step === "select-calendar" && !selectedCalendar) ||
         (step === "pick-time" && (!date || !startTime));
 
-    const isMicrosoft = selectedConnection?.provider_slug.startsWith("microsoft_");
+    const isMicrosoft =
+        selectedConnection?.provider_slug.startsWith("microsoft_");
 
     const stepTitle =
         step === "select-calendar"
@@ -219,15 +231,13 @@ export default function ScheduleInterviewModal({
                 submittingLabel="Creating..."
                 maxWidth="max-w-2xl"
                 footer={
-                    noConnections
-                        ? (
-                              <div className="flex justify-end w-full">
-                                  <button className="btn btn-ghost" onClick={onClose}>
-                                      Close
-                                  </button>
-                              </div>
-                          )
-                        : undefined
+                    noConnections ? (
+                        <div className="flex justify-end w-full">
+                            <button className="btn btn-ghost" onClick={onClose}>
+                                Close
+                            </button>
+                        </div>
+                    ) : undefined
                 }
             >
                 {/* Error */}
@@ -254,8 +264,8 @@ export default function ScheduleInterviewModal({
                             No calendar connected
                         </p>
                         <p className="text-xs text-base-content/40 mb-4">
-                            Connect Google Calendar or Microsoft Outlook to schedule
-                            interviews directly from Splits.
+                            Connect Google Calendar or Microsoft Outlook to
+                            schedule interviews directly from Splits.
                         </p>
                         <a
                             href="/portal/integrations"
@@ -280,15 +290,19 @@ export default function ScheduleInterviewModal({
                                     {connections.map((conn) => (
                                         <button
                                             key={conn.id}
-                                            onClick={() => handleSelectConnection(conn)}
+                                            onClick={() =>
+                                                handleSelectConnection(conn)
+                                            }
                                             className={`w-full text-left px-4 py-3 border transition-colors ${
-                                                selectedConnection?.id === conn.id
+                                                selectedConnection?.id ===
+                                                conn.id
                                                     ? "border-primary bg-primary/5"
                                                     : "border-base-300 hover:border-primary/30"
                                             }`}
                                         >
                                             <p className="text-sm font-bold">
-                                                {conn.provider_account_name || conn.provider_slug}
+                                                {conn.provider_account_name ||
+                                                    conn.provider_slug}
                                             </p>
                                             <p className="text-xs text-base-content/50">
                                                 {conn.provider_account_id}
@@ -307,13 +321,20 @@ export default function ScheduleInterviewModal({
                                 </legend>
                                 <div className="space-y-2">
                                     {calendars
-                                        .filter((c) => c.accessRole === "owner" || c.accessRole === "writer")
+                                        .filter(
+                                            (c) =>
+                                                c.accessRole === "owner" ||
+                                                c.accessRole === "writer",
+                                        )
                                         .map((cal) => (
                                             <button
                                                 key={cal.id}
-                                                onClick={() => setSelectedCalendar(cal)}
+                                                onClick={() =>
+                                                    setSelectedCalendar(cal)
+                                                }
                                                 className={`w-full text-left px-4 py-3 border transition-colors ${
-                                                    selectedCalendar?.id === cal.id
+                                                    selectedCalendar?.id ===
+                                                    cal.id
                                                         ? "border-primary bg-primary/5"
                                                         : "border-base-300 hover:border-primary/30"
                                                 }`}
@@ -324,14 +345,16 @@ export default function ScheduleInterviewModal({
                                                         <p className="text-sm font-bold">
                                                             {cal.summary}
                                                             {cal.primary && (
-                                                                <span className="ml-2 text-[10px] font-bold uppercase bg-primary/10 text-primary px-1.5 py-0.5">
+                                                                <span className="ml-2 text-sm font-bold uppercase bg-primary/10 text-primary px-1.5 py-0.5">
                                                                     Primary
                                                                 </span>
                                                             )}
                                                         </p>
                                                         {cal.description && (
                                                             <p className="text-xs text-base-content/50">
-                                                                {cal.description}
+                                                                {
+                                                                    cal.description
+                                                                }
                                                             </p>
                                                         )}
                                                     </div>
@@ -342,14 +365,16 @@ export default function ScheduleInterviewModal({
                             </fieldset>
                         )}
 
-                        {selectedConnection && calendars.length === 0 && !loading && (
-                            <div className="text-center py-8">
-                                <span className="loading loading-spinner loading-sm" />
-                                <p className="text-xs text-base-content/50 mt-2">
-                                    Loading calendars...
-                                </p>
-                            </div>
-                        )}
+                        {selectedConnection &&
+                            calendars.length === 0 &&
+                            !loading && (
+                                <div className="text-center py-8">
+                                    <span className="loading loading-spinner loading-sm" />
+                                    <p className="text-xs text-base-content/50 mt-2">
+                                        Loading calendars...
+                                    </p>
+                                </div>
+                            )}
                     </div>
                 )}
 
@@ -389,7 +414,9 @@ export default function ScheduleInterviewModal({
                                 <input
                                     type="time"
                                     value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
+                                    onChange={(e) =>
+                                        setStartTime(e.target.value)
+                                    }
                                     className="input input-bordered w-full rounded-none"
                                 />
                             </fieldset>
@@ -401,7 +428,9 @@ export default function ScheduleInterviewModal({
                             </legend>
                             <select
                                 value={duration}
-                                onChange={(e) => setDuration(Number(e.target.value))}
+                                onChange={(e) =>
+                                    setDuration(Number(e.target.value))
+                                }
                                 className="select select-bordered w-full rounded-none"
                             >
                                 <option value={15}>15 minutes</option>
@@ -433,11 +462,13 @@ export default function ScheduleInterviewModal({
                             <input
                                 type="text"
                                 value={attendeeEmails}
-                                onChange={(e) => setAttendeeEmails(e.target.value)}
+                                onChange={(e) =>
+                                    setAttendeeEmails(e.target.value)
+                                }
                                 placeholder="email1@example.com, email2@example.com"
                                 className="input input-bordered w-full rounded-none"
                             />
-                            <p className="text-[11px] text-base-content/40 mt-1">
+                            <p className="text-sm text-base-content/40 mt-1">
                                 Comma-separated email addresses
                             </p>
                         </fieldset>
@@ -470,7 +501,7 @@ export default function ScheduleInterviewModal({
                 {step === "confirm" && (
                     <div className="space-y-4">
                         <div className="bg-base-200 border border-base-300 p-5">
-                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-base-content/50 mb-3">
+                            <p className="text-sm font-bold tracking-[0.2em] uppercase text-base-content/50 mb-3">
                                 Review Details
                             </p>
 
@@ -479,7 +510,9 @@ export default function ScheduleInterviewModal({
                                     <p className="text-xs font-bold text-base-content/50 uppercase">
                                         Title
                                     </p>
-                                    <p className="text-sm font-semibold">{title}</p>
+                                    <p className="text-sm font-semibold">
+                                        {title}
+                                    </p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
@@ -488,15 +521,14 @@ export default function ScheduleInterviewModal({
                                             Date
                                         </p>
                                         <p className="text-sm font-semibold">
-                                            {new Date(date + "T00:00:00").toLocaleDateString(
-                                                "en-US",
-                                                {
-                                                    weekday: "long",
-                                                    month: "long",
-                                                    day: "numeric",
-                                                    year: "numeric",
-                                                },
-                                            )}
+                                            {new Date(
+                                                date + "T00:00:00",
+                                            ).toLocaleDateString("en-US", {
+                                                weekday: "long",
+                                                month: "long",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
                                         </p>
                                     </div>
                                     <div>

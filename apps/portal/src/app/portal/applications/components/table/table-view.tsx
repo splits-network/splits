@@ -24,7 +24,7 @@ export function TableView({
                         {columns.map((h, i) => (
                             <th
                                 key={i}
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-2 px-4 ${
+                                className={`text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-2 px-4 ${
                                     i === 0 ? "w-6 pl-4 pr-1" : ""
                                 } ${i === columns.length - 1 ? "w-20 text-right" : ""}`}
                             >

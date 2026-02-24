@@ -34,7 +34,7 @@ export function BaselMicroStat({
             >
                 {value}
             </div>
-            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+            <div className="text-sm uppercase tracking-wider text-base-content/40">
                 {label}
             </div>
         </div>

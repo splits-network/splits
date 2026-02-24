@@ -8,7 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateFraudSignalInput } from '../repository';
 
-const TERMINAL_STAGES = ['hired', 'rejected', 'withdrawn', 'expired'];
+const TERMINAL_STAGES = ['hired', 'rejected', 'withdrawn'];
 
 export async function analyzeDuplicateApplication(
     supabase: SupabaseClient,
@@ -27,7 +27,8 @@ export async function analyzeDuplicateApplication(
         .eq('candidate_id', candidateId)
         .eq('job_id', jobId)
         .not('id', 'eq', applicationId)
-        .not('stage', 'in', `(${TERMINAL_STAGES.join(',')})`);
+        .not('stage', 'in', `(${TERMINAL_STAGES.join(',')})`)
+        .is('expired_at', null);
 
     if (error || !existing || existing.length === 0) return null;
 

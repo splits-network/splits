@@ -77,12 +77,12 @@ function DetailPanel({
             <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <span
-                        className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                        className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                     >
                         {job.status}
                     </span>
                     {job.featured && (
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                        <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
                             Featured
                         </span>
                     )}
@@ -124,7 +124,7 @@ function DetailPanel({
                 {/* Salary + stats */}
                 <div className="grid grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Salary Range
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -132,7 +132,7 @@ function DetailPanel({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Experience
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -140,7 +140,7 @@ function DetailPanel({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Applicants
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -148,7 +148,7 @@ function DetailPanel({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Views
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -159,7 +159,7 @@ function DetailPanel({
 
                 {job.equity && (
                     <div className="bg-primary/5 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-primary/60 mb-1">
                             Equity
                         </p>
                         <p className="text-base font-bold text-primary">
@@ -271,7 +271,7 @@ function DetailPanel({
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Posted
                         </p>
                         <p className="font-bold">
@@ -279,7 +279,7 @@ function DetailPanel({
                         </p>
                     </div>
                     <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Deadline
                         </p>
                         <p className="font-bold">{formatDate(job.deadline)}</p>
@@ -710,22 +710,22 @@ function TableView({
                     <table className="table w-full">
                         <thead>
                             <tr className="bg-base-200 border-b-2 border-base-300">
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
                                     Title
                                 </th>
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4">
                                     Company
                                 </th>
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden md:table-cell">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden md:table-cell">
                                     Location
                                 </th>
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden lg:table-cell">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden lg:table-cell">
                                     Salary
                                 </th>
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden lg:table-cell">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden lg:table-cell">
                                     Status
                                 </th>
-                                <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden xl:table-cell">
+                                <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-4 hidden xl:table-cell">
                                     Type
                                 </th>
                             </tr>
@@ -756,7 +756,7 @@ function TableView({
                                                         .map((tag, i) => (
                                                             <span
                                                                 key={i}
-                                                                className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/40 px-1.5 py-0.5"
+                                                                className="text-sm uppercase tracking-wider bg-base-200 text-base-content/40 px-1.5 py-0.5"
                                                             >
                                                                 {tag}
                                                             </span>
@@ -782,7 +782,7 @@ function TableView({
                                     </td>
                                     <td className="py-4 px-4 hidden lg:table-cell">
                                         <span
-                                            className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                                            className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                                         >
                                             {job.status}
                                         </span>
@@ -858,7 +858,7 @@ function GridView({
                                 {/* Card header */}
                                 <div className="flex items-start justify-between mb-4">
                                     <span
-                                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                                     >
                                         {job.status}
                                     </span>
@@ -903,13 +903,13 @@ function GridView({
                                     {job.tags.slice(0, 3).map((tag, i) => (
                                         <span
                                             key={i}
-                                            className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
+                                            className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
                                         >
                                             {tag}
                                         </span>
                                     ))}
                                     {job.tags.length > 3 && (
-                                        <span className="text-[9px] uppercase tracking-wider text-base-content/30 px-2 py-1">
+                                        <span className="text-sm uppercase tracking-wider text-base-content/30 px-2 py-1">
                                             +{job.tags.length - 3}
                                         </span>
                                     )}
@@ -997,7 +997,7 @@ function GmailView({
                                 </h3>
                             </div>
                             <span
-                                className={`text-[9px] uppercase tracking-[0.15em] font-bold px-1.5 py-0.5 flex-shrink-0 ml-2 ${statusColor(job.status)}`}
+                                className={`text-sm uppercase tracking-[0.15em] font-bold px-1.5 py-0.5 flex-shrink-0 ml-2 ${statusColor(job.status)}`}
                             >
                                 {job.status}
                             </span>

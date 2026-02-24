@@ -381,19 +381,19 @@ export default function CompanyView() {
                                 <table className="table table-sm w-full">
                                     <thead>
                                         <tr>
-                                            <th className="text-[10px] font-black uppercase tracking-wider text-base-content/50">
+                                            <th className="text-sm font-black uppercase tracking-wider text-base-content/50">
                                                 Role Title
                                             </th>
-                                            <th className="text-[10px] font-black uppercase tracking-wider text-base-content/50 hidden md:table-cell">
+                                            <th className="text-sm font-black uppercase tracking-wider text-base-content/50 hidden md:table-cell">
                                                 Location
                                             </th>
-                                            <th className="text-[10px] font-black uppercase tracking-wider text-base-content/50 text-right">
+                                            <th className="text-sm font-black uppercase tracking-wider text-base-content/50 text-right">
                                                 Days Open
                                             </th>
-                                            <th className="text-[10px] font-black uppercase tracking-wider text-base-content/50 text-right">
+                                            <th className="text-sm font-black uppercase tracking-wider text-base-content/50 text-right">
                                                 Candidates
                                             </th>
-                                            <th className="text-[10px] font-black uppercase tracking-wider text-base-content/50">
+                                            <th className="text-sm font-black uppercase tracking-wider text-base-content/50">
                                                 Status
                                             </th>
                                         </tr>

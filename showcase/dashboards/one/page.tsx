@@ -1469,7 +1469,7 @@ export default function DashboardOne() {
                                     <p className="text-sm font-black tracking-tight leading-none">
                                         Splits
                                     </p>
-                                    <p className="text-[10px] uppercase tracking-[0.15em] opacity-50 mt-0.5">
+                                    <p className="text-sm uppercase tracking-[0.15em] opacity-50 mt-0.5">
                                         Network
                                     </p>
                                 </div>
@@ -1481,7 +1481,7 @@ export default function DashboardOne() {
 
                         {/* Navigation */}
                         <nav className="flex-1 px-3 py-4">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/30 px-3 mb-3">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/30 px-3 mb-3">
                                 Navigation
                             </p>
                             <ul className="space-y-1">
@@ -1521,7 +1521,7 @@ export default function DashboardOne() {
                                     <p className="text-xs font-semibold truncate">
                                         Sarah Kim
                                     </p>
-                                    <p className="text-[10px] text-neutral-content/40 truncate">
+                                    <p className="text-sm text-neutral-content/40 truncate">
                                         Admin
                                     </p>
                                 </div>

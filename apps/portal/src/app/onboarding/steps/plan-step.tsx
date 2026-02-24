@@ -13,7 +13,11 @@ import { StripeProvider, PaymentForm } from "@/components/stripe";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
 import type { Plan } from "@/components/pricing/types";
-import type { OnboardingState, OnboardingActions, SelectedPlan } from "../types";
+import type {
+    OnboardingState,
+    OnboardingActions,
+    SelectedPlan,
+} from "../types";
 
 type ViewState = "select_plan" | "payment_collection" | "processing";
 
@@ -115,7 +119,8 @@ export function PlanStep({ state, actions }: PlanStepProps) {
         } catch (error: any) {
             console.error("Failed to create setup intent:", error);
             setPaymentError(
-                error.message || "Failed to initialize payment. Please try again.",
+                error.message ||
+                    "Failed to initialize payment. Please try again.",
             );
             setViewState("select_plan");
         }
@@ -157,7 +162,8 @@ export function PlanStep({ state, actions }: PlanStepProps) {
                         Choose Your Plan
                     </h1>
                     <p className="text-base-content/50">
-                        Select a subscription plan that fits your recruiting needs.
+                        Select a subscription plan that fits your recruiting
+                        needs.
                     </p>
                 </div>
 
@@ -206,7 +212,7 @@ export function PlanStep({ state, actions }: PlanStepProps) {
                         Annual
                     </span>
                     {isAnnual && (
-                        <span className="badge badge-success badge-sm text-[10px]">
+                        <span className="badge badge-success badge-sm text-sm">
                             Save ~16%
                         </span>
                     )}
@@ -276,7 +282,8 @@ export function PlanStep({ state, actions }: PlanStepProps) {
                         Complete Your Subscription
                     </h1>
                     <p className="text-base-content/50">
-                        Enter your payment details to activate your subscription.
+                        Enter your payment details to activate your
+                        subscription.
                     </p>
                 </div>
 

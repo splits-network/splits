@@ -14,7 +14,7 @@ import type {
     ApplicationNote,
     ApplicationNoteCreatorType,
 } from "@splits-network/shared-types";
-import { getStageDisplay } from "./status-color";
+import { getStageDisplayWithExpired } from "./status-color";
 import ApplicationTimeline from "@/app/portal/applications/components/shared/application-timeline";
 import DocumentViewerModal from "@/app/portal/applications/components/modals/document-viewer-modal";
 import CompanyContacts from "@/components/company-contacts";
@@ -146,7 +146,8 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
         );
     }
 
-    const stageDisplay = getStageDisplay(application.stage);
+    const stageDisplay = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
+    const isExpired = !!(application as any).expired_at;
     const candidate = application.candidate;
     const job = application.job;
     const documents = application.documents || [];
@@ -155,6 +156,14 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
 
     return (
         <div className="flex flex-col h-full min-h-0 p-4 md:p-6 gap-6">
+            {/* ─── Expired Banner ─────────────────────────────────────── */}
+            {isExpired && (
+                <ExpiredBanner
+                    applicationId={application.id}
+                    onReactivated={handleUpdate}
+                />
+            )}
+
             {/* ─── Header ─────────────────────────────────────────────── */}
             <div className="flex items-start justify-between shrink-0">
                 <div>
@@ -167,7 +176,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                     </p>
                 </div>
                 <span
-                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 ${stageDisplay.badge}`}
+                    className={`text-sm uppercase tracking-[0.2em] font-bold px-3 py-1.5 ${stageDisplay.badge}`}
                 >
                     <i
                         className={`fa-duotone fa-regular ${stageDisplay.icon} mr-1`}
@@ -211,7 +220,7 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
                                 {tab.label}
                                 {tab.key === "documents" &&
                                     documents.length > 0 && (
-                                        <span className="ml-1 text-[10px] uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">
+                                        <span className="ml-1 text-sm uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">
                                             {documents.length}
                                         </span>
                                     )}
@@ -309,7 +318,7 @@ function OverviewTab({ application }: { application: Application }) {
             {/* Job Key Facts */}
             {job && (
                 <div className="bg-base-100 border-l-4 border-primary p-6">
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                    <h3 className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
                         Role Summary
                     </h3>
                     <div className="space-y-3">
@@ -355,7 +364,7 @@ function OverviewTab({ application }: { application: Application }) {
             {/* Candidate Key Facts */}
             {candidate && (
                 <div className="bg-base-100 border-l-4 border-secondary p-6">
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                    <h3 className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
                         Candidate Summary
                     </h3>
                     <div className="space-y-3">
@@ -402,7 +411,7 @@ function OverviewTab({ application }: { application: Application }) {
 
             {/* Submitting Recruiter */}
             <div className="bg-base-100 border-l-4 border-accent p-6">
-                <h3 className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                <h3 className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
                     Submitting Recruiter
                 </h3>
                 <div className="flex items-start gap-4">
@@ -507,7 +516,7 @@ function DocumentsTab({ application }: { application: Application }) {
     const renderDocumentList = (docs: any[], title: string) => (
         <div className="border-l-4 border-primary">
             <div className="px-6 py-3 border-b border-base-300">
-                <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                <h4 className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                     {title}
                 </h4>
             </div>
@@ -536,7 +545,7 @@ function DocumentsTab({ application }: { application: Application }) {
                         </div>
                         <div className="flex items-center gap-2">
                             {doc.metadata?.is_primary && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 bg-primary/15 text-primary">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 bg-primary/15 text-primary">
                                     Primary
                                 </span>
                             )}
@@ -688,6 +697,67 @@ function NotesTab({
             emptyStateMessage="No notes yet. Add a note to begin the discussion."
             maxHeight="500px"
         />
+    );
+}
+
+// ─── Expired Banner ────────────────────────────────────────────────────────
+
+function ExpiredBanner({
+    applicationId,
+    onReactivated,
+}: {
+    applicationId: string;
+    onReactivated: () => void;
+}) {
+    const { getToken } = useAuth();
+    const { isRecruiter, isAdmin } = useUserProfile();
+    const [loading, setLoading] = useState(false);
+
+    const canReactivate = isRecruiter || isAdmin;
+
+    const handleReactivate = async () => {
+        setLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+            const client = createAuthenticatedClient(token);
+            await client.post(`/applications/${applicationId}/reactivate`);
+            onReactivated();
+        } catch (err: any) {
+            console.error("Failed to reactivate application:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="bg-warning/10 border-l-4 border-warning p-4 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+                <i className="fa-duotone fa-regular fa-clock text-warning text-lg" />
+                <div>
+                    <div className="font-bold text-sm text-base-content">
+                        This application has expired
+                    </div>
+                    <div className="text-sm text-base-content/60">
+                        The original pipeline stage is preserved. Reactivate to resume processing.
+                    </div>
+                </div>
+            </div>
+            {canReactivate && (
+                <button
+                    onClick={handleReactivate}
+                    className="btn btn-warning btn-sm shrink-0"
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <span className="loading loading-spinner loading-xs" />
+                    ) : (
+                        <i className="fa-duotone fa-regular fa-rotate-right mr-1" />
+                    )}
+                    Reactivate
+                </button>
+            )}
+        </div>
     );
 }
 

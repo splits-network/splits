@@ -188,11 +188,11 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                             {/* Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-success/15 text-success">
+                                    <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-success/15 text-success">
                                         Active
                                     </span>
                                     {recruiter.specialization && (
-                                        <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                                        <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                             {recruiter.specialization}
                                         </span>
                                     )}
@@ -262,7 +262,7 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                     <p className="text-2xl font-black tracking-tight text-primary">
                                         {stat.value}
                                     </p>
-                                    <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-content/40 mt-1">
+                                    <p className="text-sm uppercase tracking-[0.2em] text-neutral-content/40 mt-1">
                                         {stat.label}
                                     </p>
                                 </div>

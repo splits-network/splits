@@ -25,8 +25,13 @@ export function GridCard({
 }) {
     const { isCompanyUser } = useUserProfile();
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
-    const counterpartySubtext = getCounterpartySubtext(invitation, isCompanyUser);
-    const counterpartyLogo = isCompanyUser ? undefined : invitation.company?.logo_url;
+    const counterpartySubtext = getCounterpartySubtext(
+        invitation,
+        isCompanyUser,
+    );
+    const counterpartyLogo = isCompanyUser
+        ? undefined
+        : invitation.company?.logo_url;
 
     return (
         <div
@@ -39,13 +44,13 @@ export function GridCard({
             {/* Top row: status pill + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                 >
                     {getStatusLabel(invitation.status)}
                 </span>
 
                 {isNew(invitation) && invitation.status === "pending" && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>

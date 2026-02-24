@@ -72,7 +72,7 @@ export function BaselChipGroup({
                                 onClick={() => toggle(chip)}
                                 className="hover:opacity-70"
                             >
-                                <i className="fa-solid fa-xmark text-[9px]" />
+                                <i className="fa-solid fa-xmark text-sm" />
                             </button>
                         </span>
                     ))}

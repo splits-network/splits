@@ -62,7 +62,7 @@
         transition: border-color 0.15s, background-color 0.15s, color 0.15s, transform 0.15s;
 
         .nav-item-icon {
-            @apply text-[10px];
+            @apply text-sm;
             color: var(--nav-accent);
         }
 
@@ -226,7 +226,7 @@
 .nav-dropdown-title {
     @layer memphis.component {
         @apply px-3 py-2 mb-1;
-        @apply text-[9px] font-black uppercase tracking-[0.2em];
+        @apply text-sm font-black uppercase tracking-[0.2em];
         color: var(--dropdown-accent);
     }
 }
@@ -266,7 +266,7 @@
 
 .nav-dropdown-item-desc {
     @layer memphis.component {
-        @apply text-[10px];
+        @apply text-sm;
         color: rgba(255, 255, 255, 0.4);
     }
 }
@@ -373,7 +373,7 @@
 
 .header-logo-box-sm {
     @layer memphis.modifier {
-        @apply w-9 h-9 text-[11px];
+        @apply w-9 h-9 text-sm;
     }
 }
 
@@ -436,6 +436,6 @@
 
 .header-logo-sub-md {
     @layer memphis.modifier {
-        @apply text-[9px];
+        @apply text-sm;
     }
 }

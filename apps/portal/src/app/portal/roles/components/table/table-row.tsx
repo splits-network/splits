@@ -86,7 +86,7 @@ export function TableRow({
                 {/* Status */}
                 <td className="px-4 py-3">
                     <span
-                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
+                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
                     >
                         {formatStatus(job.status)}
                     </span>

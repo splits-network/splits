@@ -88,7 +88,7 @@ export function GridCard({
                 )}
                 {relationship && (
                     <span
-                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
                     >
                         {formatStatus(relationship.status)}
                     </span>
@@ -112,10 +112,7 @@ export function GridCard({
                 <span className="text-sm text-base-content/40">
                     Added {addedAgo(item)}
                 </span>
-                <div
-                    className="shrink-0"
-                    onClick={(e) => e.stopPropagation()}
-                >
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <CompanyActionsToolbar
                         company={company}
                         relationship={relationship}

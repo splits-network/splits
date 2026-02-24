@@ -310,7 +310,7 @@ export default function FootersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
                                 >
                                     {feat}
                                 </span>
@@ -365,7 +365,7 @@ export default function FootersOne() {
                                         className="border-l-4 border-coral bg-base-200 p-6 hover:bg-base-300/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-3 mb-2">
-                                            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary">
+                                            <span className="px-2 py-0.5 text-sm font-semibold uppercase tracking-wider bg-primary/10 text-primary">
                                                 {post.tag}
                                             </span>
                                             <span className="text-xs text-base-content/40">
@@ -561,7 +561,7 @@ export default function FootersOne() {
                                 </form>
                             )}
 
-                            <p className="text-[10px] opacity-30 mt-3">
+                            <p className="text-sm opacity-30 mt-3">
                                 No spam. Unsubscribe anytime. We respect your
                                 privacy.
                             </p>
@@ -646,7 +646,7 @@ export default function FootersOne() {
                                 <div className="text-2xl font-black text-primary">
                                     {stat.value}
                                 </div>
-                                <div className="text-[10px] uppercase tracking-widest opacity-40 mt-1">
+                                <div className="text-sm uppercase tracking-widest opacity-40 mt-1">
                                     {stat.label}
                                 </div>
                             </div>
@@ -657,7 +657,7 @@ export default function FootersOne() {
                 {/* ── 5. Bottom Bar (legal + copyright) ───────────── */}
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="footer-bottom py-6 flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
-                        <div className="flex items-center gap-1 text-[11px] opacity-30">
+                        <div className="flex items-center gap-1 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-copyright" />
                             <span>
                                 {new Date().getFullYear()} Employment Networks
@@ -670,14 +670,14 @@ export default function FootersOne() {
                                 <a
                                     key={link.label}
                                     href={link.href}
-                                    className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
+                                    className="text-sm opacity-30 hover:opacity-60 transition-opacity"
                                 >
                                     {link.label}
                                 </a>
                             ))}
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] opacity-30">
+                        <div className="flex items-center gap-2 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-shield-check" />
                             <span>SOC 2 Type II Compliant</span>
                             <span className="mx-1">|</span>

@@ -20,22 +20,22 @@ export default function TableView({
             <table className="table w-full">
                 <thead>
                     <tr className="bg-base-200 border-b-2 border-base-300">
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
                             Recruiter
                         </th>
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden md:table-cell">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden md:table-cell">
                             Location
                         </th>
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden lg:table-cell">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden lg:table-cell">
                             Experience
                         </th>
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden lg:table-cell">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden lg:table-cell">
                             Rating
                         </th>
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden xl:table-cell">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden xl:table-cell">
                             Placements
                         </th>
-                        <th className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
                             Action
                         </th>
                     </tr>
@@ -72,7 +72,7 @@ export default function TableView({
                                             </p>
                                             {recruiter.tagline && (
                                                 <div className="flex gap-1 mt-0.5">
-                                                    <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/40 px-1.5 py-0.5 truncate max-w-[200px]">
+                                                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/40 px-1.5 py-0.5 truncate max-w-[200px]">
                                                         {recruiter.tagline}
                                                     </span>
                                                 </div>
@@ -101,7 +101,7 @@ export default function TableView({
                                 <td className="px-6 py-4 hidden lg:table-cell">
                                     {recruiter.reputation_score ? (
                                         <span
-                                            className={`text-[10px] uppercase font-bold px-2 py-1 ${reputationColor(recruiter.reputation_score)}`}
+                                            className={`text-sm uppercase font-bold px-2 py-1 ${reputationColor(recruiter.reputation_score)}`}
                                         >
                                             <i className="fa-duotone fa-regular fa-star mr-1" />
                                             {recruiter.reputation_score.toFixed(

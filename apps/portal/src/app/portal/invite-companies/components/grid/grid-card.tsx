@@ -39,14 +39,16 @@ export function GridCard({
             {/* Top row: status pill + expiring badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                 >
-                    <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
+                    <i
+                        className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`}
+                    />
                     {formatStatus(invitation.status)}
                 </span>
 
                 {isExpiringSoon(invitation) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-error/15 text-error px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-error/15 text-error px-2 py-1">
                         <i className="fa-duotone fa-regular fa-clock mr-1" />
                         Expiring
                     </span>
@@ -72,7 +74,9 @@ export function GridCard({
                     {invitation.invite_code}
                 </span>
                 {daysLeft !== null && (
-                    <span className={`text-sm font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/50"}`}>
+                    <span
+                        className={`text-sm font-bold ${daysLeft <= 3 ? "text-error" : "text-base-content/50"}`}
+                    >
                         {daysLeft > 0 ? `${daysLeft}d left` : "Expired"}
                     </span>
                 )}
@@ -81,13 +85,13 @@ export function GridCard({
             {/* Tags */}
             <div className="flex flex-wrap gap-1 mb-4">
                 {invitation.email_sent_at && (
-                    <span className="text-[10px] uppercase tracking-wider bg-success/15 text-success px-2 py-0.5">
+                    <span className="text-sm uppercase tracking-wider bg-success/15 text-success px-2 py-0.5">
                         <i className="fa-duotone fa-regular fa-envelope-circle-check mr-1" />
                         Sent
                     </span>
                 )}
                 {invitation.personal_message && (
-                    <span className="text-[10px] uppercase tracking-wider bg-info/15 text-info px-2 py-0.5">
+                    <span className="text-sm uppercase tracking-wider bg-info/15 text-info px-2 py-0.5">
                         <i className="fa-duotone fa-regular fa-message mr-1" />
                         Message
                     </span>

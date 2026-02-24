@@ -15,6 +15,8 @@ import { register, Counter, Histogram, Gauge } from 'prom-client';
 import amqp, { Connection, Channel } from 'amqplib';
 import { ReputationRepository } from '../v2/reputation/repository';
 import { ReputationService } from '../v2/reputation/service';
+import { CompanyReputationRepository } from '../v2/reputation/company-repository';
+import { CompanyReputationService } from '../v2/reputation/company-service';
 import { EventPublisher } from '../v2/shared/events';
 
 // Prometheus metrics
@@ -42,6 +44,33 @@ const runDuration = new Histogram({
 const lastRunSuccess = new Gauge({
     name: 'reputation_recalculation_last_success',
     help: 'Timestamp of last successful recalculation run',
+});
+
+// Company reputation Prometheus metrics
+const companyRecalculationRuns = new Counter({
+    name: 'company_reputation_recalculation_runs_total',
+    help: 'Total number of company reputation recalculation job runs',
+});
+
+const companiesProcessed = new Counter({
+    name: 'company_reputation_companies_processed_total',
+    help: 'Total number of companies processed',
+});
+
+const companyRecalculationErrors = new Counter({
+    name: 'company_reputation_recalculation_errors_total',
+    help: 'Total number of company recalculation errors',
+});
+
+const companyRunDuration = new Histogram({
+    name: 'company_reputation_recalculation_duration_seconds',
+    help: 'Duration of company reputation recalculation job',
+    buckets: [10, 30, 60, 120, 300, 600],
+});
+
+const companyLastRunSuccess = new Gauge({
+    name: 'company_reputation_recalculation_last_success',
+    help: 'Timestamp of last successful company recalculation run',
 });
 
 /**
@@ -90,10 +119,10 @@ export async function recalculateAllReputations(): Promise<void> {
             logger,
         );
 
-        // Run batch recalculation
+        // Run recruiter batch recalculation
         const result = await service.batchRecalculateAll();
 
-        // Update metrics
+        // Update recruiter metrics
         recruitersProcessed.inc(result.success);
         recalculationErrors.inc(result.errors);
 
@@ -103,7 +132,7 @@ export async function recalculateAllReputations(): Promise<void> {
                 success: result.success,
                 errors: result.errors,
             },
-            'Reputation recalculation job completed',
+            'Recruiter reputation recalculation completed',
         );
 
         if (result.errors === 0) {
@@ -111,6 +140,41 @@ export async function recalculateAllReputations(): Promise<void> {
         }
 
         endTimer();
+
+        // Run company batch recalculation
+        const companyEndTimer = companyRunDuration.startTimer();
+        companyRecalculationRuns.inc();
+
+        const companyRepository = new CompanyReputationRepository(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey,
+        );
+
+        const companyService = new CompanyReputationService(
+            companyRepository,
+            eventPublisher,
+            logger,
+        );
+
+        const companyResult = await companyService.batchRecalculateAll();
+
+        companiesProcessed.inc(companyResult.success);
+        companyRecalculationErrors.inc(companyResult.errors);
+
+        logger.info(
+            {
+                total: companyResult.total,
+                success: companyResult.success,
+                errors: companyResult.errors,
+            },
+            'Company reputation recalculation completed',
+        );
+
+        if (companyResult.errors === 0) {
+            companyLastRunSuccess.set(Date.now() / 1000);
+        }
+
+        companyEndTimer();
     } catch (error) {
         logger.error({ error }, 'Reputation recalculation job failed');
         recalculationErrors.inc();

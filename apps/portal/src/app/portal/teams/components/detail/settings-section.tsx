@@ -20,7 +20,7 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Team ID
                         </p>
                         <p className="font-bold text-sm font-mono truncate">
@@ -28,17 +28,17 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <span
-                            className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(team.status)}`}
+                            className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(team.status)}`}
                         >
                             {formatStatus(team.status)}
                         </span>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Created
                         </p>
                         <p className="font-bold text-sm">
@@ -46,7 +46,7 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Members
                         </p>
                         <p className="font-bold text-sm">
@@ -54,7 +54,7 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Placements
                         </p>
                         <p className="font-bold text-sm">
@@ -62,7 +62,7 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Revenue
                         </p>
                         <p className="font-bold text-sm">
@@ -97,7 +97,9 @@ export function SettingsSection({ team, onRefresh }: SettingsSectionProps) {
                     disabled
                 >
                     <i className="fa-duotone fa-regular fa-ban mr-2" />
-                    {team.status === "active" ? "Suspend Team" : "Activate Team"}
+                    {team.status === "active"
+                        ? "Suspend Team"
+                        : "Activate Team"}
                 </button>
             </div>
         </div>

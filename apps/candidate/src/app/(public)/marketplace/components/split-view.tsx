@@ -135,7 +135,7 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Rating
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -145,7 +145,7 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Placements
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -153,7 +153,7 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Success Rate
                         </p>
                         <p className="text-lg font-black tracking-tight">

@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface ChecklistItemProps {
     /** Item text */
@@ -20,39 +20,39 @@ export interface ChecklistItemProps {
  */
 export function ChecklistItem({
     text,
-    accent = 'teal',
+    accent = "teal",
     secondary = false,
-    className = '',
+    className = "",
 }: ChecklistItemProps) {
     if (secondary) {
         return (
-            <li className={[`accent-${accent}`, 'flex items-start gap-3', className].filter(Boolean).join(' ')}>
-                <div
-                    className="w-5 h-5 flex-shrink-0 flex items-center justify-center mt-0.5 bg-accent"
-                >
-                    <i
-                        className="fa-solid fa-plus text-[8px] text-on-accent"
-                    />
+            <li
+                className={[
+                    `accent-${accent}`,
+                    "flex items-start gap-3",
+                    className,
+                ]
+                    .filter(Boolean)
+                    .join(" ")}
+            >
+                <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center mt-0.5 bg-accent">
+                    <i className="fa-solid fa-plus text-[8px] text-on-accent" />
                 </div>
-                <span className="text-sm text-dark opacity-60">
-                    {text}
-                </span>
+                <span className="text-sm text-dark opacity-60">{text}</span>
             </li>
         );
     }
 
     return (
-        <li className={[`accent-${accent}`, 'flex items-start gap-3', className].filter(Boolean).join(' ')}>
-            <div
-                className="w-6 h-6 flex-shrink-0 flex items-center justify-center mt-0.5 border-2 border-accent"
-            >
-                <i
-                    className="fa-solid fa-check text-[10px] text-accent"
-                />
+        <li
+            className={[`accent-${accent}`, "flex items-start gap-3", className]
+                .filter(Boolean)
+                .join(" ")}
+        >
+            <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center mt-0.5 border-2 border-accent">
+                <i className="fa-solid fa-check text-sm text-accent" />
             </div>
-            <span
-                className="text-sm font-semibold text-dark opacity-[0.75]"
-            >
+            <span className="text-sm font-semibold text-dark opacity-[0.75]">
                 {text}
             </span>
         </li>

@@ -131,7 +131,8 @@ export class DomainEventConsumer {
             notificationService.reputation,
             logger,
             portalUrl,
-            contactLookup
+            contactLookup,
+            dataLookup
         );
         this.healthConsumer = new HealthEventConsumer(
             notificationService.health,
@@ -235,6 +236,12 @@ export class DomainEventConsumer {
 
             // Reputation tier change events
             await this.channel.bindQueue(this.queue, this.exchange, 'reputation.tier_changed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'company_reputation.tier_changed');
+
+            // Application expiration events
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.expired');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.expiration_warning');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.reactivated');
 
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
@@ -507,6 +514,20 @@ export class DomainEventConsumer {
             // Reputation tier changes
             case 'reputation.tier_changed':
                 await this.reputationConsumer.handleTierChanged(event);
+                break;
+            case 'company_reputation.tier_changed':
+                await this.reputationConsumer.handleCompanyTierChanged(event);
+                break;
+
+            // Application expiration events
+            case 'application.expired':
+                await this.applicationsConsumer.handleApplicationExpired(event);
+                break;
+            case 'application.expiration_warning':
+                await this.applicationsConsumer.handleExpirationWarning(event);
+                break;
+            case 'application.reactivated':
+                await this.applicationsConsumer.handleApplicationReactivated(event);
                 break;
 
             // Health monitoring

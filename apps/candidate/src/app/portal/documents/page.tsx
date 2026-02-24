@@ -42,7 +42,7 @@ function DocumentsLoading() {
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">
                         <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                        <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                             {/* COPY: loading indicator text */}
                             Loading your documents
                         </span>
@@ -526,7 +526,7 @@ function DocumentsContent() {
                             <div className="flex items-center justify-center py-16">
                                 <div className="text-center">
                                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         {/* COPY: loading indicator */}
                                         Loading your documents
                                     </span>
@@ -688,7 +688,7 @@ function DocumentsContent() {
                     {/* RIGHT COLUMN — Tips sidebar */}
                     <div className="hidden lg:block">
                         <div className="tips-section border-l-4 border-info bg-info/5 p-6 opacity-0 sticky top-6">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-info mb-4">
+                            <p className="text-sm font-bold uppercase tracking-[0.2em] text-info mb-4">
                                 <i className="fa-duotone fa-regular fa-lightbulb mr-2" />
                                 {/* COPY: tips section kicker */}
                                 Best Practices

@@ -39,7 +39,7 @@ export default function ControlsBar({
                             )}
                         </span>
                         {searchInput && (
-                            <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/10 text-primary">
+                            <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/10 text-primary">
                                 Filtered: &ldquo;{searchInput}&rdquo;
                             </span>
                         )}

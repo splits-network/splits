@@ -225,6 +225,43 @@ export interface ReputationUpdatedEvent extends DomainEvent {
     };
 }
 
+// Application Expiration Events
+export interface ApplicationExpiredEvent extends DomainEvent {
+    event_type: 'application.expired';
+    payload: {
+        application_id: string;
+        job_id: string;
+        candidate_id: string;
+        candidate_recruiter_id: string;
+        expired_from_stage: string;
+        expired_at: string;
+    };
+}
+
+export interface ApplicationExpirationWarningEvent extends DomainEvent {
+    event_type: 'application.expiration_warning';
+    payload: {
+        application_id: string;
+        job_id: string;
+        candidate_id: string;
+        candidate_recruiter_id: string;
+        stage: string;
+        days_remaining: number;
+        responsible_party: string;
+    };
+}
+
+export interface ApplicationReactivatedEvent extends DomainEvent {
+    event_type: 'application.reactivated';
+    payload: {
+        application_id: string;
+        job_id: string;
+        candidate_id: string;
+        candidate_recruiter_id: string;
+        reactivated_from_stage: string;
+    };
+}
+
 export type AnyDomainEvent =
     | ApplicationCreatedEvent
     | ApplicationStageChangedEvent
@@ -245,5 +282,9 @@ export type AnyDomainEvent =
     | ReplacementRequestedEvent
     | CollaborationInvitedEvent
     | CollaborationAcceptedEvent
-    | ReputationUpdatedEvent;
+    | ReputationUpdatedEvent
+    // Application expiration events
+    | ApplicationExpiredEvent
+    | ApplicationExpirationWarningEvent
+    | ApplicationReactivatedEvent;
 

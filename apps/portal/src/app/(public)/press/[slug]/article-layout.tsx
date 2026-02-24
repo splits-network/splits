@@ -263,7 +263,7 @@ export function ArticleLayout({
                                     href={`/press/${nextArticle.slug}`}
                                     className="block p-3 bg-base-100 border border-base-300 hover:border-primary/50 transition-colors mb-3"
                                 >
-                                    <div className="text-[10px] text-base-content/40 uppercase tracking-wider mb-1">
+                                    <div className="text-sm text-base-content/40 uppercase tracking-wider mb-1">
                                         Newer
                                     </div>
                                     <div className="font-bold text-sm truncate">
@@ -280,7 +280,7 @@ export function ArticleLayout({
                                     href={`/press/${prevArticle.slug}`}
                                     className="block p-3 bg-base-100 border border-base-300 hover:border-primary/50 transition-colors"
                                 >
-                                    <div className="text-[10px] text-base-content/40 uppercase tracking-wider mb-1">
+                                    <div className="text-sm text-base-content/40 uppercase tracking-wider mb-1">
                                         Older
                                     </div>
                                     <div className="font-bold text-sm truncate">

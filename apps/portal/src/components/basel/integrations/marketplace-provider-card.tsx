@@ -74,7 +74,7 @@ export function MarketplaceProviderCard({
                                 </BaselStatusPill>
                             )}
                         </div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-base-content/40 mt-0.5">
+                        <p className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 mt-0.5">
                             {CATEGORY_LABELS[provider.category] ??
                                 provider.category}
                         </p>
@@ -105,7 +105,7 @@ export function MarketplaceProviderCard({
                     {isConnected ? (
                         <button
                             onClick={onDetails}
-                            className="btn btn-outline btn-sm w-full rounded-none font-bold uppercase tracking-wider text-[11px]"
+                            className="btn btn-outline btn-sm w-full rounded-none font-bold uppercase tracking-wider text-sm"
                         >
                             <i className="fa-duotone fa-regular fa-gear text-xs" />
                             Manage
@@ -115,7 +115,7 @@ export function MarketplaceProviderCard({
                             <button
                                 onClick={onConnect}
                                 disabled={connecting || !isActive}
-                                className="btn btn-primary btn-sm flex-1 rounded-none font-bold uppercase tracking-wider text-[11px]"
+                                className="btn btn-primary btn-sm flex-1 rounded-none font-bold uppercase tracking-wider text-sm"
                             >
                                 {connecting ? (
                                     <>

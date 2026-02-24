@@ -106,7 +106,7 @@ export function SuccessStep({ selectedRole }: SuccessStepProps) {
                             className={`${stat.icon} text-primary text-lg mb-2 block`}
                         />
                         <div className="text-lg font-black">{stat.value}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-base-content/40">
+                        <div className="text-sm uppercase tracking-widest text-base-content/40">
                             {stat.label}
                         </div>
                     </div>
@@ -118,7 +118,9 @@ export function SuccessStep({ selectedRole }: SuccessStepProps) {
                 {quickActions.map((action) => (
                     <button
                         key={action.label}
-                        onClick={() => { window.location.href = action.href; }}
+                        onClick={() => {
+                            window.location.href = action.href;
+                        }}
                         className={`btn ${action.color} w-full`}
                     >
                         <i className={action.icon} /> {action.label}

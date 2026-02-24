@@ -1446,4 +1446,248 @@ export class ApplicationsEventConsumer {
             throw error;
         }
     }
+
+    async handleApplicationExpired(event: DomainEvent): Promise<void> {
+        try {
+            const {
+                application_id,
+                job_id,
+                candidate_id,
+                candidate_recruiter_id,
+                expired_from_stage,
+                expired_at,
+            } = event.payload;
+
+            this.logger.info(
+                { application_id, expired_from_stage },
+                'Processing application expired notification'
+            );
+
+            const context = await this.dataLookup.getApplicationContext(application_id);
+            if (!context) {
+                this.logger.error({ application_id }, 'Could not load application context');
+                throw new Error(`Application context not found for ${application_id}`);
+            }
+
+            const { application, job, candidate } = context;
+            const companyName = job.company?.name || 'Unknown Company';
+            const effectiveRecruiterId = candidate_recruiter_id || application.candidate_recruiter_id;
+
+            // Send candidate notification
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (candidateContact) {
+                let recruiterName: string | undefined;
+                if (effectiveRecruiterId) {
+                    const rc = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                    if (rc) recruiterName = rc.name;
+                }
+
+                await this.emailService.sendCandidateApplicationExpiredStageAware(candidateContact.email, {
+                    candidateName: candidate.full_name,
+                    jobTitle: job.title,
+                    companyName,
+                    hasRecruiter: !!effectiveRecruiterId,
+                    recruiterName,
+                    expiredFromStage: expired_from_stage,
+                    applicationId: application_id,
+                    userId: candidateContact.user_id || undefined,
+                });
+            }
+
+            // Send recruiter notification
+            if (effectiveRecruiterId) {
+                const recruiterContact = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                if (recruiterContact) {
+                    await this.emailService.sendRecruiterApplicationExpired(recruiterContact.email, {
+                        recruiterName: recruiterContact.name,
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        expiredFromStage: expired_from_stage,
+                        applicationId: application_id,
+                        userId: recruiterContact.user_id || undefined,
+                    });
+                }
+            }
+
+            // Send company admin notification for company-responsible stages
+            const companyStages = ['submitted', 'company_review', 'company_feedback'];
+            if (companyStages.includes(expired_from_stage) && job.company?.identity_organization_id) {
+                const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company.identity_organization_id);
+                const daysWaited = expired_at
+                    ? Math.round((new Date(expired_at).getTime() - new Date(application.updated_at).getTime()) / (1000 * 60 * 60 * 24))
+                    : 0;
+
+                for (const admin of companyAdmins) {
+                    await this.emailService.sendCompanyApplicationExpired(admin.email, {
+                        jobTitle: job.title,
+                        candidateName: candidate.full_name,
+                        expiredFromStage: expired_from_stage,
+                        daysWaited,
+                        applicationId: application_id,
+                        userId: admin.user_id || undefined,
+                    });
+                }
+            }
+
+            this.logger.info({ application_id, expired_from_stage }, 'Application expired notifications sent');
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send application expired notification'
+            );
+            throw error;
+        }
+    }
+
+    async handleExpirationWarning(event: DomainEvent): Promise<void> {
+        try {
+            const {
+                application_id,
+                job_id,
+                candidate_id,
+                candidate_recruiter_id,
+                stage,
+                days_remaining,
+                responsible_party,
+            } = event.payload;
+
+            this.logger.info(
+                { application_id, stage, days_remaining, responsible_party },
+                'Processing expiration warning notification'
+            );
+
+            const context = await this.dataLookup.getApplicationContext(application_id);
+            if (!context) {
+                this.logger.error({ application_id }, 'Could not load application context');
+                throw new Error(`Application context not found for ${application_id}`);
+            }
+
+            const { application, job, candidate } = context;
+            const companyName = job.company?.name || 'Unknown Company';
+            const effectiveRecruiterId = candidate_recruiter_id || application.candidate_recruiter_id;
+
+            if (responsible_party === 'candidate') {
+                // Send candidate warning
+                const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+                if (candidateContact) {
+                    let recruiterName: string | undefined;
+                    if (effectiveRecruiterId) {
+                        const rc = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                        if (rc) recruiterName = rc.name;
+                    }
+
+                    await this.emailService.sendCandidateExpirationWarning(candidateContact.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        recruiterName,
+                        stage,
+                        daysRemaining: days_remaining,
+                        applicationId: application_id,
+                        userId: candidateContact.user_id || undefined,
+                    });
+                }
+
+                // Send recruiter FYI
+                if (effectiveRecruiterId) {
+                    const recruiterContact = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                    if (recruiterContact) {
+                        await this.emailService.sendRecruiterExpirationWarning(recruiterContact.email, {
+                            recruiterName: recruiterContact.name,
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName,
+                            stage,
+                            daysRemaining: days_remaining,
+                            applicationId: application_id,
+                            userId: recruiterContact.user_id || undefined,
+                        });
+                    }
+                }
+            } else if (responsible_party === 'recruiter') {
+                // Send recruiter warning
+                if (effectiveRecruiterId) {
+                    const recruiterContact = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                    if (recruiterContact) {
+                        await this.emailService.sendRecruiterExpirationWarning(recruiterContact.email, {
+                            recruiterName: recruiterContact.name,
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName,
+                            stage,
+                            daysRemaining: days_remaining,
+                            applicationId: application_id,
+                            userId: recruiterContact.user_id || undefined,
+                        });
+                    }
+                }
+            } else if (responsible_party === 'company') {
+                // Send recruiter FYI
+                if (effectiveRecruiterId) {
+                    const recruiterContact = await this.contactLookup.getRecruiterContact(effectiveRecruiterId);
+                    if (recruiterContact) {
+                        await this.emailService.sendRecruiterExpirationWarning(recruiterContact.email, {
+                            recruiterName: recruiterContact.name,
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName,
+                            stage,
+                            daysRemaining: days_remaining,
+                            applicationId: application_id,
+                            userId: recruiterContact.user_id || undefined,
+                        });
+                    }
+                }
+
+                // Send company admin warning
+                if (job.company?.identity_organization_id) {
+                    const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company.identity_organization_id);
+                    for (const admin of companyAdmins) {
+                        await this.emailService.sendCompanyExpirationWarning(admin.email, {
+                            companyName,
+                            daysRemaining: days_remaining,
+                            applications: [{ jobTitle: job.title, candidateName: candidate.full_name }],
+                            userId: admin.user_id || undefined,
+                        });
+                    }
+                }
+            }
+
+            this.logger.info({ application_id, stage, responsible_party }, 'Expiration warning notifications sent');
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send expiration warning notification'
+            );
+            throw error;
+        }
+    }
+
+    async handleApplicationReactivated(event: DomainEvent): Promise<void> {
+        try {
+            const {
+                application_id,
+                job_id,
+                candidate_id,
+                candidate_recruiter_id,
+                reactivated_from_stage,
+            } = event.payload;
+
+            this.logger.info(
+                { application_id, reactivated_from_stage },
+                'Processing application reactivated notification'
+            );
+
+            // For now, log the event. Full reactivation notifications can be added
+            // as a follow-up if specific templates are needed.
+            this.logger.info({ application_id, reactivated_from_stage }, 'Application reactivated - logged');
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to handle application reactivated notification'
+            );
+            throw error;
+        }
+    }
 }

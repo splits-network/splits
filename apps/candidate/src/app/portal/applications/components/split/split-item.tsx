@@ -57,7 +57,7 @@ export function SplitItem({
                     ) : null}
                 </div>
                 <span
-                    className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold flex-shrink-0 ${stageColor(app.stage)}`}
+                    className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold flex-shrink-0 ${stageColor(app.stage)}`}
                 >
                     {formatStage(app.stage)}
                 </span>
@@ -74,7 +74,10 @@ export function SplitItem({
             </div>
 
             {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="absolute bottom-2 right-2"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <ActionsToolbar
                     item={app}
                     variant="icon-only"

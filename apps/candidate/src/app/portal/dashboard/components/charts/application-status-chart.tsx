@@ -1,22 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-    PieChart,
-    Pie,
-    Cell,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import {
-    useBaselChartColors,
-    BaselTooltip,
-} from "@/components/basel/charts";
+import { useBaselChartColors, BaselTooltip } from "@/components/basel/charts";
 
 interface Application {
     id: string;
     stage: string;
+    expired_at?: string | null;
     job?: {
         status?: string;
     };
@@ -49,7 +41,13 @@ const STAGE_TO_GROUP: Record<string, string> = {
     expired: "archived",
 };
 
-const GROUP_KEYS = ["active", "review", "offers", "placed", "archived"] as const;
+const GROUP_KEYS = [
+    "active",
+    "review",
+    "offers",
+    "placed",
+    "archived",
+] as const;
 
 const GROUP_LABELS: Record<string, string> = {
     active: "Active",
@@ -90,7 +88,8 @@ export default function ApplicationStatusChart({
         applications.forEach((app) => {
             if (
                 app.job?.status === "closed" ||
-                app.job?.status === "filled"
+                app.job?.status === "filled" ||
+                app.expired_at
             ) {
                 counts.archived++;
             } else {
@@ -150,10 +149,7 @@ export default function ApplicationStatusChart({
                             cornerRadius={0}
                         >
                             {chartData.map((entry, i) => (
-                                <Cell
-                                    key={i}
-                                    fill={entry.color}
-                                />
+                                <Cell key={i} fill={entry.color} />
                             ))}
                         </Pie>
                         <Tooltip
@@ -179,7 +175,7 @@ export default function ApplicationStatusChart({
                     <div className="text-2xl font-bold text-primary tabular-nums">
                         {statusData.activeTotal}
                     </div>
-                    <div className="text-[10px] text-base-content/50 font-medium">
+                    <div className="text-sm text-base-content/50 font-medium">
                         Active
                     </div>
                 </div>
@@ -195,10 +191,10 @@ export default function ApplicationStatusChart({
                                 backgroundColor: groupColors[key],
                             }}
                         />
-                        <span className="text-[11px] text-base-content/60">
+                        <span className="text-sm text-base-content/60">
                             {GROUP_LABELS[key]}
                         </span>
-                        <span className="text-[11px] font-semibold tabular-nums text-base-content/80">
+                        <span className="text-sm font-semibold tabular-nums text-base-content/80">
                             {statusData.counts[key]}
                         </span>
                     </div>

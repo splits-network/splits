@@ -118,7 +118,7 @@ function SidebarNavItem({
                         </span>
                     )}
                     {item.badge !== undefined && item.badge > 0 && (
-                        <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-[10px] font-bold px-1">
+                        <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-sm font-bold px-1">
                             {item.badge > 99 ? "99+" : item.badge}
                         </span>
                     )}
@@ -156,21 +156,21 @@ function SidebarNavItem({
 
                     {/* Aggregate badge */}
                     {item.badge !== undefined && item.badge > 0 && (
-                        <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-[10px] font-bold px-1">
+                        <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-sm font-bold px-1">
                             {item.badge > 99 ? "99+" : item.badge}
                         </span>
                     )}
 
                     {/* Shortcut hint */}
                     {item.shortcutHint && (
-                        <span className="text-[9px] font-bold text-neutral-content/20 hidden xl:inline">
+                        <span className="text-sm font-bold text-neutral-content/20 hidden xl:inline">
                             {item.shortcutHint}
                         </span>
                     )}
 
                     {/* Chevron */}
                     <i
-                        className={`fa-solid fa-chevron-right text-[10px] text-neutral-content/30 transition-transform duration-200 ${
+                        className={`fa-solid fa-chevron-right text-sm text-neutral-content/30 transition-transform duration-200 ${
                             item.expanded ? "rotate-90" : ""
                         }`}
                     />
@@ -219,14 +219,14 @@ function SidebarNavItem({
 
                 {/* Badge */}
                 {item.badge !== undefined && item.badge > 0 && (
-                    <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-[10px] font-bold px-1">
+                    <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-sm font-bold px-1">
                         {item.badge > 99 ? "99+" : item.badge}
                     </span>
                 )}
 
                 {/* Shortcut hint */}
                 {item.shortcutHint && (
-                    <span className="text-[9px] font-bold text-neutral-content/20 hidden xl:inline">
+                    <span className="text-sm font-bold text-neutral-content/20 hidden xl:inline">
                         {item.shortcutHint}
                     </span>
                 )}
@@ -243,7 +243,7 @@ function SidebarNavItem({
 function SidebarSectionHeader({ title }: { title: string }) {
     return (
         <div className="px-3 pt-6 pb-2 flex items-center gap-3">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/30">
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/30">
                 {title}
             </span>
             <div className="flex-1 h-px bg-neutral-content/10" />

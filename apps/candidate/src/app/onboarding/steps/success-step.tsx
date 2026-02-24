@@ -104,7 +104,7 @@ export function SuccessStep({ redirectUrl }: SuccessStepProps) {
                             className={`${stat.icon} text-primary text-lg mb-2 block`}
                         />
                         <div className="text-lg font-black">{stat.value}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-base-content/40">
+                        <div className="text-sm uppercase tracking-widest text-base-content/40">
                             {stat.label}
                         </div>
                     </div>

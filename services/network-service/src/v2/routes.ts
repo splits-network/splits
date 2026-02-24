@@ -8,10 +8,13 @@ import { RecruiterCandidateRepository } from './recruiter-candidates/repository'
 import { RecruiterCandidateServiceV2 } from './recruiter-candidates/service';
 import { ReputationRepository } from './reputation/repository';
 import { ReputationServiceV2 } from './reputation/service';
+import { CompanyReputationRepository } from './company-reputation/repository';
+import { CompanyReputationServiceV2 } from './company-reputation/service';
 import { registerRecruiterRoutes } from './recruiters/routes';
 import { registerAssignmentRoutes } from './assignments/routes';
 import { registerRecruiterCandidateRoutes } from './recruiter-candidates/routes';
 import { registerReputationRoutes } from './reputation/routes';
+import { registerCompanyReputationRoutes } from './company-reputation/routes';
 import { recruiterCompanyRoutes } from './recruiter-companies/routes';
 import { companyInvitationRoutes } from './company-invitations/routes';
 import { recruiterCodeRoutes } from './recruiter-codes/routes';
@@ -37,6 +40,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
         config.supabaseKey
     );
     const reputationRepository = new ReputationRepository(config.supabaseUrl, config.supabaseKey);
+    const companyReputationRepository = new CompanyReputationRepository(config.supabaseUrl, config.supabaseKey);
     const teamRepository = new TeamRepository(config.supabaseUrl, config.supabaseKey);
 
     const recruiterService = new RecruiterServiceV2(recruiterRepository, config.eventPublisher);
@@ -47,12 +51,14 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
         supabase
     );
     const reputationService = new ReputationServiceV2(reputationRepository, config.eventPublisher);
+    const companyReputationService = new CompanyReputationServiceV2(companyReputationRepository);
     const teamService = new TeamServiceV2(teamRepository, config.eventPublisher);
 
     registerRecruiterRoutes(app, { recruiterService });
     registerAssignmentRoutes(app, { assignmentService });
     registerRecruiterCandidateRoutes(app, { recruiterCandidateService });
     registerReputationRoutes(app, { reputationService });
+    registerCompanyReputationRoutes(app, { companyReputationService });
     registerTeamRoutes(app, { teamService });
 
     // Register recruiter-companies routes

@@ -42,7 +42,7 @@ export function TeamDetail({
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(team.status)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(team.status)}`}
                             >
                                 {formatStatus(team.status)}
                             </span>
@@ -87,7 +87,7 @@ export function TeamDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Members
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -95,7 +95,7 @@ export function TeamDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Placements
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -103,7 +103,7 @@ export function TeamDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Revenue
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -139,12 +139,12 @@ export function TeamDetail({
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <span
-                                            className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberRoleColor(member.role)}`}
+                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberRoleColor(member.role)}`}
                                         >
                                             {formatMemberRole(member.role)}
                                         </span>
                                         <span
-                                            className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberStatusColor(member.status)}`}
+                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberStatusColor(member.status)}`}
                                         >
                                             {formatMemberStatus(member.status)}
                                         </span>
@@ -170,7 +170,7 @@ export function TeamDetail({
                 {/* Team info grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Created
                         </p>
                         <p className="font-bold text-sm">
@@ -178,7 +178,7 @@ export function TeamDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <p className="font-bold text-sm">
@@ -186,7 +186,7 @@ export function TeamDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Owner
                         </p>
                         <p className="font-bold text-sm truncate">
@@ -271,7 +271,7 @@ export function TeamDetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading team...
                     </span>
                 </div>

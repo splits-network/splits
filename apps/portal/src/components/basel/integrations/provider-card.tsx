@@ -15,21 +15,28 @@ const CATEGORY_LABELS: Record<string, string> = {
     linkedin: "LinkedIn",
 };
 
-export function ProviderCard({ provider, connecting, onConnect }: ProviderCardProps) {
+export function ProviderCard({
+    provider,
+    connecting,
+    onConnect,
+}: ProviderCardProps) {
     return (
         <div className="integration-card opacity-0 border border-base-300 bg-base-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-5">
                 {/* Header row */}
                 <div className="flex items-start gap-4 mb-3">
                     <div className="w-10 h-10 bg-base-200 border border-base-300 flex items-center justify-center shrink-0">
-                        <i className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-lg text-base-content/60`} />
+                        <i
+                            className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-lg text-base-content/60`}
+                        />
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold tracking-tight">
                             {provider.name}
                         </h4>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-base-content/40">
-                            {CATEGORY_LABELS[provider.category] ?? provider.category}
+                        <p className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40">
+                            {CATEGORY_LABELS[provider.category] ??
+                                provider.category}
                         </p>
                     </div>
                 </div>
@@ -45,7 +52,7 @@ export function ProviderCard({ provider, connecting, onConnect }: ProviderCardPr
                 <button
                     onClick={onConnect}
                     disabled={connecting}
-                    className="btn btn-primary btn-sm w-full rounded-none font-bold uppercase tracking-wider text-[11px]"
+                    className="btn btn-primary btn-sm w-full rounded-none font-bold uppercase tracking-wider text-sm"
                 >
                     {connecting ? (
                         <>

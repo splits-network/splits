@@ -56,7 +56,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                             <p className="text-3xl font-black text-primary">
                                 {activeCount}
                             </p>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
                                 Connected
                             </p>
                         </div>
@@ -65,7 +65,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                             <p className="text-3xl font-black text-secondary">
                                 4
                             </p>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
                                 Available
                             </p>
                         </div>

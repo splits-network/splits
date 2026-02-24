@@ -295,7 +295,7 @@ export default function AIReviewPanel({
             <div
                 className={`bg-base-100 border-l-4 ${semanticBorder[color]} p-4 shadow-sm`}
             >
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/50 mb-2">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/50 mb-2">
                     AI Fit Score
                 </p>
                 <div className="flex items-center gap-3">
@@ -511,7 +511,7 @@ export default function AIReviewPanel({
                             : "N/A"}
                         %
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                    <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Match Score
                     </div>
                 </div>
@@ -532,7 +532,7 @@ export default function AIReviewPanel({
                     >
                         {aiReview.confidence_level || "N/A"}%
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                    <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Confidence Level
                     </div>
                 </div>
@@ -553,7 +553,7 @@ export default function AIReviewPanel({
                     >
                         {aiReview.skills_match_percentage || "N/A"}%
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-base-content/40 mt-1">
+                    <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Skills Match
                     </div>
                 </div>
@@ -614,7 +614,7 @@ export default function AIReviewPanel({
                     {aiReview.matched_skills &&
                         aiReview.matched_skills.length > 0 && (
                             <div className="mb-4">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">
+                                <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Matched Skills
                                 </span>
                                 <div className="flex flex-wrap gap-2 mt-2">
@@ -635,7 +635,7 @@ export default function AIReviewPanel({
                     {aiReview.missing_skills &&
                         aiReview.missing_skills.length > 0 && (
                             <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">
+                                <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Missing Skills
                                 </span>
                                 <div className="flex flex-wrap gap-2 mt-2">
@@ -660,7 +660,7 @@ export default function AIReviewPanel({
                 {aiReview.candidate_years !== null &&
                     aiReview.required_years !== null && (
                         <div className="bg-base-100 border-t-4 border-warning p-5 shadow-sm text-center">
-                            <h4 className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 mb-3">
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">
                                 Experience
                             </h4>
                             <div className="flex items-center justify-center gap-2">
@@ -678,7 +678,7 @@ export default function AIReviewPanel({
                     )}
 
                 <div className="bg-base-100 border-t-4 border-accent p-5 shadow-sm text-center">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 mb-3">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">
                         Location
                     </h4>
                     <span className="text-sm font-bold text-base-content">

@@ -30,20 +30,18 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
             onClick={onSelect}
             className={[
                 "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
-                isSelected
-                    ? "border-primary border-l-4"
-                    : "border-base-200",
+                isSelected ? "border-primary border-l-4" : "border-base-200",
             ].join(" ")}
         >
             {/* Status + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                 >
                     {formatStatusLabel(job.status)}
                 </span>
                 {isNew(job) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>
@@ -84,12 +82,12 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
             {(job.employment_type || level) && (
                 <div className="flex flex-wrap gap-1 mb-4">
                     {job.employment_type && (
-                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                             {formatEmploymentType(job.employment_type)}
                         </span>
                     )}
                     {level && (
-                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                             {level}
                         </span>
                     )}

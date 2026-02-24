@@ -2,10 +2,7 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import {
-    useBaselChartColors,
-    hexWithAlpha,
-} from "@/components/basel/charts";
+import { useBaselChartColors, hexWithAlpha } from "@/components/basel/charts";
 
 interface Application {
     id: string;
@@ -103,10 +100,7 @@ export default function ActivityHeatmap({
 
         dayDataMap.forEach((day, index) => {
             currentWeek.push(day);
-            if (
-                currentWeek.length === 7 ||
-                index === dayDataMap.length - 1
-            ) {
+            if (currentWeek.length === 7 || index === dayDataMap.length - 1) {
                 while (currentWeek.length < 7) {
                     currentWeek.push({
                         date: new Date(0),
@@ -135,10 +129,9 @@ export default function ActivityHeatmap({
         activityData.weeks.forEach((week, weekIndex) => {
             const firstValidDay = week.find((d) => d.count !== -1);
             if (firstValidDay) {
-                const month = firstValidDay.date.toLocaleDateString(
-                    "en-US",
-                    { month: "short" },
-                );
+                const month = firstValidDay.date.toLocaleDateString("en-US", {
+                    month: "short",
+                });
                 if (month !== lastMonth) {
                     result.push({ text: month, weekIndex });
                     lastMonth = month;
@@ -189,11 +182,7 @@ export default function ActivityHeatmap({
                     {monthLabels.map(({ text, weekIndex }) => (
                         <text
                             key={`month-${weekIndex}`}
-                            x={
-                                LABEL_W +
-                                weekIndex * (CELL + GAP) +
-                                CELL / 2
-                            }
+                            x={LABEL_W + weekIndex * (CELL + GAP) + CELL / 2}
                             y={10}
                             textAnchor="middle"
                             style={{
@@ -211,12 +200,7 @@ export default function ActivityHeatmap({
                         <text
                             key={`day-${i}`}
                             x={8}
-                            y={
-                                HEADER_H +
-                                i * (CELL + GAP) +
-                                CELL / 2 +
-                                3
-                            }
+                            y={HEADER_H + i * (CELL + GAP) + CELL / 2 + 3}
                             textAnchor="middle"
                             style={{
                                 fontSize: 7,
@@ -248,11 +232,7 @@ export default function ActivityHeatmap({
                                     )}
                                     style={{ cursor: "pointer" }}
                                     onMouseEnter={(e) =>
-                                        handleMouseEnter(
-                                            e,
-                                            day.date,
-                                            day.count,
-                                        )
+                                        handleMouseEnter(e, day.date, day.count)
                                     }
                                     onMouseLeave={handleMouseLeave}
                                 />
@@ -289,16 +269,36 @@ export default function ActivityHeatmap({
 
             {/* Legend */}
             <div
-                className="flex items-center justify-center gap-1.5 text-[9px] text-base-content/50"
+                className="flex items-center justify-center gap-1.5 text-sm text-base-content/50"
                 style={{ fontWeight: 500 }}
             >
                 <span>Less</span>
                 <svg width={66} height={10}>
                     <rect width={10} height={10} x={0} fill={colors.base300} />
-                    <rect width={10} height={10} x={12} fill={hexWithAlpha(colors.primary, 0.2)} />
-                    <rect width={10} height={10} x={24} fill={hexWithAlpha(colors.primary, 0.4)} />
-                    <rect width={10} height={10} x={36} fill={hexWithAlpha(colors.primary, 0.6)} />
-                    <rect width={10} height={10} x={48} fill={hexWithAlpha(colors.primary, 0.8)} />
+                    <rect
+                        width={10}
+                        height={10}
+                        x={12}
+                        fill={hexWithAlpha(colors.primary, 0.2)}
+                    />
+                    <rect
+                        width={10}
+                        height={10}
+                        x={24}
+                        fill={hexWithAlpha(colors.primary, 0.4)}
+                    />
+                    <rect
+                        width={10}
+                        height={10}
+                        x={36}
+                        fill={hexWithAlpha(colors.primary, 0.6)}
+                    />
+                    <rect
+                        width={10}
+                        height={10}
+                        x={48}
+                        fill={hexWithAlpha(colors.primary, 0.8)}
+                    />
                     <rect width={10} height={10} x={60} fill={colors.primary} />
                 </svg>
                 <span>More</span>
@@ -307,7 +307,7 @@ export default function ActivityHeatmap({
             {/* Stats */}
             {activityData.maxInDay > 0 && (
                 <div
-                    className="text-[10px] text-base-content/60"
+                    className="text-sm text-base-content/60"
                     style={{ fontWeight: 500 }}
                 >
                     Most active:{" "}

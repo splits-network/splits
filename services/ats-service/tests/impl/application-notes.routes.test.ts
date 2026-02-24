@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerApplicationFeedbackRoutes } from '../../src/v2/application-feedback/routes';
+import { registerApplicationNoteRoutes } from '../../src/v2/application-notes/routes';
 
-describe('Application feedback routes (integration)', () => {
+describe('Application notes routes (integration)', () => {
     let service: any;
 
     beforeEach(() => {
@@ -16,13 +16,13 @@ describe('Application feedback routes (integration)', () => {
         };
     });
 
-    it('returns 404 when feedback not found', async () => {
+    it('returns 404 when note not found', async () => {
         const app = Fastify();
-        await registerApplicationFeedbackRoutes(app, service);
+        await registerApplicationNoteRoutes(app, service);
 
         const response = await app.inject({
             method: 'GET',
-            url: '/application-feedback/fb-1',
+            url: '/api/v2/application-notes/fb-1',
             headers: { 'x-clerk-user-id': 'clerk-1' },
         });
 
@@ -31,12 +31,12 @@ describe('Application feedback routes (integration)', () => {
 
     it('validates input on create', async () => {
         const app = Fastify();
-        await registerApplicationFeedbackRoutes(app, service);
+        await registerApplicationNoteRoutes(app, service);
         service.create.mockRejectedValue(new Error('Message text is required'));
 
         const response = await app.inject({
             method: 'POST',
-            url: '/applications/app-1/feedback',
+            url: '/api/v2/applications/app-1/notes',
             headers: { 'x-clerk-user-id': 'clerk-1' },
             payload: { message_text: '' },
         });

@@ -15,7 +15,11 @@ import {
     jobEmploymentType,
     recruiterName,
 } from "../shared/helpers";
-import { getStageDisplay, getAIScoreBadge, getAIScoreColor } from "../shared/status-color";
+import {
+    getStageDisplayWithExpired,
+    getAIScoreBadge,
+    getAIScoreColor,
+} from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
 export function GridCard({
@@ -33,7 +37,7 @@ export function GridCard({
     const role = roleTitle(application);
     const company = companyName(application);
     const score = aiScore(application);
-    const stage = getStageDisplay(application.stage);
+    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
     const scoreBadge = getAIScoreBadge(score);
     const scoreColor = getAIScoreColor(score);
     const headline = candidateHeadline(application);
@@ -54,21 +58,21 @@ export function GridCard({
             {/* Top row: stage badge + NEW indicator + timestamp */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${stage.badge}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${stage.badge}`}
                 >
                     <i className={`fa-duotone fa-regular ${stage.icon} mr-1`} />
                     {stage.label}
                 </span>
 
                 {isNew(application) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>
                 )}
 
                 {/* Timestamp pushed right */}
-                <span className="text-[10px] uppercase tracking-wider text-base-content/40 ml-auto">
+                <span className="text-sm uppercase tracking-wider text-base-content/40 ml-auto">
                     {addedAgo(application)}
                 </span>
             </div>
@@ -92,7 +96,9 @@ export function GridCard({
                         className={`shrink-0 w-11 h-11 flex flex-col items-center justify-center border-2 ${scoreBadge}`}
                         title={`AI Fit Score: ${score}%`}
                     >
-                        <span className={`text-sm font-black leading-none ${scoreColor}`}>
+                        <span
+                            className={`text-sm font-black leading-none ${scoreColor}`}
+                        >
                             {score}
                         </span>
                         <span className="text-[8px] uppercase tracking-wider opacity-60 leading-none">
@@ -133,7 +139,7 @@ export function GridCard({
                         <span className="text-base-content/30">·</span>
                     )}
                     {employmentType && (
-                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-0.5">
+                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-0.5">
                             {employmentType}
                         </span>
                     )}
@@ -142,7 +148,7 @@ export function GridCard({
 
             {/* Recruiter attribution */}
             {recruiter && (
-                <div className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                <div className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                     <i className="fa-duotone fa-regular fa-user-tie mr-1" />
                     {recruiter}
                 </div>
@@ -158,7 +164,7 @@ export function GridCard({
                             className="w-8 h-8 shrink-0 object-contain bg-base-200 border border-base-300 p-0.5"
                         />
                     ) : (
-                        <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-[10px] font-bold text-base-content/60">
+                        <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
                             {cInitials}
                         </div>
                     )}

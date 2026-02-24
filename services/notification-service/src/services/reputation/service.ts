@@ -11,6 +11,11 @@ import {
     tierDemotionEmail,
     TierChangeData,
 } from '../../templates/reputation';
+import {
+    companyTierPromotionEmail,
+    companyTierDemotionEmail,
+    CompanyTierChangeData,
+} from '../../templates/reputation/company-emails';
 
 export class ReputationEmailService {
     constructor(
@@ -124,6 +129,58 @@ export class ReputationEmailService {
                 userId: data.userId,
                 payload: {
                     recruiter_id: data.recruiterId,
+                    old_tier: data.oldTier,
+                    new_tier: data.newTier,
+                    change_type: 'demotion',
+                },
+            }
+        );
+    }
+
+    /**
+     * Send company tier promotion notification.
+     */
+    async sendCompanyTierPromotion(
+        email: string,
+        data: CompanyTierChangeData & { userId?: string; companyId?: string }
+    ): Promise<void> {
+        const html = companyTierPromotionEmail(data);
+
+        await this.sendEmail(
+            email,
+            `Congratulations! ${data.companyName} has reached ${this.formatTier(data.newTier)} status`,
+            html,
+            {
+                eventType: 'company_reputation.tier_changed',
+                userId: data.userId,
+                payload: {
+                    company_id: data.companyId,
+                    old_tier: data.oldTier,
+                    new_tier: data.newTier,
+                    change_type: 'promotion',
+                },
+            }
+        );
+    }
+
+    /**
+     * Send company tier demotion notification.
+     */
+    async sendCompanyTierDemotion(
+        email: string,
+        data: CompanyTierChangeData & { userId?: string; companyId?: string }
+    ): Promise<void> {
+        const html = companyTierDemotionEmail(data);
+
+        await this.sendEmail(
+            email,
+            `${data.companyName}'s Reputation Tier Has Changed`,
+            html,
+            {
+                eventType: 'company_reputation.tier_changed',
+                userId: data.userId,
+                payload: {
+                    company_id: data.companyId,
                     old_tier: data.oldTier,
                     new_tier: data.newTier,
                     change_type: 'demotion',

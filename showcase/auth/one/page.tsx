@@ -343,7 +343,7 @@ export default function AuthOne() {
                                 <div className="text-lg font-black">
                                     {stat.value}
                                 </div>
-                                <div className="text-[10px] uppercase tracking-widest text-neutral-content/40">
+                                <div className="text-sm uppercase tracking-widest text-neutral-content/40">
                                     {stat.label}
                                 </div>
                             </div>
@@ -359,7 +359,7 @@ export default function AuthOne() {
                             quarter than I did all of last year.&rdquo;
                         </p>
                         <p className="text-xs font-bold">Sarah Kim</p>
-                        <p className="text-[10px] text-neutral-content/40">
+                        <p className="text-sm text-neutral-content/40">
                             Senior Technical Recruiter
                         </p>
                     </div>

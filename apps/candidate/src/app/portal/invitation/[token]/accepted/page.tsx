@@ -1,31 +1,35 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
+import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-    title: 'Agreement Accepted | Applicant Network',
-    description: 'You have successfully accepted the recruiter invitation',
+    title: "Agreement Accepted | Applicant Network",
+    description: "You have successfully accepted the recruiter invitation",
 };
 
 const NEXT_STEPS = [
     {
         num: "01",
         title: "Your recruiter reviews your profile",
-        description: "They will assess your experience and identify roles that fit.",
+        description:
+            "They will assess your experience and identify roles that fit.",
     },
     {
         num: "02",
         title: "Opportunities appear in your dashboard",
-        description: "Every role you are submitted for will show up with full details and status tracking.",
+        description:
+            "Every role you are submitted for will show up with full details and status tracking.",
     },
     {
         num: "03",
         title: "Stay informed at every stage",
-        description: "You will receive updates as your applications progress through employer review.",
+        description:
+            "You will receive updates as your applications progress through employer review.",
     },
     {
         num: "04",
         title: "Communicate directly",
-        description: "Use the platform to message your recruiter with questions, preferences, or availability changes.",
+        description:
+            "Use the platform to message your recruiter with questions, preferences, or availability changes.",
     },
 ];
 
@@ -52,13 +56,20 @@ export default function AcceptedPage() {
                     </h2>
                     <div className="space-y-4">
                         {NEXT_STEPS.map((step) => (
-                            <div key={step.num} className="flex items-start gap-3">
-                                <span className="w-6 h-6 bg-success text-success-content flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                            <div
+                                key={step.num}
+                                className="flex items-start gap-3"
+                            >
+                                <span className="w-6 h-6 bg-success text-success-content flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
                                     {step.num}
                                 </span>
                                 <div>
-                                    <p className="text-sm font-bold">{step.title}</p>
-                                    <p className="text-sm text-base-content/60">{step.description}</p>
+                                    <p className="text-sm font-bold">
+                                        {step.title}
+                                    </p>
+                                    <p className="text-sm text-base-content/60">
+                                        {step.description}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -68,9 +79,10 @@ export default function AcceptedPage() {
                 <div className="border-l-4 border-info bg-info/5 p-4 mb-6 flex items-start gap-3">
                     <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5"></i>
                     <p className="text-sm text-base-content/70">
-                        You can manage this relationship and all future recruiter
-                        connections from your dashboard. If your circumstances
-                        change, you can update your preferences at any time.
+                        You can manage this relationship and all future
+                        recruiter connections from your dashboard. If your
+                        circumstances change, you can update your preferences at
+                        any time.
                     </p>
                 </div>
 

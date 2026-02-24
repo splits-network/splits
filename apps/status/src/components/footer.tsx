@@ -221,7 +221,7 @@ export function Footer() {
             }
             bottomBar={
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
-                    <div className="flex items-center gap-1 text-[11px] opacity-30">
+                    <div className="flex items-center gap-1 text-sm opacity-30">
                         <i className="fa-duotone fa-regular fa-copyright" />
                         <span>
                             {new Date().getFullYear()} Employment Networks LLC.
@@ -235,7 +235,7 @@ export function Footer() {
                                 href={link.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
+                                className="text-sm opacity-30 hover:opacity-60 transition-opacity"
                             >
                                 {link.label}
                             </a>

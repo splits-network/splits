@@ -32,12 +32,36 @@ const LEGAL_LINKS = [
 ];
 
 const SOCIAL_LINKS = [
-    { label: "Twitter", href: "https://x.com/employ_network", icon: "fa-brands fa-x-twitter" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/company/employment-networks-inc", icon: "fa-brands fa-linkedin-in" },
-    { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61586842350461", icon: "fa-brands fa-facebook" },
-    { label: "Instagram", href: "https://www.instagram.com/employ_networks/", icon: "fa-brands fa-instagram" },
-    { label: "GitHub", href: "https://github.com/splits-network", icon: "fa-brands fa-github" },
-    { label: "YouTube", href: "https://www.youtube.com/@employ_networks", icon: "fa-brands fa-youtube" },
+    {
+        label: "Twitter",
+        href: "https://x.com/employ_network",
+        icon: "fa-brands fa-x-twitter",
+    },
+    {
+        label: "LinkedIn",
+        href: "https://www.linkedin.com/company/employment-networks-inc",
+        icon: "fa-brands fa-linkedin-in",
+    },
+    {
+        label: "Facebook",
+        href: "https://www.facebook.com/profile.php?id=61586842350461",
+        icon: "fa-brands fa-facebook",
+    },
+    {
+        label: "Instagram",
+        href: "https://www.instagram.com/employ_networks/",
+        icon: "fa-brands fa-instagram",
+    },
+    {
+        label: "GitHub",
+        href: "https://github.com/splits-network",
+        icon: "fa-brands fa-github",
+    },
+    {
+        label: "YouTube",
+        href: "https://www.youtube.com/@employ_networks",
+        icon: "fa-brands fa-youtube",
+    },
 ];
 
 const BOTTOM_LEGAL = [
@@ -274,7 +298,7 @@ export function Footer() {
             }
             bottomBar={
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
-                    <div className="flex items-center gap-1 text-[11px] opacity-30">
+                    <div className="flex items-center gap-1 text-sm opacity-30">
                         <i className="fa-duotone fa-regular fa-copyright" />
                         <span>
                             {new Date().getFullYear()} Employment Networks LLC.
@@ -286,7 +310,7 @@ export function Footer() {
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
+                                className="text-sm opacity-30 hover:opacity-60 transition-opacity"
                             >
                                 {link.label}
                             </Link>

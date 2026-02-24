@@ -703,7 +703,7 @@ export class ApplicationRepository {
         recruiterId: string,
         candidateId: string
     ): Promise<any[]> {
-        const terminalStages = ['rejected', 'withdrawn', 'hired', 'expired'];
+        const terminalStages = ['rejected', 'withdrawn', 'hired'];
 
         const { data, error } = await this.supabase
             .from('applications')
@@ -720,6 +720,7 @@ export class ApplicationRepository {
             .eq('candidate_recruiter_id', recruiterId)
             .eq('candidate_id', candidateId)
             .not('stage', 'in', `(${terminalStages.join(',')})`)
+            .is('expired_at', null)
             .order('created_at', { ascending: false });
 
         if (error) throw error;

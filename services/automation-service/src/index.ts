@@ -10,7 +10,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
-import { ReputationRepository, ReputationService, ReputationEventConsumer } from "./v2/reputation";
+import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation";
 
 async function main() {
     const baseConfig = loadBaseConfig("automation-service");
@@ -111,9 +111,19 @@ async function main() {
             outboxPublisher,
             logger,
         );
+        const companyReputationRepository = new CompanyReputationRepository(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey!,
+        );
+        const companyReputationService = new CompanyReputationService(
+            companyReputationRepository,
+            outboxPublisher,
+            logger,
+        );
         reputationConsumer = new ReputationEventConsumer(
             rabbitConfig.url,
             reputationService,
+            companyReputationService,
             logger,
         );
         await reputationConsumer.connect();

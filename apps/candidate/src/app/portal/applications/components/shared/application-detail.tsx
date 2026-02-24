@@ -138,7 +138,7 @@ export function ApplicationDetail({
                         {/* Stage pill */}
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${stageColor(application.stage)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${stageColor(application.stage)}`}
                             >
                                 {formatStage(application.stage)}
                             </span>
@@ -202,7 +202,7 @@ export function ApplicationDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -210,7 +210,7 @@ export function ApplicationDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Applied
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -221,7 +221,7 @@ export function ApplicationDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Recruiter
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -259,7 +259,7 @@ export function ApplicationDetail({
                         </h3>
                         {application.recruiter_notes && (
                             <div className="mt-3 p-3 bg-base-100 border-2 border-base-300">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Recruiter's Message
                                 </p>
                                 <p className="whitespace-pre-wrap text-sm text-base-content/70">
@@ -419,7 +419,7 @@ export function ApplicationDetail({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {doc.metadata?.is_primary && (
-                                            <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                                            <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary
                                             </span>
                                         )}
@@ -609,7 +609,7 @@ export function DetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading application...
                     </span>
                 </div>

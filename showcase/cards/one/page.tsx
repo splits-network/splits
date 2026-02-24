@@ -389,7 +389,7 @@ export default function CardsOne() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-sm font-bold uppercase tracking-wider">
                                                 Featured
                                             </span>
                                         </div>
@@ -418,7 +418,7 @@ export default function CardsOne() {
                                                 {job.tags.map((t) => (
                                                     <span
                                                         key={t}
-                                                        className="px-2 py-0.5 bg-base-300 text-[10px] font-semibold text-base-content/50"
+                                                        className="px-2 py-0.5 bg-base-300 text-sm font-semibold text-base-content/50"
                                                     >
                                                         {t}
                                                     </span>
@@ -471,7 +471,7 @@ export default function CardsOne() {
                                             {job.tags.map((t) => (
                                                 <span
                                                     key={t}
-                                                    className="px-2 py-0.5 bg-base-100 text-[10px] font-semibold text-base-content/40"
+                                                    className="px-2 py-0.5 bg-base-100 text-sm font-semibold text-base-content/40"
                                                 >
                                                     {t}
                                                 </span>
@@ -525,7 +525,7 @@ export default function CardsOne() {
                                             <div className="text-lg font-black text-primary">
                                                 {r.placements}
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Placements
                                             </div>
                                         </div>
@@ -533,7 +533,7 @@ export default function CardsOne() {
                                             <div className="text-lg font-black text-secondary">
                                                 {r.rating}
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Rating
                                             </div>
                                         </div>
@@ -585,7 +585,7 @@ export default function CardsOne() {
                                             <div className="text-xl font-black text-secondary">
                                                 {c.openRoles}
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Open Roles
                                             </div>
                                         </div>
@@ -593,7 +593,7 @@ export default function CardsOne() {
                                             <div className="text-sm font-bold">
                                                 {c.size}
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Employees
                                             </div>
                                         </div>
@@ -601,7 +601,7 @@ export default function CardsOne() {
                                             <div className="text-sm font-bold">
                                                 {c.stage}
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Stage
                                             </div>
                                         </div>
@@ -653,7 +653,7 @@ export default function CardsOne() {
                                             <div className="text-xl font-black text-accent">
                                                 {c.match}%
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Match
                                             </div>
                                         </div>
@@ -677,7 +677,7 @@ export default function CardsOne() {
                                         {c.skills.map((s) => (
                                             <span
                                                 key={s}
-                                                className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-semibold"
+                                                className="px-2 py-0.5 bg-accent/10 text-accent text-sm font-semibold"
                                             >
                                                 {s}
                                             </span>

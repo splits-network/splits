@@ -75,6 +75,7 @@ export class DomainEventConsumer {
             // Bind to events that can trigger automation rules
             await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.expired');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.status_changed');
 

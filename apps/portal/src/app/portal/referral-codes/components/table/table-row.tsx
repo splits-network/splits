@@ -95,7 +95,7 @@ export function TableRow({
                 {/* Status */}
                 <td className="px-6 py-4">
                     <span
-                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(code)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(code)}`}
                     >
                         <i
                             className={`fa-duotone fa-regular ${
@@ -184,7 +184,8 @@ export function TableRow({
                     {code.label && (
                         <>
                             {" "}
-                            (<span className="font-semibold">{code.label}</span>)
+                            (<span className="font-semibold">{code.label}</span>
+                            )
                         </>
                     )}
                     ? This will permanently remove the code and its share link

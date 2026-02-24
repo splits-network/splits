@@ -373,7 +373,7 @@ export default function NotificationBell() {
                                 <button
                                     type="button"
                                     onClick={handleMarkAllRead}
-                                    className="text-[10px] font-semibold uppercase tracking-wider text-secondary hover:text-base-content transition-colors cursor-pointer"
+                                    className="text-sm font-semibold uppercase tracking-wider text-secondary hover:text-base-content transition-colors cursor-pointer"
                                 >
                                     Mark all read
                                 </button>

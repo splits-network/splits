@@ -38,9 +38,7 @@ function getLastNMonths(n: number): string[] {
     const now = new Date();
     for (let i = n - 1; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        months.push(
-            date.toLocaleDateString("en-US", { month: "short" }),
-        );
+        months.push(date.toLocaleDateString("en-US", { month: "short" }));
     }
     return months;
 }
@@ -109,14 +107,12 @@ export default function ApplicationTimelineChart({
 
     // Limit ticks on compact mode
     const tickInterval =
-        compact && trendPeriod > 6
-            ? Math.ceil(trendPeriod / 6) - 1
-            : 0;
+        compact && trendPeriod > 6 ? Math.ceil(trendPeriod / 6) - 1 : 0;
 
     return (
         <div className="space-y-3">
             {/* Legend */}
-            <div className="flex items-center gap-4 text-[11px]">
+            <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1.5">
                     <span
                         className="w-2 h-2"
@@ -129,9 +125,7 @@ export default function ApplicationTimelineChart({
                         className="w-2 h-2"
                         style={{ backgroundColor: colors.info }}
                     />
-                    <span className="text-base-content/60">
-                        Interviewing
-                    </span>
+                    <span className="text-base-content/60">Interviewing</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <span
@@ -182,9 +176,7 @@ export default function ApplicationTimelineChart({
                             tickLine={false}
                             allowDecimals={false}
                         />
-                        <Tooltip
-                            content={<BaselTooltip />}
-                        />
+                        <Tooltip content={<BaselTooltip />} />
                         <Area
                             type="monotone"
                             dataKey="Total"

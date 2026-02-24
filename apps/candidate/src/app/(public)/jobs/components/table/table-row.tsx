@@ -45,13 +45,9 @@ export function TableRow({
                 <td className="px-4 py-3 w-8">
                     <i
                         className={`fa-duotone fa-regular ${
-                            isSelected
-                                ? "fa-chevron-down"
-                                : "fa-chevron-right"
+                            isSelected ? "fa-chevron-down" : "fa-chevron-right"
                         } text-sm transition-transform ${
-                            isSelected
-                                ? "text-primary"
-                                : "text-base-content/30"
+                            isSelected ? "text-primary" : "text-base-content/30"
                         }`}
                     />
                 </td>
@@ -88,7 +84,7 @@ export function TableRow({
 
                 {/* Type */}
                 <td className="px-4 py-3 hidden xl:table-cell">
-                    <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                         {formatEmploymentType(job.employment_type)}
                     </span>
                 </td>
@@ -96,7 +92,7 @@ export function TableRow({
                 {/* Status */}
                 <td className="px-4 py-3">
                     <span
-                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
+                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
                     >
                         {formatStatusLabel(job.status)}
                     </span>
@@ -115,10 +111,7 @@ export function TableRow({
                         colSpan={colSpan}
                         className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                     >
-                        <JobDetailLoader
-                            jobId={job.id}
-                            onClose={onSelect}
-                        />
+                        <JobDetailLoader jobId={job.id} onClose={onSelect} />
                     </td>
                 </tr>
             )}

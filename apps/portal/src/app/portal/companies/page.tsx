@@ -7,7 +7,12 @@ import {
     PaginationControls,
     ErrorState,
 } from "@/hooks/use-standard-list";
-import type { Company, CompanyRelationship, CompanyFilters, CompanyTab } from "./types";
+import type {
+    Company,
+    CompanyRelationship,
+    CompanyFilters,
+    CompanyTab,
+} from "./types";
 import type { ViewMode } from "./components/shared/status-color";
 import { companyId as getCompanyId } from "./components/shared/helpers";
 import { CompaniesAnimator } from "./companies-animator";
@@ -118,13 +123,11 @@ export default function CompaniesBaselPage() {
 
     const stats = useMemo(
         () => ({
-            total:
-                marketplace.pagination?.total || marketplace.data.length,
+            total: marketplace.pagination?.total || marketplace.data.length,
             myCompanies:
                 myCompanies.pagination?.total || myCompanies.data.length,
-            pending: myCompanies.data.filter(
-                (r: any) => r.status === "pending",
-            ).length,
+            pending: myCompanies.data.filter((r: any) => r.status === "pending")
+                .length,
         }),
         [
             marketplace.pagination,
@@ -162,7 +165,7 @@ export default function CompaniesBaselPage() {
                     {active.loading && active.data.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                 Loading companies...
                             </p>
                         </div>

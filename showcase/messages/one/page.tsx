@@ -851,7 +851,7 @@ export default function MessagesOne() {
                                                             {conv.contact.name}
                                                         </span>
                                                     </div>
-                                                    <span className="text-[11px] text-base-content/40 flex-shrink-0 ml-2">
+                                                    <span className="text-sm text-base-content/40 flex-shrink-0 ml-2">
                                                         {lastMsg.timestamp}
                                                     </span>
                                                 </div>
@@ -859,10 +859,10 @@ export default function MessagesOne() {
                                                 {/* Role badge */}
                                                 <div className="flex items-center gap-1.5 mb-1">
                                                     <i
-                                                        className={`${meta.icon} text-[10px] ${meta.textClass}`}
+                                                        className={`${meta.icon} text-sm ${meta.textClass}`}
                                                     />
                                                     <span
-                                                        className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}
+                                                        className={`text-sm font-semibold uppercase tracking-wider ${meta.textClass}`}
                                                     >
                                                         {meta.label}
                                                     </span>
@@ -886,7 +886,7 @@ export default function MessagesOne() {
                                                         {lastMsg.text}
                                                     </p>
                                                     {conv.unread > 0 && (
-                                                        <span className="flex-shrink-0 w-5 h-5 bg-accent text-accent-content text-[10px] font-bold flex items-center justify-center rounded-full">
+                                                        <span className="flex-shrink-0 w-5 h-5 bg-accent text-accent-content text-sm font-bold flex items-center justify-center rounded-full">
                                                             {conv.unread}
                                                         </span>
                                                     )}
@@ -936,10 +936,10 @@ export default function MessagesOne() {
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <i
-                                            className={`${roleMeta[selected.contact.role].icon} text-[10px] ${roleMeta[selected.contact.role].textClass}`}
+                                            className={`${roleMeta[selected.contact.role].icon} text-sm ${roleMeta[selected.contact.role].textClass}`}
                                         />
                                         <span
-                                            className={`text-[10px] font-semibold uppercase tracking-wider ${roleMeta[selected.contact.role].textClass}`}
+                                            className={`text-sm font-semibold uppercase tracking-wider ${roleMeta[selected.contact.role].textClass}`}
                                         >
                                             {
                                                 roleMeta[selected.contact.role]
@@ -949,7 +949,7 @@ export default function MessagesOne() {
                                         <span className="text-base-content/30 mx-1">
                                             |
                                         </span>
-                                        <span className="text-[10px] text-base-content/50">
+                                        <span className="text-sm text-base-content/50">
                                             {selected.contact.online
                                                 ? "Online"
                                                 : "Offline"}
@@ -989,7 +989,7 @@ export default function MessagesOne() {
                             {/* Date separator */}
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="flex-1 h-px bg-base-300" />
-                                <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                                <span className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
                                     {selected.messages[0]?.timestamp.includes(
                                         ":",
                                     )
@@ -1049,7 +1049,7 @@ export default function MessagesOne() {
                                                             ? "You"
                                                             : sender.name}
                                                     </span>
-                                                    <span className="text-[10px] text-base-content/40">
+                                                    <span className="text-sm text-base-content/40">
                                                         {msg.timestamp}
                                                     </span>
                                                 </div>
@@ -1091,7 +1091,7 @@ export default function MessagesOne() {
                             {/* Typing indicator area */}
                             <div className="h-5 mb-2">
                                 {selected.contact.online && (
-                                    <p className="text-[11px] text-base-content/30 flex items-center gap-1.5">
+                                    <p className="text-sm text-base-content/30 flex items-center gap-1.5">
                                         <span className="inline-flex gap-0.5">
                                             <span
                                                 className="w-1 h-1 bg-base-content/30 rounded-full animate-bounce"

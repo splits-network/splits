@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ApplicationFeedbackServiceV2 } from '../../src/v2/application-feedback/service';
+import { ApplicationNoteServiceV2 } from '../../src/v2/application-notes/service';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 
 function mockAccessContext(identityUserId = 'user-1') {
@@ -14,9 +14,9 @@ function mockAccessContext(identityUserId = 'user-1') {
     });
 }
 
-describe('ApplicationFeedbackServiceV2 (unit)', () => {
+describe('ApplicationNoteServiceV2 (unit)', () => {
     let repository: any;
-    let service: ApplicationFeedbackServiceV2;
+    let service: ApplicationNoteServiceV2;
     const supabase = {} as any;
     const eventPublisher = { publish: vi.fn() };
 
@@ -25,11 +25,11 @@ describe('ApplicationFeedbackServiceV2 (unit)', () => {
         repository = {
             list: vi.fn().mockResolvedValue({ data: [], pagination: { total: 0, page: 1, limit: 50, total_pages: 0 } }),
             getById: vi.fn().mockResolvedValue(null),
-            create: vi.fn().mockResolvedValue({ id: 'fb-1', application_id: 'app-1', feedback_type: 'note', created_by_type: 'recruiter' }),
+            create: vi.fn().mockResolvedValue({ id: 'fb-1', application_id: 'app-1', note_type: 'note', created_by_type: 'recruiter' }),
             update: vi.fn().mockResolvedValue({ id: 'fb-1', application_id: 'app-1' }),
             delete: vi.fn().mockResolvedValue(undefined),
         };
-        service = new ApplicationFeedbackServiceV2(repository, supabase, eventPublisher as any);
+        service = new ApplicationNoteServiceV2(repository, supabase, eventPublisher as any);
     });
 
     it('rejects empty message text on create', async () => {

@@ -96,9 +96,7 @@ export default function TerminateModal({
         setError(null);
 
         if (!reason.trim()) {
-            setError(
-                "Please provide a reason for ending this relationship.",
-            );
+            setError("Please provide a reason for ending this relationship.");
             return;
         }
 
@@ -277,7 +275,7 @@ export default function TerminateModal({
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
+                            <label className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                 Reason *
                             </label>
                             <textarea

@@ -108,9 +108,8 @@ export default function ApplicationsBaselPage() {
     const stats = useMemo(
         () => ({
             total: pagination?.total || applications.length,
-            active: applications.filter((a) =>
-                ACTIVE_STAGES.includes(a.stage),
-            ).length,
+            active: applications.filter((a) => ACTIVE_STAGES.includes(a.stage))
+                .length,
             pending: applications.filter((a) =>
                 PENDING_STAGES.includes(a.stage),
             ).length,
@@ -146,7 +145,7 @@ export default function ApplicationsBaselPage() {
                     {loading && applications.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                 Loading your applications...
                             </p>
                         </div>

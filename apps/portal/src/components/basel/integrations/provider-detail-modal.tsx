@@ -282,7 +282,7 @@ export function ProviderDetailModal({
                                                 {SCOPE_DESCRIPTIONS[scope] ??
                                                     scope}
                                             </p>
-                                            <p className="text-[11px] text-base-content/30 font-mono truncate mt-0.5">
+                                            <p className="text-sm text-base-content/30 font-mono truncate mt-0.5">
                                                 {scope}
                                             </p>
                                         </div>
@@ -316,7 +316,7 @@ export function ProviderDetailModal({
                             <div className="flex gap-3">
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-outline btn-sm flex-1 rounded-none font-bold uppercase tracking-wider text-[11px]"
+                                    className="btn btn-outline btn-sm flex-1 rounded-none font-bold uppercase tracking-wider text-sm"
                                 >
                                     Done
                                 </button>
@@ -325,7 +325,7 @@ export function ProviderDetailModal({
                             <button
                                 onClick={onConnect}
                                 disabled={connecting}
-                                className="btn btn-primary w-full rounded-none font-bold uppercase tracking-wider text-[11px]"
+                                className="btn btn-primary w-full rounded-none font-bold uppercase tracking-wider text-sm"
                             >
                                 {connecting ? (
                                     <>

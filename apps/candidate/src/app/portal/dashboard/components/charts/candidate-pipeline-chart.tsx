@@ -22,6 +22,7 @@ import {
 interface Application {
     id: string;
     stage: string;
+    expired_at?: string | null;
     job?: {
         status?: string;
     };
@@ -87,7 +88,7 @@ export default function CandidatePipelineChart({
             if (
                 app.stage === "rejected" ||
                 app.stage === "withdrawn" ||
-                app.stage === "expired"
+                app.expired_at
             )
                 return;
             if (app.job?.status === "closed" || app.job?.status === "filled")

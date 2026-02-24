@@ -302,7 +302,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 <h3 className="text-lg font-black">
                                     Stay in the loop
                                 </h3>
-                                <p className="text-xs opacity-50">
+                                <p className="text-sm opacity-50">
                                     Weekly insights on recruiting, marketplace
                                     trends, and platform updates.
                                 </p>
@@ -313,10 +313,10 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                             <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/20">
                                 <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
                                 <div>
-                                    <p className="text-sm font-bold text-success">
+                                    <p className="text-md font-bold text-success">
                                         You are subscribed!
                                     </p>
-                                    <p className="text-xs opacity-50">
+                                    <p className="text-sm opacity-50">
                                         Check your inbox for a confirmation
                                         email.
                                     </p>
@@ -345,7 +345,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                             </form>
                         )}
 
-                        <p className="text-[10px] opacity-30 mt-3">
+                        <p className="text-sm opacity-30 mt-3">
                             No spam. Unsubscribe anytime. We respect your
                             privacy.
                         </p>
@@ -420,7 +420,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 <div className="text-2xl font-black text-primary">
                                     {stat.value}
                                 </div>
-                                <div className="text-[10px] uppercase tracking-widest opacity-40 mt-1">
+                                <div className="text-sm uppercase tracking-widest opacity-40 mt-1">
                                     {stat.label}
                                 </div>
                             </div>
@@ -429,7 +429,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                 }
                 bottomBar={
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
-                        <div className="flex items-center gap-1 text-[11px] opacity-30">
+                        <div className="flex items-center gap-1 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-copyright" />
                             <span>
                                 {new Date().getFullYear()} Employment Networks
@@ -441,13 +441,13 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 <Link
                                     key={link.label}
                                     href={link.href}
-                                    className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
+                                    className="text-sm opacity-30 hover:opacity-60 transition-opacity"
                                 >
                                     {link.label}
                                 </Link>
                             ))}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] opacity-30">
+                        <div className="flex items-center gap-2 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-shield-check" />
                             <span>SOC 2 Type II Compliant</span>
                             <span className="mx-1">|</span>

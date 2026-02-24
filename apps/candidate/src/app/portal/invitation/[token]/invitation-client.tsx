@@ -394,7 +394,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
                                     }`}
                                 >
                                     {i < currentStep ? (
-                                        <i className="fa-duotone fa-regular fa-check text-[10px]" />
+                                        <i className="fa-duotone fa-regular fa-check text-sm" />
                                     ) : (
                                         step.num
                                     )}
@@ -878,7 +878,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
                                         className="flex items-center gap-3"
                                     >
                                         <div
-                                            className={`w-6 h-6 flex items-center justify-center text-[10px] font-bold ${
+                                            className={`w-6 h-6 flex items-center justify-center text-sm font-bold ${
                                                 i < currentStep
                                                     ? "bg-success text-success-content"
                                                     : i === currentStep

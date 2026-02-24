@@ -85,7 +85,7 @@ export function useUrgencyItems({
         // P1 (warning): Stale applications (14+ days at same stage, non-terminal)
         const now = new Date();
         const staleApps = applications.filter(app => {
-            if (['rejected', 'withdrawn', 'hired', 'expired', 'draft'].includes(app.stage)) return false;
+            if (['rejected', 'withdrawn', 'hired', 'draft'].includes(app.stage) || app.expired_at) return false;
             if (app.job?.status === 'closed' || app.job?.status === 'filled') return false;
             if (!app.updated_at) return false;
             const daysSinceUpdate = Math.floor(

@@ -101,14 +101,14 @@ function DevDebugPanelInner() {
                         className="btn btn-ghost btn-xs btn-square"
                         title="Refresh"
                     >
-                        <i className="fa-duotone fa-regular fa-arrows-rotate text-[10px]" />
+                        <i className="fa-duotone fa-regular fa-arrows-rotate text-sm" />
                     </button>
                     <button
                         onClick={() => setCollapsed(true)}
                         className="btn btn-ghost btn-xs btn-square"
                         title="Collapse"
                     >
-                        <i className="fa-duotone fa-regular fa-xmark text-[10px]" />
+                        <i className="fa-duotone fa-regular fa-xmark text-sm" />
                     </button>
                 </div>
             </div>
@@ -210,7 +210,7 @@ function Section({
 }) {
     return (
         <div>
-            <div className="text-base-content/50 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+            <div className="text-base-content/50 font-semibold mb-1 uppercase tracking-wider text-sm">
                 {title}
             </div>
             <div className="space-y-0.5">{children}</div>
@@ -252,7 +252,7 @@ function Row({
             >
                 {value || <span className="text-base-content/30">-</span>}
                 {copied && (
-                    <span className="ml-1 text-success text-[9px]">copied</span>
+                    <span className="ml-1 text-success text-sm">copied</span>
                 )}
             </span>
         </div>

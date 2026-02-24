@@ -173,8 +173,6 @@ export default function ProfileBaselPage() {
             },
         ];
 
-
-
         if (isPlatformAdmin) {
             systemItems.push({
                 key: "admin",
@@ -318,7 +316,7 @@ export default function ProfileBaselPage() {
                             <div
                                 className={`flex items-center gap-3 pb-2 ${gi > 0 ? "pt-4" : ""}`}
                             >
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-base-content/30">
+                                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30">
                                     {group.title}
                                 </span>
                                 <div className="flex-1 h-px bg-base-300" />
@@ -337,7 +335,7 @@ export default function ProfileBaselPage() {
                                                 className={`${item.icon} w-4 text-center`}
                                             />
                                             {item.label}
-                                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-[10px] ml-auto text-base-content/30" />
+                                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-sm ml-auto text-base-content/30" />
                                         </Link>
                                     ) : (
                                         <button

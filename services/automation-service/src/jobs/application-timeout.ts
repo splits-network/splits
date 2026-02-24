@@ -107,8 +107,9 @@ export async function expireTimedOutApplications(): Promise<void> {
                 // Find applications stuck in this stage past the timeout
                 const { data: staleApplications, error: queryError } = await supabase
                     .from('applications')
-                    .select('id, job_id, candidate_id, candidate_recruiter_id')
+                    .select('id, job_id, candidate_id, candidate_recruiter_id, stage')
                     .eq('stage', stage)
+                    .is('expired_at', null)
                     .lt('updated_at', cutoff.toISOString())
                     .limit(500);
 
@@ -128,12 +129,13 @@ export async function expireTimedOutApplications(): Promise<void> {
 
                 for (const app of staleApplications) {
                     try {
-                        // Transition to expired
+                        // Mark as expired (preserve the current stage)
+                        const expiredAt = new Date().toISOString();
                         const { error: updateError } = await supabase
                             .from('applications')
                             .update({
-                                stage: 'expired',
-                                updated_at: new Date().toISOString(),
+                                expired_at: expiredAt,
+                                updated_at: expiredAt,
                             })
                             .eq('id', app.id)
                             .eq('stage', stage); // Optimistic lock: only update if still in expected stage
@@ -145,15 +147,14 @@ export async function expireTimedOutApplications(): Promise<void> {
                             continue;
                         }
 
-                        // Publish stage changed event
-                        await eventPublisher!.publish('application.stage_changed', {
+                        // Publish application expired event
+                        await eventPublisher!.publish('application.expired', {
                             application_id: app.id,
                             job_id: app.job_id,
                             candidate_id: app.candidate_id,
                             candidate_recruiter_id: app.candidate_recruiter_id,
-                            old_stage: stage,
-                            new_stage: 'expired',
-                            changed_by: 'system:application-timeout',
+                            expired_from_stage: app.stage,
+                            expired_at: expiredAt,
                         });
 
                         totalExpired++;

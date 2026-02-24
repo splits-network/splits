@@ -97,10 +97,10 @@ export function TierComparison({
                         {upgradeValue.paidVsFree > 0 && (
                             <div className="mt-1 pt-1 border-t border-primary-content/20">
                                 <div className="badge badge-success badge-sm gap-1">
-                                    <i className="fa-duotone fa-regular fa-arrow-up text-[10px]"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-up text-sm"></i>
                                     +{formatCurrency(upgradeValue.paidVsFree)}
                                 </div>
-                                <div className="text-[10px] opacity-60 mt-0.5">
+                                <div className="text-sm opacity-60 mt-0.5">
                                     vs. Starter
                                 </div>
                             </div>
@@ -137,11 +137,11 @@ export function TierComparison({
                         {upgradeValue.premiumVsFree > 0 && (
                             <div className="mt-1 pt-1 border-t border-base-300">
                                 <div className="badge badge-success badge-sm gap-1">
-                                    <i className="fa-duotone fa-regular fa-arrow-up text-[10px]"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-up text-sm"></i>
                                     +
                                     {formatCurrency(upgradeValue.premiumVsFree)}
                                 </div>
-                                <div className="text-[10px] text-base-content/50 mt-0.5">
+                                <div className="text-sm text-base-content/50 mt-0.5">
                                     vs. Starter
                                 </div>
                             </div>

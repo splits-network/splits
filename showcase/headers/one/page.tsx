@@ -269,7 +269,7 @@ export default function HeadersOne() {
                                                 >
                                                     {link.label}
                                                     <i
-                                                        className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
                                                             activeDropdown ===
                                                             link.label
                                                                 ? "rotate-180"
@@ -283,7 +283,7 @@ export default function HeadersOne() {
                                                     link.label && (
                                                     <div className="absolute top-full left-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2 z-50">
                                                         <div className="px-4 py-2 border-b border-base-300 mb-1">
-                                                            <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                                                            <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
                                                                 {link.label}
                                                             </span>
                                                         </div>
@@ -348,7 +348,7 @@ export default function HeadersOne() {
                                             />
                                         </div>
                                         <div className="mt-2 pt-2 border-t border-base-300">
-                                            <p className="text-[10px] uppercase tracking-widest text-base-content/30 mb-2">
+                                            <p className="text-sm uppercase tracking-widest text-base-content/30 mb-2">
                                                 Quick Actions
                                             </p>
                                             {[
@@ -387,7 +387,7 @@ export default function HeadersOne() {
                                     <i className="fa-duotone fa-regular fa-bell text-base-content/60" />
                                 </button>
                                 {userMenu.notifications > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent text-accent-content text-[9px] font-bold flex items-center justify-center rounded-full">
+                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent text-accent-content text-sm font-bold flex items-center justify-center rounded-full">
                                         {userMenu.notifications}
                                     </span>
                                 )}
@@ -408,7 +408,7 @@ export default function HeadersOne() {
                                         <div className="text-xs font-bold leading-tight">
                                             {userMenu.name}
                                         </div>
-                                        <div className="text-[10px] text-base-content/50">
+                                        <div className="text-sm text-base-content/50">
                                             {userMenu.role}
                                         </div>
                                     </div>
@@ -529,7 +529,7 @@ export default function HeadersOne() {
                                                         {link.label}
                                                     </span>
                                                     <i
-                                                        className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
                                                             activeDropdown ===
                                                             link.label
                                                                 ? "rotate-180"
@@ -585,7 +585,7 @@ export default function HeadersOne() {
                                         <div className="text-sm font-bold">
                                             {userMenu.name}
                                         </div>
-                                        <div className="text-[10px] text-base-content/50">
+                                        <div className="text-sm text-base-content/50">
                                             {userMenu.role}
                                         </div>
                                     </div>
@@ -657,7 +657,7 @@ export default function HeadersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
                                 >
                                     {feat}
                                 </span>
@@ -733,7 +733,7 @@ export default function HeadersOne() {
                                                 {job.tags.map((tag) => (
                                                     <span
                                                         key={tag}
-                                                        className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary"
+                                                        className="px-2 py-0.5 text-sm font-semibold uppercase tracking-wider bg-primary/10 text-primary"
                                                     >
                                                         {tag}
                                                     </span>

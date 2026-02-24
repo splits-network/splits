@@ -40,7 +40,7 @@ export function ConnectionDetail({
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                             >
                                 <i
                                     className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"} mr-1`}
@@ -89,7 +89,7 @@ export function ConnectionDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -97,7 +97,7 @@ export function ConnectionDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Type
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -105,7 +105,7 @@ export function ConnectionDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Received
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -161,7 +161,7 @@ export function ConnectionDetail({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {invitation.relationship_start_date && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Connected Since
                             </p>
                             <p className="font-bold text-sm">
@@ -171,7 +171,7 @@ export function ConnectionDetail({
                     )}
                     {invitation.relationship_end_date && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Ended
                             </p>
                             <p className="font-bold text-sm">

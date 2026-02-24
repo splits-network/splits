@@ -380,7 +380,7 @@ export default function ApplicationsTrendsChart({
                     >
                         {TIME_PERIODS.find((p) => p.value === trendPeriod)
                             ?.label || "6M"}
-                        <i className="fa-duotone fa-regular fa-chevron-down text-[10px]"></i>
+                        <i className="fa-duotone fa-regular fa-chevron-down text-sm"></i>
                     </div>
                     <ul
                         tabIndex={0}

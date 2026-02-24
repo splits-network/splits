@@ -8,7 +8,8 @@ import type { ApplicationStage } from '@splits-network/shared-types';
  *                   ↘ recruiter_review → recruiter_proposed ↗
  *                   ↘ company_feedback (depends on recruiter assignment) ↗
  *
- * Terminal stages: hired, rejected, withdrawn, expired
+ * Terminal stages: hired, rejected, withdrawn
+ * Expired applications are tracked via expired_at timestamp (stage is preserved)
  */
 
 export interface ApplicationPermissions {
@@ -25,7 +26,7 @@ export interface ApplicationPermissions {
     canMoveToOffer?: boolean;
 }
 
-const TERMINAL_STAGES: ApplicationStage[] = ['hired', 'rejected', 'withdrawn', 'expired'];
+const TERMINAL_STAGES: ApplicationStage[] = ['hired', 'rejected', 'withdrawn'];
 
 /**
  * Determines what actions a user can take on an application based on their role and the application's stage.
@@ -35,7 +36,8 @@ export function canTakeActionOnApplication(
     isRecruiter: boolean,
     isCompanyUser: boolean,
     isPlatformAdmin: boolean,
-    candidateRecruiterId?: string | null
+    candidateRecruiterId?: string | null,
+    expiredAt?: string | null,
 ): ApplicationPermissions {
     // Default no-action response
     const noActions: ApplicationPermissions = {
@@ -51,6 +53,15 @@ export function canTakeActionOnApplication(
     };
 
     if (!stage) return noActions;
+
+    // Expired applications - no actions (stage is preserved but app is frozen)
+    if (expiredAt) {
+        return {
+            ...noActions,
+            stageLabel: `${getStageLabel(stage)} (Expired)`,
+            waitingMessage: 'This application has expired. Reactivate it to take further action.',
+        };
+    }
 
     // Terminal stages - no actions for anyone
     if (TERMINAL_STAGES.includes(stage)) {
@@ -136,13 +147,15 @@ function getPermissionsByStage(
             };
 
         case 'recruiter_proposed':
+            // Recruiter proposed a job to the candidate — only the candidate (or admin) can accept/decline.
+            // Recruiters see a waiting state here; the candidate accepts via a dedicated endpoint.
             return {
                 ...base,
-                canApprove: isRecruiter || isPlatformAdmin,
-                canReject: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Approve for Company Review',
-                rejectButtonText: 'Decline',
-                waitingMessage: 'Waiting for recruiter proposal to be reviewed.',
+                canApprove: isPlatformAdmin,
+                canReject: isPlatformAdmin,
+                approveButtonText: 'Accept Proposal',
+                rejectButtonText: 'Decline Proposal',
+                waitingMessage: 'Waiting for the candidate to respond to the recruiter\'s proposal.',
             };
 
         case 'company_feedback':

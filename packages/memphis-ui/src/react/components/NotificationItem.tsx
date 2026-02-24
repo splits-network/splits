@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface NotificationItemProps {
     /** Notification title */
@@ -36,28 +36,32 @@ export function NotificationItem({
     description,
     time,
     icon,
-    color = 'coral',
+    color = "coral",
     categoryLabel,
     read = false,
     onToggleRead,
     onDelete,
-    className = '',
+    className = "",
 }: NotificationItemProps) {
     return (
         <div
             className={[
                 `accent-${color}`,
-                'border-3 p-4 flex items-start gap-4 transition-all',
-                read ? 'border-dark/[0.08] bg-transparent opacity-70' : 'border-accent bg-white/80',
+                "border-3 p-4 flex items-start gap-4 transition-all",
+                read
+                    ? "border-dark/[0.08] bg-transparent opacity-70"
+                    : "border-accent bg-white/80",
                 className,
-            ].filter(Boolean).join(' ')}
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             {/* Icon */}
             <div
-                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center ${read ? 'bg-cream' : 'bg-accent'}`}
+                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center ${read ? "bg-cream" : "bg-accent"}`}
             >
                 <i
-                    className={`${icon} text-sm ${read ? 'text-dark/40' : 'text-on-accent'}`}
+                    className={`${icon} text-sm ${read ? "text-dark/40" : "text-on-accent"}`}
                 />
             </div>
 
@@ -67,15 +71,19 @@ export function NotificationItem({
                     {!read && (
                         <div className="w-2 h-2 rounded-full flex-shrink-0 bg-accent" />
                     )}
-                    <h4 className="text-sm font-bold truncate text-dark">{title}</h4>
+                    <h4 className="text-sm font-bold truncate text-dark">
+                        {title}
+                    </h4>
                 </div>
-                <p className="text-sm truncate text-dark opacity-50">{description}</p>
+                <p className="text-sm truncate text-dark opacity-50">
+                    {description}
+                </p>
                 <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-dark opacity-30">{time}</span>
+                    <span className="text-sm font-bold uppercase tracking-wider text-dark opacity-30">
+                        {time}
+                    </span>
                     {categoryLabel && (
-                        <span
-                            className="px-1.5 py-0.5 text-[9px] font-bold uppercase border border-accent text-accent"
-                        >
+                        <span className="px-1.5 py-0.5 text-sm font-bold uppercase border border-accent text-accent">
                             {categoryLabel}
                         </span>
                     )}
@@ -87,20 +95,28 @@ export function NotificationItem({
                 <div className="flex items-center gap-1 flex-shrink-0">
                     {onToggleRead && (
                         <button
-                            onClick={(e) => { e.stopPropagation(); onToggleRead(); }}
-                            title={read ? 'Mark unread' : 'Mark read'}
-                            className={`w-7 h-7 flex items-center justify-center border-2 border-dark/10 transition-colors ${read ? 'text-dark/30' : 'text-accent'}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleRead();
+                            }}
+                            title={read ? "Mark unread" : "Mark read"}
+                            className={`w-7 h-7 flex items-center justify-center border-2 border-dark/10 transition-colors ${read ? "text-dark/30" : "text-accent"}`}
                         >
-                            <i className={`fa-${read ? 'regular' : 'solid'} fa-circle text-[8px]`} />
+                            <i
+                                className={`fa-${read ? "regular" : "solid"} fa-circle text-[8px]`}
+                            />
                         </button>
                     )}
                     {onDelete && (
                         <button
-                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete();
+                            }}
                             title="Delete"
                             className="w-7 h-7 flex items-center justify-center border-2 border-dark/10 text-dark/30 transition-colors"
                         >
-                            <i className="fa-duotone fa-regular fa-trash text-[10px]" />
+                            <i className="fa-duotone fa-regular fa-trash text-sm" />
                         </button>
                     )}
                 </div>

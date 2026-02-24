@@ -81,7 +81,7 @@ export function TableRow({
                             .map((s, i) => (
                                 <span
                                     key={i}
-                                    className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5"
+                                    className="text-sm uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5"
                                 >
                                     {s}
                                 </span>
@@ -104,7 +104,7 @@ export function TableRow({
                 </td>
                 <td className="px-4 py-3">
                     <span
-                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
                     >
                         {formatStatus(status)}
                     </span>

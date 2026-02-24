@@ -363,7 +363,7 @@ export default function RecruiterView() {
                             ) : (
                                 <div className="space-y-3">
                                     {commissionSegments
-                                        .slice(0, 6)
+                                        .slice(0, 8)
                                         .map((seg) => {
                                             const pct =
                                                 commissionTotal > 0
@@ -539,7 +539,7 @@ export default function RecruiterView() {
                                                 </div>
                                                 {(role.candidate_count ?? 0) >
                                                     0 && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-success/10 text-success">
+                                                    <span className="px-2 py-0.5 text-sm font-bold bg-success/10 text-success">
                                                         {role.candidate_count}
                                                     </span>
                                                 )}

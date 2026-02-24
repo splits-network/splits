@@ -492,6 +492,10 @@ export interface Application {
     hired_at?: Date | null;
     placement_id?: string | null;  // Link to placement record when hired
 
+    // Expiration tracking (NULL = active, NOT NULL = expired at timestamp)
+    expired_at?: Date | null;
+    last_warning_sent_at?: Date | null;
+
     // Legacy fields (maintained for compatibility)
     accepted_by_company: boolean;
     accepted_at?: Date;

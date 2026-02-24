@@ -179,26 +179,26 @@ export default function ApplicationListItem({
                 </div>
 
                 {/* Metadata row */}
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-base-content/60 mb-1.5">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-base-content/60 mb-1.5">
                     <span className="flex items-center gap-1">
-                        <i className="fa-duotone fa-regular fa-clock text-[10px]"></i>
+                        <i className="fa-duotone fa-regular fa-clock text-sm"></i>
                         Applied {appliedTime}
                     </span>
                     {application.location && (
                         <span className="flex items-center gap-1">
-                            <i className="fa-duotone fa-regular fa-location-dot text-[10px]"></i>
+                            <i className="fa-duotone fa-regular fa-location-dot text-sm"></i>
                             {application.location}
                         </span>
                     )}
                     {application.employment_type && (
                         <span className="flex items-center gap-1">
-                            <i className="fa-duotone fa-regular fa-briefcase text-[10px]"></i>
+                            <i className="fa-duotone fa-regular fa-briefcase text-sm"></i>
                             {application.employment_type}
                         </span>
                     )}
                     {salaryRange && (
                         <span className="flex items-center gap-1 font-medium text-base-content/80">
-                            <i className="fa-duotone fa-regular fa-dollar-sign text-[10px]"></i>
+                            <i className="fa-duotone fa-regular fa-dollar-sign text-sm"></i>
                             {salaryRange}
                         </span>
                     )}
@@ -219,7 +219,7 @@ export default function ApplicationListItem({
                     <span className={`badge ${badgeClass} badge-xs uppercase`}>
                         {application.status.replace("_", " ")}
                     </span>
-                    <div className="flex items-center gap-2 text-[11px]">
+                    <div className="flex items-center gap-2 text-sm">
                         {updatedTime && (
                             <span className="text-base-content/50">
                                 Updated {updatedTime}

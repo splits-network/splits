@@ -11,7 +11,10 @@ import {
     BaselConfirmModal,
 } from "@splits-network/basel-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
-import type { TeamMember, Invitation } from "@/app/portal/company/settings/types";
+import type {
+    TeamMember,
+    Invitation,
+} from "@/app/portal/company/settings/types";
 
 const ROLES = [
     { value: "hiring_manager", label: "Hiring Manager" },
@@ -28,9 +31,7 @@ interface TeamTabProps {
     companyId: string;
 }
 
-function getRolePillColor(
-    role: string,
-): "error" | "success" | "primary" {
+function getRolePillColor(role: string): "error" | "success" | "primary" {
     switch (role) {
         case "company_admin":
             return "error";
@@ -138,9 +139,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
             });
 
             const scopeText =
-                inviteScope === "company"
-                    ? "your company"
-                    : "the organization";
+                inviteScope === "company" ? "your company" : "the organization";
             toast.success(
                 `Invitation sent to ${inviteEmail} for ${scopeText}.`,
             );
@@ -170,9 +169,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                     fetchInvitations();
                 } catch (error: any) {
                     console.error("Failed to revoke invitation:", error);
-                    toast.error(
-                        error.message || "Failed to revoke invitation",
-                    );
+                    toast.error(error.message || "Failed to revoke invitation");
                 } finally {
                     setConfirmModal(null);
                 }
@@ -234,9 +231,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                             <input
                                 type="email"
                                 value={inviteEmail}
-                                onChange={(e) =>
-                                    setInviteEmail(e.target.value)
-                                }
+                                onChange={(e) => setInviteEmail(e.target.value)}
                                 placeholder="colleague@example.com"
                                 className="input input-bordered w-full"
                                 required
@@ -247,9 +242,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                         <BaselFormField label="Role">
                             <select
                                 value={inviteRole}
-                                onChange={(e) =>
-                                    setInviteRole(e.target.value)
-                                }
+                                onChange={(e) => setInviteRole(e.target.value)}
                                 className="select select-bordered w-full"
                                 disabled={inviting}
                             >
@@ -271,9 +264,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                         >
                             <select
                                 value={inviteScope}
-                                onChange={(e) =>
-                                    setInviteScope(e.target.value)
-                                }
+                                onChange={(e) => setInviteScope(e.target.value)}
                                 className="select select-bordered w-full"
                                 disabled={inviting}
                             >
@@ -345,7 +336,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                     >
                                         {getRoleLabel(invitation.role)}
                                     </BaselStatusPill>
-                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase bg-base-300 text-base-content/60">
+                                    <span className="px-2 py-0.5 text-sm font-bold uppercase bg-base-300 text-base-content/60">
                                         {invitation.company_id
                                             ? "Company"
                                             : "Org"}
@@ -444,7 +435,9 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                 <div className="grid md:grid-cols-2 gap-8">
                     <div>
                         <div className="flex items-center gap-2 mb-3">
-                            <BaselStatusPill color="error">Admin</BaselStatusPill>
+                            <BaselStatusPill color="error">
+                                Admin
+                            </BaselStatusPill>
                             <span className="text-sm font-semibold">
                                 Company Admin
                             </span>
@@ -462,7 +455,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                     key={perm}
                                     className="text-xs text-base-content/50 flex items-center gap-2"
                                 >
-                                    <i className="fa-solid fa-check text-success text-[10px]" />
+                                    <i className="fa-solid fa-check text-success text-sm" />
                                     {perm}
                                 </li>
                             ))}
@@ -491,7 +484,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                     key={perm}
                                     className="text-xs text-base-content/50 flex items-center gap-2"
                                 >
-                                    <i className="fa-solid fa-check text-success text-[10px]" />
+                                    <i className="fa-solid fa-check text-success text-sm" />
                                     {perm}
                                 </li>
                             ))}

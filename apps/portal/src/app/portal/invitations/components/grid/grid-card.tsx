@@ -40,7 +40,7 @@ export function GridCard({
             {/* Top row: status pill + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation)}`}
                 >
                     <i
                         className={`fa-duotone fa-regular ${status.icon} mr-1`}
@@ -51,7 +51,7 @@ export function GridCard({
                 {isRecentInvitation(invitation) &&
                     !invitation.consent_given &&
                     !invitation.declined_at && (
-                        <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                             <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                             New
                         </span>
@@ -105,7 +105,7 @@ export function GridCard({
             {/* Location */}
             {candidate?.location && (
                 <div className="flex flex-wrap gap-1 mb-4">
-                    <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                         <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                         {candidate.location}
                     </span>

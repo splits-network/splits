@@ -249,7 +249,7 @@ export function UploadDocumentsStep({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                                            <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary Resume
                                             </span>
                                         ) : isSelected ? (
@@ -276,8 +276,8 @@ export function UploadDocumentsStep({
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
                         <span className="text-sm">
-                            You don't have any existing documents. Upload your first documents
-                            below.
+                            You don't have any existing documents. Upload your
+                            first documents below.
                         </span>
                     </div>
                 </div>
@@ -336,7 +336,7 @@ export function UploadDocumentsStep({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                                            <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary Resume
                                             </span>
                                         ) : (
@@ -373,7 +373,9 @@ export function UploadDocumentsStep({
                 <div className="alert alert-success">
                     <i className="fa-duotone fa-regular fa-check-circle"></i>
                     <div>
-                        <div className="font-bold text-sm">Ready to Continue</div>
+                        <div className="font-bold text-sm">
+                            Ready to Continue
+                        </div>
                         <div className="text-sm">
                             {totalDocCount} document
                             {totalDocCount > 1 ? "s" : ""} selected with primary

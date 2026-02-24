@@ -17,6 +17,7 @@ export interface CandidateStats {
 export interface Application {
     id: string;
     stage: string;
+    expired_at?: string | null;
     created_at: string;
     updated_at?: string;
     job?: {
@@ -94,9 +95,10 @@ export function useCandidateDashboardData() {
             setApplications(allApps);
 
             // Compute stats
-            const terminalStages = ['rejected', 'withdrawn', 'hired', 'expired'];
+            const terminalStages = ['rejected', 'withdrawn', 'hired'];
             const activeApplications = allApps.filter(app =>
                 !terminalStages.includes(app.stage) &&
+                !app.expired_at &&
                 app.stage !== 'draft' &&
                 app.job?.status !== 'closed' && app.job?.status !== 'filled'
             ).length;

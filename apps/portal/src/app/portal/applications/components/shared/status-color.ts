@@ -11,6 +11,23 @@ export interface StageDisplay {
     icon: string;
 }
 
+/**
+ * Returns a stage display with an expired overlay when applicable.
+ * When expired_at is set, the label becomes "Stage (Expired)" with dimmed styling.
+ */
+export function getStageDisplayWithExpired(
+    stage: string | null | undefined,
+    expiredAt: string | null | undefined,
+): StageDisplay {
+    const base = getStageDisplay(stage);
+    if (!expiredAt) return base;
+    return {
+        label: `${base.label} (Expired)`,
+        badge: "bg-base-content/10 text-base-content/50",
+        icon: "fa-clock",
+    };
+}
+
 export function getStageDisplay(stage: string | null | undefined): StageDisplay {
     switch (stage) {
         case "draft":

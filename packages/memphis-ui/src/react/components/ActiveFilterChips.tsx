@@ -1,5 +1,5 @@
-import React from 'react';
-import { getAccentColor } from '../utils/accent-cycle';
+import React from "react";
+import { getAccentColor } from "../utils/accent-cycle";
 
 export interface ActiveFilter {
     /** Unique key for this filter */
@@ -29,19 +29,17 @@ export function ActiveFilterChips({
     filters,
     onRemove,
     onClearAll,
-    className = '',
+    className = "",
 }: ActiveFilterChipsProps) {
     if (filters.length === 0) return null;
 
     return (
         <div
-            className={['flex flex-wrap items-center gap-2', className]
+            className={["flex flex-wrap items-center gap-2", className]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
         >
-            <span
-                className="text-xs font-bold uppercase tracking-wider text-dark opacity-40"
-            >
+            <span className="text-xs font-bold uppercase tracking-wider text-dark opacity-40">
                 Active:
             </span>
             {filters.map((f, i) => {
@@ -53,9 +51,7 @@ export function ActiveFilterChips({
                         className={`accent-${accent} flex items-center gap-1.5 px-3 py-1.5 border-2 border-accent text-xs font-bold uppercase tracking-wider transition-all group text-dark`}
                     >
                         {f.value}
-                        <i
-                            className="fa-solid fa-xmark text-[10px] transition-colors text-accent"
-                        />
+                        <i className="fa-solid fa-xmark text-sm transition-colors text-accent" />
                     </button>
                 );
             })}

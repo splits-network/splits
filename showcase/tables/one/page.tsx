@@ -271,7 +271,7 @@ export default function TablesOne() {
 
     const SortIcon = ({ field }: { field: SortField }) => (
         <i
-            className={`fa-solid fa-sort${sortField === field ? (sortDir === "asc" ? "-up" : "-down") : ""} text-[9px] ${sortField === field ? "text-primary" : "text-base-content/20"}`}
+            className={`fa-solid fa-sort${sortField === field ? (sortDir === "asc" ? "-up" : "-down") : ""} text-sm ${sortField === field ? "text-primary" : "text-base-content/20"}`}
         />
     );
 
@@ -441,14 +441,14 @@ export default function TablesOne() {
                                     </td>
                                     <td>
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-primary text-primary-content flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                                            <div className="w-8 h-8 bg-primary text-primary-content flex items-center justify-center text-sm font-bold flex-shrink-0">
                                                 {c.initials}
                                             </div>
                                             <div>
                                                 <div className="font-bold text-sm">
                                                     {c.name}
                                                 </div>
-                                                <div className="text-[10px] text-base-content/40">
+                                                <div className="text-sm text-base-content/40">
                                                     {c.email}
                                                 </div>
                                             </div>
@@ -460,7 +460,7 @@ export default function TablesOne() {
                                     </td>
                                     <td>
                                         <span
-                                            className={`px-2 py-0.5 text-[10px] font-bold uppercase ${stageColor[c.stage] || ""}`}
+                                            className={`px-2 py-0.5 text-sm font-bold uppercase ${stageColor[c.stage] || ""}`}
                                         >
                                             {c.stage}
                                         </span>

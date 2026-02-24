@@ -443,7 +443,8 @@ export class JobRepository {
                 .from('applications')
                 .select('job_id', { count: 'exact' })
                 .in('job_id', jobIds)
-                .not('stage', 'in', '(rejected,withdrawn,expired)');
+                .not('stage', 'in', '(rejected,withdrawn,hired)')
+                .is('expired_at', null);
 
             if (!countError && counts) {
                 // Count manually since we need per-job counts

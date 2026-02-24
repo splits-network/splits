@@ -72,7 +72,7 @@ export function ProfileHeader({
                                     {badges.map((badge, i) => (
                                         <span
                                             key={i}
-                                            className={`accent-${badge.accent} px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-accent text-on-accent`}
+                                            className={`accent-${badge.accent} px-3 py-1 text-sm font-black uppercase tracking-wider bg-accent text-on-accent`}
                                         >
                                             {badge.label}
                                         </span>

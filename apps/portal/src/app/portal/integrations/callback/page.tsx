@@ -10,7 +10,9 @@ export default function OAuthCallbackPage() {
     const router = useRouter();
     const { getToken } = useAuth();
 
-    const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
+    const [status, setStatus] = useState<"processing" | "success" | "error">(
+        "processing",
+    );
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -50,7 +52,10 @@ export default function OAuthCallbackPage() {
                 }
 
                 const client = createAuthenticatedClient(token);
-                await client.post("/integrations/connections/callback", { code, state });
+                await client.post("/integrations/connections/callback", {
+                    code,
+                    state,
+                });
 
                 setStatus("success");
 
@@ -76,7 +81,8 @@ export default function OAuthCallbackPage() {
                                 Connecting...
                             </h2>
                             <p className="text-sm text-base-content/50">
-                                Completing the authorization. This will only take a moment.
+                                Completing the authorization. This will only
+                                take a moment.
                             </p>
                         </>
                     )}
@@ -105,8 +111,12 @@ export default function OAuthCallbackPage() {
                             </h2>
                             <p className="text-sm text-error mb-4">{error}</p>
                             <button
-                                onClick={() => router.push("/portal/profile?section=integrations")}
-                                className="btn btn-primary btn-sm rounded-none font-bold uppercase tracking-wider text-[11px]"
+                                onClick={() =>
+                                    router.push(
+                                        "/portal/profile?section=integrations",
+                                    )
+                                }
+                                className="btn btn-primary btn-sm rounded-none font-bold uppercase tracking-wider text-sm"
                             >
                                 Back to settings
                             </button>

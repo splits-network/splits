@@ -26,7 +26,7 @@ export function BaselBillingToggle({
                 >
                     Annual
                     {showSavingsBadge && (
-                        <span className="ml-2 px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold uppercase tracking-wider">
+                        <span className="ml-2 px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase tracking-wider">
                             Save 20%
                         </span>
                     )}

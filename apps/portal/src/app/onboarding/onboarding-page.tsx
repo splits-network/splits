@@ -229,7 +229,7 @@ export function OnboardingPage() {
                             }`}
                         />
                     ))}
-                    <span className="text-[10px] text-base-content/30 ml-2 whitespace-nowrap">
+                    <span className="text-sm text-base-content/30 ml-2 whitespace-nowrap">
                         {activeStepIndex + 1}/{steps.length}
                     </span>
                 </div>

@@ -36,7 +36,7 @@ export function GridCard({
             {/* Top row: status pill */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${stageColor(app.stage)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${stageColor(app.stage)}`}
                 >
                     {formatStage(app.stage)}
                 </span>

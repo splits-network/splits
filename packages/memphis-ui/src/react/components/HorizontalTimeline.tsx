@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface TimelineMilestone {
     /** Milestone label */
@@ -25,10 +25,10 @@ export interface HorizontalTimelineProps {
 
 /** Map AccentColor to the CSS step color variant class */
 const STEP_COLOR_CLASS: Record<AccentColor, string> = {
-    coral: 'step-coral',
-    teal: 'step-teal',
-    yellow: 'step-yellow',
-    purple: 'step-purple',
+    coral: "step-coral",
+    teal: "step-teal",
+    yellow: "step-yellow",
+    purple: "step-purple",
 };
 
 /** Map AccentColor to the CSS variable for inline use (status badges) */
@@ -41,13 +41,17 @@ const STEP_COLOR_CLASS: Record<AccentColor, string> = {
  */
 export function HorizontalTimeline({
     milestones,
-    className = '',
+    className = "",
 }: HorizontalTimelineProps) {
     return (
-        <ul className={['steps steps-horizontal w-full', className].filter(Boolean).join(' ')}>
+        <ul
+            className={["steps steps-horizontal w-full", className]
+                .filter(Boolean)
+                .join(" ")}
+        >
             {milestones.map((m) => {
-                const colorClass = STEP_COLOR_CLASS[m.color || 'teal'];
-                const statusAccent = m.statusColor || m.color || 'teal';
+                const colorClass = STEP_COLOR_CLASS[m.color || "teal"];
+                const statusAccent = m.statusColor || m.color || "teal";
 
                 return (
                     <li key={m.label} className={`step ${colorClass}`}>
@@ -65,7 +69,7 @@ export function HorizontalTimeline({
                             </span>
                             {m.status && (
                                 <span
-                                    className={`accent-${statusAccent} px-2 py-0.5 text-[10px] font-black uppercase text-dark border-xs bg-accent`}
+                                    className={`accent-${statusAccent} px-2 py-0.5 text-sm font-black uppercase text-dark border-xs bg-accent`}
                                 >
                                     {m.status}
                                 </span>

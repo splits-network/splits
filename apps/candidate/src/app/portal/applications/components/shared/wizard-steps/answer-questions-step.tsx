@@ -134,8 +134,8 @@ export function AnswerQuestionsStep({
                     <div className="flex items-start gap-3">
                         <i className="fa-duotone fa-regular fa-info-circle text-info mt-0.5" />
                         <span className="text-sm">
-                            No pre-screening questions required. You can proceed to
-                            the next step.
+                            No pre-screening questions required. You can proceed
+                            to the next step.
                         </span>
                     </div>
                 </div>
@@ -176,11 +176,11 @@ export function AnswerQuestionsStep({
                         <div className="flex items-start justify-between gap-4 mb-3">
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-neutral/15 text-neutral-content">
+                                    <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-neutral/15 text-neutral-content">
                                         Question {index + 1}
                                     </span>
                                     {question.is_required && (
-                                        <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-error/15 text-error">
+                                        <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-error/15 text-error">
                                             Required
                                         </span>
                                     )}

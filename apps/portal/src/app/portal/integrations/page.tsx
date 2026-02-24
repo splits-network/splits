@@ -26,14 +26,17 @@ export default function IntegrationsMarketplacePage() {
     const containerRef = useRef<HTMLElement>(null);
 
     const [tab, setTab] = useState<Tab>("browse");
-    const [category, setCategory] = useState<IntegrationCategory | "all">("all");
+    const [category, setCategory] = useState<IntegrationCategory | "all">(
+        "all",
+    );
     const [providers, setProviders] = useState<IntegrationProvider[]>([]);
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [connecting, setConnecting] = useState<string | null>(null);
     const [disconnecting, setDisconnecting] = useState<string | null>(null);
-    const [selectedProvider, setSelectedProvider] = useState<IntegrationProvider | null>(null);
+    const [selectedProvider, setSelectedProvider] =
+        useState<IntegrationProvider | null>(null);
     const [showATSPanel, setShowATSPanel] = useState(false);
 
     /* ── Fetch data ──────────────────────────────────────────────────── */
@@ -45,8 +48,12 @@ export default function IntegrationsMarketplacePage() {
 
             const client = createAuthenticatedClient(token);
             const [providersRes, connectionsRes] = await Promise.all([
-                client.get("/integrations/providers") as Promise<{ data: IntegrationProvider[] }>,
-                client.get("/integrations/connections") as Promise<{ data: OAuthConnectionPublic[] }>,
+                client.get("/integrations/providers") as Promise<{
+                    data: IntegrationProvider[];
+                }>,
+                client.get("/integrations/connections") as Promise<{
+                    data: OAuthConnectionPublic[];
+                }>,
             ]);
 
             setProviders(providersRes.data ?? []);
@@ -79,23 +86,46 @@ export default function IntegrationsMarketplacePage() {
             const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
             const kicker = $1(".mkt-kicker");
-            if (kicker) tl.fromTo(kicker, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
+            if (kicker)
+                tl.fromTo(
+                    kicker,
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                );
 
             const titleWords = $(".mkt-title-word");
             if (titleWords.length) {
                 tl.fromTo(
                     titleWords,
                     { opacity: 0, y: 60, rotateX: 30 },
-                    { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.1 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        duration: 0.8,
+                        stagger: 0.1,
+                    },
                     "-=0.3",
                 );
             }
 
             const desc = $1(".mkt-desc");
-            if (desc) tl.fromTo(desc, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.4");
+            if (desc)
+                tl.fromTo(
+                    desc,
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                    "-=0.4",
+                );
 
             const content = $1(".mkt-content");
-            if (content) tl.fromTo(content, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.2");
+            if (content)
+                tl.fromTo(
+                    content,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.6 },
+                    "-=0.2",
+                );
         },
         { scope: containerRef, dependencies: [loading] },
     );
@@ -120,10 +150,13 @@ export default function IntegrationsMarketplacePage() {
             const client = createAuthenticatedClient(token);
             const redirectUri = `${window.location.origin}/portal/integrations/callback`;
 
-            const res = await client.post("/integrations/connections/initiate", {
-                provider_slug: providerSlug,
-                redirect_uri: redirectUri,
-            }) as { data: { authorization_url: string; state: string } };
+            const res = (await client.post(
+                "/integrations/connections/initiate",
+                {
+                    provider_slug: providerSlug,
+                    redirect_uri: redirectUri,
+                },
+            )) as { data: { authorization_url: string; state: string } };
 
             sessionStorage.setItem("oauth_state", res.data.state);
             window.location.href = res.data.authorization_url;
@@ -164,15 +197,47 @@ export default function IntegrationsMarketplacePage() {
 
     const activeConnections = connections.filter((c) => c.status === "active");
 
-    type CategoryItem = { value: IntegrationCategory | "all"; label: string; icon: string; count: number };
+    type CategoryItem = {
+        value: IntegrationCategory | "all";
+        label: string;
+        icon: string;
+        count: number;
+    };
     const allCategories: CategoryItem[] = [
-        { value: "all", label: "All", icon: "fa-duotone fa-regular fa-grid-2", count: providers.length },
-        { value: "calendar", label: "Calendar", icon: "fa-duotone fa-regular fa-calendar", count: providers.filter((p) => p.category === "calendar").length },
-        { value: "email", label: "Email", icon: "fa-duotone fa-regular fa-envelope", count: providers.filter((p) => p.category === "email").length },
-        { value: "ats", label: "ATS", icon: "fa-duotone fa-regular fa-briefcase", count: providers.filter((p) => p.category === "ats").length },
-        { value: "linkedin", label: "LinkedIn", icon: "fa-brands fa-linkedin", count: providers.filter((p) => p.category === "linkedin").length },
+        {
+            value: "all",
+            label: "All",
+            icon: "fa-duotone fa-regular fa-grid-2",
+            count: providers.length,
+        },
+        {
+            value: "calendar",
+            label: "Calendar",
+            icon: "fa-duotone fa-regular fa-calendar",
+            count: providers.filter((p) => p.category === "calendar").length,
+        },
+        {
+            value: "email",
+            label: "Email",
+            icon: "fa-duotone fa-regular fa-envelope",
+            count: providers.filter((p) => p.category === "email").length,
+        },
+        {
+            value: "ats",
+            label: "ATS",
+            icon: "fa-duotone fa-regular fa-briefcase",
+            count: providers.filter((p) => p.category === "ats").length,
+        },
+        {
+            value: "linkedin",
+            label: "LinkedIn",
+            icon: "fa-brands fa-linkedin",
+            count: providers.filter((p) => p.category === "linkedin").length,
+        },
     ];
-    const categories = allCategories.filter((c) => c.count > 0 || c.value === "all");
+    const categories = allCategories.filter(
+        (c) => c.count > 0 || c.value === "all",
+    );
 
     /* ── Loading ─────────────────────────────────────────────────────── */
 
@@ -181,7 +246,9 @@ export default function IntegrationsMarketplacePage() {
             <main className="min-h-screen bg-base-100 flex items-center justify-center">
                 <div className="flex items-center gap-3">
                     <span className="loading loading-spinner loading-lg" />
-                    <span className="text-base-content/50 font-semibold text-lg">Loading integrations...</span>
+                    <span className="text-base-content/50 font-semibold text-lg">
+                        Loading integrations...
+                    </span>
                 </div>
             </main>
         );
@@ -199,7 +266,9 @@ export default function IntegrationsMarketplacePage() {
                 {/* Error banner */}
                 {error && (
                     <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-6">
-                        <p className="text-sm font-semibold text-error">{error}</p>
+                        <p className="text-sm font-semibold text-error">
+                            {error}
+                        </p>
                     </div>
                 )}
 
@@ -227,7 +296,7 @@ export default function IntegrationsMarketplacePage() {
                         <i className="fa-duotone fa-regular fa-plug mr-2" />
                         Installed
                         {activeConnections.length > 0 && (
-                            <span className="ml-2 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 min-w-[20px] inline-block text-center">
+                            <span className="ml-2 bg-primary text-primary-content text-sm font-bold px-1.5 py-0.5 min-w-[20px] inline-block text-center">
                                 {activeConnections.length}
                             </span>
                         )}
@@ -245,14 +314,20 @@ export default function IntegrationsMarketplacePage() {
 
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
                             {filteredProviders.map((provider) => {
-                                const conn = getConnectionForProvider(provider.slug);
+                                const conn = getConnectionForProvider(
+                                    provider.slug,
+                                );
                                 return (
                                     <MarketplaceProviderCard
                                         key={provider.slug}
                                         provider={provider}
                                         connection={conn}
-                                        connecting={connecting === provider.slug}
-                                        onConnect={() => handleConnect(provider.slug)}
+                                        connecting={
+                                            connecting === provider.slug
+                                        }
+                                        onConnect={() =>
+                                            handleConnect(provider.slug)
+                                        }
                                         onDetails={() => {
                                             if (provider.category === "ats") {
                                                 setShowATSPanel(true);

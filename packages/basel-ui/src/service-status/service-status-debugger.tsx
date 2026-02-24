@@ -9,11 +9,15 @@ import { useEffect, useState } from "react";
  */
 export function ServiceStatusDebugger() {
     const [collapsed, setCollapsed] = useState(true);
-    const [apiStatus, setApiStatus] = useState<"checking" | "ok" | "error">("checking");
+    const [apiStatus, setApiStatus] = useState<"checking" | "ok" | "error">(
+        "checking",
+    );
     const [apiDetail, setApiDetail] = useState("");
     const [notifCount, setNotifCount] = useState(0);
     const [showPreviews, setShowPreviews] = useState(false);
-    const [dismissedPreviews, setDismissedPreviews] = useState<Set<string>>(new Set());
+    const [dismissedPreviews, setDismissedPreviews] = useState<Set<string>>(
+        new Set(),
+    );
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "(not set)";
 
@@ -31,14 +35,18 @@ export function ServiceStatusDebugger() {
                     const count = json.data?.length || 0;
                     setNotifCount(count);
                     setApiStatus("ok");
-                    setApiDetail(`${count} notification${count !== 1 ? "s" : ""}`);
+                    setApiDetail(
+                        `${count} notification${count !== 1 ? "s" : ""}`,
+                    );
                 } else {
                     setApiStatus("error");
                     setApiDetail(`${res.status} ${res.statusText}`);
                 }
             } catch (err) {
                 setApiStatus("error");
-                setApiDetail(err instanceof Error ? err.message : "Unknown error");
+                setApiDetail(
+                    err instanceof Error ? err.message : "Unknown error",
+                );
             }
         }
         testApi();
@@ -47,22 +55,24 @@ export function ServiceStatusDebugger() {
     if (process.env.NODE_ENV !== "development") return null;
 
     const statusDot =
-        apiStatus === "ok" ? "bg-success" :
-        apiStatus === "error" ? "bg-error" :
-        "bg-warning animate-pulse";
+        apiStatus === "ok"
+            ? "bg-success"
+            : apiStatus === "error"
+              ? "bg-error"
+              : "bg-warning animate-pulse";
 
     // ── Collapsed: small floating pill ──
     if (collapsed) {
         return (
             <button
                 onClick={() => setCollapsed(false)}
-                className="fixed bottom-4 right-4 z-[9999] h-8 px-3 bg-neutral text-neutral-content text-[11px] font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
+                className="fixed bottom-4 right-4 z-[9999] h-8 px-3 bg-neutral text-neutral-content text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
                 title="Service Status Debugger"
             >
                 <span className={`w-2 h-2 ${statusDot} flex-shrink-0`} />
                 <span>Status</span>
                 {notifCount > 0 && (
-                    <span className="min-w-4 h-4 flex items-center justify-center bg-primary text-primary-content text-[9px] font-bold px-1">
+                    <span className="min-w-4 h-4 flex items-center justify-center bg-primary text-primary-content text-sm font-bold px-1">
                         {notifCount}
                     </span>
                 )}
@@ -114,7 +124,9 @@ export function ServiceStatusDebugger() {
         },
     ];
 
-    const visiblePreviews = previewBanners.filter((b) => !dismissedPreviews.has(b.id));
+    const visiblePreviews = previewBanners.filter(
+        (b) => !dismissedPreviews.has(b.id),
+    );
 
     // ── Expanded panel ──
     return (
@@ -132,7 +144,7 @@ export function ServiceStatusDebugger() {
                     className="w-6 h-6 flex items-center justify-center text-neutral-content/40 hover:text-neutral-content transition-colors"
                     aria-label="Collapse"
                 >
-                    <i className="fa-solid fa-chevron-down text-[10px]" />
+                    <i className="fa-solid fa-chevron-down text-sm" />
                 </button>
             </div>
 
@@ -140,17 +152,33 @@ export function ServiceStatusDebugger() {
             <div className="overflow-y-auto flex-1 p-3 space-y-3">
                 {/* API Status */}
                 <div className="space-y-1.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
+                    <div className="text-sm font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
                         API Connection
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                        <span className={`w-1.5 h-1.5 ${statusDot} flex-shrink-0`} />
-                        <span className={apiStatus === "ok" ? "text-success" : apiStatus === "error" ? "text-error" : "text-warning"}>
-                            {apiStatus === "ok" ? "Connected" : apiStatus === "error" ? "Failed" : "Checking..."}
+                        <span
+                            className={`w-1.5 h-1.5 ${statusDot} flex-shrink-0`}
+                        />
+                        <span
+                            className={
+                                apiStatus === "ok"
+                                    ? "text-success"
+                                    : apiStatus === "error"
+                                      ? "text-error"
+                                      : "text-warning"
+                            }
+                        >
+                            {apiStatus === "ok"
+                                ? "Connected"
+                                : apiStatus === "error"
+                                  ? "Failed"
+                                  : "Checking..."}
                         </span>
-                        <span className="text-neutral-content/40">{apiDetail}</span>
+                        <span className="text-neutral-content/40">
+                            {apiDetail}
+                        </span>
                     </div>
-                    <div className="text-[10px] text-neutral-content/30 font-mono break-all">
+                    <div className="text-sm text-neutral-content/30 font-mono break-all">
                         {apiUrl}
                     </div>
                 </div>
@@ -161,7 +189,7 @@ export function ServiceStatusDebugger() {
                 {/* Banner Previews */}
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
+                        <div className="text-sm font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
                             Banner Previews
                         </div>
                         <button
@@ -169,7 +197,7 @@ export function ServiceStatusDebugger() {
                                 setShowPreviews(!showPreviews);
                                 setDismissedPreviews(new Set());
                             }}
-                            className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors"
+                            className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
                         >
                             {showPreviews ? "Hide" : "Show"}
                         </button>
@@ -183,16 +211,28 @@ export function ServiceStatusDebugger() {
                                     className={`bg-base-100 border-l-3 ${b.border} text-base-content`}
                                 >
                                     <div className="flex items-center gap-2 px-2.5 py-2">
-                                        <div className={`w-5 h-5 ${b.iconBg} flex items-center justify-center flex-shrink-0`}>
-                                            <i className={`${b.icon} ${b.iconColor} text-[10px]`} />
+                                        <div
+                                            className={`w-5 h-5 ${b.iconBg} flex items-center justify-center flex-shrink-0`}
+                                        >
+                                            <i
+                                                className={`${b.icon} ${b.iconColor} text-sm`}
+                                            />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[11px] font-bold leading-tight truncate">
+                                            <p className="text-sm font-bold leading-tight truncate">
                                                 {b.title}
                                             </p>
                                         </div>
                                         <button
-                                            onClick={() => setDismissedPreviews((prev) => new Set([...prev, b.id]))}
+                                            onClick={() =>
+                                                setDismissedPreviews(
+                                                    (prev) =>
+                                                        new Set([
+                                                            ...prev,
+                                                            b.id,
+                                                        ]),
+                                                )
+                                            }
                                             className="w-4 h-4 flex items-center justify-center text-base-content/30 hover:text-base-content/60 flex-shrink-0"
                                             aria-label="Dismiss"
                                         >
@@ -205,7 +245,7 @@ export function ServiceStatusDebugger() {
                     )}
 
                     {showPreviews && visiblePreviews.length === 0 && (
-                        <div className="text-[10px] text-neutral-content/30 py-1">
+                        <div className="text-sm text-neutral-content/30 py-1">
                             All dismissed.{" "}
                             <button
                                 onClick={() => setDismissedPreviews(new Set())}
@@ -224,8 +264,8 @@ export function ServiceStatusDebugger() {
                     className="btn btn-xs btn-ghost text-neutral-content/50 hover:text-neutral-content flex-1"
                     onClick={() => window.location.reload()}
                 >
-                    <i className="fa-solid fa-rotate-right text-[10px]" />
-                    <span className="text-[10px]">Reload</span>
+                    <i className="fa-solid fa-rotate-right text-sm" />
+                    <span className="text-sm">Reload</span>
                 </button>
             </div>
         </div>

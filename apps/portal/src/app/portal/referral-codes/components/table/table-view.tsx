@@ -9,7 +9,7 @@ const COLUMNS = [
     "Status",
     "Signups",
     "Created",
-    "",  // actions
+    "", // actions
 ] as const;
 
 export function TableView({
@@ -27,7 +27,7 @@ export function TableView({
                         {COLUMNS.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-6 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${
+                                className={`px-6 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 ${
                                     i === COLUMNS.length - 1 ? "text-right" : ""
                                 }`}
                             >

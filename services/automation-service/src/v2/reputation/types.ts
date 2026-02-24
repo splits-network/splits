@@ -15,6 +15,8 @@ export interface ReputationMetrics {
     failed_placements: number;
     total_collaborations: number;
     avg_response_time_hours: number | null;
+    total_expired_in_recruiter_stages: number;
+    total_reached_screen: number;
 }
 
 /**
@@ -45,6 +47,8 @@ export interface RecruiterReputation {
     total_collaborations: number;
     collaboration_rate: number | null;
     avg_response_time_hours: number | null;
+    total_expired_in_recruiter_stages: number;
+    pipeline_reliability_rate: number | null;
     reputation_score: number;
     last_calculated_at: string | null;
     created_at: string;

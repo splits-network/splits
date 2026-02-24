@@ -446,7 +446,7 @@ export default function SettingsOne() {
                                             ))}
                                             <div className="h-1 flex-1 bg-base-300" />
                                         </div>
-                                        <p className="text-[10px] text-success mt-1 font-semibold">
+                                        <p className="text-sm text-success mt-1 font-semibold">
                                             Strong password
                                         </p>
                                     </div>
@@ -457,7 +457,7 @@ export default function SettingsOne() {
                                                 <h3 className="font-bold flex items-center gap-2">
                                                     Two-Factor Authentication{" "}
                                                     {twoFactor && (
-                                                        <span className="px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold uppercase">
+                                                        <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
                                                             Active
                                                         </span>
                                                     )}
@@ -517,7 +517,7 @@ export default function SettingsOne() {
                                                             <p className="text-sm font-semibold">
                                                                 {session.device}{" "}
                                                                 {session.current && (
-                                                                    <span className="text-[10px] text-success font-bold ml-1">
+                                                                    <span className="text-sm text-success font-bold ml-1">
                                                                         CURRENT
                                                                     </span>
                                                                 )}
@@ -574,7 +574,7 @@ export default function SettingsOne() {
                                                 <h3 className="font-bold">
                                                     Pro Plan
                                                 </h3>
-                                                <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase">
+                                                <span className="px-2 py-0.5 bg-primary/10 text-primary text-sm font-bold uppercase">
                                                     Current
                                                 </span>
                                             </div>
@@ -663,7 +663,7 @@ export default function SettingsOne() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold uppercase">
+                                                    <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
                                                         {inv.status}
                                                     </span>
                                                     <button className="btn btn-xs btn-ghost">
@@ -707,7 +707,7 @@ export default function SettingsOne() {
                                                         </h3>
                                                         {int.status ===
                                                             "connected" && (
-                                                            <span className="px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold uppercase">
+                                                            <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
                                                                 Connected
                                                             </span>
                                                         )}
