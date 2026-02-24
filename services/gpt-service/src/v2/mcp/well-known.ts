@@ -22,9 +22,18 @@ function getBaseUrl(): string {
     return process.env.PUBLIC_BASE_URL || 'https://api.splits.network';
 }
 
+/**
+ * The candidate app URL where the OAuth consent page lives.
+ * ChatGPT/MCP clients redirect users here to authenticate via Clerk.
+ */
+function getConsentUrl(): string {
+    return process.env.CANDIDATE_APP_URL || 'https://applicant.network';
+}
+
 export function registerWellKnownRoutes(app: FastifyInstance, config: WellKnownConfig) {
     const { gptConfig } = config;
     const baseUrl = getBaseUrl();
+    const consentUrl = getConsentUrl();
 
     /**
      * GET /.well-known/oauth-protected-resource
@@ -46,7 +55,7 @@ export function registerWellKnownRoutes(app: FastifyInstance, config: WellKnownC
     app.get('/.well-known/oauth-authorization-server', async (_request, reply) => {
         return reply.send({
             issuer: baseUrl,
-            authorization_endpoint: `${baseUrl}/api/v1/gpt/oauth/authorize`,
+            authorization_endpoint: `${consentUrl}/authorize`,
             token_endpoint: `${baseUrl}/api/v1/gpt/oauth/token`,
             registration_endpoint: `${baseUrl}/api/v1/gpt/oauth/register`,
             scopes_supported: ['jobs:read', 'applications:read', 'applications:write', 'resume:read'],
