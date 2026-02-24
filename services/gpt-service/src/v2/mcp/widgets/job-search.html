@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Search Results</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .loading { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  .empty { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  .job-list { display: flex; flex-direction: column; gap: 12px; }
+  .job-card {
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    border-radius: var(--border-radius-md, 8px);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .job-card:hover {
+    border-color: var(--color-border-info, #3b82f6);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+  }
+  .job-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .job-title {
+    font-size: var(--font-text-md-size, 15px);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--color-text-primary, #1a1a1a);
+  }
+  .job-company {
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+    margin-top: 2px;
+  }
+  .job-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 8px;
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+  }
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--border-radius-sm, 4px);
+    background: var(--color-background-secondary, #f5f5f5);
+    font-size: var(--font-text-xs-size, 11px);
+    font-weight: var(--font-weight-medium, 500);
+  }
+  .salary { color: var(--color-text-success, #16a34a); font-weight: var(--font-weight-medium, 500); }
+  .job-summary {
+    margin-top: 8px;
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .pagination {
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    margin-top: 16px;
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+  }
+  .page-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    border-radius: var(--border-radius-sm, 4px);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    cursor: pointer;
+    font-size: var(--font-text-sm-size, 13px);
+  }
+  .page-btn:hover { background: var(--color-background-secondary, #f5f5f5); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Searching for jobs...</div></div>
+
+<script>
+(function() {
+  const root = document.getElementById('root');
+  let currentData = null;
+
+  // Listen for tool results from the host
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    // Handle JSON-RPC notification: tool result
+    if (msg.method === 'ui/notifications/tool-result' && msg.params) {
+      const result = msg.params;
+      if (result.structuredContent) {
+        currentData = result.structuredContent;
+        render(currentData);
+      }
+    }
+
+    // Handle tool input (partial streaming)
+    if (msg.method === 'ui/notifications/tool-input' && msg.params) {
+      // Show loading state
+      root.innerHTML = '<div class="loading">Searching for jobs...</div>';
+    }
+  });
+
+  function render(data) {
+    if (!data || !data.jobs) {
+      root.innerHTML = '<div class="empty">No results to display.</div>';
+      return;
+    }
+
+    const { jobs, pagination } = data;
+
+    if (jobs.length === 0) {
+      root.innerHTML = '<div class="empty">No jobs found matching your criteria. Try broadening your search.</div>';
+      return;
+    }
+
+    let html = '<div class="job-list">';
+
+    for (const job of jobs) {
+      html += `
+        <div class="job-card" data-job-id="${esc(job.id)}" onclick="viewJob('${esc(job.id)}')">
+          <div class="job-header">
+            <div>
+              <div class="job-title">${esc(job.title)}</div>
+              <div class="job-company">${esc(job.company_name)}</div>
+            </div>
+            ${job.salary_range ? `<span class="salary">${esc(job.salary_range)}</span>` : ''}
+          </div>
+          <div class="job-meta">
+            <span class="badge">${esc(job.location || 'Location not specified')}</span>
+            ${job.commute_types?.map(t => `<span class="badge">${esc(t)}</span>`).join('') || ''}
+            ${job.job_level ? `<span class="badge">${esc(job.job_level)}</span>` : ''}
+          </div>
+          ${job.summary ? `<div class="job-summary">${esc(job.summary)}</div>` : ''}
+        </div>`;
+    }
+
+    html += '</div>';
+
+    // Pagination
+    if (pagination && pagination.total_pages > 1) {
+      html += `
+        <div class="pagination">
+          <button class="page-btn" onclick="loadPage(${pagination.page - 1})" ${pagination.page <= 1 ? 'disabled' : ''}>Previous</button>
+          <span>Page ${pagination.page} of ${pagination.total_pages} (${pagination.total_results} results)</span>
+          <button class="page-btn" onclick="loadPage(${pagination.page + 1})" ${pagination.page >= pagination.total_pages ? 'disabled' : ''}>Next</button>
+        </div>`;
+    }
+
+    root.innerHTML = html;
+  }
+
+  // Call a tool via the host bridge
+  function callTool(name, args) {
+    window.parent.postMessage({
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: 'tools/call',
+      params: { name, arguments: args },
+    }, '*');
+  }
+
+  // Navigate to job detail
+  window.viewJob = function(jobId) {
+    callTool('get_job_detail', { job_id: jobId });
+  };
+
+  // Load a specific page
+  window.loadPage = function(page) {
+    callTool('search_jobs', { page });
+  };
+
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>

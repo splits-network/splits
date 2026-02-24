@@ -9,6 +9,8 @@ import { OAuthService } from './oauth/oauth-service';
 import { GptActionRepository } from './actions/repository';
 import { registerActionRoutes } from './actions/routes';
 import { registerOpenapiRoute } from '../openapi-route';
+import { registerMcpRoutes } from './mcp/transport';
+import { registerWellKnownRoutes } from './mcp/well-known';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -47,4 +49,15 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     // Register OpenAPI schema routes
     registerOpenapiRoute(app);
+
+    // Register MCP (ChatGPT App) routes
+    registerMcpRoutes(app, {
+        repository: actionRepository,
+        oauthService,
+        eventPublisher,
+        logger: app.log,
+    });
+
+    // Register OAuth 2.1 well-known endpoints for MCP
+    registerWellKnownRoutes(app, { gptConfig });
 }

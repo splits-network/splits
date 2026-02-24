@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Submission</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .loading { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  h2 { font-size: var(--font-heading-sm-size, 18px); font-weight: var(--font-weight-bold, 700); margin-bottom: 12px; }
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: var(--font-text-sm-size, 13px);
+    font-weight: var(--font-weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 6px;
+  }
+  .detail-row {
+    font-size: var(--font-text-sm-size, 14px);
+    padding: 4px 0;
+  }
+  .detail-label { color: var(--color-text-secondary, #666); }
+  .warning-list { list-style: none; }
+  .warning-item {
+    padding: 6px 10px;
+    background: var(--color-background-warning, #fef3c7);
+    color: var(--color-text-warning, #92400e);
+    border-radius: var(--border-radius-sm, 4px);
+    font-size: var(--font-text-sm-size, 13px);
+    margin-bottom: 4px;
+  }
+  .req-list { list-style: disc; padding-left: 20px; font-size: var(--font-text-sm-size, 13px); }
+  .req-list li { margin-bottom: 4px; }
+  .answer-list { font-size: var(--font-text-sm-size, 13px); }
+  .answer-item { padding: 4px 0; border-bottom: 1px solid var(--color-border-secondary, #f0f0f0); }
+  .answer-q { color: var(--color-text-secondary, #666); }
+  .actions { display: flex; gap: 8px; margin-top: 20px; }
+  .btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius-md, 8px);
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    font-size: var(--font-text-sm-size, 14px);
+    font-weight: var(--font-weight-semibold, 600);
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--color-background-secondary, #f5f5f5); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--color-background-success, #16a34a);
+    color: var(--color-text-inverse, #fff);
+    border-color: transparent;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .success-card {
+    text-align: center;
+    padding: 32px 16px;
+  }
+  .success-icon { font-size: 48px; margin-bottom: 12px; }
+  .success-title { font-size: var(--font-heading-sm-size, 18px); font-weight: var(--font-weight-bold, 700); margin-bottom: 8px; }
+  .success-detail { font-size: var(--font-text-sm-size, 14px); color: var(--color-text-secondary, #666); }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Processing application...</div></div>
+
+<script>
+(function() {
+  const root = document.getElementById('root');
+  let confirmToken = null;
+
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    if (msg.method === 'ui/notifications/tool-result' && msg.params?.structuredContent) {
+      const data = msg.params.structuredContent;
+      if (data.status === 'CONFIRMATION_REQUIRED') {
+        renderConfirmation(data);
+      } else if (data.status === 'SUBMITTED') {
+        renderSuccess(data);
+      } else if (data.error === 'MISSING_PRE_SCREEN_ANSWERS') {
+        renderMissingQuestions(data);
+      }
+    }
+
+    if (msg.method === 'ui/notifications/tool-input') {
+      root.innerHTML = '<div class="loading">Processing application...</div>';
+    }
+  });
+
+  function renderConfirmation(data) {
+    confirmToken = data.confirmation_token;
+
+    let html = `<h2>Confirm Application</h2>`;
+
+    html += `
+      <div class="section">
+        <div class="detail-row"><span class="detail-label">Position:</span> ${esc(data.job_title)}</div>
+        <div class="detail-row"><span class="detail-label">Company:</span> ${esc(data.company_name)}</div>
+      </div>`;
+
+    if (data.requirements_summary?.length) {
+      html += `
+        <div class="section">
+          <div class="section-title">Key Requirements</div>
+          <ul class="req-list">${data.requirements_summary.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+        </div>`;
+    }
+
+    if (data.pre_screen_answers_provided?.length) {
+      html += `
+        <div class="section">
+          <div class="section-title">Your Answers</div>
+          <div class="answer-list">
+            ${data.pre_screen_answers_provided.map(a => `
+              <div class="answer-item">
+                <div class="answer-q">${esc(a.question)}</div>
+                <div>${esc(a.answer)}</div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    if (data.warnings?.length) {
+      html += `
+        <div class="section">
+          <div class="section-title">Warnings</div>
+          <ul class="warning-list">
+            ${data.warnings.map(w => `<li class="warning-item">${esc(w)}</li>`).join('')}
+          </ul>
+        </div>`;
+    }
+
+    html += `
+      <div class="actions">
+        <button class="btn btn-primary" id="confirmBtn" onclick="confirmSubmit()">Confirm &amp; Submit</button>
+        <button class="btn" onclick="cancelSubmit()">Cancel</button>
+      </div>`;
+
+    root.innerHTML = html;
+  }
+
+  function renderSuccess(data) {
+    const app = data.application;
+    root.innerHTML = `
+      <div class="success-card">
+        <div class="success-icon">&#10003;</div>
+        <div class="success-title">Application Submitted!</div>
+        <div class="success-detail">
+          ${esc(app?.job_title || '')} at ${esc(app?.company_name || '')}<br>
+          Applied on ${esc(app?.applied_date || '')}
+        </div>
+      </div>`;
+  }
+
+  function renderMissingQuestions(data) {
+    let html = `<h2>Pre-Screen Questions Required</h2>
+      <p style="margin-bottom: 12px; font-size: var(--font-text-sm-size, 14px); color: var(--color-text-secondary, #666);">
+        This job requires answers to the following questions:
+      </p>
+      <ul class="req-list">
+        ${(data.questions || []).map(q => `<li>${esc(q.question)} <em>(${esc(q.type)})</em></li>`).join('')}
+      </ul>`;
+    root.innerHTML = html;
+  }
+
+  window.confirmSubmit = function() {
+    if (!confirmToken) return;
+    const btn = document.getElementById('confirmBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+    window.parent.postMessage({
+      jsonrpc: '2.0', id: Date.now(),
+      method: 'tools/call',
+      params: {
+        name: 'submit_application',
+        arguments: { confirmed: true, confirmation_token: confirmToken, job_id: '' },
+      },
+    }, '*');
+  };
+
+  window.cancelSubmit = function() {
+    confirmToken = null;
+    root.innerHTML = '<div class="loading">Application cancelled.</div>';
+  };
+
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>

@@ -10,6 +10,7 @@ import { DocumentServiceV2 } from './v2/documents/service';
 
 import { createClient } from '@supabase/supabase-js';
 import { loadConfig } from '@splits-network/shared-config';
+import { EventPublisher } from '@splits-network/shared-job-queue';
 
 const logger = createLogger('domain-consumer');
 const config = loadConfig();
@@ -61,9 +62,11 @@ export class DomainConsumer {
     private repository: DocumentRepositoryV2;
     private documentServiceV2: DocumentServiceV2;
     private channel: Channel;
+    private eventPublisher: EventPublisher;
 
-    constructor(channel: Channel) {
+    constructor(channel: Channel, eventPublisher: EventPublisher) {
         this.channel = channel;
+        this.eventPublisher = eventPublisher;
         this.textExtractor = new TextExtractor();
         this.documentService = new DocumentService();
         this.scannerService = new ScannerService();
@@ -308,18 +311,7 @@ export class DomainConsumer {
      */
     private async publishDocumentScanned(event: DocumentScannedEvent): Promise<void> {
         try {
-            const message = {
-                ...event,
-                id: `${event.document_id}-scanned-${Date.now()}`,
-                timestamp: new Date().toISOString()
-            };
-
-            await this.channel.publish(
-                'splits-network-events',
-                'document.scanned',
-                Buffer.from(JSON.stringify(message))
-            );
-
+            await this.eventPublisher.publish('document.scanned', event, 'document-processing-service');
             logger.debug(`Published document.scanned event: ${event.document_id} (${event.scan_status})`);
         } catch (error) {
             logger.error(`Failed to publish document.scanned event: ${event.document_id} - ${error instanceof Error ? error.message : String(error)}`);
@@ -331,18 +323,7 @@ export class DomainConsumer {
      */
     private async publishDocumentProcessed(event: DocumentProcessedEvent): Promise<void> {
         try {
-            const message = {
-                ...event,
-                id: `${event.document_id}-processed-${Date.now()}`,
-                timestamp: new Date().toISOString()
-            };
-
-            await this.channel.publish(
-                'splits-network-events',
-                'document.processed',
-                Buffer.from(JSON.stringify(message))
-            );
-
+            await this.eventPublisher.publish('document.processed', event, 'document-processing-service');
             logger.debug(`Published document.processed event: ${event.document_id} (${event.processing_status})`);
         } catch (error) {
             logger.error(`Failed to publish document.processed event: ${event.document_id} - ${error instanceof Error ? error.message : String(error)}`);
