@@ -268,9 +268,13 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
             }
         });
 
-        // Pipe request body for POST
-        if (method === 'POST' || method === 'DELETE') {
-            request.raw.pipe(proxyReq);
+        // Send request body for POST/DELETE
+        // Fastify's body parser consumes the raw stream before the route handler runs,
+        // so we re-serialize the already-parsed body instead of piping the empty raw stream.
+        if ((method === 'POST' || method === 'DELETE') && request.body) {
+            const bodyStr = JSON.stringify(request.body);
+            proxyReq.setHeader('content-length', Buffer.byteLength(bodyStr));
+            proxyReq.end(bodyStr);
         } else {
             proxyReq.end();
         }
