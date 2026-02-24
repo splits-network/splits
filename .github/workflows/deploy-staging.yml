@@ -310,6 +310,8 @@ jobs:
                   export API_BASE_URL="https://api.staging.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.staging.splits.network/ws/chat"
                   export ANALYTICS_GATEWAY_URL="wss://api.staging.splits.network/ws/analytics"
+                  export PUBLIC_BASE_URL="https://api.staging.splits.network"
+                  export CANDIDATE_APP_URL="https://staging.applicant.network"
                   export PORTAL_URL="https://staging.splits.network"
                   export CANDIDATE_URL="https://staging.applicant.network"
                   export CORPORATE_URL="https://staging.employment-networks.com"

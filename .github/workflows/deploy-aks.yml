@@ -310,6 +310,8 @@ jobs:
                   export API_BASE_URL="https://api.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.splits.network/ws/chat"
                   export ANALYTICS_GATEWAY_URL="wss://api.splits.network/ws/analytics"
+                  export PUBLIC_BASE_URL="https://api.splits.network"
+                  export CANDIDATE_APP_URL="https://applicant.network"
                   export PORTAL_URL="https://splits.network"
                   export CANDIDATE_URL="https://applicant.network"
                   export CORPORATE_URL="https://employment-networks.com"
