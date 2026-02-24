@@ -99,6 +99,15 @@ export class ApplicationServiceV2 {
             application.ai_review = await this.repository.getAIReviewForApplication(id);
         }
 
+        // Enrich company sourcer (company_sourcers table replaced by recruiter_companies)
+        const companyId = application.job?.company?.id;
+        if (companyId) {
+            const companySourcer = await this.repository.getCompanySourcer(companyId);
+            if (companySourcer) {
+                application.company_sourcer = companySourcer;
+            }
+        }
+
         return application;
     }
 

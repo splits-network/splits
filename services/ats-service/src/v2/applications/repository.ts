@@ -341,14 +341,34 @@ export class ApplicationRepository {
     // }
 
     /**
+     * Get company sourcer for a given company.
+     * company_sourcers table was replaced by recruiter_companies with relationship_type='sourcer'.
+     */
+    async getCompanySourcer(companyId: string): Promise<any | null> {
+        if (!companyId) return null;
+
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select('recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email))')
+            .eq('company_id', companyId)
+            .eq('relationship_type', 'sourcer')
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) return null;
+        return data ?? null;
+    }
+
+    /**
      * Build select clause with optional includes
      * Supports: candidate, job, recruiter, documents, pre_screen_answers, audit_log, job_requirements, ai_review
      */
     private buildSelectClause(include?: string): string {
-        // Base fields - always include related candidate and job with company
+        // Base fields - always include related candidate (with sourcer) and job with company
+        // Note: company_sourcers table no longer exists — company sourcer data not joined here
         const baseFields = `*,
             candidate:candidates(id, full_name, email, phone, location, user_id, candidate_sourcer:candidate_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
-            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id, company_sourcer:company_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))), job_requirements:job_requirements(*), company_recruiter:recruiters!fk_jobs_company_recruiter_id(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)))`;
+            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*), company_recruiter:recruiters!fk_jobs_company_recruiter_id(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)))`;
 
         if (!include) {
             return baseFields;

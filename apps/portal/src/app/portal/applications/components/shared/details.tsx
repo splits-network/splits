@@ -335,11 +335,8 @@ function OverviewTab({ application }: { application: Application }) {
         ? candidateSourcerName.split(" ").map((n: string) => n[0]).join("").toUpperCase()
         : "?";
 
-    // company_sourcers is 1:1 per company, returns as single object or array
-    const companySourcerRaw = (job?.company as any)?.company_sourcer;
-    const companySourcer = Array.isArray(companySourcerRaw)
-        ? companySourcerRaw[0]
-        : companySourcerRaw;
+    // company sourcer is enriched at the application level by the service layer
+    const companySourcer = (application as any)?.company_sourcer;
     const companySourcerRecruiter = companySourcer?.recruiter;
     const companySourcerName = companySourcerRecruiter?.user?.name || null;
     const companySourcerEmail = companySourcerRecruiter?.user?.email || null;
