@@ -308,6 +308,45 @@ function OverviewTab({ application }: { application: Application }) {
               .toUpperCase()
         : "?";
 
+    // Handle company recruiter data (lives on the job, not the application)
+    const companyRecruiter = (job as any)?.company_recruiter;
+    const companyRecruiterName =
+        companyRecruiter?.user?.name || null;
+    const companyRecruiterEmail =
+        companyRecruiter?.user?.email || null;
+    const companyRecruiterInitials = companyRecruiterName
+        ? companyRecruiterName
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+        : "?";
+
+    // Handle sourcer data
+    // candidate_sourcers is 1:1 per candidate, returns as single object or array
+    const candidateSourcerRaw = (candidate as any)?.candidate_sourcer;
+    const candidateSourcer = Array.isArray(candidateSourcerRaw)
+        ? candidateSourcerRaw[0]
+        : candidateSourcerRaw;
+    const candidateSourcerRecruiter = candidateSourcer?.recruiter;
+    const candidateSourcerName = candidateSourcerRecruiter?.user?.name || null;
+    const candidateSourcerEmail = candidateSourcerRecruiter?.user?.email || null;
+    const candidateSourcerInitials = candidateSourcerName
+        ? candidateSourcerName.split(" ").map((n: string) => n[0]).join("").toUpperCase()
+        : "?";
+
+    // company_sourcers is 1:1 per company, returns as single object or array
+    const companySourcerRaw = (job?.company as any)?.company_sourcer;
+    const companySourcer = Array.isArray(companySourcerRaw)
+        ? companySourcerRaw[0]
+        : companySourcerRaw;
+    const companySourcerRecruiter = companySourcer?.recruiter;
+    const companySourcerName = companySourcerRecruiter?.user?.name || null;
+    const companySourcerEmail = companySourcerRecruiter?.user?.email || null;
+    const companySourcerInitials = companySourcerName
+        ? companySourcerName.split(" ").map((n: string) => n[0]).join("").toUpperCase()
+        : "?";
+
     // Truncate text to ~5 lines (approx 400 chars)
     const truncateText = (text: string | null | undefined, maxLength = 400) => {
         if (!text) return null;
@@ -415,38 +454,144 @@ function OverviewTab({ application }: { application: Application }) {
                 </div>
             )}
 
-            {/* Submitting Recruiter */}
-            <div className="bg-base-100 border-l-4 border-accent p-6">
-                <h3 className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
-                    Submitting Recruiter
-                </h3>
-                <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary text-primary-content font-black text-lg flex-shrink-0">
-                        {recruiterInitials}
-                    </div>
-                    <div className="flex-1">
-                        <div className="text-lg font-black tracking-tight">
-                            {recruiterName || "Unassigned"}
-                        </div>
-                        {recruiterEmail && (
-                            <a
-                                href={`mailto:${recruiterEmail}`}
-                                className="text-sm text-primary hover:text-primary/80 font-bold"
-                            >
-                                {recruiterEmail}
-                            </a>
-                        )}
-                        <div className="text-sm text-base-content/50 mt-1">
-                            <i className="fa-duotone fa-regular fa-calendar mr-1" />
-                            Submitted{" "}
-                            {formatApplicationDate(application.created_at)}
-                        </div>
-                    </div>
+            {/* Submitted Date */}
+            <div className="flex items-center gap-2 text-sm text-base-content/50">
+                <i className="fa-duotone fa-regular fa-calendar" />
+                Submitted {formatApplicationDate(application.created_at)}
+            </div>
+
+            {/* Recruiters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                    <RecruiterCard
+                        label="Candidate Recruiter"
+                        name={recruiterName}
+                        email={recruiterEmail}
+                        initials={recruiterInitials}
+                        borderColor="border-primary"
+                        avatarColor="bg-primary text-primary-content"
+                    />
+                    <SourcerCard
+                        label="Candidate Sourcer"
+                        name={candidateSourcerName}
+                        email={candidateSourcerEmail}
+                        initials={candidateSourcerInitials}
+                        accentColor="text-primary"
+                        borderColor="border-primary"
+                    />
+                </div>
+                <div className="space-y-3">
+                    <RecruiterCard
+                        label="Company Recruiter"
+                        name={companyRecruiterName}
+                        email={companyRecruiterEmail}
+                        initials={companyRecruiterInitials}
+                        borderColor="border-secondary"
+                        avatarColor="bg-secondary text-secondary-content"
+                    />
+                    <SourcerCard
+                        label="Company Sourcer"
+                        name={companySourcerName}
+                        email={companySourcerEmail}
+                        initials={companySourcerInitials}
+                        accentColor="text-secondary"
+                        borderColor="border-secondary"
+                    />
                 </div>
             </div>
 
             {/* AI Analysis (compact reuse) */}
             <AIReviewPanel applicationId={application.id} variant="compact" />
+        </div>
+    );
+}
+
+// ─── Recruiter Card (shared by candidate & company recruiter) ───────────────
+
+function RecruiterCard({
+    label,
+    name,
+    email,
+    initials,
+    borderColor,
+    avatarColor,
+}: {
+    label: string;
+    name: string | null;
+    email: string | null;
+    initials: string;
+    borderColor: string;
+    avatarColor: string;
+}) {
+    const hasRecruiter = name || email;
+
+    return (
+        <div className={`bg-base-100 border-l-4 ${borderColor} p-6`}>
+            <h3 className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold mb-4">
+                {label}
+            </h3>
+            <div className={`flex gap-4 ${hasRecruiter ? "items-start" : "items-center"}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg flex-shrink-0 ${hasRecruiter ? avatarColor : "bg-base-200 text-base-content/40"}`}>
+                    {initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="text-lg font-black tracking-tight truncate">
+                        {name || "Not yet assigned"}
+                    </div>
+                    {email && (
+                        <a
+                            href={`mailto:${email}`}
+                            className="text-sm text-primary hover:text-primary/80 font-bold truncate block"
+                        >
+                            {email}
+                        </a>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Sourcer Card (compact, shown below recruiter cards) ────────────────────
+
+function SourcerCard({
+    label,
+    name,
+    email,
+    initials,
+    accentColor,
+    borderColor,
+}: {
+    label: string;
+    name: string | null;
+    email: string | null;
+    initials: string;
+    accentColor: string;
+    borderColor: string;
+}) {
+    const hasSourcer = name || email;
+
+    return (
+        <div className={`bg-base-200/50 border-l-4 ${borderColor} px-4 py-3 flex items-center gap-3`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${hasSourcer ? `${accentColor} bg-base-300` : "bg-base-200 text-base-content/30"}`}>
+                {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="text-sm text-base-content/40 uppercase tracking-[0.15em] font-bold">
+                    {label}
+                </div>
+                <div className="text-sm font-bold truncate">
+                    {name || "Not yet assigned"}
+                </div>
+            </div>
+            {email && (
+                <a
+                    href={`mailto:${email}`}
+                    className={`text-sm ${accentColor} hover:opacity-70 font-bold flex-shrink-0`}
+                >
+                    <i className="fa-duotone fa-regular fa-envelope" />
+                </a>
+            )}
         </div>
     );
 }

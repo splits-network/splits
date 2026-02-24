@@ -66,7 +66,7 @@ export class MonitorLoop {
                 const unhealthyCount = aggregated.filter(
                     (s) => s.status !== "healthy",
                 ).length;
-                this.logger.debug(
+                this.logger.trace(
                     { unhealthyCount, dryRun: true },
                     "Health check cycle complete (dry-run, DB writes skipped)",
                 );

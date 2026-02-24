@@ -347,8 +347,8 @@ export class ApplicationRepository {
     private buildSelectClause(include?: string): string {
         // Base fields - always include related candidate and job with company
         const baseFields = `*,
-            candidate:candidates(id, full_name, email, phone, location, user_id),
-            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*))`;
+            candidate:candidates(id, full_name, email, phone, location, user_id, candidate_sourcer:candidate_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
+            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id, company_sourcer:company_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))), job_requirements:job_requirements(*), company_recruiter:recruiters!fk_jobs_company_recruiter_id(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)))`;
 
         if (!include) {
             return baseFields;

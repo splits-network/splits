@@ -178,16 +178,23 @@ export class BillingEventConsumer {
                     event.placement_id
                 );
 
-                this.logger.info(
-                    {
-                        placement_id: event.placement_id,
-                        split_count: splits.length,
-                        transaction_count: transactions.length,
-                        total_amount: splits.reduce((sum, s) => sum + (s.split_amount || 0), 0),
-                        roles_paid: splits.map(s => s.role),
-                    },
-                    'Phase 6: Created placement splits and payout transactions'
-                );
+                if (splits.length === 0) {
+                    this.logger.info(
+                        { placement_id: event.placement_id },
+                        'No recruiter roles on placement — skipping split/transaction creation'
+                    );
+                } else {
+                    this.logger.info(
+                        {
+                            placement_id: event.placement_id,
+                            split_count: splits.length,
+                            transaction_count: transactions.length,
+                            total_amount: splits.reduce((sum, s) => sum + (s.split_amount || 0), 0),
+                            roles_paid: splits.map(s => s.role),
+                        },
+                        'Created placement splits and payout transactions'
+                    );
+                }
             } catch (payoutError) {
                 // Log payout creation failure but don't throw
                 // Snapshot is already created - payouts can be retried manually

@@ -183,7 +183,7 @@ export interface CandidateOfferReceivedData {
 
 export function candidateOfferReceivedEmail(data: CandidateOfferReceivedData): string {
     const content = `
-${heading({ level: 1, text: '🎉 Job Offer Received!' })}
+${heading({ level: 1, text: 'Job Offer Received!' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -1013,9 +1013,9 @@ ${button({
     })}
 
 ${data.hasRecruiter && data.recruiterName
-        ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> can help you explore other opportunities.`)
-        : paragraph('Continue exploring roles that match your skills and experience.')
-    }
+            ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> can help you explore other opportunities.`)
+            : paragraph('Continue exploring roles that match your skills and experience.')
+        }
     `.trim();
 
     return baseEmailTemplate({
@@ -1052,19 +1052,19 @@ ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 ${alert({ type: 'warning', title: 'Action Required', message })}
 
 ${isActionRequired
-        ? button({
-            href: data.applicationUrl,
-            text: 'Respond Now →',
-            variant: 'primary',
-            theme: defaultTheme,
-        })
-        : button({
-            href: data.applicationUrl,
-            text: 'View Application →',
-            variant: 'primary',
-            theme: defaultTheme,
-        })
-    }
+            ? button({
+                href: data.applicationUrl,
+                text: 'Respond Now →',
+                variant: 'primary',
+                theme: defaultTheme,
+            })
+            : button({
+                href: data.applicationUrl,
+                text: 'View Application →',
+                variant: 'primary',
+                theme: defaultTheme,
+            })
+        }
 
 ${paragraph('Don\'t miss out on this opportunity. Take action now to keep your application active.')}
     `.trim();

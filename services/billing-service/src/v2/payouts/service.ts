@@ -187,7 +187,8 @@ export class PayoutServiceV2 {
         }
 
         if (splitsToCreate.length === 0) {
-            throw new Error(`No valid commission roles found in snapshot for placement ${placementId}`);
+            // No recruiter involvement — normal for direct company hires
+            return { splits: [], transactions: [] };
         }
 
         // Create all splits in batch
@@ -308,7 +309,8 @@ export class PayoutServiceV2 {
         }
 
         if (splitsToCreate.length === 0) {
-            throw new Error(`No valid commission roles found in snapshot for placement ${placementId}`);
+            // No recruiter involvement — normal for direct company hires
+            return { splits: [], transactions: [] };
         }
 
         // Create splits in database
